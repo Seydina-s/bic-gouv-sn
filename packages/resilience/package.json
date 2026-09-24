@@ -1,0 +1,14 @@
+{
+  "name": "@bgs/resilience",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Timeout, retry with jittered backoff and circuit breaker, for Node and React Native",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --coverage"
+  }
+}

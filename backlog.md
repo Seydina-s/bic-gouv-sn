@@ -38,7 +38,7 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | F-03 | `packages/shared-types` : schémas Zod du modèle de contenu (source_url, source_published_at, fetched_at, content_hash, version, lang, translations[], audio[], embedding) + tests | ✅ | 24/09/2026 — Zod 4.6, 37 tests, couverture 100 % ; doc `docs/data-model.md` ; 1 bug trouvé et corrigé (ERREURS.md) |
 | F-04 | `packages/ui` : tokens `bgs.*` clair/sombre, échelles 50→900 des couleurs de la charte, contraste AA vérifié par test | ✅ | 24/09/2026 — 42 paires contrôlées (2 thèmes), 71 tests, couverture 100 % ; variables CSS `--bgs-*` pour l'admin ; ombres reportées à F-07 (spécifiques RN/web) |
 | F-05 | `packages/i18n` : socle FR/WO, aucune chaîne en dur | ✅ | 24/09/2026 — clés typées, repli FR signalé, pluriels FR/WO, 32 tests, couverture 100 % (branches 98 %) ; catalogue wolof vide en attente de locuteurs natifs (W-01) |
-| F-06 | `packages/resilience` : timeout, retry + jitter, circuit breaker + tests | 🔴 | |
+| F-06 | `packages/resilience` : timeout, retry + jitter, circuit breaker + tests | ✅ | 24/09/2026 — 30 tests (horloge simulée, stables sur 3 exécutions), couverture 100 % ; codes `RESILIENCE_*` à reporter dans F-11 |
 | F-07 | `apps/mobile` : Expo vide (New Architecture, Hermes, Expo Router), thème live | 🔴 | |
 | F-08 | `apps/api` : Fastify `/v1/health` + OpenAPI | 🔴 | |
 | F-09 | `apps/admin` : Next.js vide | 🔴 | |
