@@ -34,7 +34,7 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | # | Tâche | État | Notes |
 |---|---|---|---|
 | F-01 | `git init`, branche `chore/foundations`, `.gitignore`, `.editorconfig` | ✅ | 24/09/2026 — dépôt privé github.com/Seydina-s/bic-gouv-sn |
-| F-02 | Monorepo pnpm (apps/, services/, packages/, infra/, docs/), TypeScript strict partagé, ESLint/Prettier | 🔴 | pnpm 12.6.0 installé le 24/09/2026 |
+| F-02 | Monorepo pnpm (apps/, services/, packages/, infra/, docs/), TypeScript strict partagé, ESLint/Prettier | ✅ | 24/09/2026 — TS 6.0 strict, ESLint strictTypeChecked, Prettier ; vérifié : erreurs volontaires détectées, audit 0 vulnérabilité |
 | F-03 | `packages/shared-types` : schémas Zod du modèle de contenu (source_url, source_published_at, fetched_at, content_hash, version, lang, translations[], audio[], embedding) + tests | 🔴 | Couverture ≥ 80 % |
 | F-04 | `packages/ui` : tokens `bgs.*` clair/sombre, échelles 50→900 des couleurs de la charte, contraste AA vérifié par test | 🔴 | |
 | F-05 | `packages/i18n` : socle FR/WO, aucune chaîne en dur | 🔴 | |
@@ -68,3 +68,4 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 24/09/2026 | O-01 🔴 Section « Opportunités » conservée : définir contenu, sources officielles et priorité | Réponse utilisateur |
 | 24/09/2026 | S1-06 ✅ Node 24 LTS isolé par projet via fnm (Node 20 système conservé) | Revue du stack |
 | 24/09/2026 | L-01 🔴 Obtenir la preuve écrite d'autorisation de la Présidence avant soumission aux stores | Réponse utilisateur |
+| 24/09/2026 | T-01 🔴 Passer à TypeScript 7 dès que typescript-eslint le supporte | F-02 |
