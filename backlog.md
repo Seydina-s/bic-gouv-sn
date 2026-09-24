@@ -40,7 +40,7 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | F-05 | `packages/i18n` : socle FR/WO, aucune chaîne en dur | ✅ | 24/09/2026 — clés typées, repli FR signalé, pluriels FR/WO, 32 tests, couverture 100 % (branches 98 %) ; catalogue wolof vide en attente de locuteurs natifs (W-01) |
 | F-06 | `packages/resilience` : timeout, retry + jitter, circuit breaker + tests | ✅ | 24/09/2026 — 30 tests (horloge simulée, stables sur 3 exécutions), couverture 100 % ; codes `RESILIENCE_*` à reporter dans F-11 |
 | F-07 | `apps/mobile` : Expo vide (New Architecture, Hermes, Expo Router), thème live | ✅ | 24/09/2026 — SDK 57 ; expo-doctor 21/21 ; bundles Android + iOS Hermes OK ; 10 tests (thème live vérifié par mutation) ; pas encore testé sur un vrai téléphone |
-| F-08 | `apps/api` : Fastify `/v1/health` + OpenAPI | 🔴 | |
+| F-08 | `apps/api` : Fastify `/v1/health` + OpenAPI | ✅ | 24/09/2026 — 10 tests (couverture 100 %) + test réel du build de production par HTTP ; contrats partagés dans `shared-types/src/api` |
 | F-09 | `apps/admin` : Next.js vide | 🔴 | |
 | F-10 | CI GitHub Actions : lint, typecheck, tests, scan de secrets, audit des dépendances | 🔴 | Nécessite un dépôt GitHub (question utilisateur) |
 | F-11 | `docs/errors-catalog.md` : structure du catalogue d'erreurs lisible | 🔴 | |
@@ -73,3 +73,5 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 24/09/2026 | A-01 🔴 Logo officiel, icônes d'app et écran de lancement (actuellement icônes génériques du modèle Expo — à remplacer, ne rien inventer) | F-07 |
 | 24/09/2026 | A-02 🔴 Identifiant de publication de l'app (ex. `sn.gouv.bic…`) à valider avec le BIC avant tout build de store | F-07 |
 | 24/09/2026 | PERF-01 🔴 Expo Router embarque une police d'icônes Material Symbols de 967 Ko : vérifier si elle peut être exclue (budget de poids S1-03) | F-07 |
+| 24/09/2026 | SEC-01 🔴 Revérifier `pnpm audit` à chaque mise à jour du SDK Expo (decode-uri-component via expo-router, uuid via xcode) ; bloquer en CI toute vulnérabilité haute/critique | F-08 |
+| 24/09/2026 | API-01 🔴 Ajouter rate limiting, en-têtes de sécurité et sonde de disponibilité (readiness) quand la base de données arrivera | F-08 |

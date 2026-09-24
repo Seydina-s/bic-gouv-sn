@@ -8,3 +8,4 @@ android
 ios
 pnpm-lock.yaml
 *.md
+expo-env.d.ts
