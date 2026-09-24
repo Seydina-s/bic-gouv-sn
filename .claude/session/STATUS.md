@@ -14,17 +14,18 @@
 - API (F-08) : `apps/api`, Fastify `/v1/health` + OpenAPI 3.1 (10 tests, build vérifié par HTTP).
 - Design : Impeccable actif ; audit des tokens 11/20 → corrigé (D-01) ; PRODUCT.md écrit (D-02) ; univers visuel choisi au 1er écran citoyen (D-04).
 - Admin (F-09) : `apps/admin`, Next.js 16 + Tailwind 4, écran « État du service » réel (22 tests). 257 tests au total.
+- CI (F-10) : GitHub Actions verte (qualité, builds, sécurité) sur la PR #1 `chore/foundations` → `main`.
 - Outils : pnpm 12.6.0, GitHub CLI 2.101, Node 24.21 isolé via fnm. Captures d'écran : Chrome headless via CDP (script dans le scratchpad de session).
 
 ## En attente de l'utilisateur
-1. Feu vert pour F-10 (CI GitHub Actions).
+1. Feu vert pour F-11 (catalogue d'erreurs en langage simple) ; accord pour protéger la branche `main` (CI-01).
 2. Compte Sentry gratuit à créer quand F-12 arrivera.
 3. W-01 : qui rédige et valide le wolof de l'interface ?
 4. A-01 logo/icônes officiels ; A-02 identifiant de publication de l'app.
 5. Confirmer l'acceptation temporaire des 2 vulnérabilités modérées Expo (decisions.md, SEC-01).
 
 ## Prochaine tâche
-F-10 — CI GitHub Actions : lint, typecheck, tests, scan de secrets, audit des dépendances.
+F-11 — `docs/errors-catalog.md` + catalogue typé des codes d'erreur (RESILIENCE_*, API_*, ROUTE_NOT_FOUND…).
 
 ## Constat environnement
 - Node système 20.20.0 (inchangé, pour les autres projets). Projet : Node 24 via `fnm exec --using=24` (FNM_DIR=`C:\Users\HP\tools\fnm\data`).
