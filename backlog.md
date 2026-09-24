@@ -33,7 +33,7 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 
 | # | Tâche | État | Notes |
 |---|---|---|---|
-| F-01 | `git init`, branche `chore/foundations`, `.gitignore`, `.editorconfig` | ✅ | 24/09/2026 — dépôt local ; publication GitHub privée à faire par l’utilisateur (gh CLI absent) |
+| F-01 | `git init`, branche `chore/foundations`, `.gitignore`, `.editorconfig` | ✅ | 24/09/2026 — dépôt privé github.com/Seydina-s/bic-gouv-sn |
 | F-02 | Monorepo pnpm (apps/, services/, packages/, infra/, docs/), TypeScript strict partagé, ESLint/Prettier | 🔴 | pnpm 12.6.0 installé le 24/09/2026 |
 | F-03 | `packages/shared-types` : schémas Zod du modèle de contenu (source_url, source_published_at, fetched_at, content_hash, version, lang, translations[], audio[], embedding) + tests | 🔴 | Couverture ≥ 80 % |
 | F-04 | `packages/ui` : tokens `bgs.*` clair/sombre, échelles 50→900 des couleurs de la charte, contraste AA vérifié par test | 🔴 | |
@@ -66,5 +66,5 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 24/09/2026 | La maquette contient une section « Opportunités » (financements, concours, marchés publics) absente du périmètre CLAUDE.md → à trancher par l'utilisateur | Lecture de la maquette |
 | 24/09/2026 | Emplacement du dossier projet vérifié : conservé à `C:\bic-gouv-sn` (voir decisions.md) | Question utilisateur |
 | 24/09/2026 | O-01 🔴 Section « Opportunités » conservée : définir contenu, sources officielles et priorité | Réponse utilisateur |
-| 24/09/2026 | S1-06 🔴 Passer à Node 22 LTS (Node 20 en fin de support) — en attente d'accord | Revue du stack |
+| 24/09/2026 | S1-06 ✅ Node 24 LTS isolé par projet via fnm (Node 20 système conservé) | Revue du stack |
 | 24/09/2026 | L-01 🔴 Obtenir la preuve écrite d'autorisation de la Présidence avant soumission aux stores | Réponse utilisateur |

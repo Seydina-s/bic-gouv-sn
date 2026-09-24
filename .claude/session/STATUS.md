@@ -4,17 +4,17 @@
 
 ## Où on en est
 - Phase 0 terminée ; stack validé (voir decisions.md).
-- Dépôt Git local initialisé (`main` + branche `chore/foundations`), fichiers de base en place.
-- pnpm 12.6.0 installé.
+- Dépôt privé https://github.com/Seydina-s/bic-gouv-sn (`main` + `chore/foundations`).
+- Outils : pnpm 12.6.0, GitHub CLI 2.101, Node 24.21 isolé via fnm.
 
 ## En attente de l'utilisateur
-1. Publier le dépôt en **privé** sur GitHub depuis VS Code (gh CLI absent).
-2. Accord pour passer à Node 22 LTS (S1-06).
-3. Créer un compte Sentry gratuit quand F-12 arrivera.
+1. Feu vert pour F-02 (monorepo).
+2. Compte Sentry gratuit à créer quand F-12 arrivera.
 
 ## Prochaine tâche
 F-02 — monorepo pnpm, TypeScript strict, ESLint/Prettier.
 
 ## Constat environnement
-- Node 20.20.0 (fin de support), Git 2.52, pnpm 12.6.0.
+- Node système 20.20.0 (inchangé, pour les autres projets). Projet : Node 24 via `fnm exec --using=24` (FNM_DIR=`C:\Users\HP\tools\fnm\data`).
+- GitHub CLI : `C:\Users\HP\tools\gh\bin\gh.exe` (PATH utilisateur).
 - Projet conservé à `C:\bic-gouv-sn` (chemins courts, hors OneDrive).
