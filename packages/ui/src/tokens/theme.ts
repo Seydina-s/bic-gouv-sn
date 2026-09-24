@@ -1,23 +1,17 @@
 import { darkColors, lightColors, type SemanticColors } from "./colors";
-import { font, motion, radius, space, touchTarget } from "./scales";
+import { iconSize, layout, motion, opacity, radius, space, textStyle, touchTarget } from "./scales";
 
 export type ColorScheme = "light" | "dark";
 
 /** User preference in Settings; "system" follows the phone live (default). */
 export type ThemePreference = ColorScheme | "system";
 
-export interface Theme {
-  scheme: ColorScheme;
-  color: SemanticColors;
-  space: typeof space;
-  radius: typeof radius;
-  font: typeof font;
-  motion: typeof motion;
-  touchTarget: typeof touchTarget;
-}
+const scales = { space, radius, textStyle, iconSize, opacity, motion, touchTarget, layout };
+
+export type Theme = { scheme: ColorScheme; color: SemanticColors } & typeof scales;
 
 function buildTheme(scheme: ColorScheme, color: SemanticColors): Theme {
-  return { scheme, color, space, radius, font, motion, touchTarget };
+  return { scheme, color, ...scales };
 }
 
 export const themes: Readonly<Record<ColorScheme, Theme>> = {

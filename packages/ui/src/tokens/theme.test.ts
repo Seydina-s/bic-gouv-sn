@@ -18,7 +18,7 @@ describe("resolveColorScheme", () => {
 describe("themes", () => {
   it("share the same scales and differ only by colors", () => {
     expect(themes.dark.space).toBe(themes.light.space);
-    expect(themes.dark.font).toBe(themes.light.font);
+    expect(themes.dark.textStyle).toBe(themes.light.textStyle);
     expect(themes.dark.color).not.toEqual(themes.light.color);
   });
 

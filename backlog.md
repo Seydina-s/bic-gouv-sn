@@ -75,3 +75,8 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 24/09/2026 | PERF-01 🔴 Expo Router embarque une police d'icônes Material Symbols de 967 Ko : vérifier si elle peut être exclue (budget de poids S1-03) | F-07 |
 | 24/09/2026 | SEC-01 🔴 Revérifier `pnpm audit` à chaque mise à jour du SDK Expo (decode-uri-component via expo-router, uuid via xcode) ; bloquer en CI toute vulnérabilité haute/critique | F-08 |
 | 24/09/2026 | API-01 🔴 Ajouter rate limiting, en-têtes de sécurité et sonde de disponibilité (readiness) quand la base de données arrivera | F-08 |
+| 24/09/2026 | D-01 ✅ Audit des tokens de design + corrections (docs/design/audit-tokens-2026-09-24.md) | Demande utilisateur |
+| 24/09/2026 | D-02 🔴 `/impeccable init` (PRODUCT.md + DESIGN.md) au début de la prochaine session | Audit D-01 |
+| 24/09/2026 | D-03 🔴 Réparer l'installation de ui-ux-pro-max (dossiers data/scripts = liens cassés) + Python pour ses scripts | Audit D-01 |
+| 24/09/2026 | PERF-02 🔴 Sous-ensemble des polices (latin + wolof) pour réduire les 564 Ko | Audit D-01 |
+| 24/09/2026 | Q-01 ✅ Délai des tests porté à 30 s (échec intermittent sous charge : 12,6 s pour un démarrage à froid) | Contrôle complet |

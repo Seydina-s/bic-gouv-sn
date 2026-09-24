@@ -12,6 +12,8 @@
 - Résilience (F-06) : `packages/resilience`, timeout / retry / circuit breaker (30 tests).
 - App mobile (F-07) : `apps/mobile`, Expo SDK 57, thème live + langue (10 tests). Non testée sur appareil réel (blocage : connexion du CLI Expo au compte, `npx expo login --browser`).
 - API (F-08) : `apps/api`, Fastify `/v1/health` + OpenAPI 3.1 (10 tests, build vérifié par HTTP).
+- Design : skill Impeccable installé (actif à la prochaine session) ; audit des tokens 11/20 → corrigé (D-01) ; polices provisoires chargées. 235 tests.
+- **Début de prochaine session : lancer `/impeccable init` (D-02).**
 - Outils : pnpm 12.6.0, GitHub CLI 2.101, Node 24.21 isolé via fnm.
 
 ## En attente de l'utilisateur

@@ -51,10 +51,14 @@ export const palette = {
     300: "#C0C6C1",
     400: "#A4A9A5",
     500: "#898E8A",
-    600: "#6E736F",
+    // Tuned from #6E736F (4.498:1 on neutral 50) so metadata text passes AA on every surface.
+    600: "#6D716E",
     700: "#555956",
     800: "#3F4440",
     900: "#2B2F2C",
+    /** 925 and 940: dark-theme tonal surfaces, so stacked layers stay distinguishable. */
+    925: "#232824",
+    940: "#1A201B",
     950: "#131714",
   },
 } as const;

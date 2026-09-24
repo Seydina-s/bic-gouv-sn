@@ -22,11 +22,7 @@ export default function HomeScreen() {
     >
       <Text
         accessibilityRole="header"
-        style={{
-          color: theme.color.textBrand,
-          fontSize: theme.font.size.xxl,
-          fontWeight: theme.font.weight.bold,
-        }}
+        style={[theme.textStyle.headline, { color: theme.color.textBrand }]}
       >
         {t("tabs.home")}
       </Text>

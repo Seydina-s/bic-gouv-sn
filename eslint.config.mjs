@@ -16,6 +16,7 @@ export default tseslint.config(
       "**/.expo/**",
       "**/android/**",
       "**/ios/**",
+      ".claude/**",
     ],
   },
   js.configs.recommended,
