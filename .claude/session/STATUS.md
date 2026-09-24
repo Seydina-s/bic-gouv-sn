@@ -10,15 +10,17 @@
 - Design tokens (F-04) : `packages/ui`, thèmes clair/sombre, contraste AA testé (71 tests).
 - i18n (F-05) : `packages/i18n`, FR de référence, WO vide en attente de locuteurs natifs (32 tests).
 - Résilience (F-06) : `packages/resilience`, timeout / retry / circuit breaker (30 tests).
+- App mobile (F-07) : `apps/mobile`, Expo SDK 57, thème live + langue (10 tests). Non testée sur appareil réel.
 - Outils : pnpm 12.6.0, GitHub CLI 2.101, Node 24.21 isolé via fnm.
 
 ## En attente de l'utilisateur
-1. Feu vert pour F-07 (app mobile Expo vide avec thème automatique).
+1. Feu vert pour F-08 (API Fastify `/v1/health`).
 2. Compte Sentry gratuit à créer quand F-12 arrivera.
 3. W-01 : qui rédige et valide le wolof de l'interface ?
+4. A-01 logo/icônes officiels ; A-02 identifiant de publication de l'app.
 
 ## Prochaine tâche
-F-07 — `apps/mobile` : Expo SDK 57 vide (New Architecture, Hermes, Expo Router), thème live.
+F-08 — `apps/api` : Fastify `/v1/health` + OpenAPI.
 
 ## Constat environnement
 - Node système 20.20.0 (inchangé, pour les autres projets). Projet : Node 24 via `fnm exec --using=24` (FNM_DIR=`C:\Users\HP\tools\fnm\data`).

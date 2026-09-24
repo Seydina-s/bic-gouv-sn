@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "Bic Gouv SN",
+    "slug": "bic-gouv-sn",
+    "scheme": "bicgouvsn",
+    "version": "0.0.0",
+    "orientation": "default",
+    "userInterfaceStyle": "automatic",
+    "icon": "./assets/icon.png",
+    "backgroundColor": "#FFFFFF",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#FFFFFF",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "plugins": ["expo-router", "expo-localization"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
