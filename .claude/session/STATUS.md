@@ -17,7 +17,7 @@ F-03 — `packages/shared-types` : schémas Zod du modèle de contenu + tests.
 
 ## Constat environnement
 - Node système 20.20.0 (inchangé, pour les autres projets). Projet : Node 24 via `fnm exec --using=24` (FNM_DIR=`C:\Users\HP\tools\fnm\data`).
-- Pour les commandes du projet : ajouter `C:SERSHP	OOLSNMDATA
-ODE-VERSIONS24.21.0INSTALLATION` EN TêTE DU PATH (OU `FNM EXEC --USING=24`).
+- Pour les commandes du projet : ajouter `C:UsersHP	oolsnmdata
+ode-versions24.21.0installation` en tête du PATH (ou `fnm exec --using=24`).
 - GitHub CLI : `C:\Users\HP\tools\gh\bin\gh.exe` (PATH utilisateur).
 - Projet conservé à `C:\bic-gouv-sn` (chemins courts, hors OneDrive).
