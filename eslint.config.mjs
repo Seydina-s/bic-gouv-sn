@@ -24,7 +24,7 @@ export default tseslint.config(
     languageOptions: {
       globals: { ...globals.node },
       parserOptions: {
-        projectService: true,
+        projectService: { allowDefaultProject: ["vitest.shared.ts"] },
         tsconfigRootDir: import.meta.dirname,
       },
     },
