@@ -41,7 +41,7 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | F-06 | `packages/resilience` : timeout, retry + jitter, circuit breaker + tests | ✅ | 24/09/2026 — 30 tests (horloge simulée, stables sur 3 exécutions), couverture 100 % ; codes `RESILIENCE_*` à reporter dans F-11 |
 | F-07 | `apps/mobile` : Expo vide (New Architecture, Hermes, Expo Router), thème live | ✅ | 24/09/2026 — SDK 57 ; expo-doctor 21/21 ; bundles Android + iOS Hermes OK ; 10 tests (thème live vérifié par mutation) ; pas encore testé sur un vrai téléphone |
 | F-08 | `apps/api` : Fastify `/v1/health` + OpenAPI | ✅ | 24/09/2026 — 10 tests (couverture 100 %) + test réel du build de production par HTTP ; contrats partagés dans `shared-types/src/api` |
-| F-09 | `apps/admin` : Next.js vide | 🔴 | |
+| F-09 | `apps/admin` : Next.js vide | ✅ | 24/09/2026 — coquille + écran « État du service » (réel) ; 22 tests (100 %) ; build + captures bureau/mobile, clair/sombre, service OK/KO ; détecteur Impeccable : 0 anomalie |
 | F-10 | CI GitHub Actions : lint, typecheck, tests, scan de secrets, audit des dépendances | 🔴 | Nécessite un dépôt GitHub (question utilisateur) |
 | F-11 | `docs/errors-catalog.md` : structure du catalogue d'erreurs lisible | 🔴 | |
 | F-12 | Observabilité de base (Sentry mobile + API) | 🔴 | Nécessite un compte Sentry (question utilisateur) |
@@ -80,3 +80,5 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 24/09/2026 | D-03 🔴 Réparer l'installation de ui-ux-pro-max (dossiers data/scripts = liens cassés) + Python pour ses scripts | Audit D-01 |
 | 24/09/2026 | PERF-02 🔴 Sous-ensemble des polices (latin + wolof) pour réduire les 564 Ko | Audit D-01 |
 | 24/09/2026 | Q-01 ✅ Délai des tests porté à 30 s (échec intermittent sous charge : 12,6 s pour un démarrage à froid) | Contrôle complet |
+| 24/09/2026 | D-02 ✅ PRODUCT.md écrit (init Impeccable) | F-09 |
+| 24/09/2026 | D-04 🔴 Tour de directions visuelles Impeccable + DESIGN.md au premier écran citoyen (Phase 2) | Décision utilisateur |

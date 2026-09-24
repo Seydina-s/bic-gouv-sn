@@ -44,3 +44,9 @@ Thumbs.db
 
 # Impeccable engine binary (re-downloaded by its launcher when missing)
 .claude/skills/impeccable/scripts/bin/
+
+# Next.js generated types
+next-env.d.ts
+
+# Impeccable review captures (local evidence, not source)
+.impeccable/review/

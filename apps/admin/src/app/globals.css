@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+/* Tailwind reads the shared design tokens (--bgs-*), injected by the root layout. */
+@theme inline {
+  --color-background: var(--bgs-color-background);
+  --color-surface: var(--bgs-color-surface);
+  --color-surface-raised: var(--bgs-color-surface-raised);
+  --color-line: var(--bgs-color-border);
+  --color-line-strong: var(--bgs-color-border-strong);
+  --color-ink: var(--bgs-color-text-primary);
+  --color-ink-soft: var(--bgs-color-text-secondary);
+  --color-ink-faint: var(--bgs-color-text-tertiary);
+  --color-brand: var(--bgs-color-text-brand);
+  --color-primary: var(--bgs-color-primary);
+  --color-primary-pressed: var(--bgs-color-primary-pressed);
+  --color-on-primary: var(--bgs-color-on-primary);
+  --color-primary-container: var(--bgs-color-primary-container);
+  --color-on-primary-container: var(--bgs-color-on-primary-container);
+  --color-accent: var(--bgs-color-accent);
+  --color-danger: var(--bgs-color-danger);
+  --color-danger-surface: var(--bgs-color-danger-surface);
+  --color-on-danger-surface: var(--bgs-color-on-danger-surface);
+  --color-focus: var(--bgs-color-focus-ring);
+  --color-flag-green: var(--bgs-flag-green);
+  --color-flag-yellow: var(--bgs-flag-yellow);
+  --color-flag-red: var(--bgs-flag-red);
+  --font-display: var(--font-bricolage);
+  --font-body: var(--font-manrope);
+  --radius-sm: var(--bgs-radius-sm);
+  --radius-md: var(--bgs-radius-md);
+  --radius-lg: var(--bgs-radius-lg);
+}
+
+@layer base {
+  html {
+    background: var(--bgs-color-background);
+    color: var(--bgs-color-text-primary);
+    font-family: var(--font-manrope), system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Browser surfaces carry the palette too. */
+  ::selection {
+    background: var(--bgs-color-primary-container);
+    color: var(--bgs-color-on-primary-container);
+  }
+
+  body {
+    caret-color: var(--bgs-color-primary);
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--bgs-color-focus-ring);
+    outline-offset: 3px;
+    border-radius: var(--bgs-radius-sm);
+  }
+}
+
+/* "Alive" signal of a healthy service: one quiet, meaningful motion. */
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+.breathe {
+  animation: breathe 2.4s cubic-bezier(0.2, 0, 0, 1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .breathe {
+    animation: none;
+    opacity: 0;
+  }
+}
