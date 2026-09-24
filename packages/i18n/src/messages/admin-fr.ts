@@ -14,26 +14,15 @@ export const adminFr = {
     onlineSince: "En ligne depuis {duration}",
     recheck: "Vérifier à nouveau",
     whatToDo: "Que faire ?",
+    errorCode: "Code : {code}",
     up: {
       verdict: "L'API fonctionne",
       detail: "Le serveur répond normalement.",
     },
-    down: {
-      verdict: "L'API ne répond pas",
-      detail: "Les applications ne peuvent pas joindre le serveur en ce moment.",
-      action:
-        "Vérifiez que le serveur de l'API est démarré, puis vérifiez à nouveau. Si le problème continue, prévenez l'équipe technique.",
-    },
-    invalid: {
-      verdict: "Réponse inattendue de l'API",
-      detail: "Le serveur répond, mais pas dans le format attendu.",
-      action: "Prévenez l'équipe technique : une mise à jour a peut-être été mal déployée.",
-    },
-    unconfigured: {
-      verdict: "Adresse de l'API non configurée",
-      detail: "L'administration ne sait pas où trouver le serveur.",
-      action: "Renseignez la variable API_URL dans la configuration de l'administration.",
-    },
+    // Failure details and actions come from the shared error catalog (single source).
+    down: { verdict: "L'API ne répond pas" },
+    invalid: { verdict: "Réponse inattendue de l'API" },
+    unconfigured: { verdict: "Adresse de l'API non configurée" },
   },
   duration: {
     lessThanAMinute: "moins d'une minute",

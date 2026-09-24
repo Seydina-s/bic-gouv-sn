@@ -3,15 +3,16 @@ import {
   CheckCircleIcon,
   WarningOctagonIcon,
 } from "@phosphor-icons/react/dist/ssr";
+import { describeError, type ErrorCode } from "@bgs/shared-types";
 import type { ApiStatus } from "../lib/api-status";
 import { formatClockTime, formatDuration } from "../lib/format";
 import { t } from "../lib/i18n";
 
-const FAILURE_COPY = {
-  down: "status.down",
-  invalid: "status.invalid",
-  unconfigured: "status.unconfigured",
-} as const;
+const FAILURE = {
+  down: { verdict: "status.down.verdict", code: "ADMIN_API_UNREACHABLE" },
+  invalid: { verdict: "status.invalid.verdict", code: "ADMIN_API_INVALID_RESPONSE" },
+  unconfigured: { verdict: "status.unconfigured.verdict", code: "ADMIN_API_UNCONFIGURED" },
+} as const satisfies Record<string, { verdict: string; code: ErrorCode }>;
 
 function Verdict({ status }: { status: ApiStatus }) {
   if (status.state === "up") {
@@ -31,21 +32,23 @@ function Verdict({ status }: { status: ApiStatus }) {
     );
   }
 
-  const copy = FAILURE_COPY[status.state];
+  const failure = FAILURE[status.state];
+  const explanation = describeError(failure.code);
   return (
     <div className="rounded-lg bg-danger-surface p-6 text-on-danger-surface md:p-8">
       <div className="flex items-start gap-4">
         <WarningOctagonIcon aria-hidden="true" weight="duotone" className="mt-1 size-8 shrink-0" />
         <div>
           <p className="text-balance font-display text-2xl font-bold leading-tight md:text-3xl">
-            {t(`${copy}.verdict`)}
+            {t(failure.verdict)}
           </p>
-          <p className="mt-2 text-base">{t(`${copy}.detail`)}</p>
+          <p className="mt-2 text-base">{explanation.impact}</p>
         </div>
       </div>
       <div className="mt-6 border-t border-current/20 pt-5 md:ml-12">
         <p className="text-sm font-bold">{t("status.whatToDo")}</p>
-        <p className="mt-1 max-w-prose text-base">{t(`${copy}.action`)}</p>
+        <p className="mt-1 max-w-prose text-base">{explanation.action}</p>
+        <p className="mt-3 font-mono text-xs">{t("status.errorCode", { code: failure.code })}</p>
       </div>
     </div>
   );

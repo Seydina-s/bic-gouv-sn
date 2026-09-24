@@ -1,3 +1,4 @@
+import type { ErrorCode } from "@bgs/shared-types";
 import { z } from "zod";
 
 /** Every setting comes from environment variables; secrets are never hard-coded. */
@@ -13,7 +14,7 @@ const envSchema = z.object({
 export type Config = z.infer<typeof envSchema>;
 
 export class ConfigError extends Error {
-  readonly code = "API_CONFIG_INVALID";
+  readonly code: ErrorCode = "API_CONFIG_INVALID";
 }
 
 export function loadConfig(env: Readonly<Record<string, string | undefined>>): Config {

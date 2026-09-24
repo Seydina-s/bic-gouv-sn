@@ -1,14 +1,14 @@
-import type { ApiError } from "@bgs/shared-types";
+import type { ApiError, ErrorCode } from "@bgs/shared-types";
 import type { FastifyError, FastifyInstance } from "fastify";
 
-/** Codes documented in docs/errors-catalog.md. */
+/** Codes declared in the shared error catalog (docs/errors-catalog.md). */
 export const API_ERROR_CODES = {
   notFound: "ROUTE_NOT_FOUND",
   invalidRequest: "REQUEST_INVALID",
   internal: "INTERNAL_ERROR",
-} as const;
+} as const satisfies Record<string, ErrorCode>;
 
-function body(code: string, message: string, requestId: string): ApiError {
+function body(code: ErrorCode, message: string, requestId: string): ApiError {
   return { code, message, requestId };
 }
 

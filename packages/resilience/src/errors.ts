@@ -1,7 +1,9 @@
-/** Error codes match docs/errors-catalog.md, where each gets a plain-language explanation. */
+import type { ErrorCode } from "@bgs/shared-types";
+
+/** Codes are declared in the shared error catalog (docs/errors-catalog.md). */
 
 export class TimeoutError extends Error {
-  readonly code = "RESILIENCE_TIMEOUT";
+  readonly code: ErrorCode = "RESILIENCE_TIMEOUT";
 
   constructor(readonly timeoutMs: number) {
     super(`Operation timed out after ${String(timeoutMs)} ms`);
@@ -10,7 +12,7 @@ export class TimeoutError extends Error {
 }
 
 export class CircuitOpenError extends Error {
-  readonly code = "RESILIENCE_CIRCUIT_OPEN";
+  readonly code: ErrorCode = "RESILIENCE_CIRCUIT_OPEN";
 
   constructor(readonly dependency: string) {
     super(`Circuit for "${dependency}" is open: calls are paused`);
@@ -19,7 +21,7 @@ export class CircuitOpenError extends Error {
 }
 
 export class AbortedError extends Error {
-  readonly code = "RESILIENCE_ABORTED";
+  readonly code: ErrorCode = "RESILIENCE_ABORTED";
 
   constructor() {
     super("Operation was cancelled");

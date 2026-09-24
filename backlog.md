@@ -43,7 +43,7 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | F-08 | `apps/api` : Fastify `/v1/health` + OpenAPI | ✅ | 24/09/2026 — 10 tests (couverture 100 %) + test réel du build de production par HTTP ; contrats partagés dans `shared-types/src/api` |
 | F-09 | `apps/admin` : Next.js vide | ✅ | 24/09/2026 — coquille + écran « État du service » (réel) ; 22 tests (100 %) ; build + captures bureau/mobile, clair/sombre, service OK/KO ; détecteur Impeccable : 0 anomalie |
 | F-10 | CI GitHub Actions : lint, typecheck, tests, scan de secrets, audit des dépendances | ✅ | 24/09/2026 — 3 jobs verts sur la PR #1 (qualité, builds prod, sécurité) ; Dependabot ; actions épinglées par SHA |
-| F-11 | `docs/errors-catalog.md` : structure du catalogue d'erreurs lisible | 🔴 | |
+| F-11 | `docs/errors-catalog.md` : structure du catalogue d'erreurs lisible | ✅ | 24/09/2026 — 10 codes, type `ErrorCode` imposé, doc générée et testée, admin branché dessus |
 | F-12 | Observabilité de base (Sentry mobile + API) | 🔴 | Nécessite un compte Sentry (question utilisateur) |
 
 ## Phases suivantes (à détailler au fil de l'eau)

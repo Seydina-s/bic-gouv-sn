@@ -8,3 +8,4 @@ export * from "./content/media.schema";
 export * from "./content/news-article.schema";
 export * from "./content/traceable-content.schema";
 export * from "./content/translation.schema";
+export * from "./errors/error-catalog";
