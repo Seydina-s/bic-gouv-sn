@@ -1,34 +1,29 @@
 # STATUS — Bic Gouv SN
 
-**Dernière mise à jour** : 24/09/2026 · **Mode** : standard
+**Dernière mise à jour** : 25/09/2026 · **Mode** : standard
 
 ## Où on en est
-- Phase 0 terminée ; stack validé (voir decisions.md).
-- Dépôt privé https://github.com/Seydina-s/bic-gouv-sn (`main` + `chore/foundations`).
-- Monorepo pnpm en place (F-02) : TypeScript 6.0 strict, ESLint, Prettier.
-- Modèle de contenu (F-03) : `packages/shared-types`, schémas Zod, 37 tests, couverture 100 %.
-- Design tokens (F-04) : `packages/ui`, thèmes clair/sombre, contraste AA testé (71 tests).
-- i18n (F-05) : `packages/i18n`, FR de référence, WO vide en attente de locuteurs natifs (32 tests).
-- Résilience (F-06) : `packages/resilience`, timeout / retry / circuit breaker (30 tests).
-- App mobile (F-07) : `apps/mobile`, Expo SDK 57, thème live + langue (10 tests). Non testée sur appareil réel (blocage : connexion du CLI Expo au compte, `npx expo login --browser`).
-- API (F-08) : `apps/api`, Fastify `/v1/health` + OpenAPI 3.1 (10 tests, build vérifié par HTTP).
-- Design : Impeccable actif ; audit des tokens 11/20 → corrigé (D-01) ; PRODUCT.md écrit (D-02) ; univers visuel choisi au 1er écran citoyen (D-04).
-- Admin (F-09) : `apps/admin`, Next.js 16 + Tailwind 4, écran « État du service » réel (22 tests). 257 tests au total.
-- CI (F-10) : GitHub Actions verte (qualité, builds, sécurité) sur la PR #1 `chore/foundations` → `main`.
-- Outils : pnpm 12.6.0, GitHub CLI 2.101, Node 24.21 isolé via fnm. Captures d'écran : Chrome headless via CDP (script dans le scratchpad de session).
+- Sprint 0 (fondations) : tâches F-01 à F-12 terminées. 294 tests, CI verte (PR #1 `chore/foundations` → `main`).
+- `packages/` : shared-types (Zod, catalogue d'erreurs), ui (tokens clair/sombre audités), i18n (FR ; WO vide en attente de locuteurs natifs), resilience.
+- `apps/` : mobile (Expo SDK 57, polices, thème live), api (Fastify /v1/health, OpenAPI), admin (Next.js, écran « État du service »).
+- Sentry intégré (API + mobile), **inactif tant qu'aucun DSN n'est fourni**.
+- Design : Impeccable actif, PRODUCT.md écrit ; univers visuel au 1er écran citoyen (D-04).
+- Critère de sortie du sprint encore non vérifié : « app vide déployable Android/iOS » (build EAS, nécessite la connexion Expo).
 
 ## En attente de l'utilisateur
-1. Feu vert pour F-11 (catalogue d'erreurs en langage simple) ; accord pour protéger la branche `main` (CI-01).
-2. Compte Sentry gratuit à créer quand F-12 arrivera.
-3. W-01 : qui rédige et valide le wolof de l'interface ?
-4. A-01 logo/icônes officiels ; A-02 identifiant de publication de l'app.
-5. Confirmer l'acceptation temporaire des 2 vulnérabilités modérées Expo (decisions.md, SEC-01).
+1. Créer le compte Sentry (guide donné le 25/09/2026) puis fournir les 2 DSN (MON-01).
+2. Protection de `main` : GitHub Pro (4 $/mois) ou autre option (CI-01).
+3. Connexion du CLI Expo (`npx expo login --browser`) : nécessaire pour tester sur téléphone et pour le build EAS.
+4. W-01 : qui rédige et valide le wolof de l'interface ?
+5. A-01 logo/icônes officiels ; A-02 identifiant de publication de l'app.
+6. Confirmer l'acceptation temporaire des 2 vulnérabilités modérées Expo (SEC-01).
 
 ## Prochaine tâche
-F-11 — `docs/errors-catalog.md` + catalogue typé des codes d'erreur (RESILIENCE_*, API_*, ROUTE_NOT_FOUND…).
+Clôture du Sprint 0 : vérifier le critère « déployable » (build EAS), puis rituel d'audit croisé de fin de sprint (CLAUDE.md §11) et fusion de la PR #1.
 
 ## Constat environnement
 - Node système 20.20.0 (inchangé, pour les autres projets). Projet : Node 24 via `fnm exec --using=24` (FNM_DIR=`C:\Users\HP\tools\fnm\data`).
 - Pour les commandes du projet : ajouter `C:\Users\HP\tools\fnm\data\node-versions\v24.21.0\installation` en tête du PATH (ou `fnm exec --using=24`).
 - GitHub CLI : `C:\Users\HP\tools\gh\bin\gh.exe` (PATH utilisateur).
 - Projet conservé à `C:\bic-gouv-sn` (chemins courts, hors OneDrive).
+- Captures d'écran : Chrome headless piloté par le protocole DevTools (émulation mobile réelle).

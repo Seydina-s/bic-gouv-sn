@@ -82,7 +82,7 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 24/09/2026 | Q-01 ✅ Délai des tests porté à 30 s (échec intermittent sous charge : 12,6 s pour un démarrage à froid) | Contrôle complet |
 | 24/09/2026 | D-02 ✅ PRODUCT.md écrit (init Impeccable) | F-09 |
 | 24/09/2026 | D-04 🔴 Tour de directions visuelles Impeccable + DESIGN.md au premier écran citoyen (Phase 2) | Décision utilisateur |
-| 24/09/2026 | CI-01 🔴 Activer la protection de la branche `main` (CI verte obligatoire, pas de push direct) — accord utilisateur requis | F-10 |
+| 24/09/2026 | CI-01 ⏸ Protection de la branche `main` : accord donné le 25/09/2026, mais **refusée par GitHub** (dépôt privé en offre gratuite : nécessite GitHub Pro, 4 $/mois, ou un dépôt public). En attente de décision ; d'ici là, règle appliquée : jamais de push direct sur `main`, fusion uniquement par PR avec CI verte | F-10 |
 | 24/09/2026 | CI-02 🔴 Passer le runner à Ubuntu 26.04 de façon délibérée (ubuntu-latest y bascule le 19/10/2026) | F-10 |
 | 25/09/2026 | MON-01 🔴 Après création du compte Sentry : DSN dans les variables d'environnement, plugin `@sentry/react-native/expo` + `getSentryExpoConfig` (source maps), `SENTRY_AUTH_TOKEN` en secret EAS/CI, désactiver le stockage des IP côté projet | F-12 |
 | 25/09/2026 | MON-02 🔴 Sentry pour l'admin Next.js (hors périmètre F-12) | F-12 |
