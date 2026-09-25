@@ -26,13 +26,16 @@ export interface CoverImageProps {
   /** Width of the slot in density-independent pixels, to pick the right variant. */
   slotWidth: number;
   style?: StyleProp<ImageStyle>;
+  /** Spoken description; without it the photo is decorative (its title speaks). */
+  label?: string;
 }
 
 /**
- * Official cover photo, decorative next to its title (the title carries the
- * meaning for screen readers). The BlurHash fills the slot while it loads.
+ * Official photo in lighter variants. Next to a title it is decorative (the title
+ * carries the meaning for screen readers); inside an article it gets a label.
+ * The BlurHash fills the slot while it loads.
  */
-export function CoverImage({ cover, slotWidth, style }: CoverImageProps) {
+export function CoverImage({ cover, slotWidth, style, label }: CoverImageProps) {
   const { theme } = useTheme();
   // Screen density, updated live (external display, fold/unfold).
   const { scale } = useWindowDimensions();
@@ -45,8 +48,9 @@ export function CoverImage({ cover, slotWidth, style }: CoverImageProps) {
       transition={theme.motion.duration.normal}
       recyclingKey={source?.url ?? null}
       testID="cover-image"
-      accessible={false}
-      importantForAccessibility="no-hide-descendants"
+      accessible={label !== undefined}
+      {...(label === undefined ? {} : { accessibilityLabel: label })}
+      importantForAccessibility={label === undefined ? "no-hide-descendants" : "yes"}
       style={[{ backgroundColor: theme.color.surface }, style]}
     />
   );

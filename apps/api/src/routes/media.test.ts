@@ -12,6 +12,7 @@ const ID = "00000000-0000-5000-8000-000000000001";
 const SOURCE = "https://www.presidence.sn/fr/actualites/test-1/";
 
 const COVER: Image = {
+  role: "cover",
   originalUrl: "https://bo-admin.presidence.sn/storage/image/actualites/test.jpg",
   originalKey: "images/abc/original.jpg",
   width: 1200,
@@ -43,7 +44,8 @@ async function storeWithOneArticle() {
         lang: "fr",
         status: "official",
         title: "Titre",
-        bodyHtml: "<p>Corps.</p>",
+        bodyHtml:
+          '<p>Corps.</p><img src="https://bo-admin.presidence.sn/uploads/images/in.jpg" alt="Salle" /><img src="https://bo-admin.presidence.sn/uploads/images/other.jpg" />',
         sourceUrl: SOURCE,
       },
     ],
@@ -98,6 +100,37 @@ describe("cover photos", () => {
 
     const detail = await app.inject({ method: "GET", url: `/v1/news/${ID}` });
     expect(newsDetailSchema.parse(detail.json()).cover?.sources).toHaveLength(2);
+  });
+
+  it("points stored images of the text to our copies, others to the official source", async () => {
+    const articles = await storeWithOneArticle();
+    const inline: Image = {
+      ...COVER,
+      role: "inline",
+      originalUrl: "https://bo-admin.presidence.sn/uploads/images/in.jpg",
+      originalKey: "images/in/original.jpg",
+      variants: [{ format: "jpeg", width: 480, key: "images/in/480.jpg", bytes: 4 }],
+    };
+    await articles.setImages(ID, [inline]);
+    app = await buildApp({
+      config: loadConfig({ LOG_LEVEL: "silent", MEDIA_ROOT: dir }),
+      version: "1.0.0",
+      articles,
+    });
+    const detail = newsDetailSchema.parse(
+      (await app.inject({ method: "GET", url: `/v1/news/${ID}` })).json(),
+    );
+    expect(detail.cover).toBeNull();
+    const [stored, notYet] = detail.blocks.filter((block) => block.type === "image");
+    expect(stored).toMatchObject({
+      alt: "Salle",
+      media: { sources: [{ url: "http://localhost:80/media/images/in/480.jpg" }] },
+    });
+    expect(notYet).toEqual({
+      type: "image",
+      src: "https://bo-admin.presidence.sn/uploads/images/other.jpg",
+      alt: null,
+    });
   });
 
   it("serves the media folder read-only, cacheable, without escaping it", async () => {

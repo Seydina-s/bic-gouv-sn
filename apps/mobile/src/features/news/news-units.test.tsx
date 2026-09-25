@@ -107,6 +107,26 @@ describe("BlockRenderer", () => {
     await fireEvent.press(screen.getByText("Lien"));
     expect(openURL).toHaveBeenCalledWith("https://www.presidence.sn/fr/");
   });
+
+  it("shows our stored copy of an image in the text, with its description", async () => {
+    await render(
+      <ThemeProvider>
+        <I18nProvider>
+          <BlockRenderer
+            blocks={[
+              {
+                type: "image",
+                src: "https://bo-admin.presidence.sn/uploads/images/in.jpg",
+                alt: "Salle du Conseil",
+                media: COVER,
+              },
+            ]}
+          />
+        </I18nProvider>
+      </ThemeProvider>,
+    );
+    expect(screen.getByLabelText("Salle du Conseil")).toHaveProp("testID", "cover-image");
+  });
 });
 
 describe("pickCoverSource", () => {

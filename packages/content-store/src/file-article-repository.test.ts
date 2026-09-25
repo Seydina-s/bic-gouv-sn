@@ -75,6 +75,7 @@ describe("FileArticleRepository", () => {
   it("attaches images without creating a new version", async () => {
     await repo.save(article(1));
     const image = {
+      role: "cover" as const,
       originalUrl: "https://www.presidence.sn/media/a.jpg",
       originalKey: "images/a/original.jpg",
       width: 1200,
