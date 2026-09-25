@@ -110,5 +110,10 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | VS-04 | API `GET /v1/news` (liste) et `GET /v1/news/:id` (détail), schémas partagés, cache HTTP | 🔴 | |
 | VS-05 | Tour de directions visuelles Impeccable (univers de la marque) sur l'accueil / fil d'actualité | 🔴 | D-04, choix utilisateur |
 | VS-06 | App : fil d'actualité + écran article avec les vrais articles, attribution « Source : presidence.sn » + lien | 🔴 | |
+
+## Ajouts en cours de route (suite)
+
+| Date | Ajout | Origine |
+|---|---|---|
 | 25/09/2026 | L-02 🔴 Questions au BIC : (1) autorisation d'utiliser l'API publique `bo-admin.presidence.sn/api/front` ; (2) webhook à chaque publication (fraîcheur < 2 min) ; (3) reprise de la publication officielle en wolof, arrêtée le 01/10/2025 | VS-01 |
 | 25/09/2026 | DM-01 🔴 Modèle de contenu : la date de publication de la source est une date sans heure → champ date calendaire (pas d'heure inventée) + horodatages du back-office | VS-01 |
