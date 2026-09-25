@@ -12,6 +12,11 @@ export function canonicalArticleUrl(lang: Lang, slug: string): string {
   return `${SITE_ORIGIN}/${lang}/actualites/${encodeURIComponent(slug)}/`;
 }
 
+/** Stable id of a presidence.sn article, shared by its French and Wolof versions. */
+export function presidenceArticleId(sourceArticleId: number): string {
+  return stableUuid(`${SITE_ORIGIN}/article/${String(sourceArticleId)}`);
+}
+
 /** Below this, an article is considered emptied (by the source or by sanitization). */
 const MIN_TEXT_LENGTH = 40;
 
@@ -48,7 +53,7 @@ export function normalizeDetail(detail: DetailResponse, { lang, fetchedAt }: Nor
     { lang, status: "official", title, bodyHtml, sourceUrl },
   ];
   const candidate: NewsArticle = {
-    id: stableUuid(`${SITE_ORIGIN}/article/${String(version.articleId)}`),
+    id: presidenceArticleId(version.articleId),
     kind: "news-article",
     category: category.reference,
     sourceUrl,

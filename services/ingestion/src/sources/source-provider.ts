@@ -10,12 +10,20 @@ export interface SourceArticleRef {
   sourceUpdatedAt: string;
 }
 
+/** One page of a source listing, newest first. */
+export interface SourcePage {
+  refs: SourceArticleRef[];
+  lastPage: number;
+}
+
 /**
  * Any official source (presidence.sn API today; a Firecrawl or Playwright fallback
  * later) is read through this interface, so switching tools means one new adapter.
  */
 export interface SourceProvider {
-  listLatest(lang: Lang, page: number): Promise<SourceArticleRef[]>;
+  listPage(lang: Lang, page: number): Promise<SourcePage>;
+  /** Id the stored article gets for this source item (same for all its languages). */
+  articleIdFor(ref: SourceArticleRef): string;
   /** Fetches and normalizes one article; throws QuarantineError when it fails validation. */
   fetchArticle(ref: SourceArticleRef): Promise<NewsArticle>;
 }

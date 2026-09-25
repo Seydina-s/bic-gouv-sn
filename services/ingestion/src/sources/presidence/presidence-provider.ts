@@ -5,7 +5,7 @@ import { QuarantineError, SourceUnreachableError } from "../../lib/errors";
 import { createRateLimiter } from "../../lib/rate-limiter";
 import type { SourceArticleRef, SourceProvider } from "../source-provider";
 import { detailResponseSchema, listResponseSchema } from "./api-schemas";
-import { normalizeDetail } from "./normalize";
+import { normalizeDetail, presidenceArticleId } from "./normalize";
 
 export const PRESIDENCE_API = "https://bo-admin.presidence.sn/api/front";
 
@@ -74,19 +74,24 @@ export function createPresidenceProvider({
   }
 
   return {
-    async listLatest(lang, page) {
+    async listPage(lang, page) {
       const list = await getJson(
         `/articles?page=${String(page)}&q=&categoryIds=`,
         lang,
         listResponseSchema,
       );
-      return list.data.data.map((item) => ({
-        sourceId: item.id,
-        slug: item.slug,
-        lang,
-        sourceUpdatedAt: item.updated_at,
-      }));
+      return {
+        lastPage: list.data.last_page,
+        refs: list.data.data.map((item) => ({
+          sourceId: item.id,
+          slug: item.slug,
+          lang,
+          sourceUpdatedAt: item.updated_at,
+        })),
+      };
     },
+
+    articleIdFor: (ref) => presidenceArticleId(ref.sourceId),
 
     async fetchArticle(ref: SourceArticleRef): Promise<NewsArticle> {
       const detail = await getJson(

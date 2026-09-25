@@ -98,7 +98,8 @@ describe("createPresidenceProvider", () => {
   it("lists the latest articles with the language header and project User-Agent", async () => {
     const fetchImpl = vi.fn<typeof fetch>(() => jsonResponse(fixture("list-fr")));
     const provider = createPresidenceProvider({ fetchImpl, intervalMs: 0 });
-    const refs = await provider.listLatest("fr", 1);
+    const { refs, lastPage } = await provider.listPage("fr", 1);
+    expect(lastPage).toBe(127);
     expect(refs).toHaveLength(3);
     expect(refs[0]).toMatchObject({ sourceId: 1514, lang: "fr" });
     const [url, init] = fetchImpl.mock.calls[0] ?? [];
@@ -126,13 +127,13 @@ describe("createPresidenceProvider", () => {
   it("quarantines a response whose structure changed", async () => {
     const fetchImpl = vi.fn<typeof fetch>(() => jsonResponse({ data: { unexpected: true } }));
     const provider = createPresidenceProvider({ fetchImpl, intervalMs: 0 });
-    await expect(provider.listLatest("fr", 1)).rejects.toBeInstanceOf(QuarantineError);
+    await expect(provider.listPage("fr", 1)).rejects.toBeInstanceOf(QuarantineError);
   });
 
   it("does not retry a 404", async () => {
     const fetchImpl = vi.fn<typeof fetch>(() => jsonResponse({}, 404));
     const provider = createPresidenceProvider({ fetchImpl, intervalMs: 0 });
-    await expect(provider.listLatest("fr", 1)).rejects.toBeInstanceOf(SourceUnreachableError);
+    await expect(provider.listPage("fr", 1)).rejects.toBeInstanceOf(SourceUnreachableError);
     expect(fetchImpl).toHaveBeenCalledTimes(1);
   });
 
@@ -140,7 +141,7 @@ describe("createPresidenceProvider", () => {
     vi.useFakeTimers();
     const fetchImpl = vi.fn<typeof fetch>(() => Promise.reject(new TypeError("fetch failed")));
     const provider = createPresidenceProvider({ fetchImpl, intervalMs: 0 });
-    const pending = expect(provider.listLatest("fr", 1)).rejects.toMatchObject({
+    const pending = expect(provider.listPage("fr", 1)).rejects.toMatchObject({
       code: "INGESTION_SOURCE_UNREACHABLE",
       status: null,
     });
@@ -154,7 +155,7 @@ describe("createPresidenceProvider", () => {
     vi.useFakeTimers();
     const fetchImpl = vi.fn<typeof fetch>(() => jsonResponse({}, 503));
     const provider = createPresidenceProvider({ fetchImpl, intervalMs: 0 });
-    const pending = expect(provider.listLatest("fr", 1)).rejects.toThrow(/HTTP 503/);
+    const pending = expect(provider.listPage("fr", 1)).rejects.toThrow(/HTTP 503/);
     await vi.runAllTimersAsync();
     await pending;
     expect(fetchImpl).toHaveBeenCalledTimes(3);
@@ -187,8 +188,12 @@ describe("collectLatest", () => {
 
   it("reports non-coded errors as UNKNOWN", async () => {
     const provider = {
-      listLatest: () =>
-        Promise.resolve([{ sourceId: 1, slug: "s", lang: "fr" as const, sourceUpdatedAt: "" }]),
+      articleIdFor: () => "id",
+      listPage: () =>
+        Promise.resolve({
+          lastPage: 1,
+          refs: [{ sourceId: 1, slug: "s", lang: "fr" as const, sourceUpdatedAt: "" }],
+        }),
       fetchArticle: () => Promise.reject(new Error("boom")),
     };
     const report = await collectLatest(provider, "fr", 5);
@@ -197,8 +202,12 @@ describe("collectLatest", () => {
 
   it("reports a non-Error rejection as text", async () => {
     const provider = {
-      listLatest: () =>
-        Promise.resolve([{ sourceId: 1, slug: "s", lang: "fr" as const, sourceUpdatedAt: "" }]),
+      articleIdFor: () => "id",
+      listPage: () =>
+        Promise.resolve({
+          lastPage: 1,
+          refs: [{ sourceId: 1, slug: "s", lang: "fr" as const, sourceUpdatedAt: "" }],
+        }),
       // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- simulates a misbehaving adapter
       fetchArticle: () => Promise.reject("plain text"),
     };

@@ -82,8 +82,12 @@ describe("ingestLatest", () => {
 
   function providerReturning(article: NewsArticle): SourceProvider {
     return {
-      listLatest: (lang) =>
-        Promise.resolve([{ sourceId: 1074, slug: "test", lang, sourceUpdatedAt: "" }]),
+      articleIdFor: () => ID,
+      listPage: (lang) =>
+        Promise.resolve({
+          lastPage: 1,
+          refs: [{ sourceId: 1074, slug: "test", lang, sourceUpdatedAt: "" }],
+        }),
       fetchArticle: () => Promise.resolve(article),
     };
   }
