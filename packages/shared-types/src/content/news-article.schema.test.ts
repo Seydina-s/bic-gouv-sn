@@ -12,9 +12,10 @@ describe("newsArticleSchema", () => {
   });
 
   it("accepts an article without a publication date instead of guessing one", () => {
-    expect(newsArticleSchema.safeParse(newsArticle({ sourcePublishedAt: null })).success).toBe(
-      true,
-    );
+    expect(
+      newsArticleSchema.safeParse(newsArticle({ sourcePublishedOn: null, sourceUpdatedAt: null }))
+        .success,
+    ).toBe(true);
   });
 
   it("accepts a machine-translated Wolof version when the official one is missing", () => {
@@ -23,6 +24,11 @@ describe("newsArticleSchema", () => {
       woTranslation({ status: "machine", sourceUrl: undefined }),
     ];
     expect(newsArticleSchema.safeParse(newsArticle({ translations })).success).toBe(true);
+  });
+
+  it("rejects a publication date carrying an invented time", () => {
+    const article = newsArticle({ sourcePublishedOn: "2026-09-24T00:00:00Z" });
+    expect(newsArticleSchema.safeParse(article).success).toBe(false);
   });
 
   it("rejects content from a non-official source", () => {

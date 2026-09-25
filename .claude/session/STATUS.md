@@ -19,7 +19,7 @@
 7. Confirmer l'acceptation temporaire des 2 vulnérabilités modérées Expo (SEC-01).
 
 ## Prochaine tâche
-VS-01 — cartographie minimale de presidence.sn (robots.txt, conditions, liste des actualités, structure d'un article) → docs/sources.md. Branche `feat/news-vertical-slice`.
+VS-03 — stockage provisoire des articles validés (remplacé par PostgreSQL en Phase 1), puis VS-04 (API /v1/news). VS-01 et VS-02 faits : 8 vrais articles collectés.
 
 ## Constat environnement
 - Node système 20.20.0 (inchangé, pour les autres projets). Projet : Node 24 via `fnm exec --using=24` (FNM_DIR=`C:\Users\HP\tools\fnm\data`).

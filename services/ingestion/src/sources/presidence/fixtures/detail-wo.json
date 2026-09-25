@@ -1,0 +1,143 @@
+{
+  "status": "success",
+  "code": 200,
+  "message": null,
+  "data": {
+    "article": {
+      "id": 3392,
+      "slug": "njiitu-reew-mi-dalal-na-mbooloo-mu-bawoo-ci-kurelug-imaam-ak-waaraatekat-yu-senegaa",
+      "titre": "Njiitu Réew mi dalal na mbooloo mu bawoo ci Kurélug Imaam ak Waaraatekat yu Senegaa.",
+      "langage": "WO",
+      "content": "<p><img src=\"https://bo-admin.presidence.sn//storage/image/content/converted_zAdaU7moc3zZIjFtsAyw.jpeg\" data-filename=\"IMG_5597.jpeg\" style=\"width: 282px;\"><br></p><p class=\"p1\" style=\"margin-right: 0px; margin-bottom: 0px; margin-left: 0px; font-width: normal; font-size: 17px; line-height: normal; font-size-adjust: none; font-kerning: auto; font-variant-alternates: normal; font-variant-ligatures: normal; font-variant-numeric: normal; font-variant-east-asian: normal; font-variant-position: normal; font-feature-settings: normal; font-optical-sizing: auto; font-variation-settings: normal; caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); -webkit-tap-highlight-color: rgba(26, 26, 26, 0.3); -webkit-text-size-adjust: auto;\"><span class=\"s1\" style=\"font-family: UICTFontTextStyleBody;\">Njiitu Réew mi Basiiru Jomaay FAY, dalal na ci bisub tay bi mbooloo mu bawoo ci Kurélug Imaam ak Waaraatekat yu Senegaal, ñi ko séqoon di Imaam Ahmat Daam NJAAY, Imaam Fadiilu TAAL ak Imaam Ismayla NJAAY.&nbsp;</span></p><p class=\"p2\" style=\"margin-right: 0px; margin-bottom: 0px; margin-left: 0px; font-width: normal; font-size: 17px; line-height: normal; font-size-adjust: none; font-kerning: auto; font-variant-alternates: normal; font-variant-ligatures: normal; font-variant-numeric: normal; font-variant-east-asian: normal; font-variant-position: normal; font-feature-settings: normal; font-optical-sizing: auto; font-variation-settings: normal; min-height: 24px; caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); -webkit-tap-highlight-color: rgba(26, 26, 26, 0.3); -webkit-text-size-adjust: auto;\"><span class=\"s1\" style=\"font-family: UICTFontTextStyleBody;\"></span><br></p><p class=\"p1\" style=\"margin-right: 0px; margin-bottom: 0px; margin-left: 0px; font-width: normal; font-size: 17px; line-height: normal; font-size-adjust: none; font-kerning: auto; font-variant-alternates: normal; font-variant-ligatures: normal; font-variant-numeric: normal; font-variant-east-asian: normal; font-variant-position: normal; font-feature-settings: normal; font-optical-sizing: auto; font-variation-settings: normal; caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); -webkit-tap-highlight-color: rgba(26, 26, 26, 0.3); -webkit-text-size-adjust: auto;\"><span class=\"s1\" style=\"font-family: UICTFontTextStyleBody;\">Ndaje mii di am pose ngir yaatal ci tomb yu am solo yu laale ak wàllu jàmm, déggoo ci réew mi ak gën a dooleel mbaaxi ngëm yi tàwwu sunu réew.&nbsp;</span></p><p class=\"p2\" style=\"margin-right: 0px; margin-bottom: 0px; margin-left: 0px; font-width: normal; font-size: 17px; line-height: normal; font-size-adjust: none; font-kerning: auto; font-variant-alternates: normal; font-variant-ligatures: normal; font-variant-numeric: normal; font-variant-east-asian: normal; font-variant-position: normal; font-feature-settings: normal; font-optical-sizing: auto; font-variation-settings: normal; min-height: 24px; caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); -webkit-tap-highlight-color: rgba(26, 26, 26, 0.3); -webkit-text-size-adjust: auto;\"><span class=\"s1\" style=\"font-family: UICTFontTextStyleBody;\"></span><br></p><p class=\"p1\" style=\"margin-right: 0px; margin-bottom: 0px; margin-left: 0px; font-width: normal; font-size: 17px; line-height: normal; font-size-adjust: none; font-kerning: auto; font-variant-alternates: normal; font-variant-ligatures: normal; font-variant-numeric: normal; font-variant-east-asian: normal; font-variant-position: normal; font-feature-settings: normal; font-optical-sizing: auto; font-variation-settings: normal; caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); -webkit-tap-highlight-color: rgba(26, 26, 26, 0.3); -webkit-text-size-adjust: auto;\"><span class=\"s1\" style=\"font-family: UICTFontTextStyleBody;\">Njiitu Réew mi di rafetlu jaayante gu sax gi kilifay diine yi am ci sàmm déggoo gi ci réew mi boole ko ak di feddali ag taqoom ci diisoo saa su ne ak kilifa diine yiy sàmm dal gi ak jàppalante gi ngir njariñu askan wi.&nbsp;</span></p>",
+      "articleId": 1074,
+      "created_at": "2025-10-01T22:59:23.000000Z",
+      "updated_at": "2025-10-30T15:03:39.000000Z",
+      "deleted_at": null,
+      "weblink": null,
+      "article": {
+        "id": 1074,
+        "reference": "communiqués_68ddb24aed441",
+        "published": 1,
+        "categorieId": 2,
+        "created_at": "2025-10-01T22:59:22.000000Z",
+        "updated_at": "2025-10-03T19:55:32.000000Z",
+        "deleted_at": null,
+        "featured": 0,
+        "image": "https://bo-admin.presidence.sn//storage/image/actualites/97WGJzfGUFsW5jxkjhFMiTkjUoyBZWlT6zdeJSXi.jpg",
+        "image_vedette": null,
+        "type": "TEXTE",
+        "video_url": null,
+        "date": "2025-10-01",
+        "document_1": null,
+        "document_2": null,
+        "category": {
+          "id": 2,
+          "reference": "communiques",
+          "nom_categorie": "Communiqués",
+          "created_at": "2024-06-21T09:04:09.000000Z",
+          "updated_at": "2024-06-21T09:04:09.000000Z",
+          "deleted_at": null
+        }
+      }
+    },
+    "nextArticle": {
+      "id": 3400,
+      "slug": "-1916",
+      "titre": null,
+      "langage": "WO",
+      "content": null,
+      "articleId": 1076,
+      "created_at": "2025-10-07T08:32:54.000000Z",
+      "updated_at": "2025-10-07T16:21:17.000000Z",
+      "deleted_at": null,
+      "weblink": null,
+      "article": {
+        "id": 1076,
+        "reference": "communiqués_68e4d036e594d",
+        "published": 1,
+        "categorieId": 2,
+        "created_at": "2025-10-07T08:32:54.000000Z",
+        "updated_at": "2025-10-07T16:21:17.000000Z",
+        "deleted_at": null,
+        "featured": 0,
+        "image": "https://bo-admin.presidence.sn//storage/image/actualites/NmNhU3AYxAoXcSIX8jknvhawqvVx8xvCFi2gVTfJ.jpg",
+        "image_vedette": null,
+        "type": "TEXTE",
+        "video_url": null,
+        "date": "2025-10-06",
+        "document_1": null,
+        "document_2": null,
+        "category": {
+          "id": 2,
+          "reference": "communiques",
+          "nom_categorie": "Communiqués",
+          "created_at": "2024-06-21T09:04:09.000000Z",
+          "updated_at": "2024-06-21T09:04:09.000000Z",
+          "deleted_at": null
+        }
+      }
+    },
+    "last10": [],
+    "categories": [
+      {
+        "id": 1,
+        "reference": "conseil-des-ministres",
+        "nom_categorie": "Conseil des ministres",
+        "created_at": "2024-06-21T09:04:09.000000Z",
+        "updated_at": "2024-06-21T09:04:09.000000Z",
+        "deleted_at": null
+      },
+      {
+        "id": 2,
+        "reference": "communiques",
+        "nom_categorie": "Communiqués",
+        "created_at": "2024-06-21T09:04:09.000000Z",
+        "updated_at": "2024-06-21T09:04:09.000000Z",
+        "deleted_at": null
+      },
+      {
+        "id": 3,
+        "reference": "international",
+        "nom_categorie": "International",
+        "created_at": "2024-06-21T09:04:09.000000Z",
+        "updated_at": "2024-06-21T09:04:09.000000Z",
+        "deleted_at": null
+      },
+      {
+        "id": 4,
+        "reference": "discours",
+        "nom_categorie": "Discours",
+        "created_at": "2024-06-21T09:04:09.000000Z",
+        "updated_at": "2024-06-21T09:04:09.000000Z",
+        "deleted_at": null
+      },
+      {
+        "id": 5,
+        "reference": "focus",
+        "nom_categorie": "Focus",
+        "created_at": "2024-06-21T09:04:09.000000Z",
+        "updated_at": "2024-06-21T09:04:09.000000Z",
+        "deleted_at": null
+      },
+      {
+        "id": 6,
+        "reference": "interviews",
+        "nom_categorie": "Interviews & reportages",
+        "created_at": "2024-06-21T09:04:09.000000Z",
+        "updated_at": "2024-06-21T09:04:09.000000Z",
+        "deleted_at": null
+      },
+      {
+        "id": 7,
+        "reference": "agenda",
+        "nom_categorie": "Agenda",
+        "created_at": "2024-06-26T05:56:48.000000Z",
+        "updated_at": "2024-06-26T05:56:48.000000Z",
+        "deleted_at": null
+      }
+    ],
+    "nom_categorie": null
+  },
+  "error": null,
+  "metadata": null
+}

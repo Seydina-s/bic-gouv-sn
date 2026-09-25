@@ -1,0 +1,24 @@
+{
+  "name": "@bgs/ingestion",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Collects official content (presidence.sn) and turns it into validated, traceable articles",
+  "type": "module",
+  "scripts": {
+    "collect": "tsx src/cli/collect-latest.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@bgs/resilience": "workspace:*",
+    "@bgs/shared-types": "workspace:*",
+    "sanitize-html": "2.17.7",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.6",
+    "@types/sanitize-html": "2.16.1",
+    "tsx": "4.23.15",
+    "typescript": "6.0.3"
+  }
+}

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { officialSourceUrlSchema } from "../common/official-source.schema";
 import {
+  isoDateSchema,
   isoDateTimeSchema,
   langSchema,
   positiveIntSchema,
@@ -17,8 +18,13 @@ import { translationSchema } from "./translation.schema";
 export const traceableContentShape = {
   id: z.uuid(),
   sourceUrl: officialSourceUrlSchema,
-  /** Null when the source page shows no publication date: never guessed. */
-  sourcePublishedAt: isoDateTimeSchema.nullable(),
+  /**
+   * Publication date as published by the source: a calendar day, since presidence.sn
+   * gives no hour. Null when the source shows no date. Never guessed.
+   */
+  sourcePublishedOn: isoDateSchema.nullable(),
+  /** Last modification time reported by the source's back-office, when available. */
+  sourceUpdatedAt: isoDateTimeSchema.nullable(),
   fetchedAt: isoDateTimeSchema,
   contentHash: sha256HexSchema,
   version: positiveIntSchema,

@@ -69,6 +69,22 @@ export const ERROR_CATALOG = {
     severity: "critical",
     action: "Transmettez l'identifiant de la requête à l'équipe technique.",
   },
+  INGESTION_SOURCE_UNREACHABLE: {
+    what: "Le site de la Présidence ne répond pas à la collecte des articles.",
+    where: "Collecte automatique (presidence.sn)",
+    impact:
+      "Les nouveaux articles n'arrivent plus dans l'app ; les articles déjà collectés restent visibles.",
+    severity: "critical",
+    action: "Vérifiez que presidence.sn est accessible ; la collecte reprend seule dès son retour.",
+  },
+  INGESTION_QUARANTINED: {
+    what: "Un article collecté est incomplet ou mal formé : il n'a pas été publié.",
+    where: "Collecte automatique (presidence.sn)",
+    impact: "Cet article n'apparaît pas dans l'app tant qu'il n'est pas corrigé.",
+    severity: "warning",
+    action:
+      "Vérifiez l'article sur presidence.sn ; si la structure du site a changé, prévenez l'équipe technique.",
+  },
   ADMIN_API_UNREACHABLE: {
     what: "L'administration n'arrive pas à joindre l'API.",
     where: "Centre d'administration, écran « État du service »",
