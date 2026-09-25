@@ -8,7 +8,8 @@ import { BlockRenderer } from "./BlockRenderer";
 import { categoryLabelKey } from "./category";
 import { pickCoverSource } from "./CoverImage";
 import { formatDay, formatPublishedOn, parseCalendarDate } from "./format";
-import { NewsBand } from "./NewsBand";
+import { composeFrontPage } from "./front-page";
+import { CouncilCard, LeadStory, StoryRow } from "./Stories";
 
 jest.mock("expo-localization", () => ({ getLocales: () => [{ languageTag: "fr-SN" }] }));
 
@@ -123,28 +124,83 @@ describe("pickCoverSource", () => {
   });
 });
 
-describe("NewsBand", () => {
-  async function band(lead: boolean, cover: typeof COVER | null) {
+describe("stories", () => {
+  async function show(kind: "lead" | "row" | "council", cover: typeof COVER | null) {
     const item = { ...LIST.items[0], cover } as (typeof LIST.items)[number];
+    const onPress = jest.fn();
+    const props = { item, lastOpened: true, onPress };
     await render(
       <ThemeProvider>
         <I18nProvider>
-          <NewsBand item={item} lead={lead} lastOpened={false} onPress={jest.fn()} />
+          {kind === "lead" && <LeadStory {...props} />}
+          {kind === "row" && <StoryRow {...props} />}
+          {kind === "council" && <CouncilCard item={item} onPress={onPress} />}
         </I18nProvider>
       </ThemeProvider>,
     );
+    return onPress;
   }
 
-  it("shows the official photo, decorative, on lead and regular bands", async () => {
-    await band(true, COVER);
+  it("shows the official photo, decorative, on the lead story and in the list", async () => {
+    await show("lead", COVER);
     expect(screen.getByTestId("cover-image", { includeHiddenElements: true })).toBeOnTheScreen();
+    expect(screen.getByText("24 septembre 2026 · presidence.sn")).toBeOnTheScreen();
     await screen.unmount();
-    await band(false, COVER);
+    await show("row", COVER);
     expect(screen.getByTestId("cover-image", { includeHiddenElements: true })).toBeOnTheScreen();
+    expect(screen.getByText("Dernière lecture")).toBeOnTheScreen();
   });
 
   it("shows no photo frame when the article has none", async () => {
-    await band(true, null);
+    await show("lead", null);
     expect(screen.queryByTestId("cover-image", { includeHiddenElements: true })).toBeNull();
+  });
+
+  it("opens the latest Conseil des ministres from its card", async () => {
+    const onPress = await show("council", null);
+    expect(screen.getByText("Dernier Conseil des ministres")).toBeOnTheScreen();
+    await fireEvent.press(screen.getByText("Lire le communiqué"));
+    expect(onPress).toHaveBeenCalledWith(LIST.items[0]?.id);
+  });
+});
+
+describe("composeFrontPage", () => {
+  const story = (id: string, category = "communiques") =>
+    ({ ...LIST.items[0], id, category }) as (typeof LIST.items)[number];
+
+  it("leads with the newest story and lifts the latest council into its card", () => {
+    const rows = composeFrontPage([
+      story("a"),
+      story("b"),
+      story("c", "conseil-des-ministres"),
+      story("d", "conseil-des-ministres"),
+    ]);
+    expect(rows.map((row) => `${row.kind}:${row.item.id}`)).toEqual([
+      "lead:a",
+      "council:c",
+      "story:b",
+      "story:d",
+    ]);
+  });
+
+  it("never shows the same council twice when it already leads", () => {
+    const rows = composeFrontPage([story("c", "conseil-des-ministres"), story("b")]);
+    expect(rows.map((row) => row.kind)).toEqual(["lead", "story"]);
+  });
+
+  it("shows the latest council from its own query when it is older than the loaded pages", () => {
+    const older = story("old", "conseil-des-ministres");
+    const rows = composeFrontPage([story("a"), story("b")], older);
+    expect(rows.map((row) => `${row.kind}:${row.item.id}`)).toEqual([
+      "lead:a",
+      "council:old",
+      "story:b",
+    ]);
+    const leading = composeFrontPage([older, story("b")], older);
+    expect(leading.map((row) => row.kind)).toEqual(["lead", "story"]);
+  });
+
+  it("is empty without news", () => {
+    expect(composeFrontPage([])).toEqual([]);
   });
 });

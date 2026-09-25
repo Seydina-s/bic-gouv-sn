@@ -5,6 +5,8 @@ export type SaveOutcome = "created" | "updated" | "unchanged";
 export interface ListQuery {
   /** Only articles having a translation in this language. */
   lang?: Lang | undefined;
+  /** Only articles of this section (slug, e.g. "conseil-des-ministres"). */
+  category?: string | undefined;
   limit: number;
   /** Opaque position returned by the previous page. */
   cursor?: string | undefined;

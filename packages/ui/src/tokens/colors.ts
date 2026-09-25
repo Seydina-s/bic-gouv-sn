@@ -47,6 +47,13 @@ export interface SemanticColors {
   focusRing: string;
   /** Behind modals and sheets, used with opacity.scrim. */
   scrim: string;
+  /** Floating bars (tab bar), used with opacity.glass / glassOpaque. */
+  glass: string;
+  glassBorder: string;
+  /** The flag itself, identical in both themes: decorative stripe only, never text. */
+  flagGreen: string;
+  flagYellow: string;
+  flagRed: string;
 }
 
 export const lightColors: SemanticColors = {
@@ -78,6 +85,11 @@ export const lightColors: SemanticColors = {
   onDangerSurface: red[700],
   focusRing: green[600],
   scrim: neutral[950],
+  glass: neutral[0],
+  glassBorder: neutral[200],
+  flagGreen: green[600],
+  flagYellow: yellow[100],
+  flagRed: red[600],
 };
 
 export const darkColors: SemanticColors = {
@@ -108,4 +120,9 @@ export const darkColors: SemanticColors = {
   onDangerSurface: red[200],
   focusRing: green[400],
   scrim: neutral[950],
+  glass: neutral[925],
+  glassBorder: neutral[800],
+  flagGreen: green[600],
+  flagYellow: yellow[100],
+  flagRed: red[600],
 };

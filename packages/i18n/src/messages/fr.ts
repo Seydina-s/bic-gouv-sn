@@ -3,7 +3,11 @@
  * Short, direct, respectful (vouvoiement); strings are added screen by screen.
  */
 export const fr = {
+  app: {
+    name: "Bic Gouv SN",
+  },
   tabs: {
+    navigation: "Navigation principale",
     home: "Accueil",
     nearMe: "Près de moi",
     assistant: "Assistant IA",
@@ -31,12 +35,8 @@ export const fr = {
     general: "Actualité",
   },
   feed: {
-    newsToday: {
-      one: "{count} publication aujourd'hui",
-      other: "{count} publications aujourd'hui",
-    },
-    latest: "Dernières actualités",
-    newest: "Dernière publication",
+    latestCouncil: "Dernier Conseil des ministres",
+    readCommunique: "Lire le communiqué",
     loadMore: "Chargement de la suite",
     lastOpened: "Dernière lecture",
     offline: "Hors ligne : voici les dernières actualités enregistrées.",

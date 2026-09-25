@@ -40,13 +40,13 @@ beforeEach(async () => {
 });
 
 describe("app shell", () => {
-  it("opens on the feed: today's date, then the woven news bands", async () => {
+  it("opens on the front page: masthead, lead story, then the other stories", async () => {
     await renderRouter(routes, { initialUrl: "/" });
     expect(await screen.findByText("Titre de test A")).toBeOnTheScreen();
     expect(screen.getByText("Titre de test B")).toBeOnTheScreen();
     expect(screen.getByText("Conseil des ministres")).toBeOnTheScreen();
     expect(screen.getByText("Actualité")).toBeOnTheScreen();
-    expect(screen.getByText("Dernières actualités")).toBeOnTheScreen();
+    expect(screen.getByRole("header", { name: "Bic Gouv SN" })).toBeOnTheScreen();
   });
 
   it("opens an article with its official source link", async () => {

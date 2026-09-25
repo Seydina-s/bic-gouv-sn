@@ -90,6 +90,19 @@ describe("GET /v1/news", () => {
     expect(again.statusCode).toBe(304);
   });
 
+  it("filters by section, and refuses a malformed section", async () => {
+    const response = await app.inject({ method: "GET", url: "/v1/news?category=communiques" });
+    expect(newsListResponseSchema.parse(response.json()).items).toHaveLength(3);
+    const none = await app.inject({
+      method: "GET",
+      url: "/v1/news?category=conseil-des-ministres",
+    });
+    expect(newsListResponseSchema.parse(none.json()).items).toEqual([]);
+    expect((await app.inject({ method: "GET", url: "/v1/news?category=../x" })).statusCode).toBe(
+      400,
+    );
+  });
+
   it("rejects an invalid language or limit", async () => {
     expect((await app.inject({ method: "GET", url: "/v1/news?lang=en" })).statusCode).toBe(400);
     expect((await app.inject({ method: "GET", url: "/v1/news?limit=500" })).statusCode).toBe(400);

@@ -7,12 +7,10 @@ import { UsersThreeIcon as UsersThree } from "phosphor-react-native/src/icons/Us
 import type { ComponentType } from "react";
 import type { ColorValue } from "react-native";
 import type { IconProps as PhosphorProps } from "phosphor-react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { GlassTabBar } from "../../components/GlassTabBar";
 import { Icon } from "../../components/Icon";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
-
-const TAB_BAR_HEIGHT = 64;
 
 function tabIcon(glyph: ComponentType<PhosphorProps>) {
   return function TabIcon({ color, focused }: { color: ColorValue; focused: boolean }) {
@@ -25,29 +23,14 @@ function tabIcon(glyph: ComponentType<PhosphorProps>) {
 export default function TabsLayout() {
   const { theme } = useTheme();
   const { t } = useTranslation();
-  const { color, textStyle } = theme;
-  const insets = useSafeAreaInsets();
 
   return (
     <Tabs
+      tabBar={(props) => <GlassTabBar {...props} />}
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: color.textBrand,
-        tabBarInactiveTintColor: color.textSecondary,
-        tabBarStyle: {
-          backgroundColor: color.background,
-          borderTopColor: color.border,
-          // Room for icon + label at every font scale, above the system gesture bar.
-          height: TAB_BAR_HEIGHT + insets.bottom,
-          paddingBottom: insets.bottom,
-        },
-        tabBarLabelStyle: {
-          fontFamily: textStyle.caption.fontFamily,
-          fontSize: textStyle.caption.fontSize,
-          lineHeight: textStyle.caption.lineHeight,
-          // Never squeezed by the icon: a clipped label is unreadable.
-          flexShrink: 0,
-        },
+        // Screens run beneath the floating glass bar; they pad their own content.
+        sceneStyle: { backgroundColor: theme.color.background },
       }}
     >
       <Tabs.Screen name="index" options={{ title: t("tabs.home"), tabBarIcon: tabIcon(House) }} />

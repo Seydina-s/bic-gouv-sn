@@ -37,10 +37,11 @@ export class FileArticleRepository implements ArticleRepository {
     return (await this.read()).articles[id]?.current ?? null;
   }
 
-  async list({ lang, limit, cursor }: ListQuery): Promise<ArticlePage> {
+  async list({ lang, category, limit, cursor }: ListQuery): Promise<ArticlePage> {
     const all = Object.values((await this.read()).articles)
       .map((entry) => entry.current)
       .filter((article) => lang === undefined || article.translations.some((t) => t.lang === lang))
+      .filter((article) => category === undefined || article.category === category)
       .sort(compareNewestFirst);
     const start = cursor === undefined ? 0 : all.findIndex((article) => article.id === cursor) + 1;
     const items = all.slice(start, start + limit);

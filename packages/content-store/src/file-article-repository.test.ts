@@ -111,6 +111,13 @@ describe("FileArticleRepository", () => {
     expect(items.map((item) => item.id)).toEqual([article(2).id, article(1).id]);
   });
 
+  it("filters by section", async () => {
+    await repo.save(article(1));
+    await repo.save(article(2, { category: "conseil-des-ministres" }));
+    const { items } = await repo.list({ limit: 5, category: "conseil-des-ministres" });
+    expect(items.map((item) => item.id)).toEqual([article(2).id]);
+  });
+
   it("filters by language", async () => {
     await repo.save(article(1));
     expect((await repo.list({ lang: "wo", limit: 5 })).items).toEqual([]);

@@ -59,6 +59,12 @@ export function createNewsClient({
       }
       return getJson(`/v1/news?${query.toString()}`, readNewsList, signal);
     },
+    /** Newest story of one section, or null when the section has none in this language. */
+    async latestIn(lang: Lang, category: string, signal?: AbortSignal) {
+      const query = new URLSearchParams({ lang, limit: "1", category });
+      const page = await getJson(`/v1/news?${query.toString()}`, readNewsList, signal);
+      return page.items[0] ?? null;
+    },
     getNews(id: string, lang: Lang, signal?: AbortSignal): Promise<NewsDetail> {
       return getJson(`/v1/news/${encodeURIComponent(id)}?lang=${lang}`, readNewsDetail, signal);
     },
