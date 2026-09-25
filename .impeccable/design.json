@@ -1,0 +1,413 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-25T00:00:00Z",
+  "title": "Design System: Bic Gouv SN",
+  "extensions": {
+    "colorMeta": {
+      "flag-green": {
+        "role": "primary",
+        "displayName": "Vert du drapeau",
+        "canonical": "#00853F",
+        "tonalRamp": [
+          "#013817",
+          "#025124",
+          "#016A31",
+          "#00853F",
+          "#43A361",
+          "#69BD80",
+          "#8DD99F",
+          "#AAEEB9",
+          "#C2FECF",
+          "#E5FFEA"
+        ]
+      },
+      "text-brand": {
+        "role": "primary",
+        "displayName": "Vert encre",
+        "canonical": "#016A31",
+        "tonalRamp": [
+          "#013817",
+          "#025124",
+          "#016A31",
+          "#00853F",
+          "#43A361",
+          "#69BD80",
+          "#8DD99F",
+          "#AAEEB9",
+          "#C2FECF",
+          "#E5FFEA"
+        ]
+      },
+      "primary-container": {
+        "role": "primary",
+        "displayName": "Vert tendre",
+        "canonical": "#E5FFEA",
+        "tonalRamp": [
+          "#013817",
+          "#025124",
+          "#016A31",
+          "#00853F",
+          "#43A361",
+          "#69BD80",
+          "#8DD99F",
+          "#AAEEB9",
+          "#C2FECF",
+          "#E5FFEA"
+        ]
+      },
+      "flag-yellow": {
+        "role": "secondary",
+        "displayName": "Jaune du drapeau",
+        "canonical": "#FDEF42",
+        "tonalRamp": [
+          "#3D2A02",
+          "#553E01",
+          "#6E5405",
+          "#8A6E04",
+          "#A78904",
+          "#C3A611",
+          "#DEC52E",
+          "#F2DE3E",
+          "#FDEF42",
+          "#FFFBBA"
+        ]
+      },
+      "accent-container": {
+        "role": "secondary",
+        "displayName": "Jaune pâle",
+        "canonical": "#FFFBBA",
+        "tonalRamp": [
+          "#3D2A02",
+          "#553E01",
+          "#6E5405",
+          "#8A6E04",
+          "#A78904",
+          "#C3A611",
+          "#DEC52E",
+          "#F2DE3E",
+          "#FDEF42",
+          "#FFFBBA"
+        ]
+      },
+      "flag-red": {
+        "role": "tertiary",
+        "displayName": "Rouge du drapeau",
+        "canonical": "#E31B23",
+        "tonalRamp": [
+          "#5C0105",
+          "#81000A",
+          "#A70411",
+          "#E31B23",
+          "#F1453F",
+          "#FF796D",
+          "#FEABA1",
+          "#FFCDC7",
+          "#FEE7E4",
+          "#FFF4F2"
+        ]
+      },
+      "background": {
+        "role": "neutral",
+        "displayName": "Blanc coton",
+        "canonical": "#FFFFFF",
+        "tonalRamp": [
+          "#131714",
+          "#1A201B",
+          "#232824",
+          "#2B2F2C",
+          "#3F4440",
+          "#555956",
+          "#6D716E",
+          "#898E8A",
+          "#A4A9A5",
+          "#C0C6C1",
+          "#D7DCD8",
+          "#E9EEEA",
+          "#F3F8F4",
+          "#FFFFFF"
+        ]
+      },
+      "background-dark": {
+        "role": "neutral",
+        "displayName": "Nuit verte",
+        "canonical": "#131714",
+        "tonalRamp": [
+          "#131714",
+          "#1A201B",
+          "#232824",
+          "#2B2F2C",
+          "#3F4440",
+          "#555956",
+          "#6D716E",
+          "#898E8A",
+          "#A4A9A5",
+          "#C0C6C1",
+          "#D7DCD8",
+          "#E9EEEA",
+          "#F3F8F4",
+          "#FFFFFF"
+        ]
+      },
+      "glass": {
+        "role": "neutral",
+        "displayName": "Verre dépoli",
+        "canonical": "#FFFFFF",
+        "tonalRamp": ["#232824", "#FFFFFF"]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Très grands titres d'écran ; sa famille signe le nom de l'app dans l'en-tête."
+      },
+      "headline": { "displayName": "Headline", "purpose": "Titres d'écrans secondaires." },
+      "lead-headline": {
+        "displayName": "Titre de une",
+        "purpose": "Titre de l'article à la une et de la page article (Literata)."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Nom de l'app dans l'en-tête, titres de section."
+      },
+      "subtitle": {
+        "displayName": "Subtitle",
+        "purpose": "Intertitres d'article ; famille du gras et du libellé d'onglet actif."
+      },
+      "story-title": {
+        "displayName": "Titre d'article",
+        "purpose": "Titres de la liste et de la carte du Conseil (Literata)."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Lecture et extraits ; colonne de 640 dp au plus."
+      },
+      "body-small": {
+        "displayName": "Body small",
+        "purpose": "Date, source, mention de traduction automatique."
+      },
+      "label": { "displayName": "Label", "purpose": "Boutons, liens d'action, date de l'en-tête." },
+      "caption": {
+        "displayName": "Caption",
+        "purpose": "Libellés d'onglets et nom de rubrique ; jamais pour lire."
+      }
+    },
+    "opacity": [
+      { "name": "disabled", "value": "0.38", "purpose": "Contrôles désactivés." },
+      { "name": "pressed", "value": "0.12", "purpose": "Voile de pression." },
+      { "name": "scrim", "value": "0.6", "purpose": "Voile derrière les modales." },
+      { "name": "glass", "value": "0.82", "purpose": "Voile du verre sur flou réel (iOS, web)." },
+      {
+        "name": "glassOpaque",
+        "value": "0.94",
+        "purpose": "Voile du verre sans flou (Android, GPU d'entrée de gamme)."
+      },
+      { "name": "baobab", "value": "0.06", "purpose": "Filigrane du baobab (plage 3-6 %)." }
+    ],
+    "shadows": [
+      {
+        "name": "tab-bar-float",
+        "value": "0 8px 24px rgba(19, 23, 20, 0.14)",
+        "purpose": "Barre d'onglets flottante uniquement (Android : elevation 8)."
+      }
+    ],
+    "backdrop": [
+      {
+        "name": "glass-blur",
+        "value": "BlurView intensity 40 (iOS, web) ; aucun flou sur Android",
+        "purpose": "Barre d'onglets en verre dépoli."
+      }
+    ],
+    "motion": [
+      { "name": "duration-fast", "value": "120ms", "purpose": "Petits changements d'état." },
+      {
+        "name": "duration-normal",
+        "value": "220ms",
+        "purpose": "Fondu des photos, transitions courantes."
+      },
+      { "name": "duration-slow", "value": "360ms", "purpose": "Mouvements d'écran." },
+      { "name": "duration-exit-fast", "value": "90ms", "purpose": "Sorties (≈ 70 % des entrées)." },
+      {
+        "name": "duration-exit-normal",
+        "value": "160ms",
+        "purpose": "Sorties (≈ 70 % des entrées)."
+      },
+      {
+        "name": "ease-standard",
+        "value": "cubic-bezier(0.2, 0, 0, 1)",
+        "purpose": "Transitions d'état par défaut."
+      },
+      {
+        "name": "ease-emphasized",
+        "value": "cubic-bezier(0.3, 0, 0, 1)",
+        "purpose": "Mouvements mis en valeur."
+      },
+      {
+        "name": "spring-snappy",
+        "value": "damping 20, stiffness 300, mass 1",
+        "purpose": "Appuis, bascules, petits éléments."
+      },
+      {
+        "name": "spring-gentle",
+        "value": "damping 26, stiffness 180, mass 1",
+        "purpose": "Cartes, feuilles, entrée tissée des articles."
+      },
+      {
+        "name": "woven-in",
+        "value": "fondu + montée 12dp, décalage 40ms, spring-gentle, 8 premiers articles",
+        "purpose": "Mouvement signature du fil ; apparition directe si « réduire les animations »."
+      }
+    ],
+    "breakpoints": [
+      { "name": "compact", "value": "0dp" },
+      { "name": "medium", "value": "600dp" },
+      { "name": "expanded", "value": "840dp" }
+    ],
+    "layout": [
+      {
+        "name": "readingMaxWidth",
+        "value": "640dp",
+        "purpose": "Colonne de lecture (≈ 65 caractères)."
+      },
+      { "name": "coverAspectRatio", "value": "16/9", "purpose": "Photo de la page article." },
+      { "name": "touchTarget.min", "value": "48dp", "purpose": "Cible tactile minimale." },
+      { "name": "iconSize", "value": "16 / 24 / 32dp", "purpose": "Icônes Phosphor sm / md / lg." }
+    ]
+  },
+  "components": [
+    {
+      "name": "Barre d'onglets en verre",
+      "kind": "nav",
+      "refersTo": "glass-tab-bar",
+      "description": "Pilule flottante en verre dépoli ; onglet actif = indicateur vert tendre, icône pleine, libellé vert encre.",
+      "html": "<nav class=\"ds-tabbar\" role=\"tablist\"><button class=\"ds-tab ds-tab-active\" role=\"tab\" aria-selected=\"true\"><span class=\"ds-tab-ind\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 256 256\" fill=\"#025124\"><path d=\"M224 120v96a8 8 0 0 1-8 8h-56a8 8 0 0 1-8-8v-52a4 4 0 0 0-4-4h-40a4 4 0 0 0-4 4v52a8 8 0 0 1-8 8H40a8 8 0 0 1-8-8v-96a16 16 0 0 1 4.69-11.31l80-80a16 16 0 0 1 22.62 0l80 80A16 16 0 0 1 224 120Z\"/></svg></span><span>Accueil</span></button><button class=\"ds-tab\" role=\"tab\" aria-selected=\"false\"><span class=\"ds-tab-ind\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 256 256\" fill=\"none\" stroke=\"#555956\" stroke-width=\"16\"><circle cx=\"128\" cy=\"104\" r=\"32\"/><path d=\"M208 104c0 72-80 128-80 128s-80-56-80-128a80 80 0 0 1 160 0Z\"/></svg></span><span>Près de moi</span></button></nav>",
+      "css": ".ds-tabbar { display: flex; height: 64px; border-radius: 999px; border: 0.5px solid #D7DCD8; background: rgba(255,255,255,0.82); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: 0 8px 24px rgba(19,23,20,0.14); overflow: hidden; } .ds-tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; background: none; border: 0; font: 600 12px/16px Manrope, sans-serif; color: #555956; min-height: 48px; } .ds-tab-ind { display: flex; align-items: center; justify-content: center; width: 56px; height: 32px; border-radius: 16px; } .ds-tab-active { color: #2B2F2C; font-weight: 700; } .ds-tab-active .ds-tab-ind { background: #E5FFEA; } .ds-tab:active { opacity: 0.64; } .ds-tab:focus-visible { outline: 2px solid #00853F; outline-offset: -4px; }"
+    },
+    {
+      "name": "En-tête de la une",
+      "kind": "custom",
+      "refersTo": "masthead",
+      "description": "Bandeau tricolore, nom de l'app, date, filet noir, baobab en filigrane.",
+      "html": "<header class=\"ds-mast\"><div class=\"ds-flag\"><i style=\"background:#00853F\"></i><i style=\"background:#FDEF42\"></i><i style=\"background:#E31B23\"></i></div><div class=\"ds-mast-body\"><h1>Bic Gouv SN</h1><p>jeudi 25 septembre 2026</p></div></header>",
+      "css": ".ds-mast { background: #FFFFFF; } .ds-flag { display: flex; height: 4px; } .ds-flag i { flex: 1; } .ds-mast-body { padding: 16px 16px 12px; border-bottom: 1px solid #2B2F2C; } .ds-mast-body h1 { margin: 0; font: 800 22px/30px 'Bricolage Grotesque', sans-serif; color: #016A31; } .ds-mast-body p { margin: 0; font: 600 14px/20px Manrope, sans-serif; color: #555956; }"
+    },
+    {
+      "name": "Article de la liste",
+      "kind": "card",
+      "refersTo": "story-row",
+      "description": "Lisière tissée, rubrique, titre serif, date, vignette à droite.",
+      "html": "<a class=\"ds-row\" href=\"#\"><span class=\"ds-selvage\"></span><span class=\"ds-row-body\"><span class=\"ds-tag\"><span class=\"ds-swatch\"></span>Communiqués</span><span class=\"ds-row-title\">Titre officiel de l'article, tel que publié par la source</span><span class=\"ds-row-day\">25 septembre 2026</span></span><span class=\"ds-thumb\"></span></a>",
+      "css": ".ds-row { display: flex; min-height: 48px; padding: 16px 16px 16px 0; border-top: 0.5px solid #D7DCD8; background: #FFFFFF; text-decoration: none; } .ds-row:active { background: #F3F8F4; } .ds-row:focus-visible { outline: 2px solid #00853F; } .ds-selvage { width: 6px; background-image: radial-gradient(circle at 3px 4px, #00853F 1.3px, transparent 1.4px); background-size: 6px 8px; } .ds-row-body { flex: 1; display: flex; flex-direction: column; gap: 4px; margin-left: 10px; } .ds-tag { display: flex; align-items: center; gap: 8px; font: 600 12px/16px Manrope, sans-serif; letter-spacing: 0.8px; text-transform: uppercase; color: #016A31; } .ds-swatch { width: 12px; height: 12px; background-image: radial-gradient(circle at 3px 4px, #016A31 1.3px, transparent 1.4px); background-size: 6px 8px; } .ds-row-title { font: 600 18px/24px Literata, Georgia, serif; color: #2B2F2C; } .ds-row-day { font: 400 14px/20px Manrope, sans-serif; color: #6D716E; } .ds-thumb { width: 92px; height: 72px; border-radius: 12px; margin-left: 12px; background: #F3F8F4; }"
+    },
+    {
+      "name": "Carte Dernier Conseil des ministres",
+      "kind": "card",
+      "refersTo": "council-card",
+      "description": "Carte vert tendre tissée de chevrons en haut, titre serif et action de lecture.",
+      "html": "<a class=\"ds-council\" href=\"#\"><span class=\"ds-chevrons\"></span><span class=\"ds-council-body\"><span class=\"ds-council-title\">Communiqué du Conseil des ministres</span><span class=\"ds-council-day\">24 septembre 2026</span><span class=\"ds-council-act\">Lire le communiqué →</span></span></a>",
+      "css": ".ds-council { display: block; margin: 12px 16px; border-radius: 20px; overflow: hidden; background: #E5FFEA; color: #025124; text-decoration: none; } .ds-council:active { opacity: 0.85; } .ds-council:focus-visible { outline: 2px solid #00853F; outline-offset: 2px; } .ds-chevrons { display: block; height: 6px; background: repeating-linear-gradient(135deg, #025124 0 1.4px, transparent 1.4px 4px); } .ds-council-body { display: flex; flex-direction: column; gap: 8px; padding: 16px; } .ds-council-title { font: 600 18px/24px Literata, Georgia, serif; } .ds-council-day { font: 400 14px/20px Manrope, sans-serif; } .ds-council-act { font: 600 14px/20px Manrope, sans-serif; margin-top: 4px; }"
+    },
+    {
+      "name": "Nœud dernier ouvert",
+      "kind": "chip",
+      "refersTo": "last-opened-knot",
+      "description": "Pilule jaune pâle sur l'article ouvert en dernier.",
+      "html": "<span class=\"ds-knot\">Dernière lecture</span>",
+      "css": ".ds-knot { display: inline-block; padding: 0 8px; border-radius: 999px; background: #FFFBBA; color: #553E01; font: 600 12px/16px Manrope, sans-serif; }"
+    },
+    {
+      "name": "Bouton principal",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Action principale (réessayer) : vert du drapeau, texte blanc, 48 dp.",
+      "html": "<button class=\"ds-btn-primary\">Réessayer</button>",
+      "css": ".ds-btn-primary { min-height: 48px; padding: 0 24px; border: 0; border-radius: 12px; background: #00853F; color: #FFFFFF; font: 600 14px/20px Manrope, sans-serif; } .ds-btn-primary:active { background: #016A31; } .ds-btn-primary:focus-visible { outline: 2px solid #00853F; outline-offset: 2px; }"
+    },
+    {
+      "name": "Lien vers la source",
+      "kind": "button",
+      "refersTo": "source-link",
+      "description": "Lien vers l'article original, au pied de chaque article.",
+      "html": "<a class=\"ds-source\" href=\"#\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 256 256\" fill=\"none\" stroke=\"#016A31\" stroke-width=\"16\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M216 104V40h-64M136 120l80-80M184 136v72a8 8 0 0 1-8 8H48a8 8 0 0 1-8-8V80a8 8 0 0 1 8-8h72\"/></svg>Lire sur presidence.sn</a>",
+      "css": ".ds-source { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; color: #016A31; font: 600 14px/20px Manrope, sans-serif; text-decoration: none; } .ds-source:active { opacity: 0.64; } .ds-source:focus-visible { outline: 2px solid #00853F; outline-offset: 2px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "La Une tissée",
+    "overview": "L'accueil est la une d'un journal du jour : un bandeau tricolore fin, le nom de l'application et la date comme un titre de quotidien, un filet noir dessous, puis une grande photo pleine largeur et un titre en serif. Sous la une, la carte « Dernier Conseil des ministres » et la liste des articles, chacun avec sa vignette à droite. C'est la direction D-05 choisie par l'utilisateur le 25/09/2026 : elle remplace l'ancienne direction « pagne tissé seul ».\n\nLe pagne tissé en bandes (manjak / wolof) reste le fil conducteur : chaque rubrique a son motif tissé (chevron, points, sergé, échelle, losange, tiret, grille). Le motif borde chaque article (lisière), précède le nom de la rubrique (pastille) et traverse le haut de la carte du Conseil (bande). Il permet de reconnaître une rubrique sans dépendre de la couleur. Le fond est blanc coton en clair, presque noir à peine teinté de vert en sombre. Le vert du drapeau domine, le jaune reste rare, le rouge est réservé aux alertes.\n\nLa densité est celle d'un quotidien lisible sur petit écran : une colonne, des filets fins entre les articles, beaucoup d'air autour des titres. La profondeur se limite à une seule surface flottante, la barre d'onglets en verre dépoli. Le mouvement se réduit à une entrée « tissée » des articles, supprimée si le système demande de réduire les animations.",
+    "keyCharacteristics": [
+      "Une de journal : bandeau tricolore, nom + date, filet, photo pleine largeur, titre serif Literata.",
+      "Un motif tissé par rubrique, toujours décoratif, jamais derrière un texte.",
+      "Vert dominant, jaune en petite touche, rouge réservé aux alertes ; tokens sémantiques pour les deux thèmes.",
+      "Plat par défaut ; une seule surface flottante : la barre d'onglets en verre.",
+      "Le baobab une seule fois par vue, en filigrane très léger."
+    ],
+    "rules": [
+      {
+        "name": "La règle du drapeau muet",
+        "body": "Les trois couleurs exactes du drapeau (`flag-green`, `flag-yellow`, `flag-red`) sont identiques dans les deux thèmes et ne servent qu'au bandeau tricolore décoratif. Jamais de texte en `flag-*`.",
+        "section": "colors"
+      },
+      {
+        "name": "La règle du jaune porté",
+        "body": "Le jaune n'est jamais du texte sur fond blanc ou clair (contraste insuffisant). Il sert de fond, avec du texte `on-accent` / `on-accent-container`, ou de touche sur une surface verte (`accent-on-brand-surface`, en grand texte ou en icône seulement).",
+        "section": "colors"
+      },
+      {
+        "name": "La règle du rouge rare",
+        "body": "Le rouge signale une erreur ou un avertissement. Il ne décore rien, ne distingue aucune rubrique et ne sert pas à attirer l'œil.",
+        "section": "colors"
+      },
+      {
+        "name": "La règle des tokens seuls",
+        "body": "Aucune couleur en dur dans un écran ou un composant. Une translucidité passe par `withAlpha(token, opacity.*)` ; un contraste sur fond translucide se vérifie avec `composite()` (`packages/ui/src/color/contrast.ts`).",
+        "section": "colors"
+      },
+      {
+        "name": "La règle du serif pour l'information",
+        "body": "Literata est réservée aux titres d'articles officiels (`lead-headline`, `story-title`). L'interface (boutons, onglets, libellés) reste en Manrope.",
+        "section": "typography"
+      },
+      {
+        "name": "La règle de l'interligne large",
+        "body": "L'interligne vaut au moins 1,25 fois la taille pour que les diacritiques français et wolof (É, Ë, Ñ, Ŋ) ne soient jamais rognés.",
+        "section": "typography"
+      },
+      {
+        "name": "La règle de la taille système",
+        "body": "Les tailles sont en sp et suivent le réglage de taille de texte du téléphone. Aucun texte ne désactive la mise à l'échelle. La hiérarchie repose sur la graisse et la famille autant que sur la taille, pour tenir aux plus grandes tailles système. Seul le libellé d'onglet peut réduire sa police à 80 % pour tenir sur une ligne.",
+        "section": "typography"
+      },
+      {
+        "name": "La règle de la seule surface flottante",
+        "body": "Seule la barre d'onglets flotte. Les cartes, articles et photos restent posés à plat : aucune ombre et aucun flou ailleurs.",
+        "section": "elevation"
+      },
+      {
+        "name": "La règle du verre lisible",
+        "body": "Tout texte posé sur le verre doit atteindre 4,5:1 contre le pire fond possible (photo entièrement blanche ou entièrement noire qui défile dessous), calculé avec `composite(glass, opacity, fond)`, dans les deux thèmes et pour les deux opacités. Le test `packages/ui/src/tokens/colors.test.ts` en est la garde.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do faire passer tout changement visuel par les tokens de `packages/ui/src/tokens/` ou par un composant listé ci-dessus. Un écran assemble des composants et lit `theme.*`, rien d'autre.",
+      "Do vérifier chaque nouvelle paire texte / fond en WCAG AA dans les deux thèmes : 4,5:1 pour le texte, 3:1 pour les grands textes et les contours. Ajouter la paire aux tests de `colors.test.ts`.",
+      "Do vérifier tout texte posé sur le verre contre un fond blanc pur et noir pur, avec `opacity.glass` et `opacity.glassOpaque`.",
+      "Do garantir une cible tactile d'au moins 48 dp (`touchTarget.min`) pour tout élément pressable.",
+      "Do laisser le texte suivre la taille système. Tester à la plus grande taille, en français et en wolof.",
+      "Do remplacer tout mouvement par une apparition directe ou un fondu quand « réduire les animations » est actif.",
+      "Do donner un motif tissé à chaque nouvelle rubrique et l'accompagner de son nom.",
+      "Do afficher « Source : presidence.sn » et le lien vers l'original au pied de chaque article."
+    ],
+    "donts": [
+      "Don't écrire une couleur, une taille de police, un espacement ou un rayon en dur dans un écran.",
+      "Don't utiliser le jaune comme couleur de texte sur fond blanc ou clair.",
+      "Don't utiliser les couleurs `flag-*` pour autre chose que le bandeau tricolore décoratif.",
+      "Don't utiliser le rouge pour décorer ou distinguer une rubrique.",
+      "Don't poser un motif tissé ou le baobab derrière un texte, ni afficher le baobab plus d'une fois par vue.",
+      "Don't ajouter du flou sur Android, ni une deuxième surface flottante ou ombrée.",
+      "Don't coder une information par la couleur seule : motif + mot, icône + libellé.",
+      "Don't utiliser `fontWeight` pour changer de graisse d'une police personnalisée : utiliser la face `fontFace` correspondante.",
+      "Don't placer une accroche ou un sur-titre inventé au-dessus d'un titre. Seul le nom réel de la rubrique source peut précéder un titre."
+    ]
+  }
+}

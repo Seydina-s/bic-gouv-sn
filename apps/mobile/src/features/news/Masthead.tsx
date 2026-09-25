@@ -5,8 +5,6 @@ import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 import { formatDay } from "./format";
 
-const FLAG_STRIPE_HEIGHT = 4;
-
 /** The flag as a thin tricolour stripe: decoration only, identical in both themes. */
 function FlagStripe() {
   const { theme } = useTheme();
@@ -15,7 +13,7 @@ function FlagStripe() {
     <View
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
-      style={[styles.stripe, { height: FLAG_STRIPE_HEIGHT }]}
+      style={[styles.stripe, { height: theme.layout.flagStripe }]}
     >
       {[flagGreen, flagYellow, flagRed].map((color) => (
         <View key={color} style={[styles.band, { backgroundColor: color }]} />
@@ -50,7 +48,7 @@ export function Masthead({ today }: { today: Date }) {
         ]}
       >
         <View style={[styles.watermark, { right: space.md }]}>
-          <Baobab size={72} color={color.textBrand} opacity={0.06} />
+          <Baobab size={72} color={color.textBrand} opacity={theme.opacity.watermark} />
         </View>
         <Text
           accessibilityRole="header"

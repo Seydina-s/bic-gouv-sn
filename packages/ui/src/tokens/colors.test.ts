@@ -67,7 +67,9 @@ describe.each([
   it.each(["#FFFFFF", "#000000"])("keeps tab labels readable over %s", (backdrop) => {
     for (const alpha of [opacity.glass, opacity.glassOpaque]) {
       const bar = composite(colors.glass, alpha, backdrop);
+      // Inactive labels, and the active label (bold, under its green indicator).
       expect(contrastRatio(colors.textSecondary, bar)).toBeGreaterThanOrEqual(WCAG_AA.text);
+      expect(contrastRatio(colors.textPrimary, bar)).toBeGreaterThanOrEqual(WCAG_AA.text);
       expect(
         contrastRatio(colors.onPrimaryContainer, colors.primaryContainer),
       ).toBeGreaterThanOrEqual(WCAG_AA.text);

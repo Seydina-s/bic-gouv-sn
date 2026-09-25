@@ -1,12 +1,32 @@
 import { darkColors, lightColors, type SemanticColors } from "./colors";
-import { iconSize, layout, motion, opacity, radius, space, textStyle, touchTarget } from "./scales";
+import {
+  iconSize,
+  layout,
+  motion,
+  opacity,
+  radius,
+  space,
+  textStyle,
+  touchTarget,
+  tracking,
+} from "./scales";
 
 export type ColorScheme = "light" | "dark";
 
 /** User preference in Settings; "system" follows the phone live (default). */
 export type ThemePreference = ColorScheme | "system";
 
-const scales = { space, radius, textStyle, iconSize, opacity, motion, touchTarget, layout };
+const scales = {
+  space,
+  radius,
+  textStyle,
+  tracking,
+  iconSize,
+  opacity,
+  motion,
+  touchTarget,
+  layout,
+};
 
 export type Theme = { scheme: ColorScheme; color: SemanticColors } & typeof scales;
 
