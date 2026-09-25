@@ -18,7 +18,7 @@
     "@bgs/ui": "workspace:*",
     "@phosphor-icons/react": "2.1.10",
     "next": "16.3.6",
-    "react": "19.2.3",
+    "react": "19.2.8",
     "react-dom": "19.2.3",
     "zod": "4.6.5"
   },
