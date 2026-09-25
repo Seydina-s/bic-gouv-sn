@@ -2,6 +2,25 @@
 // IDs that match uploaded source maps (readable crash reports). Upload only happens
 // in builds where SENTRY_AUTH_TOKEN is set as a secret; never in the repository.
 // eslint-disable-next-line @typescript-eslint/no-require-imports -- Metro loads its config as CommonJS
+const path = require("node:path");
+// eslint-disable-next-line @typescript-eslint/no-require-imports -- Metro loads its config as CommonJS
 const { getSentryExpoConfig } = require("@sentry/react-native/metro");
 
-module.exports = getSentryExpoConfig(__dirname);
+const config = getSentryExpoConfig(__dirname);
+
+/**
+ * Bundle weight (PERF-03): Zod's catalogue of translated error messages is replaced
+ * by an empty module (-275 KB). Only this exact import from inside Zod is redirected.
+ */
+const ZOD_LOCALES_STUB = path.join(__dirname, "src", "stubs", "zod-locales.js");
+const insideZod = /[\\/]zod[\\/]v4[\\/](?:classic|core)[\\/]/;
+const upstreamResolve = config.resolver.resolveRequest;
+
+config.resolver.resolveRequest = (context, moduleName, platform) => {
+  if (moduleName === "../locales/index.js" && insideZod.test(context.originModulePath)) {
+    return { type: "sourceFile", filePath: ZOD_LOCALES_STUB };
+  }
+  return (upstreamResolve ?? context.resolveRequest)(context, moduleName, platform);
+};
+
+module.exports = config;

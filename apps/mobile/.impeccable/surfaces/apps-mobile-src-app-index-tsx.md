@@ -1,8 +1,8 @@
 ---
-version: 1
+version: 2
 slug: "apps-mobile-src-app-index-tsx"
-primary_target: "apps/mobile/src/app/index.tsx"
-related_targets: []
+primary_target: "apps/mobile/src/app/(tabs)/index.tsx"
+related_targets: ["apps/mobile/src/app/article/[id].tsx", "apps/mobile/src/components/GlassTabBar.tsx"]
 ---
 
 ## Scope
@@ -11,31 +11,29 @@ Mobile app (adaptive: Android + iOS), first citizen surface: home news feed ("Ac
 
 Audience and job: Senegalese citizens on modest Android phones, often in bright light or on the move, some reading little. Job: know in seconds what the government did today, then read or (later) listen to one official text, traceable to presidence.sn.
 
-Constraints: flag palette tokens (green dominant, yellow accent never text on white, red alerts only); white ground in light mode; Bricolage Grotesque + Manrope (provisional, S1-04); Phosphor icons; native navigation (tab bar, stack, system back); 48 dp targets; Dynamic Type / font scale; reduce motion; low-end GPU budget (no blur, no heavy shadows); no invented content, no official emblem.
+Constraints: flag palette tokens (green dominant, yellow accent never text on white, red alerts only); white ground in light mode; Bricolage Grotesque + Manrope + Literata (provisional, S1-04); Phosphor icons; native navigation (tab bar, stack, system back); 48 dp targets; Dynamic Type / font scale; reduce motion; low-end GPU budget (blur only on iOS; Android glass is translucent without blur; no heavy shadows); no invented content, no official emblem.
 
-Substitution: the user delegated every visual decision (autonomous mode, 25/09/2026). No decision page was shown; the assigned direction is built and the verdicts are recorded here.
+Substitution: the first direction ("pagne tissé" only) was delegated and built in autonomous mode (25/09/2026). The user rejected it the same day and chose D-05 from a board of 5 directions with iPhone captures (decisions.md, 25/09/2026). The contract below records D-05 as shipped.
 
 ## Direction contract
 
-THESIS: The day's official news is a strip-woven cloth: each article is one narrow woven band, sewn edge to edge into "la pièce du jour". It refuses the category default of a government app: blue cards, a seal, and a carousel of stock photos.
+THESIS: The day's official news as a newspaper front page ("La Une"), woven with the strip-cloth pagne: a masthead with the flag, the app's name and the date, one lead story with a full-width photo and a serif headline, then the other stories, each bordered by its section's weave. It refuses the category default of a government app: blue cards, a seal, and a carousel of stock photos.
 
-OWN-WORLD: White cotton ground (dark: indigo-black thioup). Each band has a hairline seam above it and a 6 dp selvage on its leading edge, woven in a pattern that names its section: chevron for Conseil des ministres, dots for Communiqués, diagonal twill for International, ladder for Discours, diamond for Focus, dash for Interviews, grid for Agenda. The pattern is a thin SVG repeat, never behind text. Colors come from flag tints: green threads for official news, yellow thread only as a small "new" knot, red never decorative. The display face is set large for the day and date; the body face is used for bands and reading.
+OWN-WORLD: White cotton ground (dark: near-black with a faint green tint, neutral 950). Masthead = 4 dp tricolour flag stripe (decorative only), name in the display family, date, a 1 dp black rule beneath, the baobab once as a 6 % watermark. Headlines in Literata serif (lead 26/34, stories 18/24); body and UI in Manrope. Each section has its own woven pattern (chevron Conseil des ministres, dots Communiqués, twill International, ladder Discours, diamond Focus, dash Interviews, grid Agenda): 6 dp selvage on the leading edge of each story, 12 dp swatch before the section name, 6 dp strip across the top of the Council card. Patterns are thin SVG repeats, never behind text, always paired with the section's name. Green threads for official news; yellow only as the soft "last read" knot; red never decorative. One floating surface: a frosted-glass pill tab bar (real blur on iOS, translucent without blur on Android).
 
-STORY: Opening the app, the reader sees today's date woven in big type and the number of bands; the first band (latest) is widest; they scan titles, recognise sections by pattern and colour, and open one to read it as plain, generous text with "Source : presidence.sn" and a link at the foot.
+STORY: Opening the app, the reader sees today's front page: the name and date under the flag stripe, the latest story as the lead with its photo and serif headline, then the latest Conseil des ministres as a green card woven with chevrons, then the list. They recognise sections by pattern and name, open one, and read plain, generous text ending with "Source : presidence.sn" and a link to the original.
 
-FIRST VIEWPORT: Top: day name + date in display type (left, 2 lines), small count "N actualités" under it, baobab hairline watermark at 4 % in the header corner. Below: bands full-width, each = selvage 6 dp + section label (caption, caps) + title (subtitle role, 3 lines max) + publication day; first band taller with the excerpt. Bottom: native tab bar (Accueil active). No image required: bands work text-only.
+FIRST VIEWPORT: Top: flag stripe, app name (display family, title size, brand green), weekday + date, black rule, baobab watermark in the corner. Below: lead story = full-width photo (16:10), section tag, headline (lead-headline, 5 lines max), 3-line excerpt, "day · presidence.sn". Then the Council card (primary container, radius lg). Then story rows: selvage + section tag + serif title (3 lines max) + day, 92 × 72 thumbnail on the right when a photo exists. Bottom: floating glass tab bar (Accueil active: soft green indicator, filled icon, label). Stories work text-only when no photo exists.
 
-FORM: Strip-woven pagne (Manjak / Wolof strip cloth), position 5 of 7 on the grounded list; seed key 9db7b8bb.
-- Raise (from brick instructions): wordless wayfinding: numerals and pictograms carry sequence wherever reading is not assumed.
-- Raise (from film cutting bench): the place you stopped is marked: a folded "flag" knot on the band last opened, restored on return.
-- Raise (from timetable slide rack): rank is carried by weight and case before size, so the hierarchy survives the largest system font sizes.
-- Raise (from magazine identity): one mark per view: the baobab appears once as the recurring landmark, never repeated as decoration.
-- Declined: tensegrity column (kept: state shown by structure, not colour alone); darkroom exposure record (kept: a strict tonal ramp as the only surface tokens).
+FORM: Newspaper front page ("La Une", board screen 3) combined with the strip-woven pagne motifs (board screen 1), chosen by the user as D-05.
+- Kept from the woven direction: wordless wayfinding (pattern names the section), the place you stopped is marked (the "last read" knot, restored on return), rank carried by weight and family before size so the hierarchy survives the largest font sizes, the baobab once per view.
+- Added by D-05: flag stripe masthead, full-width lead photo, Literata serif headlines, highlighted Council card, right-hand thumbnails, floating frosted-glass tab bar.
+- Dropped: the date set large in display type as the page title, the "N actualités" count, the widest-first band layout.
 
-SIGNATURE INTERACTION: New bands are woven in: on refresh, new articles slide in from the top edge one after another (40 ms stagger, spring "gentle"), and a thread-tension line crosses the header while loading. Reduce motion: crossfade.
+SIGNATURE INTERACTION: Stories are woven in: on load and refresh, the first 8 stories fade in rising 12 dp one after another (40 ms stagger, spring "gentle", native driver). Loading uses the native pull-to-refresh and a spinner (the planned thread-tension line was not built). Reduce motion: stories appear at once.
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
 
 ## Unresolved
 
-Final typefaces (S1-04); real photos wait for the media pipeline (MED-01); Wolof UI strings wait for native writers (W-01).
+Final typefaces (S1-04); Wolof UI strings wait for native writers (W-01); two-pane layout on wide screens (RESP-01); D-05 validation on real phones before DESIGN.md is regenerated.

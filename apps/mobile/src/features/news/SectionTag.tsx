@@ -1,3 +1,4 @@
+import { tracking } from "@bgs/ui";
 import { StyleSheet, Text, View } from "react-native";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
@@ -47,6 +48,6 @@ export function SectionTag({ category, lastOpened = false, color }: SectionTagPr
 
 const styles = StyleSheet.create({
   row: { flexDirection: "row", alignItems: "center" },
-  caps: { textTransform: "uppercase", letterSpacing: 0.8 },
+  caps: { textTransform: "uppercase", letterSpacing: tracking.caps },
   knot: { borderRadius: 999, overflow: "hidden" },
 });

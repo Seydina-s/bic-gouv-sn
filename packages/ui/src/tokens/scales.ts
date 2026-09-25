@@ -43,6 +43,10 @@ export const opacity = {
   glass: 0.82,
   /** Same bars without blur (Android: blur is too costly on entry-level GPUs). */
   glassOpaque: 0.94,
+  /** Baobab and other watermarks (charter: 3–6 %). */
+  watermark: 0.06,
+  /** Whole tinted card while pressed. */
+  cardPressed: 0.85,
 } as const;
 
 /**
@@ -140,8 +144,19 @@ export function windowClass(width: number): WindowClass {
 export const layout = {
   /** Comfortable reading measure (≈ 65 characters at body size). */
   readingMaxWidth: 640,
-  /** Side of the square photo next to a feed title. */
-  thumbnail: 72,
-  /** Frame of a lead or article cover photo (cropped, never distorted). */
+  /** Photo on the right of a story in the list (cropped, never distorted). */
+  thumbnail: { width: 92, height: 72 },
+  /** Full-bleed photo of the lead story on the front page. */
+  leadAspectRatio: 16 / 10,
+  /** Photo at the top of an article. */
   coverAspectRatio: 16 / 9,
+  /** Floating tab bar: height, side margin and minimal gap above the screen edge. */
+  tabBar: { height: 64, sideMargin: 12, minBottomGap: 12 },
+  /** Thickness of the decorative flag stripe atop the front page. */
+  flagStripe: 4,
+  /** Blur strength of the glass bar where the system blurs (expo-blur intensity). */
+  glassBlur: 40,
 } as const;
+
+/** Letter spacing of uppercase section names (sp). */
+export const tracking = { caps: 0.8 } as const;

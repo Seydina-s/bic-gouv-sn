@@ -1,4 +1,4 @@
-import { withAlpha } from "@bgs/ui";
+import { layout, radius, withAlpha } from "@bgs/ui";
 import { BlurView } from "expo-blur";
 import type { Tabs } from "expo-router";
 import type { ComponentProps } from "react";
@@ -9,9 +9,7 @@ import { useTheme } from "../theme/useTheme";
 
 type TabBarProps = Parameters<NonNullable<ComponentProps<typeof Tabs>["tabBar"]>>[0];
 
-const BAR_HEIGHT = 64;
-const SIDE_MARGIN = 12;
-const MIN_BOTTOM_GAP = 12;
+const { height: BAR_HEIGHT, sideMargin: SIDE_MARGIN, minBottomGap: MIN_BOTTOM_GAP } = layout.tabBar;
 /** Width of the soft green indicator behind the active icon (Material 3 proportions). */
 const INDICATOR_WIDTH = 56;
 const INDICATOR_HEIGHT = 32;
@@ -63,7 +61,7 @@ export function GlassTabBar({ state, descriptors, navigation }: TabBarProps) {
       >
         {BLUR_AVAILABLE && (
           <BlurView
-            intensity={40}
+            intensity={layout.glassBlur}
             tint={theme.scheme === "dark" ? "dark" : "light"}
             style={StyleSheet.absoluteFill}
           />
@@ -127,7 +125,8 @@ export function GlassTabBar({ state, descriptors, navigation }: TabBarProps) {
                 style={[
                   textStyle.caption,
                   {
-                    color: focused ? color.textBrand : color.textSecondary,
+                    // Active: bold, under the green indicator (legible on glass in every case).
+                    color: focused ? color.textPrimary : color.textSecondary,
                     fontFamily: focused
                       ? theme.textStyle.subtitle.fontFamily
                       : textStyle.caption.fontFamily,
@@ -148,7 +147,7 @@ const styles = StyleSheet.create({
   // Outer layer carries the soft offset shadow; the inner one clips the glass.
   shadow: {
     position: "absolute",
-    borderRadius: 999,
+    borderRadius: radius.full,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.14,
     shadowRadius: 24,
@@ -157,7 +156,7 @@ const styles = StyleSheet.create({
   glass: {
     flex: 1,
     flexDirection: "row",
-    borderRadius: 999,
+    borderRadius: radius.full,
     borderWidth: StyleSheet.hairlineWidth,
     overflow: "hidden",
   },

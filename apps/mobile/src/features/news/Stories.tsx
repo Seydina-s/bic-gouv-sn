@@ -1,4 +1,5 @@
 import type { NewsSummary } from "@bgs/shared-types";
+import { tracking } from "@bgs/ui";
 import { ArrowRightIcon as ArrowRight } from "phosphor-react-native/src/icons/ArrowRight";
 import { Pressable, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import { Icon } from "../../components/Icon";
@@ -11,10 +12,6 @@ import { SectionTag } from "./SectionTag";
 import { Selvage, SELVAGE_WIDTH, WovenStrip } from "./Selvage";
 
 const SOURCE = "presidence.sn";
-/** Wider than the feed thumbnails of the woven direction: photos carry "La Une". */
-const THUMB_WIDTH = 92;
-const THUMB_HEIGHT = 72;
-const LEAD_ASPECT_RATIO = 16 / 10;
 
 export interface StoryProps {
   item: NewsSummary;
@@ -50,7 +47,7 @@ export function LeadStory({ item, lastOpened, onPress }: StoryProps) {
         <CoverImage
           cover={item.cover}
           slotWidth={Math.min(width, layout.readingMaxWidth + space.xxxl)}
-          style={{ aspectRatio: LEAD_ASPECT_RATIO }}
+          style={{ aspectRatio: layout.leadAspectRatio }}
         />
       )}
       <View style={{ padding: space.lg, gap: space.sm }}>
@@ -93,7 +90,7 @@ export function CouncilCard({ item, onPress }: Omit<StoryProps, "lastOpened">) {
           marginVertical: space.md,
           borderRadius: radius.lg,
           backgroundColor: color.primaryContainer,
-          opacity: pressed ? 0.85 : 1,
+          opacity: pressed ? theme.opacity.cardPressed : 1,
         },
       ]}
     >
@@ -119,7 +116,7 @@ export function CouncilCard({ item, onPress }: Omit<StoryProps, "lastOpened">) {
 export function StoryRow({ item, lastOpened, onPress }: StoryProps) {
   const { theme } = useTheme();
   const { label, day } = useStoryLabel(item);
-  const { color, space, textStyle, radius } = theme;
+  const { color, space, textStyle, radius, layout } = theme;
 
   return (
     <Pressable
@@ -152,10 +149,10 @@ export function StoryRow({ item, lastOpened, onPress }: StoryProps) {
       {item.cover !== null && (
         <CoverImage
           cover={item.cover}
-          slotWidth={THUMB_WIDTH}
+          slotWidth={layout.thumbnail.width}
           style={{
-            width: THUMB_WIDTH,
-            height: THUMB_HEIGHT,
+            width: layout.thumbnail.width,
+            height: layout.thumbnail.height,
             borderRadius: radius.md,
             marginLeft: space.md,
           }}
@@ -167,7 +164,7 @@ export function StoryRow({ item, lastOpened, onPress }: StoryProps) {
 
 const styles = StyleSheet.create({
   card: { overflow: "hidden" },
-  caps: { textTransform: "uppercase", letterSpacing: 0.8 },
+  caps: { textTransform: "uppercase", letterSpacing: tracking.caps },
   action: { flexDirection: "row", alignItems: "center" },
   row: { flexDirection: "row", borderTopWidth: StyleSheet.hairlineWidth },
   body: { flex: 1 },
