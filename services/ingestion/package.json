@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "collect": "tsx src/cli/collect-latest.ts",
+    "backfill": "tsx src/cli/backfill.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --coverage"
   },

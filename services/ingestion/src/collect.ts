@@ -16,7 +16,7 @@ export async function collectLatest(
   lang: Lang,
   limit: number,
 ): Promise<CollectionReport> {
-  const refs = (await provider.listLatest(lang, 1)).slice(0, limit);
+  const refs = (await provider.listPage(lang, 1)).refs.slice(0, limit);
   const report: CollectionReport = { articles: [], failures: [] };
   for (const ref of refs) {
     try {
