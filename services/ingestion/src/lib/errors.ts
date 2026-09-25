@@ -25,3 +25,16 @@ export class SourceUnreachableError extends Error {
     this.name = "SourceUnreachableError";
   }
 }
+
+/** A cover photo could not be downloaded or prepared: the article stays published without it. */
+export class MediaProcessingError extends Error {
+  readonly code: ErrorCode = "MEDIA_PROCESSING_FAILED";
+
+  constructor(
+    readonly mediaUrl: string,
+    options: { cause: unknown },
+  ) {
+    super(`Media processing failed: ${mediaUrl}`, options);
+    this.name = "MediaProcessingError";
+  }
+}

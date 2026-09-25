@@ -72,6 +72,24 @@ describe("FileArticleRepository", () => {
     ]);
   });
 
+  it("attaches images without creating a new version", async () => {
+    await repo.save(article(1));
+    const image = {
+      originalUrl: "https://www.presidence.sn/media/a.jpg",
+      originalKey: "images/a/original.jpg",
+      width: 1200,
+      height: 800,
+      alt: null,
+      blurhash: "LEHV6nWB2yk8pyo0adR*.7kCMdnj",
+      variants: [{ format: "jpeg" as const, width: 960, key: "images/a/960.jpg", bytes: 1000 }],
+    };
+    expect(await repo.setImages(article(1).id, [image])).toBe(true);
+    const stored = await repo.get(article(1).id);
+    expect(stored?.images).toEqual([image]);
+    expect(stored?.version).toBe(1);
+    expect(await repo.setImages("missing", [image])).toBe(false);
+  });
+
   it("lists newest first with cursor pagination", async () => {
     for (const n of [1, 3, 2]) {
       await repo.save(article(n));

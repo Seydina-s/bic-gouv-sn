@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { HASH, image } from "../testing/fixtures";
-import { imageSchema, pdfAttachmentSchema } from "./media.schema";
+import { imageSchema, mediaKeySchema, pdfAttachmentSchema } from "./media.schema";
 
 describe("imageSchema", () => {
   it("accepts an image with a JPEG fallback", () => {
@@ -8,15 +8,29 @@ describe("imageSchema", () => {
   });
 
   it("requires a JPEG fallback variant", () => {
-    const variants = [
-      { format: "webp", width: 800, url: "https://cdn.example.test/i.webp", bytes: 1 },
-    ];
+    const variants = [{ format: "webp", width: 800, key: "images/test/800.webp", bytes: 1 }];
     expect(imageSchema.safeParse(image({ variants })).error?.issues[0]?.message).toMatch(/JPEG/);
   });
 
   it("rejects variants wider than the original", () => {
     const result = imageSchema.safeParse(image({ width: 400 }));
     expect(result.error?.issues[0]?.message).toMatch(/wider/);
+  });
+});
+
+describe("mediaKeySchema", () => {
+  it.each(["images/ab12/960.webp", "images/x/original.jpg"])("accepts %s", (key) => {
+    expect(mediaKeySchema.safeParse(key).success).toBe(true);
+  });
+
+  it.each([
+    "../etc/passwd",
+    "/images/a.jpg",
+    "images//a.jpg",
+    "https://x.test/a.jpg",
+    "Images/A.jpg",
+  ])("rejects %s", (key) => {
+    expect(mediaKeySchema.safeParse(key).success).toBe(false);
   });
 });
 

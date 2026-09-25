@@ -83,10 +83,11 @@ describe("ingestLatest", () => {
   function providerReturning(article: NewsArticle): SourceProvider {
     return {
       articleIdFor: () => ID,
+      downloadMedia: () => Promise.reject(new Error("no media")),
       listPage: (lang) =>
         Promise.resolve({
           lastPage: 1,
-          refs: [{ sourceId: 1074, slug: "test", lang, sourceUpdatedAt: "" }],
+          refs: [{ sourceId: 1074, slug: "test", lang, sourceUpdatedAt: "", coverSourceUrl: null }],
         }),
       fetchArticle: () => Promise.resolve(article),
     };

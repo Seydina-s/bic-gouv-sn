@@ -1,6 +1,7 @@
 // Real-time watcher: `pnpm --filter @bgs/ingestion watch`. Stops cleanly on Ctrl+C / SIGTERM.
 import { fileURLToPath } from "node:url";
 import { FileArticleRepository } from "@bgs/content-store";
+import { FileMediaStorage } from "../media/media-storage";
 import { createPresidenceProvider } from "../sources/presidence/presidence-provider";
 import { nextPollDelayMs, pollOnce, SeenIndex } from "../watch";
 
@@ -9,6 +10,9 @@ const storePath =
   fileURLToPath(new URL("../../../../.data/news.json", import.meta.url));
 const provider = createPresidenceProvider();
 const repository = new FileArticleRepository(storePath);
+const media = new FileMediaStorage(
+  process.env["MEDIA_ROOT"] ?? fileURLToPath(new URL("../../../../.data/media", import.meta.url)),
+);
 const seen = new SeenIndex();
 
 // Mutated from signal handlers: an object so the loop condition is re-read each time.
@@ -25,7 +29,14 @@ let lastChangeAt: Date | null = null;
 while (control.running) {
   const startedAt = new Date();
   try {
-    const result = await pollOnce(provider, repository, ["fr", "wo"], seen);
+    const result = await pollOnce(
+      provider,
+      repository,
+      ["fr", "wo"],
+      seen,
+      () => new Date(),
+      media,
+    );
     const { created, updated } = result.outcomes;
     if (created + updated > 0) {
       lastChangeAt = new Date();

@@ -101,7 +101,12 @@ describe("createPresidenceProvider", () => {
     const { refs, lastPage } = await provider.listPage("fr", 1);
     expect(lastPage).toBe(127);
     expect(refs).toHaveLength(3);
-    expect(refs[0]).toMatchObject({ sourceId: 1514, lang: "fr" });
+    expect(refs[0]).toMatchObject({
+      sourceId: 1514,
+      lang: "fr",
+      coverSourceUrl:
+        "https://bo-admin.presidence.sn/storage/image/actualites/LDoLUUdoHQgT5zBfyOp3SZkNEKs9Adp3OD8FwZuT.jpg",
+    });
     const [url, init] = fetchImpl.mock.calls[0] ?? [];
     expect(url).toBe(`${PRESIDENCE_API}/articles?page=1&q=&categoryIds=`);
     expect(init?.headers).toMatchObject({ "Accept-Language": "fr", "User-Agent": USER_AGENT });
@@ -119,9 +124,42 @@ describe("createPresidenceProvider", () => {
       slug: "x y",
       lang: "fr",
       sourceUpdatedAt: "",
+      coverSourceUrl: null,
     });
     expect(article.fetchedAt).toBe(FETCHED_AT);
     expect(fetchImpl.mock.calls[0]?.[0]).toBe(`${PRESIDENCE_API}/article/x%20y`);
+  });
+
+  it("downloads a media file with the project User-Agent", async () => {
+    const fetchImpl = vi.fn<typeof fetch>(() =>
+      Promise.resolve(new Response(new Uint8Array([1, 2, 3]))),
+    );
+    const provider = createPresidenceProvider({ fetchImpl, intervalMs: 0 });
+    const data = await provider.downloadMedia("https://bo-admin.presidence.sn/storage/a.jpg");
+    expect([...data]).toEqual([1, 2, 3]);
+    expect(fetchImpl.mock.calls[0]?.[1]?.headers).toMatchObject({ "User-Agent": USER_AGENT });
+  });
+
+  it("reports a missing media file without retrying it", async () => {
+    const fetchImpl = vi.fn<typeof fetch>(() => Promise.resolve(new Response("", { status: 404 })));
+    const provider = createPresidenceProvider({ fetchImpl, intervalMs: 0 });
+    await expect(provider.downloadMedia("https://bo-admin.presidence.sn/x.jpg")).rejects.toThrow(
+      SourceUnreachableError,
+    );
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
+
+  it("reports an unreachable media host, after retries", async () => {
+    vi.useFakeTimers();
+    const fetchImpl = vi.fn<typeof fetch>(() => Promise.reject(new TypeError("fetch failed")));
+    const provider = createPresidenceProvider({ fetchImpl, intervalMs: 0 });
+    const pending = expect(
+      provider.downloadMedia("https://bo-admin.presidence.sn/x.jpg"),
+    ).rejects.toThrow(SourceUnreachableError);
+    await vi.runAllTimersAsync();
+    await pending;
+    expect(fetchImpl).toHaveBeenCalledTimes(3);
+    vi.useRealTimers();
   });
 
   it("quarantines a response whose structure changed", async () => {
@@ -189,10 +227,19 @@ describe("collectLatest", () => {
   it("reports non-coded errors as UNKNOWN", async () => {
     const provider = {
       articleIdFor: () => "id",
+      downloadMedia: () => Promise.reject(new Error("no media")),
       listPage: () =>
         Promise.resolve({
           lastPage: 1,
-          refs: [{ sourceId: 1, slug: "s", lang: "fr" as const, sourceUpdatedAt: "" }],
+          refs: [
+            {
+              sourceId: 1,
+              slug: "s",
+              lang: "fr" as const,
+              sourceUpdatedAt: "",
+              coverSourceUrl: null,
+            },
+          ],
         }),
       fetchArticle: () => Promise.reject(new Error("boom")),
     };
@@ -203,10 +250,19 @@ describe("collectLatest", () => {
   it("reports a non-Error rejection as text", async () => {
     const provider = {
       articleIdFor: () => "id",
+      downloadMedia: () => Promise.reject(new Error("no media")),
       listPage: () =>
         Promise.resolve({
           lastPage: 1,
-          refs: [{ sourceId: 1, slug: "s", lang: "fr" as const, sourceUpdatedAt: "" }],
+          refs: [
+            {
+              sourceId: 1,
+              slug: "s",
+              lang: "fr" as const,
+              sourceUpdatedAt: "",
+              coverSourceUrl: null,
+            },
+          ],
         }),
       // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- simulates a misbehaving adapter
       fetchArticle: () => Promise.reject("plain text"),

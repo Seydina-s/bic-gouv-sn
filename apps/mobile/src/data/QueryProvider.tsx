@@ -1,3 +1,4 @@
+import { apiContractFingerprint } from "@bgs/shared-types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
 import { QueryClient } from "@tanstack/react-query";
@@ -28,7 +29,11 @@ const persister = createAsyncStoragePersister({ storage: AsyncStorage, key: "bgs
 export function QueryProvider({ children }: { children: ReactNode }) {
   const [client] = useState(createQueryClient);
   return (
-    <PersistQueryClientProvider client={client} persistOptions={{ persister, maxAge: WEEK }}>
+    <PersistQueryClientProvider
+      client={client}
+      // A cache saved in an older data format (before an app update) is discarded.
+      persistOptions={{ persister, maxAge: WEEK, buster: apiContractFingerprint() }}
+    >
       {children}
     </PersistQueryClientProvider>
   );

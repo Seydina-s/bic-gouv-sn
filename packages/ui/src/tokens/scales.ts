@@ -126,5 +126,11 @@ export function windowClass(width: number): WindowClass {
   return width >= breakpoint.medium ? "medium" : "compact";
 }
 
-/** Comfortable reading measure (≈ 65 characters at body size). */
-export const layout = { readingMaxWidth: 640 } as const;
+export const layout = {
+  /** Comfortable reading measure (≈ 65 characters at body size). */
+  readingMaxWidth: 640,
+  /** Side of the square photo next to a feed title. */
+  thumbnail: 72,
+  /** Frame of a lead or article cover photo (cropped, never distorted). */
+  coverAspectRatio: 16 / 9,
+} as const;

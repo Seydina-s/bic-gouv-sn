@@ -10,10 +10,13 @@ import {
 import type { FastifyReply, FastifyRequest } from "fastify";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
-import { toDetail, toSummary } from "../news/present";
+import { freshnessKey, toDetail, toSummary } from "../news/present";
+import { mediaBaseUrlFor } from "./media";
 
 export interface NewsRoutesOptions {
   articles: ArticleRepository;
+  /** Public address of media; absent in development (served by this API). */
+  mediaBaseUrl: string | undefined;
 }
 
 /**
@@ -34,7 +37,10 @@ function sendCached<T>(request: FastifyRequest, reply: FastifyReply, fingerprint
   return body;
 }
 
-export const newsRoutes: FastifyPluginAsyncZod<NewsRoutesOptions> = (app, { articles }) => {
+export const newsRoutes: FastifyPluginAsyncZod<NewsRoutesOptions> = (
+  app,
+  { articles, mediaBaseUrl },
+) => {
   app.get(
     "/news",
     {
@@ -52,8 +58,9 @@ export const newsRoutes: FastifyPluginAsyncZod<NewsRoutesOptions> = (app, { arti
     async (request, reply) => {
       const { lang, limit, cursor } = request.query;
       const page = await articles.list({ lang, limit, cursor });
-      const items = page.items.flatMap((article) => toSummary(article, lang) ?? []);
-      const fingerprint = [lang, cursor, ...page.items.map((a) => a.contentHash)].join("|");
+      const media = mediaBaseUrlFor(request, mediaBaseUrl);
+      const items = page.items.flatMap((article) => toSummary(article, lang, media) ?? []);
+      const fingerprint = [lang, cursor, media, ...page.items.map(freshnessKey)].join("|");
       return sendCached(request, reply, fingerprint, { items, nextCursor: page.nextCursor });
     },
   );
@@ -71,7 +78,8 @@ export const newsRoutes: FastifyPluginAsyncZod<NewsRoutesOptions> = (app, { arti
     },
     async (request, reply) => {
       const article = await articles.get(request.params.id);
-      const detail = article === null ? null : toDetail(article, request.query.lang);
+      const media = mediaBaseUrlFor(request, mediaBaseUrl);
+      const detail = article === null ? null : toDetail(article, request.query.lang, media);
       if (article === null || detail === null) {
         return reply.code(404).send({
           code: NOT_FOUND,
@@ -79,7 +87,12 @@ export const newsRoutes: FastifyPluginAsyncZod<NewsRoutesOptions> = (app, { arti
           requestId: request.id,
         });
       }
-      return sendCached(request, reply, `${request.query.lang}|${article.contentHash}`, detail);
+      return sendCached(
+        request,
+        reply,
+        `${request.query.lang}|${media}|${freshnessKey(article)}`,
+        detail,
+      );
     },
   );
   return Promise.resolve();

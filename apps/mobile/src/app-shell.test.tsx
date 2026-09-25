@@ -10,7 +10,7 @@ import NearMeScreen from "./app/(tabs)/near-me";
 import ParticipateScreen from "./app/(tabs)/participate";
 import ProceduresScreen from "./app/(tabs)/procedures";
 import ArticleScreen from "./app/article/[id]";
-import { newsFetch } from "./testing/news-fixtures";
+import { LIST, newsFetch } from "./testing/news-fixtures";
 
 jest.mock("expo-localization", () => ({ getLocales: () => [{ languageTag: "fr-SN" }] }));
 jest.mock("expo-system-ui", () => ({ setBackgroundColorAsync: jest.fn(() => Promise.resolve()) }));
@@ -68,6 +68,50 @@ describe("app shell", () => {
       await screen.findByText("Les actualités n'ont pas pu être chargées.", {}, { timeout: 5000 }),
     ).toBeOnTheScreen();
     expect(screen.getByText("Réessayer")).toBeOnTheScreen();
+  });
+
+  it("discards news saved in an older data format instead of crashing on it", async () => {
+    // Saved by a previous app version: no `cover` field yet (regression of 25/09/2026).
+    const { cover: _dropped, ...oldItem } = { ...LIST.items[0], title: "Ancien format" };
+    const now = Date.now();
+    await AsyncStorage.setItem(
+      "bgs-query-cache",
+      JSON.stringify({
+        buster: "", // what versions without a contract fingerprint wrote
+        timestamp: now,
+        clientState: {
+          mutations: [],
+          queries: [
+            {
+              queryKey: ["news", "fr"],
+              queryHash: '["news","fr"]',
+              state: {
+                data: { pages: [{ items: [oldItem], nextCursor: null }], pageParams: [null] },
+                dataUpdatedAt: now,
+                dataUpdateCount: 1,
+                error: null,
+                errorUpdateCount: 0,
+                errorUpdatedAt: 0,
+                fetchFailureCount: 0,
+                fetchFailureReason: null,
+                fetchMeta: null,
+                fetchStatus: "idle",
+                isInvalidated: false,
+                status: "success",
+              },
+            },
+          ],
+        },
+      }),
+    );
+    globalThis.fetch = newsFetch({
+      list: () => new Response("{}", { status: 500 }),
+    }) as unknown as typeof fetch;
+    await renderRouter(routes, { initialUrl: "/" });
+    expect(
+      await screen.findByText("Les actualités n'ont pas pu être chargées.", {}, { timeout: 5000 }),
+    ).toBeOnTheScreen();
+    expect(screen.queryByText("Ancien format")).toBeNull();
   });
 
   it("keeps showing loaded news when a refresh fails, with an offline notice", async () => {

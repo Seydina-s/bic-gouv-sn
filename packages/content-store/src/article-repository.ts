@@ -27,6 +27,11 @@ export interface ArticleRepository {
   save(article: NewsArticle): Promise<SaveOutcome>;
   /** Previous versions of an article, oldest first. */
   history(id: string): Promise<NewsArticle[]>;
+  /**
+   * Attaches processed images to the current version. Media is derived from the
+   * source, not editorial content: no new version. Returns false if unknown.
+   */
+  setImages(id: string, images: NewsArticle["images"]): Promise<boolean>;
 }
 
 /** Sort key shared by every implementation: newest publication first, stable by id. */

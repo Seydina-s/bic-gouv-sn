@@ -12,6 +12,11 @@ export function canonicalArticleUrl(lang: Lang, slug: string): string {
   return `${SITE_ORIGIN}/${lang}/actualites/${encodeURIComponent(slug)}/`;
 }
 
+/** The source serves media URLs with a doubled slash ("…sn//storage/…"): normalized. */
+export function normalizeMediaUrl(url: string): string {
+  return url.replace(/([^:])\/{2,}/g, "$1/");
+}
+
 /** Stable id of a presidence.sn article, shared by its French and Wolof versions. */
 export function presidenceArticleId(sourceArticleId: number): string {
   return stableUuid(`${SITE_ORIGIN}/article/${String(sourceArticleId)}`);

@@ -1,8 +1,9 @@
 import type { NewsSummary } from "@bgs/shared-types";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 import { categoryLabelKey } from "./category";
+import { CoverImage } from "./CoverImage";
 import { formatPublishedOn } from "./format";
 import { Selvage, SELVAGE_WIDTH } from "./Selvage";
 
@@ -14,13 +15,17 @@ export interface NewsBandProps {
   onPress: (id: string) => void;
 }
 
-/** One woven band of "la pièce du jour": section selvage, section, title, day. */
+/**
+ * One woven band of "la pièce du jour": section selvage, section, title, day, and
+ * the official cover photo (wide on the lead band, a thumbnail on the others).
+ */
 export function NewsBand({ item, lead, lastOpened, onPress }: NewsBandProps) {
   const { theme } = useTheme();
   const { t, lang } = useTranslation();
   const section = t(categoryLabelKey(item.category));
   const day = formatPublishedOn(item.publishedOn, lang);
-  const { color, space, textStyle } = theme;
+  const { color, space, textStyle, layout, radius } = theme;
+  const { width: windowWidth } = useWindowDimensions();
 
   return (
     <Pressable
@@ -42,6 +47,17 @@ export function NewsBand({ item, lead, lastOpened, onPress }: NewsBandProps) {
     >
       <Selvage category={item.category} color={color.primary} />
       <View style={[styles.body, { marginLeft: space.lg - SELVAGE_WIDTH + space.sm }]}>
+        {lead && item.cover !== null && (
+          <CoverImage
+            cover={item.cover}
+            slotWidth={Math.min(windowWidth, layout.readingMaxWidth)}
+            style={{
+              aspectRatio: layout.coverAspectRatio,
+              borderRadius: radius.md,
+              marginBottom: space.md,
+            }}
+          />
+        )}
         <View style={styles.meta}>
           <Text style={[textStyle.caption, styles.caps, { color: color.textBrand }]}>
             {section}
@@ -85,6 +101,18 @@ export function NewsBand({ item, lead, lastOpened, onPress }: NewsBandProps) {
           </Text>
         )}
       </View>
+      {!lead && item.cover !== null && (
+        <CoverImage
+          cover={item.cover}
+          slotWidth={layout.thumbnail}
+          style={{
+            width: layout.thumbnail,
+            height: layout.thumbnail,
+            borderRadius: radius.sm,
+            marginLeft: space.md,
+          }}
+        />
+      )}
     </Pressable>
   );
 }

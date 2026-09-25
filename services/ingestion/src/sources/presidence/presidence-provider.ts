@@ -5,7 +5,7 @@ import { QuarantineError, SourceUnreachableError } from "../../lib/errors";
 import { createRateLimiter } from "../../lib/rate-limiter";
 import type { SourceArticleRef, SourceProvider } from "../source-provider";
 import { detailResponseSchema, listResponseSchema } from "./api-schemas";
-import { normalizeDetail, presidenceArticleId } from "./normalize";
+import { normalizeDetail, normalizeMediaUrl, presidenceArticleId } from "./normalize";
 
 export const PRESIDENCE_API = "https://bo-admin.presidence.sn/api/front";
 
@@ -87,11 +87,30 @@ export function createPresidenceProvider({
           slug: item.slug,
           lang,
           sourceUpdatedAt: item.updated_at,
+          coverSourceUrl: item.image === null ? null : normalizeMediaUrl(item.image),
         })),
       };
     },
 
     articleIdFor: (ref) => presidenceArticleId(ref.sourceId),
+
+    async downloadMedia(url) {
+      const data = await call((signal) =>
+        schedule(async () => {
+          const response = await fetchImpl(url, {
+            signal,
+            headers: { "User-Agent": USER_AGENT },
+          }).catch((error: unknown) => {
+            throw signal.aborted ? error : new SourceUnreachableError(url, null);
+          });
+          if (!response.ok) {
+            throw new SourceUnreachableError(url, response.status);
+          }
+          return response.arrayBuffer();
+        }),
+      );
+      return Buffer.from(data);
+    },
 
     async fetchArticle(ref: SourceArticleRef): Promise<NewsArticle> {
       const detail = await getJson(

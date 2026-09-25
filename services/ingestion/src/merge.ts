@@ -36,6 +36,8 @@ export function mergeArticle(existing: NewsArticle | null, incoming: NewsArticle
     sourceUrl: original?.sourceUrl ?? incoming.sourceUrl,
     translations,
     audio: existing.audio,
+    // Derived media survive an editorial update; the media step refreshes them if needed.
+    images: existing.images,
     embedding: existing.embedding,
     version: existing.version,
     contentHash: articleContentHash(translations, incoming.sourcePublishedOn, incoming.category),

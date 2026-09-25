@@ -1,17 +1,27 @@
 import { z } from "zod";
 import { httpsUrlSchema, positiveIntSchema, sha256HexSchema } from "../common/primitives.schema";
 
+/**
+ * Path of a stored media file relative to the media root (e.g. "images/ab12/960.webp").
+ * Stored instead of a full URL, so moving to a CDN only changes the base URL.
+ */
+export const mediaKeySchema = z
+  .string()
+  .regex(/^[a-z0-9]+(?:[/._-][a-z0-9]+)*$/, "Expected a relative media path, no '..'");
+
 export const imageVariantSchema = z.strictObject({
   format: z.enum(["avif", "webp", "jpeg"]),
   width: positiveIntSchema,
-  url: httpsUrlSchema,
+  key: mediaKeySchema,
   bytes: positiveIntSchema,
 });
 
 export const imageSchema = z
   .strictObject({
-    /** Original image URL on the source site; the original file is kept in storage. */
+    /** Original image URL on the source site (traceability). */
     originalUrl: httpsUrlSchema,
+    /** The original file as downloaded, kept untouched in storage. */
+    originalKey: mediaKeySchema,
     width: positiveIntSchema,
     height: positiveIntSchema,
     /** Alt text as published by the source, or null when the source provides none. */

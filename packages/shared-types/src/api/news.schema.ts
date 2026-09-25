@@ -38,6 +38,27 @@ export const blockSchema = z.discriminatedUnion("type", [
 ]);
 export type Block = z.infer<typeof blockSchema>;
 
+/**
+ * Cover photo, as lighter variants of the official image. The app picks the
+ * smallest source wide enough for its slot, and shows the BlurHash while loading.
+ */
+export const coverSchema = z.strictObject({
+  width: z.int().positive(),
+  height: z.int().positive(),
+  blurhash: z.string().min(6),
+  sources: z
+    .array(
+      z.strictObject({
+        format: z.enum(["avif", "webp", "jpeg"]),
+        width: z.int().positive(),
+        /** https in production; plain http only on a local development network. */
+        url: z.url({ protocol: /^https?$/ }),
+      }),
+    )
+    .min(1),
+});
+export type Cover = z.infer<typeof coverSchema>;
+
 /** One article in a feed, in the requested language. */
 export const newsSummarySchema = z.strictObject({
   id: z.uuid(),
@@ -50,6 +71,7 @@ export const newsSummarySchema = z.strictObject({
   translationStatus: translationStatusSchema,
   /** Languages this article is available in. */
   availableLangs: z.array(langSchema).min(1),
+  cover: coverSchema.nullable(),
 });
 export type NewsSummary = z.infer<typeof newsSummarySchema>;
 

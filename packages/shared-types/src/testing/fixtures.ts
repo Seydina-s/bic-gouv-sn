@@ -39,13 +39,14 @@ export function audioTrack(overrides: Record<string, unknown> = {}) {
 export function image(overrides: Record<string, unknown> = {}) {
   return {
     originalUrl: "https://www.presidence.sn/media/test.jpg",
+    originalKey: "images/test/original.jpg",
     width: 1600,
     height: 900,
     alt: null,
     blurhash: "LEHV6nWB2yk8pyo0adR*.7kCMdnj",
     variants: [
-      { format: "avif", width: 800, url: "https://cdn.example.test/i/800.avif", bytes: 40_000 },
-      { format: "jpeg", width: 800, url: "https://cdn.example.test/i/800.jpg", bytes: 90_000 },
+      { format: "avif", width: 800, key: "images/test/800.avif", bytes: 40_000 },
+      { format: "jpeg", width: 800, key: "images/test/800.jpg", bytes: 90_000 },
     ],
     ...overrides,
   };

@@ -110,6 +110,13 @@ export const ERROR_CATALOG = {
     action:
       "Vérifiez l'article sur presidence.sn ; si la structure du site a changé, prévenez l'équipe technique.",
   },
+  MEDIA_PROCESSING_FAILED: {
+    what: "La photo d'un article n'a pas pu être récupérée ou préparée.",
+    where: "Collecte automatique (photos)",
+    impact: "L'article est publié sans photo ; le texte reste complet.",
+    severity: "info",
+    action: "Rien à faire : une nouvelle tentative a lieu au prochain passage.",
+  },
   ADMIN_API_UNREACHABLE: {
     what: "L'administration n'arrive pas à joindre l'API.",
     where: "Centre d'administration, écran « État du service »",
