@@ -1,6 +1,7 @@
 import { newsArticleSchema, type Lang, type NewsArticle } from "@bgs/shared-types";
 import { QuarantineError } from "../../lib/errors";
-import { contentHash, stableUuid } from "../../lib/identity";
+import { stableUuid } from "../../lib/identity";
+import { articleContentHash } from "../../merge";
 import { sanitizeArticleHtml, textLength } from "../../lib/sanitize";
 import type { DetailResponse } from "./api-schemas";
 
@@ -43,6 +44,9 @@ export function normalizeDetail(detail: DetailResponse, { lang, fetchedAt }: Nor
     throw quarantine("article body is empty after sanitization");
   }
 
+  const translations: NewsArticle["translations"] = [
+    { lang, status: "official", title, bodyHtml, sourceUrl },
+  ];
   const candidate: NewsArticle = {
     id: stableUuid(`${SITE_ORIGIN}/article/${String(version.articleId)}`),
     kind: "news-article",
@@ -51,10 +55,10 @@ export function normalizeDetail(detail: DetailResponse, { lang, fetchedAt }: Nor
     sourcePublishedOn: base.date,
     sourceUpdatedAt: version.updated_at,
     fetchedAt,
-    contentHash: contentHash({ title, bodyHtml, date: base.date, category: category.reference }),
+    contentHash: articleContentHash(translations, base.date, category.reference),
     version: 1,
     lang,
-    translations: [{ lang, status: "official", title, bodyHtml, sourceUrl }],
+    translations,
     audio: [],
     embedding: null,
     images: [],

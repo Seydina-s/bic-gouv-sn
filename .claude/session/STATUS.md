@@ -1,6 +1,6 @@
 # STATUS — Bic Gouv SN
 
-**Dernière mise à jour** : 25/09/2026 · **Mode** : standard
+**Dernière mise à jour** : 25/09/2026 · **Mode** : autonome
 
 ## Où on en est
 - Sprint 0 (fondations) : tâches F-01 à F-12 terminées. 294 tests, CI verte (PR #1 `chore/foundations` → `main`).

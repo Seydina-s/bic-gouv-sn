@@ -50,3 +50,6 @@ next-env.d.ts
 
 # Impeccable review captures (local evidence, not source)
 .impeccable/review/
+
+# Local data (provisional file store, collected content)
+.data/
