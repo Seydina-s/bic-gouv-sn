@@ -126,3 +126,6 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 25/09/2026 | DS-01 🔴 DESIGN.md (documenteur Impeccable) après verdict de la revue sur appareils | VS-06 |
 | 25/09/2026 | AUD-03 ✅ (partiel) CSP de l'admin active (vérifiée sur build de production) ; règle maintenue : pas de déploiement public de l'admin avant 2FA (Phase 4) | Audit Sprint 0 |
 | 25/09/2026 | SEC-03 🔴 Admin : CSP à nonce (supprimer `'unsafe-inline'` des scripts) via le proxy Next.js | AUD-03 |
+| 25/09/2026 | D-05 🔴 L'utilisateur n'est pas convaincu par la direction « pagne tissé » (vue sur téléphone) : lui présenter 2-3 directions visuelles (planche de décision Impeccable, re-roll) et le laisser choisir | Retour utilisateur |
+| 25/09/2026 | VID-01 🔴 Articles vidéo de presidence.sn (interviews sans texte, `video_url`) : 8 mis en quarantaine à l'import ; ajouter un bloc vidéo au modèle et à l'app | Import historique |
+| 25/09/2026 | ING-01 ✅ Import complet de l'historique : 961 articles (15/04/2019 → 24/09/2026), 311 FR+WO, 94 Conseil des ministres ; 10 écartés (8 vidéos sans texte, 2 erreurs ponctuelles) | Phase 1 |
