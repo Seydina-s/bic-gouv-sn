@@ -25,7 +25,15 @@
       "expo-localization",
       "expo-font",
       "expo-splash-screen",
-      "expo-image"
+      "expo-image",
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://de.sentry.io/",
+          "organization": "bic-gouv-sn",
+          "project": "bic-gouv-sn-mobile"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

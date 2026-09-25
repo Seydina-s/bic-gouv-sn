@@ -6,6 +6,8 @@ export default defineConfig({
     // The default 5 s is too tight for cold imports when packages test in parallel
     // on a loaded machine or a small CI runner (API app build took 12.6 s once).
     testTimeout: 30_000,
+    // Same margin for beforeEach/afterEach: cold imports of Fastify under load (see ERREURS.md).
+    hookTimeout: 30_000,
     coverage: {
       provider: "v8",
       include: ["src/**/*.ts"],

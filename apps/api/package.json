@@ -5,9 +5,9 @@
   "description": "Public REST API (/v1) for the Bic Gouv SN app",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch --import ./src/instrument.ts src/server.ts",
+    "dev": "tsx watch --env-file-if-exists=.env.local --import ./src/instrument.ts src/server.ts",
     "build": "tsdown",
-    "start": "node --import ./dist/instrument.mjs dist/server.mjs",
+    "start": "node --env-file-if-exists=.env.local --import ./dist/instrument.mjs dist/server.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --coverage"
   },
