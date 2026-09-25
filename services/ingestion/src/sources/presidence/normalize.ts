@@ -1,0 +1,69 @@
+import { newsArticleSchema, type Lang, type NewsArticle } from "@bgs/shared-types";
+import { QuarantineError } from "../../lib/errors";
+import { contentHash, stableUuid } from "../../lib/identity";
+import { sanitizeArticleHtml, textLength } from "../../lib/sanitize";
+import type { DetailResponse } from "./api-schemas";
+
+export const SITE_ORIGIN = "https://www.presidence.sn";
+
+/** Canonical public page of an article (the site redirects URLs without the final slash). */
+export function canonicalArticleUrl(lang: Lang, slug: string): string {
+  return `${SITE_ORIGIN}/${lang}/actualites/${encodeURIComponent(slug)}/`;
+}
+
+/** Below this, an article is considered emptied (by the source or by sanitization). */
+const MIN_TEXT_LENGTH = 40;
+
+export interface NormalizeContext {
+  lang: Lang;
+  fetchedAt: string;
+}
+
+/**
+ * Turns one presidence.sn API detail into a validated NewsArticle, identical to the
+ * source in its words. Images and PDF attachments are processed by a later pipeline
+ * step (download, variants, hashes), so they are not attached here yet.
+ */
+export function normalizeDetail(detail: DetailResponse, { lang, fetchedAt }: NormalizeContext) {
+  const version = detail.data.article;
+  const base = version.article;
+  const sourceUrl = canonicalArticleUrl(lang, version.slug);
+  const category = detail.data.categories.find((entry) => entry.id === base.categorieId);
+  const title = version.titre.trim();
+  const bodyHtml = sanitizeArticleHtml(version.content);
+
+  const quarantine = (reason: string) => new QuarantineError(sourceUrl, reason);
+  if (base.published !== 1 || base.deleted_at !== null) {
+    throw quarantine("article is not published at the source");
+  }
+  if (category === undefined) {
+    throw quarantine(`unknown category id ${String(base.categorieId)}`);
+  }
+  if (textLength(bodyHtml) < MIN_TEXT_LENGTH) {
+    throw quarantine("article body is empty after sanitization");
+  }
+
+  const candidate: NewsArticle = {
+    id: stableUuid(`${SITE_ORIGIN}/article/${String(version.articleId)}`),
+    kind: "news-article",
+    category: category.reference,
+    sourceUrl,
+    sourcePublishedOn: base.date,
+    sourceUpdatedAt: version.updated_at,
+    fetchedAt,
+    contentHash: contentHash({ title, bodyHtml, date: base.date, category: category.reference }),
+    version: 1,
+    lang,
+    translations: [{ lang, status: "official", title, bodyHtml, sourceUrl }],
+    audio: [],
+    embedding: null,
+    images: [],
+    attachments: [],
+  };
+
+  const result = newsArticleSchema.safeParse(candidate);
+  if (!result.success) {
+    throw quarantine(result.error.issues.map((issue) => issue.message).join("; "));
+  }
+  return result.data;
+}

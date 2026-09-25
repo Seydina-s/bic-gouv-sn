@@ -8,7 +8,8 @@ Source : `packages/shared-types` (schémas Zod). Toute donnée qui entre ou sort
 |---|---|---|
 | `id` | `id` | UUID interne |
 | `sourceUrl` | `source_url` | Page officielle d'origine. Seuls `presidence.sn` et `e-senegal.sn` sont acceptés. |
-| `sourcePublishedAt` | `source_published_at` | Date affichée par la source, `null` si elle n'en affiche pas (jamais devinée) |
+| `sourcePublishedOn` | `source_published_on` | Jour de publication donné par la source (`AAAA-MM-JJ` : presidence.sn ne donne pas d'heure), `null` si la source n'en affiche pas. Jamais deviné. |
+| `sourceUpdatedAt` | `source_updated_at` | Dernière modification signalée par le back-office de la source, si disponible |
 | `fetchedAt` | `fetched_at` | Date de collecte |
 | `contentHash` | `content_hash` | SHA-256 du contenu, pour détecter les modifications |
 | `version` | `version` | Incrémentée à chaque modification détectée, sans écrasement silencieux |

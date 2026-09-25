@@ -105,7 +105,7 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | # | Tâche | État | Notes |
 |---|---|---|---|
 | VS-01 | Cartographie minimale de presidence.sn/fr : robots.txt, conditions d'utilisation, page de liste des actualités, structure d'un article → `docs/sources.md` | ✅ | 25/09/2026 — API JSON publique du site trouvée ; FR 1 014 / WO 318 ; liaison FR↔WO par `articleId` ; wolof officiel arrêté au 01/10/2025 |
-| VS-02 | `SourceProvider` + premier adaptateur (API JSON de presidence.sn, sous réserve de validation) : collecte de quelques articles FR, validés par `newsArticleSchema`, traçables (URL, date de collecte, empreinte) | 🔴 | Outil choisi après VS-01 (Firecrawl / fetch + analyse HTML / Playwright) |
+| VS-02 | `SourceProvider` + premier adaptateur (API JSON de presidence.sn, sous réserve de validation) : collecte de quelques articles FR, validés par `newsArticleSchema`, traçables (URL, date de collecte, empreinte) | ✅ | 25/09/2026 — adaptateur API presidence.sn (débit 1 req/s, disjoncteur, 3 essais, quarantaine) ; HTML nettoyé ; id stable UUID v5 ; 27 tests (100 % des lignes) ; **collecte réelle : 8/8 articles valides** ; images et PDF reportés au pipeline média |
 | VS-03 | Stockage provisoire des articles validés (remplacé par PostgreSQL en Phase 1) | 🔴 | |
 | VS-04 | API `GET /v1/news` (liste) et `GET /v1/news/:id` (détail), schémas partagés, cache HTTP | 🔴 | |
 | VS-05 | Tour de directions visuelles Impeccable (univers de la marque) sur l'accueil / fil d'actualité | 🔴 | D-04, choix utilisateur |
@@ -116,4 +116,6 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | Date | Ajout | Origine |
 |---|---|---|
 | 25/09/2026 | L-02 🔴 Questions au BIC : (1) autorisation d'utiliser l'API publique `bo-admin.presidence.sn/api/front` ; (2) webhook à chaque publication (fraîcheur < 2 min) ; (3) reprise de la publication officielle en wolof, arrêtée le 01/10/2025 | VS-01 |
-| 25/09/2026 | DM-01 🔴 Modèle de contenu : la date de publication de la source est une date sans heure → champ date calendaire (pas d'heure inventée) + horodatages du back-office | VS-01 |
+| 25/09/2026 | DM-01 ✅ Modèle de contenu : la date de publication de la source est une date sans heure → champ date calendaire (pas d'heure inventée) + horodatages du back-office | VS-01 |
+| 25/09/2026 | MED-01 🔴 Pipeline média : téléchargement des images et PDF de la source, variantes AVIF/WebP/JPEG, BlurHash, empreintes (articles publiés sans image en attendant) | VS-02 |
+| 25/09/2026 | WO-01 🔴 URL canonique des pages wolof à vérifier (le plan du site utilise `/wo/actualites/-1017`, l'API des slugs wolof) | VS-02 |
