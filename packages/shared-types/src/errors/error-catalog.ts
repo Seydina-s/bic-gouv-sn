@@ -62,6 +62,13 @@ export const ERROR_CATALOG = {
     severity: "info",
     action: "Si cela vient de l'app officielle, prévenez l'équipe technique.",
   },
+  NEWS_NOT_FOUND: {
+    what: "Un article demandé n'existe pas ou n'est pas disponible dans cette langue.",
+    where: "API publique, actualités",
+    impact: "L'utilisateur voit un message « article introuvable ».",
+    severity: "info",
+    action: "Rien à faire, sauf si le nombre augmente (lien cassé dans une notification ?).",
+  },
   INTERNAL_ERROR: {
     what: "Une erreur inattendue s'est produite dans l'API.",
     where: "API publique",

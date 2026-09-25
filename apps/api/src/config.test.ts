@@ -9,6 +9,7 @@ describe("loadConfig", () => {
       PORT: 3000,
       LOG_LEVEL: "info",
       SHUTDOWN_TIMEOUT_MS: 10_000,
+      NEWS_STORE_PATH: ".data/news.json",
       SENTRY_TRACES_SAMPLE_RATE: 0.02,
     });
   });

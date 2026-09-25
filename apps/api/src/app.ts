@@ -8,17 +8,24 @@ import {
   serializerCompiler,
   validatorCompiler,
 } from "fastify-type-provider-zod";
+import type { ArticleRepository } from "@bgs/content-store";
 import type { Config } from "./config";
 import { registerErrorHandlers } from "./errors";
 import { healthRoutes } from "./routes/health";
+import { newsRoutes } from "./routes/news";
 
 export interface AppOptions {
   config: Config;
   version: string;
+  articles: ArticleRepository;
 }
 
 /** Builds the API without listening, so tests can call it in memory. */
-export async function buildApp({ config, version }: AppOptions): Promise<FastifyInstance> {
+export async function buildApp({
+  config,
+  version,
+  articles,
+}: AppOptions): Promise<FastifyInstance> {
   const app = Fastify({
     logger: {
       level: config.LOG_LEVEL,
@@ -53,6 +60,7 @@ export async function buildApp({ config, version }: AppOptions): Promise<Fastify
   }
 
   await app.register(healthRoutes, { prefix: "/v1", version });
+  await app.register(newsRoutes, { prefix: "/v1", articles });
   app.get("/v1/openapi.json", { schema: { hide: true } }, () => app.swagger());
 
   return app;
