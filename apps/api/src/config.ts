@@ -9,6 +9,8 @@ const envSchema = z.object({
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).default("info"),
   /** Grace period for in-flight requests on shutdown before forcing exit. */
   SHUTDOWN_TIMEOUT_MS: z.coerce.number().int().positive().default(10_000),
+  /** Provisional article store written by the ingestion job (PostgreSQL in Phase 1). */
+  NEWS_STORE_PATH: z.string().min(1).default(".data/news.json"),
   /** Sentry project key; crash reporting stays off while it is absent. */
   SENTRY_DSN: z.url({ protocol: /^https$/ }).optional(),
   /** Share of requests traced for performance (0 to 1); errors are always reported. */

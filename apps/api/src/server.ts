@@ -1,9 +1,14 @@
 import packageJson from "../package.json" with { type: "json" };
+import { FileArticleRepository } from "@bgs/content-store";
 import { buildApp } from "./app";
 import { loadConfig } from "./config";
 
 const config = loadConfig(process.env);
-const app = await buildApp({ config, version: packageJson.version });
+const app = await buildApp({
+  config,
+  version: packageJson.version,
+  articles: new FileArticleRepository(config.NEWS_STORE_PATH),
+});
 
 /** Graceful shutdown: stop accepting requests, finish in-flight ones, then exit. */
 function shutdown(signal: NodeJS.Signals): void {

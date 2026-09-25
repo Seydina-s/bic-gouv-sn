@@ -2,6 +2,7 @@ import type { ErrorEvent, EventHint } from "@sentry/node";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { buildApp } from "./app";
 import { loadConfig } from "./config";
+import { temporaryStore } from "./testing/store";
 import { initMonitoring, tagWithErrorCode } from "./monitoring";
 
 const sentry = vi.hoisted(() => ({
@@ -71,12 +72,12 @@ describe("buildApp error reporting", () => {
   const config = loadConfig({ LOG_LEVEL: "silent" });
 
   it("hooks Sentry into Fastify only when monitoring is on", async () => {
-    const off = await buildApp({ config, version: "1.0.0" });
+    const off = await buildApp({ config, version: "1.0.0", articles: temporaryStore() });
     expect(sentry.setupFastifyErrorHandler).not.toHaveBeenCalled();
     await off.close();
 
     sentry.isInitialized.mockReturnValueOnce(true);
-    const on = await buildApp({ config, version: "1.0.0" });
+    const on = await buildApp({ config, version: "1.0.0", articles: temporaryStore() });
     expect(sentry.setupFastifyErrorHandler).toHaveBeenCalledWith(on);
     await on.close();
   });

@@ -1,0 +1,70 @@
+import { z } from "zod";
+import { officialSourceUrlSchema } from "../common/official-source.schema";
+import {
+  httpsUrlSchema,
+  isoDateSchema,
+  isoDateTimeSchema,
+  langSchema,
+  slugSchema,
+} from "../common/primitives.schema";
+import { translationStatusSchema } from "../content/translation.schema";
+
+/*
+ * Public news API (/v1/news). Article bodies travel as structured blocks, not HTML:
+ * the app renders them with native components (no web view, nothing executable).
+ */
+
+export const inlineSchema = z.strictObject({
+  text: z.string(),
+  bold: z.boolean().optional(),
+  italic: z.boolean().optional(),
+  underline: z.boolean().optional(),
+  href: httpsUrlSchema.optional(),
+});
+export type Inline = z.infer<typeof inlineSchema>;
+
+const inlines = z.array(inlineSchema).min(1);
+
+export const blockSchema = z.discriminatedUnion("type", [
+  z.strictObject({ type: z.literal("paragraph"), inlines }),
+  z.strictObject({
+    type: z.literal("heading"),
+    level: z.union([z.literal(2), z.literal(3), z.literal(4)]),
+    inlines,
+  }),
+  z.strictObject({ type: z.literal("list"), ordered: z.boolean(), items: z.array(inlines).min(1) }),
+  z.strictObject({ type: z.literal("quote"), inlines }),
+  z.strictObject({ type: z.literal("image"), src: httpsUrlSchema, alt: z.string().nullable() }),
+]);
+export type Block = z.infer<typeof blockSchema>;
+
+/** One article in a feed, in the requested language. */
+export const newsSummarySchema = z.strictObject({
+  id: z.uuid(),
+  category: slugSchema,
+  publishedOn: isoDateSchema.nullable(),
+  lang: langSchema,
+  title: z.string().min(1),
+  /** Opening words of the article, cut on a word boundary: never rewritten. */
+  excerpt: z.string(),
+  translationStatus: translationStatusSchema,
+  /** Languages this article is available in. */
+  availableLangs: z.array(langSchema).min(1),
+});
+export type NewsSummary = z.infer<typeof newsSummarySchema>;
+
+export const newsListResponseSchema = z.strictObject({
+  items: z.array(newsSummarySchema),
+  nextCursor: z.string().nullable(),
+});
+export type NewsListResponse = z.infer<typeof newsListResponseSchema>;
+
+export const newsDetailSchema = newsSummarySchema.omit({ excerpt: true }).extend({
+  blocks: z.array(blockSchema),
+  /** Official page, shown as "Source : presidence.sn" with a link (traceability). */
+  sourceUrl: officialSourceUrlSchema,
+  sourceUpdatedAt: isoDateTimeSchema.nullable(),
+  fetchedAt: isoDateTimeSchema,
+  version: z.int().positive(),
+});
+export type NewsDetail = z.infer<typeof newsDetailSchema>;

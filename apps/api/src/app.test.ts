@@ -4,11 +4,16 @@ import { afterEach, describe, expect, it } from "vitest";
 import { z } from "zod";
 import { buildApp } from "./app";
 import { loadConfig } from "./config";
+import { temporaryStore } from "./testing/store";
 
 let app: FastifyInstance;
 
 async function start(env: Record<string, string> = {}) {
-  app = await buildApp({ config: loadConfig({ LOG_LEVEL: "silent", ...env }), version: "1.2.3" });
+  app = await buildApp({
+    config: loadConfig({ LOG_LEVEL: "silent", ...env }),
+    version: "1.2.3",
+    articles: temporaryStore(),
+  });
   return app;
 }
 
