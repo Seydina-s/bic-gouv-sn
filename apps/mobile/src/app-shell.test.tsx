@@ -72,7 +72,8 @@ describe("app shell", () => {
 
   it("discards news saved in an older data format instead of crashing on it", async () => {
     // Saved by a previous app version: no `cover` field yet (regression of 25/09/2026).
-    const { cover: _dropped, ...oldItem } = { ...LIST.items[0], title: "Ancien format" };
+    const oldItem: Record<string, unknown> = { ...LIST.items[0], title: "Ancien format" };
+    delete oldItem["cover"];
     const now = Date.now();
     await AsyncStorage.setItem(
       "bgs-query-cache",
