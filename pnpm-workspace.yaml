@@ -7,6 +7,7 @@ engineStrict: true
 
 # Dependencies allowed to run install scripts (everything else is blocked).
 allowBuilds:
+  "@sentry/cli": true # official Sentry uploader (source maps), downloads its binary
   esbuild: true
 
 # Official Expo SDK 57 packages, exempted by `expo install` from the minimum

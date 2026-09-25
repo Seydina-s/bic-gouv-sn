@@ -3,7 +3,8 @@ import { defineConfig } from "tsdown";
 // Bundles the API and the workspace packages (shipped as TypeScript sources)
 // into one Node file; npm dependencies stay external.
 export default defineConfig({
-  entry: ["src/server.ts"],
+  // instrument.ts is loaded before everything else via `node --import` (Sentry ESM setup).
+  entry: ["src/server.ts", "src/instrument.ts"],
   platform: "node",
   format: "esm",
   outDir: "dist",

@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
+import * as Sentry from "@sentry/node";
 import Fastify, { type FastifyInstance } from "fastify";
 import {
   jsonSchemaTransform,
@@ -26,6 +27,10 @@ export async function buildApp({ config, version }: AppOptions): Promise<Fastify
     genReqId: () => randomUUID(),
   });
 
+  // Reports unexpected (5xx) errors to Sentry when monitoring is on (see instrument.ts).
+  if (Sentry.isInitialized()) {
+    Sentry.setupFastifyErrorHandler(app);
+  }
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
   registerErrorHandlers(app);

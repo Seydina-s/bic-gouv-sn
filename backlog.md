@@ -44,7 +44,7 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | F-09 | `apps/admin` : Next.js vide | ✅ | 24/09/2026 — coquille + écran « État du service » (réel) ; 22 tests (100 %) ; build + captures bureau/mobile, clair/sombre, service OK/KO ; détecteur Impeccable : 0 anomalie |
 | F-10 | CI GitHub Actions : lint, typecheck, tests, scan de secrets, audit des dépendances | ✅ | 24/09/2026 — 3 jobs verts sur la PR #1 (qualité, builds prod, sécurité) ; Dependabot ; actions épinglées par SHA |
 | F-11 | `docs/errors-catalog.md` : structure du catalogue d'erreurs lisible | ✅ | 24/09/2026 — 10 codes, type `ErrorCode` imposé, doc générée et testée, admin branché dessus |
-| F-12 | Observabilité de base (Sentry mobile + API) | 🔴 | Nécessite un compte Sentry (question utilisateur) |
+| F-12 | Observabilité de base (Sentry mobile + API) | ✅ | 25/09/2026 — intégration prête, inactive sans DSN ; tests (API 17, mobile 18) ; build mobile avec DSN vérifié ; activation = MON-01 |
 
 ## Phases suivantes (à détailler au fil de l'eau)
 
@@ -84,3 +84,5 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 24/09/2026 | D-04 🔴 Tour de directions visuelles Impeccable + DESIGN.md au premier écran citoyen (Phase 2) | Décision utilisateur |
 | 24/09/2026 | CI-01 🔴 Activer la protection de la branche `main` (CI verte obligatoire, pas de push direct) — accord utilisateur requis | F-10 |
 | 24/09/2026 | CI-02 🔴 Passer le runner à Ubuntu 26.04 de façon délibérée (ubuntu-latest y bascule le 19/10/2026) | F-10 |
+| 25/09/2026 | MON-01 🔴 Après création du compte Sentry : DSN dans les variables d'environnement, plugin `@sentry/react-native/expo` + `getSentryExpoConfig` (source maps), `SENTRY_AUTH_TOKEN` en secret EAS/CI, désactiver le stockage des IP côté projet | F-12 |
+| 25/09/2026 | MON-02 🔴 Sentry pour l'admin Next.js (hors périmètre F-12) | F-12 |

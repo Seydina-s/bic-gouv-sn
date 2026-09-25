@@ -9,8 +9,14 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       include: ["src/**/*.ts"],
-      // server.ts is the process entrypoint, covered by the built-bundle smoke test.
-      exclude: ["src/**/*.test.ts", "src/index.ts", "src/testing/**", "src/server.ts"],
+      // Process entrypoints (server.ts, instrument.ts), covered by the built-bundle smoke test.
+      exclude: [
+        "src/**/*.test.ts",
+        "src/index.ts",
+        "src/testing/**",
+        "src/server.ts",
+        "src/instrument.ts",
+      ],
       thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },
     },
   },

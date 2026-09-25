@@ -9,6 +9,10 @@ const envSchema = z.object({
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).default("info"),
   /** Grace period for in-flight requests on shutdown before forcing exit. */
   SHUTDOWN_TIMEOUT_MS: z.coerce.number().int().positive().default(10_000),
+  /** Sentry project key; crash reporting stays off while it is absent. */
+  SENTRY_DSN: z.url({ protocol: /^https$/ }).optional(),
+  /** Share of requests traced for performance (0 to 1); errors are always reported. */
+  SENTRY_TRACES_SAMPLE_RATE: z.coerce.number().min(0).max(1).default(0.02),
 });
 
 export type Config = z.infer<typeof envSchema>;

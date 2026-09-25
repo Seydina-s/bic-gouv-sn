@@ -5,9 +5,9 @@
   "description": "Public REST API (/v1) for the Bic Gouv SN app",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "tsx watch --import ./src/instrument.ts src/server.ts",
     "build": "tsdown",
-    "start": "node dist/server.mjs",
+    "start": "node --import ./dist/instrument.mjs dist/server.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --coverage"
   },
@@ -15,6 +15,7 @@
     "@bgs/shared-types": "workspace:*",
     "@fastify/swagger": "9.9.0",
     "@fastify/swagger-ui": "6.1.1",
+    "@sentry/node": "10.75.2",
     "fastify": "5.12.5",
     "fastify-type-provider-zod": "7.0.0",
     "zod": "4.6.5"
