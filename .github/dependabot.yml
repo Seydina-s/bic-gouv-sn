@@ -1,0 +1,17 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      # Expo pins its own versions: upgrade them together with `expo install --fix`.
+      expo:
+        patterns: ["expo", "expo-*", "@expo/*", "react-native", "react-native-*"]
+      tooling:
+        patterns: ["eslint*", "@eslint/*", "typescript-eslint", "prettier", "vitest", "@vitest/*"]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

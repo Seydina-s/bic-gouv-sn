@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // DOM only for setTimeout/AbortController typings, available in Node and React Native.
+    "lib": ["ES2023", "DOM"],
+    "types": []
+  },
+  "include": ["src", "vitest.config.ts"]
+}

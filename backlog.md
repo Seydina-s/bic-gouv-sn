@@ -33,18 +33,18 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 
 | # | Tâche | État | Notes |
 |---|---|---|---|
-| F-01 | `git init`, branche `chore/foundations`, `.gitignore`, `.editorconfig` | ✅ | 24/09/2026 — dépôt local ; publication GitHub privée à faire par l’utilisateur (gh CLI absent) |
-| F-02 | Monorepo pnpm (apps/, services/, packages/, infra/, docs/), TypeScript strict partagé, ESLint/Prettier | 🔴 | pnpm 12.6.0 installé le 24/09/2026 |
-| F-03 | `packages/shared-types` : schémas Zod du modèle de contenu (source_url, source_published_at, fetched_at, content_hash, version, lang, translations[], audio[], embedding) + tests | 🔴 | Couverture ≥ 80 % |
-| F-04 | `packages/ui` : tokens `bgs.*` clair/sombre, échelles 50→900 des couleurs de la charte, contraste AA vérifié par test | 🔴 | |
-| F-05 | `packages/i18n` : socle FR/WO, aucune chaîne en dur | 🔴 | |
-| F-06 | `packages/resilience` : timeout, retry + jitter, circuit breaker + tests | 🔴 | |
-| F-07 | `apps/mobile` : Expo vide (New Architecture, Hermes, Expo Router), thème live | 🔴 | |
-| F-08 | `apps/api` : Fastify `/v1/health` + OpenAPI | 🔴 | |
-| F-09 | `apps/admin` : Next.js vide | 🔴 | |
-| F-10 | CI GitHub Actions : lint, typecheck, tests, scan de secrets, audit des dépendances | 🔴 | Nécessite un dépôt GitHub (question utilisateur) |
-| F-11 | `docs/errors-catalog.md` : structure du catalogue d'erreurs lisible | 🔴 | |
-| F-12 | Observabilité de base (Sentry mobile + API) | 🔴 | Nécessite un compte Sentry (question utilisateur) |
+| F-01 | `git init`, branche `chore/foundations`, `.gitignore`, `.editorconfig` | ✅ | 24/09/2026 — dépôt privé github.com/Seydina-s/bic-gouv-sn |
+| F-02 | Monorepo pnpm (apps/, services/, packages/, infra/, docs/), TypeScript strict partagé, ESLint/Prettier | ✅ | 24/09/2026 — TS 6.0 strict, ESLint strictTypeChecked, Prettier ; vérifié : erreurs volontaires détectées, audit 0 vulnérabilité |
+| F-03 | `packages/shared-types` : schémas Zod du modèle de contenu (source_url, source_published_at, fetched_at, content_hash, version, lang, translations[], audio[], embedding) + tests | ✅ | 24/09/2026 — Zod 4.6, 37 tests, couverture 100 % ; doc `docs/data-model.md` ; 1 bug trouvé et corrigé (ERREURS.md) |
+| F-04 | `packages/ui` : tokens `bgs.*` clair/sombre, échelles 50→900 des couleurs de la charte, contraste AA vérifié par test | ✅ | 24/09/2026 — 42 paires contrôlées (2 thèmes), 71 tests, couverture 100 % ; variables CSS `--bgs-*` pour l'admin ; ombres reportées à F-07 (spécifiques RN/web) |
+| F-05 | `packages/i18n` : socle FR/WO, aucune chaîne en dur | ✅ | 24/09/2026 — clés typées, repli FR signalé, pluriels FR/WO, 32 tests, couverture 100 % (branches 98 %) ; catalogue wolof vide en attente de locuteurs natifs (W-01) |
+| F-06 | `packages/resilience` : timeout, retry + jitter, circuit breaker + tests | ✅ | 24/09/2026 — 30 tests (horloge simulée, stables sur 3 exécutions), couverture 100 % ; codes `RESILIENCE_*` à reporter dans F-11 |
+| F-07 | `apps/mobile` : Expo vide (New Architecture, Hermes, Expo Router), thème live | ✅ | 24/09/2026 — SDK 57 ; expo-doctor 21/21 ; bundles Android + iOS Hermes OK ; 10 tests (thème live vérifié par mutation) ; pas encore testé sur un vrai téléphone |
+| F-08 | `apps/api` : Fastify `/v1/health` + OpenAPI | ✅ | 24/09/2026 — 10 tests (couverture 100 %) + test réel du build de production par HTTP ; contrats partagés dans `shared-types/src/api` |
+| F-09 | `apps/admin` : Next.js vide | ✅ | 24/09/2026 — coquille + écran « État du service » (réel) ; 22 tests (100 %) ; build + captures bureau/mobile, clair/sombre, service OK/KO ; détecteur Impeccable : 0 anomalie |
+| F-10 | CI GitHub Actions : lint, typecheck, tests, scan de secrets, audit des dépendances | ✅ | 24/09/2026 — 3 jobs verts sur la PR #1 (qualité, builds prod, sécurité) ; Dependabot ; actions épinglées par SHA |
+| F-11 | `docs/errors-catalog.md` : structure du catalogue d'erreurs lisible | ✅ | 24/09/2026 — 10 codes, type `ErrorCode` imposé, doc générée et testée, admin branché dessus |
+| F-12 | Observabilité de base (Sentry mobile + API) | ✅ | 25/09/2026 — intégration prête, inactive sans DSN ; tests (API 17, mobile 18) ; build mobile avec DSN vérifié ; activation = MON-01 |
 
 ## Phases suivantes (à détailler au fil de l'eau)
 
@@ -66,5 +66,47 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 24/09/2026 | La maquette contient une section « Opportunités » (financements, concours, marchés publics) absente du périmètre CLAUDE.md → à trancher par l'utilisateur | Lecture de la maquette |
 | 24/09/2026 | Emplacement du dossier projet vérifié : conservé à `C:\bic-gouv-sn` (voir decisions.md) | Question utilisateur |
 | 24/09/2026 | O-01 🔴 Section « Opportunités » conservée : définir contenu, sources officielles et priorité | Réponse utilisateur |
-| 24/09/2026 | S1-06 🔴 Passer à Node 22 LTS (Node 20 en fin de support) — en attente d'accord | Revue du stack |
+| 24/09/2026 | S1-06 ✅ Node 24 LTS isolé par projet via fnm (Node 20 système conservé) | Revue du stack |
 | 24/09/2026 | L-01 🔴 Obtenir la preuve écrite d'autorisation de la Présidence avant soumission aux stores | Réponse utilisateur |
+| 24/09/2026 | T-01 🔴 Passer à TypeScript 7 dès que typescript-eslint le supporte | F-02 |
+| 24/09/2026 | W-01 🔴 Identifier qui rédige et valide les textes wolof de l'interface (catalogue `packages/i18n/src/messages/wo.ts`) | F-05 |
+| 24/09/2026 | A-01 🔴 Logo officiel, icônes d'app et écran de lancement (actuellement icônes génériques du modèle Expo — à remplacer, ne rien inventer) | F-07 |
+| 24/09/2026 | A-02 🔴 Identifiant de publication de l'app (ex. `sn.gouv.bic…`) à valider avec le BIC avant tout build de store | F-07 |
+| 24/09/2026 | PERF-01 🔴 Expo Router embarque une police d'icônes Material Symbols de 967 Ko : vérifier si elle peut être exclue (budget de poids S1-03) | F-07 |
+| 24/09/2026 | SEC-01 🔴 Revérifier `pnpm audit` à chaque mise à jour du SDK Expo (decode-uri-component via expo-router, uuid via xcode) ; bloquer en CI toute vulnérabilité haute/critique | F-08 |
+| 24/09/2026 | API-01 🔴 Ajouter rate limiting, en-têtes de sécurité et sonde de disponibilité (readiness) quand la base de données arrivera | F-08 |
+| 24/09/2026 | D-01 ✅ Audit des tokens de design + corrections (docs/design/audit-tokens-2026-09-24.md) | Demande utilisateur |
+| 24/09/2026 | D-02 🔴 `/impeccable init` (PRODUCT.md + DESIGN.md) au début de la prochaine session | Audit D-01 |
+| 24/09/2026 | D-03 🔴 Réparer l'installation de ui-ux-pro-max (dossiers data/scripts = liens cassés) + Python pour ses scripts | Audit D-01 |
+| 24/09/2026 | PERF-02 🔴 Sous-ensemble des polices (latin + wolof) pour réduire les 564 Ko | Audit D-01 |
+| 24/09/2026 | Q-01 ✅ Délai des tests porté à 30 s (échec intermittent sous charge : 12,6 s pour un démarrage à froid) | Contrôle complet |
+| 24/09/2026 | D-02 ✅ PRODUCT.md écrit (init Impeccable) | F-09 |
+| 24/09/2026 | D-04 🔴 Tour de directions visuelles Impeccable + DESIGN.md au premier écran citoyen (Phase 2) | Décision utilisateur |
+| 24/09/2026 | CI-01 ⏸ Protection de la branche `main` : accord donné le 25/09/2026, mais **refusée par GitHub** (dépôt privé en offre gratuite : nécessite GitHub Pro, 4 $/mois, ou un dépôt public). En attente de décision ; d'ici là, règle appliquée : jamais de push direct sur `main`, fusion uniquement par PR avec CI verte | F-10 |
+| 24/09/2026 | CI-02 🔴 Passer le runner à Ubuntu 26.04 de façon délibérée (ubuntu-latest y bascule le 19/10/2026) | F-10 |
+| 25/09/2026 | MON-01 🔴 Après création du compte Sentry : DSN dans les variables d'environnement, plugin `@sentry/react-native/expo` + `getSentryExpoConfig` (source maps), `SENTRY_AUTH_TOKEN` en secret EAS/CI, désactiver le stockage des IP côté projet | F-12 |
+| 25/09/2026 | MON-02 🔴 Sentry pour l'admin Next.js (hors périmètre F-12) | F-12 |
+
+## Rituel de fin de Sprint 0 — audit croisé (25/09/2026)
+
+| # | Agent | Constat → tâche | Priorité |
+|---|---|---|---|
+| AUD-01 | Orchestrateur | `.claude/context/STACK.md` jamais rédigé (S1-05) ; S1-02 (hébergement), S1-03 (budget de poids), S1-04 (typographie) toujours ouverts | Haute |
+| AUD-02 | Ingestion & Données | Avant toute collecte : vérifier `robots.txt` et les conditions d'utilisation de presidence.sn, fixer un débit poli, documenter dans `docs/sources.md` | Bloquante pour VS-02 |
+| AUD-03 | Sécurité | Admin : ajouter une Content-Security-Policy ; **ne jamais déployer l'admin en public avant l'authentification 2FA (Phase 4)** | Haute |
+| AUD-04 | Sécurité (challenge Architecte) | API sans limitation de débit ni en-têtes de sécurité (API-01) : à faire avant toute exposition publique | Haute |
+| AUD-05 | QA | Aucun test de bout en bout (Maestro) ni test lecteur d'écran / grande police sur appareil : à mettre en place avec les premiers écrans réels | Moyenne |
+| AUD-06 | Performance | Budget de poids non contrôlé en CI ; police Material Symbols 967 Ko (PERF-01) ; sous-ensemble des polices (PERF-02) | Moyenne |
+| AUD-07 | Design (challenge Développeur) | L'accueil mobile est un gabarit technique : aucun écran citoyen avant le tour de directions visuelles (D-04) | Haute (VS-05) |
+| AUD-08 | Copywriter | Wolof de l'interface sans rédacteur désigné (W-01) : bloquera la parité FR/WO des premiers écrans | Moyenne |
+
+## Tranche verticale « premiers vrais articles »
+
+| # | Tâche | État | Notes |
+|---|---|---|---|
+| VS-01 | Cartographie minimale de presidence.sn/fr : robots.txt, conditions d'utilisation, page de liste des actualités, structure d'un article → `docs/sources.md` | 🔴 | Inclut AUD-02 |
+| VS-02 | `ScraperProvider` + premier adaptateur : collecte de quelques articles FR, validés par `newsArticleSchema`, traçables (URL, date de collecte, empreinte) | 🔴 | Outil choisi après VS-01 (Firecrawl / fetch + analyse HTML / Playwright) |
+| VS-03 | Stockage provisoire des articles validés (remplacé par PostgreSQL en Phase 1) | 🔴 | |
+| VS-04 | API `GET /v1/news` (liste) et `GET /v1/news/:id` (détail), schémas partagés, cache HTTP | 🔴 | |
+| VS-05 | Tour de directions visuelles Impeccable (univers de la marque) sur l'accueil / fil d'actualité | 🔴 | D-04, choix utilisateur |
+| VS-06 | App : fil d'actualité + écran article avec les vrais articles, attribution « Source : presidence.sn » + lien | 🔴 | |

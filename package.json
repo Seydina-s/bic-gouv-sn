@@ -1,0 +1,33 @@
+{
+  "name": "bic-gouv-sn",
+  "private": true,
+  "description": "Bic Gouv SN monorepo",
+  "packageManager": "pnpm@12.6.0",
+  "engines": {
+    "node": ">=24.3.0"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "pnpm -r --if-present test",
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test",
+    "errors:doc": "tsx scripts/generate-errors-doc.ts"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@types/node": "24.13.6",
+    "@vitest/coverage-v8": "5.0.1",
+    "eslint": "10.11.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "globals": "17.12.0",
+    "prettier": "3.9.9",
+    "tsx": "4.23.15",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.70.1",
+    "vitest": "5.0.1"
+  }
+}
