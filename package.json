@@ -14,7 +14,8 @@
     "typecheck": "pnpm -r --if-present typecheck",
     "test": "pnpm -r --if-present test",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test",
-    "errors:doc": "tsx scripts/generate-errors-doc.ts"
+    "errors:doc": "tsx scripts/generate-errors-doc.ts",
+    "bundle:size": "tsx scripts/check-bundle-size.ts"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

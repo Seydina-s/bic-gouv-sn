@@ -23,9 +23,9 @@ Source de vérité unique de l'avancement. Mis à jour en temps réel. Aucune t�
 |---|---|---|---|
 | S1-01 | Présenter le stack §4.1 à l'utilisateur pour validation explicite | ✅ | 24/09/2026 — validé ; Node 22 LTS recommandé |
 | S1-02 | Chiffrer l'hébergement (région proche Afrique de l'Ouest + CDN) | 🔴 | Dépend de S1-01 |
-| S1-03 | Fixer le budget de poids de l'app (contrôlé en CI) | 🔴 | |
+| S1-03 | Fixer le budget de poids de l'app (contrôlé en CI) | ✅ | 25/09/2026 — plafond 6 Mo par bundle JS (Hermes), cible 4 Mo après PERF-03 ; mesuré : Android 5,16 Mo, iOS 4,88 Mo ; étape CI « Mobile bundle weight budget » |
 | S1-04 | Comparatif typographique : Bricolage/Manrope vs 2–3 alternatives (glyphes wolof ë é à ó ñ ŋ, petites tailles, poids, licence) | 🔴 | Choix final par l'utilisateur |
-| S1-05 | Rédiger `.claude/context/STACK.md` avec le stack validé | 🔴 | Après S1-01 |
+| S1-05 | Rédiger `.claude/context/STACK.md` avec le stack validé | ✅ | 25/09/2026 — état réel, dérogations et éléments à venir |
 
 ## Sprint 0 — Fondations (feuille de route Phase 0 technique)
 
@@ -126,6 +126,6 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 25/09/2026 | DS-01 🔴 DESIGN.md (documenteur Impeccable) après verdict de la revue sur appareils | VS-06 |
 | 25/09/2026 | AUD-03 ✅ (partiel) CSP de l'admin active (vérifiée sur build de production) ; règle maintenue : pas de déploiement public de l'admin avant 2FA (Phase 4) | Audit Sprint 0 |
 | 25/09/2026 | SEC-03 🔴 Admin : CSP à nonce (supprimer `'unsafe-inline'` des scripts) via le proxy Next.js | AUD-03 |
-| 25/09/2026 | D-05 🔴 L'utilisateur n'est pas convaincu par la direction « pagne tissé » (vue sur téléphone) : lui présenter 2-3 directions visuelles (planche de décision Impeccable, re-roll) et le laisser choisir | Retour utilisateur |
+| 25/09/2026 | D-05 🔵 (planche prête : https://claude.ai/artifact/WviS1JMDtvTWSvZV6WsXrq — 5 directions : pagne tissé, journal parlé, la Une, sous-verre, classique épuré) L'utilisateur n'est pas convaincu par la direction « pagne tissé » (vue sur téléphone) : lui présenter 2-3 directions visuelles (planche de décision Impeccable, re-roll) et le laisser choisir | Retour utilisateur |
 | 25/09/2026 | VID-01 🔴 Articles vidéo de presidence.sn (interviews sans texte, `video_url`) : 8 mis en quarantaine à l'import ; ajouter un bloc vidéo au modèle et à l'app | Import historique |
 | 25/09/2026 | ING-01 ✅ Import complet de l'historique : 961 articles (15/04/2019 → 24/09/2026), 311 FR+WO, 94 Conseil des ministres ; 10 écartés (8 vidéos sans texte, 2 erreurs ponctuelles) | Phase 1 |
