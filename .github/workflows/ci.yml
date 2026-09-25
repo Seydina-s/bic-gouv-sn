@@ -43,6 +43,8 @@ jobs:
         run: pnpm --filter @bgs/admin build
       - name: Mobile JS bundles (Android + iOS, Hermes)
         run: pnpm --filter @bgs/mobile bundle:check
+      - name: Mobile bundle weight budget
+        run: pnpm bundle:size
 
   security:
     name: Secrets and dependencies
