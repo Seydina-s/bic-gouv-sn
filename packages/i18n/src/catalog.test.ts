@@ -21,6 +21,12 @@ describe("catalog helpers", () => {
     expect(lookupMessage(tree, "nope")).toBeUndefined();
   });
 
+  it("does not mistake a label group containing an 'other' key for a plural", () => {
+    const labels = { group: { general: "G", other: "O" } };
+    expect(listMessageKeys(labels)).toEqual(["group.general", "group.other"]);
+    expect(lookupMessage(labels, "group.other")).toBe("O");
+  });
+
   it("finds messages missing from a partial catalog", () => {
     expect(findMissingMessages(tree, { group: { b: "b" } })).toEqual(["a", "group.count"]);
   });

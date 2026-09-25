@@ -1,7 +1,6 @@
 /**
  * Reference French catalog. Every UI string lives here, never in components.
- * Only strings already set by CLAUDE.md or the reference mockup for now;
- * the rest is added screen by screen with UX writing review.
+ * Short, direct, respectful (vouvoiement); strings are added screen by screen.
  */
 export const fr = {
   tabs: {
@@ -19,6 +18,41 @@ export const fr = {
   },
   onboarding: {
     skip: "Passer",
+  },
+  /** Sections of presidence.sn, keyed by their slug. */
+  categories: {
+    "conseil-des-ministres": "Conseil des ministres",
+    communiques: "Communiqués",
+    international: "International",
+    discours: "Discours",
+    focus: "Focus",
+    interviews: "Interviews & reportages",
+    agenda: "Agenda",
+    general: "Actualité",
+  },
+  feed: {
+    newsToday: {
+      one: "{count} publication aujourd'hui",
+      other: "{count} publications aujourd'hui",
+    },
+    latest: "Dernières actualités",
+    newest: "Dernière publication",
+    loadMore: "Chargement de la suite",
+    lastOpened: "Dernière lecture",
+    offline: "Hors ligne : voici les dernières actualités enregistrées.",
+    empty: "Aucune actualité pour le moment.",
+    error: "Les actualités n'ont pas pu être chargées.",
+    retry: "Réessayer",
+  },
+  article: {
+    back: "Retour",
+    openSource: "Lire sur {source}",
+    notFound: "Cet article n'est pas disponible.",
+    image: "Photo de l'article",
+  },
+  comingSoon: {
+    title: "Bientôt disponible",
+    body: "Cette partie de l'application est en préparation.",
   },
 } as const;
 

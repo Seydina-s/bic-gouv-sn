@@ -1,0 +1,14 @@
+{
+  // Type-check only (pnpm typecheck). Metro and Jest read tsconfig.json paths as
+  // runtime aliases, so this redirection must never live there: it only points the
+  // per-icon Phosphor imports to their published .d.ts instead of their .tsx sources,
+  // which do not compile under exactOptionalPropertyTypes.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "phosphor-react-native/src/icons/*": [
+        "./node_modules/phosphor-react-native/lib/typescript/icons/*"
+      ]
+    }
+  }
+}

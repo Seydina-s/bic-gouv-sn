@@ -4,6 +4,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import * as SystemUI from "expo-system-ui";
 import { useEffect, type ComponentType } from "react";
+import { QueryProvider } from "../data/QueryProvider";
 import { I18nProvider } from "../i18n/I18nProvider";
 import { initMonitoring } from "../monitoring/monitoring";
 import { ThemeProvider } from "../theme/ThemeProvider";
@@ -54,11 +55,13 @@ function ThemedStack() {
 
 function RootLayout() {
   return (
-    <ThemeProvider>
-      <I18nProvider>
-        <ThemedStack />
-      </I18nProvider>
-    </ThemeProvider>
+    <QueryProvider>
+      <ThemeProvider>
+        <I18nProvider>
+          <ThemedStack />
+        </I18nProvider>
+      </ThemeProvider>
+    </QueryProvider>
   );
 }
 
