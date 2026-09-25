@@ -21,9 +21,20 @@ export type PartialCatalog<T> = {
   [K in keyof T]?: T[K] extends Message ? T[K] : PartialCatalog<T[K]>;
 };
 
+const PLURAL_FORMS: ReadonlySet<string> = new Set(["one", "many", "other"]);
+
+/**
+ * A plural message has ONLY plural forms. A group that merely contains a key named
+ * "other" (e.g. a list of labels) is not one: it was once misread that way.
+ */
 export function isPluralMessage(value: unknown): value is PluralMessage {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+  const entries = Object.entries(value);
   return (
-    typeof value === "object" && value !== null && typeof Reflect.get(value, "other") === "string"
+    typeof Reflect.get(value, "other") === "string" &&
+    entries.every(([key, text]) => PLURAL_FORMS.has(key) && typeof text === "string")
   );
 }
 

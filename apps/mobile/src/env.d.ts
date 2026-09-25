@@ -5,6 +5,7 @@ declare global {
     interface ProcessEnv {
       readonly EXPO_PUBLIC_SENTRY_DSN?: string;
       readonly EXPO_PUBLIC_APP_ENV?: string;
+      readonly EXPO_PUBLIC_API_URL?: string;
     }
   }
 }

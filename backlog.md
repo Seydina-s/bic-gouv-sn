@@ -108,8 +108,8 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | VS-02 | `SourceProvider` + premier adaptateur (API JSON de presidence.sn, sous réserve de validation) : collecte de quelques articles FR, validés par `newsArticleSchema`, traçables (URL, date de collecte, empreinte) | ✅ | 25/09/2026 — adaptateur API presidence.sn (débit 1 req/s, disjoncteur, 3 essais, quarantaine) ; HTML nettoyé ; id stable UUID v5 ; 27 tests (100 % des lignes) ; **collecte réelle : 8/8 articles valides** ; images et PDF reportés au pipeline média |
 | VS-03 | Stockage provisoire des articles validés (remplacé par PostgreSQL en Phase 1) | ✅ | 25/09/2026 — `@bgs/content-store` (interface + fichier JSON atomique, historique des versions) ; fusion FR/WO ; collecte réelle 8 FR + 8 WO, re-passage = 0 doublon |
 | VS-04 | API `GET /v1/news` (liste) et `GET /v1/news/:id` (détail), schémas partagés, cache HTTP | ✅ | 25/09/2026 — texte en blocs structurés (pas de HTML vers l'app), ETag + 304, stale-while-revalidate, filtre langue, pagination par curseur ; 37 tests API ; vérifié sur les 16 vrais articles |
-| VS-05 | Tour de directions visuelles Impeccable (univers de la marque) sur l'accueil / fil d'actualité | 🔴 | D-04, choix utilisateur |
-| VS-06 | App : fil d'actualité + écran article avec les vrais articles, attribution « Source : presidence.sn » + lien | 🔴 | |
+| VS-05 | Tour de directions visuelles Impeccable (univers de la marque) sur l'accueil / fil d'actualité | ✅ | 25/09/2026 — « le pagne tissé » (décision déléguée, decisions.md) |
+| VS-06 | App : fil d'actualité + écran article avec les vrais articles, attribution « Source : presidence.sn » + lien | 🔵 | 25/09/2026 — fonctionnel : 5 onglets, fil en bandes tissées, article en blocs natifs, hors ligne, « Dernière lecture » ; 28 tests ; rendu vérifié en aperçu web (clair/sombre/tablette). **Revue de finition Impeccable : « recapture »** → captures sur vrais appareils requises (QA-02) avant verdict et DESIGN.md |
 
 ## Ajouts en cours de route (suite)
 
@@ -119,3 +119,8 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 25/09/2026 | DM-01 ✅ Modèle de contenu : la date de publication de la source est une date sans heure → champ date calendaire (pas d'heure inventée) + horodatages du back-office | VS-01 |
 | 25/09/2026 | MED-01 🔴 Pipeline média : téléchargement des images et PDF de la source, variantes AVIF/WebP/JPEG, BlurHash, empreintes (articles publiés sans image en attendant) | VS-02 |
 | 25/09/2026 | WO-01 🔴 URL canonique des pages wolof à vérifier (le plan du site utilise `/wo/actualites/-1017`, l'API des slugs wolof) | VS-02 |
+| 25/09/2026 | QA-02 🔴 Captures sur vrais appareils (Android + iPhone, clair/sombre, grande police, bas d'un article avec la source) pour la revue de finition Impeccable ; option : émulateur Android (Android Studio, gratuit) | Revue VS-06 |
+| 25/09/2026 | QA-03 🔴 Vérifier sur appareil l'espace vide sous certaines bandes (mesure FlashList, peut-être propre à l'aperçu web) | Revue VS-06 |
+| 25/09/2026 | RESP-01 🔴 Grands écrans : deux volets liste + article, et rail de navigation (Material) au lieu de la barre du bas sur tablette | Revue VS-06 |
+| 25/09/2026 | PERF-03 🔴 Poids du bundle JS : 5,4 Mo (Hermes) ; gros postes : Sentry (~1,7 Mo source, dont replay inutilisé), Zod (~0,8 Mo) ; fixer le budget S1-03 et le contrôler en CI | VS-06 |
+| 25/09/2026 | DS-01 🔴 DESIGN.md (documenteur Impeccable) après verdict de la revue sur appareils | VS-06 |
