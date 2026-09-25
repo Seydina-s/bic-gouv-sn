@@ -1,19 +1,22 @@
-import type { NewsSummary } from "@bgs/shared-types";
 import { FlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
 import { useMemo } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { FeedHeader } from "../../features/news/FeedHeader";
-import { toIsoDay } from "../../features/news/format";
-import { NewsBand } from "../../features/news/NewsBand";
+import { useTabBarInset } from "../../components/GlassTabBar";
+import {
+  composeFrontPage,
+  COUNCIL_CATEGORY,
+  type FrontPageRow,
+} from "../../features/news/front-page";
+import { Masthead } from "../../features/news/Masthead";
+import { CouncilCard, LeadStory, StoryRow } from "../../features/news/Stories";
 import { useLastOpened } from "../../features/news/useLastOpened";
-import { useNewsFeed } from "../../features/news/useNews";
+import { useLatestIn, useNewsFeed } from "../../features/news/useNews";
 import { WovenIn } from "../../features/news/WovenIn";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 
-/** Only the first screenful is woven in; later bands appear directly while scrolling. */
+/** Only the first screenful is woven in; later stories appear directly while scrolling. */
 const ANIMATED_BANDS = 8;
 
 function Notice({
@@ -51,18 +54,21 @@ function Notice({
   );
 }
 
-/** Home: "la pièce du jour", the latest official news woven as bands. */
+/** Home: "La Une" of the official news, with the woven pagne motifs of each section. */
 export default function HomeScreen() {
   const { theme } = useTheme();
   const { t } = useTranslation();
-  const insets = useSafeAreaInsets();
+  const bottomInset = useTabBarInset();
   const router = useRouter();
   const feed = useNewsFeed();
+  const council = useLatestIn(COUNCIL_CATEGORY);
   const { lastOpened, markOpened } = useLastOpened();
-  const items = useMemo(() => feed.data?.pages.flatMap((page) => page.items) ?? [], [feed.data]);
+  const rows = useMemo(
+    () =>
+      composeFrontPage(feed.data?.pages.flatMap((page) => page.items) ?? [], council.data ?? null),
+    [feed.data, council.data],
+  );
   const { color, space } = theme;
-  const today = new Date();
-  const todayIso = toIsoDay(today);
 
   const open = (id: string) => {
     markOpened(id);
@@ -70,20 +76,23 @@ export default function HomeScreen() {
   };
 
   const header = (
-    <View style={{ paddingTop: insets.top }}>
-      <FeedHeader
-        todayCount={items.filter((item) => item.publishedOn === todayIso).length}
-        today={today}
-      />
-      {feed.isError && items.length > 0 && <Notice text={t("feed.offline")} />}
+    <View>
+      <Masthead today={new Date()} />
+      {feed.isError && rows.length > 0 && <Notice text={t("feed.offline")} />}
     </View>
   );
 
-  const renderItem = ({ item, index }: { item: NewsSummary; index: number }) => {
-    const band = (
-      <NewsBand item={item} lead={index === 0} lastOpened={item.id === lastOpened} onPress={open} />
-    );
-    return index < ANIMATED_BANDS ? <WovenIn index={index}>{band}</WovenIn> : band;
+  const renderItem = ({ item: row, index }: { item: FrontPageRow; index: number }) => {
+    const props = { item: row.item, lastOpened: row.item.id === lastOpened, onPress: open };
+    const story =
+      row.kind === "lead" ? (
+        <LeadStory {...props} />
+      ) : row.kind === "council" ? (
+        <CouncilCard item={row.item} onPress={open} />
+      ) : (
+        <StoryRow {...props} />
+      );
+    return index < ANIMATED_BANDS ? <WovenIn index={index}>{story}</WovenIn> : story;
   };
 
   const empty = feed.isPending ? (
@@ -103,9 +112,11 @@ export default function HomeScreen() {
       {/* Wide screens: one centred reading column (two-pane layout: task RESP-01). */}
       <View style={[styles.column, { maxWidth: theme.layout.readingMaxWidth + space.xxxl }]}>
         <FlashList
-          data={items}
-          keyExtractor={(item) => item.id}
+          data={rows}
+          keyExtractor={(row) => row.item.id}
+          getItemType={(row) => row.kind}
           renderItem={renderItem}
+          contentContainerStyle={{ paddingBottom: bottomInset }}
           ListHeaderComponent={header}
           ListEmptyComponent={empty}
           onEndReached={() => {
@@ -119,7 +130,10 @@ export default function HomeScreen() {
             ) : null
           }
           refreshing={feed.isRefetching && !feed.isFetchingNextPage}
-          onRefresh={() => void feed.refetch()}
+          onRefresh={() => {
+            void feed.refetch();
+            void council.refetch();
+          }}
           testID="news-feed"
         />
       </View>

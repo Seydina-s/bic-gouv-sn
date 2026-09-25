@@ -13,10 +13,9 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Icon } from "../../components/Icon";
 import { BlockRenderer } from "../../features/news/BlockRenderer";
-import { categoryLabelKey } from "../../features/news/category";
 import { CoverImage } from "../../features/news/CoverImage";
 import { formatPublishedOn } from "../../features/news/format";
-import { Selvage } from "../../features/news/Selvage";
+import { SectionTag } from "../../features/news/SectionTag";
 import { useNewsArticle } from "../../features/news/useNews";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
@@ -67,28 +66,24 @@ export default function ArticleScreen() {
           }}
         >
           {detail.cover !== null && (
+            // Full-bleed on phones, like the front page; framed in the reading column on wide screens.
             <CoverImage
               cover={detail.cover}
-              slotWidth={Math.min(windowWidth, layout.readingMaxWidth) - 2 * space.lg}
+              slotWidth={Math.min(windowWidth, layout.readingMaxWidth)}
               style={{
                 aspectRatio: layout.coverAspectRatio,
-                borderRadius: radius.md,
-                marginTop: space.sm,
-                marginBottom: space.md,
+                marginHorizontal: windowWidth > layout.readingMaxWidth ? 0 : -space.lg,
+                borderRadius: windowWidth > layout.readingMaxWidth ? radius.md : 0,
+                marginBottom: space.lg,
               }}
             />
           )}
-          <View style={[styles.sectionRow, { gap: space.sm, marginTop: space.sm }]}>
-            <View style={{ height: 16 }}>
-              <Selvage category={detail.category} color={color.primary} />
-            </View>
-            <Text style={[textStyle.caption, styles.caps, { color: color.textBrand }]}>
-              {t(categoryLabelKey(detail.category))}
-            </Text>
+          <View style={{ marginTop: detail.cover === null ? space.md : 0 }}>
+            <SectionTag category={detail.category} />
           </View>
           <Text
             accessibilityRole="header"
-            style={[textStyle.headline, { color: color.textPrimary, marginTop: space.md }]}
+            style={[textStyle.leadHeadline, { color: color.textPrimary, marginTop: space.md }]}
           >
             {detail.title}
           </Text>
@@ -136,8 +131,6 @@ export default function ArticleScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
-  sectionRow: { flexDirection: "row", alignItems: "center" },
-  caps: { textTransform: "uppercase", letterSpacing: 0.6 },
   source: { borderTopWidth: StyleSheet.hairlineWidth },
   sourceLink: { flexDirection: "row", alignItems: "center" },
 });

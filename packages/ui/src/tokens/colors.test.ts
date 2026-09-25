@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { contrastRatio, WCAG_AA } from "../color/contrast";
+import { composite, contrastRatio, withAlpha, WCAG_AA } from "../color/contrast";
+import { opacity } from "./scales";
 import { darkColors, lightColors, type SemanticColors } from "./colors";
 import { palette } from "./palette";
 
@@ -55,6 +56,33 @@ describe.each([
     for (const value of Object.values(colors)) {
       expect(paletteColors).toContain(value);
     }
+  });
+});
+
+describe.each([
+  ["light", lightColors],
+  ["dark", darkColors],
+] as const)("%s floating glass bar", (_scheme, colors) => {
+  // Worst cases: a pure white or pure black photo scrolling under the bar.
+  it.each(["#FFFFFF", "#000000"])("keeps tab labels readable over %s", (backdrop) => {
+    for (const alpha of [opacity.glass, opacity.glassOpaque]) {
+      const bar = composite(colors.glass, alpha, backdrop);
+      expect(contrastRatio(colors.textSecondary, bar)).toBeGreaterThanOrEqual(WCAG_AA.text);
+      expect(
+        contrastRatio(colors.onPrimaryContainer, colors.primaryContainer),
+      ).toBeGreaterThanOrEqual(WCAG_AA.text);
+    }
+  });
+});
+
+describe("withAlpha", () => {
+  it("turns a token into a translucent rgba color", () => {
+    expect(withAlpha("#00853F", 0.5)).toBe("rgba(0, 133, 63, 0.5)");
+    expect(() => withAlpha("red", 1)).toThrow();
+  });
+
+  it("composites like the screen does", () => {
+    expect(composite("#FFFFFF", 0.5, "#000000")).toBe("#808080");
   });
 });
 

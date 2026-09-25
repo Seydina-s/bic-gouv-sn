@@ -39,6 +39,10 @@ export const opacity = {
   pressed: 0.12,
   /** Scrim behind modals and sheets. */
   scrim: 0.6,
+  /** Frosted-glass bars where the system blurs what scrolls beneath (iOS). */
+  glass: 0.82,
+  /** Same bars without blur (Android: blur is too costly on entry-level GPUs). */
+  glassOpaque: 0.94,
 } as const;
 
 /**
@@ -54,6 +58,9 @@ export const fontFace = {
   bodyRegular: "Manrope_400Regular",
   bodySemibold: "Manrope_600SemiBold",
   bodyBold: "Manrope_700Bold",
+  /** Newspaper serif for headlines ("La Une", D-05): Literata, OFL, Wolof glyphs verified. */
+  serifSemibold: "Literata_600SemiBold",
+  serifBold: "Literata_700Bold",
 } as const;
 
 export interface TextStyle {
@@ -71,8 +78,12 @@ export interface TextStyle {
 export const textStyle = {
   display: { fontFamily: fontFace.displayExtrabold, fontSize: 34, lineHeight: 44 },
   headline: { fontFamily: fontFace.displayBold, fontSize: 28, lineHeight: 36 },
+  /** Front-page headline of the lead story. */
+  leadHeadline: { fontFamily: fontFace.serifBold, fontSize: 26, lineHeight: 34 },
   title: { fontFamily: fontFace.displaySemibold, fontSize: 22, lineHeight: 30 },
   subtitle: { fontFamily: fontFace.bodyBold, fontSize: 18, lineHeight: 26 },
+  /** Headline of a story in the list or a highlighted card. */
+  storyTitle: { fontFamily: fontFace.serifSemibold, fontSize: 18, lineHeight: 24 },
   body: { fontFamily: fontFace.bodyRegular, fontSize: 16, lineHeight: 24 },
   bodySmall: { fontFamily: fontFace.bodyRegular, fontSize: 14, lineHeight: 20 },
   label: { fontFamily: fontFace.bodySemibold, fontSize: 14, lineHeight: 20 },

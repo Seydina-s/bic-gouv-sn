@@ -16,6 +16,15 @@ export function useNewsFeed() {
   });
 }
 
+/** Newest story of one section (e.g. the latest Conseil des ministres for its card). */
+export function useLatestIn(category: string) {
+  const { lang } = useTranslation();
+  return useQuery({
+    queryKey: ["news", lang, "latest", category],
+    queryFn: ({ signal }) => client.latestIn(lang, category, signal),
+  });
+}
+
 export function useNewsArticle(id: string) {
   const { lang } = useTranslation();
   return useQuery({

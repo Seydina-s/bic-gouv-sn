@@ -1,9 +1,10 @@
-import { View } from "react-native";
+import { View, type DimensionValue } from "react-native";
 import Svg, { Circle, Defs, Line, Path, Pattern, Rect } from "react-native-svg";
 
 /**
- * Woven selvage on the leading edge of each news band. Each section has its own
- * pattern, so the section can be told apart without relying on colour alone.
+ * Pagne tissé motifs, kept in the "La Une" direction (D-05). Each section has its
+ * own woven pattern, so the section can be told apart without relying on colour
+ * alone. Always decorative: never behind text, hidden from screen readers.
  */
 export const SELVAGE_WIDTH = 6;
 
@@ -30,23 +31,54 @@ const PATTERNS: Record<string, Draw> = {
 
 const PLAIN: Draw = (c) => <Line x1={3} y1={0} x2={3} y2={8} stroke={c} strokeWidth={1.2} />;
 
-export function Selvage({ category, color }: { category: string; color: string }) {
+interface WeaveProps {
+  category: string;
+  color: string;
+  width: DimensionValue;
+  height: DimensionValue;
+  /** Lays the pattern sideways, for a horizontal strip. */
+  sideways?: boolean;
+}
+
+/** The section's woven pattern filling a box. */
+function Weave({ category, color, width, height, sideways = false }: WeaveProps) {
   const draw = PATTERNS[category] ?? PLAIN;
-  const id = `selvage-${category}`;
+  const id = `weave-${category}-${sideways ? "h" : "v"}`;
   return (
     <View
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
-      style={{ width: SELVAGE_WIDTH }}
+      style={{ width, height }}
     >
-      <Svg width={SELVAGE_WIDTH} height="100%">
+      <Svg width="100%" height="100%">
         <Defs>
-          <Pattern id={id} width={SELVAGE_WIDTH} height={TILE} patternUnits="userSpaceOnUse">
+          <Pattern
+            id={id}
+            width={SELVAGE_WIDTH}
+            height={TILE}
+            patternUnits="userSpaceOnUse"
+            {...(sideways ? { patternTransform: "rotate(-90)" } : {})}
+          >
             {draw(color)}
           </Pattern>
         </Defs>
-        <Rect width={SELVAGE_WIDTH} height="100%" fill={`url(#${id})`} />
+        <Rect width="100%" height="100%" fill={`url(#${id})`} />
       </Svg>
     </View>
   );
+}
+
+/** Woven selvage along the leading edge of a story. */
+export function Selvage({ category, color }: { category: string; color: string }) {
+  return <Weave category={category} color={color} width={SELVAGE_WIDTH} height="100%" />;
+}
+
+/** Horizontal woven stripe, e.g. across the top of a highlighted card. */
+export function WovenStrip({ category, color }: { category: string; color: string }) {
+  return <Weave category={category} color={color} width="100%" height={SELVAGE_WIDTH} sideways />;
+}
+
+/** Small woven chip set before a section name: the pattern names the section. */
+export function WovenSwatch({ category, color }: { category: string; color: string }) {
+  return <Weave category={category} color={color} width={SELVAGE_WIDTH * 2} height={TILE * 1.5} />;
 }

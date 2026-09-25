@@ -3,6 +3,7 @@ import type { ArticleRepository } from "@bgs/content-store";
 import {
   apiErrorSchema,
   langSchema,
+  slugSchema,
   newsDetailSchema,
   newsListResponseSchema,
   type ErrorCode,
@@ -51,16 +52,20 @@ export const newsRoutes: FastifyPluginAsyncZod<NewsRoutesOptions> = (
           lang: langSchema.default("fr"),
           limit: z.coerce.number().int().min(1).max(50).default(20),
           cursor: z.uuid().optional(),
+          /** Only this section, e.g. the latest Conseil des ministres. */
+          category: slugSchema.optional(),
         }),
         response: { 200: newsListResponseSchema, 304: z.null() },
       },
     },
     async (request, reply) => {
-      const { lang, limit, cursor } = request.query;
-      const page = await articles.list({ lang, limit, cursor });
+      const { lang, limit, cursor, category } = request.query;
+      const page = await articles.list({ lang, limit, cursor, category });
       const media = mediaBaseUrlFor(request, mediaBaseUrl);
       const items = page.items.flatMap((article) => toSummary(article, lang, media) ?? []);
-      const fingerprint = [lang, cursor, media, ...page.items.map(freshnessKey)].join("|");
+      const fingerprint = [lang, cursor, category, media, ...page.items.map(freshnessKey)].join(
+        "|",
+      );
       return sendCached(request, reply, fingerprint, { items, nextCursor: page.nextCursor });
     },
   );
