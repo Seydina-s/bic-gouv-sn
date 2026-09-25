@@ -138,3 +138,6 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 25/09/2026 | PERF-04 🔴 Sous-ensemble des polices (Literata ≈ 500 Ko pour 2 graisses) | UI-01 |
 | 25/09/2026 | QA-02 🔵 Premières captures iPhone reçues (thème sombre OK, faux « Hors ligne » → BUG-02 corrigé) | Utilisateur |
 | 25/09/2026 | CI-01 ⏸ Dépôt public : historique nettoyé localement (e-mail remplacé, sauvegarde faite) ; renommage de l'ancien dépôt, création du nouveau et push à faire par l'utilisateur (action bloquée par les permissions) | Utilisateur |
+| 25/09/2026 | CI-01 ✅ Dépôt public sécurisé (nouveau dépôt, historique nettoyé, ancien dépôt archivé en privé ; protection de main, analyse des secrets avec blocage, Dependabot, signalement privé, actions épinglées, approbation des contributions externes) | Utilisateur |
+| 25/09/2026 | MON-01 🔵 Sentry : DSN API et mobile configurés localement (`.env.local`, non versionnés), message de test reçu côté API ; plugin Expo + Metro prêts pour les source maps ; reste : `SENTRY_AUTH_TOKEN` en secret GitHub (utilisateur) puis secrets EAS au premier build (A-02), DSN côté hébergement (S1-02) | Utilisateur |
+| 25/09/2026 | L-02 (ajout) Licence du code à décider avec le BIC (aucune licence libre pour l'instant) | CI-01 |
