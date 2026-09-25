@@ -1,4 +1,4 @@
-import type { Block, Inline } from "@bgs/shared-types";
+import { officialMediaUrl, type Block, type Inline } from "@bgs/shared-types";
 import { isTag, isText, type ChildNode, type Element } from "domhandler";
 import { parseDocument } from "htmlparser2";
 
@@ -67,18 +67,13 @@ function nonEmpty(value: string | undefined): string | null {
   return trimmed === "" ? null : trimmed;
 }
 
+/**
+ * Only images hosted by an official source are kept (images pasted from social
+ * networks would expose readers to third parties and are not official content).
+ */
 function imageBlock(element: Element): Block[] {
-  const src = element.attribs["src"];
-  if (src?.startsWith("https://") !== true) {
-    return [];
-  }
-  return [
-    {
-      type: "image",
-      src: src.replace(/([^:])\/{2,}/g, "$1/"),
-      alt: nonEmpty(element.attribs["alt"]),
-    },
-  ];
+  const src = officialMediaUrl(element.attribs["src"] ?? "");
+  return src === null ? [] : [{ type: "image", src, alt: nonEmpty(element.attribs["alt"]) }];
 }
 
 /** Images nested in a paragraph become their own blocks, around the text. */

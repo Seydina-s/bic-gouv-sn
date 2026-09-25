@@ -53,10 +53,18 @@ describe("htmlToBlocks", () => {
     ]);
   });
 
-  it("ignores images without an HTTPS source and uses null for a missing alt", () => {
+  it("keeps only official HTTPS images and uses null for a missing alt", () => {
     expect(
-      htmlToBlocks('<img src="http://a.test/x.jpg" /><img src="https://a.test/y.jpg" />'),
-    ).toEqual([{ type: "image", src: "https://a.test/y.jpg", alt: null }]);
+      htmlToBlocks(
+        [
+          '<img src="http://bo-admin.presidence.sn/x.jpg" />',
+          '<img src="https://static.xx.fbcdn.net/images/emoji.png" />',
+          '<img src="https://bo.presidence.sn/uploads/images/y.jpg" />',
+        ].join(""),
+      ),
+    ).toEqual([
+      { type: "image", src: "https://bo-admin.presidence.sn/uploads/images/y.jpg", alt: null },
+    ]);
   });
 
   it("handles headings, lists, quotes and loose text", () => {

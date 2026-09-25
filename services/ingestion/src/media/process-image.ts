@@ -59,6 +59,8 @@ export interface ProcessImageInput {
   /** Source URL of the image (traceability, and the stable storage folder). */
   sourceUrl: string;
   alt: string | null;
+  /** Cover of the article or image placed in its text. */
+  role: Image["role"];
 }
 
 /**
@@ -68,7 +70,7 @@ export interface ProcessImageInput {
  * Idempotent: the storage folder is derived from the source URL.
  */
 export async function processImage(
-  { original, sourceUrl, alt }: ProcessImageInput,
+  { original, sourceUrl, alt, role }: ProcessImageInput,
   storage: MediaStorage,
 ): Promise<{ image: Image; lowestSsim: number }> {
   const folder = `images/${createHash("sha256").update(sourceUrl).digest("hex").slice(0, 20)}`;
@@ -94,6 +96,7 @@ export async function processImage(
   }
 
   const image = imageSchema.parse({
+    role,
     originalUrl: sourceUrl,
     originalKey,
     width,

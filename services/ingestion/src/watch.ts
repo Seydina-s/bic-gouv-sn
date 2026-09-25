@@ -2,6 +2,7 @@ import type { ArticleRepository, SaveOutcome } from "@bgs/content-store";
 import { errorCodeOf, type Lang } from "@bgs/shared-types";
 import type { CollectionReport } from "./collect";
 import { attachCover } from "./media/attach-cover";
+import { attachInlineImages } from "./media/attach-inline";
 import type { MediaStorage } from "./media/media-storage";
 import { mergeArticle } from "./merge";
 import type { SourceArticleRef, SourceProvider } from "./sources/source-provider";
@@ -68,6 +69,15 @@ export async function pollOnce(
           // Throws MediaProcessingError: the article stays saved but the ref is not
           // remembered, so the cover is retried on the next pass.
           await attachCover(ref, provider, repository, media);
+          // Images in the text: failures are reported but never block the article;
+          // the inline-images job picks them up again.
+          const saved = await repository.get(provider.articleIdFor(ref));
+          if (saved !== null) {
+            const inline = await attachInlineImages(saved, provider, repository, media);
+            for (const failure of inline.failures) {
+              result.failures.push({ ref: ref.slug, code: failure.code, message: failure.message });
+            }
+          }
         }
         seen.remember(ref);
       } catch (error) {

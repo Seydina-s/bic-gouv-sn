@@ -1,11 +1,11 @@
-import type { Lang, NewsArticle } from "@bgs/shared-types";
+import { officialMediaUrl, type Lang, type NewsArticle } from "@bgs/shared-types";
 import { CircuitBreaker, createResilientCall } from "@bgs/resilience";
 import type { z } from "zod";
 import { QuarantineError, SourceUnreachableError } from "../../lib/errors";
 import { createRateLimiter } from "../../lib/rate-limiter";
 import type { SourceArticleRef, SourceProvider } from "../source-provider";
 import { detailResponseSchema, listResponseSchema } from "./api-schemas";
-import { normalizeDetail, normalizeMediaUrl, presidenceArticleId } from "./normalize";
+import { normalizeDetail, presidenceArticleId } from "./normalize";
 
 export const PRESIDENCE_API = "https://bo-admin.presidence.sn/api/front";
 
@@ -87,7 +87,7 @@ export function createPresidenceProvider({
           slug: item.slug,
           lang,
           sourceUpdatedAt: item.updated_at,
-          coverSourceUrl: item.image === null ? null : normalizeMediaUrl(item.image),
+          coverSourceUrl: item.image === null ? null : officialMediaUrl(item.image),
         })),
       };
     },

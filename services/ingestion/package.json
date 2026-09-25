@@ -9,6 +9,7 @@
     "backfill": "tsx src/cli/backfill.ts",
     "watch": "tsx src/cli/watch.ts",
     "covers": "tsx src/cli/backfill-covers.ts",
+    "inline-images": "tsx src/cli/inline-images.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --coverage"
   },

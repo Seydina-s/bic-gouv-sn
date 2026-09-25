@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { officialSourceUrlSchema } from "./official-source.schema";
+import { officialMediaUrl, officialSourceUrlSchema } from "./official-source.schema";
 
 describe("officialSourceUrlSchema", () => {
   it.each([
@@ -18,5 +18,28 @@ describe("officialSourceUrlSchema", () => {
     "not a url",
   ])("rejects non-official source %s", (url) => {
     expect(officialSourceUrlSchema.safeParse(url).success).toBe(false);
+  });
+});
+
+describe("officialMediaUrl", () => {
+  it("keeps official media and collapses the doubled slashes of the source", () => {
+    expect(officialMediaUrl("https://bo-admin.presidence.sn//storage/image/a.jpg")).toBe(
+      "https://bo-admin.presidence.sn/storage/image/a.jpg",
+    );
+  });
+
+  it("moves the former media host (invalid certificate) to the current one", () => {
+    expect(officialMediaUrl("https://bo.presidence.sn/uploads/images/x.png")).toBe(
+      "https://bo-admin.presidence.sn/uploads/images/x.png",
+    );
+  });
+
+  it.each([
+    ["a social network image", "https://static.xx.fbcdn.net/images/emoji.png"],
+    ["plain http", "http://bo-admin.presidence.sn/a.jpg"],
+    ["a look-alike domain", "https://bo-admin.presidence.sn.example.com/a.jpg"],
+    ["not a URL", "not a url"],
+  ])("refuses %s", (_label, url) => {
+    expect(officialMediaUrl(url)).toBeNull();
   });
 });

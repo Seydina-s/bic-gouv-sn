@@ -18,6 +18,28 @@ import { translationStatusSchema } from "../content/translation.schema";
  * reads responses through tolerant-reader.ts (unknown blocks and formats dropped).
  */
 
+/**
+ * Photo as lighter variants of the official image (cover, or image in the text).
+ * The app picks the smallest source wide enough for its slot, and shows the
+ * BlurHash while loading.
+ */
+export const coverSchema = z.object({
+  width: z.int().positive(),
+  height: z.int().positive(),
+  blurhash: z.string().min(6),
+  sources: z
+    .array(
+      z.object({
+        format: z.enum(["avif", "webp", "jpeg"]),
+        width: z.int().positive(),
+        /** https in production; plain http only on a local development network. */
+        url: z.url({ protocol: /^https?$/ }),
+      }),
+    )
+    .min(1),
+});
+export type Cover = z.infer<typeof coverSchema>;
+
 export const inlineSchema = z.object({
   text: z.string(),
   bold: z.boolean().optional(),
@@ -38,30 +60,16 @@ export const blockSchema = z.discriminatedUnion("type", [
   }),
   z.object({ type: z.literal("list"), ordered: z.boolean(), items: z.array(inlines).min(1) }),
   z.object({ type: z.literal("quote"), inlines }),
-  z.object({ type: z.literal("image"), src: httpsUrlSchema, alt: z.string().nullable() }),
+  z.object({
+    type: z.literal("image"),
+    /** Official source image (traceability, fallback when no stored copy exists). */
+    src: httpsUrlSchema,
+    alt: z.string().nullable(),
+    /** Our lighter stored copies, when the ingestion has processed this image. */
+    media: coverSchema.optional(),
+  }),
 ]);
 export type Block = z.infer<typeof blockSchema>;
-
-/**
- * Cover photo, as lighter variants of the official image. The app picks the
- * smallest source wide enough for its slot, and shows the BlurHash while loading.
- */
-export const coverSchema = z.object({
-  width: z.int().positive(),
-  height: z.int().positive(),
-  blurhash: z.string().min(6),
-  sources: z
-    .array(
-      z.object({
-        format: z.enum(["avif", "webp", "jpeg"]),
-        width: z.int().positive(),
-        /** https in production; plain http only on a local development network. */
-        url: z.url({ protocol: /^https?$/ }),
-      }),
-    )
-    .min(1),
-});
-export type Cover = z.infer<typeof coverSchema>;
 
 /** One article in a feed, in the requested language. */
 export const newsSummarySchema = z.object({

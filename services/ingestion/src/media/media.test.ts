@@ -8,6 +8,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { articleContentHash } from "../merge";
 import type { SourceArticleRef, SourceProvider } from "../sources/source-provider";
 import { attachCover } from "./attach-cover";
+import { attachInlineImages, inlineImageUrls } from "./attach-inline";
+import { backfillInlineImages } from "./backfill-inline";
 import { backfillCovers } from "./backfill-covers";
 import { FileMediaStorage, type MediaStorage } from "./media-storage";
 import { SSIM_FLOOR, processImage } from "./process-image";
@@ -61,7 +63,7 @@ describe("processImage", () => {
     const storage = new MemoryMediaStorage();
     const original = await testPhoto(1200, 800);
     const { image, lowestSsim } = await processImage(
-      { original, sourceUrl: SOURCE_URL, alt: null },
+      { original, sourceUrl: SOURCE_URL, alt: null, role: "cover" },
       storage,
     );
 
@@ -86,7 +88,12 @@ describe("processImage", () => {
   it("never upscales a small image and keeps a PNG original as PNG", async () => {
     const storage = new MemoryMediaStorage();
     const { image } = await processImage(
-      { original: await testPhoto(300, 200, "png"), sourceUrl: SOURCE_URL, alt: "Légende" },
+      {
+        original: await testPhoto(300, 200, "png"),
+        sourceUrl: SOURCE_URL,
+        alt: "Légende",
+        role: "inline",
+      },
       storage,
     );
     expect(image.originalKey).toMatch(/original\.png$/);
@@ -98,8 +105,14 @@ describe("processImage", () => {
     const storage = new MemoryMediaStorage();
     const put = vi.spyOn(storage, "put");
     const original = await testPhoto(500, 300);
-    const first = await processImage({ original, sourceUrl: SOURCE_URL, alt: null }, storage);
-    const second = await processImage({ original, sourceUrl: SOURCE_URL, alt: null }, storage);
+    const first = await processImage(
+      { original, sourceUrl: SOURCE_URL, alt: null, role: "cover" },
+      storage,
+    );
+    const second = await processImage(
+      { original, sourceUrl: SOURCE_URL, alt: null, role: "cover" },
+      storage,
+    );
     expect(second.image).toEqual(first.image);
     const originalWrites = put.mock.calls.filter(([key]) => key === first.image.originalKey);
     expect(originalWrites).toHaveLength(1);
@@ -273,5 +286,84 @@ describe("attachCover", () => {
       "no-cover",
     );
     expect(await attachCover(ref, provider, repo, storage)).toBe("unknown-article");
+  });
+});
+
+describe("images placed in the text", () => {
+  let dir: string;
+  let repo: FileArticleRepository;
+  const inlineA = "https://bo-admin.presidence.sn/storage/image/actualites/a.jpg";
+  const inlineB = "https://bo-admin.presidence.sn/uploads/images/b.png";
+
+  function withBody(bodyHtml: string): NewsArticle {
+    const base = storedArticle();
+    const translations = base.translations.map((translation) => ({ ...translation, bodyHtml }));
+    return { ...base, translations };
+  }
+
+  const body = [
+    `<p>Texte</p><img src="https://bo-admin.presidence.sn//storage/image/actualites/a.jpg" />`,
+    `<img src="https://bo.presidence.sn/uploads/images/b.png" alt="" />`,
+    `<img src="https://static.xx.fbcdn.net/images/emoji.png" />`,
+    `<img src="https://bo-admin.presidence.sn/storage/image/actualites/a.jpg" />`,
+  ].join("");
+
+  beforeEach(async () => {
+    dir = await mkdtemp(join(tmpdir(), "bgs-inline-"));
+    repo = new FileArticleRepository(join(dir, "news.json"));
+  });
+  afterEach(async () => {
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  function provider(download: SourceProvider["downloadMedia"]): SourceProvider {
+    return {
+      articleIdFor: () => ID,
+      downloadMedia: download,
+      listPage: () => Promise.reject(new Error("unused")),
+      fetchArticle: () => Promise.reject(new Error("unused")),
+    };
+  }
+
+  it("lists official images once, moving the former host and skipping social networks", () => {
+    expect(inlineImageUrls(withBody(body))).toEqual([inlineA, inlineB]);
+  });
+
+  it("stores each image, isolates a failing one, and keeps the cover", async () => {
+    const photo = await testPhoto(600, 400);
+    await repo.save(withBody(body));
+    const storage = new MemoryMediaStorage();
+    const download = vi.fn((url: string) =>
+      url === inlineB ? Promise.reject(new Error("404")) : Promise.resolve(photo),
+    );
+    const first = await attachInlineImages(withBody(body), provider(download), repo, storage);
+    expect(first.attached).toBe(1);
+    expect(first.failures.map((failure) => failure.code)).toEqual(["MEDIA_PROCESSING_FAILED"]);
+
+    const withCover: SourceArticleRef = {
+      sourceId: 1,
+      slug: "test",
+      lang: "fr",
+      sourceUpdatedAt: "",
+      coverSourceUrl: SOURCE_URL,
+    };
+    await attachCover(withCover, provider(download), repo, storage);
+    const images = (await repo.get(ID))?.images ?? [];
+    expect(images.map((image) => `${image.role}:${image.originalUrl}`)).toEqual([
+      `cover:${SOURCE_URL}`,
+      `inline:${inlineA}`,
+    ]);
+  });
+
+  it("resumes over the whole store without downloading stored images again", async () => {
+    const photo = await testPhoto(600, 400);
+    await repo.save(withBody(body));
+    const download = vi.fn(() => Promise.resolve(photo));
+    const storage = new MemoryMediaStorage();
+    const first = await backfillInlineImages(provider(download), repo, storage);
+    expect(first).toMatchObject({ articles: 1, attached: 2, failures: [] });
+    const again = await backfillInlineImages(provider(download), repo, storage);
+    expect(again.attached).toBe(0);
+    expect(download).toHaveBeenCalledTimes(2);
   });
 });

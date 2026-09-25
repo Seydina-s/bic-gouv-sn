@@ -1,9 +1,10 @@
 import type { Block, Inline } from "@bgs/shared-types";
 import { Image } from "expo-image";
 import { useState } from "react";
-import { Linking, StyleSheet, Text, View, type TextStyle } from "react-native";
+import { Linking, StyleSheet, Text, View, useWindowDimensions, type TextStyle } from "react-native";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
+import { CoverImage } from "./CoverImage";
 
 function Runs({ inlines }: { inlines: Inline[] }) {
   const { theme } = useTheme();
@@ -30,10 +31,28 @@ function Runs({ inlines }: { inlines: Inline[] }) {
   });
 }
 
-function ArticleImage({ src, alt }: { src: string; alt: string | null }) {
+type ImageBlock = Extract<Block, { type: "image" }>;
+
+/** Image in the text: our stored lighter copies when available, else the official file. */
+function ArticleImage({ block }: { block: ImageBlock }) {
   const { theme } = useTheme();
   const { t } = useTranslation();
+  const { width } = useWindowDimensions();
   const [ratio, setRatio] = useState(16 / 9);
+  const { src, alt, media } = block;
+  if (media !== undefined) {
+    return (
+      <CoverImage
+        cover={media}
+        slotWidth={Math.min(width, theme.layout.readingMaxWidth)}
+        label={alt ?? t("article.image")}
+        style={[
+          styles.image,
+          { aspectRatio: media.width / media.height, borderRadius: theme.radius.md },
+        ]}
+      />
+    );
+  }
   return (
     <Image
       source={{ uri: src }}
@@ -105,7 +124,7 @@ export function BlockRenderer({ blocks }: { blocks: Block[] }) {
       case "image":
         return (
           <View key={key} style={{ marginBottom: space.lg }}>
-            <ArticleImage src={block.src} alt={block.alt} />
+            <ArticleImage block={block} />
           </View>
         );
     }

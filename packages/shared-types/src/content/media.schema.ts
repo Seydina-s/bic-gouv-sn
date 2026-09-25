@@ -18,6 +18,8 @@ export const imageVariantSchema = z.strictObject({
 
 export const imageSchema = z
   .strictObject({
+    /** Cover of the article, or an image placed inside its text. Stored before: cover. */
+    role: z.enum(["cover", "inline"]).default("cover"),
     /** Original image URL on the source site (traceability). */
     originalUrl: httpsUrlSchema,
     /** The original file as downloaded, kept untouched in storage. */

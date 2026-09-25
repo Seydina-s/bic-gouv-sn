@@ -1,4 +1,12 @@
-import type { Cover, Lang, NewsArticle, NewsDetail, NewsSummary } from "@bgs/shared-types";
+import type {
+  Block,
+  Cover,
+  Image,
+  Lang,
+  NewsArticle,
+  NewsDetail,
+  NewsSummary,
+} from "@bgs/shared-types";
 import { excerptOf, htmlToBlocks } from "./html-to-blocks";
 
 function translationIn(article: NewsArticle, lang: Lang) {
@@ -9,12 +17,8 @@ function availableLangs(article: NewsArticle): Lang[] {
   return article.translations.map((translation) => translation.lang).sort();
 }
 
-/** Public cover of an article: its first image, with URLs under `mediaBaseUrl`. */
-export function coverOf(article: NewsArticle, mediaBaseUrl: string): Cover | null {
-  const image = article.images[0];
-  if (image === undefined) {
-    return null;
-  }
+/** A stored image as the public API shows it, with URLs under `mediaBaseUrl`. */
+function presentImage(image: Image, mediaBaseUrl: string): Cover {
   return {
     width: image.width,
     height: image.height,
@@ -25,6 +29,21 @@ export function coverOf(article: NewsArticle, mediaBaseUrl: string): Cover | nul
       url: `${mediaBaseUrl}/${key}`,
     })),
   };
+}
+
+/** Public cover of an article, or null when it has none. */
+export function coverOf(article: NewsArticle, mediaBaseUrl: string): Cover | null {
+  const cover = article.images.find((image) => image.role === "cover");
+  return cover === undefined ? null : presentImage(cover, mediaBaseUrl);
+}
+
+/** Article blocks where each image we stored points to our lighter copies. */
+function blocksOf(article: NewsArticle, bodyHtml: string, mediaBaseUrl: string): Block[] {
+  const stored = new Map(article.images.map((image) => [image.originalUrl, image]));
+  return htmlToBlocks(bodyHtml).map((block) => {
+    const image = block.type === "image" ? stored.get(block.src) : undefined;
+    return image === undefined ? block : { ...block, media: presentImage(image, mediaBaseUrl) };
+  });
 }
 
 /** Feed entry in `lang`, or null when the article has no version in that language. */
@@ -69,7 +88,7 @@ export function toDetail(
     translationStatus: translation.status,
     availableLangs: availableLangs(article),
     cover: coverOf(article, mediaBaseUrl),
-    blocks: htmlToBlocks(translation.bodyHtml),
+    blocks: blocksOf(article, translation.bodyHtml, mediaBaseUrl),
     sourceUrl: translation.sourceUrl ?? article.sourceUrl,
     sourceUpdatedAt: article.sourceUpdatedAt,
     fetchedAt: article.fetchedAt,
@@ -78,9 +97,9 @@ export function toDetail(
 }
 
 /**
- * What makes a cached response stale: the words (content hash) and the cover,
- * which is attached after the article without changing its content hash.
+ * What makes a cached response stale: the words (content hash) and the images,
+ * which are attached after the article without changing its content hash.
  */
 export function freshnessKey(article: NewsArticle): string {
-  return `${article.contentHash}:${article.images[0]?.originalKey ?? "-"}`;
+  return [article.contentHash, ...article.images.map((image) => image.originalKey)].join(":");
 }
