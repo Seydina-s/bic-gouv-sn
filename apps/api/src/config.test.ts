@@ -9,6 +9,7 @@ describe("loadConfig", () => {
       PORT: 3000,
       LOG_LEVEL: "info",
       SHUTDOWN_TIMEOUT_MS: 10_000,
+      RATE_LIMIT_PER_MINUTE: 600,
       NEWS_STORE_PATH: ".data/news.json",
       SENTRY_TRACES_SAMPLE_RATE: 0.02,
     });

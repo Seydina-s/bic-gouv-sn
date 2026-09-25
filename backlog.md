@@ -74,7 +74,7 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 24/09/2026 | A-02 🔴 Identifiant de publication de l'app (ex. `sn.gouv.bic…`) à valider avec le BIC avant tout build de store | F-07 |
 | 24/09/2026 | PERF-01 🔴 Expo Router embarque une police d'icônes Material Symbols de 967 Ko : vérifier si elle peut être exclue (budget de poids S1-03) | F-07 |
 | 24/09/2026 | SEC-01 🔴 Revérifier `pnpm audit` à chaque mise à jour du SDK Expo (decode-uri-component via expo-router, uuid via xcode) ; bloquer en CI toute vulnérabilité haute/critique | F-08 |
-| 24/09/2026 | API-01 🔴 Ajouter rate limiting, en-têtes de sécurité et sonde de disponibilité (readiness) quand la base de données arrivera | F-08 |
+| 24/09/2026 | API-01 ✅ (25/09) Limitation de débit (600/min/adresse, CGNAT), en-têtes de sécurité (CSP stricte en production), sonde `/v1/health/ready` ; 43 tests API | F-08 |
 | 24/09/2026 | D-01 ✅ Audit des tokens de design + corrections (docs/design/audit-tokens-2026-09-24.md) | Demande utilisateur |
 | 24/09/2026 | D-02 🔴 `/impeccable init` (PRODUCT.md + DESIGN.md) au début de la prochaine session | Audit D-01 |
 | 24/09/2026 | D-03 🔴 Réparer l'installation de ui-ux-pro-max (dossiers data/scripts = liens cassés) + Python pour ses scripts | Audit D-01 |
@@ -124,3 +124,5 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 25/09/2026 | RESP-01 🔴 Grands écrans : deux volets liste + article, et rail de navigation (Material) au lieu de la barre du bas sur tablette | Revue VS-06 |
 | 25/09/2026 | PERF-03 🔴 Poids du bundle JS : 5,4 Mo (Hermes) ; gros postes : Sentry (~1,7 Mo source, dont replay inutilisé), Zod (~0,8 Mo) ; fixer le budget S1-03 et le contrôler en CI | VS-06 |
 | 25/09/2026 | DS-01 🔴 DESIGN.md (documenteur Impeccable) après verdict de la revue sur appareils | VS-06 |
+| 25/09/2026 | AUD-03 ✅ (partiel) CSP de l'admin active (vérifiée sur build de production) ; règle maintenue : pas de déploiement public de l'admin avant 2FA (Phase 4) | Audit Sprint 0 |
+| 25/09/2026 | SEC-03 🔴 Admin : CSP à nonce (supprimer `'unsafe-inline'` des scripts) via le proxy Next.js | AUD-03 |
