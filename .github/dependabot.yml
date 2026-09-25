@@ -6,39 +6,30 @@ updates:
       interval: weekly
     open-pull-requests-limit: 5
     groups:
-      # Expo pins its own versions: upgrade them together with `expo install --fix`.
-      expo:
-        patterns: ["expo", "expo-*", "@expo/*", "react-native", "react-native-*"]
       tooling:
         patterns: ["eslint*", "@eslint/*", "typescript-eslint", "prettier", "vitest", "@vitest/*"]
     ignore:
-      # Versions chosen by the Expo SDK (React must match the renderer inside
-      # react-native, or the app crashes at launch; tests do not catch it). Only
-      # patches arrive here; minor/major move with an SDK upgrade (`expo install --fix`).
+      # Versions chosen by the Expo SDK: they move only with an SDK upgrade
+      # (`expo install --fix`, task UPG-01), never one by one. React must equal the
+      # renderer version inside react-native exactly, or the app crashes at launch
+      # (tests do not catch it). Known vulnerabilities are still caught by the
+      # `pnpm audit` step of CI.
       - dependency-name: "expo"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
       - dependency-name: "expo-*"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
       - dependency-name: "@expo/*"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "@expo-google-fonts/*"
       - dependency-name: "react-native"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
       - dependency-name: "react-native-*"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
-      - dependency-name: "react"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
-      - dependency-name: "react-dom"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
-      - dependency-name: "@types/react*"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
-      - dependency-name: "jest"
-        update-types: ["version-update:semver-major"]
-      - dependency-name: "@types/jest"
-        update-types: ["version-update:semver-major"]
-      - dependency-name: "jest-expo"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "@react-native/*"
+      - dependency-name: "@react-native-async-storage/*"
+      - dependency-name: "@shopify/flash-list"
       - dependency-name: "@sentry/react-native"
-        update-types: ["version-update:semver-major"]
+      - dependency-name: "react"
+      - dependency-name: "react-dom"
+      - dependency-name: "@types/react*"
+      - dependency-name: "jest"
+      - dependency-name: "@types/jest"
+      - dependency-name: "jest-expo"
       # Types follow the Node.js runtime of the project (24).
       - dependency-name: "@types/node"
         update-types: ["version-update:semver-major"]
