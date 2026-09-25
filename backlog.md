@@ -144,3 +144,5 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 25/09/2026 | UPG-01 🔴 Montée vers Expo SDK 58 (react-native 0.87, expo-router 58, React et Jest alignés, Sentry RN 8) d'un bloc avec `expo install --fix`, puis tests sur appareils | Dependabot #1-#5 |
 | 25/09/2026 | MED-02a ✅ Images du texte stockées chez nous (variantes, SSIM, BlurHash, rôle « inline »), API qui pointe vers nos copies, app qui les affiche avec leur description ; images hors sources officielles (réseaux sociaux) écartées ; ancienne adresse bo.presidence.sn (certificat invalide) remplacée par bo-admin.presidence.sn ; import de l'historique lancé. PDF : MED-02b | MED-02 |
 | 25/09/2026 | MED-02b 🔴 PDF officiels (4 liens dans l'historique) stockés chez nous avec empreinte, taille et titre | MED-02 |
+| 25/09/2026 | BUG-03 ✅ Fichier des articles remis à zéro par une coupure (écriture sans fsync) : écriture durable + copie de secours, médias contrôlés, reconstruction lancée (voir ERREURS.md) | Incident |
+| 25/09/2026 | DATA-01 🔴 Sauvegardes : en attendant PostgreSQL (sauvegardes automatiques), copie quotidienne de `.data/` hors de la machine | BUG-03 |

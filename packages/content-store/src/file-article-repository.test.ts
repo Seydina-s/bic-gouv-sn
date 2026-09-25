@@ -125,6 +125,16 @@ describe("FileArticleRepository", () => {
     expect((await repo.list({ lang: "fr", limit: 5 })).items).toHaveLength(1);
   });
 
+  it("survives a main file zeroed by a power cut, thanks to its backup (25/09/2026)", async () => {
+    const path = join(dir, "news.json");
+    const store = new FileArticleRepository(path);
+    await store.save(article(1));
+    await writeFile(path, Buffer.alloc(4096));
+    expect((await store.get(article(1).id))?.id).toBe(article(1).id);
+    await store.save(article(2));
+    expect((await new FileArticleRepository(path).list({ limit: 5 })).items).toHaveLength(2);
+  });
+
   it("refuses a corrupted store instead of serving bad data", async () => {
     const path = join(dir, "broken.json");
     await writeFile(path, JSON.stringify({ schemaVersion: 1, articles: { x: { current: {} } } }));

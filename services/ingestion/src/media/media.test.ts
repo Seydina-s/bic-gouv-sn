@@ -30,8 +30,8 @@ function testPhoto(width: number, height: number, format: "jpeg" | "png" = "jpeg
 
 class MemoryMediaStorage implements MediaStorage {
   readonly files = new Map<string, Buffer>();
-  exists(key: string) {
-    return Promise.resolve(this.files.has(key));
+  size(key: string) {
+    return Promise.resolve(this.files.get(key)?.length ?? null);
   }
   put(key: string, data: Buffer) {
     this.files.set(key, data);
@@ -116,6 +116,8 @@ describe("processImage", () => {
     expect(second.image).toEqual(first.image);
     const originalWrites = put.mock.calls.filter(([key]) => key === first.image.originalKey);
     expect(originalWrites).toHaveLength(1);
+    // Rebuilding after a store loss reuses the variants on disk instead of re-encoding.
+    expect(put).toHaveBeenCalledTimes(1 + first.image.variants.length);
   });
 });
 
@@ -130,9 +132,9 @@ describe("FileMediaStorage", () => {
 
   it("writes files under its root and reports them as existing", async () => {
     const storage = new FileMediaStorage(dir);
-    expect(await storage.exists("images/a/480.webp")).toBe(false);
+    expect(await storage.size("images/a/480.webp")).toBeNull();
     await storage.put("images/a/480.webp", Buffer.from("x"));
-    expect(await storage.exists("images/a/480.webp")).toBe(true);
+    expect(await storage.size("images/a/480.webp")).toBe(1);
     expect(await readFile(join(dir, "images", "a", "480.webp"), "utf8")).toBe("x");
   });
 
