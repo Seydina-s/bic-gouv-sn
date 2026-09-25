@@ -8,18 +8,18 @@
 - `apps/` : mobile (Expo SDK 57, polices, thème live), api (Fastify /v1/health, OpenAPI), admin (Next.js, écran « État du service »).
 - Sentry intégré (API + mobile), **inactif tant qu'aucun DSN n'est fourni**.
 - Design : Impeccable actif, PRODUCT.md écrit ; univers visuel au 1er écran citoyen (D-04).
-- Critère de sortie du sprint encore non vérifié : « app vide déployable Android/iOS » (build EAS, nécessite la connexion Expo).
+- Sprint 0 clos le 25/09/2026 (audit croisé AUD-01…08 dans backlog.md). Build natif EAS en attente de l'identifiant officiel (A-02).
 
 ## En attente de l'utilisateur
 1. Créer le compte Sentry (guide donné le 25/09/2026) puis fournir les 2 DSN (MON-01).
 2. Protection de `main` : GitHub Pro (4 $/mois) ou autre option (CI-01).
-3. Connexion du CLI Expo (`npx expo login --browser`) : nécessaire pour tester sur téléphone et pour le build EAS.
-4. W-01 : qui rédige et valide le wolof de l'interface ?
-5. A-01 logo/icônes officiels ; A-02 identifiant de publication de l'app.
-6. Confirmer l'acceptation temporaire des 2 vulnérabilités modérées Expo (SEC-01).
+3. Build EAS (critère « déployable ») : l'aperçu sur téléphone fonctionne (confirmé par l'utilisateur le 25/09/2026).
+5. W-01 : qui rédige et valide le wolof de l'interface ?
+6. A-01 logo/icônes officiels ; A-02 identifiant de publication de l'app.
+7. Confirmer l'acceptation temporaire des 2 vulnérabilités modérées Expo (SEC-01).
 
 ## Prochaine tâche
-Clôture du Sprint 0 : vérifier le critère « déployable » (build EAS), puis rituel d'audit croisé de fin de sprint (CLAUDE.md §11) et fusion de la PR #1.
+VS-01 — cartographie minimale de presidence.sn (robots.txt, conditions, liste des actualités, structure d'un article) → docs/sources.md. Branche `feat/news-vertical-slice`.
 
 ## Constat environnement
 - Node système 20.20.0 (inchangé, pour les autres projets). Projet : Node 24 via `fnm exec --using=24` (FNM_DIR=`C:\Users\HP\tools\fnm\data`).

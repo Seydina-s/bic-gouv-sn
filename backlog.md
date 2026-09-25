@@ -86,3 +86,27 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 24/09/2026 | CI-02 🔴 Passer le runner à Ubuntu 26.04 de façon délibérée (ubuntu-latest y bascule le 19/10/2026) | F-10 |
 | 25/09/2026 | MON-01 🔴 Après création du compte Sentry : DSN dans les variables d'environnement, plugin `@sentry/react-native/expo` + `getSentryExpoConfig` (source maps), `SENTRY_AUTH_TOKEN` en secret EAS/CI, désactiver le stockage des IP côté projet | F-12 |
 | 25/09/2026 | MON-02 🔴 Sentry pour l'admin Next.js (hors périmètre F-12) | F-12 |
+
+## Rituel de fin de Sprint 0 — audit croisé (25/09/2026)
+
+| # | Agent | Constat → tâche | Priorité |
+|---|---|---|---|
+| AUD-01 | Orchestrateur | `.claude/context/STACK.md` jamais rédigé (S1-05) ; S1-02 (hébergement), S1-03 (budget de poids), S1-04 (typographie) toujours ouverts | Haute |
+| AUD-02 | Ingestion & Données | Avant toute collecte : vérifier `robots.txt` et les conditions d'utilisation de presidence.sn, fixer un débit poli, documenter dans `docs/sources.md` | Bloquante pour VS-02 |
+| AUD-03 | Sécurité | Admin : ajouter une Content-Security-Policy ; **ne jamais déployer l'admin en public avant l'authentification 2FA (Phase 4)** | Haute |
+| AUD-04 | Sécurité (challenge Architecte) | API sans limitation de débit ni en-têtes de sécurité (API-01) : à faire avant toute exposition publique | Haute |
+| AUD-05 | QA | Aucun test de bout en bout (Maestro) ni test lecteur d'écran / grande police sur appareil : à mettre en place avec les premiers écrans réels | Moyenne |
+| AUD-06 | Performance | Budget de poids non contrôlé en CI ; police Material Symbols 967 Ko (PERF-01) ; sous-ensemble des polices (PERF-02) | Moyenne |
+| AUD-07 | Design (challenge Développeur) | L'accueil mobile est un gabarit technique : aucun écran citoyen avant le tour de directions visuelles (D-04) | Haute (VS-05) |
+| AUD-08 | Copywriter | Wolof de l'interface sans rédacteur désigné (W-01) : bloquera la parité FR/WO des premiers écrans | Moyenne |
+
+## Tranche verticale « premiers vrais articles »
+
+| # | Tâche | État | Notes |
+|---|---|---|---|
+| VS-01 | Cartographie minimale de presidence.sn/fr : robots.txt, conditions d'utilisation, page de liste des actualités, structure d'un article → `docs/sources.md` | 🔴 | Inclut AUD-02 |
+| VS-02 | `ScraperProvider` + premier adaptateur : collecte de quelques articles FR, validés par `newsArticleSchema`, traçables (URL, date de collecte, empreinte) | 🔴 | Outil choisi après VS-01 (Firecrawl / fetch + analyse HTML / Playwright) |
+| VS-03 | Stockage provisoire des articles validés (remplacé par PostgreSQL en Phase 1) | 🔴 | |
+| VS-04 | API `GET /v1/news` (liste) et `GET /v1/news/:id` (détail), schémas partagés, cache HTTP | 🔴 | |
+| VS-05 | Tour de directions visuelles Impeccable (univers de la marque) sur l'accueil / fil d'actualité | 🔴 | D-04, choix utilisateur |
+| VS-06 | App : fil d'actualité + écran article avec les vrais articles, attribution « Source : presidence.sn » + lien | 🔴 | |
