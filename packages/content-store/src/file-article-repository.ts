@@ -70,6 +70,17 @@ export class FileArticleRepository implements ArticleRepository {
     return existing === undefined ? "created" : "updated";
   }
 
+  async setImages(id: string, images: NewsArticle["images"]): Promise<boolean> {
+    const store = await this.read();
+    const entry = store.articles[id];
+    if (entry === undefined) {
+      return false;
+    }
+    entry.current = newsArticleSchema.parse({ ...entry.current, images });
+    await this.write(store);
+    return true;
+  }
+
   private async read(): Promise<StoreFile> {
     try {
       return fileSchema.parse(JSON.parse(await readFile(this.path, "utf8")));

@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { z } from "zod";
 import { apiErrorSchema } from "./api-error.schema";
+import { apiContractFingerprint, schemasFingerprint } from "./contract";
 import { healthResponseSchema } from "./health.schema";
 
 describe("healthResponseSchema", () => {
@@ -25,5 +27,19 @@ describe("apiErrorSchema", () => {
     const error = { code: "ROUTE_NOT_FOUND", message: "Not found", requestId: "req-1" };
     expect(apiErrorSchema.safeParse(error).success).toBe(true);
     expect(apiErrorSchema.safeParse({ ...error, code: "not-found" }).success).toBe(false);
+  });
+});
+
+describe("apiContractFingerprint", () => {
+  it("is a short stable hex fingerprint", () => {
+    expect(apiContractFingerprint()).toMatch(/^[0-9a-f]{8}$/);
+    expect(apiContractFingerprint()).toBe(apiContractFingerprint());
+  });
+
+  it("changes as soon as a response format changes", () => {
+    const before = z.strictObject({ title: z.string() });
+    const after = before.extend({ cover: z.string().nullable() });
+    expect(schemasFingerprint([before])).toBe(schemasFingerprint([before]));
+    expect(schemasFingerprint([after])).not.toBe(schemasFingerprint([before]));
   });
 });

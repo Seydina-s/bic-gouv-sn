@@ -45,9 +45,11 @@ function liveSource() {
     page: [{ sourceId: 1, updatedAt: "2026-09-25T09:59:00Z", title: "Premier" }],
     fetched: [] as number[],
     failing: false,
+    cover: null as string | null,
   };
   const provider: SourceProvider = {
     articleIdFor: (ref) => idOf(ref.sourceId),
+    downloadMedia: () => Promise.reject(new Error("no media")),
     listPage: (lang) =>
       Promise.resolve({
         lastPage: 1,
@@ -56,6 +58,7 @@ function liveSource() {
           slug: `s${String(item.sourceId)}`,
           lang,
           sourceUpdatedAt: item.updatedAt,
+          coverSourceUrl: state.cover,
         })),
       }),
     fetchArticle: (ref) => {
@@ -125,6 +128,18 @@ describe("pollOnce", () => {
     const result = await pollOnce(provider, repo, ["fr", "wo"], new SeenIndex(), () => NOW);
     expect(result.outcomes.updated + result.outcomes.created).toBe(2);
     expect(result.detectionDelays).toEqual([]);
+  });
+
+  it("keeps the article when its cover fails, and retries the cover next pass", async () => {
+    const { state, provider } = liveSource();
+    state.cover = "https://bo-admin.presidence.sn/storage/image/actualites/x.jpg";
+    const media = { exists: () => Promise.resolve(false), put: () => Promise.resolve() };
+    const seen = new SeenIndex();
+    const first = await pollOnce(provider, repo, ["fr"], seen, () => NOW, media);
+    expect(first.outcomes.created).toBe(1);
+    expect(first.failures[0]?.code).toBe("MEDIA_PROCESSING_FAILED");
+    await pollOnce(provider, repo, ["fr"], seen, () => NOW, media);
+    expect(state.fetched).toEqual([1, 1]);
   });
 
   it("reports non-Error failures as text", async () => {

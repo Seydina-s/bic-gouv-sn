@@ -1,4 +1,16 @@
-import type { NewsDetail, NewsListResponse } from "@bgs/shared-types";
+import type { Cover, NewsDetail, NewsListResponse } from "@bgs/shared-types";
+
+export const COVER: Cover = {
+  width: 1200,
+  height: 800,
+  blurhash: "LEHV6nWB2yk8pyo0adR*.7kCMdnj",
+  sources: [
+    { format: "avif", width: 480, url: "https://api.test/media/images/a/480.avif" },
+    { format: "webp", width: 960, url: "https://api.test/media/images/a/960.webp" },
+    { format: "webp", width: 480, url: "https://api.test/media/images/a/480.webp" },
+    { format: "jpeg", width: 480, url: "https://api.test/media/images/a/480.jpg" },
+  ],
+};
 
 // Test data with placeholder texts, not real government content.
 export const LIST: NewsListResponse = {
@@ -12,6 +24,7 @@ export const LIST: NewsListResponse = {
       excerpt: "Extrait de test A.",
       translationStatus: "official",
       availableLangs: ["fr"],
+      cover: COVER,
     },
     {
       id: "00000000-0000-5000-8000-000000000001",
@@ -22,6 +35,7 @@ export const LIST: NewsListResponse = {
       excerpt: "",
       translationStatus: "official",
       availableLangs: ["fr", "wo"],
+      cover: COVER,
     },
   ],
   nextCursor: null,
@@ -35,6 +49,7 @@ export const DETAIL: NewsDetail = {
   title: "Titre de test A",
   translationStatus: "official",
   availableLangs: ["fr"],
+  cover: COVER,
   blocks: [
     { type: "paragraph", inlines: [{ text: "Paragraphe de test." }] },
     { type: "heading", level: 3, inlines: [{ text: "Intertitre" }] },

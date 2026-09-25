@@ -8,6 +8,7 @@
     "collect": "tsx src/cli/collect-latest.ts",
     "backfill": "tsx src/cli/backfill.ts",
     "watch": "tsx src/cli/watch.ts",
+    "covers": "tsx src/cli/backfill-covers.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --coverage"
   },
@@ -15,7 +16,9 @@
     "@bgs/content-store": "workspace:*",
     "@bgs/resilience": "workspace:*",
     "@bgs/shared-types": "workspace:*",
+    "blurhash": "2.0.5",
     "sanitize-html": "2.17.7",
+    "sharp": "0.35.4",
     "zod": "4.6.5"
   },
   "devDependencies": {

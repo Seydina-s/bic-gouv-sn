@@ -1,13 +1,16 @@
 import type { ArticleRepository, SaveOutcome } from "@bgs/content-store";
 import { errorCodeOf, type Lang } from "@bgs/shared-types";
 import type { CollectionReport } from "./collect";
+import { attachCover } from "./media/attach-cover";
+import type { MediaStorage } from "./media/media-storage";
 import { mergeArticle } from "./merge";
 import type { SourceArticleRef, SourceProvider } from "./sources/source-provider";
 
 /**
  * Real-time detection (CLAUDE.md §4.4, freshness SLO < 2 min). Each pass reads the
  * first page of every language (one request each) and fetches only articles that
- * are new or whose source modification time changed since they were last seen.
+ * are new or whose source modification time changed since they were last seen,
+ * then attaches their cover photo when a media storage is given.
  */
 export interface PollResult {
   outcomes: Record<SaveOutcome, number>;
@@ -39,6 +42,7 @@ export async function pollOnce(
   langs: readonly Lang[],
   seen: SeenIndex,
   now: () => Date = () => new Date(),
+  media: MediaStorage | null = null,
 ): Promise<PollResult> {
   const result: PollResult = {
     outcomes: { created: 0, updated: 0, unchanged: 0 },
@@ -59,6 +63,11 @@ export async function pollOnce(
           if (!Number.isNaN(changedAt)) {
             result.detectionDelays.push(Math.max(0, (now().getTime() - changedAt) / 1000));
           }
+        }
+        if (media !== null) {
+          // Throws MediaProcessingError: the article stays saved but the ref is not
+          // remembered, so the cover is retried on the next pass.
+          await attachCover(ref, provider, repository, media);
         }
         seen.remember(ref);
       } catch (error) {

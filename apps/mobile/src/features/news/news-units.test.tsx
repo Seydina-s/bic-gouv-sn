@@ -2,11 +2,13 @@ import { fireEvent, render, screen } from "@testing-library/react-native";
 import { Linking } from "react-native";
 import { createNewsClient, NewsApiError } from "../../api/news-client";
 import { I18nProvider } from "../../i18n/I18nProvider";
-import { DETAIL, LIST } from "../../testing/news-fixtures";
+import { COVER, DETAIL, LIST } from "../../testing/news-fixtures";
 import { ThemeProvider } from "../../theme/ThemeProvider";
 import { BlockRenderer } from "./BlockRenderer";
 import { categoryLabelKey } from "./category";
+import { pickCoverSource } from "./CoverImage";
 import { formatDay, formatPublishedOn, parseCalendarDate } from "./format";
+import { NewsBand } from "./NewsBand";
 
 jest.mock("expo-localization", () => ({ getLocales: () => [{ languageTag: "fr-SN" }] }));
 
@@ -88,5 +90,46 @@ describe("BlockRenderer", () => {
     expect(screen.getByLabelText("Photo de l'article")).toBeOnTheScreen();
     await fireEvent.press(screen.getByText("Lien"));
     expect(openURL).toHaveBeenCalledWith("https://www.presidence.sn/fr/");
+  });
+});
+
+describe("pickCoverSource", () => {
+  it("picks the smallest WebP sharp enough for the slot on this screen", () => {
+    expect(pickCoverSource(COVER, 72, 3)?.url).toMatch(/480\.webp$/);
+    expect(pickCoverSource(COVER, 360, 2)?.url).toMatch(/960\.webp$/);
+  });
+
+  it("falls back to the widest source, then to another format", () => {
+    expect(pickCoverSource(COVER, 800, 3)?.url).toMatch(/960\.webp$/);
+    const jpegOnly = { ...COVER, sources: COVER.sources.filter((s) => s.format === "jpeg") };
+    expect(pickCoverSource(jpegOnly, 72, 2)?.url).toMatch(/480\.jpg$/);
+    const avifOnly = { ...COVER, sources: COVER.sources.filter((s) => s.format === "avif") };
+    expect(pickCoverSource(avifOnly, 72, 2)?.url).toMatch(/480\.avif$/);
+  });
+});
+
+describe("NewsBand", () => {
+  async function band(lead: boolean, cover: typeof COVER | null) {
+    const item = { ...LIST.items[0], cover } as (typeof LIST.items)[number];
+    await render(
+      <ThemeProvider>
+        <I18nProvider>
+          <NewsBand item={item} lead={lead} lastOpened={false} onPress={jest.fn()} />
+        </I18nProvider>
+      </ThemeProvider>,
+    );
+  }
+
+  it("shows the official photo, decorative, on lead and regular bands", async () => {
+    await band(true, COVER);
+    expect(screen.getByTestId("cover-image", { includeHiddenElements: true })).toBeOnTheScreen();
+    await screen.unmount();
+    await band(false, COVER);
+    expect(screen.getByTestId("cover-image", { includeHiddenElements: true })).toBeOnTheScreen();
+  });
+
+  it("shows no photo frame when the article has none", async () => {
+    await band(true, null);
+    expect(screen.queryByTestId("cover-image", { includeHiddenElements: true })).toBeNull();
   });
 });

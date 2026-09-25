@@ -13,6 +13,16 @@ const envSchema = z.object({
   RATE_LIMIT_PER_MINUTE: z.coerce.number().int().positive().default(600),
   /** Provisional article store written by the ingestion job (PostgreSQL in Phase 1). */
   NEWS_STORE_PATH: z.string().min(1).default(".data/news.json"),
+  /** Folder of processed media (cover photos) written by the ingestion job. */
+  MEDIA_ROOT: z.string().min(1).default(".data/media"),
+  /**
+   * Public address of those media (a CDN in production). Absent: served by this API
+   * under /media, at the address the request came in on (local development).
+   */
+  MEDIA_BASE_URL: z
+    .url({ protocol: /^https$/ })
+    .transform((url) => url.replace(/\/+$/, ""))
+    .optional(),
   /** Sentry project key; crash reporting stays off while it is absent. */
   SENTRY_DSN: z.url({ protocol: /^https$/ }).optional(),
   /** Share of requests traced for performance (0 to 1); errors are always reported. */

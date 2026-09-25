@@ -8,11 +8,13 @@ import {
   StyleSheet,
   Text,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Icon } from "../../components/Icon";
 import { BlockRenderer } from "../../features/news/BlockRenderer";
 import { categoryLabelKey } from "../../features/news/category";
+import { CoverImage } from "../../features/news/CoverImage";
 import { formatPublishedOn } from "../../features/news/format";
 import { Selvage } from "../../features/news/Selvage";
 import { useNewsArticle } from "../../features/news/useNews";
@@ -28,7 +30,8 @@ export default function ArticleScreen() {
   const { theme } = useTheme();
   const { t, lang } = useTranslation();
   const insets = useSafeAreaInsets();
-  const { color, space, textStyle, layout } = theme;
+  const { color, space, textStyle, layout, radius } = theme;
+  const { width: windowWidth } = useWindowDimensions();
   const detail = article.data;
 
   return (
@@ -63,6 +66,18 @@ export default function ArticleScreen() {
             maxWidth: layout.readingMaxWidth,
           }}
         >
+          {detail.cover !== null && (
+            <CoverImage
+              cover={detail.cover}
+              slotWidth={Math.min(windowWidth, layout.readingMaxWidth) - 2 * space.lg}
+              style={{
+                aspectRatio: layout.coverAspectRatio,
+                borderRadius: radius.md,
+                marginTop: space.sm,
+                marginBottom: space.md,
+              }}
+            />
+          )}
           <View style={[styles.sectionRow, { gap: space.sm, marginTop: space.sm }]}>
             <View style={{ height: 16 }}>
               <Selvage category={detail.category} color={color.primary} />

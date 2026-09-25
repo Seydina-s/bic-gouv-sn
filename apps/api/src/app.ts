@@ -13,6 +13,7 @@ import type { Config } from "./config";
 import { registerErrorHandlers } from "./errors";
 import { registerSecurity } from "./security";
 import { healthRoutes } from "./routes/health";
+import { registerMedia } from "./routes/media";
 import { newsRoutes } from "./routes/news";
 
 export interface AppOptions {
@@ -72,7 +73,15 @@ export async function buildApp({
         () => false,
       ),
   });
-  await app.register(newsRoutes, { prefix: "/v1", articles });
+  await app.register(newsRoutes, {
+    prefix: "/v1",
+    articles,
+    mediaBaseUrl: config.MEDIA_BASE_URL,
+  });
+  // With a CDN configured, media are served from there, not by the API.
+  if (config.MEDIA_BASE_URL === undefined) {
+    await registerMedia(app, config.MEDIA_ROOT);
+  }
   app.get("/v1/openapi.json", { schema: { hide: true } }, () => app.swagger());
 
   return app;

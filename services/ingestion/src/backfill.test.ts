@@ -50,6 +50,7 @@ function fakeSource(): SourceProvider & { fetched: number[] } {
   return {
     fetched,
     articleIdFor: (ref) => idOf(ref.sourceId),
+    downloadMedia: () => Promise.reject(new Error("no media")),
     listPage: (lang, page) =>
       Promise.resolve({
         lastPage: pages.length,
@@ -58,6 +59,7 @@ function fakeSource(): SourceProvider & { fetched: number[] } {
           slug: `s${String(sourceId)}`,
           lang,
           sourceUpdatedAt: "",
+          coverSourceUrl: null,
         })),
       }),
     fetchArticle: (ref) => {
