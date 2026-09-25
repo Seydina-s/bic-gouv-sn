@@ -69,6 +69,24 @@ export const ERROR_CATALOG = {
     severity: "info",
     action: "Rien à faire, sauf si le nombre augmente (lien cassé dans une notification ?).",
   },
+  RATE_LIMITED: {
+    what: "Trop de demandes sont arrivées depuis la même adresse réseau.",
+    where: "API publique (protection contre les abus)",
+    impact:
+      "Les demandes en excès sont refusées une minute ; en cas de hausse soudaine, possible abus ou robot.",
+    severity: "warning",
+    action:
+      "Si cela touche beaucoup d'utilisateurs d'un opérateur, prévenez l'équipe technique (seuil à relever).",
+  },
+  SERVICE_NOT_READY: {
+    what: "Le serveur de l'API tourne mais ne peut pas encore lire les articles.",
+    where: "API publique (sonde de disponibilité)",
+    impact:
+      "Le répartiteur de charge n'envoie pas de citoyens vers ce serveur tant qu'il n'est pas prêt.",
+    severity: "critical",
+    action:
+      "Vérifiez l'accès au stockage des articles ; si cela dure, prévenez l'équipe technique.",
+  },
   INTERNAL_ERROR: {
     what: "Une erreur inattendue s'est produite dans l'API.",
     where: "API publique",

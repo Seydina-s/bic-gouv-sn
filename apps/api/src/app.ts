@@ -11,6 +11,7 @@ import {
 import type { ArticleRepository } from "@bgs/content-store";
 import type { Config } from "./config";
 import { registerErrorHandlers } from "./errors";
+import { registerSecurity } from "./security";
 import { healthRoutes } from "./routes/health";
 import { newsRoutes } from "./routes/news";
 
@@ -47,6 +48,8 @@ export async function buildApp({
     done();
   });
 
+  await registerSecurity(app, config);
+
   await app.register(swagger, {
     openapi: {
       openapi: "3.1.0",
@@ -59,7 +62,16 @@ export async function buildApp({
     await app.register(swaggerUi, { routePrefix: "/docs" });
   }
 
-  await app.register(healthRoutes, { prefix: "/v1", version });
+  await app.register(healthRoutes, {
+    prefix: "/v1",
+    version,
+    // Ready = able to read the article store.
+    isReady: () =>
+      articles.list({ limit: 1 }).then(
+        () => true,
+        () => false,
+      ),
+  });
   await app.register(newsRoutes, { prefix: "/v1", articles });
   app.get("/v1/openapi.json", { schema: { hide: true } }, () => app.swagger());
 

@@ -5,6 +5,8 @@ import type { FastifyError, FastifyInstance } from "fastify";
 export const API_ERROR_CODES = {
   notFound: "ROUTE_NOT_FOUND",
   invalidRequest: "REQUEST_INVALID",
+  rateLimited: "RATE_LIMITED",
+  notReady: "SERVICE_NOT_READY",
   internal: "INTERNAL_ERROR",
 } as const satisfies Record<string, ErrorCode>;
 
@@ -28,6 +30,13 @@ export function registerErrorHandlers(app: FastifyInstance): void {
       return reply
         .code(400)
         .send(body(API_ERROR_CODES.invalidRequest, "The request is invalid", request.id));
+    }
+    if (error.statusCode === 429) {
+      return reply
+        .code(429)
+        .send(
+          body(API_ERROR_CODES.rateLimited, "Too many requests, please retry shortly", request.id),
+        );
     }
     request.log.error({ err: error }, "Unhandled API error");
     return reply
