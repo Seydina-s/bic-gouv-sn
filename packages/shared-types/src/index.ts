@@ -1,5 +1,6 @@
 export * from "./api/api-error.schema";
 export * from "./api/contract";
+export * from "./api/tolerant-reader";
 export * from "./api/health.schema";
 export * from "./common/official-source.schema";
 export * from "./common/primitives.schema";

@@ -37,6 +37,21 @@ describe("createNewsClient", () => {
     await expect(client.getNews(DETAIL.id, "fr")).resolves.toEqual(DETAIL);
   });
 
+  it("still reads a newer API that added fields and block types (regression 25/09/2026)", async () => {
+    const newer = {
+      ...DETAIL,
+      audio: [{ lang: "wo" }],
+      blocks: [{ type: "video", url: "https://cdn.test/v.mp4" }, ...DETAIL.blocks],
+    };
+    const client = createNewsClient({ baseUrl: "", fetchImpl: respond(newer) });
+    await expect(client.getNews(DETAIL.id, "fr")).resolves.toEqual(DETAIL);
+    const list = createNewsClient({
+      baseUrl: "",
+      fetchImpl: respond({ ...LIST, total: 2 }),
+    });
+    await expect(list.listNews("fr", null)).resolves.toEqual(LIST);
+  });
+
   it("rejects an HTTP error and an unexpected body", async () => {
     const failing = createNewsClient({
       baseUrl: "",
