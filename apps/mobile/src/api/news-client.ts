@@ -1,12 +1,11 @@
 import {
-  newsDetailSchema,
-  newsListResponseSchema,
+  readNewsDetail,
+  readNewsList,
   type Lang,
   type NewsDetail,
   type NewsListResponse,
 } from "@bgs/shared-types";
 import { withTimeout } from "@bgs/resilience";
-import type { z } from "zod";
 
 export class NewsApiError extends Error {
   constructor(
@@ -24,14 +23,17 @@ export interface NewsClientOptions {
   timeoutMs?: number;
 }
 
-/** Talks to /v1/news. Every response is validated before reaching the screens. */
+/**
+ * Talks to /v1/news. Every response is validated before reaching the screens, by a
+ * tolerant reader: a newer API never breaks this installed version.
+ */
 export function createNewsClient({
   baseUrl,
   // Looked up at call time: a fetch replaced later (tests, interceptors) is honoured.
   fetchImpl = (input, init) => fetch(input, init),
   timeoutMs = 10_000,
 }: NewsClientOptions) {
-  async function getJson<S extends z.ZodType>(path: string, schema: S, signal?: AbortSignal) {
+  async function getJson<T>(path: string, read: (raw: unknown) => T | null, signal?: AbortSignal) {
     const response = await withTimeout(
       (timeoutSignal) => fetchImpl(`${baseUrl}${path}`, { signal: timeoutSignal }),
       signal === undefined ? { timeoutMs } : { timeoutMs, signal },
@@ -42,11 +44,11 @@ export function createNewsClient({
         `GET ${path} failed with HTTP ${String(response.status)}`,
       );
     }
-    const parsed = schema.safeParse(await response.json());
-    if (!parsed.success) {
+    const data = read(await response.json());
+    if (data === null) {
       throw new NewsApiError(null, `GET ${path} returned an unexpected shape`);
     }
-    return parsed.data;
+    return data;
   }
 
   return {
@@ -55,10 +57,10 @@ export function createNewsClient({
       if (cursor !== null) {
         query.set("cursor", cursor);
       }
-      return getJson(`/v1/news?${query.toString()}`, newsListResponseSchema, signal);
+      return getJson(`/v1/news?${query.toString()}`, readNewsList, signal);
     },
     getNews(id: string, lang: Lang, signal?: AbortSignal): Promise<NewsDetail> {
-      return getJson(`/v1/news/${encodeURIComponent(id)}?lang=${lang}`, newsDetailSchema, signal);
+      return getJson(`/v1/news/${encodeURIComponent(id)}?lang=${lang}`, readNewsDetail, signal);
     },
   };
 }

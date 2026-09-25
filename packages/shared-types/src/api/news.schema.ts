@@ -12,9 +12,13 @@ import { translationStatusSchema } from "../content/translation.schema";
 /*
  * Public news API (/v1/news). Article bodies travel as structured blocks, not HTML:
  * the app renders them with native components (no web view, nothing executable).
+ *
+ * Evolution rule: installed apps lag behind the API for months. Objects are not
+ * strict (unknown fields are ignored), changes are additive only, and the app
+ * reads responses through tolerant-reader.ts (unknown blocks and formats dropped).
  */
 
-export const inlineSchema = z.strictObject({
+export const inlineSchema = z.object({
   text: z.string(),
   bold: z.boolean().optional(),
   italic: z.boolean().optional(),
@@ -26,15 +30,15 @@ export type Inline = z.infer<typeof inlineSchema>;
 const inlines = z.array(inlineSchema).min(1);
 
 export const blockSchema = z.discriminatedUnion("type", [
-  z.strictObject({ type: z.literal("paragraph"), inlines }),
-  z.strictObject({
+  z.object({ type: z.literal("paragraph"), inlines }),
+  z.object({
     type: z.literal("heading"),
     level: z.union([z.literal(2), z.literal(3), z.literal(4)]),
     inlines,
   }),
-  z.strictObject({ type: z.literal("list"), ordered: z.boolean(), items: z.array(inlines).min(1) }),
-  z.strictObject({ type: z.literal("quote"), inlines }),
-  z.strictObject({ type: z.literal("image"), src: httpsUrlSchema, alt: z.string().nullable() }),
+  z.object({ type: z.literal("list"), ordered: z.boolean(), items: z.array(inlines).min(1) }),
+  z.object({ type: z.literal("quote"), inlines }),
+  z.object({ type: z.literal("image"), src: httpsUrlSchema, alt: z.string().nullable() }),
 ]);
 export type Block = z.infer<typeof blockSchema>;
 
@@ -42,13 +46,13 @@ export type Block = z.infer<typeof blockSchema>;
  * Cover photo, as lighter variants of the official image. The app picks the
  * smallest source wide enough for its slot, and shows the BlurHash while loading.
  */
-export const coverSchema = z.strictObject({
+export const coverSchema = z.object({
   width: z.int().positive(),
   height: z.int().positive(),
   blurhash: z.string().min(6),
   sources: z
     .array(
-      z.strictObject({
+      z.object({
         format: z.enum(["avif", "webp", "jpeg"]),
         width: z.int().positive(),
         /** https in production; plain http only on a local development network. */
@@ -60,7 +64,7 @@ export const coverSchema = z.strictObject({
 export type Cover = z.infer<typeof coverSchema>;
 
 /** One article in a feed, in the requested language. */
-export const newsSummarySchema = z.strictObject({
+export const newsSummarySchema = z.object({
   id: z.uuid(),
   category: slugSchema,
   publishedOn: isoDateSchema.nullable(),
@@ -75,7 +79,7 @@ export const newsSummarySchema = z.strictObject({
 });
 export type NewsSummary = z.infer<typeof newsSummarySchema>;
 
-export const newsListResponseSchema = z.strictObject({
+export const newsListResponseSchema = z.object({
   items: z.array(newsSummarySchema),
   nextCursor: z.string().nullable(),
 });

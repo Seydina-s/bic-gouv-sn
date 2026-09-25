@@ -132,3 +132,4 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 25/09/2026 | MED-02 🔴 Pièces jointes PDF et images du corps des articles : téléchargement, stockage chez nous (autonomie vis-à-vis de la source), liens réécrits vers notre CDN | MED-01 |
 | 25/09/2026 | MED-03 🔴 Mode économie de données : vignettes masquées / plus petites variantes sur demande | MED-01 |
 | 25/09/2026 | BUG-01 ✅ Plantage au démarrage avec un cache hors ligne de l'ancien format (sans photo) : cache versionné par empreinte automatique du contrat d'API (voir ERREURS.md) | MED-01 |
+| 25/09/2026 | BUG-02 ✅ Faux « Hors ligne » sur iPhone : la version installée rejetait le nouveau champ `cover` ; schémas non stricts + lecteur tolérant (voir ERREURS.md) | QA-02 (captures iPhone) |

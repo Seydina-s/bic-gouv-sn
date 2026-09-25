@@ -2,7 +2,7 @@ import { z } from "zod";
 import { isoDateTimeSchema } from "../common/primitives.schema";
 
 /** GET /v1/health: liveness probe used by the load balancer, monitoring and the app. */
-export const healthResponseSchema = z.strictObject({
+export const healthResponseSchema = z.object({
   status: z.literal("ok"),
   /** Deployed API version (from package.json), useful to trace incidents. */
   version: z.string().min(1),
