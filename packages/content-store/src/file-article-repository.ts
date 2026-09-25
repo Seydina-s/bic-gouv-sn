@@ -1,4 +1,4 @@
-import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import { mkdir, open, readFile, rename } from "node:fs/promises";
 import { dirname } from "node:path";
 import { newsArticleSchema, type NewsArticle } from "@bgs/shared-types";
 import { z } from "zod";
@@ -82,21 +82,54 @@ export class FileArticleRepository implements ArticleRepository {
     return true;
   }
 
+  private get backupPath(): string {
+    return `${this.path}.bak`;
+  }
+
+  /**
+   * Reads the store; if the main file is unreadable (e.g. zeroed by a power cut),
+   * falls back to the backup copy, which every write keeps in sync.
+   */
   private async read(): Promise<StoreFile> {
     try {
-      return fileSchema.parse(JSON.parse(await readFile(this.path, "utf8")));
+      return await readStoreFile(this.path);
     } catch (error) {
-      if (isMissingFile(error)) {
-        return structuredClone(EMPTY);
+      try {
+        return await readStoreFile(this.backupPath);
+      } catch (backupError) {
+        if (isMissingFile(error) && isMissingFile(backupError)) {
+          return structuredClone(EMPTY);
+        }
+        throw error;
       }
-      throw error;
     }
   }
 
+  /** Main file then backup, each flushed to disk before it replaces the previous one. */
   private async write(store: StoreFile): Promise<void> {
     await mkdir(dirname(this.path), { recursive: true });
-    const temp = `${this.path}.${String(process.pid)}.tmp`;
-    await writeFile(temp, JSON.stringify(store), "utf8");
-    await rename(temp, this.path);
+    const data = JSON.stringify(store);
+    await replaceDurably(this.path, data);
+    await replaceDurably(this.backupPath, data);
   }
+}
+
+async function readStoreFile(path: string): Promise<StoreFile> {
+  return fileSchema.parse(JSON.parse(await readFile(path, "utf8")));
+}
+
+/**
+ * Writes a temporary file, forces it onto the disk (fsync), then renames it over
+ * `path`. Without the fsync, a power cut can leave a renamed file full of zeros.
+ */
+async function replaceDurably(path: string, data: string): Promise<void> {
+  const temp = `${path}.${String(process.pid)}.tmp`;
+  const handle = await open(temp, "w");
+  try {
+    await handle.writeFile(data, "utf8");
+    await handle.sync();
+  } finally {
+    await handle.close();
+  }
+  await rename(temp, path);
 }

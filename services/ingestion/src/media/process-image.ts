@@ -78,7 +78,7 @@ export async function processImage(
   const meta = await sharp(oriented).metadata();
   const { width, height } = meta;
   const originalKey = `${folder}/original.${meta.format === "png" ? "png" : "jpg"}`;
-  if (!(await storage.exists(originalKey))) {
+  if ((await storage.size(originalKey)) === null) {
     await storage.put(originalKey, original);
   }
 
@@ -87,8 +87,14 @@ export async function processImage(
   let lowestSsim = 1;
   for (const variantWidth of widths) {
     for (const format of ["avif", "webp", "jpeg"] as const) {
-      const { data, score } = await encodeVariant(oriented, variantWidth, format);
       const key = `${folder}/${String(variantWidth)}.${format === "jpeg" ? "jpg" : format}`;
+      // Already produced (and SSIM-checked) by an earlier run: reused, not re-encoded.
+      const storedBytes = await storage.size(key);
+      if (storedBytes !== null) {
+        variants.push({ format, width: variantWidth, key, bytes: storedBytes });
+        continue;
+      }
+      const { data, score } = await encodeVariant(oriented, variantWidth, format);
       await storage.put(key, data);
       variants.push({ format, width: variantWidth, key, bytes: data.length });
       lowestSsim = Math.min(lowestSsim, score);

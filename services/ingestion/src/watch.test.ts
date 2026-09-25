@@ -133,7 +133,7 @@ describe("pollOnce", () => {
   it("keeps the article when its cover fails, and retries the cover next pass", async () => {
     const { state, provider } = liveSource();
     state.cover = "https://bo-admin.presidence.sn/storage/image/actualites/x.jpg";
-    const media = { exists: () => Promise.resolve(false), put: () => Promise.resolve() };
+    const media = { size: () => Promise.resolve(null), put: () => Promise.resolve() };
     const seen = new SeenIndex();
     const first = await pollOnce(provider, repo, ["fr"], seen, () => NOW, media);
     expect(first.outcomes.created).toBe(1);
