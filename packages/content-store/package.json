@@ -1,0 +1,22 @@
+{
+  "name": "@bgs/content-store",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Storage of validated articles, with version history (file store now, PostgreSQL in Phase 1)",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@bgs/shared-types": "workspace:*",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.6",
+    "typescript": "6.0.3"
+  }
+}

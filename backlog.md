@@ -4,7 +4,7 @@ Source de vérité unique de l'avancement. Mis à jour en temps réel. Aucune t�
 
 États : 🔴 À faire · 🔵 En cours · ✅ Terminé · ⏸ En pause · ❌ Abandonnée (raison notée)
 
-**Mode actif : standard** (chaque tâche significative est validée par l'utilisateur).
+**Mode actif : autonome** depuis le 25/09/2026 (demande explicite de l'utilisateur ; décisions notées « Claude (autonome) »).
 
 ---
 
@@ -106,7 +106,7 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 |---|---|---|---|
 | VS-01 | Cartographie minimale de presidence.sn/fr : robots.txt, conditions d'utilisation, page de liste des actualités, structure d'un article → `docs/sources.md` | ✅ | 25/09/2026 — API JSON publique du site trouvée ; FR 1 014 / WO 318 ; liaison FR↔WO par `articleId` ; wolof officiel arrêté au 01/10/2025 |
 | VS-02 | `SourceProvider` + premier adaptateur (API JSON de presidence.sn, sous réserve de validation) : collecte de quelques articles FR, validés par `newsArticleSchema`, traçables (URL, date de collecte, empreinte) | ✅ | 25/09/2026 — adaptateur API presidence.sn (débit 1 req/s, disjoncteur, 3 essais, quarantaine) ; HTML nettoyé ; id stable UUID v5 ; 27 tests (100 % des lignes) ; **collecte réelle : 8/8 articles valides** ; images et PDF reportés au pipeline média |
-| VS-03 | Stockage provisoire des articles validés (remplacé par PostgreSQL en Phase 1) | 🔴 | |
+| VS-03 | Stockage provisoire des articles validés (remplacé par PostgreSQL en Phase 1) | ✅ | 25/09/2026 — `@bgs/content-store` (interface + fichier JSON atomique, historique des versions) ; fusion FR/WO ; collecte réelle 8 FR + 8 WO, re-passage = 0 doublon |
 | VS-04 | API `GET /v1/news` (liste) et `GET /v1/news/:id` (détail), schémas partagés, cache HTTP | 🔴 | |
 | VS-05 | Tour de directions visuelles Impeccable (univers de la marque) sur l'accueil / fil d'actualité | 🔴 | D-04, choix utilisateur |
 | VS-06 | App : fil d'actualité + écran article avec les vrais articles, attribution « Source : presidence.sn » + lien | 🔴 | |
