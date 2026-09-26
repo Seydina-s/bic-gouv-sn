@@ -1,7 +1,15 @@
 import { FlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { windowClass } from "@bgs/ui";
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from "react-native";
 import { BookmarkSimpleIcon as BookmarkSimple } from "phosphor-react-native/src/icons/BookmarkSimple";
 import { MagnifyingGlassIcon as MagnifyingGlass } from "phosphor-react-native/src/icons/MagnifyingGlass";
 import { useTabBarInset } from "../../components/GlassTabBar";
@@ -11,6 +19,7 @@ import {
   COUNCIL_CATEGORY,
   type FrontPageRow,
 } from "../../features/news/front-page";
+import { ArticlePane } from "../../features/news/ArticlePane";
 import { Masthead } from "../../features/news/Masthead";
 import { SectionFilter } from "../../features/news/SectionFilter";
 import { CouncilCard, LeadStory, StoryRow } from "../../features/news/Stories";
@@ -77,11 +86,23 @@ export default function HomeScreen() {
       ),
     [feed.data, council.data, section],
   );
-  const { color, space } = theme;
+  const { color, space, layout } = theme;
+  const { width } = useWindowDimensions();
+  // Tablets and unfolded foldables: list and article side by side (recomputed live).
+  const twoPane = windowClass(width) === "expanded";
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const shownId = selectedId ?? rows[0]?.item.id ?? null;
+  const listPaneWidth = Math.round(
+    Math.min(Math.max(width * layout.listPane.share, layout.listPane.min), layout.listPane.max),
+  );
 
   const open = (id: string) => {
     markOpened(id);
-    router.push({ pathname: "/article/[id]", params: { id } });
+    if (twoPane) {
+      setSelectedId(id);
+    } else {
+      router.push({ pathname: "/article/[id]", params: { id } });
+    }
   };
 
   const header = (
@@ -137,36 +158,50 @@ export default function HomeScreen() {
     <Notice text={section === null ? t("feed.empty") : t("feed.emptySection")} />
   );
 
+  const list = (
+    <FlashList
+      data={rows}
+      keyExtractor={(row) => row.item.id}
+      getItemType={(row) => row.kind}
+      renderItem={renderItem}
+      contentContainerStyle={{ paddingBottom: bottomInset }}
+      ListHeaderComponent={header}
+      ListEmptyComponent={empty}
+      onEndReached={() => {
+        if (feed.hasNextPage && !feed.isFetchingNextPage) {
+          void feed.fetchNextPage();
+        }
+      }}
+      ListFooterComponent={
+        feed.isFetchingNextPage ? (
+          <ActivityIndicator style={{ margin: space.lg }} color={color.primary} />
+        ) : null
+      }
+      refreshing={feed.isRefetching && !feed.isFetchingNextPage}
+      onRefresh={() => {
+        void feed.refetch();
+        void council.refetch();
+      }}
+      testID="news-feed"
+    />
+  );
+
+  if (twoPane) {
+    return (
+      <View style={[styles.split, { backgroundColor: color.background }]}>
+        <View style={[styles.listPane, { width: listPaneWidth, borderRightColor: color.border }]}>
+          {list}
+        </View>
+        {shownId !== null && (
+          <ArticlePane id={shownId} paneWidth={width - listPaneWidth} bottomInset={bottomInset} />
+        )}
+      </View>
+    );
+  }
+
   return (
     <View style={[styles.root, { backgroundColor: color.background }]}>
-      {/* Wide screens: one centred reading column (two-pane layout: task RESP-01). */}
-      <View style={[styles.column, { maxWidth: theme.layout.readingMaxWidth + space.xxxl }]}>
-        <FlashList
-          data={rows}
-          keyExtractor={(row) => row.item.id}
-          getItemType={(row) => row.kind}
-          renderItem={renderItem}
-          contentContainerStyle={{ paddingBottom: bottomInset }}
-          ListHeaderComponent={header}
-          ListEmptyComponent={empty}
-          onEndReached={() => {
-            if (feed.hasNextPage && !feed.isFetchingNextPage) {
-              void feed.fetchNextPage();
-            }
-          }}
-          ListFooterComponent={
-            feed.isFetchingNextPage ? (
-              <ActivityIndicator style={{ margin: space.lg }} color={color.primary} />
-            ) : null
-          }
-          refreshing={feed.isRefetching && !feed.isFetchingNextPage}
-          onRefresh={() => {
-            void feed.refetch();
-            void council.refetch();
-          }}
-          testID="news-feed"
-        />
-      </View>
+      <View style={[styles.column, { maxWidth: layout.readingMaxWidth + space.xxxl }]}>{list}</View>
     </View>
   );
 }
@@ -174,5 +209,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1, alignItems: "center" },
   column: { flex: 1, width: "100%" },
+  split: { flex: 1, flexDirection: "row" },
+  listPane: { borderRightWidth: StyleSheet.hairlineWidth },
   button: { alignSelf: "flex-start", justifyContent: "center" },
 });
