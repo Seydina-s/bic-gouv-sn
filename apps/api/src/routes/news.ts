@@ -12,6 +12,7 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { freshnessKey, toDetail, toSummary } from "../news/present";
+import { searchArticles } from "../news/search";
 import { mediaBaseUrlFor } from "./media";
 
 export interface NewsRoutesOptions {
@@ -28,6 +29,9 @@ const CACHE_CONTROL = "public, max-age=60, stale-while-revalidate=600";
 
 const NOT_FOUND: ErrorCode = "NEWS_NOT_FOUND";
 
+/** Searches change with every publication: a short shared cache only. */
+const SEARCH_CACHE_CONTROL = "public, max-age=60";
+
 /** Answers 304 when the client already holds this exact content. */
 function sendCached<T>(request: FastifyRequest, reply: FastifyReply, fingerprint: string, body: T) {
   const etag = `"${createHash("sha256").update(fingerprint).digest("base64url").slice(0, 27)}"`;
@@ -42,6 +46,32 @@ export const newsRoutes: FastifyPluginAsyncZod<NewsRoutesOptions> = (
   app,
   { articles, mediaBaseUrl },
 ) => {
+  app.get(
+    "/news/search",
+    {
+      schema: {
+        tags: ["news"],
+        summary: "Search the official news (accents and case ignored)",
+        querystring: z.object({
+          q: z.string().trim().min(2).max(120),
+          lang: langSchema.default("fr"),
+          limit: z.coerce.number().int().min(1).max(50).default(20),
+        }),
+        response: { 200: newsListResponseSchema },
+      },
+    },
+    async (request, reply) => {
+      const { q, lang, limit } = request.query;
+      const media = mediaBaseUrlFor(request, mediaBaseUrl);
+      const hits = await searchArticles(articles, { query: q, lang, limit });
+      void reply.header("cache-control", SEARCH_CACHE_CONTROL);
+      return {
+        items: hits.flatMap((article) => toSummary(article, lang, media) ?? []),
+        nextCursor: null,
+      };
+    },
+  );
+
   app.get(
     "/news",
     {

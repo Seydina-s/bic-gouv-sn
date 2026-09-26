@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import { BookmarkSimpleIcon as BookmarkSimple } from "phosphor-react-native/src/icons/BookmarkSimple";
+import { MagnifyingGlassIcon as MagnifyingGlass } from "phosphor-react-native/src/icons/MagnifyingGlass";
 import { useTabBarInset } from "../../components/GlassTabBar";
 import { IconButton } from "../../components/IconButton";
 import {
@@ -88,13 +89,22 @@ export default function HomeScreen() {
       <Masthead
         today={new Date()}
         actions={
-          <IconButton
-            icon={BookmarkSimple}
-            label={t("favorites.title")}
-            onPress={() => {
-              router.push("/favorites");
-            }}
-          />
+          <>
+            <IconButton
+              icon={MagnifyingGlass}
+              label={t("search.title")}
+              onPress={() => {
+                router.push("/search");
+              }}
+            />
+            <IconButton
+              icon={BookmarkSimple}
+              label={t("favorites.title")}
+              onPress={() => {
+                router.push("/favorites");
+              }}
+            />
+          </>
         }
       />
       <SectionFilter selected={section} onSelect={setSection} />
