@@ -1,44 +1,23 @@
 import { Stack, useLocalSearchParams } from "expo-router";
-import { ArrowSquareOutIcon as ArrowSquareOut } from "phosphor-react-native/src/icons/ArrowSquareOut";
-import {
-  ActivityIndicator,
-  Linking,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-  useWindowDimensions,
-} from "react-native";
+import { StyleSheet, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Icon } from "../../components/Icon";
-import { useFavorites } from "../../features/favorites/FavoritesProvider";
 import { ArticleActions } from "../../features/news/ArticleActions";
-import { BlockRenderer } from "../../features/news/BlockRenderer";
-import { CoverImage } from "../../features/news/CoverImage";
-import { formatPublishedOn } from "../../features/news/format";
-import { SectionTag } from "../../features/news/SectionTag";
-import { useNewsArticle } from "../../features/news/useNews";
+import { ArticleView, useArticleDetail } from "../../features/news/ArticleView";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 
-const SOURCE = "presidence.sn";
-
 /**
- * One official article, identical to the source, with its link back to it; it can
- * be kept in the favorites (readable offline) and shared.
+ * One official article on its own screen (phones), with its actions in the header:
+ * keep it in the favorites (readable offline) and share it.
  */
 export default function ArticleScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const article = useNewsArticle(id);
+  const { detail, isPending } = useArticleDetail(id);
   const { theme } = useTheme();
-  const { t, lang } = useTranslation();
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const { color, space, textStyle, layout, radius } = theme;
-  const { width: windowWidth } = useWindowDimensions();
-  const favorites = useFavorites();
-  // Offline, an article kept in the favorites is read from its saved copy.
-  const detail = article.data ?? favorites.saved(id);
+  const { width } = useWindowDimensions();
+  const { color } = theme;
 
   return (
     <View style={[styles.root, { backgroundColor: color.background }]}>
@@ -53,92 +32,16 @@ export default function ArticleScreen() {
           headerRight: () => (detail === undefined ? null : <ArticleActions detail={detail} />),
         }}
       />
-      {detail === undefined ? (
-        <View style={[styles.center, { padding: space.xl }]}>
-          {article.isPending ? (
-            <ActivityIndicator color={color.primary} />
-          ) : (
-            <Text style={[textStyle.body, { color: color.textSecondary }]}>
-              {t("article.notFound")}
-            </Text>
-          )}
-        </View>
-      ) : (
-        <ScrollView
-          contentContainerStyle={{
-            paddingHorizontal: space.lg,
-            paddingBottom: insets.bottom + space.xxxl,
-            alignSelf: "center",
-            width: "100%",
-            maxWidth: layout.readingMaxWidth,
-          }}
-        >
-          {detail.cover !== null && (
-            // Full-bleed on phones, like the front page; framed in the reading column on wide screens.
-            <CoverImage
-              cover={detail.cover}
-              slotWidth={Math.min(windowWidth, layout.readingMaxWidth)}
-              style={{
-                aspectRatio: layout.coverAspectRatio,
-                marginHorizontal: windowWidth > layout.readingMaxWidth ? 0 : -space.lg,
-                borderRadius: windowWidth > layout.readingMaxWidth ? radius.md : 0,
-                marginBottom: space.lg,
-              }}
-            />
-          )}
-          <View style={{ marginTop: detail.cover === null ? space.md : 0 }}>
-            <SectionTag category={detail.category} />
-          </View>
-          <Text
-            accessibilityRole="header"
-            style={[textStyle.leadHeadline, { color: color.textPrimary, marginTop: space.md }]}
-          >
-            {detail.title}
-          </Text>
-          <Text
-            style={[
-              textStyle.bodySmall,
-              { color: color.textTertiary, marginTop: space.sm, marginBottom: space.xl },
-            ]}
-          >
-            {formatPublishedOn(detail.publishedOn, lang)}
-            {detail.translationStatus === "machine" ? ` · ${t("content.machineTranslation")}` : ""}
-          </Text>
-          <BlockRenderer blocks={detail.blocks} />
-          <View
-            style={[
-              styles.source,
-              {
-                borderTopColor: color.border,
-                paddingTop: space.lg,
-                marginTop: space.md,
-                gap: space.md,
-              },
-            ]}
-          >
-            <Text style={[textStyle.bodySmall, { color: color.textSecondary }]}>
-              {t("content.sourceAttribution", { source: SOURCE })}
-            </Text>
-            <Pressable
-              accessibilityRole="link"
-              onPress={() => void Linking.openURL(detail.sourceUrl)}
-              style={[styles.sourceLink, { minHeight: theme.touchTarget.min, gap: space.sm }]}
-            >
-              <Icon icon={ArrowSquareOut} size="sm" color={color.textBrand} />
-              <Text style={[textStyle.label, { color: color.textBrand }]}>
-                {t("article.openSource", { source: SOURCE })}
-              </Text>
-            </Pressable>
-          </View>
-        </ScrollView>
-      )}
+      <ArticleView
+        detail={detail}
+        isPending={isPending}
+        paneWidth={width}
+        bottomInset={insets.bottom}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  center: { flex: 1, alignItems: "center", justifyContent: "center" },
-  source: { borderTopWidth: StyleSheet.hairlineWidth },
-  sourceLink: { flexDirection: "row", alignItems: "center" },
 });

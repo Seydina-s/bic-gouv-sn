@@ -2,14 +2,26 @@ import { layout, radius, withAlpha } from "@bgs/ui";
 import { BlurView } from "expo-blur";
 import type { Tabs } from "expo-router";
 import type { ComponentProps } from "react";
-import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import { Platform, Pressable, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "../i18n/useTranslation";
 import { useTheme } from "../theme/useTheme";
 
 type TabBarProps = Parameters<NonNullable<ComponentProps<typeof Tabs>["tabBar"]>>[0];
 
-const { height: BAR_HEIGHT, sideMargin: SIDE_MARGIN, minBottomGap: MIN_BOTTOM_GAP } = layout.tabBar;
+const {
+  height: BAR_HEIGHT,
+  sideMargin: SIDE_MARGIN,
+  minBottomGap: MIN_BOTTOM_GAP,
+  maxWidth: MAX_BAR_WIDTH,
+} = layout.tabBar;
+
+/** Side offsets of the bar: margins on phones, centred and capped on wide windows. */
+function sideOffsets(windowWidth: number, left: number, right: number) {
+  const free = windowWidth - left - right - 2 * SIDE_MARGIN;
+  const extra = Math.max(0, free - MAX_BAR_WIDTH) / 2;
+  return { left: left + SIDE_MARGIN + extra, right: right + SIDE_MARGIN + extra };
+}
 /** Width of the soft green indicator behind the active icon (Material 3 proportions). */
 const INDICATOR_WIDTH = 56;
 const INDICATOR_HEIGHT = 32;
@@ -39,6 +51,7 @@ export function GlassTabBar({ state, descriptors, navigation }: TabBarProps) {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
   const { color, space, textStyle, opacity } = theme;
 
   return (
@@ -46,8 +59,7 @@ export function GlassTabBar({ state, descriptors, navigation }: TabBarProps) {
       style={[
         styles.shadow,
         {
-          left: SIDE_MARGIN + insets.left,
-          right: SIDE_MARGIN + insets.right,
+          ...sideOffsets(width, insets.left, insets.right),
           bottom: bottomGap(insets.bottom),
           height: BAR_HEIGHT,
           shadowColor: color.scrim,

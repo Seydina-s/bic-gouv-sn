@@ -150,8 +150,10 @@ export const layout = {
   leadAspectRatio: 16 / 10,
   /** Photo at the top of an article. */
   coverAspectRatio: 16 / 9,
-  /** Floating tab bar: height, side margin and minimal gap above the screen edge. */
-  tabBar: { height: 64, sideMargin: 12, minBottomGap: 12 },
+  /** Floating tab bar: height, side margin, minimal gap above the edge, width cap (tablets). */
+  tabBar: { height: 64, sideMargin: 12, minBottomGap: 12, maxWidth: 560 },
+  /** List pane of the two-pane layout (expanded windows): share of the width, clamped. */
+  listPane: { share: 0.4, min: 360, max: 440 },
   /** Thickness of the decorative flag stripe atop the front page. */
   flagStripe: 4,
   /** Blur strength of the glass bar where the system blurs (expo-blur intensity). */

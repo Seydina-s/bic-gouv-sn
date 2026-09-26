@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { fireEvent, screen, waitFor } from "@testing-library/react-native";
 import { renderRouter } from "expo-router/testing-library";
-import { Linking } from "react-native";
+import { Dimensions, Linking } from "react-native";
 import RootLayout from "./app/_layout";
 import TabsLayout from "./app/(tabs)/_layout";
 import HomeScreen from "./app/(tabs)/index";
@@ -90,6 +90,22 @@ describe("app shell", () => {
     expect(
       await screen.findByText("Aucun résultat pour « introuvable ».", {}, { timeout: 3000 }),
     ).toBeOnTheScreen();
+  });
+
+  it("shows list and article side by side on a wide window (tablet, unfolded)", async () => {
+    const phone = Dimensions.get("window");
+    Dimensions.set({ window: { ...phone, width: 1024, height: 768 } });
+    try {
+      await renderRouter(routes, { initialUrl: "/" });
+      expect(await screen.findByText("Titre de test B")).toBeOnTheScreen();
+      // The first story opens in the detail pane, with its actions, without navigating.
+      expect(await screen.findByText("Paragraphe de test.")).toBeOnTheScreen();
+      expect(screen.getByRole("button", { name: "Ajouter aux favoris" })).toBeOnTheScreen();
+      // Both at once: on a phone, the paragraph only shows after opening the article.
+      expect(screen.getByText("Titre de test B")).toBeOnTheScreen();
+    } finally {
+      Dimensions.set({ window: phone });
+    }
   });
 
   it("filters the front page by section", async () => {
