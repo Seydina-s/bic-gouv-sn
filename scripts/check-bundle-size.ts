@@ -1,28 +1,46 @@
-// Fails when a mobile JS bundle (Hermes bytecode) exceeds the weight budget (S1-03).
+// Fails when the mobile app exceeds its weight budget (S1-03, revised 26/09/2026).
 // Run after `pnpm --filter @bgs/mobile bundle:check`: `pnpm bundle:size`.
-import { readdirSync, statSync } from "node:fs";
+import { readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-/** Ceiling enforced in CI; the target after PERF-03 (Sentry replay, Zod) is 4 MB. */
-const BUDGET_BYTES = 6 * 1024 * 1024;
+const MB = 1024 * 1024;
+/**
+ * JavaScript (Hermes bytecode): what delays startup on a 2 GB Android phone,
+ * so it keeps its own ceiling.
+ */
+const CODE_BUDGET_BYTES = 6 * MB;
+/**
+ * Whole app content shipped in the bundle (code + fonts, illustrations, animations):
+ * raised to 15 MB by the user for an immersive experience (decisions.md, 26/09/2026).
+ */
+const TOTAL_BUDGET_BYTES = 15 * MB;
 
-const root = fileURLToPath(new URL("../apps/mobile/dist/_expo/static/js/", import.meta.url));
-const bundles = readdirSync(root).flatMap((platform) =>
-  readdirSync(join(root, platform))
-    .filter((file) => file.endsWith(".hbc") || file.endsWith(".js"))
-    .map((file) => ({ platform, file, bytes: statSync(join(root, platform, file)).size })),
-);
+interface Metadata {
+  fileMetadata: Record<string, { bundle: string; assets: { path: string }[] }>;
+}
 
+const dist = fileURLToPath(new URL("../apps/mobile/dist/", import.meta.url));
+const sizeOf = (path: string) => statSync(join(dist, path.replaceAll("\\", "/"))).size;
+
+let metadata: Metadata;
+try {
+  metadata = JSON.parse(readFileSync(join(dist, "metadata.json"), "utf8")) as Metadata;
+} catch {
+  process.stdout.write("No export found: run the mobile bundle:check first.\n");
+  process.exit(1);
+}
+
+const mb = (bytes: number) => (bytes / MB).toFixed(2);
 let over = false;
-for (const { platform, file, bytes } of bundles) {
-  const ok = bytes <= BUDGET_BYTES;
-  over ||= !ok;
+for (const [platform, { bundle, assets }] of Object.entries(metadata.fileMetadata)) {
+  const code = sizeOf(bundle);
+  const total = code + assets.reduce((sum, asset) => sum + sizeOf(asset.path), 0);
+  const codeOk = code <= CODE_BUDGET_BYTES;
+  const totalOk = total <= TOTAL_BUDGET_BYTES;
+  over ||= !codeOk || !totalOk;
   process.stdout.write(
-    `${ok ? "ok  " : "OVER"} ${platform}/${file}: ${(bytes / 1024 / 1024).toFixed(2)} MB / ${(BUDGET_BYTES / 1024 / 1024).toFixed(0)} MB\n`,
+    `${codeOk && totalOk ? "ok  " : "OVER"} ${platform}: code ${mb(code)} / ${mb(CODE_BUDGET_BYTES)} MB · total ${mb(total)} / ${mb(TOTAL_BUDGET_BYTES)} MB\n`,
   );
 }
-if (bundles.length === 0) {
-  process.stdout.write("No bundle found: run the mobile bundle:check first.\n");
-}
-process.exitCode = over || bundles.length === 0 ? 1 : 0;
+process.exitCode = over ? 1 : 0;
