@@ -15,7 +15,7 @@ export const fr = {
     participate: "Participer",
   },
   content: {
-    sourceAttribution: "Source : {source}",
+    sourceAttribution: "Source\u00a0: {source}",
     machineTranslation: "Traduction automatique",
     listen: "Écouter",
     updatedJustNow: "Mis à jour à l'instant.",
@@ -31,6 +31,18 @@ export const fr = {
   },
   onboarding: {
     skip: "Passer",
+    next: "Suivant",
+    start: "Commencer",
+    step: "Étape {current} sur {total}",
+    languageTitle: "Choisissez votre langue",
+    languageBody: "Vous pourrez la changer à tout moment dans les réglages.",
+    newsTitle: "L'action du gouvernement, chaque jour",
+    newsBody:
+      "Conseil des ministres, communiqués, discours\u00a0: les publications officielles, dès leur mise en ligne.",
+    sourceTitle: "La source, toujours",
+    sourceBody: "Chaque article vient de presidence.sn et renvoie à sa page d'origine.",
+    offlineTitle: "Gardez l'essentiel, même sans réseau",
+    offlineBody: "Touchez le marque-page\u00a0: l'article reste lisible hors ligne.",
   },
   /** Sections of presidence.sn, keyed by their slug. */
   categories: {
@@ -50,7 +62,7 @@ export const fr = {
     emptySection: "Aucune actualité dans cette rubrique pour le moment.",
     loadMore: "Chargement de la suite",
     lastOpened: "Dernière lecture",
-    offline: "Hors ligne : voici les dernières actualités enregistrées.",
+    offline: "Hors ligne\u00a0: voici les dernières actualités enregistrées.",
     empty: "Aucune actualité pour le moment.",
     error: "Les actualités n'ont pas pu être chargées.",
     retry: "Réessayer",
@@ -68,7 +80,7 @@ export const fr = {
     title: "Rechercher",
     placeholder: "Un mot, un lieu, une personne…",
     hint: "Tapez au moins 2 lettres pour chercher dans les actualités officielles.",
-    noResult: "Aucun résultat pour « {query} ».",
+    noResult: "Aucun résultat pour «\u00a0{query}\u00a0».",
     offline: "La recherche a besoin d'une connexion. Réessayez quand vous êtes en ligne.",
   },
   settings: {
@@ -93,7 +105,7 @@ export const fr = {
     add: "Ajouter aux favoris",
     remove: "Retirer des favoris",
     empty:
-      "Aucun favori pour l'instant. Touchez le marque-page d'un article pour le garder : il restera lisible hors ligne.",
+      "Aucun favori pour l'instant. Touchez le marque-page d'un article pour le garder\u00a0: il restera lisible hors ligne.",
   },
   comingSoon: {
     title: "Bientôt disponible",
