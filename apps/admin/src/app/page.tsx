@@ -4,11 +4,13 @@ import { getApiStatus } from "../lib/api-status";
 import { readApiUrl } from "../lib/config";
 import { t } from "../lib/i18n";
 import { getIngestionReport } from "../lib/ingestion-status";
+import { requireAccount } from "../lib/session";
 
 // Always the live state: never served from a cache.
 export const dynamic = "force-dynamic";
 
 export default async function StatusPage() {
+  await requireAccount();
   const apiUrl = readApiUrl(process.env);
   // Both checks at once: the page never waits for one before starting the other.
   const [status, report] = await Promise.all([
