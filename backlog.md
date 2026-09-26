@@ -148,6 +148,7 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 25/09/2026 | DATA-01 🔴 Sauvegardes : en attendant PostgreSQL (sauvegardes automatiques), copie quotidienne de `.data/` hors de la machine | BUG-03 |
 | 25/09/2026 | DS-02 ✅ Écarts relevés par la documentation corrigés : libellé de l'onglet actif lisible sur le verre dans tous les cas (test ajouté), dimensions et opacités passées en jetons (barre, bandeau, flou, filigrane, vignette, format de la une, espacement des capitales) | DS-01 |
 | 26/09/2026 | FEED-01 ✅ Favoris (marque-page sur l'article, page « Mes favoris » depuis l'en-tête, article complet gardé sur le téléphone donc lisible hors ligne, sans compte) et partage (titre + lien vers la page officielle presidence.sn) | P0 fil |
-| 26/09/2026 | FEED-02 🔴 Filtres par rubrique sur l'accueil | P0 fil |
+| 26/09/2026 | FEED-02 ✅ (puces de rubrique avec leur motif tissé sous l'en-tête ; chaque rubrique a son cache hors ligne ; carte du Conseil réservée à « Tout ») Filtres par rubrique sur l'accueil | P0 fil |
 | 26/09/2026 | FEED-03 🔴 Recherche dans les actualités (FR/WO, tolérante aux fautes ; Meilisearch en production) | P0 fil |
 | 26/09/2026 | FEED-04 🔴 Notifications push par rubrique (opt-in, heures calmes) — nécessite un build natif (A-02) | P0 fil |
+| 26/09/2026 | MED-04 🔵 223 échecs d'images du texte lors de la reconstruction (téléchargements OK ensuite : panne passagère probable + disjoncteur) ; cause désormais écrite dans chaque rapport ; relance de l'import prévue | Reconstruction |

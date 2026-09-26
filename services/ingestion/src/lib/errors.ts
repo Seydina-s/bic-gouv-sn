@@ -34,7 +34,9 @@ export class MediaProcessingError extends Error {
     readonly mediaUrl: string,
     options: { cause: unknown },
   ) {
-    super(`Media processing failed: ${mediaUrl}`, options);
+    // The cause is spelled out: a report must say why, not only which file (26/09/2026).
+    const reason = options.cause instanceof Error ? options.cause.message : String(options.cause);
+    super(`Media processing failed: ${mediaUrl} (${reason})`, options);
     this.name = "MediaProcessingError";
   }
 }

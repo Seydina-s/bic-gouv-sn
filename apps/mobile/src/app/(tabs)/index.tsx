@@ -1,6 +1,6 @@
 import { FlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import { BookmarkSimpleIcon as BookmarkSimple } from "phosphor-react-native/src/icons/BookmarkSimple";
 import { useTabBarInset } from "../../components/GlassTabBar";
@@ -11,6 +11,7 @@ import {
   type FrontPageRow,
 } from "../../features/news/front-page";
 import { Masthead } from "../../features/news/Masthead";
+import { SectionFilter } from "../../features/news/SectionFilter";
 import { CouncilCard, LeadStory, StoryRow } from "../../features/news/Stories";
 import { useLastOpened } from "../../features/news/useLastOpened";
 import { useLatestIn, useNewsFeed } from "../../features/news/useNews";
@@ -62,13 +63,18 @@ export default function HomeScreen() {
   const { t } = useTranslation();
   const bottomInset = useTabBarInset();
   const router = useRouter();
-  const feed = useNewsFeed();
+  const [section, setSection] = useState<string | null>(null);
+  const feed = useNewsFeed(section);
   const council = useLatestIn(COUNCIL_CATEGORY);
   const { lastOpened, markOpened } = useLastOpened();
   const rows = useMemo(
     () =>
-      composeFrontPage(feed.data?.pages.flatMap((page) => page.items) ?? [], council.data ?? null),
-    [feed.data, council.data],
+      composeFrontPage(
+        feed.data?.pages.flatMap((page) => page.items) ?? [],
+        // The Conseil des ministres card belongs to the full front page only.
+        section === null ? (council.data ?? null) : null,
+      ),
+    [feed.data, council.data, section],
   );
   const { color, space } = theme;
 
@@ -91,6 +97,7 @@ export default function HomeScreen() {
           />
         }
       />
+      <SectionFilter selected={section} onSelect={setSection} />
       {feed.isError && rows.length > 0 && <Notice text={t("feed.offline")} />}
     </View>
   );
@@ -117,7 +124,7 @@ export default function HomeScreen() {
   ) : feed.isError ? (
     <Notice text={t("feed.error")} action={t("feed.retry")} onAction={() => void feed.refetch()} />
   ) : (
-    <Notice text={t("feed.empty")} />
+    <Notice text={section === null ? t("feed.empty") : t("feed.emptySection")} />
   );
 
   return (
