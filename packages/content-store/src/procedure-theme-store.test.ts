@@ -52,6 +52,49 @@ describe("FileProcedureThemeStore", () => {
     });
   });
 
+  it("keeps the themes the platform added when official themes are collected again", async () => {
+    await store.savePlatformThemes([
+      { id: "bgsagri", title: "Agriculture", sourceIcon: "fa-seedling", fetchedAt: NOW },
+    ]);
+    await store.saveThemes([{ id: "a1", title: "Transports", sourceIcon: null, fetchedAt: LATER }]);
+    const themes = (await store.read()).themes;
+    expect(themes.map((theme) => [theme.id, theme.origin])).toEqual([
+      ["a1", "source"],
+      ["bgsagri", "platform"],
+    ]);
+    await expect(
+      store.savePlatformThemes([{ id: "a1", title: "X", sourceIcon: null, fetchedAt: NOW }]),
+    ).rejects.toThrow(/official/);
+  });
+
+  it("applies a delegated classification without replacing what a person validated", async () => {
+    await store.propose({ "permis-a": "b2", "credit-b": "b2" }, NOW);
+    await store.validate(["credit-b"], "b2", "relecteur-1", NOW);
+    const result = await store.applyClassification(
+      { "permis-a": "a1", "credit-b": "a1", "sans-proposition": "b2" },
+      "delegation:claude",
+      LATER,
+    );
+    expect(result).toEqual({
+      applied: ["permis-a", "sans-proposition"],
+      keptPersonal: ["credit-b"],
+    });
+    const { assignments } = await store.read();
+    expect(assignments["permis-a"]).toMatchObject({
+      themeId: "a1",
+      status: "validated",
+      reviewedBy: "delegation:claude",
+    });
+    expect(assignments["credit-b"]).toMatchObject({ themeId: "b2", reviewedBy: "relecteur-1" });
+    // Applying the same classification again changes nothing.
+    expect(
+      (await store.applyClassification({ "permis-a": "a1" }, "delegation:claude", LATER)).applied,
+    ).toEqual([]);
+    await expect(
+      store.applyClassification({ "permis-a": "zz" }, "delegation:claude", LATER),
+    ).rejects.toThrow(/Unknown theme/);
+  });
+
   it("refuses a theme that does not exist", async () => {
     await expect(store.validate(["permis-a"], "zz", "relecteur-1", NOW)).rejects.toThrow(
       /Unknown theme/,

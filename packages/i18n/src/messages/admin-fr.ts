@@ -90,6 +90,8 @@ export const adminFr = {
     validatedTitle: "Déjà validées dans « {theme} »",
     moveTo: "Thème pour « {procedure} »",
     fileHere: "Classer ici",
+    byClaude: "classée par Claude (délégation)",
+    addedTheme: "thème ajouté",
     moveSummary: "Mettre une de ces démarches dans un autre thème",
     none: "Rien à vérifier dans ce thème.",
     done: {

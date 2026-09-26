@@ -1,4 +1,4 @@
-import type { Procedure, ProcedureTheme } from "@bgs/shared-types";
+import type { Procedure, ProcedureThemeInput } from "@bgs/shared-types";
 import { CircuitBreaker, createResilientCall } from "@bgs/resilience";
 import type { z } from "zod";
 import { QuarantineError, SourceUnreachableError } from "../../lib/errors";
@@ -27,7 +27,7 @@ export interface ProcedureSource {
   listPage(page: number): Promise<ProcedureListPage>;
   fetchProcedure(slug: string): Promise<Procedure>;
   /** Official themes of procedures (not linked to procedures at the source). */
-  listThemes(): Promise<ProcedureTheme[]>;
+  listThemes(): Promise<ProcedureThemeInput[]>;
 }
 
 export interface EsenegalProviderOptions {

@@ -8,9 +8,18 @@ import { BatchForm, MoveForm, type ReviewProcedure } from "./ReviewForms";
 export const dynamic = "force-dynamic";
 
 const UNCLASSIFIED = "a-classer";
+/** Classifications the user delegated to Claude (apps/api procedures:classify). */
+const DELEGATED_REVIEWER = "delegation:claude";
 
 const reviewSchema = z.object({
-  themes: z.array(z.object({ id: z.string(), title: z.string(), icon: z.string().nullable() })),
+  themes: z.array(
+    z.object({
+      id: z.string(),
+      title: z.string(),
+      icon: z.string().nullable(),
+      origin: z.enum(["source", "platform"]).default("source"),
+    }),
+  ),
   procedures: z.array(
     z.object({
       slug: z.string(),
@@ -18,6 +27,7 @@ const reviewSchema = z.object({
       summary: z.string().nullable(),
       themeId: z.string().nullable(),
       status: z.enum(["proposed", "validated", "unclassified"]),
+      reviewedBy: z.string().nullable().default(null),
     }),
   ),
 });
@@ -93,7 +103,9 @@ export default async function ProcedureThemesPage({
             {themes.map((item) =>
               link(
                 item.id,
-                item.title,
+                item.origin === "platform"
+                  ? `${item.title} (${t("review.addedTheme")})`
+                  : item.title,
                 `${t("review.toCheck", { count: proposedIn(item.id).length })} · ${t("review.validated", { count: validatedIn(item.id).length })}`,
               ),
             )}
@@ -155,7 +167,14 @@ export default async function ProcedureThemesPage({
                   </h2>
                   <ul className="list-disc space-y-1 pl-6 text-ink-soft">
                     {validatedIn(theme.id).map((row) => (
-                      <li key={row.slug}>{row.title}</li>
+                      <li key={row.slug}>
+                        {row.title}
+                        {row.reviewedBy === DELEGATED_REVIEWER && (
+                          <span className="ml-2 text-sm text-ink-faint">
+                            {t("review.byClaude")}
+                          </span>
+                        )}
+                      </li>
                     ))}
                   </ul>
                 </div>

@@ -1,7 +1,8 @@
 import { readFile } from "node:fs/promises";
 import {
+  procedureThemeSchema,
   procedureThemesFileSchema,
-  type ProcedureTheme,
+  type ProcedureThemeInput,
   type ProcedureThemesFile,
   type ThemeAssignment,
 } from "@bgs/shared-types";
@@ -30,10 +31,73 @@ export class FileProcedureThemeStore {
     return procedureThemesFileSchema.parse(JSON.parse(raw));
   }
 
-  /** Replaces the list of themes (as collected from the source). */
-  async saveThemes(themes: ProcedureTheme[]): Promise<void> {
+  /**
+   * Replaces the official themes (as collected from the source). Themes the platform
+   * added are kept: a new collection never removes them.
+   */
+  async saveThemes(themes: ProcedureThemeInput[]): Promise<void> {
     const file = await this.read();
-    await this.write({ ...file, themes });
+    const official = themes.map((theme) =>
+      procedureThemeSchema.parse({ ...theme, origin: "source" }),
+    );
+    const added = file.themes.filter((theme) => theme.origin === "platform");
+    await this.write({ ...file, themes: [...official, ...added] });
+  }
+
+  /** Creates or updates themes added by the platform (never an official one). */
+  async savePlatformThemes(themes: ProcedureThemeInput[]): Promise<void> {
+    const file = await this.read();
+    const added = themes.map((theme) =>
+      procedureThemeSchema.parse({ ...theme, origin: "platform" }),
+    );
+    const ids = new Set(added.map((theme) => theme.id));
+    if (file.themes.some((theme) => theme.origin === "source" && ids.has(theme.id))) {
+      throw new Error("A platform theme cannot replace an official theme");
+    }
+    const kept = file.themes.filter((theme) => !ids.has(theme.id));
+    await this.write({ ...file, themes: [...kept, ...added] });
+  }
+
+  /**
+   * Files procedures under themes on someone's behalf (e.g. a classification the
+   * user delegated). What a person validated in the console is never replaced:
+   * only procedures proposed, unclassified, or filed by this same reviewer change.
+   */
+  async applyClassification(
+    classification: Record<string, string>,
+    reviewer: string,
+    now: string,
+  ): Promise<{ applied: string[]; keptPersonal: string[] }> {
+    const file = await this.read();
+    const known = new Set(file.themes.map((theme) => theme.id));
+    const assignments = { ...file.assignments };
+    const applied: string[] = [];
+    const keptPersonal: string[] = [];
+    for (const [slug, themeId] of Object.entries(classification)) {
+      if (!known.has(themeId)) {
+        throw new Error(`Unknown theme ${themeId}`);
+      }
+      const current = assignments[slug];
+      if (current?.status === "validated" && current.reviewedBy !== reviewer) {
+        keptPersonal.push(slug);
+        continue;
+      }
+      if (current?.status === "validated" && current.themeId === themeId) {
+        continue;
+      }
+      assignments[slug] = {
+        themeId,
+        status: "validated",
+        proposedAt: current?.proposedAt ?? now,
+        reviewedBy: reviewer,
+        reviewedAt: now,
+      };
+      applied.push(slug);
+    }
+    if (applied.length > 0) {
+      await this.write({ ...file, assignments });
+    }
+    return { applied, keptPersonal };
   }
 
   /**

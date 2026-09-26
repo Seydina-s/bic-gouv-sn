@@ -10,7 +10,8 @@
     "start": "node --env-file-if-exists=.env.local --import ./dist/instrument.mjs dist/server.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --coverage",
-    "admin:create": "tsx --env-file-if-exists=.env.local src/cli/create-admin.ts"
+    "admin:create": "tsx --env-file-if-exists=.env.local src/cli/create-admin.ts",
+    "procedures:classify": "tsx --env-file-if-exists=.env.local src/cli/apply-procedure-classification.ts"
   },
   "dependencies": {
     "@bgs/admin-auth": "workspace:*",

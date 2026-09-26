@@ -9,10 +9,13 @@ import { FileTextIcon as FileText } from "phosphor-react-native/src/icons/FileTe
 import { FingerprintIcon as Fingerprint } from "phosphor-react-native/src/icons/Fingerprint";
 import { GraduationCapIcon as GraduationCap } from "phosphor-react-native/src/icons/GraduationCap";
 import { IdentificationBadgeIcon as IdentificationBadge } from "phosphor-react-native/src/icons/IdentificationBadge";
+import { LightningIcon as Lightning } from "phosphor-react-native/src/icons/Lightning";
 import { MaskHappyIcon as MaskHappy } from "phosphor-react-native/src/icons/MaskHappy";
+import { PlantIcon as Plant } from "phosphor-react-native/src/icons/Plant";
 import { ScalesIcon as Scales } from "phosphor-react-native/src/icons/Scales";
 import { StethoscopeIcon as Stethoscope } from "phosphor-react-native/src/icons/Stethoscope";
 import { SwimmingPoolIcon as SwimmingPool } from "phosphor-react-native/src/icons/SwimmingPool";
+import { TreeIcon as Tree } from "phosphor-react-native/src/icons/Tree";
 import { UsersFourIcon as UsersFour } from "phosphor-react-native/src/icons/UsersFour";
 import { UsersThreeIcon as UsersThree } from "phosphor-react-native/src/icons/UsersThree";
 import { WalletIcon as Wallet } from "phosphor-react-native/src/icons/Wallet";
@@ -41,6 +44,10 @@ const GLYPHS: Record<string, ComponentType<PhosphorProps>> = {
   "fa-users-cog": Factory,
   "fa-users-class": IdentificationBadge,
   "fa-wallet": Wallet,
+  // Themes the platform added (no official theme fits these procedures).
+  "fa-seedling": Plant,
+  "fa-tree": Tree,
+  "fa-bolt": Lightning,
 };
 
 /** Cards per row: two on phones, more as the window widens (tablets, unfolded). */
