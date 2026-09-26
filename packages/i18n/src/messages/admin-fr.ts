@@ -24,6 +24,20 @@ export const adminFr = {
     invalid: { verdict: "Réponse inattendue de l'API" },
     unconfigured: { verdict: "Adresse de l'API non configurée" },
   },
+  ingestion: {
+    title: "Collecte des actualités",
+    ok: {
+      verdict: "Les actualités se mettent à jour",
+      detail: "Dernière vérification de presidence.sn à {time}.",
+    },
+    lastArticle: "Dernier nouvel article repéré à {time}, {delay} après sa mise en ligne.",
+    unknown: {
+      verdict: "État de la collecte inconnu",
+      detail:
+        "Aucun rapport de la collecte n'est disponible : elle n'a peut-être jamais été lancée, ou l'API ne répond pas.",
+    },
+    since: "Depuis {time}",
+  },
   duration: {
     lessThanAMinute: "moins d'une minute",
     minutes: "{minutes} min",

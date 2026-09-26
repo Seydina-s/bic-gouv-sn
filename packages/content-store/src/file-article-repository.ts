@@ -1,5 +1,4 @@
-import { mkdir, open, readFile, rename } from "node:fs/promises";
-import { dirname } from "node:path";
+import { readFile } from "node:fs/promises";
 import { newsArticleSchema, type NewsArticle } from "@bgs/shared-types";
 import { z } from "zod";
 import {
@@ -9,6 +8,7 @@ import {
   type ListQuery,
   type SaveOutcome,
 } from "./article-repository";
+import { writeFileDurably } from "./durable-file";
 
 const fileSchema = z.object({
   schemaVersion: z.literal(1),
@@ -107,29 +107,12 @@ export class FileArticleRepository implements ArticleRepository {
 
   /** Main file then backup, each flushed to disk before it replaces the previous one. */
   private async write(store: StoreFile): Promise<void> {
-    await mkdir(dirname(this.path), { recursive: true });
     const data = JSON.stringify(store);
-    await replaceDurably(this.path, data);
-    await replaceDurably(this.backupPath, data);
+    await writeFileDurably(this.path, data);
+    await writeFileDurably(this.backupPath, data);
   }
 }
 
 async function readStoreFile(path: string): Promise<StoreFile> {
   return fileSchema.parse(JSON.parse(await readFile(path, "utf8")));
-}
-
-/**
- * Writes a temporary file, forces it onto the disk (fsync), then renames it over
- * `path`. Without the fsync, a power cut can leave a renamed file full of zeros.
- */
-async function replaceDurably(path: string, data: string): Promise<void> {
-  const temp = `${path}.${String(process.pid)}.tmp`;
-  const handle = await open(temp, "w");
-  try {
-    await handle.writeFile(data, "utf8");
-    await handle.sync();
-  } finally {
-    await handle.close();
-  }
-  await rename(temp, path);
 }

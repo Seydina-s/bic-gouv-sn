@@ -1,8 +1,14 @@
 // Real-time watcher: `pnpm --filter @bgs/ingestion watch`. Stops cleanly on Ctrl+C / SIGTERM.
 import { fileURLToPath } from "node:url";
-import { FileArticleRepository } from "@bgs/content-store";
+import {
+  FileArticleRepository,
+  readIngestionStatus,
+  writeIngestionStatus,
+} from "@bgs/content-store";
+import { errorCodeOf } from "@bgs/shared-types";
 import { FileMediaStorage } from "../media/media-storage";
 import { createPresidenceProvider } from "../sources/presidence/presidence-provider";
+import { nextIngestionStatus, type PassOutcome } from "../status";
 import { nextPollDelayMs, pollOnce, SeenIndex } from "../watch";
 
 const storePath =
@@ -22,6 +28,19 @@ for (const signal of ["SIGINT", "SIGTERM"] as const) {
   process.once(signal, () => {
     control.running = false;
     wake?.();
+  });
+}
+
+// Report read by the administration console (through the API) after each pass.
+const statusPath =
+  process.env["INGESTION_STATUS_PATH"] ??
+  fileURLToPath(new URL("../../../../.data/ingestion-status.json", import.meta.url));
+let status = await readIngestionStatus(statusPath);
+
+async function report(outcome: PassOutcome) {
+  status = nextIngestionStatus(status, outcome, new Date());
+  await writeIngestionStatus(statusPath, status).catch((error: unknown) => {
+    process.stdout.write(`status report not written: ${String(error)}\n`);
   });
 }
 
@@ -45,10 +64,12 @@ while (control.running) {
         `${startedAt.toISOString()} new ${String(created)} · edited ${String(updated)} · slowest detection ${slowest.toFixed(0)} s\n`,
       );
     }
+    await report({ result });
     for (const failure of result.failures) {
       process.stdout.write(`${startedAt.toISOString()} ✗ ${failure.code} ${failure.ref}\n`);
     }
   } catch (error) {
+    await report({ error: { code: errorCodeOf(error) ?? "UNKNOWN" } });
     process.stdout.write(
       `${startedAt.toISOString()} ✗ ${error instanceof Error ? error.message : String(error)}\n`,
     );

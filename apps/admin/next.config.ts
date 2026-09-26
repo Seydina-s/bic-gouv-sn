@@ -3,11 +3,13 @@ import type { NextConfig } from "next";
 /**
  * Content Security Policy. Next.js hydrates with inline scripts, hence
  * 'unsafe-inline' for scripts until nonce-based CSP is set up (backlog SEC-03).
- * Everything else is locked to this origin; no framing, no plugins.
+ * 'unsafe-eval' only in local development (React's debugging tools need it);
+ * production never allows it. Everything else is locked to this origin.
  */
+const isDevelopment = process.env.NODE_ENV === "development";
 const contentSecurityPolicy = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline'",
+  `script-src 'self' 'unsafe-inline'${isDevelopment ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data:",
   "font-src 'self'",
