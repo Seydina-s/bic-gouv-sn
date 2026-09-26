@@ -46,9 +46,25 @@ describe("app shell", () => {
     await renderRouter(routes, { initialUrl: "/" });
     expect(await screen.findByText("Titre de test A")).toBeOnTheScreen();
     expect(screen.getByText("Titre de test B")).toBeOnTheScreen();
-    expect(screen.getByText("Conseil des ministres")).toBeOnTheScreen();
+    expect(
+      screen.getByRole("button", { name: /^Conseil des ministres\. Titre de test A/ }),
+    ).toBeOnTheScreen();
     expect(screen.getByText("Actualité")).toBeOnTheScreen();
     expect(screen.getByRole("header", { name: "Bic Gouv SN" })).toBeOnTheScreen();
+  });
+
+  it("filters the front page by section", async () => {
+    const fetchMock = newsFetch();
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    await renderRouter(routes, { initialUrl: "/" });
+    await screen.findByText("Titre de test A");
+    await fireEvent.press(screen.getByRole("button", { name: "Communiqués" }));
+    await waitFor(() => {
+      expect(fetchMock.mock.calls.some(([url]) => url.includes("category=communiques"))).toBe(true);
+    });
+    expect(screen.getByRole("button", { name: "Communiqués", selected: true })).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole("button", { name: "Tout" }));
+    expect(screen.getByRole("button", { name: "Tout", selected: true })).toBeOnTheScreen();
   });
 
   it("keeps an article in the favorites, saved on the phone", async () => {

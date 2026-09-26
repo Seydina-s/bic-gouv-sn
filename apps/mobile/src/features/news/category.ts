@@ -18,3 +18,14 @@ function isKnown(slug: string): slug is KnownCategory {
 export function categoryLabelKey(slug: string): `categories.${KnownCategory | "general"}` {
   return isKnown(slug) ? `categories.${slug}` : "categories.general";
 }
+
+/** Sections offered as filters on the front page, in the order of the official site. */
+export const SECTION_FILTERS: readonly KnownCategory[] = [
+  "conseil-des-ministres",
+  "communiques",
+  "discours",
+  "international",
+  "focus",
+  "interviews",
+  "agenda",
+];

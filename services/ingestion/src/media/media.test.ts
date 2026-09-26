@@ -341,6 +341,8 @@ describe("images placed in the text", () => {
     const first = await attachInlineImages(withBody(body), provider(download), repo, storage);
     expect(first.attached).toBe(1);
     expect(first.failures.map((failure) => failure.code)).toEqual(["MEDIA_PROCESSING_FAILED"]);
+    // The report says why, not only which file.
+    expect(first.failures[0]?.message).toMatch(/b\.png \(404\)$/);
 
     const withCover: SourceArticleRef = {
       sourceId: 1,

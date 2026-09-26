@@ -52,10 +52,19 @@ export function createNewsClient({
   }
 
   return {
-    listNews(lang: Lang, cursor: string | null, signal?: AbortSignal): Promise<NewsListResponse> {
+    /** One page of the feed, optionally limited to one section. */
+    listNews(
+      lang: Lang,
+      cursor: string | null,
+      signal?: AbortSignal,
+      category: string | null = null,
+    ): Promise<NewsListResponse> {
       const query = new URLSearchParams({ lang, limit: "20" });
       if (cursor !== null) {
         query.set("cursor", cursor);
+      }
+      if (category !== null) {
+        query.set("category", category);
       }
       return getJson(`/v1/news?${query.toString()}`, readNewsList, signal);
     },

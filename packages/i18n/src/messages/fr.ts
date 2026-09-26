@@ -37,6 +37,8 @@ export const fr = {
   feed: {
     latestCouncil: "Dernier Conseil des ministres",
     readCommunique: "Lire le communiqué",
+    allSections: "Tout",
+    emptySection: "Aucune actualité dans cette rubrique pour le moment.",
     loadMore: "Chargement de la suite",
     lastOpened: "Dernière lecture",
     offline: "Hors ligne : voici les dernières actualités enregistrées.",
