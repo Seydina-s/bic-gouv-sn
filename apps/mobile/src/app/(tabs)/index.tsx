@@ -83,8 +83,7 @@ export default function HomeScreen() {
           : t("content.updatedDaysAgo", { count: freshness.count });
   const bottomInset = useTabBarInset();
   const router = useRouter();
-  const [section, setSection] = useState<string | null>(null);
-  const feed = useNewsFeed(section);
+  const feed = useNewsFeed();
   const council = useLatestIn(COUNCIL_CATEGORY);
   const { lastOpened, markOpened } = useLastOpened();
   const rows = useMemo(
@@ -92,9 +91,9 @@ export default function HomeScreen() {
       composeFrontPage(
         feed.data?.pages.flatMap((page) => page.items) ?? [],
         // The Conseil des ministres card belongs to the full front page only.
-        section === null ? (council.data ?? null) : null,
+        council.data ?? null,
       ),
-    [feed.data, council.data, section],
+    [feed.data, council.data],
   );
   const { color, space, layout } = theme;
   const { width } = useWindowDimensions();
@@ -145,7 +144,14 @@ export default function HomeScreen() {
           </>
         }
       />
-      <SectionFilter selected={section} onSelect={setSection} />
+      <SectionFilter
+        selected={null}
+        onSelect={(category) => {
+          if (category !== null) {
+            router.push({ pathname: "/section/[slug]", params: { slug: category } });
+          }
+        }}
+      />
       {feed.isError && rows.length > 0 && (
         <Notice
           text={`${t("feed.offline")} ${freshnessText(freshnessOf(feed.dataUpdatedAt, feed.errorUpdatedAt))}`}
@@ -176,7 +182,7 @@ export default function HomeScreen() {
   ) : feed.isError ? (
     <Notice text={t("feed.error")} action={t("feed.retry")} onAction={() => void feed.refetch()} />
   ) : (
-    <Notice text={section === null ? t("feed.empty") : t("feed.emptySection")} />
+    <Notice text={t("feed.empty")} />
   );
 
   const list = (

@@ -11,6 +11,7 @@ import ParticipateScreen from "./app/(tabs)/participate";
 import ProceduresScreen from "./app/(tabs)/procedures";
 import ArticleScreen from "./app/article/[id]";
 import ProcedureScreen from "./app/procedure/[slug]";
+import SectionScreen from "./app/section/[slug]";
 import FavoritesScreen from "./app/favorites";
 import SearchScreen from "./app/search";
 import SettingsScreen from "./app/settings";
@@ -36,6 +37,7 @@ const routes = {
   "(tabs)/participate": ParticipateScreen,
   "article/[id]": ArticleScreen,
   "procedure/[slug]": ProcedureScreen,
+  "section/[slug]": SectionScreen,
   favorites: FavoritesScreen,
   search: SearchScreen,
   settings: SettingsScreen,
@@ -180,18 +182,33 @@ describe("app shell", () => {
     ).toBeOnTheScreen();
   });
 
-  it("filters the front page by section", async () => {
-    const fetchMock = newsFetch();
+  it("opens a section from its chip, 20 stories per numbered page", async () => {
+    const fetchMock = newsFetch({
+      list: () => new Response(JSON.stringify({ ...LIST, total: 45 })),
+    });
     globalThis.fetch = fetchMock as unknown as typeof fetch;
     await renderRouter(routes, { initialUrl: "/" });
     await screen.findByText("Titre de test A");
     await fireEvent.press(screen.getByRole("button", { name: "Communiqués" }));
-    await waitFor(() => {
-      expect(fetchMock.mock.calls.some(([url]) => url.includes("category=communiques"))).toBe(true);
-    });
+    expect(await screen.findByText("45 articles")).toBeOnTheScreen();
     expect(screen.getByRole("button", { name: "Communiqués", selected: true })).toBeOnTheScreen();
+    expect(screen.getByText("Page 1 sur 3")).toBeOnTheScreen();
+    expect(fetchMock.mock.calls.some(([url]) => url.includes("category=communiques&page=1"))).toBe(
+      true,
+    );
+    await fireEvent.press(screen.getByRole("button", { name: "Page 3" }));
+    expect(await screen.findByText("Page 3 sur 3")).toBeOnTheScreen();
+    expect(fetchMock.mock.calls.some(([url]) => url.includes("category=communiques&page=3"))).toBe(
+      true,
+    );
+    expect(screen.getByRole("button", { name: "Page suivante" })).toBeDisabled();
+  });
+
+  it('goes back to the front page from the section\'s "Tout" chip', async () => {
+    await renderRouter(routes, { initialUrl: "/section/discours" });
+    expect(await screen.findByRole("header", { name: "Discours" })).toBeOnTheScreen();
     await fireEvent.press(screen.getByRole("button", { name: "Tout" }));
-    expect(screen.getByRole("button", { name: "Tout", selected: true })).toBeOnTheScreen();
+    expect(await screen.findByRole("header", { name: "Bic Gouv SN" })).toBeOnTheScreen();
   });
 
   it("keeps an article in the favorites, saved on the phone", async () => {

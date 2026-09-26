@@ -1,4 +1,5 @@
 import { tracking } from "@bgs/ui";
+import { useRef } from "react";
 import { Pressable, ScrollView, StyleSheet, Text } from "react-native";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
@@ -19,6 +20,7 @@ export function SectionFilter({ selected, onSelect }: SectionFilterProps) {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const { color, space, textStyle, radius, touchTarget } = theme;
+  const row = useRef<ScrollView>(null);
 
   const chip = (category: string | null, label: string) => {
     const active = selected === category;
@@ -33,6 +35,12 @@ export function SectionFilter({ selected, onSelect }: SectionFilterProps) {
         accessibilityLabel={label}
         onPress={() => {
           onSelect(category);
+        }}
+        onLayout={(event) => {
+          // The selected section is brought into view (it may sit past the screen edge).
+          if (active) {
+            row.current?.scrollTo({ x: Math.max(0, event.nativeEvent.layout.x - space.lg) });
+          }
         }}
         style={({ pressed }) => [
           styles.chip,
@@ -55,6 +63,7 @@ export function SectionFilter({ selected, onSelect }: SectionFilterProps) {
 
   return (
     <ScrollView
+      ref={row}
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={{
