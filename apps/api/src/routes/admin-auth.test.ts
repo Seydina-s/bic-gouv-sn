@@ -63,7 +63,7 @@ beforeEach(async () => {
     config: loadConfig({ LOG_LEVEL: "silent" }),
     version: "1.0.0",
     articles: temporaryStore(),
-    adminSignIn: signIn,
+    admin: { signIn, journal },
   });
 });
 

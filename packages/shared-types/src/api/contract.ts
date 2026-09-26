@@ -4,7 +4,11 @@ import {
   newsListResponseSchema,
   newsSectionsResponseSchema,
 } from "./news.schema";
-import { procedureDetailSchema, procedureListResponseSchema } from "./procedures.schema";
+import {
+  procedureDetailSchema,
+  procedureListResponseSchema,
+  procedureThemesResponseSchema,
+} from "./procedures.schema";
 
 /** FNV-1a, 32 bits: tiny and dependency-free; collisions only cost a cache refill. */
 function fnv1a(text: string): string {
@@ -35,6 +39,7 @@ export function apiContractFingerprint(): string {
     newsSectionsResponseSchema,
     procedureListResponseSchema,
     procedureDetailSchema,
+    procedureThemesResponseSchema,
   ]);
   return cached;
 }

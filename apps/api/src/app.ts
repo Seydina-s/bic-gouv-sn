@@ -10,17 +10,19 @@ import {
 } from "fastify-type-provider-zod";
 import {
   FileProcedureRepository,
+  FileProcedureThemeStore,
   type ArticleRepository,
   type ProcedureRepository,
 } from "@bgs/content-store";
 import { FileAdminAccountStore } from "./admin/account-store";
-import { FileAuditJournal } from "./admin/audit-journal";
+import { FileAuditJournal, type AuditJournal } from "./admin/audit-journal";
 import { SecretBox } from "./admin/secret-box";
 import { AdminSignIn } from "./admin/sign-in-service";
 import type { Config } from "./config";
 import { registerErrorHandlers } from "./errors";
 import { registerSecurity } from "./security";
 import { adminAuthRoutes } from "./routes/admin-auth";
+import { adminProcedureThemesRoutes } from "./routes/admin-procedure-themes";
 import { healthRoutes } from "./routes/health";
 import { registerMedia } from "./routes/media";
 import { newsRoutes } from "./routes/news";
@@ -33,19 +35,30 @@ export interface AppOptions {
   articles: ArticleRepository;
   /** Defaults to the procedure store at PROCEDURES_STORE_PATH. */
   procedures?: ProcedureRepository;
+  /** Defaults to the theme store at PROCEDURE_THEMES_PATH. */
+  procedureThemes?: FileProcedureThemeStore;
   /** Defaults to the file stores when ADMIN_SECRET_KEY is set; none otherwise. */
-  adminSignIn?: AdminSignIn | null;
+  admin?: AdminServices | null;
 }
 
-function defaultAdminSignIn(config: Config): AdminSignIn | null {
+export interface AdminServices {
+  signIn: AdminSignIn;
+  journal: AuditJournal;
+}
+
+function defaultAdmin(config: Config): AdminServices | null {
   if (config.ADMIN_SECRET_KEY === undefined) {
     return null;
   }
-  return new AdminSignIn({
-    accounts: new FileAdminAccountStore(config.ADMIN_ACCOUNTS_PATH),
-    journal: new FileAuditJournal(config.ADMIN_AUDIT_PATH),
-    box: new SecretBox(config.ADMIN_SECRET_KEY),
-  });
+  const journal = new FileAuditJournal(config.ADMIN_AUDIT_PATH);
+  return {
+    journal,
+    signIn: new AdminSignIn({
+      accounts: new FileAdminAccountStore(config.ADMIN_ACCOUNTS_PATH),
+      journal,
+      box: new SecretBox(config.ADMIN_SECRET_KEY),
+    }),
+  };
 }
 
 /** Builds the API without listening, so tests can call it in memory. */
@@ -54,7 +67,8 @@ export async function buildApp({
   version,
   articles,
   procedures = new FileProcedureRepository(config.PROCEDURES_STORE_PATH),
-  adminSignIn = defaultAdminSignIn(config),
+  procedureThemes = new FileProcedureThemeStore(config.PROCEDURE_THEMES_PATH),
+  admin = defaultAdmin(config),
 }: AppOptions): Promise<FastifyInstance> {
   const app = Fastify({
     logger: {
@@ -101,7 +115,11 @@ export async function buildApp({
         () => false,
       ),
   });
-  await app.register(proceduresRoutes, { prefix: "/v1", procedures });
+  await app.register(proceduresRoutes, {
+    prefix: "/v1",
+    procedures,
+    themes: procedureThemes,
+  });
   await app.register(statusRoutes, {
     prefix: "/v1",
     ingestionStatusPath: config.INGESTION_STATUS_PATH,
@@ -115,8 +133,14 @@ export async function buildApp({
   if (config.MEDIA_BASE_URL === undefined) {
     await registerMedia(app, config.MEDIA_ROOT);
   }
-  if (adminSignIn !== null) {
-    await app.register(adminAuthRoutes, { prefix: "/admin/v1", signIn: adminSignIn });
+  if (admin !== null) {
+    await app.register(adminAuthRoutes, { prefix: "/admin/v1", signIn: admin.signIn });
+    await app.register(adminProcedureThemesRoutes, {
+      prefix: "/admin/v1",
+      ...admin,
+      procedures,
+      themes: procedureThemes,
+    });
   }
   app.get("/v1/openapi.json", { schema: { hide: true } }, () => app.swagger());
 

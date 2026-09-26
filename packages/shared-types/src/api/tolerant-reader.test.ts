@@ -5,6 +5,7 @@ import {
   readNewsSections,
   readProcedureDetail,
   readProcedureList,
+  readProcedureThemes,
 } from "./tolerant-reader";
 
 // Placeholder texts, not real content.
@@ -154,5 +155,18 @@ describe("procedures (a newer API talking to an older app)", () => {
     expect(detail?.blocks).toEqual([{ type: "paragraph", inlines: [{ text: "Étape" }] }]);
     expect(detail?.faqs[0]?.blocks).toEqual([]);
     expect(readProcedureDetail({ ...detailItem, sourceUrl: "https://example.com" })).toBeNull();
+  });
+});
+
+describe("readProcedureThemes", () => {
+  it("keeps readable themes, ignores new fields, refuses a broken list", () => {
+    const read = readProcedureThemes({
+      themes: [
+        { id: "a1", title: "Transports", icon: "fa-bus-alt", count: 3, colour: "blue" },
+        { id: "", title: "Sans identifiant", icon: null, count: 1 },
+      ],
+    });
+    expect(read?.themes).toEqual([{ id: "a1", title: "Transports", icon: "fa-bus-alt", count: 3 }]);
+    expect(readProcedureThemes({ items: [] })).toBeNull();
   });
 });

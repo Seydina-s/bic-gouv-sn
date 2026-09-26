@@ -12,6 +12,7 @@ describe("loadConfig", () => {
       RATE_LIMIT_PER_MINUTE: 600,
       NEWS_STORE_PATH: ".data/news.json",
       PROCEDURES_STORE_PATH: ".data/procedures.json",
+      PROCEDURE_THEMES_PATH: ".data/procedure-themes.json",
       INGESTION_STATUS_PATH: ".data/ingestion-status.json",
       MEDIA_ROOT: ".data/media",
       ADMIN_ACCOUNTS_PATH: ".data/admin/accounts.json",

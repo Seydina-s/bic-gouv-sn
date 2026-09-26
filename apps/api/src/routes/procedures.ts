@@ -1,9 +1,10 @@
 import { createHash } from "node:crypto";
-import type { ProcedureRepository } from "@bgs/content-store";
+import type { FileProcedureThemeStore, ProcedureRepository } from "@bgs/content-store";
 import {
   apiErrorSchema,
   procedureDetailSchema,
   procedureListResponseSchema,
+  procedureThemesResponseSchema,
   type ErrorCode,
   type Procedure,
 } from "@bgs/shared-types";
@@ -14,6 +15,8 @@ import { scoreText, searchTerms } from "../search/text-search";
 
 export interface ProceduresRoutesOptions {
   procedures: ProcedureRepository;
+  /** Official themes and the theme of each procedure (only validated ones are public). */
+  themes: FileProcedureThemeStore;
 }
 
 /** Procedures change rarely: longer freshness than the news, same stale window. */
@@ -47,8 +50,51 @@ function matching(all: readonly Procedure[], query: string | undefined): Procedu
  */
 export const proceduresRoutes: FastifyPluginAsyncZod<ProceduresRoutesOptions> = (
   app,
-  { procedures },
+  { procedures, themes },
 ) => {
+  /** Slugs a person has filed under each theme (proposals are never public). */
+  async function validatedByTheme(): Promise<Map<string, Set<string>>> {
+    const { assignments } = await themes.read();
+    const byTheme = new Map<string, Set<string>>();
+    for (const [slug, assignment] of Object.entries(assignments)) {
+      if (assignment.status === "validated") {
+        const slugs = byTheme.get(assignment.themeId) ?? new Set<string>();
+        slugs.add(slug);
+        byTheme.set(assignment.themeId, slugs);
+      }
+    }
+    return byTheme;
+  }
+
+  app.get(
+    "/procedures/themes",
+    {
+      schema: {
+        tags: ["procedures"],
+        summary: "Official themes of e-senegal.sn, with their validated procedures count",
+        response: { 200: procedureThemesResponseSchema, 304: z.null() },
+      },
+    },
+    async (request, reply) => {
+      const file = await themes.read();
+      const byTheme = await validatedByTheme();
+      const body = {
+        themes: file.themes.map((theme) => ({
+          id: theme.id,
+          title: theme.title,
+          icon: theme.sourceIcon,
+          count: byTheme.get(theme.id)?.size ?? 0,
+        })),
+      };
+      const etag = fingerprint(body.themes.map((t) => `${t.id}:${t.title}:${String(t.count)}`));
+      void reply.header("etag", etag).header("cache-control", CACHE_CONTROL);
+      if (request.headers["if-none-match"] === etag) {
+        return reply.code(304).send(null);
+      }
+      return body;
+    },
+  );
+
   app.get(
     "/procedures",
     {
@@ -60,17 +106,33 @@ export const proceduresRoutes: FastifyPluginAsyncZod<ProceduresRoutesOptions> = 
           limit: z.coerce.number().int().min(1).max(100).default(30),
           /** Slug of the last procedure of the previous page. */
           cursor: z.string().min(1).max(200).optional(),
+          /** Only the procedures a person has filed under this official theme. */
+          theme: z
+            .string()
+            .regex(/^[a-z0-9]+$/)
+            .max(64)
+            .optional(),
         }),
         response: { 200: procedureListResponseSchema, 304: z.null() },
       },
     },
     async (request, reply) => {
-      const { q, limit, cursor } = request.query;
-      const all = matching(await procedures.all(), q);
+      const { q, limit, cursor, theme } = request.query;
+      const inTheme =
+        theme === undefined ? null : ((await validatedByTheme()).get(theme) ?? new Set());
+      const all = matching(await procedures.all(), q).filter(
+        (procedure) => inTheme === null || inTheme.has(procedure.slug),
+      );
       const start = cursor === undefined ? 0 : all.findIndex((p) => p.slug === cursor) + 1;
       const page = all.slice(start, start + limit);
       const last = page.at(-1);
-      const etag = fingerprint([q ?? "", cursor ?? "", ...page.map((p) => p.contentHash)]);
+      const etag = fingerprint([
+        q ?? "",
+        cursor ?? "",
+        theme ?? "",
+        String(all.length),
+        ...page.map((p) => p.contentHash),
+      ]);
       void reply.header("etag", etag).header("cache-control", CACHE_CONTROL);
       if (request.headers["if-none-match"] === etag) {
         return reply.code(304).send(null);
