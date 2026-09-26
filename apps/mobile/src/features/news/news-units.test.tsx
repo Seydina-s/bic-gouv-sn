@@ -7,7 +7,7 @@ import { ThemeProvider } from "../../theme/ThemeProvider";
 import { BlockRenderer } from "./BlockRenderer";
 import { categoryLabelKey } from "./category";
 import { pickCoverSource } from "./CoverImage";
-import { formatDay, formatPublishedOn, parseCalendarDate } from "./format";
+import { formatDay, formatPublishedOn, freshnessOf, parseCalendarDate } from "./format";
 import { composeFrontPage } from "./front-page";
 import { CouncilCard, LeadStory, StoryRow } from "./Stories";
 
@@ -246,5 +246,21 @@ describe("composeFrontPage", () => {
 
   it("is empty without news", () => {
     expect(composeFrontPage([])).toEqual([]);
+  });
+});
+
+describe("freshnessOf", () => {
+  const now = Date.parse("2026-09-26T12:00:00Z");
+  it.each([
+    [30_000, { unit: "now" }],
+    [5 * 60_000, { unit: "minutes", count: 5 }],
+    [3 * 3_600_000 + 59_000, { unit: "hours", count: 3 }],
+    [2 * 86_400_000, { unit: "days", count: 2 }],
+  ])("describes data fetched %i ms ago", (age, expected) => {
+    expect(freshnessOf(now - age, now)).toEqual(expected);
+  });
+
+  it("never reports a negative age (clock changed)", () => {
+    expect(freshnessOf(now + 60_000, now)).toEqual({ unit: "now" });
   });
 });

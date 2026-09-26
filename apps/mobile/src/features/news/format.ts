@@ -36,3 +36,24 @@ export function formatPublishedOn(isoDate: string | null, lang: Lang): string {
     year: "numeric",
   }).format(parseCalendarDate(isoDate));
 }
+
+const MINUTE = 60_000;
+const HOUR = 60 * MINUTE;
+const DAY = 24 * HOUR;
+
+export type Freshness = { unit: "now" } | { unit: "minutes" | "hours" | "days"; count: number };
+
+/** How long ago the shown data was fetched, in the largest whole unit. */
+export function freshnessOf(updatedAt: number, now: number): Freshness {
+  const age = Math.max(0, now - updatedAt);
+  if (age < MINUTE) {
+    return { unit: "now" };
+  }
+  if (age < HOUR) {
+    return { unit: "minutes", count: Math.floor(age / MINUTE) };
+  }
+  if (age < DAY) {
+    return { unit: "hours", count: Math.floor(age / HOUR) };
+  }
+  return { unit: "days", count: Math.floor(age / DAY) };
+}

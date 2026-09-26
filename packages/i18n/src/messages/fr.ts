@@ -18,7 +18,16 @@ export const fr = {
     sourceAttribution: "Source : {source}",
     machineTranslation: "Traduction automatique",
     listen: "Écouter",
-    updatedMinutesAgo: "Mis à jour il y a {count} min",
+    updatedJustNow: "Mis à jour à l'instant.",
+    updatedMinutesAgo: "Mis à jour il y a {count} min.",
+    updatedHoursAgo: {
+      one: "Mis à jour il y a {count} heure.",
+      other: "Mis à jour il y a {count} heures.",
+    },
+    updatedDaysAgo: {
+      one: "Mis à jour il y a {count} jour.",
+      other: "Mis à jour il y a {count} jours.",
+    },
   },
   onboarding: {
     skip: "Passer",
