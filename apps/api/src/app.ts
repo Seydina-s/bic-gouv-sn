@@ -15,6 +15,7 @@ import { registerSecurity } from "./security";
 import { healthRoutes } from "./routes/health";
 import { registerMedia } from "./routes/media";
 import { newsRoutes } from "./routes/news";
+import { statusRoutes } from "./routes/status";
 
 export interface AppOptions {
   config: Config;
@@ -72,6 +73,10 @@ export async function buildApp({
         () => true,
         () => false,
       ),
+  });
+  await app.register(statusRoutes, {
+    prefix: "/v1",
+    ingestionStatusPath: config.INGESTION_STATUS_PATH,
   });
   await app.register(newsRoutes, {
     prefix: "/v1",

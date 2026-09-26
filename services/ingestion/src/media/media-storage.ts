@@ -1,5 +1,6 @@
-import { mkdir, open, rename, stat } from "node:fs/promises";
-import { dirname, join } from "node:path";
+import { stat } from "node:fs/promises";
+import { join } from "node:path";
+import { writeFileDurably } from "@bgs/content-store";
 import { mediaKeySchema } from "@bgs/shared-types";
 
 /**
@@ -28,21 +29,8 @@ export class FileMediaStorage implements MediaStorage {
     }
   }
 
-  /**
-   * Durable write: temporary file flushed to disk (fsync), then renamed, so a
-   * power cut never leaves a truncated or zeroed file under its final name.
-   */
+  /** Durable write: never a truncated or zeroed file under its final name. */
   async put(key: string, data: Buffer): Promise<void> {
-    const path = this.pathOf(key);
-    await mkdir(dirname(path), { recursive: true });
-    const temp = `${path}.${String(process.pid)}.tmp`;
-    const handle = await open(temp, "w");
-    try {
-      await handle.writeFile(data);
-      await handle.sync();
-    } finally {
-      await handle.close();
-    }
-    await rename(temp, path);
+    await writeFileDurably(this.pathOf(key), data);
   }
 }

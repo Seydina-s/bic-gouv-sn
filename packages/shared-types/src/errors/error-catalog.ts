@@ -102,6 +102,14 @@ export const ERROR_CATALOG = {
     severity: "critical",
     action: "Vérifiez que presidence.sn est accessible ; la collecte reprend seule dès son retour.",
   },
+  INGESTION_STOPPED: {
+    what: "La surveillance des nouvelles publications de la Présidence est arrêtée.",
+    where: "Collecte automatique (presidence.sn)",
+    impact:
+      "Les nouveaux articles n'arrivent plus dans l'app ; les articles déjà collectés restent visibles.",
+    severity: "critical",
+    action: "Relancez le service de collecte, ou prévenez l'équipe technique.",
+  },
   INGESTION_QUARANTINED: {
     what: "Un article collecté est incomplet ou mal formé : il n'a pas été publié.",
     where: "Collecte automatique (presidence.sn)",
