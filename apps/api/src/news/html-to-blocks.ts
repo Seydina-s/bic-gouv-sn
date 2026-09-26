@@ -1,4 +1,4 @@
-import { officialMediaUrl, type Block, type Inline } from "@bgs/shared-types";
+import { officialMediaUrl, youtubeVideoId, type Block, type Inline } from "@bgs/shared-types";
 import { isTag, isText, type ChildNode, type Element } from "domhandler";
 import { parseDocument } from "htmlparser2";
 
@@ -76,13 +76,32 @@ function imageBlock(element: Element): Block[] {
   return src === null ? [] : [{ type: "image", src, alt: nonEmpty(element.attribs["alt"]) }];
 }
 
-/** Images nested in a paragraph become their own blocks, around the text. */
+/** Official video embed (kept by the ingestion allowlist): opened on tap, never embedded. */
+function videoBlock(element: Element): Block[] {
+  const videoId = youtubeVideoId(element.attribs["src"] ?? "");
+  return videoId === null
+    ? []
+    : [
+        {
+          type: "video",
+          provider: "youtube",
+          videoId,
+          url: `https://www.youtube.com/watch?v=${videoId}`,
+        },
+      ];
+}
+
+function mediaBlock(element: Element): Block[] {
+  return element.name === "iframe" ? videoBlock(element) : imageBlock(element);
+}
+
+/** Images and videos nested in a paragraph become their own blocks, around the text. */
 function textBlock(element: Element, make: (inlines: Inline[]) => Block): Block[] {
-  const images = element.children.filter(
-    (child): child is Element => isTag(child) && child.name === "img",
+  const media = element.children.filter(
+    (child): child is Element => isTag(child) && (child.name === "img" || child.name === "iframe"),
   );
   const inlines = inlinesOf(element.children);
-  return [...images.flatMap(imageBlock), ...(inlines.length > 0 ? [make(inlines)] : [])];
+  return [...media.flatMap(mediaBlock), ...(inlines.length > 0 ? [make(inlines)] : [])];
 }
 
 function listBlock(element: Element): Block[] {
@@ -103,7 +122,8 @@ function blocksOf(node: ChildNode): Block[] {
   }
   switch (node.name) {
     case "img":
-      return imageBlock(node);
+    case "iframe":
+      return mediaBlock(node);
     case "h2":
     case "h3":
     case "h4": {

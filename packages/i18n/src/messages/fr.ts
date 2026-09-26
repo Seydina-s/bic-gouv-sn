@@ -49,6 +49,8 @@ export const fr = {
     openSource: "Lire sur {source}",
     notFound: "Cet article n'est pas disponible.",
     image: "Photo de l'article",
+    watchVideo: "Regarder la vidéo",
+    videoHost: "Sur YouTube",
   },
   comingSoon: {
     title: "Bientôt disponible",
