@@ -1,7 +1,17 @@
 import type { Block, Inline } from "@bgs/shared-types";
 import { Image } from "expo-image";
 import { useState } from "react";
-import { Linking, StyleSheet, Text, View, useWindowDimensions, type TextStyle } from "react-native";
+import { PlayCircleIcon as PlayCircle } from "phosphor-react-native/src/icons/PlayCircle";
+import {
+  Linking,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+  type TextStyle,
+} from "react-native";
+import { Icon } from "../../components/Icon";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 import { CoverImage } from "./CoverImage";
@@ -127,11 +137,51 @@ export function BlockRenderer({ blocks }: { blocks: Block[] }) {
             <ArticleImage block={block} />
           </View>
         );
+      case "video":
+        return <VideoCard key={key} url={block.url} />;
     }
   });
 }
 
+/**
+ * Official video: a card that opens it in YouTube on tap. No embedded player:
+ * lighter on modest phones, and nothing reaches the video host until the reader asks.
+ */
+function VideoCard({ url }: { url: string }) {
+  const { theme } = useTheme();
+  const { t } = useTranslation();
+  const { color, space, textStyle, radius } = theme;
+  const title = t("article.watchVideo");
+  const host = t("article.videoHost");
+  return (
+    <Pressable
+      accessibilityRole="link"
+      accessibilityLabel={`${title}. ${host}`}
+      onPress={() => void Linking.openURL(url)}
+      style={({ pressed }) => [
+        styles.video,
+        {
+          gap: space.md,
+          padding: space.lg,
+          marginBottom: space.lg,
+          minHeight: theme.touchTarget.min,
+          borderRadius: radius.md,
+          backgroundColor: color.primaryContainer,
+          opacity: pressed ? theme.opacity.cardPressed : 1,
+        },
+      ]}
+    >
+      <Icon icon={PlayCircle} size="lg" weight="fill" color={color.onPrimaryContainer} />
+      <View style={styles.flex}>
+        <Text style={[textStyle.label, { color: color.onPrimaryContainer }]}>{title}</Text>
+        <Text style={[textStyle.bodySmall, { color: color.onPrimaryContainer }]}>{host}</Text>
+      </View>
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
+  video: { flexDirection: "row", alignItems: "center" },
   image: { width: "100%" },
   listItem: { flexDirection: "row" },
   flex: { flex: 1 },

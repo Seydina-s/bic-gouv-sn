@@ -42,7 +42,7 @@ describe("createNewsClient", () => {
     const newer = {
       ...DETAIL,
       audio: [{ lang: "wo" }],
-      blocks: [{ type: "video", url: "https://cdn.test/v.mp4" }, ...DETAIL.blocks],
+      blocks: [{ type: "podcast", url: "https://cdn.test/p.mp3" }, ...DETAIL.blocks],
     };
     const client = createNewsClient({ baseUrl: "", fetchImpl: respond(newer) });
     await expect(client.getNews(DETAIL.id, "fr")).resolves.toEqual(DETAIL);
@@ -106,6 +106,30 @@ describe("BlockRenderer", () => {
     expect(screen.getByLabelText("Photo de l'article")).toBeOnTheScreen();
     await fireEvent.press(screen.getByText("Lien"));
     expect(openURL).toHaveBeenCalledWith("https://www.presidence.sn/fr/");
+  });
+
+  it("opens an official video in YouTube only when the reader taps it", async () => {
+    const openURL = jest.spyOn(Linking, "openURL").mockResolvedValue(true);
+    openURL.mockClear();
+    await render(
+      <ThemeProvider>
+        <I18nProvider>
+          <BlockRenderer
+            blocks={[
+              {
+                type: "video",
+                provider: "youtube",
+                videoId: "UMZm4iPcFWE",
+                url: "https://www.youtube.com/watch?v=UMZm4iPcFWE",
+              },
+            ]}
+          />
+        </I18nProvider>
+      </ThemeProvider>,
+    );
+    expect(openURL).not.toHaveBeenCalled();
+    await fireEvent.press(screen.getByRole("link", { name: "Regarder la vidéo. Sur YouTube" }));
+    expect(openURL).toHaveBeenCalledWith("https://www.youtube.com/watch?v=UMZm4iPcFWE");
   });
 
   it("shows our stored copy of an image in the text, with its description", async () => {

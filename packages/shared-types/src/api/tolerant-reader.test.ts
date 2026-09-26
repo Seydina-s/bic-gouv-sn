@@ -72,7 +72,7 @@ describe("readNewsDetail", () => {
   it("drops block types this version cannot display", () => {
     const article = readNewsDetail({
       ...detail,
-      blocks: [{ type: "video", url: "https://cdn.test/v.mp4" }, ...detail.blocks],
+      blocks: [{ type: "podcast", url: "https://cdn.test/p.mp3" }, ...detail.blocks],
     });
     expect(article?.blocks).toEqual(detail.blocks);
   });

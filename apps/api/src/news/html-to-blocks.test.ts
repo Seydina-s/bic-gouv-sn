@@ -53,6 +53,21 @@ describe("htmlToBlocks", () => {
     ]);
   });
 
+  it("turns an official video embed into a video block opened on tap", () => {
+    expect(
+      htmlToBlocks(
+        '<p><iframe src="https://www.youtube-nocookie.com/embed/UMZm4iPcFWE"></iframe></p><iframe src="https://evil.example/x"></iframe>',
+      ),
+    ).toEqual([
+      {
+        type: "video",
+        provider: "youtube",
+        videoId: "UMZm4iPcFWE",
+        url: "https://www.youtube.com/watch?v=UMZm4iPcFWE",
+      },
+    ]);
+  });
+
   it("keeps only official HTTPS images and uses null for a missing alt", () => {
     expect(
       htmlToBlocks(

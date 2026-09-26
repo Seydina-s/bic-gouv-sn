@@ -59,3 +59,32 @@ export function officialMediaUrl(url: string): string | null {
     return null;
   }
 }
+
+const YOUTUBE_EMBED_HOSTS: ReadonlySet<string> = new Set([
+  "www.youtube.com",
+  "youtube.com",
+  "www.youtube-nocookie.com",
+  "youtube-nocookie.com",
+]);
+const YOUTUBE_VIDEO_ID = /^[A-Za-z0-9_-]{11}$/;
+
+/**
+ * Id of a YouTube video embedded by an official page (".../embed/<id>"), or null.
+ * Only embeds are recognised: the official site publishes some interviews this way.
+ * Never throws.
+ */
+export function youtubeVideoId(url: string): string | null {
+  try {
+    const parsed = new URL(url);
+    const [kind, id] = parsed.pathname.split("/").filter(Boolean);
+    return parsed.protocol === "https:" &&
+      YOUTUBE_EMBED_HOSTS.has(parsed.hostname) &&
+      kind === "embed" &&
+      id !== undefined &&
+      YOUTUBE_VIDEO_ID.test(id)
+      ? id
+      : null;
+  } catch {
+    return null;
+  }
+}

@@ -1,7 +1,30 @@
 import { describe, expect, it, vi } from "vitest";
 import { contentHash, stableUuid } from "./identity";
 import { createRateLimiter } from "./rate-limiter";
-import { sanitizeArticleHtml, textLength } from "./sanitize";
+import { hasVideo, sanitizeArticleHtml, textLength } from "./sanitize";
+
+describe("sanitizeArticleHtml: embedded videos", () => {
+  it("keeps an official YouTube embed, on the privacy-enhanced host, without extra attributes", () => {
+    const html = sanitizeArticleHtml(
+      '<p><iframe allowfullscreen="" frameborder="0" height="315" src="https://www.youtube.com/embed/UMZm4iPcFWE" width="100%" onload="x()"></iframe></p>',
+    );
+    expect(html).toBe(
+      '<p><iframe src="https://www.youtube-nocookie.com/embed/UMZm4iPcFWE"></iframe></p>',
+    );
+    expect(hasVideo(html)).toBe(true);
+  });
+
+  it.each([
+    ["another host", '<iframe src="https://evil.example/embed/UMZm4iPcFWE"></iframe>'],
+    ["plain http", '<iframe src="http://www.youtube.com/embed/UMZm4iPcFWE"></iframe>'],
+    ["a non-embed page", '<iframe src="https://www.youtube.com/watch?v=UMZm4iPcFWE"></iframe>'],
+    ["a script URL", '<iframe src="javascript:alert(1)"></iframe>'],
+  ])("drops a frame from %s", (_label, frame) => {
+    const html = sanitizeArticleHtml(`<p>Texte</p>${frame}`);
+    expect(html).toBe("<p>Texte</p>");
+    expect(hasVideo(html)).toBe(false);
+  });
+});
 
 describe("sanitizeArticleHtml", () => {
   it("removes scripts, event handlers, styles and classes", () => {

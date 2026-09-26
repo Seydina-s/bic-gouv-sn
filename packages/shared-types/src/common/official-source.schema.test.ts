@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { officialMediaUrl, officialSourceUrlSchema } from "./official-source.schema";
+import {
+  officialMediaUrl,
+  officialSourceUrlSchema,
+  youtubeVideoId,
+} from "./official-source.schema";
 
 describe("officialSourceUrlSchema", () => {
   it.each([
@@ -41,5 +45,24 @@ describe("officialMediaUrl", () => {
     ["not a URL", "not a url"],
   ])("refuses %s", (_label, url) => {
     expect(officialMediaUrl(url)).toBeNull();
+  });
+});
+
+describe("youtubeVideoId", () => {
+  it("reads the id of an embedded video", () => {
+    expect(youtubeVideoId("https://www.youtube.com/embed/UMZm4iPcFWE")).toBe("UMZm4iPcFWE");
+    expect(youtubeVideoId("https://www.youtube-nocookie.com/embed/UMZm4iPcFWE?rel=0")).toBe(
+      "UMZm4iPcFWE",
+    );
+  });
+
+  it.each([
+    "http://www.youtube.com/embed/UMZm4iPcFWE",
+    "https://www.youtube.com/watch?v=UMZm4iPcFWE",
+    "https://evil.example/embed/UMZm4iPcFWE",
+    "https://www.youtube.com/embed/short",
+    "not a url",
+  ])("refuses %s", (url) => {
+    expect(youtubeVideoId(url)).toBeNull();
   });
 });

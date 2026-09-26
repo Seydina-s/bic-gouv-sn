@@ -2,7 +2,7 @@ import { newsArticleSchema, type Lang, type NewsArticle } from "@bgs/shared-type
 import { QuarantineError } from "../../lib/errors";
 import { stableUuid } from "../../lib/identity";
 import { articleContentHash } from "../../merge";
-import { sanitizeArticleHtml, textLength } from "../../lib/sanitize";
+import { hasVideo, sanitizeArticleHtml, textLength } from "../../lib/sanitize";
 import type { DetailResponse } from "./api-schemas";
 
 export const SITE_ORIGIN = "https://www.presidence.sn";
@@ -17,7 +17,7 @@ export function presidenceArticleId(sourceArticleId: number): string {
   return stableUuid(`${SITE_ORIGIN}/article/${String(sourceArticleId)}`);
 }
 
-/** Below this, an article is considered emptied (by the source or by sanitization). */
+/** Below this, an article without video is considered emptied (source or sanitization). */
 const MIN_TEXT_LENGTH = 40;
 
 export interface NormalizeContext {
@@ -45,7 +45,7 @@ export function normalizeDetail(detail: DetailResponse, { lang, fetchedAt }: Nor
   if (category === undefined) {
     throw quarantine(`unknown category id ${String(base.categorieId)}`);
   }
-  if (textLength(bodyHtml) < MIN_TEXT_LENGTH) {
+  if (textLength(bodyHtml) < MIN_TEXT_LENGTH && !hasVideo(bodyHtml)) {
     throw quarantine("article body is empty after sanitization");
   }
 

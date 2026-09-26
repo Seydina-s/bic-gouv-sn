@@ -1,3 +1,4 @@
+import { youtubeVideoId } from "@bgs/shared-types";
 import sanitizeHtml from "sanitize-html";
 
 /**
@@ -5,6 +6,8 @@ import sanitizeHtml from "sanitize-html";
  * classes, scripts or event handlers; links and images over HTTPS only.
  * The source wraps paragraphs in <div> (text pasted from social networks):
  * they become <p>, and empty blocks are dropped.
+ * The only frames kept are YouTube embeds published by the official site (some
+ * interviews are video only); they are normalised to the privacy-enhanced host.
  */
 const OPTIONS: sanitizeHtml.IOptions = {
   allowedTags: [
@@ -22,20 +25,30 @@ const OPTIONS: sanitizeHtml.IOptions = {
     "blockquote",
     "a",
     "img",
+    "iframe",
   ],
-  allowedAttributes: { a: ["href"], img: ["src", "alt"] },
+  allowedAttributes: { a: ["href"], img: ["src", "alt"], iframe: ["src"] },
   allowedSchemes: ["https"],
   allowedSchemesAppliedToAttributes: ["href", "src"],
   allowProtocolRelative: false,
+  allowedIframeHostnames: ["www.youtube.com", "youtube.com", "www.youtube-nocookie.com"],
   transformTags: {
     div: "p",
     b: "strong",
     i: "em",
     h1: "h2",
+    iframe: (_tagName, attribs) => {
+      const id = youtubeVideoId(attribs["src"] ?? "");
+      return {
+        tagName: "iframe",
+        attribs: id === null ? {} : { src: `https://www.youtube-nocookie.com/embed/${id}` },
+      };
+    },
   },
   exclusiveFilter: (frame) =>
-    frame.tag === "p" && frame.text.trim() === "" && !frame.mediaChildren.length,
-  nonTextTags: ["script", "style", "textarea", "noscript", "iframe"],
+    (frame.tag === "iframe" && frame.attribs["src"] === undefined) ||
+    (frame.tag === "p" && frame.text.trim() === "" && !frame.mediaChildren.length),
+  nonTextTags: ["script", "style", "textarea", "noscript"],
 };
 
 export function sanitizeArticleHtml(html: string): string {
@@ -48,4 +61,9 @@ export function sanitizeArticleHtml(html: string): string {
 /** Visible text length, to detect articles emptied by the source or by sanitization. */
 export function textLength(html: string): number {
   return sanitizeHtml(html, { allowedTags: [], allowedAttributes: {} }).trim().length;
+}
+
+/** True when the sanitized article carries an official video. */
+export function hasVideo(html: string): boolean {
+  return html.includes("<iframe ");
 }
