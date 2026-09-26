@@ -79,7 +79,10 @@ export function ArticleView({ detail, isPending, paneWidth, bottomInset }: Artic
           slotWidth={Math.min(paneWidth, layout.readingMaxWidth)}
           style={{
             aspectRatio: layout.coverAspectRatio,
-            marginHorizontal: framed ? 0 : -space.lg,
+            // Explicit width: on phones, stretch + negative margins + aspect ratio left
+            // a gap on the right (native layout only; the web export looked right).
+            width: framed ? "100%" : paneWidth,
+            marginLeft: framed ? 0 : -space.lg,
             borderRadius: framed ? radius.md : 0,
             marginBottom: space.lg,
           }}
