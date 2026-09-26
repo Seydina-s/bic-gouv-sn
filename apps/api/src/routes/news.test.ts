@@ -2,6 +2,7 @@ import {
   apiErrorSchema,
   newsDetailSchema,
   newsListResponseSchema,
+  newsSectionsResponseSchema,
   type NewsArticle,
 } from "@bgs/shared-types";
 import type { FastifyInstance } from "fastify";
@@ -69,6 +70,29 @@ describe("GET /v1/news", () => {
     expect(newsListResponseSchema.parse(next.json()).items.map((i) => i.title)).toEqual([
       "Titre fr 1",
     ]);
+  });
+
+  it("serves numbered pages with the total", async () => {
+    const response = await app.inject({ method: "GET", url: "/v1/news?limit=2&page=2" });
+    const body = newsListResponseSchema.parse(response.json());
+    expect(body.items.map((item) => item.title)).toEqual(["Titre fr 1"]);
+    expect(body.total).toBe(3);
+    const first = newsListResponseSchema.parse(
+      (await app.inject({ method: "GET", url: "/v1/news?limit=2&page=1" })).json(),
+    );
+    expect(first.items.map((item) => item.title)).toEqual(["Titre fr 3", "Titre fr 2"]);
+    expect((await app.inject({ method: "GET", url: "/v1/news?page=0" })).statusCode).toBe(400);
+  });
+
+  it("gives the newest articles of each section in one response", async () => {
+    const response = await app.inject({ method: "GET", url: "/v1/news/sections?perSection=2" });
+    expect(response.statusCode).toBe(200);
+    expect(response.headers.etag).toBeDefined();
+    const body = newsSectionsResponseSchema.parse(response.json());
+    expect(body.sections).toHaveLength(1);
+    expect(body.sections[0]?.category).toBe("communiques");
+    expect(body.sections[0]?.total).toBe(3);
+    expect(body.sections[0]?.items.map((item) => item.title)).toEqual(["Titre fr 3", "Titre fr 2"]);
   });
 
   it("lists only articles available in Wolof when asked", async () => {

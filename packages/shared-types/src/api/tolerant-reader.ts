@@ -4,9 +4,11 @@ import {
   coverSchema,
   newsDetailSchema,
   newsListResponseSchema,
+  newsSectionsResponseSchema,
   newsSummarySchema,
   type NewsDetail,
   type NewsListResponse,
+  type NewsSectionsResponse,
 } from "./news.schema";
 import {
   procedureDetailSchema,
@@ -58,13 +60,31 @@ export function readNewsList(raw: unknown): NewsListResponse | null {
   if (!isRecord(raw)) {
     return null;
   }
-  const items = Array.isArray(raw["items"])
+  const parsed = newsListResponseSchema.safeParse({ ...raw, items: readableSummaries(raw) });
+  return parsed.success ? parsed.data : null;
+}
+
+/** Front page rows: unreadable articles are skipped, broken sections dropped. */
+export function readNewsSections(raw: unknown): NewsSectionsResponse | null {
+  if (!isRecord(raw) || !Array.isArray(raw["sections"])) {
+    return null;
+  }
+  const sections = raw["sections"]
+    .filter(isRecord)
+    .map((section) => ({ ...section, items: readableSummaries(section) }));
+  const parsed = newsSectionsResponseSchema.safeParse({
+    ...raw,
+    sections: keepValid(sections, newsSectionsResponseSchema.shape.sections.element),
+  });
+  return parsed.success ? parsed.data : null;
+}
+
+function readableSummaries(raw: Record<string, unknown>): unknown {
+  return Array.isArray(raw["items"])
     ? raw["items"]
         .map(withReadableParts)
         .filter((item) => newsSummarySchema.safeParse(item).success)
     : raw["items"];
-  const parsed = newsListResponseSchema.safeParse({ ...raw, items });
-  return parsed.success ? parsed.data : null;
 }
 
 /** One article, without the blocks this version cannot display. Null if broken. */

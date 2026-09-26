@@ -12,12 +12,30 @@ export interface ListQuery {
   limit: number;
   /** Opaque position returned by the previous page. */
   cursor?: string | undefined;
+  /** Numbered pages: articles to skip (ignored when a cursor is given). */
+  offset?: number | undefined;
 }
 
 export interface ArticlePage {
   items: NewsArticle[];
   /** Null on the last page. */
   nextCursor: string | null;
+  /** Articles matching the query, all pages together. */
+  total: number;
+}
+
+export interface SectionsQuery {
+  lang?: Lang | undefined;
+  /** Newest articles kept per section. */
+  perSection: number;
+}
+
+export interface SectionPage {
+  category: string;
+  /** Newest first, at most `perSection`. */
+  items: NewsArticle[];
+  /** Articles of the section, all pages together. */
+  total: number;
 }
 
 /**
@@ -28,6 +46,8 @@ export interface ArticleRepository {
   get(id: string): Promise<NewsArticle | null>;
   /** Newest first: source publication day, then source update time. */
   list(query: ListQuery): Promise<ArticlePage>;
+  /** Newest articles of every section, sections ordered by their newest article. */
+  sections(query: SectionsQuery): Promise<SectionPage[]>;
   save(article: NewsArticle): Promise<SaveOutcome>;
   /** Previous versions of an article, oldest first. */
   history(id: string): Promise<NewsArticle[]>;

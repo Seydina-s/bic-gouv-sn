@@ -100,8 +100,26 @@ export type NewsSummary = z.infer<typeof newsSummarySchema>;
 export const newsListResponseSchema = z.object({
   items: z.array(newsSummarySchema),
   nextCursor: z.string().nullable(),
+  /**
+   * Articles matching, all pages together (numbered pages). Optional: absent from
+   * search results and from APIs older than this field.
+   */
+  total: z.int().nonnegative().optional(),
 });
 export type NewsListResponse = z.infer<typeof newsListResponseSchema>;
+
+/** The newest articles of each section, for the front page rows. */
+export const newsSectionsResponseSchema = z.object({
+  sections: z.array(
+    z.object({
+      category: z.string().min(1),
+      /** Articles of the section, all pages together. */
+      total: z.int().nonnegative(),
+      items: z.array(newsSummarySchema),
+    }),
+  ),
+});
+export type NewsSectionsResponse = z.infer<typeof newsSectionsResponseSchema>;
 
 export const newsDetailSchema = newsSummarySchema.omit({ excerpt: true }).extend({
   blocks: z.array(blockSchema),

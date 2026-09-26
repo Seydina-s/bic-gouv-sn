@@ -51,7 +51,8 @@ function article(n: number, overrides: Partial<NewsArticle> = {}): NewsArticle {
 describe("FileArticleRepository", () => {
   it("starts empty when the file does not exist", async () => {
     expect(await repo.get("missing")).toBeNull();
-    expect(await repo.list({ limit: 10 })).toEqual({ items: [], nextCursor: null });
+    expect(await repo.list({ limit: 10 })).toEqual({ items: [], nextCursor: null, total: 0 });
+    expect(await repo.sections({ perSection: 10 })).toEqual([]);
     expect(await repo.history("missing")).toEqual([]);
   });
 
@@ -101,6 +102,31 @@ describe("FileArticleRepository", () => {
     const second = await repo.list({ limit: 2, cursor: first.nextCursor ?? undefined });
     expect(second.items.map((item) => item.sourcePublishedOn)).toEqual(["2026-09-11"]);
     expect(second.nextCursor).toBeNull();
+  });
+
+  it("serves numbered pages with the total", async () => {
+    for (const n of [1, 2, 3, 4, 5]) {
+      await repo.save(article(n));
+    }
+    const page2 = await repo.list({ limit: 2, offset: 2 });
+    expect(page2.items.map((item) => item.sourcePublishedOn)).toEqual(["2026-09-13", "2026-09-12"]);
+    expect(page2.total).toBe(5);
+    expect((await repo.list({ limit: 2, offset: 10 })).items).toEqual([]);
+  });
+
+  it("gives the newest articles of each section, newest section first", async () => {
+    await repo.save(article(1, { category: "discours" }));
+    await repo.save(article(2));
+    await repo.save(article(3));
+    await repo.save(article(4, { category: "discours" }));
+    await repo.save(article(5, { category: "agenda" }));
+    const sections = await repo.sections({ perSection: 1 });
+    expect(sections.map(({ category, total }) => [category, total])).toEqual([
+      ["agenda", 1],
+      ["discours", 2],
+      ["communiques", 2],
+    ]);
+    expect(sections[1]?.items.map((item) => item.id)).toEqual([article(4).id]);
   });
 
   it("orders same-day articles by source update time", async () => {
