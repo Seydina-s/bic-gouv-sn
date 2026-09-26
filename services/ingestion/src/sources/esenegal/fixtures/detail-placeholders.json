@@ -1,0 +1,24 @@
+{
+  "data": {
+    "fetchDemarcheBySlug": {
+      "id": "6981280d26c9ad93f292b549",
+      "titre": "Extrait de naissance",
+      "slug": "extrait-de-naissance",
+      "resume": "L’acte de naissance est un document officiel qui certifie la naissance d’une personne et fournit des informations comme le nom, la date et le lieu de naissance, ainsi que les noms des parents.",
+      "description": "",
+      "date_publication": "2026-03-22T22:28:56.940Z",
+      "cout": 1000,
+      "delai": 2,
+      "corps": "<h1>L’acte&nbsp;de&nbsp;naissance&nbsp;est&nbsp;un&nbsp;document&nbsp;officiel&nbsp;qui&nbsp;certifie&nbsp;la&nbsp;naissance&nbsp;d’une&nbsp;personne&nbsp;et&nbsp;fournit&nbsp;des&nbsp;informations&nbsp;comme&nbsp;le&nbsp;nom,&nbsp;la&nbsp;date&nbsp;et&nbsp;le&nbsp;lieu&nbsp;de&nbsp;naissance,&nbsp;ainsi&nbsp;que&nbsp;les&nbsp;noms&nbsp;des&nbsp;parents.</h1><p></p><p><strong>Qui&nbsp;peut&nbsp;demander&nbsp;un&nbsp;bulletin&nbsp;de&nbsp;naissance&nbsp;?</strong></p><ul><li>La&nbsp;personne&nbsp;elle-même&nbsp;ou&nbsp;toute&nbsp;personne&nbsp;intéressée</li><li>Les&nbsp;autorités&nbsp;administratives&nbsp;et&nbsp;judiciaires&nbsp;</li></ul><p>&nbsp;</p><p><strong>Quand&nbsp;peut-on&nbsp;demander&nbsp;?</strong></p><p>Dès&nbsp;la&nbsp;déclaration&nbsp;de&nbsp;naissance&nbsp;et&nbsp;à&nbsp;tout&nbsp;moment&nbsp;afin&nbsp;de&nbsp;compléter&nbsp;un&nbsp;dossier&nbsp;administratif.</p><p>&nbsp;</p><p><strong>Quelles&nbsp;sont&nbsp;les&nbsp;étapes&nbsp;et&nbsp;documents&nbsp;à&nbsp;fournir&nbsp;?</strong></p><p>Présenter&nbsp;l&#39;une&nbsp;des&nbsp;pièces&nbsp;suivantes&nbsp;:</p><p>•&nbsp;Un&nbsp;extrait&nbsp;de&nbsp;naissance</p><p>•&nbsp;Un&nbsp;ancien&nbsp;bulletin&nbsp;de&nbsp;naissance</p><p>•&nbsp;Le&nbsp;livret&nbsp;de&nbsp;famille</p><p>•&nbsp;Le&nbsp;volet&nbsp;n°&nbsp;1&nbsp;de&nbsp;l&#39;acte&nbsp;de&nbsp;naissance</p><p>•&nbsp;L&#39;année&nbsp;et&nbsp;le&nbsp;numéro&nbsp;de&nbsp;l&#39;acte&nbsp;d&#39;enregistrement&nbsp;de&nbsp;la&nbsp;naissance&nbsp;sur&nbsp;les&nbsp;registres&nbsp;de&nbsp;l&#39;état&nbsp;civil</p><p></p><p><strong>Quel&nbsp;est&nbsp;le&nbsp;coût&nbsp;?</strong></p><p>Une&nbsp;vignette&nbsp;dont&nbsp;le&nbsp;montant&nbsp;varie&nbsp;selon&nbsp;la&nbsp;localité&nbsp;(de&nbsp;200&nbsp;FCFA&nbsp;à&nbsp;500&nbsp;FCFA&nbsp;pour&nbsp;les&nbsp;communes,&nbsp;de&nbsp;75&nbsp;FCFA&nbsp;à&nbsp;150&nbsp;FCFA&nbsp;pour&nbsp;les&nbsp;communautés&nbsp;rurales).&nbsp;</p><p></p><p><strong>Où&nbsp;s’adresser&nbsp;?</strong></p><p>Au&nbsp;centre&nbsp;d&#39;état&nbsp;civil&nbsp;auprès&nbsp;duquel&nbsp;la&nbsp;naissance&nbsp;a&nbsp;été&nbsp;déclarée.</p><p>NB&nbsp;:&nbsp;Pour&nbsp;les&nbsp;naissances&nbsp;à&nbsp;l&#39;étranger,&nbsp;s&#39;adresser&nbsp;au&nbsp;ministère&nbsp;des&nbsp;Affaires&nbsp;étrangères&nbsp;ou&nbsp;à&nbsp;la&nbsp;représentation&nbsp;diplomatique&nbsp;du&nbsp;Sénégal&nbsp;dans&nbsp;le&nbsp;pays&nbsp;de&nbsp;naissance.</p><p>NB&nbsp;:&nbsp;Les&nbsp;personnes&nbsp;résidant&nbsp;à&nbsp;l&#39;étranger&nbsp;peuvent&nbsp;s&#39;adresser&nbsp;à&nbsp;la&nbsp;représentation&nbsp;diplomatique&nbsp;ou&nbsp;consulaire&nbsp;du&nbsp;Sénégal&nbsp;du&nbsp;pays&nbsp;de&nbsp;résidence.</p><p>&nbsp;</p><p><strong>Pour&nbsp;en&nbsp;savoir&nbsp;plus…</strong></p><p>S&#39;adresser&nbsp;au&nbsp;Centre&nbsp;national&nbsp;d&#39;état&nbsp;civil&nbsp;ou&nbsp;au&nbsp;tribunal&nbsp;départemental.</p><p>Service(s)&nbsp;à&nbsp;contacter&nbsp;:</p><p>•&nbsp;Direction&nbsp;de&nbsp;l&#39;état&nbsp;civil</p><p>•&nbsp;Tribunaux&nbsp;d&#39;instances&nbsp;(ex&nbsp;départementaux)</p><p>•&nbsp;Postes&nbsp;comptables&nbsp;de&nbsp;la&nbsp;direction&nbsp;générale&nbsp;du&nbsp;Trésor&nbsp;et&nbsp;de&nbsp;la&nbsp;Comptabilité&nbsp;publique&nbsp;(trésoreries,&nbsp;paieries&nbsp;régionales,&nbsp;perceptions)</p><p></p><p><strong>Contact</strong></p><ul><li>support@e-senegal.sn</li></ul><p></p>",
+      "qui_peut_faire_reponse": "R",
+      "documents_a_fournir": ["D"],
+      "online": false,
+      "service_administratifs": [],
+      "categories": [],
+      "textes": [],
+      "faqs": [],
+      "lien_utiles": [],
+      "demarches": []
+    }
+  }
+}

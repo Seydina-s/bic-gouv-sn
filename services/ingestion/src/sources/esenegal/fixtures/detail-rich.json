@@ -1,0 +1,60 @@
+{
+  "data": {
+    "fetchDemarcheBySlug": {
+      "id": "68b47ba03c89e8b1239e27fa",
+      "titre": "Attestation de non-appartenance à la Fonction Publique ",
+      "slug": "demande-de-non-appartenance-a-la-fonction-publique-1",
+      "resume": "La \"non-appartenance à la fonction publique\" peut désigner soit une situation où une personne n'est pas un fonctionnaire titulaire, mais un agent contractuel (non-titulaire) embauché sans concours pour une durée déterminée, soit, dans certains pays, une catégorie d'agents publics spécifique dont le régime est défini par un texte particulier, comme les agents contractuels de l'État.",
+      "description": "<span>Demande de non appartenance &#224; la Fonction Publique</span>",
+      "date_publication": "2026-03-22T20:41:34.803Z",
+      "cout": null,
+      "delai": 1,
+      "corps": "<p>La&nbsp;non-appartenance&nbsp;à&nbsp;la&nbsp;fonction&nbsp;publique&quot;&nbsp;peut&nbsp;désigner&nbsp;soit&nbsp;une&nbsp;situation&nbsp;où&nbsp;une&nbsp;personne&nbsp;n&#39;est&nbsp;pas&nbsp;un&nbsp;fonctionnaire&nbsp;titulaire,&nbsp;mais&nbsp;un&nbsp;agent&nbsp;contractuel&nbsp;(non-titulaire)&nbsp;embauché&nbsp;sans&nbsp;concours&nbsp;pour&nbsp;une&nbsp;durée&nbsp;déterminée,&nbsp;soit,&nbsp;dans&nbsp;certains&nbsp;pays,&nbsp;une&nbsp;catégorie&nbsp;d&#39;agents&nbsp;publics&nbsp;spécifique&nbsp;dont&nbsp;le&nbsp;régime&nbsp;est&nbsp;défini&nbsp;par&nbsp;un&nbsp;texte&nbsp;particulier,&nbsp;comme&nbsp;les&nbsp;agents&nbsp;contractuels&nbsp;de&nbsp;l&#39;État.&nbsp;Il&nbsp;s&#39;agit&nbsp;d&#39;une&nbsp;relation&nbsp;de&nbsp;travail&nbsp;différente&nbsp;de&nbsp;celle&nbsp;du&nbsp;fonctionnaire&nbsp;classique,&nbsp;qui&nbsp;est&nbsp;titulaire&nbsp;d&#39;un&nbsp;grade&nbsp;et&nbsp;d&#39;un&nbsp;emploi,&nbsp;en&nbsp;somme&nbsp;un&nbsp;agent&nbsp;non&nbsp;fonctionnaire.</p><p></p><p><strong>Qui&nbsp;peut&nbsp;initier&nbsp;la&nbsp;démarche&nbsp;?</strong></p><p>Tout&nbsp;citoyen&nbsp;sénégalais&nbsp;âgé&nbsp;de&nbsp;18&nbsp;ans&nbsp;au&nbsp;moins&nbsp;</p><p></p><p><strong>Quels&nbsp;sont&nbsp;les&nbsp;documents&nbsp;à&nbsp;fournir&nbsp;?</strong></p><p>Une&nbsp;copie&nbsp;de&nbsp;la&nbsp;carte&nbsp;nationale&nbsp;d’identité</p><p></p><p><strong>Quelle&nbsp;est&nbsp;la&nbsp;nature&nbsp;de&nbsp;la&nbsp;pièce&nbsp;délivrée&nbsp;?</strong>&nbsp;</p><p>Une&nbsp;attestation&nbsp;de&nbsp;non-appartenance&nbsp;à&nbsp;la&nbsp;fonction&nbsp;publique</p><p></p><p><strong>Que&nbsp;faire&nbsp;en&nbsp;cas&nbsp;de&nbsp;perte&nbsp;ou&nbsp;de&nbsp;vol&nbsp;?</strong></p><p>Reprendre&nbsp;la&nbsp;procédure</p>",
+      "qui_peut_faire_reponse": "Tout citoyen sénégalais âgé de 18 ans, au moins.",
+      "documents_a_fournir": ["Une copie de la carte nationale d’identité."],
+      "online": true,
+      "service_administratifs": [],
+      "categories": [],
+      "textes": [
+        {
+          "name": "Décret relatif aux attributions du Ministre de la Fonction publique, de l’Emploi, du Travail et des Organisations professionnelles.",
+          "description": "Décret n° 2009-543 du 5 juin 2009 relatif aux attributions du Ministre de la Fonction publique, de l’Emploi, du Travail et des Organisations professionnelles."
+        },
+        {
+          "name": "Décret portant organisation et fonctionnement du Ministère de l’Energie.",
+          "description": "Décret n° 2009-34 du 26 janvier 2009 portant organisation et fonctionnement du Ministère de l’Energie."
+        },
+        {
+          "name": "Adhésion à la mutuelle de la Fonction Publique",
+          "description": null
+        }
+      ],
+      "faqs": [
+        {
+          "question": "Où obtenir des informations sur l'entrée dans la fonction publique (concours, contrats, stages, etc.) ?",
+          "reponse": "XXX"
+        }
+      ],
+      "lien_utiles": [
+        {
+          "name": "Ministère de la Fonction Publique, de la Rationalisation des effectifs et du renouveau du Service Public (MFPRERSP) ",
+          "url": "http://www.fonctionpublique.gouv.sn"
+        }
+      ],
+      "demarches": [
+        {
+          "slug": "demander-une-evacuation-sanitaire-a-letranger-au-centre-medico-social-de-la-fonction-publique",
+          "titre": "Demander une évacuation sanitaire à l’étranger au Centre Médico-social de la  Fonction Publique"
+        },
+        {
+          "slug": "demander-une-visite-daptitude-au-centre-medico-social-de-la-fonction-publique",
+          "titre": "Demander une visite d’aptitude au Centre Médico-social de la Fonction Publique"
+        },
+        {
+          "slug": "demander-le-paiement-dune-indemnite-de-fonction-pour-les-agents-de-letat",
+          "titre": "Demander le paiement d’une indemnité de fonction pour les agents de l'Etat"
+        }
+      ]
+    }
+  }
+}

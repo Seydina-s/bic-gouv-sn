@@ -10,6 +10,7 @@
     "watch": "tsx src/cli/watch.ts",
     "covers": "tsx src/cli/backfill-covers.ts",
     "inline-images": "tsx src/cli/inline-images.ts",
+    "procedures": "tsx src/cli/procedures.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --coverage"
   },
