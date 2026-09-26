@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Baobab } from "../../components/Baobab";
@@ -24,9 +25,10 @@ function FlagStripe() {
 
 /**
  * Front-page masthead ("La Une", D-05): flag stripe, the app's name, today's date,
- * a newspaper rule beneath, and the baobab once, as a faint watermark.
+ * a newspaper rule beneath, and the baobab once, as a faint watermark. Screen-level
+ * actions (favorites, search) sit on the right of the name.
  */
-export function Masthead({ today }: { today: Date }) {
+export function Masthead({ today, actions }: { today: Date; actions?: ReactNode }) {
   const { theme } = useTheme();
   const { t, lang } = useTranslation();
   const insets = useSafeAreaInsets();
@@ -39,6 +41,7 @@ export function Masthead({ today }: { today: Date }) {
       <View
         style={[
           styles.rule,
+          styles.row,
           {
             paddingHorizontal: space.lg,
             paddingTop: space.lg,
@@ -50,18 +53,21 @@ export function Masthead({ today }: { today: Date }) {
         <View style={[styles.watermark, { right: space.md }]}>
           <Baobab size={72} color={color.textBrand} opacity={theme.opacity.watermark} />
         </View>
-        <Text
-          accessibilityRole="header"
-          style={[
-            textStyle.title,
-            { fontFamily: textStyle.display.fontFamily, color: color.textBrand },
-          ]}
-        >
-          {t("app.name")}
-        </Text>
-        <Text style={[textStyle.label, { color: color.textSecondary }]}>
-          {weekday} {date}
-        </Text>
+        <View style={styles.titles}>
+          <Text
+            accessibilityRole="header"
+            style={[
+              textStyle.title,
+              { fontFamily: textStyle.display.fontFamily, color: color.textBrand },
+            ]}
+          >
+            {t("app.name")}
+          </Text>
+          <Text style={[textStyle.label, { color: color.textSecondary }]}>
+            {weekday} {date}
+          </Text>
+        </View>
+        {actions}
       </View>
     </View>
   );
@@ -71,5 +77,7 @@ const styles = StyleSheet.create({
   stripe: { flexDirection: "row" },
   band: { flex: 1 },
   rule: { borderBottomWidth: 1 },
+  row: { flexDirection: "row", alignItems: "center" },
+  titles: { flex: 1 },
   watermark: { position: "absolute", bottom: 0 },
 });

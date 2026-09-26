@@ -12,6 +12,8 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Icon } from "../../components/Icon";
+import { useFavorites } from "../../features/favorites/FavoritesProvider";
+import { ArticleActions } from "../../features/news/ArticleActions";
 import { BlockRenderer } from "../../features/news/BlockRenderer";
 import { CoverImage } from "../../features/news/CoverImage";
 import { formatPublishedOn } from "../../features/news/format";
@@ -22,7 +24,10 @@ import { useTheme } from "../../theme/useTheme";
 
 const SOURCE = "presidence.sn";
 
-/** One official article, identical to the source, with its link back to it. */
+/**
+ * One official article, identical to the source, with its link back to it; it can
+ * be kept in the favorites (readable offline) and shared.
+ */
 export default function ArticleScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const article = useNewsArticle(id);
@@ -31,7 +36,9 @@ export default function ArticleScreen() {
   const insets = useSafeAreaInsets();
   const { color, space, textStyle, layout, radius } = theme;
   const { width: windowWidth } = useWindowDimensions();
-  const detail = article.data;
+  const favorites = useFavorites();
+  // Offline, an article kept in the favorites is read from its saved copy.
+  const detail = article.data ?? favorites.saved(id);
 
   return (
     <View style={[styles.root, { backgroundColor: color.background }]}>
@@ -43,6 +50,7 @@ export default function ArticleScreen() {
           headerTintColor: color.textBrand,
           headerStyle: { backgroundColor: color.background },
           headerShadowVisible: false,
+          headerRight: () => (detail === undefined ? null : <ArticleActions detail={detail} />),
         }}
       />
       {detail === undefined ? (
