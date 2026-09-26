@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { readNewsDetail, readNewsList } from "./tolerant-reader";
+import {
+  readNewsDetail,
+  readNewsList,
+  readProcedureDetail,
+  readProcedureList,
+} from "./tolerant-reader";
 
 // Placeholder texts, not real content.
 const summary = {
@@ -80,5 +85,49 @@ describe("readNewsDetail", () => {
   it("refuses an article without its essentials", () => {
     expect(readNewsDetail({ ...detail, sourceUrl: undefined })).toBeNull();
     expect(readNewsDetail("broken")).toBeNull();
+  });
+});
+
+describe("procedures (a newer API talking to an older app)", () => {
+  const summaryItem = {
+    id: "00000000-0000-5000-8000-000000000001",
+    slug: "extrait-de-naissance",
+    title: "Extrait de naissance",
+    summary: null,
+    costFcfa: 1000,
+    delayDays: 2,
+    online: false,
+  };
+  const detailItem = {
+    ...summaryItem,
+    translationStatus: "official",
+    blocks: [{ type: "podcast" }, { type: "paragraph", inlines: [{ text: "Étape" }] }],
+    eligibility: null,
+    documents: [],
+    offices: [],
+    faqs: [{ question: "Délai ?", blocks: [{ type: "podcast" }] }],
+    legalTexts: [],
+    usefulLinks: [],
+    related: [],
+    sourceUrl: "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/extrait-de-naissance",
+    fetchedAt: "2026-09-26T10:00:00Z",
+    version: 1,
+  };
+
+  it("skips an unreadable procedure instead of failing the list", () => {
+    const list = readProcedureList({
+      items: [{ ...summaryItem, title: "" }, summaryItem],
+      nextCursor: null,
+      total: 2,
+    });
+    expect(list?.items).toHaveLength(1);
+    expect(readProcedureList("broken")).toBeNull();
+  });
+
+  it("drops block types this version cannot display, also inside FAQ answers", () => {
+    const detail = readProcedureDetail(detailItem);
+    expect(detail?.blocks).toEqual([{ type: "paragraph", inlines: [{ text: "Étape" }] }]);
+    expect(detail?.faqs[0]?.blocks).toEqual([]);
+    expect(readProcedureDetail({ ...detailItem, sourceUrl: "https://example.com" })).toBeNull();
   });
 });
