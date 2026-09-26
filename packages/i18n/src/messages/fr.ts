@@ -134,6 +134,8 @@ export const fr = {
   settings: {
     title: "Réglages",
     appearance: "Apparence",
+    close: "Fermer les réglages",
+    auto: "Auto",
     themeSystem: "Comme le téléphone",
     themeLight: "Clair",
     themeDark: "Sombre",
@@ -141,11 +143,13 @@ export const fr = {
     languageAuto: "Comme le téléphone",
     languageFr: "Français",
     languageWo: "Wolof",
-    wolofNote:
-      "Les actualités s'affichent dans leur version wolof officielle. Les textes de l'application seront traduits en wolof par des locuteurs natifs.",
     about: "À propos",
-    aboutBody:
-      "Bic Gouv SN relaie les informations officielles publiées sur presidence.sn. Chaque article renvoie à sa page d'origine.",
+    aboutNews:
+      "Bic Gouv SN réunit en un seul endroit l'actualité officielle du Gouvernement du Sénégal. Comptes rendus du Conseil des ministres, communiqués, discours, audiences et visites officielles arrivent dans l'application dès leur publication sur presidence.sn, en français et en wolof.",
+    aboutProcedures:
+      "Pour vos démarches administratives, l'application explique chaque procédure publiée sur e-senegal.sn avec les pièces à fournir, le coût, le délai et le lien pour la faire en ligne.",
+    aboutSources:
+      "Chaque contenu renvoie à sa source officielle, sans ajout ni commentaire. Les articles que vous gardez en favoris restent lisibles même sans connexion.",
     version: "Version {version}",
   },
   favorites: {
