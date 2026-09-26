@@ -153,6 +153,7 @@ describe("importProcedures", () => {
   it("imports every page, isolates failures, and is idempotent", async () => {
     const rich = normalizeProcedure(await fixture("detail-rich"), FETCHED_AT);
     const source: ProcedureSource = {
+      listThemes: () => Promise.resolve([]),
       listPage: (page) =>
         Promise.resolve({ slugs: page === 1 ? ["rich", "broken"] : [], pageCount: 2 }),
       fetchProcedure: (slug) =>
