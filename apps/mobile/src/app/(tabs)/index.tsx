@@ -21,6 +21,7 @@ import {
   type FrontPageRow,
 } from "../../features/news/front-page";
 import { ArticlePane } from "../../features/news/ArticlePane";
+import { freshnessOf, type Freshness } from "../../features/news/format";
 import { Masthead } from "../../features/news/Masthead";
 import { SectionFilter } from "../../features/news/SectionFilter";
 import { CouncilCard, LeadStory, StoryRow } from "../../features/news/Stories";
@@ -72,6 +73,14 @@ function Notice({
 export default function HomeScreen() {
   const { theme } = useTheme();
   const { t } = useTranslation();
+  const freshnessText = (freshness: Freshness): string =>
+    freshness.unit === "now"
+      ? t("content.updatedJustNow")
+      : freshness.unit === "minutes"
+        ? t("content.updatedMinutesAgo", { count: freshness.count })
+        : freshness.unit === "hours"
+          ? t("content.updatedHoursAgo", { count: freshness.count })
+          : t("content.updatedDaysAgo", { count: freshness.count });
   const bottomInset = useTabBarInset();
   const router = useRouter();
   const [section, setSection] = useState<string | null>(null);
@@ -137,7 +146,11 @@ export default function HomeScreen() {
         }
       />
       <SectionFilter selected={section} onSelect={setSection} />
-      {feed.isError && rows.length > 0 && <Notice text={t("feed.offline")} />}
+      {feed.isError && rows.length > 0 && (
+        <Notice
+          text={`${t("feed.offline")} ${freshnessText(freshnessOf(feed.dataUpdatedAt, feed.errorUpdatedAt))}`}
+        />
+      )}
     </View>
   );
 

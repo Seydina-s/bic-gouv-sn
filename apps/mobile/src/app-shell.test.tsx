@@ -258,7 +258,7 @@ describe("app shell", () => {
     await fireEvent(screen.getByTestId("news-feed"), "refresh");
     expect(
       await screen.findByText(
-        "Hors ligne : voici les dernières actualités enregistrées.",
+        "Hors ligne : voici les dernières actualités enregistrées. Mis à jour à l'instant.",
         {},
         { timeout: 5000 },
       ),
