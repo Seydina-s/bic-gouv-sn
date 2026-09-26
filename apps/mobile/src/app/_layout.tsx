@@ -5,6 +5,7 @@ import { StatusBar } from "expo-status-bar";
 import * as SystemUI from "expo-system-ui";
 import { useEffect, type ComponentType } from "react";
 import { QueryProvider } from "../data/QueryProvider";
+import { FavoritesProvider } from "../features/favorites/FavoritesProvider";
 import { I18nProvider } from "../i18n/I18nProvider";
 import { initMonitoring } from "../monitoring/monitoring";
 import { ThemeProvider } from "../theme/ThemeProvider";
@@ -58,7 +59,9 @@ function RootLayout() {
     <QueryProvider>
       <ThemeProvider>
         <I18nProvider>
-          <ThemedStack />
+          <FavoritesProvider>
+            <ThemedStack />
+          </FavoritesProvider>
         </I18nProvider>
       </ThemeProvider>
     </QueryProvider>

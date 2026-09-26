@@ -51,6 +51,14 @@ export const fr = {
     image: "Photo de l'article",
     watchVideo: "Regarder la vidéo",
     videoHost: "Sur YouTube",
+    share: "Partager",
+  },
+  favorites: {
+    title: "Mes favoris",
+    add: "Ajouter aux favoris",
+    remove: "Retirer des favoris",
+    empty:
+      "Aucun favori pour l'instant. Touchez le marque-page d'un article pour le garder : il restera lisible hors ligne.",
   },
   comingSoon: {
     title: "Bientôt disponible",

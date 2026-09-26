@@ -10,7 +10,8 @@ import NearMeScreen from "./app/(tabs)/near-me";
 import ParticipateScreen from "./app/(tabs)/participate";
 import ProceduresScreen from "./app/(tabs)/procedures";
 import ArticleScreen from "./app/article/[id]";
-import { LIST, newsFetch } from "./testing/news-fixtures";
+import FavoritesScreen from "./app/favorites";
+import { DETAIL, LIST, newsFetch } from "./testing/news-fixtures";
 
 jest.mock("expo-localization", () => ({ getLocales: () => [{ languageTag: "fr-SN" }] }));
 jest.mock("expo-system-ui", () => ({ setBackgroundColorAsync: jest.fn(() => Promise.resolve()) }));
@@ -31,6 +32,7 @@ const routes = {
   "(tabs)/procedures": ProceduresScreen,
   "(tabs)/participate": ParticipateScreen,
   "article/[id]": ArticleScreen,
+  favorites: FavoritesScreen,
 };
 
 beforeEach(async () => {
@@ -47,6 +49,37 @@ describe("app shell", () => {
     expect(screen.getByText("Conseil des ministres")).toBeOnTheScreen();
     expect(screen.getByText("Actualité")).toBeOnTheScreen();
     expect(screen.getByRole("header", { name: "Bic Gouv SN" })).toBeOnTheScreen();
+  });
+
+  it("keeps an article in the favorites, saved on the phone", async () => {
+    await renderRouter(routes, { initialUrl: "/" });
+    await fireEvent.press(await screen.findByText("Titre de test A"));
+    await fireEvent.press(await screen.findByRole("button", { name: "Ajouter aux favoris" }));
+    expect(await screen.findByRole("button", { name: "Retirer des favoris" })).toBeOnTheScreen();
+    await waitFor(async () => {
+      expect(await AsyncStorage.getItem("bgs-favorites-v1")).toContain(DETAIL.id);
+    });
+  });
+
+  it("reads a kept article offline, from its saved copy", async () => {
+    await AsyncStorage.setItem(
+      "bgs-favorites-v1",
+      JSON.stringify([{ detail: DETAIL, savedAt: "2026-09-26T08:00:00Z" }]),
+    );
+    globalThis.fetch = newsFetch({
+      list: () => new Response("{}", { status: 503 }),
+      detail: () => new Response("{}", { status: 503 }),
+    }) as unknown as typeof fetch;
+    await renderRouter(routes, { initialUrl: "/favorites" });
+    await fireEvent.press(await screen.findByText("Titre de test A"));
+    expect(await screen.findByText("Paragraphe de test.")).toBeOnTheScreen();
+  });
+
+  it("shows how to keep articles when there is no favorite yet", async () => {
+    await renderRouter(routes, { initialUrl: "/favorites" });
+    expect(
+      await screen.findByText(/Touchez le marque-page d'un article pour le garder/),
+    ).toBeOnTheScreen();
   });
 
   it("opens an article with its official source link", async () => {

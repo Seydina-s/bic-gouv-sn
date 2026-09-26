@@ -2,7 +2,9 @@ import { FlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
 import { useMemo } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { BookmarkSimpleIcon as BookmarkSimple } from "phosphor-react-native/src/icons/BookmarkSimple";
 import { useTabBarInset } from "../../components/GlassTabBar";
+import { IconButton } from "../../components/IconButton";
 import {
   composeFrontPage,
   COUNCIL_CATEGORY,
@@ -77,7 +79,18 @@ export default function HomeScreen() {
 
   const header = (
     <View>
-      <Masthead today={new Date()} />
+      <Masthead
+        today={new Date()}
+        actions={
+          <IconButton
+            icon={BookmarkSimple}
+            label={t("favorites.title")}
+            onPress={() => {
+              router.push("/favorites");
+            }}
+          />
+        }
+      />
       {feed.isError && rows.length > 0 && <Notice text={t("feed.offline")} />}
     </View>
   );
