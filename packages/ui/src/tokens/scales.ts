@@ -106,6 +106,8 @@ export const motion = {
     slow: 360,
     exitFast: 90,
     exitNormal: 160,
+    /** Time each story stays in the front page carousel (long headlines, WCAG 2.2.2). */
+    carouselDwell: 5000,
   },
   easing: {
     standard: [0.2, 0, 0, 1],
@@ -148,6 +150,8 @@ export const layout = {
   thumbnail: { width: 92, height: 72 },
   /** Full-bleed photo of the lead story on the front page. */
   leadAspectRatio: 16 / 10,
+  /** Vertical cards of the front page rows: share of the width, capped; photo ratio. */
+  railCard: { share: 0.7, maxWidth: 280, photoAspectRatio: 3 / 2 },
   /** Photo at the top of an article. */
   coverAspectRatio: 16 / 9,
   /** Floating tab bar: height, side margin, minimal gap above the edge, width cap (tablets). */

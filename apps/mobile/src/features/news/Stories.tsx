@@ -1,7 +1,7 @@
 import type { NewsSummary } from "@bgs/shared-types";
 import { tracking } from "@bgs/ui";
 import { ArrowRightIcon as ArrowRight } from "phosphor-react-native/src/icons/ArrowRight";
-import { Pressable, StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Icon } from "../../components/Icon";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
@@ -21,43 +21,55 @@ export interface StoryProps {
 }
 
 /** What a screen reader announces for one story: section, title, day. */
-function useStoryLabel(item: NewsSummary): { label: string; day: string } {
+export function useStoryLabel(item: NewsSummary): { label: string; day: string } {
   const { t, lang } = useTranslation();
   const day = formatPublishedOn(item.publishedOn, lang);
   const label = [t(categoryLabelKey(item.category)), item.title, day].filter(Boolean).join(". ");
   return { label, day };
 }
 
-/** The lead story: full-bleed photo, newspaper headline, opening words, source. */
-export function LeadStory({ item, lastOpened, onPress }: StoryProps) {
+export interface LeadStoryProps extends StoryProps {
+  /** Width of the slot: explicit, so the photo always spans it on phones. */
+  width: number;
+  /** Spoken position in the carousel, e.g. "Article 2 sur 5". */
+  position?: string;
+}
+
+/**
+ * The lead story (one slide of the carousel): full-bleed photo, newspaper headline,
+ * opening words, source. Line counts are capped so every slide has the same height.
+ */
+export function LeadStory({ item, lastOpened, onPress, width, position }: LeadStoryProps) {
   const { theme } = useTheme();
-  const { width } = useWindowDimensions();
   const { label, day } = useStoryLabel(item);
   const { color, space, textStyle, layout } = theme;
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={label}
+      accessibilityLabel={[position, label].filter(Boolean).join(". ")}
       onPress={() => {
         onPress(item.id);
       }}
-      style={({ pressed }) => ({ backgroundColor: pressed ? color.surface : color.background })}
+      style={({ pressed }) => ({
+        width,
+        backgroundColor: pressed ? color.surface : color.background,
+      })}
     >
       {item.cover !== null && (
         <CoverImage
           cover={item.cover}
-          slotWidth={Math.min(width, layout.readingMaxWidth + space.xxxl)}
-          style={{ aspectRatio: layout.leadAspectRatio }}
+          slotWidth={width}
+          style={{ width, aspectRatio: layout.leadAspectRatio }}
         />
       )}
       <View style={{ padding: space.lg, gap: space.sm }}>
         <SectionTag category={item.category} lastOpened={lastOpened} />
-        <Text style={[textStyle.leadHeadline, { color: color.textPrimary }]} numberOfLines={5}>
+        <Text style={[textStyle.leadHeadline, { color: color.textPrimary }]} numberOfLines={3}>
           {item.title}
         </Text>
         {item.excerpt !== "" && (
-          <Text style={[textStyle.body, { color: color.textSecondary }]} numberOfLines={3}>
+          <Text style={[textStyle.body, { color: color.textSecondary }]} numberOfLines={2}>
             {item.excerpt}
           </Text>
         )}

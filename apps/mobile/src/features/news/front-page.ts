@@ -1,36 +1,37 @@
 import type { NewsSummary } from "@bgs/shared-types";
+import { SECTION_FILTERS } from "./category";
 
 export const COUNCIL_CATEGORY = "conseil-des-ministres";
 
-export type FrontPageRow =
-  | { kind: "lead"; item: NewsSummary }
-  | { kind: "council"; item: NewsSummary }
-  | { kind: "story"; item: NewsSummary };
+/** Stories taking turns in the front page carousel. */
+export const HERO_SIZE = 5;
 
 /**
- * Lays out "La Une": the newest story leads, the latest Conseil des ministres is
- * lifted into its own card right after it (unless it already leads), and every
- * other story follows in publication order. Each story appears exactly once.
- * `latestCouncil` comes from its own query, so the card shows even when the last
- * council is older than the loaded pages.
+ * Stories for the carousel: the newest ones that have a photo (a carousel without
+ * pictures reads as a wall of text). Falls back to the newest story alone.
  */
-export function composeFrontPage(
-  items: readonly NewsSummary[],
-  latestCouncil: NewsSummary | null = null,
-): FrontPageRow[] {
-  const [lead, ...rest] = items;
-  if (lead === undefined) {
-    return [];
+export function heroStories(items: readonly NewsSummary[], size = HERO_SIZE): NewsSummary[] {
+  const pictured = items.filter((item) => item.cover !== null).slice(0, size);
+  if (pictured.length > 0) {
+    return pictured;
   }
-  const council =
-    lead.category === COUNCIL_CATEGORY || latestCouncil?.id === lead.id
-      ? undefined
-      : (latestCouncil ?? rest.find((item) => item.category === COUNCIL_CATEGORY));
-  return [
-    { kind: "lead", item: lead },
-    ...(council === undefined ? [] : [{ kind: "council" as const, item: council }]),
-    ...rest
-      .filter((item) => item.id !== council?.id)
-      .map((item) => ({ kind: "story" as const, item })),
-  ];
+  return items.slice(0, 1);
+}
+
+/**
+ * Front page rows in the order of the official site's sections; sections this
+ * version does not know come after, empty sections are left out.
+ */
+export function orderSections<T extends { category: string; items: readonly unknown[] }>(
+  sections: readonly T[],
+): T[] {
+  const rank = (category: string) => {
+    const index = (SECTION_FILTERS as readonly string[]).indexOf(category);
+    return index === -1 ? SECTION_FILTERS.length : index;
+  };
+  return sections
+    .filter((section) => section.items.length > 0)
+    .map((section, position) => ({ section, position }))
+    .sort((a, b) => rank(a.section.category) - rank(b.section.category) || a.position - b.position)
+    .map(({ section }) => section);
 }
