@@ -11,6 +11,7 @@ import ParticipateScreen from "./app/(tabs)/participate";
 import ProceduresScreen from "./app/(tabs)/procedures";
 import ArticleScreen from "./app/article/[id]";
 import FavoritesScreen from "./app/favorites";
+import SearchScreen from "./app/search";
 import { DETAIL, LIST, newsFetch } from "./testing/news-fixtures";
 
 jest.mock("expo-localization", () => ({ getLocales: () => [{ languageTag: "fr-SN" }] }));
@@ -33,6 +34,7 @@ const routes = {
   "(tabs)/participate": ParticipateScreen,
   "article/[id]": ArticleScreen,
   favorites: FavoritesScreen,
+  search: SearchScreen,
 };
 
 beforeEach(async () => {
@@ -51,6 +53,43 @@ describe("app shell", () => {
     ).toBeOnTheScreen();
     expect(screen.getByText("Actualité")).toBeOnTheScreen();
     expect(screen.getByRole("header", { name: "Bic Gouv SN" })).toBeOnTheScreen();
+  });
+
+  it("searches the news from the front page and opens a result", async () => {
+    const fetchMock = newsFetch();
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    await renderRouter(routes, { initialUrl: "/" });
+    await fireEvent.press(await screen.findByRole("button", { name: "Rechercher" }));
+    expect(await screen.findByText(/Tapez au moins 2 lettres/)).toBeOnTheScreen();
+    await fireEvent.changeText(screen.getByLabelText("Rechercher"), "Kaolack");
+    expect(await screen.findByText("Titre de test B", {}, { timeout: 3000 })).toBeOnTheScreen();
+    expect(fetchMock.mock.calls.some(([url]) => url.includes("search?lang=fr&q=Kaolack"))).toBe(
+      true,
+    );
+    await fireEvent.press(screen.getByText("Titre de test A"));
+    expect(await screen.findByText("Paragraphe de test.")).toBeOnTheScreen();
+  });
+
+  it("says when a search needs a connection", async () => {
+    globalThis.fetch = newsFetch({
+      search: () => new Response("{}", { status: 503 }),
+    }) as unknown as typeof fetch;
+    await renderRouter(routes, { initialUrl: "/search" });
+    await fireEvent.changeText(await screen.findByLabelText("Rechercher"), "Kaolack");
+    expect(
+      await screen.findByText(/La recherche a besoin d'une connexion/, {}, { timeout: 8000 }),
+    ).toBeOnTheScreen();
+  });
+
+  it("says when a search finds nothing", async () => {
+    globalThis.fetch = newsFetch({
+      search: () => new Response(JSON.stringify({ items: [], nextCursor: null })),
+    }) as unknown as typeof fetch;
+    await renderRouter(routes, { initialUrl: "/search" });
+    await fireEvent.changeText(await screen.findByLabelText("Rechercher"), "introuvable");
+    expect(
+      await screen.findByText("Aucun résultat pour « introuvable ».", {}, { timeout: 3000 }),
+    ).toBeOnTheScreen();
   });
 
   it("filters the front page by section", async () => {

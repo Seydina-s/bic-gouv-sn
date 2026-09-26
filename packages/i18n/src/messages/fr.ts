@@ -55,6 +55,13 @@ export const fr = {
     videoHost: "Sur YouTube",
     share: "Partager",
   },
+  search: {
+    title: "Rechercher",
+    placeholder: "Un mot, un lieu, une personne…",
+    hint: "Tapez au moins 2 lettres pour chercher dans les actualités officielles.",
+    noResult: "Aucun résultat pour « {query} ».",
+    offline: "La recherche a besoin d'une connexion. Réessayez quand vous êtes en ligne.",
+  },
   favorites: {
     title: "Mes favoris",
     add: "Ajouter aux favoris",

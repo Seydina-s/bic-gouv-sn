@@ -103,6 +103,20 @@ describe("GET /v1/news", () => {
     );
   });
 
+  it("searches the news, and refuses a query too short", async () => {
+    const found = await app.inject({ method: "GET", url: "/v1/news/search?q=TITRE%20wo" });
+    expect(found.statusCode).toBe(200);
+    expect(newsListResponseSchema.parse(found.json()).items).toEqual([]);
+    const fr = await app.inject({
+      method: "GET",
+      url: "/v1/news/search?q=premier%20paragraphe%203",
+    });
+    expect(newsListResponseSchema.parse(fr.json()).items.map((item) => item.title)).toEqual([
+      "Titre fr 3",
+    ]);
+    expect((await app.inject({ method: "GET", url: "/v1/news/search?q=a" })).statusCode).toBe(400);
+  });
+
   it("rejects an invalid language or limit", async () => {
     expect((await app.inject({ method: "GET", url: "/v1/news?lang=en" })).statusCode).toBe(400);
     expect((await app.inject({ method: "GET", url: "/v1/news?limit=500" })).statusCode).toBe(400);

@@ -70,12 +70,17 @@ export const DETAIL: NewsDetail = {
 };
 
 /** Fake fetch answering the two news endpoints. */
-export function newsFetch(overrides: { list?: () => Response; detail?: () => Response } = {}) {
-  return jest.fn((input: string) =>
-    Promise.resolve(
+export function newsFetch(
+  overrides: { list?: () => Response; detail?: () => Response; search?: () => Response } = {},
+) {
+  return jest.fn((input: string) => {
+    if (input.includes("/v1/news/search?")) {
+      return Promise.resolve(overrides.search?.() ?? new Response(JSON.stringify(LIST)));
+    }
+    return Promise.resolve(
       input.includes("/v1/news?")
         ? (overrides.list?.() ?? new Response(JSON.stringify(LIST)))
         : (overrides.detail?.() ?? new Response(JSON.stringify(DETAIL))),
-    ),
-  );
+    );
+  });
 }

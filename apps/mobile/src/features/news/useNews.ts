@@ -28,6 +28,19 @@ export function useLatestIn(category: string) {
   });
 }
 
+/** Search results; waits for at least 2 characters (the API minimum). */
+export function useNewsSearch(query: string) {
+  const { lang } = useTranslation();
+  const trimmed = query.trim();
+  return useQuery({
+    queryKey: ["news", lang, "search", trimmed],
+    queryFn: ({ signal }) => client.searchNews(lang, trimmed, signal),
+    enabled: trimmed.length >= MIN_QUERY_LENGTH,
+  });
+}
+
+export const MIN_QUERY_LENGTH = 2;
+
 export function useNewsArticle(id: string) {
   const { lang } = useTranslation();
   return useQuery({

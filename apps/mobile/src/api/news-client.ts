@@ -68,6 +68,11 @@ export function createNewsClient({
       }
       return getJson(`/v1/news?${query.toString()}`, readNewsList, signal);
     },
+    /** Stories matching a query (accents and case ignored), best matches first. */
+    searchNews(lang: Lang, query: string, signal?: AbortSignal): Promise<NewsListResponse> {
+      const params = new URLSearchParams({ lang, q: query, limit: "30" });
+      return getJson(`/v1/news/search?${params.toString()}`, readNewsList, signal);
+    },
     /** Newest story of one section, or null when the section has none in this language. */
     async latestIn(lang: Lang, category: string, signal?: AbortSignal) {
       const query = new URLSearchParams({ lang, limit: "1", category });
