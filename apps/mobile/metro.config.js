@@ -14,11 +14,21 @@ const config = getSentryExpoConfig(__dirname);
  */
 const ZOD_LOCALES_STUB = path.join(__dirname, "src", "stubs", "zod-locales.js");
 const insideZod = /[\\/]zod[\\/]v4[\\/](?:classic|core)[\\/]/;
+/**
+ * Bundle weight (PERF-01): Expo Router's native tabs, unused here, import expo-symbols,
+ * which bundles the Material Symbols font on Android (-966 KB). Only that import is
+ * redirected; any direct use of expo-symbols elsewhere would resolve normally.
+ */
+const EXPO_SYMBOLS_STUB = path.join(__dirname, "src", "stubs", "expo-symbols.js");
+const insideRouterNativeTabs = /[\\/]expo-router[\\/]build[\\/]native-tabs[\\/]/;
 const upstreamResolve = config.resolver.resolveRequest;
 
 config.resolver.resolveRequest = (context, moduleName, platform) => {
   if (moduleName === "../locales/index.js" && insideZod.test(context.originModulePath)) {
     return { type: "sourceFile", filePath: ZOD_LOCALES_STUB };
+  }
+  if (moduleName === "expo-symbols" && insideRouterNativeTabs.test(context.originModulePath)) {
+    return { type: "sourceFile", filePath: EXPO_SYMBOLS_STUB };
   }
   return (upstreamResolve ?? context.resolveRequest)(context, moduleName, platform);
 };
