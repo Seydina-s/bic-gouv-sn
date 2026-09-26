@@ -1,4 +1,5 @@
 import type { Cover, NewsDetail, NewsListResponse } from "@bgs/shared-types";
+import { PROCEDURE_DETAIL, PROCEDURE_LIST } from "./procedure-fixtures";
 
 export const COVER: Cover = {
   width: 1200,
@@ -69,11 +70,24 @@ export const DETAIL: NewsDetail = {
   version: 1,
 };
 
-/** Fake fetch answering the two news endpoints. */
+/** Fake fetch answering the news and procedures endpoints. */
 export function newsFetch(
-  overrides: { list?: () => Response; detail?: () => Response; search?: () => Response } = {},
+  overrides: {
+    list?: () => Response;
+    detail?: () => Response;
+    search?: () => Response;
+    procedures?: () => Response;
+  } = {},
 ) {
   return jest.fn((input: string) => {
+    if (input.includes("/v1/procedures?")) {
+      return Promise.resolve(
+        overrides.procedures?.() ?? new Response(JSON.stringify(PROCEDURE_LIST)),
+      );
+    }
+    if (input.includes("/v1/procedures/")) {
+      return Promise.resolve(new Response(JSON.stringify(PROCEDURE_DETAIL)));
+    }
     if (input.includes("/v1/news/search?")) {
       return Promise.resolve(overrides.search?.() ?? new Response(JSON.stringify(LIST)));
     }

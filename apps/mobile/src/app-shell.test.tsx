@@ -10,6 +10,7 @@ import NearMeScreen from "./app/(tabs)/near-me";
 import ParticipateScreen from "./app/(tabs)/participate";
 import ProceduresScreen from "./app/(tabs)/procedures";
 import ArticleScreen from "./app/article/[id]";
+import ProcedureScreen from "./app/procedure/[slug]";
 import FavoritesScreen from "./app/favorites";
 import SearchScreen from "./app/search";
 import SettingsScreen from "./app/settings";
@@ -34,6 +35,7 @@ const routes = {
   "(tabs)/procedures": ProceduresScreen,
   "(tabs)/participate": ParticipateScreen,
   "article/[id]": ArticleScreen,
+  "procedure/[slug]": ProcedureScreen,
   favorites: FavoritesScreen,
   search: SearchScreen,
   settings: SettingsScreen,
@@ -309,6 +311,51 @@ describe("app shell", () => {
     await waitFor(() => {
       expect(screen.getByText("Bientôt disponible")).toBeOnTheScreen();
     });
+  });
+
+  it("lists the procedures with their known facts, and searches them", async () => {
+    const fetchMock = newsFetch();
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    await renderRouter(routes, { initialUrl: "/procedures" });
+    expect(await screen.findByText("2 démarches")).toBeOnTheScreen();
+    expect(screen.getByText("Démarche de test A")).toBeOnTheScreen();
+    expect(screen.getByText(/^20.000.F.CFA$/)).toBeOnTheScreen();
+    expect(screen.getByText("1 jour")).toBeOnTheScreen();
+    expect(screen.getByText("Possible en ligne")).toBeOnTheScreen();
+    // Unknown facts are left out, never shown as "free".
+    expect(screen.getAllByText(/F.CFA$/)).toHaveLength(1);
+    await fireEvent.changeText(screen.getByLabelText("Rechercher une démarche"), "passeport");
+    await waitFor(
+      () => {
+        expect(fetchMock.mock.calls.some(([url]) => url.includes("q=passeport"))).toBe(true);
+      },
+      { timeout: 3000 },
+    );
+  });
+
+  it("says when no procedure matches", async () => {
+    globalThis.fetch = newsFetch({
+      procedures: () => new Response(JSON.stringify({ items: [], nextCursor: null, total: 0 })),
+    }) as unknown as typeof fetch;
+    await renderRouter(routes, { initialUrl: "/procedures" });
+    expect(await screen.findByText("0 démarche")).toBeOnTheScreen();
+  });
+
+  it("explains a procedure and leads to its official page", async () => {
+    const openURL = jest.spyOn(Linking, "openURL").mockResolvedValue(true);
+    await renderRouter(routes, { initialUrl: "/procedures" });
+    await fireEvent.press(await screen.findByText("Démarche de test A"));
+    expect(await screen.findByText("Public de test.")).toBeOnTheScreen();
+    expect(screen.getByRole("header", { name: "Pièces à fournir" })).toBeOnTheScreen();
+    expect(screen.getByText("Pièce de test")).toBeOnTheScreen();
+    expect(screen.getByText("Étape de test.")).toBeOnTheScreen();
+    expect(screen.getByText("Réponse de test.")).toBeOnTheScreen();
+    expect(screen.getByText(/Source.: e-senegal.sn/)).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole("link", { name: "Faire la démarche sur e-senegal.sn" }));
+    expect(openURL).toHaveBeenCalledWith(
+      "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demarche-test-a",
+    );
+    openURL.mockRestore();
   });
 
   it("keeps the splash screen while fonts load", async () => {
