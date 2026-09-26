@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import {
   FileArticleRepository,
   readIngestionStatus,
+  snapshotDaily,
   writeIngestionStatus,
 } from "@bgs/content-store";
 import { errorCodeOf } from "@bgs/shared-types";
@@ -37,11 +38,25 @@ const statusPath =
   fileURLToPath(new URL("../../../../.data/ingestion-status.json", import.meta.url));
 let status = await readIngestionStatus(statusPath);
 
+// One safety copy of the data per day, the last 7 kept (DATA-01).
+const backupsDir =
+  process.env["BACKUPS_DIR"] ??
+  fileURLToPath(new URL("../../../../.data/backups", import.meta.url));
+
 async function report(outcome: PassOutcome) {
   status = nextIngestionStatus(status, outcome, new Date());
   await writeIngestionStatus(statusPath, status).catch((error: unknown) => {
     process.stdout.write(`status report not written: ${String(error)}\n`);
   });
+  await snapshotDaily({ files: [storePath, statusPath], backupsDir, now: new Date(), keep: 7 })
+    .then((snapshot) => {
+      if (snapshot === "created") {
+        process.stdout.write(`daily backup written in ${backupsDir}\n`);
+      }
+    })
+    .catch((error: unknown) => {
+      process.stdout.write(`daily backup failed: ${String(error)}\n`);
+    });
 }
 
 let lastChangeAt: Date | null = null;
