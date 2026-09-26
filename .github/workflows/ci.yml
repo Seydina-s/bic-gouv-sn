@@ -27,6 +27,8 @@ jobs:
       - uses: ./.github/actions/setup
       - run: pnpm format:check
       - run: pnpm lint
+      - name: Fonts carry every French and Wolof letter
+        run: pnpm fonts:check
       - run: pnpm typecheck
       - run: pnpm test
 

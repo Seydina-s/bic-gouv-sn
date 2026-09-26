@@ -78,7 +78,7 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 24/09/2026 | D-01 ✅ Audit des tokens de design + corrections (docs/design/audit-tokens-2026-09-24.md) | Demande utilisateur |
 | 24/09/2026 | D-02 🔴 `/impeccable init` (PRODUCT.md + DESIGN.md) au début de la prochaine session | Audit D-01 |
 | 24/09/2026 | D-03 🔴 Réparer l'installation de ui-ux-pro-max (dossiers data/scripts = liens cassés) + Python pour ses scripts | Audit D-01 |
-| 24/09/2026 | PERF-02 🔴 Sous-ensemble des polices (latin + wolof) pour réduire les 564 Ko | Audit D-01 |
+| 24/09/2026 | PERF-02 ✅ Sous-ensemble des polices (latin + wolof) pour réduire les 564 Ko — réalisé avec PERF-04 (26/09/2026) | Audit D-01 |
 | 24/09/2026 | Q-01 ✅ Délai des tests porté à 30 s (échec intermittent sous charge : 12,6 s pour un démarrage à froid) | Contrôle complet |
 | 24/09/2026 | D-02 ✅ PRODUCT.md écrit (init Impeccable) | F-09 |
 | 24/09/2026 | D-04 🔴 Tour de directions visuelles Impeccable + DESIGN.md au premier écran citoyen (Phase 2) | Décision utilisateur |
@@ -135,7 +135,7 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 25/09/2026 | BUG-02 ✅ Faux « Hors ligne » sur iPhone : la version installée rejetait le nouveau champ `cover` ; schémas non stricts + lecteur tolérant (voir ERREURS.md) | QA-02 (captures iPhone) |
 | 25/09/2026 | UI-01 ✅ Accueil « La Une » (bandeau tricolore, en-tête journal, photo pleine largeur, serif Literata, carte Conseil des ministres, lisières tissées) + article (photo pleine largeur, titre serif) + barre de navigation flottante en verre dépoli | D-05 |
 | 25/09/2026 | QA-04 🔴 Valider « La Une » et la barre en verre sur l'iPhone de l'utilisateur et sur un Android d'entrée de gamme (fluidité 60 fps, lisibilité en plein soleil) | UI-01 |
-| 25/09/2026 | PERF-04 🔴 Sous-ensemble des polices (Literata ≈ 500 Ko pour 2 graisses) | UI-01 |
+| 25/09/2026 | PERF-04 ✅ Sous-ensemble des polices : 8 fichiers, 1 090 → 611 Ko (Literata 261 → 124 Ko par graisse) ; contrôle CI des lettres françaises et wolof (test de mutation fait) ; Ɓ Ɗ Ƴ absents des polices d'origine (à peser en S1-04) | UI-01 |
 | 25/09/2026 | QA-02 🔵 Premières captures iPhone reçues (thème sombre OK, faux « Hors ligne » → BUG-02 corrigé) | Utilisateur |
 | 25/09/2026 | CI-01 ⏸ Dépôt public : historique nettoyé localement (e-mail remplacé, sauvegarde faite) ; renommage de l'ancien dépôt, création du nouveau et push à faire par l'utilisateur (action bloquée par les permissions) | Utilisateur |
 | 25/09/2026 | CI-01 ✅ Dépôt public sécurisé (nouveau dépôt, historique nettoyé, ancien dépôt archivé en privé ; protection de main, analyse des secrets avec blocage, Dependabot, signalement privé, actions épinglées, approbation des contributions externes) | Utilisateur |
