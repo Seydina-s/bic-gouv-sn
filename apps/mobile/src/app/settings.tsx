@@ -1,141 +1,150 @@
 import type { ThemePreference } from "@bgs/ui";
 import Constants from "expo-constants";
-import { Stack } from "expo-router";
-import { CheckIcon as Check } from "phosphor-react-native/src/icons/Check";
+import { Stack, useRouter } from "expo-router";
+import { DeviceMobileIcon as DeviceMobile } from "phosphor-react-native/src/icons/DeviceMobile";
+import { MoonIcon as Moon } from "phosphor-react-native/src/icons/Moon";
+import { SunIcon as Sun } from "phosphor-react-native/src/icons/Sun";
+import { XIcon as X } from "phosphor-react-native/src/icons/X";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Icon } from "../components/Icon";
+import { GlassBackdrop } from "../components/GlassBackdrop";
+import { IconButton } from "../components/IconButton";
+import { SegmentedChoice, type Segment } from "../components/SegmentedChoice";
 import type { LangChoice } from "../i18n/I18nProvider";
 import { useTranslation } from "../i18n/useTranslation";
 import { useTheme } from "../theme/useTheme";
 
-interface ChoiceListProps<T extends string> {
-  title: string;
-  options: readonly { value: T; label: string }[];
-  selected: T;
-  onSelect: (value: T) => void;
-}
-
-/** One group of exclusive options (radio buttons), each a full-width 48 dp row. */
-function ChoiceList<T extends string>({ title, options, selected, onSelect }: ChoiceListProps<T>) {
-  const { theme } = useTheme();
-  const { color, space, textStyle, touchTarget } = theme;
-  return (
-    <View accessibilityRole="radiogroup" accessibilityLabel={title} style={{ marginTop: space.xl }}>
-      <Text
-        accessibilityRole="header"
-        style={[textStyle.subtitle, { color: color.textPrimary, marginBottom: space.sm }]}
-      >
-        {title}
-      </Text>
-      {options.map((option) => {
-        const checked = option.value === selected;
-        return (
-          <Pressable
-            key={option.value}
-            accessibilityRole="radio"
-            accessibilityState={{ checked }}
-            onPress={() => {
-              onSelect(option.value);
-            }}
-            style={({ pressed }) => [
-              styles.row,
-              {
-                minHeight: touchTarget.min,
-                borderBottomColor: color.border,
-                backgroundColor: pressed ? color.surface : color.background,
-              },
-            ]}
-          >
-            <Text style={[textStyle.body, styles.label, { color: color.textPrimary }]}>
-              {option.label}
-            </Text>
-            {checked && <Icon icon={Check} weight="bold" color={color.textBrand} />}
-          </Pressable>
-        );
-      })}
-    </View>
-  );
-}
-
-/** Settings: appearance and language (remembered on the phone), and about. */
+/**
+ * Settings as a frosted-glass sheet over the page the reader came from, which stays
+ * visible, blurred, behind it. Appearance and language are chosen like tabs; a tap
+ * outside the sheet, the close button or the back gesture closes it.
+ */
 export default function SettingsScreen() {
   const { theme, preference, setPreference } = useTheme();
   const { t, choice, setLang } = useTranslation();
+  const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { color, space, textStyle } = theme;
+  const { color, space, textStyle, radius, layout } = theme;
 
-  const themes: { value: ThemePreference; label: string }[] = [
-    { value: "system", label: t("settings.themeSystem") },
-    { value: "light", label: t("settings.themeLight") },
-    { value: "dark", label: t("settings.themeDark") },
+  const themes: Segment<ThemePreference>[] = [
+    {
+      value: "system",
+      label: t("settings.auto"),
+      spokenLabel: t("settings.themeSystem"),
+      icon: DeviceMobile,
+    },
+    { value: "light", label: t("settings.themeLight"), icon: Sun },
+    { value: "dark", label: t("settings.themeDark"), icon: Moon },
   ];
-  const languages: { value: LangChoice; label: string }[] = [
-    { value: "auto", label: t("settings.languageAuto") },
-    { value: "fr", label: t("settings.languageFr") },
-    { value: "wo", label: t("settings.languageWo") },
+  const languages: Segment<LangChoice>[] = [
+    {
+      value: "auto",
+      label: t("settings.auto"),
+      spokenLabel: t("settings.languageAuto"),
+      icon: DeviceMobile,
+    },
+    { value: "fr", label: t("settings.languageFr"), icon: "FR" },
+    { value: "wo", label: t("settings.languageWo"), icon: "WO" },
   ];
+  const close = () => {
+    router.back();
+  };
 
   return (
-    <View style={[styles.root, { backgroundColor: color.background }]}>
+    <View style={styles.root}>
       <Stack.Screen
         options={{
-          headerShown: true,
-          title: t("settings.title"),
-          headerBackTitle: t("article.back"),
-          headerTintColor: color.textBrand,
-          headerTitleStyle: { fontFamily: textStyle.subtitle.fontFamily, color: color.textPrimary },
-          headerStyle: { backgroundColor: color.background },
-          headerShadowVisible: false,
+          headerShown: false,
+          presentation: "transparentModal",
+          animation: "fade",
+          contentStyle: { backgroundColor: "transparent" },
         }}
       />
-      <ScrollView
-        contentContainerStyle={{
-          paddingHorizontal: space.lg,
-          paddingBottom: insets.bottom + space.xxxl,
-          alignSelf: "center",
-          width: "100%",
-          maxWidth: theme.layout.readingMaxWidth,
-        }}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t("settings.close")}
+        onPress={close}
+        style={StyleSheet.absoluteFill}
       >
-        <ChoiceList
-          title={t("settings.appearance")}
-          options={themes}
-          selected={preference}
-          onSelect={setPreference}
-        />
-        <ChoiceList
-          title={t("settings.language")}
-          options={languages}
-          selected={choice}
-          onSelect={setLang}
-        />
-        <Text style={[textStyle.bodySmall, { color: color.textSecondary, marginTop: space.sm }]}>
-          {t("settings.wolofNote")}
-        </Text>
-        <Text
-          accessibilityRole="header"
-          style={[textStyle.subtitle, { color: color.textPrimary, marginTop: space.xxl }]}
+        <GlassBackdrop strength="veil" />
+      </Pressable>
+      <View
+        accessibilityViewIsModal
+        style={[
+          styles.sheet,
+          {
+            maxWidth: layout.readingMaxWidth,
+            borderTopLeftRadius: radius.lg + space.sm,
+            borderTopRightRadius: radius.lg + space.sm,
+            borderColor: color.glassBorder,
+            shadowColor: color.scrim,
+          },
+        ]}
+      >
+        <GlassBackdrop />
+        <ScrollView
+          contentContainerStyle={{
+            padding: space.xl,
+            paddingBottom: insets.bottom + space.xl,
+            gap: space.xl,
+          }}
         >
-          {t("settings.about")}
-        </Text>
-        <Text style={[textStyle.body, { color: color.textSecondary, marginTop: space.sm }]}>
-          {t("settings.aboutBody")}
-        </Text>
-        <Text style={[textStyle.bodySmall, { color: color.textTertiary, marginTop: space.md }]}>
-          {t("settings.version", { version: Constants.expoConfig?.version ?? "—" })}
-        </Text>
-      </ScrollView>
+          <View style={styles.header}>
+            <Text
+              accessibilityRole="header"
+              style={[textStyle.title, styles.flex, { color: color.textPrimary }]}
+            >
+              {t("settings.title")}
+            </Text>
+            <IconButton icon={X} label={t("settings.close")} onPress={close} />
+          </View>
+          <SegmentedChoice
+            title={t("settings.appearance")}
+            segments={themes}
+            selected={preference}
+            onSelect={setPreference}
+          />
+          <SegmentedChoice
+            title={t("settings.language")}
+            segments={languages}
+            selected={choice}
+            onSelect={setLang}
+          />
+          <View style={{ gap: space.sm }}>
+            <Text
+              accessibilityRole="header"
+              style={[textStyle.label, { color: color.textSecondary }]}
+            >
+              {t("settings.about")}
+            </Text>
+            {(["aboutNews", "aboutProcedures", "aboutSources"] as const).map((key) => (
+              <Text key={key} style={[textStyle.body, { color: color.textPrimary }]}>
+                {t(`settings.${key}`)}
+              </Text>
+            ))}
+            <Text style={[textStyle.bodySmall, { color: color.textTertiary }]}>
+              {t("settings.version", { version: Constants.expoConfig?.version ?? "—" })}
+            </Text>
+          </View>
+        </ScrollView>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1 },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderBottomWidth: StyleSheet.hairlineWidth,
+  root: { flex: 1, justifyContent: "flex-end", alignItems: "center" },
+  sheet: {
+    width: "100%",
+    maxHeight: "88%",
+    overflow: "hidden",
+    borderWidth: StyleSheet.hairlineWidth,
+    borderBottomWidth: 0,
+    elevation: 12,
+    shadowOpacity: 0.2,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: -4 },
   },
-  label: { flex: 1 },
+  header: { flexDirection: "row", alignItems: "center" },
+  flex: { flex: 1 },
 });

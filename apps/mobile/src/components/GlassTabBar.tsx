@@ -1,11 +1,11 @@
-import { layout, radius, withAlpha } from "@bgs/ui";
-import { BlurView } from "expo-blur";
+import { layout, radius } from "@bgs/ui";
 import type { Tabs } from "expo-router";
 import type { ComponentProps } from "react";
-import { Platform, Pressable, StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import { Pressable, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "../i18n/useTranslation";
 import { useTheme } from "../theme/useTheme";
+import { GlassBackdrop } from "./GlassBackdrop";
 
 type TabBarProps = Parameters<NonNullable<ComponentProps<typeof Tabs>["tabBar"]>>[0];
 
@@ -25,12 +25,6 @@ function sideOffsets(windowWidth: number, left: number, right: number) {
 /** Width of the soft green indicator behind the active icon (Material 3 proportions). */
 const INDICATOR_WIDTH = 56;
 const INDICATOR_HEIGHT = 32;
-
-/**
- * Real blur only where it is cheap: iOS materials (and the web). Android keeps the
- * same floating glass shape, nearly opaque, so entry-level GPUs stay at 60 fps.
- */
-const BLUR_AVAILABLE = Platform.OS !== "android";
 
 function bottomGap(insetBottom: number): number {
   return Math.max(insetBottom - 6, MIN_BOTTOM_GAP);
@@ -71,24 +65,7 @@ export function GlassTabBar({ state, descriptors, navigation }: TabBarProps) {
         accessibilityLabel={t("tabs.navigation")}
         style={[styles.glass, { borderColor: color.glassBorder }]}
       >
-        {BLUR_AVAILABLE && (
-          <BlurView
-            intensity={layout.glassBlur}
-            tint={theme.scheme === "dark" ? "dark" : "light"}
-            style={StyleSheet.absoluteFill}
-          />
-        )}
-        <View
-          style={[
-            StyleSheet.absoluteFill,
-            {
-              backgroundColor: withAlpha(
-                color.glass,
-                BLUR_AVAILABLE ? opacity.glass : opacity.glassOpaque,
-              ),
-            },
-          ]}
-        />
+        <GlassBackdrop />
         {state.routes.map((route, index) => {
           const focused = state.index === index;
           const options = descriptors[route.key]?.options;

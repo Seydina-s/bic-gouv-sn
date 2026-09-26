@@ -41,6 +41,8 @@ export const opacity = {
   scrim: 0.6,
   /** Frosted-glass bars where the system blurs what scrolls beneath (iOS). */
   glass: 0.82,
+  /** Glass veil over a whole screen (sheet backdrop): the page behind stays recognisable. */
+  veil: 0.45,
   /** Same bars without blur (Android: blur is too costly on entry-level GPUs). */
   glassOpaque: 0.94,
   /** Baobab and other watermarks (charter: 3–6 %). */
