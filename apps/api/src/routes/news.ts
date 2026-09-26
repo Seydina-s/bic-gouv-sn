@@ -6,6 +6,7 @@ import {
   slugSchema,
   newsDetailSchema,
   newsListResponseSchema,
+  newsSectionsResponseSchema,
   type ErrorCode,
 } from "@bgs/shared-types";
 import type { FastifyReply, FastifyRequest } from "fastify";
@@ -82,6 +83,8 @@ export const newsRoutes: FastifyPluginAsyncZod<NewsRoutesOptions> = (
           lang: langSchema.default("fr"),
           limit: z.coerce.number().int().min(1).max(50).default(20),
           cursor: z.uuid().optional(),
+          /** Numbered page, from 1 (ignored when a cursor is given). */
+          page: z.coerce.number().int().min(1).max(10_000).optional(),
           /** Only this section, e.g. the latest Conseil des ministres. */
           category: slugSchema.optional(),
         }),
@@ -89,14 +92,63 @@ export const newsRoutes: FastifyPluginAsyncZod<NewsRoutesOptions> = (
       },
     },
     async (request, reply) => {
-      const { lang, limit, cursor, category } = request.query;
-      const page = await articles.list({ lang, limit, cursor, category });
+      const { lang, limit, cursor, page: pageNumber, category } = request.query;
+      const offset =
+        cursor === undefined && pageNumber !== undefined ? (pageNumber - 1) * limit : 0;
+      const page = await articles.list({ lang, limit, cursor, offset, category });
       const media = mediaBaseUrlFor(request, mediaBaseUrl);
       const items = page.items.flatMap((article) => toSummary(article, lang, media) ?? []);
-      const fingerprint = [lang, cursor, category, media, ...page.items.map(freshnessKey)].join(
-        "|",
-      );
-      return sendCached(request, reply, fingerprint, { items, nextCursor: page.nextCursor });
+      const fingerprint = [
+        lang,
+        cursor,
+        offset,
+        category,
+        media,
+        page.total,
+        ...page.items.map(freshnessKey),
+      ].join("|");
+      return sendCached(request, reply, fingerprint, {
+        items,
+        nextCursor: page.nextCursor,
+        total: page.total,
+      });
+    },
+  );
+
+  app.get(
+    "/news/sections",
+    {
+      schema: {
+        tags: ["news"],
+        summary: "The newest articles of each section, for the front page rows",
+        querystring: z.object({
+          lang: langSchema.default("fr"),
+          perSection: z.coerce.number().int().min(1).max(20).default(10),
+        }),
+        response: { 200: newsSectionsResponseSchema, 304: z.null() },
+      },
+    },
+    async (request, reply) => {
+      const { lang, perSection } = request.query;
+      const sections = await articles.sections({ lang, perSection });
+      const media = mediaBaseUrlFor(request, mediaBaseUrl);
+      const fingerprint = [
+        lang,
+        perSection,
+        media,
+        ...sections.flatMap((section) => [
+          section.category,
+          section.total,
+          ...section.items.map(freshnessKey),
+        ]),
+      ].join("|");
+      return sendCached(request, reply, fingerprint, {
+        sections: sections.map((section) => ({
+          category: section.category,
+          total: section.total,
+          items: section.items.flatMap((article) => toSummary(article, lang, media) ?? []),
+        })),
+      });
     },
   );
 

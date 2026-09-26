@@ -49,7 +49,7 @@ describe("createNewsClient", () => {
     await expect(client.getNews(DETAIL.id, "fr")).resolves.toEqual(DETAIL);
     const list = createNewsClient({
       baseUrl: "",
-      fetchImpl: respond({ ...LIST, total: 2 }),
+      fetchImpl: respond({ ...LIST, pageCount: 2 }),
     });
     await expect(list.listNews("fr", null)).resolves.toEqual(LIST);
   });

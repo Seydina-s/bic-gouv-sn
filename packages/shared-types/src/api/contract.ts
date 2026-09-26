@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { newsDetailSchema, newsListResponseSchema } from "./news.schema";
+import {
+  newsDetailSchema,
+  newsListResponseSchema,
+  newsSectionsResponseSchema,
+} from "./news.schema";
 import { procedureDetailSchema, procedureListResponseSchema } from "./procedures.schema";
 
 /** FNV-1a, 32 bits: tiny and dependency-free; collisions only cost a cache refill. */
@@ -28,6 +32,7 @@ export function apiContractFingerprint(): string {
   cached ??= schemasFingerprint([
     newsListResponseSchema,
     newsDetailSchema,
+    newsSectionsResponseSchema,
     procedureListResponseSchema,
     procedureDetailSchema,
   ]);

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   readNewsDetail,
   readNewsList,
+  readNewsSections,
   readProcedureDetail,
   readProcedureList,
 } from "./tolerant-reader";
@@ -39,10 +40,15 @@ describe("readNewsList (a newer API talking to an older app)", () => {
     const list = readNewsList({
       items: [{ ...summary, audio: { url: "x" } }],
       nextCursor: null,
-      total: 3,
+      pageCount: 3,
     });
     expect(list?.items[0]).not.toHaveProperty("audio");
-    expect(list).not.toHaveProperty("total");
+    expect(list).not.toHaveProperty("pageCount");
+  });
+
+  it("reads the total of numbered pages, and does without it", () => {
+    expect(readNewsList({ items: [summary], nextCursor: null, total: 41 })?.total).toBe(41);
+    expect(readNewsList({ items: [summary], nextCursor: null })?.total).toBeUndefined();
   });
 
   it("skips one unreadable item instead of failing the page", () => {
@@ -70,6 +76,25 @@ describe("readNewsList (a newer API talking to an older app)", () => {
     expect(readNewsList(null)).toBeNull();
     expect(readNewsList({ items: "no", nextCursor: null })).toBeNull();
     expect(readNewsList({ items: [] })).toBeNull();
+  });
+});
+
+describe("readNewsSections", () => {
+  it("keeps readable sections and skips unreadable articles inside them", () => {
+    const read = readNewsSections({
+      sections: [
+        { category: "communiques", total: 2, items: [{ ...summary, title: "" }, summary] },
+        { category: "", total: 1, items: [summary] },
+        "broken",
+      ],
+    });
+    expect(read?.sections).toHaveLength(1);
+    expect(read?.sections[0]?.items).toHaveLength(1);
+  });
+
+  it("refuses a response without sections", () => {
+    expect(readNewsSections({ items: [] })).toBeNull();
+    expect(readNewsSections(null)).toBeNull();
   });
 });
 
