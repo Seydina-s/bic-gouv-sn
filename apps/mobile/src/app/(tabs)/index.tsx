@@ -16,7 +16,7 @@ import { GearSixIcon as GearSix } from "phosphor-react-native/src/icons/GearSix"
 import { MagnifyingGlassIcon as MagnifyingGlass } from "phosphor-react-native/src/icons/MagnifyingGlass";
 import { useTabBarInset } from "../../components/GlassTabBar";
 import { IconButton } from "../../components/IconButton";
-import { ScrollTopButton } from "../../components/ScrollTopButton";
+import { ScrollTopButton, useScrollTop } from "../../components/ScrollTopButton";
 import { ArticlePane } from "../../features/news/ArticlePane";
 import { freshnessOf, type Freshness } from "../../features/news/format";
 import { COUNCIL_CATEGORY, heroStories, orderSections } from "../../features/news/front-page";
@@ -24,15 +24,13 @@ import { HeroCarousel } from "../../features/news/HeroCarousel";
 import { Masthead } from "../../features/news/Masthead";
 import { SectionFilter } from "../../features/news/SectionFilter";
 import { SectionRail } from "../../features/news/SectionRail";
+import { SettingsSheet } from "../../features/settings/SettingsSheet";
 import { CouncilCard } from "../../features/news/Stories";
 import { useLastOpened } from "../../features/news/useLastOpened";
 import { useFrontSections, useLatestIn, useNewsFeed } from "../../features/news/useNews";
 import { WovenIn } from "../../features/news/WovenIn";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
-
-/** The "back to top" button appears after this share of a screen has been scrolled. */
-const SCROLL_TOP_AFTER = 0.8;
 
 function Notice({
   text,
@@ -93,9 +91,10 @@ export default function HomeScreen() {
   const front = useFrontSections();
   const { lastOpened, markOpened } = useLastOpened();
   const scroller = useRef<ScrollView>(null);
-  const [showTop, setShowTop] = useState(false);
+  const scrollTop = useScrollTop();
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const { color, space, layout } = theme;
-  const { width, height } = useWindowDimensions();
+  const { width } = useWindowDimensions();
   // Tablets and unfolded foldables: front page and article side by side (recomputed live).
   const twoPane = windowClass(width) === "expanded";
   const listPaneWidth = Math.round(
@@ -152,7 +151,7 @@ export default function HomeScreen() {
               icon={GearSix}
               label={t("settings.title")}
               onPress={() => {
-                router.push("/settings");
+                setSettingsOpen(true);
               }}
             />
           </>
@@ -220,12 +219,7 @@ export default function HomeScreen() {
         ref={scroller}
         contentContainerStyle={{ paddingBottom: bottomInset + space.xl }}
         scrollEventThrottle={100}
-        onScroll={(event) => {
-          const past = event.nativeEvent.contentOffset.y > height * SCROLL_TOP_AFTER;
-          if (past !== showTop) {
-            setShowTop(past);
-          }
-        }}
+        onScroll={scrollTop.onScroll}
         refreshControl={
           <RefreshControl
             refreshing={feed.isRefetching || front.isRefetching}
@@ -239,8 +233,14 @@ export default function HomeScreen() {
         {masthead}
         {body}
       </ScrollView>
+      <SettingsSheet
+        visible={settingsOpen}
+        onClose={() => {
+          setSettingsOpen(false);
+        }}
+      />
       <ScrollTopButton
-        visible={showTop}
+        visible={scrollTop.visible}
         bottom={bottomInset + space.sm}
         onPress={() => {
           scroller.current?.scrollTo({ y: 0, animated: true });

@@ -13,6 +13,7 @@ import { SectionFilter } from "../../features/news/SectionFilter";
 import { StoryRow } from "../../features/news/Stories";
 import { useSectionPage } from "../../features/news/useNews";
 import { useTranslation } from "../../i18n/useTranslation";
+import { ScrollTopButton, useScrollTop } from "../../components/ScrollTopButton";
 import { useTheme } from "../../theme/useTheme";
 
 /** A page number from the address; anything else reads as the first page. */
@@ -36,6 +37,7 @@ export default function SectionScreen() {
   const tone = useCategoryTone(slug);
   const list = useRef<FlashListRef<NewsSummary>>(null);
   const section = useSectionPage(slug, page);
+  const scrollTop = useScrollTop();
   const { color, space, textStyle, layout } = theme;
   const items = section.data?.items ?? [];
   const total = section.data?.total;
@@ -123,6 +125,8 @@ export default function SectionScreen() {
       <View style={[styles.column, { maxWidth: layout.readingMaxWidth + space.xxxl }]}>
         <FlashList
           ref={list}
+          onScroll={scrollTop.onScroll}
+          scrollEventThrottle={100}
           data={items}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
@@ -142,6 +146,13 @@ export default function SectionScreen() {
           testID="section-list"
         />
       </View>
+      <ScrollTopButton
+        visible={scrollTop.visible}
+        bottom={insets.bottom + space.lg}
+        onPress={() => {
+          list.current?.scrollToOffset({ offset: 0, animated: true });
+        }}
+      />
     </View>
   );
 }

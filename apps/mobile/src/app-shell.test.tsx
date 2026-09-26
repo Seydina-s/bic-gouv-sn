@@ -14,7 +14,6 @@ import ProcedureScreen from "./app/procedure/[slug]";
 import SectionScreen from "./app/section/[slug]";
 import FavoritesScreen from "./app/favorites";
 import SearchScreen from "./app/search";
-import SettingsScreen from "./app/settings";
 import { DETAIL, LIST, newsFetch } from "./testing/news-fixtures";
 
 jest.mock("expo-localization", () => ({ getLocales: () => [{ languageTag: "fr-SN" }] }));
@@ -49,7 +48,6 @@ const routes = {
   "section/[slug]": SectionScreen,
   favorites: FavoritesScreen,
   search: SearchScreen,
-  settings: SettingsScreen,
 };
 
 beforeEach(async () => {
@@ -181,6 +179,17 @@ describe("app shell", () => {
     }
   });
 
+  it("opens the settings over the front page, which stays in place when they close", async () => {
+    await renderRouter(routes, { initialUrl: "/" });
+    await fireEvent.press(await screen.findByRole("button", { name: "Réglages" }));
+    expect(await screen.findByRole("radio", { name: "Sombre" })).toBeOnTheScreen();
+    // The front page is still mounted underneath (a pop-up, not a new page).
+    expect(screen.getByTestId("news-feed", { includeHiddenElements: true })).toBeTruthy();
+    await fireEvent.press(first(screen.getAllByRole("button", { name: "Fermer les réglages" })));
+    expect(screen.queryByRole("radio", { name: "Sombre" })).toBeNull();
+    expect(screen.getByTestId("news-feed")).toBeOnTheScreen();
+  });
+
   it("remembers the appearance and language chosen in the settings", async () => {
     const fetchMock = newsFetch();
     globalThis.fetch = fetchMock as unknown as typeof fetch;
@@ -204,7 +213,8 @@ describe("app shell", () => {
     ]);
     const fetchMock = newsFetch();
     globalThis.fetch = fetchMock as unknown as typeof fetch;
-    await renderRouter(routes, { initialUrl: "/settings" });
+    await renderRouter(routes, { initialUrl: "/" });
+    await fireEvent.press(await screen.findByRole("button", { name: "Réglages" }));
     expect(await screen.findByRole("radio", { name: "Wolof", checked: true })).toBeOnTheScreen();
     expect(
       screen.getByRole("radio", { name: "Comme le téléphone", checked: true }),
@@ -360,6 +370,20 @@ describe("app shell", () => {
       ),
     ).toBeOnTheScreen();
     expect(screen.getAllByText("Titre de test A")[0]).toBeOnTheScreen();
+  });
+
+  it("offers a way back to the top once a list has been scrolled", async () => {
+    await renderRouter(routes, { initialUrl: "/section/discours" });
+    const list = await screen.findByTestId("section-list");
+    expect(screen.queryByRole("button", { name: "Revenir en haut" })).toBeNull();
+    await fireEvent.scroll(list, {
+      nativeEvent: {
+        contentOffset: { x: 0, y: 2000 },
+        contentSize: { width: 390, height: 5000 },
+        layoutMeasurement: { width: 390, height: 844 },
+      },
+    });
+    expect(await screen.findByRole("button", { name: "Revenir en haut" })).toBeOnTheScreen();
   });
 
   it("shows an honest coming-soon screen for sections not built yet", async () => {

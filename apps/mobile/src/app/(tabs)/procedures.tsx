@@ -1,6 +1,8 @@
-import { FlashList } from "@shopify/flash-list";
+import { FlashList, type FlashListRef } from "@shopify/flash-list";
+import type { ProcedureSummary } from "@bgs/shared-types";
+
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTabBarInset } from "../../components/GlassTabBar";
@@ -8,6 +10,7 @@ import { useDebouncedValue } from "../../features/news/useDebouncedValue";
 import { ProcedureRow } from "../../features/procedures/ProcedureRow";
 import { useProcedures } from "../../features/procedures/useProcedures";
 import { useTranslation } from "../../i18n/useTranslation";
+import { ScrollTopButton, useScrollTop } from "../../components/ScrollTopButton";
 import { useTheme } from "../../theme/useTheme";
 
 /** Pause after typing before the search is sent (fewer requests on slow networks). */
@@ -23,6 +26,8 @@ export default function ProceduresScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const bottomInset = useTabBarInset();
+  const list = useRef<FlashListRef<ProcedureSummary>>(null);
+  const scrollTop = useScrollTop();
   const [text, setText] = useState("");
   const query = useDebouncedValue(text.trim(), TYPING_PAUSE_MS);
   const procedures = useProcedures(query);
@@ -100,6 +105,9 @@ export default function ProceduresScreen() {
   return (
     <View style={[styles.root, { backgroundColor: color.background }]}>
       <FlashList
+        ref={list}
+        onScroll={scrollTop.onScroll}
+        scrollEventThrottle={100}
         data={items}
         keyExtractor={(item) => item.id}
         keyboardShouldPersistTaps="handled"
@@ -130,6 +138,13 @@ export default function ProceduresScreen() {
           ) : null
         }
         contentContainerStyle={{ paddingBottom: bottomInset + space.xl }}
+      />
+      <ScrollTopButton
+        visible={scrollTop.visible}
+        bottom={bottomInset + space.sm}
+        onPress={() => {
+          list.current?.scrollToOffset({ offset: 0, animated: true });
+        }}
       />
     </View>
   );
