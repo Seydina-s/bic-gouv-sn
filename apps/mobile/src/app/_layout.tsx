@@ -4,8 +4,11 @@ import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import * as SystemUI from "expo-system-ui";
 import { useEffect, type ComponentType } from "react";
+import { StyleSheet, View } from "react-native";
 import { QueryProvider } from "../data/QueryProvider";
 import { FavoritesProvider } from "../features/favorites/FavoritesProvider";
+import { Onboarding } from "../features/onboarding/Onboarding";
+import { useOnboardingDone } from "../features/onboarding/useOnboardingDone";
 import { I18nProvider } from "../i18n/I18nProvider";
 import { initMonitoring } from "../monitoring/monitoring";
 import { ThemeProvider } from "../theme/ThemeProvider";
@@ -25,6 +28,8 @@ void SplashScreen.preventAutoHideAsync();
 function ThemedStack() {
   const { theme } = useTheme();
   const fontsReady = useAppFonts();
+  const onboarding = useOnboardingDone();
+  const ready = fontsReady && onboarding.done !== null;
 
   // Root background behind every screen: no white flash in dark mode.
   useEffect(() => {
@@ -32,12 +37,12 @@ function ThemedStack() {
   }, [theme.color.background]);
 
   useEffect(() => {
-    if (fontsReady) {
+    if (ready) {
       void SplashScreen.hideAsync();
     }
-  }, [fontsReady]);
+  }, [ready]);
 
-  if (!fontsReady) {
+  if (!ready) {
     return null;
   }
 
@@ -50,6 +55,12 @@ function ThemedStack() {
           contentStyle: { backgroundColor: theme.color.background },
         }}
       />
+      {/* First run: welcome screens above the app (the navigator stays mounted). */}
+      {onboarding.done === false && (
+        <View accessibilityViewIsModal style={StyleSheet.absoluteFill}>
+          <Onboarding onFinish={onboarding.finish} />
+        </View>
+      )}
     </>
   );
 }

@@ -45,6 +45,19 @@ describe("shipped catalogs", () => {
     }
   });
 
+  it("follow French typography: non-breaking space before a colon and inside « »", () => {
+    for (const key of listMessageKeys(fr)) {
+      const message = lookupMessage(fr, key);
+      const texts =
+        typeof message === "string"
+          ? [message]
+          : [message?.one, message?.many, message?.other].filter((text) => text !== undefined);
+      for (const text of texts) {
+        expect(text, key).not.toMatch(/ :|« | »/);
+      }
+    }
+  });
+
   it("report every Wolof string still to be translated", () => {
     // Wolof strings come from native speakers: until then, all keys are reported.
     expect(findMissingMessages(fr, wo)).toEqual(listMessageKeys(fr));

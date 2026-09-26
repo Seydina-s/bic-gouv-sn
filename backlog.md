@@ -156,3 +156,6 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 26/09/2026 | SET-01 ✅ Réglages : apparence (Comme le téléphone / Clair / Sombre) et langue (Comme le téléphone / Français / Wolof), mémorisées sur le téléphone ; section « À propos » indiquant que l'app relaie les informations officielles de presidence.sn (en attendant l'autorisation L-01) | Charte |
 | 26/09/2026 | ING-02 ✅ Écarté à juste titre : 1 article fait d'un lecteur externe (Issuu) qui exige un script tiers | Import |
 | 26/09/2026 | FEED-05 ✅ Hors ligne : le bandeau indique l'âge des actualités affichées (« mis à jour il y a 2 heures »), comme prévu par la chaîne de repli de CLAUDE.md | Résilience |
+| 26/09/2026 | ONB-01 ✅ Accueil au premier lancement : choix de la langue puis 3 écrans (une idée chacun, avec un vrai morceau de l'app en démonstration), « Passer » toujours visible, mémorisé ; seules les fonctions existantes sont présentées ; permissions demandées plus tard, au moment utile | Charte |
+| 26/09/2026 | TYPO-01 ✅ Typographie française : espace insécable avant « : » et dans « », vérifiée par un test sur tout le catalogue | UX writing |
+| 26/09/2026 | SPLASH-01 🔴 Splash : le baobab se dessine trait par trait (< 1,5 s), sans bloquer le chargement ; nécessite un build natif pour l'écran natif (A-02) | Charte |

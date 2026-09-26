@@ -41,8 +41,42 @@ const routes = {
 
 beforeEach(async () => {
   await AsyncStorage.clear();
+  // Most journeys start after the welcome screens (tested on their own below).
+  await AsyncStorage.setItem("bgs-onboarding", "done");
   mockFontState = [true, null];
   globalThis.fetch = newsFetch() as unknown as typeof fetch;
+});
+
+describe("first run", () => {
+  it("welcomes with the language first, then one idea per screen, then the app", async () => {
+    await AsyncStorage.removeItem("bgs-onboarding");
+    await renderRouter(routes, { initialUrl: "/" });
+    expect(await screen.findByText("Choisissez votre langue")).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole("radio", { name: "Wolof" }));
+    expect(screen.getByRole("radio", { name: "Wolof", checked: true })).toBeOnTheScreen();
+    for (const title of [
+      "L'action du gouvernement, chaque jour",
+      "La source, toujours",
+      "Gardez l'essentiel, même sans réseau",
+    ]) {
+      await fireEvent.press(screen.getByRole("button", { name: "Suivant" }));
+      expect(await screen.findByText(title)).toBeOnTheScreen();
+    }
+    await fireEvent.press(screen.getByRole("button", { name: "Commencer" }));
+    expect(screen.queryByText("Gardez l'essentiel, même sans réseau")).toBeNull();
+    expect(await AsyncStorage.multiGet(["bgs-onboarding", "bgs-language"])).toEqual([
+      ["bgs-onboarding", "done"],
+      ["bgs-language", "wo"],
+    ]);
+  });
+
+  it("can be skipped at any step", async () => {
+    await AsyncStorage.removeItem("bgs-onboarding");
+    await renderRouter(routes, { initialUrl: "/" });
+    await fireEvent.press(await screen.findByRole("button", { name: "Passer" }));
+    expect(screen.queryByText("Choisissez votre langue")).toBeNull();
+    expect(await screen.findByText("Titre de test A")).toBeOnTheScreen();
+  });
 });
 
 describe("app shell", () => {
@@ -90,7 +124,11 @@ describe("app shell", () => {
     await renderRouter(routes, { initialUrl: "/search" });
     await fireEvent.changeText(await screen.findByLabelText("Rechercher"), "introuvable");
     expect(
-      await screen.findByText("Aucun résultat pour « introuvable ».", {}, { timeout: 3000 }),
+      await screen.findByText(
+        "Aucun résultat pour «\u00a0introuvable\u00a0».",
+        {},
+        { timeout: 3000 },
+      ),
     ).toBeOnTheScreen();
   });
 
@@ -188,7 +226,7 @@ describe("app shell", () => {
     await renderRouter(routes, { initialUrl: "/" });
     await fireEvent.press(await screen.findByText("Titre de test A"));
     expect(await screen.findByText("Paragraphe de test.")).toBeOnTheScreen();
-    expect(screen.getByText("Source : presidence.sn")).toBeOnTheScreen();
+    expect(screen.getByText("Source\u00a0: presidence.sn")).toBeOnTheScreen();
     await fireEvent.press(screen.getByText("Lire sur presidence.sn"));
     expect(openURL).toHaveBeenCalledWith("https://www.presidence.sn/fr/actualites/test/");
   });
@@ -258,7 +296,7 @@ describe("app shell", () => {
     await fireEvent(screen.getByTestId("news-feed"), "refresh");
     expect(
       await screen.findByText(
-        "Hors ligne : voici les dernières actualités enregistrées. Mis à jour à l'instant.",
+        "Hors ligne\u00a0: voici les dernières actualités enregistrées. Mis à jour à l'instant.",
         {},
         { timeout: 5000 },
       ),
