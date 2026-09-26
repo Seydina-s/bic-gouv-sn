@@ -163,3 +163,7 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 26/09/2026 | ADM-02 🔴 Authentification de l'administration (2FA obligatoire, rôles, journal d'audit) avant toute mise en ligne de la console | Phase 4 |
 | 26/09/2026 | S1-03b ✅ Budget de poids : 15 Mo pour l'app entière, 6 Mo pour le code (contrôlé en CI) — décision utilisateur | Utilisateur |
 | 26/09/2026 | UX-01 🔴 Expérience immersive : animations Rive (splash, transitions, onboarding), illustrations, onboarding plus intuitif — en attente des retours de l'utilisateur et du logo, avec benchmark des meilleures apps | Utilisateur |
+| 26/09/2026 | DEM-01 ✅ Collecte des démarches d'e-senegal.sn (interface GraphQL publique du site, 1 requête/s) : modèle « démarche » traçable (lien vers la page publique), faits laissés vides plutôt qu'inventés, valeurs bouche-trous de la source écartées (« Q », « XXX »…), liens non sécurisés écartés, quarantaine si vide, versionnage ; stockage générique factorisé (VersionedJsonStore) | Phase 5 |
+| 26/09/2026 | DEM-02 🔴 API /v1/procedures (liste par catégorie, recherche, fiche) | Phase 5 |
+| 26/09/2026 | DEM-03 🔴 Onglet « Démarches » de l'app (liste, recherche, fiche étape par étape, lien vers e-senegal.sn), puis illustrations des étapes (UX-01) | Phase 5 |
+| 26/09/2026 | DEM-04 🔴 Relier les démarches aux services de la carte (les services administratifs de la source sont souvent vides : la base interne validée prendra le relais) | Phase 3/5 |

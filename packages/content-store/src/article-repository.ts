@@ -1,6 +1,8 @@
 import type { Lang, NewsArticle } from "@bgs/shared-types";
 
-export type SaveOutcome = "created" | "updated" | "unchanged";
+import type { SaveOutcome } from "./versioned-json-store";
+
+export type { SaveOutcome };
 
 export interface ListQuery {
   /** Only articles having a translation in this language. */

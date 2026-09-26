@@ -72,3 +72,43 @@ export function newsArticle(overrides: Record<string, unknown> = {}) {
     ...overrides,
   };
 }
+
+export function procedure(overrides: Record<string, unknown> = {}) {
+  const sourceUrl = "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/test-demarche";
+  return {
+    id: "7a1c2b8e-4d5a-5f6b-9c7d-8e9f0a1b2c3d",
+    kind: "procedure",
+    slug: "test-demarche",
+    sourceUrl,
+    sourcePublishedOn: "2026-03-22",
+    sourceUpdatedAt: null,
+    fetchedAt: NOW,
+    contentHash: HASH,
+    version: 1,
+    lang: "fr",
+    translations: [
+      {
+        lang: "fr",
+        status: "official",
+        title: "Démarche de test",
+        bodyHtml: "<p>Étapes de test.</p>",
+        sourceUrl,
+      },
+    ],
+    audio: [],
+    embedding: null,
+    summary: "Résumé de test.",
+    costFcfa: 1000,
+    delayDays: 2,
+    eligibility: null,
+    documents: ["Pièce de test"],
+    online: false,
+    categories: ["État civil"],
+    offices: [],
+    faqs: [],
+    legalTexts: [],
+    usefulLinks: [],
+    related: [],
+    ...overrides,
+  };
+}

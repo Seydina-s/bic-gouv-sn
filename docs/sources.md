@@ -67,4 +67,31 @@ Puisque le projet est porté par le BIC, demander à l'équipe du back-office :
 
 ## e-senegal.sn (démarches)
 
-Non cartographié à ce stade (Phase 5).
+Relevé le 26/09/2026.
+
+### Règles d'accès
+
+- Pas de fichier `robots.txt` (l'adresse renvoie la page de l'application) : aucune règle explicite. On reste poli : 1 requête par seconde, client identifié (`BicGouvSN-ingestion`), et uniquement l'interface publique utilisée par le site lui-même.
+
+### Architecture du site
+
+- Application Angular à une seule page, routage par dièse (`#/`).
+- Données servies par une interface **GraphQL** publique : `https://gateway.e-senegal.sn/citoyen/v1` (POST JSON `{ query, variables }`).
+- Page publique d'une démarche (lien « source » affiché dans l'app), vérifiée au navigateur : `https://e-senegal.sn/#/comprendre-ma-demarche/demarche/{slug}`.
+
+### Requêtes utiles
+
+- `fetchDemarches(queryFilter, demarcheFilter)` : liste paginée (100 par page) → `pagination { totalItems pageCount pageSize currentPage }` et `results { id titre slug resume delai cout icon form isAvailableOnTeledac teledacUrl categories { id title icon } variants { … } }`.
+- `fetchDemarcheBySlug(slug)` : fiche complète → `titre resume description date_publication mot_cle cout delai corps qui_peut_faire_question qui_peut_faire_reponse documents_a_fournir online allowAppointment`, `service_administratifs { name sigle adresse ville region telephone email }` (lien avec la carte des services), `categories`, `textes` (textes officiels), `faqs { question reponse }`, `lien_utiles { name url }`, `formulaires`, `demarches` (démarches liées), `variants`.
+- Autres : `SearchDemarches`, `FetchCategorys`, `FetchCategoriesByPurpose`, `FetchOnlineDemarches`, `FetchAdministrations`, `FetchFaqs`.
+
+### Volumes au 26/09/2026
+
+- **718 démarches** (8 pages de 100). Import complet ≈ 730 requêtes, ≈ 12 min à 1 requête/s.
+- Coût (`cout`, en francs CFA) et délai (`delai`, en jours) parfois vides (`null`) : l'app n'affiche alors rien plutôt que d'inventer.
+
+### Points d'attention pour la collecte
+
+- Les champs longs (`description`, `corps`, `documents_a_fournir`…) sont du HTML : même assainissement strict que presidence.sn.
+- Rattacher chaque fiche à sa page publique (lien source) et à sa date de collecte ; versionner les modifications comme pour les articles.
+- Démarches en wolof : absentes à la source → traduction automatique étiquetée plus tard (P2), jamais présentée comme officielle.
