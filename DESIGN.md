@@ -335,7 +335,13 @@ Une pilule flottante, discrète, par-dessus le contenu qui défile.
 ### Motifs tissés (`features/news/Selvage.tsx` : `Selvage`, `WovenStrip`, `WovenSwatch`)
 Le tissage identifie la rubrique.
 - Un motif par rubrique : chevron (Conseil des ministres), points (Communiqués), sergé diagonal (International), échelle (Discours), losange (Focus), tiret (Interviews), grille (Agenda). Les autres rubriques ont un fil vertical simple.
-- Toujours décoratif (masqué aux lecteurs d'écran), jamais derrière un texte, toujours doublé du nom de la rubrique en toutes lettres. Une nouvelle rubrique reçoit un nouveau motif dans `PATTERNS`, jamais une nouvelle couleur.
+- Toujours décoratif (masqué aux lecteurs d'écran), jamais derrière un texte, toujours doublé du nom de la rubrique en toutes lettres. Une nouvelle rubrique reçoit un nouveau motif dans `PATTERNS`, une icône (`CategoryIcon`) et un ton (`category-tones.ts`).
+
+### Tons et icônes de rubrique (`packages/ui/src/tokens/category-tones.ts`, `features/news/CategoryIcon.tsx`)
+
+- Demande de l'utilisateur (26/09/2026) : chaque rubrique a sa couleur et une icône qui dit son mot clé. Tons terriens autour du vert du drapeau : vert (Conseil des ministres, icône bâtiment officiel), indigo (Communiqués, porte-voix), latérite (Discours, micro sur pied), Atlantique (International, globe centré sur l'Afrique), ocre (Focus, objectif photo), bissap (Interviews & reportages, bulles), écorce de baobab (Agenda, calendrier) ; neutre pour les autres. Le rouge reste réservé aux alertes.
+- Chaque ton a trois valeurs par thème : `container` (fond teinté), `ink` (texte et icônes, ≥ 4,5:1 partout), `solid` (lisières, pastilles, ≥ 3:1) ; contrôlées par `category-tones.test.ts`.
+- Icônes Phosphor en graisse duotone, toujours suivies du nom de la rubrique ; le motif tissé reste l'indice non coloré.
 
 ### Photo (`features/news/CoverImage.tsx`)
 - Variante WebP la plus petite suffisante pour la largeur de l'emplacement et la densité de l'écran (JPEG de secours), BlurHash pendant le chargement, fondu `motion.duration.normal`, fond `surface`. Décorative à côté d'un titre ; décrite (`label`) dans un article.
@@ -364,7 +370,7 @@ Le tissage identifie la rubrique.
 - **Do** garantir une cible tactile d'au moins 48 dp (`touchTarget.min`) pour tout élément pressable.
 - **Do** laisser le texte suivre la taille système. Tester à la plus grande taille, en français et en wolof.
 - **Do** remplacer tout mouvement par une apparition directe ou un fondu quand « réduire les animations » est actif.
-- **Do** donner un motif tissé à chaque nouvelle rubrique et l'accompagner de son nom.
+- **Do** donner à chaque nouvelle rubrique un motif tissé, une icône et un ton, toujours accompagnés de son nom.
 - **Do** afficher « Source : presidence.sn » et le lien vers l'original au pied de chaque article.
 
 ### Don't:

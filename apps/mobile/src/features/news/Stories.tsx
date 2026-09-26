@@ -6,6 +6,7 @@ import { Icon } from "../../components/Icon";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 import { categoryLabelKey } from "./category";
+import { useCategoryTone } from "./CategoryIcon";
 import { CoverImage } from "./CoverImage";
 import { formatPublishedOn } from "./format";
 import { SectionTag } from "./SectionTag";
@@ -116,6 +117,7 @@ export function CouncilCard({ item, onPress }: Omit<StoryProps, "lastOpened">) {
 export function StoryRow({ item, lastOpened, onPress }: StoryProps) {
   const { theme } = useTheme();
   const { label, day } = useStoryLabel(item);
+  const tone = useCategoryTone(item.category);
   const { color, space, textStyle, radius, layout } = theme;
 
   return (
@@ -136,7 +138,7 @@ export function StoryRow({ item, lastOpened, onPress }: StoryProps) {
         },
       ]}
     >
-      <Selvage category={item.category} color={color.primary} />
+      <Selvage category={item.category} color={tone.solid} />
       <View style={[styles.body, { marginLeft: space.lg - SELVAGE_WIDTH, gap: space.xs }]}>
         <SectionTag category={item.category} lastOpened={lastOpened} />
         <Text style={[textStyle.storyTitle, { color: color.textPrimary }]} numberOfLines={3}>

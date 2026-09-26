@@ -3,26 +3,27 @@ import { StyleSheet, Text, View } from "react-native";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 import { categoryLabelKey } from "./category";
-import { WovenSwatch } from "./Selvage";
+import { CategoryIcon, useCategoryTone } from "./CategoryIcon";
 
 export interface SectionTagProps {
   category: string;
   /** Marks the story the reader opened last (restored on return). */
   lastOpened?: boolean;
-  /** Text color on tinted surfaces (defaults to the brand green). */
+  /** Text color on tinted surfaces (defaults to the section's own tone). */
   color?: string;
 }
 
-/** Section name preceded by its woven chip: the pattern and the words name the section. */
+/** Section name preceded by its icon, in the section's tone: icon and words name it. */
 export function SectionTag({ category, lastOpened = false, color }: SectionTagProps) {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const { space, textStyle } = theme;
-  const tint = color ?? theme.color.textBrand;
+  const tone = useCategoryTone(category);
+  const tint = color ?? tone.ink;
 
   return (
     <View style={[styles.row, { gap: space.sm }]}>
-      <WovenSwatch category={category} color={tint} />
+      <CategoryIcon category={category} color={tint} />
       <Text style={[textStyle.caption, styles.caps, { color: tint }]}>
         {t(categoryLabelKey(category))}
       </Text>

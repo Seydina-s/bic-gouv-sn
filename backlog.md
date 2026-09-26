@@ -167,4 +167,9 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 26/09/2026 | DEM-02 ✅ API /v1/procedures : liste alphabétique paginée, recherche (moteur partagé avec les actualités), fiche en blocs structurés avec lien officiel, cache et 304 ; thèmes non disponibles à la source (non inventés) | Phase 5 |
 | 26/09/2026 | DEM-03 ✅ Onglet « Démarches » de l'app : recherche en tête (GOV.UK), nombre de démarches, faits connus en pastilles (coût, délai, en ligne ; inconnu = non affiché), fiche avec faits en cartes, « Qui peut faire la démarche », pièces à fournir en liste à cocher, texte officiel, FAQ, démarches liées, bouton « Faire la démarche sur e-senegal.sn » et mention de la source ; illustrations des étapes reportées à UX-01 | Phase 5 |
 | 26/09/2026 | BUG-ART-01 ✅ Photo du haut d'un article : vide à droite sur téléphone (signalé par l'utilisateur) ; largeur explicite + test anti-régression | Retour utilisateur |
+| 26/09/2026 | HOME-01 ✅ API : pages numérotées (`page`, `total`) et dernières actualités par rubrique en une requête (`/v1/news/sections`) | Retour utilisateur |
+| 26/09/2026 | HOME-02 ✅ Identité des rubriques : un ton par rubrique (contraste AA contrôlé) et une icône par mot clé, sur les pastilles, filtres et lisières | Retour utilisateur |
+| 26/09/2026 | HOME-03 🔴 Page de rubrique : filtres en haut, 20 articles par page, pagination numérotée | Retour utilisateur |
+| 26/09/2026 | HOME-04 🔴 Accueil : bandeau défilant (5 s, pause), rangées horizontales de 10 cartes par rubrique + « Voir plus », espacements | Retour utilisateur |
+| 26/09/2026 | HOME-05 🔴 Bouton discret « remonter en haut », flottant en bas à droite, après défilement | Retour utilisateur |
 | 26/09/2026 | DEM-04 🔴 Relier les démarches aux services de la carte (les services administratifs de la source sont souvent vides : la base interne validée prendra le relais) | Phase 3/5 |

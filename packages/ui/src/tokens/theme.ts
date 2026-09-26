@@ -1,3 +1,4 @@
+import { darkCategoryTones, lightCategoryTones, type CategoryTones } from "./category-tones";
 import { darkColors, lightColors, type SemanticColors } from "./colors";
 import {
   iconSize,
@@ -28,15 +29,23 @@ const scales = {
   layout,
 };
 
-export type Theme = { scheme: ColorScheme; color: SemanticColors } & typeof scales;
+export type Theme = {
+  scheme: ColorScheme;
+  color: SemanticColors;
+  categoryTones: CategoryTones;
+} & typeof scales;
 
-function buildTheme(scheme: ColorScheme, color: SemanticColors): Theme {
-  return { scheme, color, ...scales };
+function buildTheme(
+  scheme: ColorScheme,
+  color: SemanticColors,
+  categoryTones: CategoryTones,
+): Theme {
+  return { scheme, color, categoryTones, ...scales };
 }
 
 export const themes: Readonly<Record<ColorScheme, Theme>> = {
-  light: buildTheme("light", lightColors),
-  dark: buildTheme("dark", darkColors),
+  light: buildTheme("light", lightColors, lightCategoryTones),
+  dark: buildTheme("dark", darkColors, darkCategoryTones),
 };
 
 /**
