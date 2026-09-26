@@ -1,4 +1,9 @@
-import type { ProcedureDetail, ProcedureListResponse, ProcedureSummary } from "@bgs/shared-types";
+import type {
+  ProcedureDetail,
+  ProcedureListResponse,
+  ProcedureSummary,
+  ProcedureThemesResponse,
+} from "@bgs/shared-types";
 
 // Test data with placeholder texts, not real administrative content.
 const SUMMARY_A: ProcedureSummary = {
@@ -47,4 +52,12 @@ export const PROCEDURE_DETAIL: ProcedureDetail = {
   sourceUrl: "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demarche-test-a",
   fetchedAt: "2026-09-25T10:00:00Z",
   version: 1,
+};
+
+/** Two official themes: only the first holds validated procedures. */
+export const PROCEDURE_THEMES: ProcedureThemesResponse = {
+  themes: [
+    { id: "a1", title: "Transports", icon: "fa-bus-alt", count: 3 },
+    { id: "b2", title: "Finances", icon: "fa-wallet", count: 0 },
+  ],
 };

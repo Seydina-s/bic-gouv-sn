@@ -8,7 +8,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTabBarInset } from "../../components/GlassTabBar";
 import { useDebouncedValue } from "../../features/news/useDebouncedValue";
 import { ProcedureRow } from "../../features/procedures/ProcedureRow";
-import { useProcedures } from "../../features/procedures/useProcedures";
+import { ThemeCards } from "../../features/procedures/ThemeCards";
+import { useProcedureThemes, useProcedures } from "../../features/procedures/useProcedures";
 import { useTranslation } from "../../i18n/useTranslation";
 import { ScrollTopButton, useScrollTop } from "../../components/ScrollTopButton";
 import { FloatingAppBar } from "../../features/shell/FloatingAppBar";
@@ -32,6 +33,9 @@ export default function ProceduresScreen() {
   const [text, setText] = useState("");
   const query = useDebouncedValue(text.trim(), TYPING_PAUSE_MS);
   const procedures = useProcedures(query);
+  const themes = useProcedureThemes();
+  const browsing = query === "";
+  const hasThemes = (themes.data?.themes ?? []).some((theme) => theme.count > 0);
   const { color, space, textStyle, radius, touchTarget } = theme;
   const items = procedures.data?.pages.flatMap((page) => page.items) ?? [];
   const total = procedures.data?.pages[0]?.total;
@@ -67,6 +71,25 @@ export default function ProceduresScreen() {
           },
         ]}
       />
+      {browsing && hasThemes && (
+        <View style={{ marginTop: space.xl }}>
+          <ThemeCards
+            themes={themes.data?.themes ?? []}
+            onOpen={(theme) => {
+              router.push({
+                pathname: "/procedure-theme/[id]",
+                params: { id: theme.id, title: theme.title },
+              });
+            }}
+          />
+          <Text
+            accessibilityRole="header"
+            style={[textStyle.subtitle, { color: color.textPrimary, marginTop: space.xl }]}
+          >
+            {t("procedures.allProcedures")}
+          </Text>
+        </View>
+      )}
       <Text
         accessibilityLiveRegion="polite"
         style={[textStyle.label, { color: color.textSecondary, marginVertical: space.md }]}
