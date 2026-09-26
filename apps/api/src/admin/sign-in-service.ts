@@ -61,6 +61,14 @@ export interface SignInDependencies {
   now?: () => number;
 }
 
+/** "seydina@gmail.com" → "sey…(7)@gmail.com": enough to spot a typo, not to read it. */
+export function maskAddress(address: string): string {
+  const at = address.lastIndexOf("@");
+  const local = at === -1 ? address : address.slice(0, at);
+  const domain = at === -1 ? "" : address.slice(at);
+  return `${local.slice(0, 3)}…(${String(local.length)})${domain}`;
+}
+
 function publicAccount(account: AdminAccount): SignedInAccount {
   return { id: account.id, email: account.email, name: account.name, role: account.role };
 }
@@ -197,7 +205,17 @@ export class AdminSignIn {
     await verifyPassword(password, await this.decoyHash);
     const state = recordFailure(this.unknownAttempts.get(key) ?? NO_ATTEMPTS, now);
     this.unknownAttempts.set(key, state);
-    return isLocked(state, now) ? { kind: "locked" } : { kind: "failed" };
+    const locked = isLocked(state, now);
+    // Journaled with a masked address: a typo at account creation, or someone trying
+    // addresses at random, becomes visible without exposing who was typed.
+    await this.audit(
+      "unknown",
+      locked ? "sign-in.unknown-address-locked" : "sign-in.unknown-address",
+      {
+        address: maskAddress(key),
+      },
+    );
+    return locked ? { kind: "locked" } : { kind: "failed" };
   }
 
   private async recordFailedStep(

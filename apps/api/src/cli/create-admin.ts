@@ -4,6 +4,7 @@
 //   pnpm --filter @bgs/api admin:create -- --email prenom.nom@bic.sn --name "Prénom Nom" --role admin
 // The second factor is set up at the first sign-in (QR code in the console).
 import { randomUUID } from "node:crypto";
+import { createInterface } from "node:readline/promises";
 import { parseArgs } from "node:util";
 import { hashPassword, isRole, passwordProblem, PASSWORD_MIN_LENGTH } from "@bgs/admin-auth";
 import { z } from "zod";
@@ -48,20 +49,54 @@ function readHidden(prompt: string): Promise<string> {
   });
 }
 
+/** Reads one visible line (used to confirm the address). */
+async function readVisible(prompt: string): Promise<string> {
+  const reader = createInterface({ input: process.stdin, output: process.stdout });
+  try {
+    return await reader.question(prompt);
+  } finally {
+    reader.close();
+  }
+}
+
+const USAGE =
+  'Utilisation : admin:create --email <e-mail> --name "<nom>" --role reviewer|editor|admin';
+
+/**
+ * Options of the command. Some pnpm versions pass on the "--" separator itself:
+ * it is dropped, so the command works with or without it.
+ */
+function parseCommandLine() {
+  const args = process.argv.slice(2).filter((arg) => arg !== "--");
+  try {
+    return parseArgs({
+      args,
+      options: { email: { type: "string" }, name: { type: "string" }, role: { type: "string" } },
+    });
+  } catch {
+    throw new Error(USAGE);
+  }
+}
+
 async function main(): Promise<void> {
-  const { values } = parseArgs({
-    options: { email: { type: "string" }, name: { type: "string" }, role: { type: "string" } },
-  });
+  const { values } = parseCommandLine();
   const email = z.email().safeParse(values.email?.trim().toLowerCase());
   if (!email.success || values.name === undefined || !isRole(values.role)) {
-    throw new Error(
-      'Utilisation : admin:create -- --email <e-mail> --name "<nom>" --role reviewer|editor|admin',
-    );
+    throw new Error(USAGE);
   }
   const config = loadConfig(process.env);
   const accounts = new FileAdminAccountStore(config.ADMIN_ACCOUNTS_PATH);
   if ((await accounts.findByEmail(email.data)) !== null) {
     throw new Error(`Un compte existe déjà pour ${email.data}.`);
+  }
+  // A typo in the address makes the account unreachable (ERREURS.md, 26/09/2026):
+  // the address is shown and typed a second time before anything is saved.
+  process.stdout.write(`Adresse du compte : ${email.data}\n`);
+  const again = (await readVisible("Retapez cette adresse pour confirmer : ")).trim().toLowerCase();
+  if (again !== email.data) {
+    throw new Error(
+      "Les deux adresses sont différentes : rien n'a été créé. Relancez la commande.",
+    );
   }
   const password = await readHidden(
     `Mot de passe (${String(PASSWORD_MIN_LENGTH)} caractères ou plus) : `,
