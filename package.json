@@ -15,7 +15,9 @@
     "test": "pnpm -r --if-present test",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test",
     "errors:doc": "tsx scripts/generate-errors-doc.ts",
-    "bundle:size": "tsx scripts/check-bundle-size.ts"
+    "bundle:size": "tsx scripts/check-bundle-size.ts",
+    "fonts": "tsx scripts/fonts.ts",
+    "fonts:check": "tsx scripts/fonts.ts --check"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
@@ -25,7 +27,9 @@
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-react-hooks": "7.1.1",
     "globals": "17.12.0",
+    "harfbuzzjs": "1.6.2",
     "prettier": "3.9.9",
+    "subset-font": "2.9.0",
     "tsx": "4.23.15",
     "typescript": "6.0.3",
     "typescript-eslint": "8.70.1",
