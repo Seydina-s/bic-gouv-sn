@@ -10,6 +10,7 @@ import { useDebouncedValue } from "../features/news/useDebouncedValue";
 import { MIN_QUERY_LENGTH, useNewsSearch } from "../features/news/useNews";
 import { useTranslation } from "../i18n/useTranslation";
 import { ScrollTopButton, useScrollTop } from "../components/ScrollTopButton";
+import { FloatingAppBar } from "../features/shell/FloatingAppBar";
 import { useTheme } from "../theme/useTheme";
 
 /** Pause after typing before the search is sent (fewer requests on slow networks). */
@@ -115,6 +116,7 @@ export default function SearchScreen() {
           list.current?.scrollToOffset({ offset: 0, animated: true });
         }}
       />
+      <FloatingAppBar visible={scrollTop.visible} />
     </View>
   );
 }

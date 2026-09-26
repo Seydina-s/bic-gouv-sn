@@ -14,6 +14,7 @@ import { StoryRow } from "../../features/news/Stories";
 import { useSectionPage } from "../../features/news/useNews";
 import { useTranslation } from "../../i18n/useTranslation";
 import { ScrollTopButton, useScrollTop } from "../../components/ScrollTopButton";
+import { FloatingAppBar } from "../../features/shell/FloatingAppBar";
 import { useTheme } from "../../theme/useTheme";
 
 /** A page number from the address; anything else reads as the first page. */
@@ -153,6 +154,7 @@ export default function SectionScreen() {
           list.current?.scrollToOffset({ offset: 0, animated: true });
         }}
       />
+      <FloatingAppBar visible={scrollTop.visible} />
     </View>
   );
 }
