@@ -1,6 +1,6 @@
 import { DETAIL } from "../../testing/news-fixtures";
 import {
-  FAVORITES_KEY,
+  FAVORITES_SLOT,
   loadFavorites,
   saveFavorites,
   summaryOf,
@@ -37,15 +37,15 @@ describe("favorites", () => {
   });
 
   it("survives damaged or outdated records", async () => {
-    expect(await loadFavorites(memoryStorage({ [FAVORITES_KEY]: "{not json" }))).toEqual([]);
-    expect(await loadFavorites(memoryStorage({ [FAVORITES_KEY]: '{"a":1}' }))).toEqual([]);
+    expect(await loadFavorites(memoryStorage({ [FAVORITES_SLOT]: "{not json" }))).toEqual([]);
+    expect(await loadFavorites(memoryStorage({ [FAVORITES_SLOT]: '{"a":1}' }))).toEqual([]);
     const mixed = JSON.stringify([
       null,
       { detail: { id: "broken" }, savedAt: "2026-09-26T08:00:00Z" },
       { detail: DETAIL, savedAt: 42 },
       { detail: DETAIL, savedAt: "2026-09-26T08:00:00Z" },
     ]);
-    const loaded = await loadFavorites(memoryStorage({ [FAVORITES_KEY]: mixed }));
+    const loaded = await loadFavorites(memoryStorage({ [FAVORITES_SLOT]: mixed }));
     expect(loaded.map((favorite) => favorite.detail.id)).toEqual([DETAIL.id]);
   });
 

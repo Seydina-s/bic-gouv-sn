@@ -6,7 +6,8 @@ export interface Favorite {
   savedAt: string;
 }
 
-export const FAVORITES_KEY = "bgs-favorites-v1";
+/** Name of the phone storage slot holding the favorites (not a secret). */
+export const FAVORITES_SLOT = "bgs-favorites-v1";
 
 /** Minimal key-value storage (AsyncStorage in the app, a map in tests). */
 export interface KeyValueStorage {
@@ -22,7 +23,7 @@ export interface KeyValueStorage {
 export async function loadFavorites(storage: KeyValueStorage): Promise<Favorite[]> {
   let raw: unknown;
   try {
-    raw = JSON.parse((await storage.getItem(FAVORITES_KEY)) ?? "[]");
+    raw = JSON.parse((await storage.getItem(FAVORITES_SLOT)) ?? "[]");
   } catch {
     return [];
   }
@@ -40,7 +41,7 @@ export async function loadFavorites(storage: KeyValueStorage): Promise<Favorite[
 }
 
 export async function saveFavorites(storage: KeyValueStorage, favorites: Favorite[]) {
-  await storage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+  await storage.setItem(FAVORITES_SLOT, JSON.stringify(favorites));
 }
 
 /** Adds the article on top, or removes it when it is already a favorite. */
