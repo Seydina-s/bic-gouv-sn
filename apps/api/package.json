@@ -9,9 +9,11 @@
     "build": "tsdown",
     "start": "node --env-file-if-exists=.env.local --import ./dist/instrument.mjs dist/server.mjs",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --coverage"
+    "test": "vitest run --coverage",
+    "admin:create": "tsx --env-file-if-exists=.env.local src/cli/create-admin.ts"
   },
   "dependencies": {
+    "@bgs/admin-auth": "workspace:*",
     "@bgs/content-store": "workspace:*",
     "@bgs/shared-types": "workspace:*",
     "@fastify/helmet": "13.1.1",

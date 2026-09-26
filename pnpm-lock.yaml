@@ -263,6 +263,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@bgs/admin-auth':
+        specifier: workspace:*
+        version: link:../../packages/admin-auth
       '@bgs/content-store':
         specifier: workspace:*
         version: link:../../packages/content-store

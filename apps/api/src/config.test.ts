@@ -14,8 +14,19 @@ describe("loadConfig", () => {
       PROCEDURES_STORE_PATH: ".data/procedures.json",
       INGESTION_STATUS_PATH: ".data/ingestion-status.json",
       MEDIA_ROOT: ".data/media",
+      ADMIN_ACCOUNTS_PATH: ".data/admin/accounts.json",
+      ADMIN_AUDIT_PATH: ".data/admin/audit.jsonl",
       SENTRY_TRACES_SAMPLE_RATE: 0.02,
     });
+  });
+
+  it("accepts an admin key of 32 bytes only", () => {
+    const key = Buffer.alloc(32, 7).toString("base64");
+    expect(loadConfig({ ADMIN_SECRET_KEY: key }).ADMIN_SECRET_KEY).toBe(key);
+    expect(() => loadConfig({ ADMIN_SECRET_KEY: Buffer.alloc(16).toString("base64") })).toThrow(
+      /ADMIN_SECRET_KEY/,
+    );
+    expect(() => loadConfig({ ADMIN_SECRET_KEY: "pas du base64 !" })).toThrow(/ADMIN_SECRET_KEY/);
   });
 
   it("reads values from the environment", () => {
