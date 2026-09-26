@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { createNewsClient } from "../../api/news-client";
 import { useTranslation } from "../../i18n/useTranslation";
 
@@ -16,6 +16,25 @@ export function useNewsFeed(category: string | null = null) {
     queryFn: ({ pageParam, signal }) => client.listNews(lang, pageParam, signal, category),
     initialPageParam: null as string | null,
     getNextPageParam: (page) => page.nextCursor,
+  });
+}
+
+/** One numbered page of a section; the previous page stays shown while the next loads. */
+export function useSectionPage(category: string, page: number) {
+  const { lang } = useTranslation();
+  return useQuery({
+    queryKey: ["news", lang, "section", category, page],
+    queryFn: ({ signal }) => client.sectionPage(lang, category, page, signal),
+    placeholderData: keepPreviousData,
+  });
+}
+
+/** The newest stories of every section, for the front page rows. */
+export function useFrontSections() {
+  const { lang } = useTranslation();
+  return useQuery({
+    queryKey: ["news", lang, "sections"],
+    queryFn: ({ signal }) => client.sections(lang, signal),
   });
 }
 

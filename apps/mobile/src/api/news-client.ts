@@ -1,14 +1,21 @@
 import {
   readNewsDetail,
   readNewsList,
+  readNewsSections,
   type Lang,
   type NewsDetail,
   type NewsListResponse,
+  type NewsSectionsResponse,
 } from "@bgs/shared-types";
 import { createJsonGetter, type ApiClientOptions } from "./json-getter";
 
 export { NewsApiError } from "./json-getter";
 export type { ApiClientOptions as NewsClientOptions } from "./json-getter";
+
+/** Stories per numbered page of a section. */
+export const SECTION_PAGE_SIZE = 20;
+/** Stories per front page row, before "Voir plus". */
+export const ROW_SIZE = 10;
 
 /**
  * Talks to /v1/news. Every response is validated before reaching the screens, by a
@@ -33,6 +40,26 @@ export function createNewsClient(options: ApiClientOptions) {
         query.set("category", category);
       }
       return getJson(`/v1/news?${query.toString()}`, readNewsList, signal);
+    },
+    /** Numbered page of one section (from 1), with the total when the API gives it. */
+    sectionPage(
+      lang: Lang,
+      category: string,
+      page: number,
+      signal?: AbortSignal,
+    ): Promise<NewsListResponse> {
+      const query = new URLSearchParams({
+        lang,
+        limit: String(SECTION_PAGE_SIZE),
+        category,
+        page: String(page),
+      });
+      return getJson(`/v1/news?${query.toString()}`, readNewsList, signal);
+    },
+    /** The newest stories of every section, for the front page rows (one request). */
+    sections(lang: Lang, signal?: AbortSignal): Promise<NewsSectionsResponse> {
+      const query = new URLSearchParams({ lang, perSection: String(ROW_SIZE) });
+      return getJson(`/v1/news/sections?${query.toString()}`, readNewsSections, signal);
     },
     /** Stories matching a query (accents and case ignored), best matches first. */
     searchNews(lang: Lang, query: string, signal?: AbortSignal): Promise<NewsListResponse> {

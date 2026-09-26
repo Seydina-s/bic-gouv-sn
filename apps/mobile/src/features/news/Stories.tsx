@@ -113,8 +113,16 @@ export function CouncilCard({ item, onPress }: Omit<StoryProps, "lastOpened">) {
   );
 }
 
-/** One story in the list: woven selvage, section, serif title, day, photo on the right. */
-export function StoryRow({ item, lastOpened, onPress }: StoryProps) {
+/**
+ * One story in the list: woven selvage, section, serif title, day, photo on the right.
+ * Inside a section page the section name is already the page title: `showSection` off.
+ */
+export function StoryRow({
+  item,
+  lastOpened,
+  onPress,
+  showSection = true,
+}: StoryProps & { showSection?: boolean }) {
   const { theme } = useTheme();
   const { label, day } = useStoryLabel(item);
   const tone = useCategoryTone(item.category);
@@ -140,7 +148,7 @@ export function StoryRow({ item, lastOpened, onPress }: StoryProps) {
     >
       <Selvage category={item.category} color={tone.solid} />
       <View style={[styles.body, { marginLeft: space.lg - SELVAGE_WIDTH, gap: space.xs }]}>
-        <SectionTag category={item.category} lastOpened={lastOpened} />
+        {showSection && <SectionTag category={item.category} lastOpened={lastOpened} />}
         <Text style={[textStyle.storyTitle, { color: color.textPrimary }]} numberOfLines={3}>
           {item.title}
         </Text>

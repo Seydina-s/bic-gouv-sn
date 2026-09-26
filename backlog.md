@@ -169,7 +169,7 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 26/09/2026 | BUG-ART-01 ✅ Photo du haut d'un article : vide à droite sur téléphone (signalé par l'utilisateur) ; largeur explicite + test anti-régression | Retour utilisateur |
 | 26/09/2026 | HOME-01 ✅ API : pages numérotées (`page`, `total`) et dernières actualités par rubrique en une requête (`/v1/news/sections`) | Retour utilisateur |
 | 26/09/2026 | HOME-02 ✅ Identité des rubriques : un ton par rubrique (contraste AA contrôlé) et une icône par mot clé, sur les pastilles, filtres et lisières | Retour utilisateur |
-| 26/09/2026 | HOME-03 🔴 Page de rubrique : filtres en haut, 20 articles par page, pagination numérotée | Retour utilisateur |
+| 26/09/2026 | HOME-03 ✅ Page de rubrique (`/section/[slug]`) : filtres en haut (la rubrique choisie défile en vue, « Tout » ramène à l’accueil), bandeau aux couleurs de la rubrique avec le nombre d’articles, 20 articles par page, pagination numérotée (1 … 4 5 6 … 12, page courante pleine, « Page 2 sur 12 ») ; les pastilles de l’accueil ouvrent cette page | Retour utilisateur |
 | 26/09/2026 | HOME-04 🔴 Accueil : bandeau défilant (5 s, pause), rangées horizontales de 10 cartes par rubrique + « Voir plus », espacements | Retour utilisateur |
 | 26/09/2026 | HOME-05 🔴 Bouton discret « remonter en haut », flottant en bas à droite, après défilement | Retour utilisateur |
 | 26/09/2026 | DEM-04 🔴 Relier les démarches aux services de la carte (les services administratifs de la source sont souvent vides : la base interne validée prendra le relais) | Phase 3/5 |
