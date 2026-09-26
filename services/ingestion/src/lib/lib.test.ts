@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { contentHash, stableUuid } from "./identity";
 import { createRateLimiter } from "./rate-limiter";
-import { hasVideo, sanitizeArticleHtml, textLength } from "./sanitize";
+import { hasOfficialMedia, hasVideo, sanitizeArticleHtml, textLength } from "./sanitize";
 
 describe("sanitizeArticleHtml: embedded videos", () => {
   it("keeps an official YouTube embed, on the privacy-enhanced host, without extra attributes", () => {
@@ -14,8 +14,23 @@ describe("sanitizeArticleHtml: embedded videos", () => {
     expect(hasVideo(html)).toBe(true);
   });
 
+  it("completes a protocol-relative YouTube embed, as the source sometimes writes it", () => {
+    expect(
+      sanitizeArticleHtml('<p><iframe src="//www.youtube.com/embed/m6gWj4NjCp4"></iframe></p>'),
+    ).toBe('<p><iframe src="https://www.youtube-nocookie.com/embed/m6gWj4NjCp4"></iframe></p>');
+  });
+
+  it("recognises official media in an article without text", () => {
+    expect(hasOfficialMedia('<p><img src="https://bo-admin.presidence.sn/a.png" /></p>')).toBe(
+      true,
+    );
+    expect(hasOfficialMedia('<p><img src="https://static.xx.fbcdn.net/e.png" /></p>')).toBe(false);
+    expect(hasOfficialMedia("<p>Texte</p>")).toBe(false);
+  });
+
   it.each([
     ["another host", '<iframe src="https://evil.example/embed/UMZm4iPcFWE"></iframe>'],
+    ["a protocol-relative other host", '<iframe src="//evil.example/embed/UMZm4iPcFWE"></iframe>'],
     ["plain http", '<iframe src="http://www.youtube.com/embed/UMZm4iPcFWE"></iframe>'],
     ["a non-embed page", '<iframe src="https://www.youtube.com/watch?v=UMZm4iPcFWE"></iframe>'],
     ["a script URL", '<iframe src="javascript:alert(1)"></iframe>'],

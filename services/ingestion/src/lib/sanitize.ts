@@ -1,4 +1,4 @@
-import { youtubeVideoId } from "@bgs/shared-types";
+import { officialMediaUrl, youtubeVideoId } from "@bgs/shared-types";
 import sanitizeHtml from "sanitize-html";
 
 /**
@@ -38,7 +38,9 @@ const OPTIONS: sanitizeHtml.IOptions = {
     i: "em",
     h1: "h2",
     iframe: (_tagName, attribs) => {
-      const id = youtubeVideoId(attribs["src"] ?? "");
+      // The source also writes protocol-relative embeds ("//www.youtube.com/...").
+      const src = attribs["src"] ?? "";
+      const id = youtubeVideoId(src.startsWith("//") ? `https:${src}` : src);
       return {
         tagName: "iframe",
         attribs: id === null ? {} : { src: `https://www.youtube-nocookie.com/embed/${id}` },
@@ -66,4 +68,17 @@ export function textLength(html: string): number {
 /** True when the sanitized article carries an official video. */
 export function hasVideo(html: string): boolean {
   return html.includes("<iframe ");
+}
+
+/**
+ * True when the sanitized article carries an official image or video: some
+ * articles are a single scanned press page or an interview, with no text.
+ */
+export function hasOfficialMedia(html: string): boolean {
+  return (
+    hasVideo(html) ||
+    [...html.matchAll(/<img\b[^>]*\bsrc="([^"]+)"/g)].some(
+      (match) => officialMediaUrl((match[1] ?? "").replaceAll("&amp;", "&")) !== null,
+    )
+  );
 }
