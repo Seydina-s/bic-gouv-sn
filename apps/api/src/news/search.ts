@@ -1,65 +1,15 @@
 import type { ArticleRepository } from "@bgs/content-store";
 import type { Lang, NewsArticle } from "@bgs/shared-types";
+import { scoreText, searchTerms } from "../search/text-search";
 
-/*
- * Provisional search over the article store (Meilisearch replaces it in production,
- * with typo tolerance, behind the same route). Case and accents are ignored, so
- * "senegal" finds "Sénégal" and Wolof letters (ë, ñ, ŋ) match their plain forms;
- * every word typed must appear; title matches rank first, then the newest.
- */
+/** Search over the article store: title matches rank first, then the newest. */
 
 const PAGE_SIZE = 200;
-const TITLE_WEIGHT = 3;
-
-/** Lowercase, without diacritics or punctuation, single-spaced. */
-export function normalizeForSearch(text: string): string {
-  return text
-    .normalize("NFD")
-    .replace(/\p{M}/gu, "")
-    .replace(/ŋ/g, "n")
-    .replace(/Ŋ/g, "n")
-    .toLowerCase()
-    .replace(/<[^>]+>/g, " ")
-    .replace(/[^\p{L}\p{N}]+/gu, " ")
-    .trim();
-}
-
-export function searchTerms(query: string): string[] {
-  return [
-    ...new Set(
-      normalizeForSearch(query)
-        .split(" ")
-        // Numbers always count ("Conseil du 3 septembre"); lone letters do not.
-        .filter((term) => term.length >= 2 || /^\p{N}+$/u.test(term)),
-    ),
-  ];
-}
-
-function occurrences(haystack: string, term: string): number {
-  let count = 0;
-  for (let at = haystack.indexOf(term); at !== -1; at = haystack.indexOf(term, at + term.length)) {
-    count += 1;
-  }
-  return count;
-}
 
 /** Relevance of one language version, or 0 when a term is missing. */
 export function scoreArticle(article: NewsArticle, lang: Lang, terms: readonly string[]): number {
   const translation = article.translations.find((candidate) => candidate.lang === lang);
-  if (translation === undefined || terms.length === 0) {
-    return 0;
-  }
-  const title = normalizeForSearch(translation.title);
-  const body = normalizeForSearch(translation.bodyHtml);
-  let score = 0;
-  for (const term of terms) {
-    const hits = occurrences(title, term) * TITLE_WEIGHT + occurrences(body, term);
-    if (hits === 0) {
-      return 0;
-    }
-    score += hits;
-  }
-  return score;
+  return translation === undefined ? 0 : scoreText(translation.title, translation.bodyHtml, terms);
 }
 
 async function allArticles(articles: ArticleRepository, lang: Lang): Promise<NewsArticle[]> {
