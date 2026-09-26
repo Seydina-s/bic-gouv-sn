@@ -9,7 +9,7 @@ import { BlockRenderer } from "./BlockRenderer";
 import { categoryLabelKey } from "./category";
 import { pickCoverSource } from "./CoverImage";
 import { formatDay, formatPublishedOn, freshnessOf, parseCalendarDate } from "./format";
-import { composeFrontPage } from "./front-page";
+import { heroStories, orderSections } from "./front-page";
 import { CouncilCard, LeadStory, StoryRow } from "./Stories";
 
 jest.mock("expo-localization", () => ({ getLocales: () => [{ languageTag: "fr-SN" }] }));
@@ -200,7 +200,7 @@ describe("stories", () => {
     await render(
       <ThemeProvider>
         <I18nProvider>
-          {kind === "lead" && <LeadStory {...props} />}
+          {kind === "lead" && <LeadStory {...props} width={390} />}
           {kind === "row" && <StoryRow {...props} />}
           {kind === "council" && <CouncilCard item={item} onPress={onPress} />}
         </I18nProvider>
@@ -232,44 +232,40 @@ describe("stories", () => {
   });
 });
 
-describe("composeFrontPage", () => {
-  const story = (id: string, category = "communiques") =>
-    ({ ...LIST.items[0], id, category }) as (typeof LIST.items)[number];
+describe("front page", () => {
+  const story = (id: string, category = "communiques", pictured = true) =>
+    ({
+      ...LIST.items[0],
+      id,
+      category,
+      cover: pictured ? COVER : null,
+    }) as (typeof LIST.items)[number];
 
-  it("leads with the newest story and lifts the latest council into its card", () => {
-    const rows = composeFrontPage([
-      story("a"),
-      story("b"),
-      story("c", "conseil-des-ministres"),
-      story("d", "conseil-des-ministres"),
-    ]);
-    expect(rows.map((row) => `${row.kind}:${row.item.id}`)).toEqual([
-      "lead:a",
-      "council:c",
-      "story:b",
-      "story:d",
-    ]);
+  it("puts the newest pictured stories in the carousel", () => {
+    const items = [story("a", "agenda", false), story("b"), story("c"), story("d")];
+    expect(heroStories(items, 2).map((item) => item.id)).toEqual(["b", "c"]);
   });
 
-  it("never shows the same council twice when it already leads", () => {
-    const rows = composeFrontPage([story("c", "conseil-des-ministres"), story("b")]);
-    expect(rows.map((row) => row.kind)).toEqual(["lead", "story"]);
+  it("falls back to the newest story when none has a photo", () => {
+    expect(heroStories([story("a", "agenda", false), story("b", "agenda", false)])).toHaveLength(1);
+    expect(heroStories([])).toEqual([]);
   });
 
-  it("shows the latest council from its own query when it is older than the loaded pages", () => {
-    const older = story("old", "conseil-des-ministres");
-    const rows = composeFrontPage([story("a"), story("b")], older);
-    expect(rows.map((row) => `${row.kind}:${row.item.id}`)).toEqual([
-      "lead:a",
-      "council:old",
-      "story:b",
+  it("orders the rows like the official site, unknown sections last, empty ones out", () => {
+    const row = (category: string, items: unknown[] = [1]) => ({ category, items });
+    const ordered = orderSections([
+      row("inconnue"),
+      row("international"),
+      row("agenda", []),
+      row("conseil-des-ministres"),
+      row("communiques"),
     ]);
-    const leading = composeFrontPage([older, story("b")], older);
-    expect(leading.map((row) => row.kind)).toEqual(["lead", "story"]);
-  });
-
-  it("is empty without news", () => {
-    expect(composeFrontPage([])).toEqual([]);
+    expect(ordered.map((section) => section.category)).toEqual([
+      "conseil-des-ministres",
+      "communiques",
+      "international",
+      "inconnue",
+    ]);
   });
 });
 

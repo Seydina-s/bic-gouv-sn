@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { fireEvent, screen, waitFor } from "@testing-library/react-native";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react-native";
 import { renderRouter } from "expo-router/testing-library";
 import { Dimensions, Linking } from "react-native";
 import RootLayout from "./app/_layout";
@@ -26,6 +26,15 @@ jest.mock("expo-splash-screen", () => ({
 
 let mockFontState: [boolean, Error | null] = [true, null];
 jest.mock("expo-font", () => ({ useFonts: () => mockFontState }));
+
+/** The first match (a story shows in the carousel and in its section row). */
+function first<T>(matches: T[]): T {
+  const [match] = matches;
+  if (match === undefined) {
+    throw new Error("no match");
+  }
+  return match;
+}
 
 const routes = {
   _layout: RootLayout,
@@ -79,20 +88,40 @@ describe("first run", () => {
     await renderRouter(routes, { initialUrl: "/" });
     await fireEvent.press(await screen.findByRole("button", { name: "Passer" }));
     expect(screen.queryByText("Choisissez votre langue")).toBeNull();
-    expect(await screen.findByText("Titre de test A")).toBeOnTheScreen();
+    expect((await screen.findAllByText("Titre de test A"))[0]).toBeOnTheScreen();
   });
 });
 
 describe("app shell", () => {
-  it("opens on the front page: masthead, lead story, then the other stories", async () => {
+  it("opens on the front page: carousel, then one row of cards per section", async () => {
+    const fetchMock = newsFetch();
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
     await renderRouter(routes, { initialUrl: "/" });
-    expect(await screen.findByText("Titre de test A")).toBeOnTheScreen();
-    expect(screen.getByText("Titre de test B")).toBeOnTheScreen();
     expect(
-      screen.getByRole("button", { name: /^Conseil des ministres\. Titre de test A/ }),
+      await screen.findByRole("button", {
+        name: /^Article 1 sur 2\. Conseil des ministres\. Titre de test A/,
+      }),
     ).toBeOnTheScreen();
-    expect(screen.getByText("Actualité")).toBeOnTheScreen();
     expect(screen.getByRole("header", { name: "Bic Gouv SN" })).toBeOnTheScreen();
+    // Rows in the official order, each with its "Voir plus" leading to the section.
+    expect(screen.getByRole("header", { name: "Conseil des ministres" })).toBeOnTheScreen();
+    expect(screen.getByRole("header", { name: "Actualité" })).toBeOnTheScreen();
+    await fireEvent.press(
+      first(screen.getAllByRole("button", { name: "Voir plus\u00a0: Conseil des ministres" })),
+    );
+    await waitFor(() => {
+      expect(
+        fetchMock.mock.calls.some(([url]) => url.includes("category=conseil-des-ministres&page=1")),
+      ).toBe(true);
+    });
+  });
+
+  it("lets the reader pause the carousel", async () => {
+    await renderRouter(routes, { initialUrl: "/" });
+    await fireEvent.press(
+      await screen.findByRole("button", { name: "Mettre en pause le défilement" }),
+    );
+    expect(screen.getByRole("button", { name: "Reprendre le défilement" })).toBeOnTheScreen();
   });
 
   it("searches the news from the front page and opens a result", async () => {
@@ -141,12 +170,12 @@ describe("app shell", () => {
     Dimensions.set({ window: { ...phone, width: 1024, height: 768 } });
     try {
       await renderRouter(routes, { initialUrl: "/" });
-      expect(await screen.findByText("Titre de test B")).toBeOnTheScreen();
+      expect((await screen.findAllByText("Titre de test B"))[0]).toBeOnTheScreen();
       // The first story opens in the detail pane, with its actions, without navigating.
       expect(await screen.findByText("Paragraphe de test.")).toBeOnTheScreen();
       expect(screen.getByRole("button", { name: "Ajouter aux favoris" })).toBeOnTheScreen();
       // Both at once: on a phone, the paragraph only shows after opening the article.
-      expect(screen.getByText("Titre de test B")).toBeOnTheScreen();
+      expect(screen.getAllByText("Titre de test B")[0]).toBeOnTheScreen();
     } finally {
       Dimensions.set({ window: phone });
     }
@@ -188,7 +217,7 @@ describe("app shell", () => {
     });
     globalThis.fetch = fetchMock as unknown as typeof fetch;
     await renderRouter(routes, { initialUrl: "/" });
-    await screen.findByText("Titre de test A");
+    await screen.findAllByText("Titre de test A");
     await fireEvent.press(screen.getByRole("button", { name: "Communiqués" }));
     expect(await screen.findByText("45 articles")).toBeOnTheScreen();
     expect(screen.getByRole("button", { name: "Communiqués", selected: true })).toBeOnTheScreen();
@@ -213,7 +242,7 @@ describe("app shell", () => {
 
   it("keeps an article in the favorites, saved on the phone", async () => {
     await renderRouter(routes, { initialUrl: "/" });
-    await fireEvent.press(await screen.findByText("Titre de test A"));
+    await fireEvent.press(first(await screen.findAllByText("Titre de test A")));
     await fireEvent.press(await screen.findByRole("button", { name: "Ajouter aux favoris" }));
     expect(await screen.findByRole("button", { name: "Retirer des favoris" })).toBeOnTheScreen();
     expect(await AsyncStorage.getItem("bgs-favorites-v1")).toContain(DETAIL.id);
@@ -229,7 +258,7 @@ describe("app shell", () => {
       detail: () => new Response("{}", { status: 503 }),
     }) as unknown as typeof fetch;
     await renderRouter(routes, { initialUrl: "/favorites" });
-    await fireEvent.press(await screen.findByText("Titre de test A"));
+    await fireEvent.press(first(await screen.findAllByText("Titre de test A")));
     expect(await screen.findByText("Paragraphe de test.")).toBeOnTheScreen();
   });
 
@@ -243,7 +272,7 @@ describe("app shell", () => {
   it("opens an article with its official source link", async () => {
     const openURL = jest.spyOn(Linking, "openURL").mockResolvedValue(true);
     await renderRouter(routes, { initialUrl: "/" });
-    await fireEvent.press(await screen.findByText("Titre de test A"));
+    await fireEvent.press(first(await screen.findAllByText("Titre de test A")));
     expect(await screen.findByText("Paragraphe de test.")).toBeOnTheScreen();
     expect(screen.getByText("Source\u00a0: presidence.sn")).toBeOnTheScreen();
     await fireEvent.press(screen.getByText("Lire sur presidence.sn"));
@@ -253,6 +282,7 @@ describe("app shell", () => {
   it("offers a retry when the feed cannot load and nothing is saved", async () => {
     globalThis.fetch = newsFetch({
       list: () => new Response("{}", { status: 500 }),
+      sections: () => new Response("{}", { status: 500 }),
     }) as unknown as typeof fetch;
     await renderRouter(routes, { initialUrl: "/" });
     expect(
@@ -298,6 +328,7 @@ describe("app shell", () => {
     );
     globalThis.fetch = newsFetch({
       list: () => new Response("{}", { status: 500 }),
+      sections: () => new Response("{}", { status: 500 }),
     }) as unknown as typeof fetch;
     await renderRouter(routes, { initialUrl: "/" });
     expect(
@@ -308,11 +339,19 @@ describe("app shell", () => {
 
   it("keeps showing loaded news when a refresh fails, with an offline notice", async () => {
     await renderRouter(routes, { initialUrl: "/" });
-    expect(await screen.findByText("Titre de test A")).toBeOnTheScreen();
+    expect((await screen.findAllByText("Titre de test A"))[0]).toBeOnTheScreen();
     globalThis.fetch = newsFetch({
       list: () => new Response("{}", { status: 503 }),
     }) as unknown as typeof fetch;
-    await fireEvent(screen.getByTestId("news-feed"), "refresh");
+    // Pull to refresh: the ScrollView carries its RefreshControl as a prop.
+    const refresh = (
+      screen.getByTestId("news-feed").props as {
+        refreshControl: { props: { onRefresh: () => void } };
+      }
+    ).refreshControl.props.onRefresh;
+    await act(() => {
+      refresh();
+    });
     expect(
       await screen.findByText(
         "Hors ligne\u00a0: voici les dernières actualités enregistrées. Mis à jour à l'instant.",
@@ -320,7 +359,7 @@ describe("app shell", () => {
         { timeout: 5000 },
       ),
     ).toBeOnTheScreen();
-    expect(screen.getByText("Titre de test A")).toBeOnTheScreen();
+    expect(screen.getAllByText("Titre de test A")[0]).toBeOnTheScreen();
   });
 
   it("shows an honest coming-soon screen for sections not built yet", async () => {

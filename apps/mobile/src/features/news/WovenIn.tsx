@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { AccessibilityInfo, Animated } from "react-native";
+import { Animated } from "react-native";
+import { useReduceMotion } from "../../theme/useSystemAccessibility";
 import { useTheme } from "../../theme/useTheme";
 
 const STAGGER_MS = 40;
@@ -14,11 +15,7 @@ export function WovenIn({ index, children }: { index: number; children: ReactNod
   const { theme } = useTheme();
   // Created once per band; kept in state so render never reads a ref.
   const [progress] = useState(() => new Animated.Value(0));
-  const [reduceMotion, setReduceMotion] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    void AccessibilityInfo.isReduceMotionEnabled().then(setReduceMotion);
-  }, []);
+  const reduceMotion = useReduceMotion();
 
   useEffect(() => {
     if (reduceMotion === null) {

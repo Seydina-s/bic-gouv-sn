@@ -1,4 +1,4 @@
-import type { Cover, NewsDetail, NewsListResponse } from "@bgs/shared-types";
+import type { Cover, NewsDetail, NewsListResponse, NewsSectionsResponse } from "@bgs/shared-types";
 import { PROCEDURE_DETAIL, PROCEDURE_LIST } from "./procedure-fixtures";
 
 export const COVER: Cover = {
@@ -42,6 +42,11 @@ export const LIST: NewsListResponse = {
   nextCursor: null,
 };
 
+/** Front page rows built from the same placeholder stories. */
+export const SECTIONS: NewsSectionsResponse = {
+  sections: LIST.items.map((item) => ({ category: item.category, total: 12, items: [item] })),
+};
+
 export const DETAIL: NewsDetail = {
   id: "00000000-0000-5000-8000-000000000002",
   category: "conseil-des-ministres",
@@ -76,6 +81,7 @@ export function newsFetch(
     list?: () => Response;
     detail?: () => Response;
     search?: () => Response;
+    sections?: () => Response;
     procedures?: () => Response;
   } = {},
 ) {
@@ -87,6 +93,9 @@ export function newsFetch(
     }
     if (input.includes("/v1/procedures/")) {
       return Promise.resolve(new Response(JSON.stringify(PROCEDURE_DETAIL)));
+    }
+    if (input.includes("/v1/news/sections?")) {
+      return Promise.resolve(overrides.sections?.() ?? new Response(JSON.stringify(SECTIONS)));
     }
     if (input.includes("/v1/news/search?")) {
       return Promise.resolve(overrides.search?.() ?? new Response(JSON.stringify(LIST)));
