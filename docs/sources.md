@@ -95,3 +95,5 @@ Relevé le 26/09/2026.
 - Les champs longs (`description`, `corps`, `documents_a_fournir`…) sont du HTML : même assainissement strict que presidence.sn.
 - Rattacher chaque fiche à sa page publique (lien source) et à sa date de collecte ; versionner les modifications comme pour les articles.
 - Démarches en wolof : absentes à la source → traduction automatique étiquetée plus tard (P2), jamais présentée comme officielle.
+- **Thèmes** : 15 catégories existent (`fetchCategorys` : « Citoyenneté, justice et sécurité », « Transports », « Santé et protection sociale »…, avec sous-catégories), mais au 26/09/2026 **aucune démarche n'y est rattachée** (`categories` vide sur les 718) et le filtre `demarcheFilter.categories` est ignoré par le serveur (718 résultats quel que soit le thème). L'app n'invente donc aucun regroupement : recherche et liste alphabétique, thèmes ajoutés le jour où la source les renseigne.
+- Import du 26/09/2026 : 718 démarches, 0 échec ; faits renseignés à la source : coût 95, délai 104, conditions 7, pièces à fournir 6, démarches en ligne 7 ; services administratifs, FAQ et thèmes : aucun (après filtrage des bouche-trous).

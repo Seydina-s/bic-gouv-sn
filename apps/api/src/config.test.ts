@@ -11,6 +11,7 @@ describe("loadConfig", () => {
       SHUTDOWN_TIMEOUT_MS: 10_000,
       RATE_LIMIT_PER_MINUTE: 600,
       NEWS_STORE_PATH: ".data/news.json",
+      PROCEDURES_STORE_PATH: ".data/procedures.json",
       INGESTION_STATUS_PATH: ".data/ingestion-status.json",
       MEDIA_ROOT: ".data/media",
       SENTRY_TRACES_SAMPLE_RATE: 0.02,

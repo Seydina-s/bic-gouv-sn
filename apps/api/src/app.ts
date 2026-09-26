@@ -8,19 +8,26 @@ import {
   serializerCompiler,
   validatorCompiler,
 } from "fastify-type-provider-zod";
-import type { ArticleRepository } from "@bgs/content-store";
+import {
+  FileProcedureRepository,
+  type ArticleRepository,
+  type ProcedureRepository,
+} from "@bgs/content-store";
 import type { Config } from "./config";
 import { registerErrorHandlers } from "./errors";
 import { registerSecurity } from "./security";
 import { healthRoutes } from "./routes/health";
 import { registerMedia } from "./routes/media";
 import { newsRoutes } from "./routes/news";
+import { proceduresRoutes } from "./routes/procedures";
 import { statusRoutes } from "./routes/status";
 
 export interface AppOptions {
   config: Config;
   version: string;
   articles: ArticleRepository;
+  /** Defaults to the procedure store at PROCEDURES_STORE_PATH. */
+  procedures?: ProcedureRepository;
 }
 
 /** Builds the API without listening, so tests can call it in memory. */
@@ -28,6 +35,7 @@ export async function buildApp({
   config,
   version,
   articles,
+  procedures = new FileProcedureRepository(config.PROCEDURES_STORE_PATH),
 }: AppOptions): Promise<FastifyInstance> {
   const app = Fastify({
     logger: {
@@ -74,6 +82,7 @@ export async function buildApp({
         () => false,
       ),
   });
+  await app.register(proceduresRoutes, { prefix: "/v1", procedures });
   await app.register(statusRoutes, {
     prefix: "/v1",
     ingestionStatusPath: config.INGESTION_STATUS_PATH,

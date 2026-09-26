@@ -13,6 +13,8 @@ const envSchema = z.object({
   RATE_LIMIT_PER_MINUTE: z.coerce.number().int().positive().default(600),
   /** Provisional article store written by the ingestion job (PostgreSQL in Phase 1). */
   NEWS_STORE_PATH: z.string().min(1).default(".data/news.json"),
+  /** Provisional procedure store written by the e-senegal.sn collection. */
+  PROCEDURES_STORE_PATH: z.string().min(1).default(".data/procedures.json"),
   /** Report written by the real-time collection after each pass (console supervision). */
   INGESTION_STATUS_PATH: z.string().min(1).default(".data/ingestion-status.json"),
   /** Folder of processed media (cover photos) written by the ingestion job. */

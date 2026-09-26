@@ -102,6 +102,15 @@ export const ERROR_CATALOG = {
     severity: "critical",
     action: "Vérifiez que presidence.sn est accessible ; la collecte reprend seule dès son retour.",
   },
+  PROCEDURE_NOT_FOUND: {
+    what: "Une démarche demandée n'existe pas (ou plus).",
+    where: "API publique (/v1/procedures)",
+    impact:
+      "La personne voit un message « démarche introuvable » ; les autres démarches s'affichent.",
+    severity: "info",
+    action:
+      "Rien à faire si c'est ponctuel ; si cela se répète, vérifiez la collecte des démarches.",
+  },
   INGESTION_STOPPED: {
     what: "La surveillance des nouvelles publications de la Présidence est arrêtée.",
     where: "Collecte automatique (presidence.sn)",

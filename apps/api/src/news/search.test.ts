@@ -1,7 +1,8 @@
 import type { NewsArticle } from "@bgs/shared-types";
 import { describe, expect, it } from "vitest";
 import { temporaryStore } from "../testing/store";
-import { normalizeForSearch, searchArticles, searchTerms } from "./search";
+import { normalizeForSearch, searchTerms } from "../search/text-search";
+import { searchArticles } from "./search";
 
 // Placeholder texts, not real content.
 function article(n: number, title: string, body: string, lang: "fr" | "wo" = "fr"): NewsArticle {
