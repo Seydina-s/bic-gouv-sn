@@ -1,20 +1,18 @@
 # STATUS — Bic Gouv SN
 
-**Dernière mise à jour** : 25/09/2026 (soir) · **Mode** : autonome
+**Dernière mise à jour** : 26/09/2026 (nuit) · **Mode** : autonome
 
 ## Où on en est
-- Dépôt **public et sécurisé** : https://github.com/Seydina-s/bic-gouv-sn (historique nettoyé, ancien dépôt archivé en privé `bic-gouv-sn-archive`). `main` protégée : tout passe par PR + 3 contrôles verts.
-- Tranche verticale fusionnée dans `main` : collecte presidence.sn (961 articles, 717 photos), API /v1/news (filtre rubrique, ETag), app « La Une » + motifs du pagne tissé + barre en verre dépoli (D-05, choix utilisateur).
-- Sentry : DSN en `.env.local` (API + mobile, non versionnés), message de test reçu ; plugin Expo prêt pour les source maps.
-- 450 tests, contrôle complet vert.
+- Dépôt **public et sécurisé** : https://github.com/Seydina-s/bic-gouv-sn. `main` protégée : tout passe par PR + 3 contrôles verts. Secret `SENTRY_AUTH_TOKEN` en place (utilisateur, 25/09).
+- Incident du 25/09 (fichier des articles remis à zéro) corrigé : écriture durable + copie `.bak`. Reconstruction faite : 953 articles (316 FR+WO, 94 Conseils des ministres), 713 couvertures ; images du texte en cours (script `scratchpad/rebuild.sh`, journaux `scratchpad/rebuild-logs/`, reprenable).
+- Design D-05 (« La Une » + pagne tissé + verre) documenté dans DESIGN.md ; constantes passées en jetons ; utilisateur « un peu satisfait », améliorations futures prévues.
+- Paquet de l'app allégé (Android 4,96 Mo, iOS 4,68 Mo). 462 tests, contrôle complet vert.
 
 ## En attente de l'utilisateur
-1. Mettre le jeton Sentry en secret GitHub : dépôt → Settings → Secrets and variables → Actions → New repository secret, nom `SENTRY_AUTH_TOKEN` (ne jamais le coller dans le chat).
-2. Avis sur « La Une » vu sur iPhone (QA-04).
-3. W-01 locuteurs wolof ; A-01 logo ; A-02 identifiant de l'app ; L-02 questions au BIC (dont la licence du code) ; S1-02 budget d'hébergement.
+1. W-01 locuteurs wolof ; A-01 logo ; A-02 identifiant de l'app ; L-02 questions au BIC (dont la licence du code) ; S1-02 budget d'hébergement.
 
 ## Prochaine tâche
-MED-02 (PDF et images du corps des articles stockés chez nous), puis UPG-01 (Expo SDK 58), PERF-03/04, WO-01, VID-01, RESP-01.
+Fin de l'import des images du texte, puis PERF-03 (Sentry), DATA-01 (sauvegardes), VID-01, WO-01, RESP-01. UPG-01 attend la version stable d'Expo SDK 58.
 
 ## Constat environnement
 - Node système 20.20.0 (inchangé). Projet : Node 24 — ajouter `C:\Users\HP\tools\fnm\data\node-versions\v24.21.0\installation` en tête du PATH.
