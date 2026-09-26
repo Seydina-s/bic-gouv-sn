@@ -11,6 +11,7 @@ import ParticipateScreen from "./app/(tabs)/participate";
 import ProceduresScreen from "./app/(tabs)/procedures";
 import ArticleScreen from "./app/article/[id]";
 import ProcedureScreen from "./app/procedure/[slug]";
+import ProcedureThemeScreen from "./app/procedure-theme/[id]";
 import SectionScreen from "./app/section/[slug]";
 import FavoritesScreen from "./app/favorites";
 import SearchScreen from "./app/search";
@@ -45,6 +46,7 @@ const routes = {
   "(tabs)/participate": ParticipateScreen,
   "article/[id]": ArticleScreen,
   "procedure/[slug]": ProcedureScreen,
+  "procedure-theme/[id]": ProcedureThemeScreen,
   "section/[slug]": SectionScreen,
   favorites: FavoritesScreen,
   search: SearchScreen,
@@ -414,6 +416,18 @@ describe("app shell", () => {
       },
       { timeout: 3000 },
     );
+  });
+
+  it("shows the themes holding validated procedures, and opens one", async () => {
+    const fetchMock = newsFetch();
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    await renderRouter(routes, { initialUrl: "/procedures" });
+    await fireEvent.press(await screen.findByRole("button", { name: "Transports. 3 démarches" }));
+    expect(screen.queryByRole("button", { name: /^Finances/ })).toBeNull();
+    await waitFor(() => {
+      expect(fetchMock.mock.calls.some(([url]) => url.includes("theme=a1"))).toBe(true);
+    });
+    expect(await screen.findByText("Démarche de test A")).toBeOnTheScreen();
   });
 
   it("says when no procedure matches", async () => {
