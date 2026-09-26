@@ -1,9 +1,10 @@
 import { fireEvent, render, screen } from "@testing-library/react-native";
-import { Linking } from "react-native";
+import { Linking, StyleSheet } from "react-native";
 import { createNewsClient, NewsApiError } from "../../api/news-client";
 import { I18nProvider } from "../../i18n/I18nProvider";
 import { COVER, DETAIL, LIST } from "../../testing/news-fixtures";
 import { ThemeProvider } from "../../theme/ThemeProvider";
+import { ArticleView } from "./ArticleView";
 import { BlockRenderer } from "./BlockRenderer";
 import { categoryLabelKey } from "./category";
 import { pickCoverSource } from "./CoverImage";
@@ -150,6 +151,29 @@ describe("BlockRenderer", () => {
       </ThemeProvider>,
     );
     expect(screen.getByLabelText("Salle du Conseil")).toHaveProp("testID", "cover-image");
+  });
+});
+
+describe("ArticleView cover", () => {
+  async function coverStyle(paneWidth: number) {
+    await render(
+      <ThemeProvider>
+        <I18nProvider>
+          <ArticleView detail={DETAIL} isPending={false} paneWidth={paneWidth} bottomInset={0} />
+        </I18nProvider>
+      </ThemeProvider>,
+    );
+    const cover = screen.getByTestId("cover-image", { includeHiddenElements: true });
+    return StyleSheet.flatten(cover.props["style"] as Parameters<typeof StyleSheet.flatten>[0]);
+  }
+
+  // Regression: on phones the photo left a gap on the right (width inferred natively).
+  it("spans the whole screen width on phones", async () => {
+    expect(await coverStyle(390)).toMatchObject({ width: 390, marginLeft: -16 });
+  });
+
+  it("stays framed in the reading column on wide panes", async () => {
+    expect(await coverStyle(1000)).toMatchObject({ width: "100%", marginLeft: 0 });
   });
 });
 
