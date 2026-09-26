@@ -13,9 +13,14 @@ import {
   type ArticleRepository,
   type ProcedureRepository,
 } from "@bgs/content-store";
+import { FileAdminAccountStore } from "./admin/account-store";
+import { FileAuditJournal } from "./admin/audit-journal";
+import { SecretBox } from "./admin/secret-box";
+import { AdminSignIn } from "./admin/sign-in-service";
 import type { Config } from "./config";
 import { registerErrorHandlers } from "./errors";
 import { registerSecurity } from "./security";
+import { adminAuthRoutes } from "./routes/admin-auth";
 import { healthRoutes } from "./routes/health";
 import { registerMedia } from "./routes/media";
 import { newsRoutes } from "./routes/news";
@@ -28,6 +33,19 @@ export interface AppOptions {
   articles: ArticleRepository;
   /** Defaults to the procedure store at PROCEDURES_STORE_PATH. */
   procedures?: ProcedureRepository;
+  /** Defaults to the file stores when ADMIN_SECRET_KEY is set; none otherwise. */
+  adminSignIn?: AdminSignIn | null;
+}
+
+function defaultAdminSignIn(config: Config): AdminSignIn | null {
+  if (config.ADMIN_SECRET_KEY === undefined) {
+    return null;
+  }
+  return new AdminSignIn({
+    accounts: new FileAdminAccountStore(config.ADMIN_ACCOUNTS_PATH),
+    journal: new FileAuditJournal(config.ADMIN_AUDIT_PATH),
+    box: new SecretBox(config.ADMIN_SECRET_KEY),
+  });
 }
 
 /** Builds the API without listening, so tests can call it in memory. */
@@ -36,6 +54,7 @@ export async function buildApp({
   version,
   articles,
   procedures = new FileProcedureRepository(config.PROCEDURES_STORE_PATH),
+  adminSignIn = defaultAdminSignIn(config),
 }: AppOptions): Promise<FastifyInstance> {
   const app = Fastify({
     logger: {
@@ -95,6 +114,9 @@ export async function buildApp({
   // With a CDN configured, media are served from there, not by the API.
   if (config.MEDIA_BASE_URL === undefined) {
     await registerMedia(app, config.MEDIA_ROOT);
+  }
+  if (adminSignIn !== null) {
+    await app.register(adminAuthRoutes, { prefix: "/admin/v1", signIn: adminSignIn });
   }
   app.get("/v1/openapi.json", { schema: { hide: true } }, () => app.swagger());
 

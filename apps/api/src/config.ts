@@ -27,6 +27,18 @@ const envSchema = z.object({
     .url({ protocol: /^https$/ })
     .transform((url) => url.replace(/\/+$/, ""))
     .optional(),
+  /**
+   * Key sealing the admin second-factor secrets (32 random bytes, base64). Absent:
+   * the admin sign-in routes are not served at all (public API only).
+   */
+  ADMIN_SECRET_KEY: z
+    .base64()
+    .refine((key) => Buffer.from(key, "base64").length === 32, "must decode to 32 bytes")
+    .optional(),
+  /** Provisional admin account store (PostgreSQL later). */
+  ADMIN_ACCOUNTS_PATH: z.string().min(1).default(".data/admin/accounts.json"),
+  /** Append-only, hash-chained audit journal of the admin console. */
+  ADMIN_AUDIT_PATH: z.string().min(1).default(".data/admin/audit.jsonl"),
   /** Sentry project key; crash reporting stays off while it is absent. */
   SENTRY_DSN: z.url({ protocol: /^https$/ }).optional(),
   /** Share of requests traced for performance (0 to 1); errors are always reported. */

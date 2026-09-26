@@ -111,6 +111,37 @@ export const ERROR_CATALOG = {
     action:
       "Rien à faire si c'est ponctuel ; si cela se répète, vérifiez la collecte des démarches.",
   },
+  ADMIN_SIGN_IN_FAILED: {
+    what: "Une tentative de connexion au centre d'administration a échoué (mauvais e-mail, mot de passe ou code).",
+    where: "Centre d'administration (connexion)",
+    impact: "La personne n'entre pas ; aucun accès n'a été donné.",
+    severity: "info",
+    action:
+      "Rien à faire si c'est ponctuel ; de nombreux échecs sur un même compte peuvent signaler une tentative d'intrusion.",
+  },
+  ADMIN_TOO_MANY_ATTEMPTS: {
+    what: "Un compte d'administration est bloqué 15 minutes après 5 tentatives de connexion ratées.",
+    where: "Centre d'administration (connexion)",
+    impact: "La personne concernée doit attendre 15 minutes avant de réessayer.",
+    severity: "warning",
+    action:
+      "Vérifiez avec la personne que c'était bien elle ; sinon, changez son mot de passe et consultez le journal d'audit.",
+  },
+  ADMIN_SESSION_EXPIRED: {
+    what: "Une session du centre d'administration a expiré (30 minutes sans activité ou 8 heures au total).",
+    where: "Centre d'administration",
+    impact: "La personne doit se reconnecter ; rien n'est perdu.",
+    severity: "info",
+    action: "Rien à faire : c'est une protection normale.",
+  },
+  ADMIN_FORBIDDEN: {
+    what: "Un compte a tenté une action que son rôle ne permet pas.",
+    where: "Centre d'administration",
+    impact: "L'action a été refusée ; rien n'a été modifié.",
+    severity: "warning",
+    action:
+      "Si la personne a besoin de ce droit, un administrateur change son rôle ; sinon, consultez le journal d'audit.",
+  },
   INGESTION_STOPPED: {
     what: "La surveillance des nouvelles publications de la Présidence est arrêtée.",
     where: "Collecte automatique (presidence.sn)",
