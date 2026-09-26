@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text } from "react-native";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 import { categoryLabelKey, SECTION_FILTERS } from "./category";
-import { WovenSwatch } from "./Selvage";
+import { CategoryIcon } from "./CategoryIcon";
 
 export interface SectionFilterProps {
   /** Selected section slug, or null for every section. */
@@ -12,8 +12,8 @@ export interface SectionFilterProps {
 }
 
 /**
- * Row of section chips under the masthead. Each chip carries the woven pattern of
- * its section, so the filter and the stories speak the same visual language.
+ * Row of section chips under the masthead. Each chip carries the icon and tone of
+ * its section, so the chips and the stories speak the same visual language.
  */
 export function SectionFilter({ selected, onSelect }: SectionFilterProps) {
   const { theme } = useTheme();
@@ -22,7 +22,9 @@ export function SectionFilter({ selected, onSelect }: SectionFilterProps) {
 
   const chip = (category: string | null, label: string) => {
     const active = selected === category;
-    const ink = active ? color.onPrimaryContainer : color.textSecondary;
+    const tone = category === null ? null : theme.categoryTones[category];
+    const ink = tone?.ink ?? (active ? color.onPrimaryContainer : color.textSecondary);
+    const fill = tone?.container ?? color.primaryContainer;
     return (
       <Pressable
         key={category ?? "all"}
@@ -39,13 +41,13 @@ export function SectionFilter({ selected, onSelect }: SectionFilterProps) {
             gap: space.sm,
             paddingHorizontal: space.md,
             borderRadius: radius.full,
-            borderColor: active ? color.primaryContainer : color.border,
-            backgroundColor: active ? color.primaryContainer : color.background,
+            borderColor: active ? (tone?.solid ?? fill) : color.border,
+            backgroundColor: active ? fill : color.background,
             opacity: pressed ? theme.opacity.cardPressed : 1,
           },
         ]}
       >
-        {category !== null && <WovenSwatch category={category} color={ink} />}
+        {category !== null && <CategoryIcon category={category} color={ink} />}
         <Text style={[textStyle.caption, styles.caps, { color: ink }]}>{label}</Text>
       </Pressable>
     );
