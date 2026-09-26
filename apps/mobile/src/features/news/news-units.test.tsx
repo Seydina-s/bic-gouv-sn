@@ -1,4 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react-native";
+import type { Block } from "@bgs/shared-types";
+import * as Speech from "expo-speech";
 import { Linking, StyleSheet } from "react-native";
 import { createNewsClient, NewsApiError } from "../../api/news-client";
 import { I18nProvider } from "../../i18n/I18nProvider";
@@ -10,9 +12,17 @@ import { categoryLabelKey } from "./category";
 import { pickCoverSource } from "./CoverImage";
 import { formatDay, formatPublishedOn, freshnessOf, parseCalendarDate } from "./format";
 import { heroStories, orderSections } from "./front-page";
+import { spokenPieces } from "./spoken-text";
 import { CouncilCard, LeadStory, StoryRow } from "./Stories";
 
 jest.mock("expo-localization", () => ({ getLocales: () => [{ languageTag: "fr-SN" }] }));
+// Screens here render outside a navigator: they are always "focused".
+jest.mock("expo-router", () => ({ useIsFocused: () => true }));
+jest.mock("expo-speech", () => ({
+  speak: jest.fn(),
+  stop: jest.fn(() => Promise.resolve()),
+  maxSpeechInputLength: 4000,
+}));
 
 function respond(body: unknown, status = 200) {
   return jest.fn(() => Promise.resolve(new Response(JSON.stringify(body), { status })));
@@ -151,6 +161,61 @@ describe("BlockRenderer", () => {
       </ThemeProvider>,
     );
     expect(screen.getByLabelText("Salle du Conseil")).toHaveProp("testID", "cover-image");
+  });
+});
+
+describe("reading an article aloud", () => {
+  const view = (detail: typeof DETAIL) =>
+    render(
+      <ThemeProvider>
+        <I18nProvider>
+          <ArticleView detail={detail} isPending={false} paneWidth={390} bottomInset={0} />
+        </I18nProvider>
+      </ThemeProvider>,
+    );
+
+  it("reads the title, then the text in order, skipping pictures", () => {
+    const blocks: Block[] = [
+      { type: "heading", level: 2, inlines: [{ text: "Intertitre" }] },
+      { type: "image", src: "https://bo-admin.presidence.sn/storage/x.jpg", alt: null },
+      { type: "paragraph", inlines: [{ text: "Un " }, { text: "paragraphe", bold: true }] },
+      { type: "list", ordered: false, items: [[{ text: "Point" }]] },
+    ];
+    expect(spokenPieces("Titre", blocks, 4000)).toEqual([
+      "Titre",
+      "Intertitre",
+      "Un paragraphe",
+      "Point",
+    ]);
+  });
+
+  it("cuts a long text after sentences to fit one reading", () => {
+    const long = "Première phrase assez longue. Deuxième phrase assez longue. Troisième.";
+    const pieces = spokenPieces("T", [{ type: "paragraph", inlines: [{ text: long }] }], 40);
+    expect(pieces).toEqual([
+      "T",
+      "Première phrase assez longue.",
+      // Exactly 40 characters: fits one reading.
+      "Deuxième phrase assez longue. Troisième.",
+    ]);
+    expect(pieces.every((piece) => piece.length <= 40)).toBe(true);
+  });
+
+  it("offers Écouter on the photo of a French article, then Arrêter", async () => {
+    await view(DETAIL);
+    await fireEvent.press(screen.getByRole("button", { name: "Écouter" }));
+    expect(Speech.speak).toHaveBeenCalledWith(
+      DETAIL.title,
+      expect.objectContaining({ language: "fr-FR" }),
+    );
+    await fireEvent.press(screen.getByRole("button", { name: "Arrêter" }));
+    expect(Speech.stop).toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Écouter" })).toBeOnTheScreen();
+  });
+
+  it("offers no voice for a Wolof article (no phone has one yet)", async () => {
+    await view({ ...DETAIL, lang: "wo" });
+    expect(screen.queryByRole("button", { name: "Écouter" })).toBeNull();
   });
 });
 
