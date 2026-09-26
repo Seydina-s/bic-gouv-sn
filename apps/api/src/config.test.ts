@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { ConfigError, loadConfig } from "./config";
+import { join } from "node:path";
+import { workspaceRoot } from "./data-path";
+
+/** Data paths are resolved from the project root, wherever the tests start. */
+const fromRoot = (path: string) => join(workspaceRoot(process.cwd()) ?? "", path);
 
 describe("loadConfig", () => {
   it("applies safe defaults", () => {
@@ -10,13 +15,13 @@ describe("loadConfig", () => {
       LOG_LEVEL: "info",
       SHUTDOWN_TIMEOUT_MS: 10_000,
       RATE_LIMIT_PER_MINUTE: 600,
-      NEWS_STORE_PATH: ".data/news.json",
-      PROCEDURES_STORE_PATH: ".data/procedures.json",
-      PROCEDURE_THEMES_PATH: ".data/procedure-themes.json",
-      INGESTION_STATUS_PATH: ".data/ingestion-status.json",
-      MEDIA_ROOT: ".data/media",
-      ADMIN_ACCOUNTS_PATH: ".data/admin/accounts.json",
-      ADMIN_AUDIT_PATH: ".data/admin/audit.jsonl",
+      NEWS_STORE_PATH: fromRoot(".data/news.json"),
+      PROCEDURES_STORE_PATH: fromRoot(".data/procedures.json"),
+      PROCEDURE_THEMES_PATH: fromRoot(".data/procedure-themes.json"),
+      INGESTION_STATUS_PATH: fromRoot(".data/ingestion-status.json"),
+      MEDIA_ROOT: fromRoot(".data/media"),
+      ADMIN_ACCOUNTS_PATH: fromRoot(".data/admin/accounts.json"),
+      ADMIN_AUDIT_PATH: fromRoot(".data/admin/audit.jsonl"),
       SENTRY_TRACES_SAMPLE_RATE: 0.02,
     });
   });

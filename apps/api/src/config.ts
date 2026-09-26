@@ -1,5 +1,6 @@
 import type { ErrorCode } from "@bgs/shared-types";
 import { z } from "zod";
+import { resolveDataPath } from "./data-path";
 
 /** Every setting comes from environment variables; secrets are never hard-coded. */
 const envSchema = z.object({
@@ -12,15 +13,35 @@ const envSchema = z.object({
   /** Requests allowed per minute and per client address (generous: carrier-grade NAT). */
   RATE_LIMIT_PER_MINUTE: z.coerce.number().int().positive().default(600),
   /** Provisional article store written by the ingestion job (PostgreSQL in Phase 1). */
-  NEWS_STORE_PATH: z.string().min(1).default(".data/news.json"),
+  NEWS_STORE_PATH: z
+    .string()
+    .min(1)
+    .default(".data/news.json")
+    .transform((path) => resolveDataPath(path)),
   /** Provisional procedure store written by the e-senegal.sn collection. */
-  PROCEDURES_STORE_PATH: z.string().min(1).default(".data/procedures.json"),
+  PROCEDURES_STORE_PATH: z
+    .string()
+    .min(1)
+    .default(".data/procedures.json")
+    .transform((path) => resolveDataPath(path)),
   /** Official procedure themes and the theme of each procedure (validated in the console). */
-  PROCEDURE_THEMES_PATH: z.string().min(1).default(".data/procedure-themes.json"),
+  PROCEDURE_THEMES_PATH: z
+    .string()
+    .min(1)
+    .default(".data/procedure-themes.json")
+    .transform((path) => resolveDataPath(path)),
   /** Report written by the real-time collection after each pass (console supervision). */
-  INGESTION_STATUS_PATH: z.string().min(1).default(".data/ingestion-status.json"),
+  INGESTION_STATUS_PATH: z
+    .string()
+    .min(1)
+    .default(".data/ingestion-status.json")
+    .transform((path) => resolveDataPath(path)),
   /** Folder of processed media (cover photos) written by the ingestion job. */
-  MEDIA_ROOT: z.string().min(1).default(".data/media"),
+  MEDIA_ROOT: z
+    .string()
+    .min(1)
+    .default(".data/media")
+    .transform((path) => resolveDataPath(path)),
   /**
    * Public address of those media (a CDN in production). Absent: served by this API
    * under /media, at the address the request came in on (local development).
@@ -38,9 +59,17 @@ const envSchema = z.object({
     .refine((key) => Buffer.from(key, "base64").length === 32, "must decode to 32 bytes")
     .optional(),
   /** Provisional admin account store (PostgreSQL later). */
-  ADMIN_ACCOUNTS_PATH: z.string().min(1).default(".data/admin/accounts.json"),
+  ADMIN_ACCOUNTS_PATH: z
+    .string()
+    .min(1)
+    .default(".data/admin/accounts.json")
+    .transform((path) => resolveDataPath(path)),
   /** Append-only, hash-chained audit journal of the admin console. */
-  ADMIN_AUDIT_PATH: z.string().min(1).default(".data/admin/audit.jsonl"),
+  ADMIN_AUDIT_PATH: z
+    .string()
+    .min(1)
+    .default(".data/admin/audit.jsonl")
+    .transform((path) => resolveDataPath(path)),
   /** Sentry project key; crash reporting stays off while it is absent. */
   SENTRY_DSN: z.url({ protocol: /^https$/ }).optional(),
   /** Share of requests traced for performance (0 to 1); errors are always reported. */
