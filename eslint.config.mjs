@@ -36,6 +36,20 @@ export default tseslint.config(
       "@typescript-eslint/switch-exhaustiveness-check": "error",
       "no-console": "error",
       eqeqeq: ["error", "always"],
+      // Invisible control characters (e.g. a "\b" turned into a real backspace by a
+      // shell) break patterns silently: never allowed in code (ERREURS.md, 26/09/2026).
+      "no-control-regex": "error",
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "Literal[raw=/[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F]/]",
+          message: "Invisible control character in a literal: write it as an escape sequence.",
+        },
+        {
+          selector: "TemplateElement[value.raw=/[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F]/]",
+          message: "Invisible control character in a template: write it as an escape sequence.",
+        },
+      ],
     },
   },
   {

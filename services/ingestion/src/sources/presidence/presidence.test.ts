@@ -78,6 +78,14 @@ describe("normalizeDetail", () => {
     );
   });
 
+  it("accepts an article made of one official image (scanned press page)", () => {
+    const detail = detailFr();
+    detail.data.article.content =
+      '<p><img alt="" src="https://bo.presidence.sn/uploads/images/5b03c722d11c0.png"/></p>';
+    const article = normalizeDetail(detail, { lang: "fr", fetchedAt: FETCHED_AT });
+    expect(article.translations[0]?.bodyHtml).toContain("<img");
+  });
+
   it("builds the canonical URL with its final slash", () => {
     expect(canonicalArticleUrl("wo", "a b")).toBe("https://www.presidence.sn/wo/actualites/a%20b/");
   });
