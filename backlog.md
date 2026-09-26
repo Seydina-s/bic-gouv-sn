@@ -153,3 +153,5 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 26/09/2026 | FEED-04 🔴 Notifications push par rubrique (opt-in, heures calmes) — nécessite un build natif (A-02) | P0 fil |
 | 26/09/2026 | MED-04 🔵 223 échecs d'images du texte lors de la reconstruction (téléchargements OK ensuite : panne passagère probable + disjoncteur) ; cause désormais écrite dans chaque rapport ; relance de l'import prévue | Reconstruction |
 | 26/09/2026 | SEARCH-01 🔴 Moteur Meilisearch (tolérance aux fautes, synonymes FR/WO) derrière la même route, et relevé des recherches sans résultat pour l'admin (agrégé, anonyme) | FEED-03 |
+| 26/09/2026 | SET-01 ✅ Réglages : apparence (Comme le téléphone / Clair / Sombre) et langue (Comme le téléphone / Français / Wolof), mémorisées sur le téléphone ; section « À propos » indiquant que l'app relaie les informations officielles de presidence.sn (en attendant l'autorisation L-01) | Charte |
+| 26/09/2026 | ING-02 ✅ Écarté à juste titre : 1 article fait d'un lecteur externe (Issuu) qui exige un script tiers | Import |
