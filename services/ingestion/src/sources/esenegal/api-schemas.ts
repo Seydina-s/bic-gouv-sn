@@ -69,3 +69,23 @@ export const DETAIL_QUERY = `query($slug: String!) {
     lien_utiles { name url } demarches { slug titre }
   }
 }`;
+
+/** The official themes (the source calls them categories). */
+export const THEMES_QUERY = `query {
+  fetchCategorys { results { id title icon purpose } }
+}`;
+
+export const themesResponseSchema = z.object({
+  data: z.object({
+    fetchCategorys: z.object({
+      results: z.array(
+        z.object({
+          id: z.string().regex(/^[a-z0-9]+$/),
+          title: z.string().min(1),
+          icon: z.string().nullable().optional(),
+          purpose: z.string().nullable().optional(),
+        }),
+      ),
+    }),
+  }),
+});

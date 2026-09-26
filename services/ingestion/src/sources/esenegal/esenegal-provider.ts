@@ -1,10 +1,17 @@
-import type { Procedure } from "@bgs/shared-types";
+import type { Procedure, ProcedureTheme } from "@bgs/shared-types";
 import { CircuitBreaker, createResilientCall } from "@bgs/resilience";
 import type { z } from "zod";
 import { QuarantineError, SourceUnreachableError } from "../../lib/errors";
 import { createRateLimiter } from "../../lib/rate-limiter";
 import { USER_AGENT } from "../presidence/presidence-provider";
-import { DETAIL_QUERY, detailResponseSchema, LIST_QUERY, listResponseSchema } from "./api-schemas";
+import {
+  DETAIL_QUERY,
+  detailResponseSchema,
+  LIST_QUERY,
+  listResponseSchema,
+  THEMES_QUERY,
+  themesResponseSchema,
+} from "./api-schemas";
 import { canonicalProcedureUrl, normalizeProcedure } from "./normalize";
 
 /** Public GraphQL interface used by the official site itself (docs/sources.md). */
@@ -19,6 +26,8 @@ export interface ProcedureListPage {
 export interface ProcedureSource {
   listPage(page: number): Promise<ProcedureListPage>;
   fetchProcedure(slug: string): Promise<Procedure>;
+  /** Official themes of procedures (not linked to procedures at the source). */
+  listThemes(): Promise<ProcedureTheme[]>;
 }
 
 export interface EsenegalProviderOptions {
@@ -106,6 +115,19 @@ export function createEsenegalProvider({
         throw new QuarantineError(ref, "procedure not found at the source");
       }
       return normalizeProcedure(found, now().toISOString());
+    },
+
+    async listThemes() {
+      const themes = await query(THEMES_QUERY, {}, themesResponseSchema, `${ESENEGAL_API}#themes`);
+      const fetchedAt = now().toISOString();
+      return themes.data.fetchCategorys.results
+        .filter((theme) => theme.purpose === "DEMARCHE")
+        .map((theme) => ({
+          id: theme.id,
+          title: theme.title.trim(),
+          sourceIcon: theme.icon ?? null,
+          fetchedAt,
+        }));
     },
   };
 }
