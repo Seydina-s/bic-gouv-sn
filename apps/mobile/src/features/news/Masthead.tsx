@@ -2,26 +2,10 @@ import type { ReactNode } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Baobab } from "../../components/Baobab";
+import { FlagStripe } from "../../components/FlagStripe";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 import { formatDay } from "./format";
-
-/** The flag as a thin tricolour stripe: decoration only, identical in both themes. */
-function FlagStripe() {
-  const { theme } = useTheme();
-  const { flagGreen, flagYellow, flagRed } = theme.color;
-  return (
-    <View
-      accessibilityElementsHidden
-      importantForAccessibility="no-hide-descendants"
-      style={[styles.stripe, { height: theme.layout.flagStripe }]}
-    >
-      {[flagGreen, flagYellow, flagRed].map((color) => (
-        <View key={color} style={[styles.band, { backgroundColor: color }]} />
-      ))}
-    </View>
-  );
-}
 
 /**
  * Front-page masthead ("La Une", D-05): flag stripe, the app's name, today's date,
@@ -74,8 +58,6 @@ export function Masthead({ today, actions }: { today: Date; actions?: ReactNode 
 }
 
 const styles = StyleSheet.create({
-  stripe: { flexDirection: "row" },
-  band: { flex: 1 },
   rule: { borderBottomWidth: 1 },
   row: { flexDirection: "row", alignItems: "center" },
   titles: { flex: 1 },

@@ -160,8 +160,8 @@ export const layout = {
   tabBar: { height: 64, sideMargin: 12, minBottomGap: 12, maxWidth: 560 },
   /** List pane of the two-pane layout (expanded windows): share of the width, clamped. */
   listPane: { share: 0.4, min: 360, max: 440 },
-  /** Thickness of the decorative flag stripe atop the front page. */
-  flagStripe: 4,
+  /** Thickness of the flag stripe atop the front page: tall enough to show the star. */
+  flagStripe: 8,
   /** Blur strength of the glass bar where the system blurs (expo-blur intensity). */
   glassBlur: 40,
 } as const;
