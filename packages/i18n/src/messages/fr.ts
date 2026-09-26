@@ -62,6 +62,23 @@ export const fr = {
     noResult: "Aucun résultat pour « {query} ».",
     offline: "La recherche a besoin d'une connexion. Réessayez quand vous êtes en ligne.",
   },
+  settings: {
+    title: "Réglages",
+    appearance: "Apparence",
+    themeSystem: "Comme le téléphone",
+    themeLight: "Clair",
+    themeDark: "Sombre",
+    language: "Langue",
+    languageAuto: "Comme le téléphone",
+    languageFr: "Français",
+    languageWo: "Wolof",
+    wolofNote:
+      "Les actualités s'affichent dans leur version wolof officielle. Les textes de l'application seront traduits en wolof par des locuteurs natifs.",
+    about: "À propos",
+    aboutBody:
+      "Bic Gouv SN relaie les informations officielles publiées sur presidence.sn. Chaque article renvoie à sa page d'origine.",
+    version: "Version {version}",
+  },
   favorites: {
     title: "Mes favoris",
     add: "Ajouter aux favoris",

@@ -11,6 +11,7 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { BookmarkSimpleIcon as BookmarkSimple } from "phosphor-react-native/src/icons/BookmarkSimple";
+import { GearSixIcon as GearSix } from "phosphor-react-native/src/icons/GearSix";
 import { MagnifyingGlassIcon as MagnifyingGlass } from "phosphor-react-native/src/icons/MagnifyingGlass";
 import { useTabBarInset } from "../../components/GlassTabBar";
 import { IconButton } from "../../components/IconButton";
@@ -123,6 +124,13 @@ export default function HomeScreen() {
               label={t("favorites.title")}
               onPress={() => {
                 router.push("/favorites");
+              }}
+            />
+            <IconButton
+              icon={GearSix}
+              label={t("settings.title")}
+              onPress={() => {
+                router.push("/settings");
               }}
             />
           </>

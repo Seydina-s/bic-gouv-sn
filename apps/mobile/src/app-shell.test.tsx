@@ -12,6 +12,7 @@ import ProceduresScreen from "./app/(tabs)/procedures";
 import ArticleScreen from "./app/article/[id]";
 import FavoritesScreen from "./app/favorites";
 import SearchScreen from "./app/search";
+import SettingsScreen from "./app/settings";
 import { DETAIL, LIST, newsFetch } from "./testing/news-fixtures";
 
 jest.mock("expo-localization", () => ({ getLocales: () => [{ languageTag: "fr-SN" }] }));
@@ -35,6 +36,7 @@ const routes = {
   "article/[id]": ArticleScreen,
   favorites: FavoritesScreen,
   search: SearchScreen,
+  settings: SettingsScreen,
 };
 
 beforeEach(async () => {
@@ -108,6 +110,36 @@ describe("app shell", () => {
     }
   });
 
+  it("remembers the appearance and language chosen in the settings", async () => {
+    const fetchMock = newsFetch();
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    await renderRouter(routes, { initialUrl: "/" });
+    await fireEvent.press(await screen.findByRole("button", { name: "Réglages" }));
+    await fireEvent.press(await screen.findByRole("radio", { name: "Sombre" }));
+    await fireEvent.press(screen.getByRole("radio", { name: "Wolof" }));
+    expect(screen.getByRole("radio", { name: "Sombre", checked: true })).toBeOnTheScreen();
+    expect(screen.getByRole("radio", { name: "Wolof", checked: true })).toBeOnTheScreen();
+    // Read after the actions (an async callback inside waitFor overlaps act() calls).
+    expect(await AsyncStorage.multiGet(["bgs-theme", "bgs-language"])).toEqual([
+      ["bgs-theme", "dark"],
+      ["bgs-language", "wo"],
+    ]);
+  });
+
+  it("starts with the saved choices, and ignores a damaged one", async () => {
+    await AsyncStorage.multiSet([
+      ["bgs-theme", "purple"],
+      ["bgs-language", "wo"],
+    ]);
+    const fetchMock = newsFetch();
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    await renderRouter(routes, { initialUrl: "/settings" });
+    expect(await screen.findByRole("radio", { name: "Wolof", checked: true })).toBeOnTheScreen();
+    expect(
+      screen.getByRole("radio", { name: "Comme le téléphone", checked: true }),
+    ).toBeOnTheScreen();
+  });
+
   it("filters the front page by section", async () => {
     const fetchMock = newsFetch();
     globalThis.fetch = fetchMock as unknown as typeof fetch;
@@ -127,9 +159,7 @@ describe("app shell", () => {
     await fireEvent.press(await screen.findByText("Titre de test A"));
     await fireEvent.press(await screen.findByRole("button", { name: "Ajouter aux favoris" }));
     expect(await screen.findByRole("button", { name: "Retirer des favoris" })).toBeOnTheScreen();
-    await waitFor(async () => {
-      expect(await AsyncStorage.getItem("bgs-favorites-v1")).toContain(DETAIL.id);
-    });
+    expect(await AsyncStorage.getItem("bgs-favorites-v1")).toContain(DETAIL.id);
   });
 
   it("reads a kept article offline, from its saved copy", async () => {
