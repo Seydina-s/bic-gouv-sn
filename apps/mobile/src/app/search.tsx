@@ -1,12 +1,15 @@
-import { FlashList } from "@shopify/flash-list";
+import { FlashList, type FlashListRef } from "@shopify/flash-list";
+import type { NewsSummary } from "@bgs/shared-types";
+
 import { Stack, useRouter } from "expo-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StoryRow } from "../features/news/Stories";
 import { useDebouncedValue } from "../features/news/useDebouncedValue";
 import { MIN_QUERY_LENGTH, useNewsSearch } from "../features/news/useNews";
 import { useTranslation } from "../i18n/useTranslation";
+import { ScrollTopButton, useScrollTop } from "../components/ScrollTopButton";
 import { useTheme } from "../theme/useTheme";
 
 /** Pause after typing before the search is sent (fewer requests on slow networks). */
@@ -18,6 +21,8 @@ export default function SearchScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const list = useRef<FlashListRef<NewsSummary>>(null);
+  const scrollTop = useScrollTop();
   const [text, setText] = useState("");
   const query = useDebouncedValue(text.trim(), TYPING_PAUSE_MS);
   const search = useNewsSearch(query);
@@ -75,6 +80,9 @@ export default function SearchScreen() {
         <ActivityIndicator color={color.primary} style={{ marginTop: space.xl }} />
       ) : (
         <FlashList
+          ref={list}
+          onScroll={scrollTop.onScroll}
+          scrollEventThrottle={100}
           data={items}
           keyExtractor={(item) => item.id}
           keyboardShouldPersistTaps="handled"
@@ -100,6 +108,13 @@ export default function SearchScreen() {
           contentContainerStyle={{ paddingBottom: insets.bottom + space.xl }}
         />
       )}
+      <ScrollTopButton
+        visible={scrollTop.visible}
+        bottom={insets.bottom + space.lg}
+        onPress={() => {
+          list.current?.scrollToOffset({ offset: 0, animated: true });
+        }}
+      />
     </View>
   );
 }

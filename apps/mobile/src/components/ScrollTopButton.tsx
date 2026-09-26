@@ -1,10 +1,37 @@
 import { ArrowUpIcon as ArrowUp } from "phosphor-react-native/src/icons/ArrowUp";
-import { useEffect, useState } from "react";
-import { Animated, Pressable, StyleSheet } from "react-native";
+import { useCallback, useEffect, useState } from "react";
+import {
+  Animated,
+  Pressable,
+  StyleSheet,
+  useWindowDimensions,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
+} from "react-native";
 import { useTranslation } from "../i18n/useTranslation";
 import { useReduceMotion } from "../theme/useSystemAccessibility";
 import { useTheme } from "../theme/useTheme";
 import { Icon } from "./Icon";
+
+/** The button appears after this share of a screen has been scrolled. */
+const SHOW_AFTER = 0.8;
+
+/**
+ * Tells when the reader has scrolled far enough for "back to top" to help. Give
+ * `onScroll` to the list (with scrollEventThrottle), and `visible` to the button.
+ */
+export function useScrollTop() {
+  const { height } = useWindowDimensions();
+  const [visible, setVisible] = useState(false);
+  const onScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      // Same value: React skips the render, so scrolling stays cheap.
+      setVisible(event.nativeEvent.contentOffset.y > height * SHOW_AFTER);
+    },
+    [height],
+  );
+  return { visible, onScroll };
+}
 
 export interface ScrollTopButtonProps {
   visible: boolean;

@@ -1,4 +1,6 @@
-import { FlashList } from "@shopify/flash-list";
+import { useRef } from "react";
+import { FlashList, type FlashListRef } from "@shopify/flash-list";
+
 import { Stack, useRouter } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -6,6 +8,7 @@ import { summaryOf } from "../features/favorites/favorites-store";
 import { useFavorites } from "../features/favorites/FavoritesProvider";
 import { StoryRow } from "../features/news/Stories";
 import { useTranslation } from "../i18n/useTranslation";
+import { ScrollTopButton, useScrollTop } from "../components/ScrollTopButton";
 import { useTheme } from "../theme/useTheme";
 
 /** Articles kept by the reader, newest first, all readable offline. */
@@ -15,6 +18,8 @@ export default function FavoritesScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { favorites } = useFavorites();
+  const list = useRef<FlashListRef<(typeof favorites)[number]>>(null);
+  const scrollTop = useScrollTop();
   const { color, space, textStyle } = theme;
 
   return (
@@ -31,6 +36,9 @@ export default function FavoritesScreen() {
         }}
       />
       <FlashList
+        ref={list}
+        onScroll={scrollTop.onScroll}
+        scrollEventThrottle={100}
         data={favorites}
         keyExtractor={(favorite) => favorite.detail.id}
         renderItem={({ item }) => (
@@ -48,6 +56,13 @@ export default function FavoritesScreen() {
           </Text>
         }
         contentContainerStyle={{ paddingBottom: insets.bottom + space.xl }}
+      />
+      <ScrollTopButton
+        visible={scrollTop.visible}
+        bottom={insets.bottom + space.lg}
+        onPress={() => {
+          list.current?.scrollToOffset({ offset: 0, animated: true });
+        }}
       />
     </View>
   );

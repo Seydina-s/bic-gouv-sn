@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import type { NewsDetail } from "@bgs/shared-types";
 import { ArrowSquareOutIcon as ArrowSquareOut } from "phosphor-react-native/src/icons/ArrowSquareOut";
 import {
@@ -11,6 +12,7 @@ import {
 } from "react-native";
 import { Icon } from "../../components/Icon";
 import { useTranslation } from "../../i18n/useTranslation";
+import { ScrollTopButton, useScrollTop } from "../../components/ScrollTopButton";
 import { useTheme } from "../../theme/useTheme";
 import { useFavorites } from "../favorites/FavoritesProvider";
 import { BlockRenderer } from "./BlockRenderer";
@@ -46,6 +48,8 @@ export interface ArticleViewProps {
 export function ArticleView({ detail, isPending, paneWidth, bottomInset }: ArticleViewProps) {
   const { theme } = useTheme();
   const { t, lang } = useTranslation();
+  const scroller = useRef<ScrollView>(null);
+  const scrollTop = useScrollTop();
   const { color, space, textStyle, layout, radius } = theme;
 
   if (detail === undefined) {
@@ -65,92 +69,105 @@ export function ArticleView({ detail, isPending, paneWidth, bottomInset }: Artic
   // Full-bleed photo when the pane is no wider than the reading column, framed otherwise.
   const framed = paneWidth > layout.readingMaxWidth;
   return (
-    <ScrollView
-      contentContainerStyle={{
-        paddingHorizontal: space.lg,
-        paddingBottom: bottomInset + space.xxxl,
-        alignSelf: "center",
-        width: "100%",
-        maxWidth: layout.readingMaxWidth,
-      }}
-    >
-      {detail.cover !== null && (
-        <View>
-          <CoverImage
-            cover={detail.cover}
-            slotWidth={Math.min(paneWidth, layout.readingMaxWidth)}
-            style={{
-              aspectRatio: layout.coverAspectRatio,
-              // Explicit width: on phones, stretch + negative margins + aspect ratio left
-              // a gap on the right (native layout only; the web export looked right).
-              width: framed ? "100%" : paneWidth,
-              marginLeft: framed ? 0 : -space.lg,
-              borderRadius: framed ? radius.md : 0,
-              marginBottom: space.lg,
-            }}
-          />
-          {canListen(detail) && (
-            <View
-              style={[
-                styles.onPhoto,
-                { right: framed ? space.md : 0, bottom: space.lg + space.md },
-              ]}
-            >
-              <ListenButton detail={detail} />
-            </View>
-          )}
+    <View style={styles.scrollRoot}>
+      <ScrollView
+        ref={scroller}
+        onScroll={scrollTop.onScroll}
+        scrollEventThrottle={100}
+        contentContainerStyle={{
+          paddingHorizontal: space.lg,
+          paddingBottom: bottomInset + space.xxxl,
+          alignSelf: "center",
+          width: "100%",
+          maxWidth: layout.readingMaxWidth,
+        }}
+      >
+        {detail.cover !== null && (
+          <View>
+            <CoverImage
+              cover={detail.cover}
+              slotWidth={Math.min(paneWidth, layout.readingMaxWidth)}
+              style={{
+                aspectRatio: layout.coverAspectRatio,
+                // Explicit width: on phones, stretch + negative margins + aspect ratio left
+                // a gap on the right (native layout only; the web export looked right).
+                width: framed ? "100%" : paneWidth,
+                marginLeft: framed ? 0 : -space.lg,
+                borderRadius: framed ? radius.md : 0,
+                marginBottom: space.lg,
+              }}
+            />
+            {canListen(detail) && (
+              <View
+                style={[
+                  styles.onPhoto,
+                  { right: framed ? space.md : 0, bottom: space.lg + space.md },
+                ]}
+              >
+                <ListenButton detail={detail} />
+              </View>
+            )}
+          </View>
+        )}
+        <View style={[styles.tagRow, { marginTop: detail.cover === null ? space.md : 0 }]}>
+          <SectionTag category={detail.category} />
+          {detail.cover === null && canListen(detail) && <ListenButton detail={detail} />}
         </View>
-      )}
-      <View style={[styles.tagRow, { marginTop: detail.cover === null ? space.md : 0 }]}>
-        <SectionTag category={detail.category} />
-        {detail.cover === null && canListen(detail) && <ListenButton detail={detail} />}
-      </View>
-      <Text
-        accessibilityRole="header"
-        style={[textStyle.leadHeadline, { color: color.textPrimary, marginTop: space.md }]}
-      >
-        {detail.title}
-      </Text>
-      <Text
-        style={[
-          textStyle.bodySmall,
-          { color: color.textTertiary, marginTop: space.sm, marginBottom: space.xl },
-        ]}
-      >
-        {formatPublishedOn(detail.publishedOn, lang)}
-        {detail.translationStatus === "machine" ? ` · ${t("content.machineTranslation")}` : ""}
-      </Text>
-      <BlockRenderer blocks={detail.blocks} />
-      <View
-        style={[
-          styles.source,
-          {
-            borderTopColor: color.border,
-            paddingTop: space.lg,
-            marginTop: space.md,
-            gap: space.md,
-          },
-        ]}
-      >
-        <Text style={[textStyle.bodySmall, { color: color.textSecondary }]}>
-          {t("content.sourceAttribution", { source: SOURCE })}
-        </Text>
-        <Pressable
-          accessibilityRole="link"
-          onPress={() => void Linking.openURL(detail.sourceUrl)}
-          style={[styles.sourceLink, { minHeight: theme.touchTarget.min, gap: space.sm }]}
+        <Text
+          accessibilityRole="header"
+          style={[textStyle.leadHeadline, { color: color.textPrimary, marginTop: space.md }]}
         >
-          <Icon icon={ArrowSquareOut} size="sm" color={color.textBrand} />
-          <Text style={[textStyle.label, { color: color.textBrand }]}>
-            {t("article.openSource", { source: SOURCE })}
+          {detail.title}
+        </Text>
+        <Text
+          style={[
+            textStyle.bodySmall,
+            { color: color.textTertiary, marginTop: space.sm, marginBottom: space.xl },
+          ]}
+        >
+          {formatPublishedOn(detail.publishedOn, lang)}
+          {detail.translationStatus === "machine" ? ` · ${t("content.machineTranslation")}` : ""}
+        </Text>
+        <BlockRenderer blocks={detail.blocks} />
+        <View
+          style={[
+            styles.source,
+            {
+              borderTopColor: color.border,
+              paddingTop: space.lg,
+              marginTop: space.md,
+              gap: space.md,
+            },
+          ]}
+        >
+          <Text style={[textStyle.bodySmall, { color: color.textSecondary }]}>
+            {t("content.sourceAttribution", { source: SOURCE })}
           </Text>
-        </Pressable>
-      </View>
-    </ScrollView>
+          <Pressable
+            accessibilityRole="link"
+            onPress={() => void Linking.openURL(detail.sourceUrl)}
+            style={[styles.sourceLink, { minHeight: theme.touchTarget.min, gap: space.sm }]}
+          >
+            <Icon icon={ArrowSquareOut} size="sm" color={color.textBrand} />
+            <Text style={[textStyle.label, { color: color.textBrand }]}>
+              {t("article.openSource", { source: SOURCE })}
+            </Text>
+          </Pressable>
+        </View>
+      </ScrollView>
+      <ScrollTopButton
+        visible={scrollTop.visible}
+        bottom={bottomInset + space.lg}
+        onPress={() => {
+          scroller.current?.scrollTo({ y: 0, animated: true });
+        }}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  scrollRoot: { flex: 1 },
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
   source: { borderTopWidth: StyleSheet.hairlineWidth },
   sourceLink: { flexDirection: "row", alignItems: "center" },
