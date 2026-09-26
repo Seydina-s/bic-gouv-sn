@@ -15,6 +15,7 @@ import { useTheme } from "../../theme/useTheme";
 import { useFavorites } from "../favorites/FavoritesProvider";
 import { BlockRenderer } from "./BlockRenderer";
 import { CoverImage } from "./CoverImage";
+import { canListen, ListenButton } from "./ListenButton";
 import { formatPublishedOn } from "./format";
 import { SectionTag } from "./SectionTag";
 import { useNewsArticle } from "./useNews";
@@ -74,22 +75,35 @@ export function ArticleView({ detail, isPending, paneWidth, bottomInset }: Artic
       }}
     >
       {detail.cover !== null && (
-        <CoverImage
-          cover={detail.cover}
-          slotWidth={Math.min(paneWidth, layout.readingMaxWidth)}
-          style={{
-            aspectRatio: layout.coverAspectRatio,
-            // Explicit width: on phones, stretch + negative margins + aspect ratio left
-            // a gap on the right (native layout only; the web export looked right).
-            width: framed ? "100%" : paneWidth,
-            marginLeft: framed ? 0 : -space.lg,
-            borderRadius: framed ? radius.md : 0,
-            marginBottom: space.lg,
-          }}
-        />
+        <View>
+          <CoverImage
+            cover={detail.cover}
+            slotWidth={Math.min(paneWidth, layout.readingMaxWidth)}
+            style={{
+              aspectRatio: layout.coverAspectRatio,
+              // Explicit width: on phones, stretch + negative margins + aspect ratio left
+              // a gap on the right (native layout only; the web export looked right).
+              width: framed ? "100%" : paneWidth,
+              marginLeft: framed ? 0 : -space.lg,
+              borderRadius: framed ? radius.md : 0,
+              marginBottom: space.lg,
+            }}
+          />
+          {canListen(detail) && (
+            <View
+              style={[
+                styles.onPhoto,
+                { right: framed ? space.md : 0, bottom: space.lg + space.md },
+              ]}
+            >
+              <ListenButton detail={detail} />
+            </View>
+          )}
+        </View>
       )}
-      <View style={{ marginTop: detail.cover === null ? space.md : 0 }}>
+      <View style={[styles.tagRow, { marginTop: detail.cover === null ? space.md : 0 }]}>
         <SectionTag category={detail.category} />
+        {detail.cover === null && canListen(detail) && <ListenButton detail={detail} />}
       </View>
       <Text
         accessibilityRole="header"
@@ -140,4 +154,6 @@ const styles = StyleSheet.create({
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
   source: { borderTopWidth: StyleSheet.hairlineWidth },
   sourceLink: { flexDirection: "row", alignItems: "center" },
+  onPhoto: { position: "absolute" },
+  tagRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
 });
