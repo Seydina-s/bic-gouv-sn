@@ -72,7 +72,7 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 24/09/2026 | W-01 🔴 Identifier qui rédige et valide les textes wolof de l'interface (catalogue `packages/i18n/src/messages/wo.ts`) | F-05 |
 | 24/09/2026 | A-01 🔴 Logo officiel, icônes d'app et écran de lancement (actuellement icônes génériques du modèle Expo — à remplacer, ne rien inventer) | F-07 |
 | 24/09/2026 | A-02 🔴 Identifiant de publication de l'app (ex. `sn.gouv.bic…`) à valider avec le BIC avant tout build de store | F-07 |
-| 24/09/2026 | PERF-01 🔴 Expo Router embarque une police d'icônes Material Symbols de 967 Ko : vérifier si elle peut être exclue (budget de poids S1-03) | F-07 |
+| 24/09/2026 | PERF-01 ✅ Expo Router embarque une police d'icônes Material Symbols de 967 Ko : exclue le 26/09/2026 (import d'expo-symbols par les « onglets natifs » inutilisés redirigé vers un module vide, comme pour Zod) ; Android 6,58 → 5,57 Mo | F-07 |
 | 24/09/2026 | SEC-01 🔴 Revérifier `pnpm audit` à chaque mise à jour du SDK Expo (decode-uri-component via expo-router, uuid via xcode) ; bloquer en CI toute vulnérabilité haute/critique | F-08 |
 | 24/09/2026 | API-01 ✅ (25/09) Limitation de débit (600/min/adresse, CGNAT), en-têtes de sécurité (CSP stricte en production), sonde `/v1/health/ready` ; 43 tests API | F-08 |
 | 24/09/2026 | D-01 ✅ Audit des tokens de design + corrections (docs/design/audit-tokens-2026-09-24.md) | Demande utilisateur |
