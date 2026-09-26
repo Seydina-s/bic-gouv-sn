@@ -17,7 +17,14 @@ export interface AdminProcedureThemesOptions {
 const MAX_BATCH = 200;
 
 const reviewSchema = z.object({
-  themes: z.array(z.object({ id: z.string(), title: z.string(), icon: z.string().nullable() })),
+  themes: z.array(
+    z.object({
+      id: z.string(),
+      title: z.string(),
+      icon: z.string().nullable(),
+      origin: z.enum(["source", "platform"]),
+    }),
+  ),
   procedures: z.array(
     z.object({
       slug: z.string(),
@@ -64,6 +71,7 @@ export const adminProcedureThemesRoutes: FastifyPluginAsyncZod<AdminProcedureThe
           id: theme.id,
           title: theme.title,
           icon: theme.sourceIcon,
+          origin: theme.origin,
         })),
         procedures: (await procedures.all()).map((procedure) => {
           const assignment = file.assignments[procedure.slug];

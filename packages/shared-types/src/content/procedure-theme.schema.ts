@@ -14,8 +14,14 @@ export const procedureThemeSchema = z.strictObject({
   /** Icon name at the source (Font Awesome, e.g. "fa-bus-alt"); the app maps it. */
   sourceIcon: z.string().nullable(),
   fetchedAt: isoDateTimeSchema,
+  /**
+   * "source": official theme of e-senegal.sn. "platform": added because no official
+   * theme fits some procedures (decided with the user, decisions.md 26/09/2026).
+   */
+  origin: z.enum(["source", "platform"]).default("source"),
 });
 export type ProcedureTheme = z.infer<typeof procedureThemeSchema>;
+export type ProcedureThemeInput = z.input<typeof procedureThemeSchema>;
 
 export const themeAssignmentSchema = z.strictObject({
   themeId: z.string().min(1),

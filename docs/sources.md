@@ -97,3 +97,13 @@ Relevé le 26/09/2026.
 - Démarches en wolof : absentes à la source → traduction automatique étiquetée plus tard (P2), jamais présentée comme officielle.
 - **Thèmes** : 15 catégories existent (`fetchCategorys` : « Citoyenneté, justice et sécurité », « Transports », « Santé et protection sociale »…, avec sous-catégories), mais au 26/09/2026 **aucune démarche n'y est rattachée** (`categories` vide sur les 718) et le filtre `demarcheFilter.categories` est ignoré par le serveur (718 résultats quel que soit le thème). L'app n'invente donc aucun regroupement : recherche et liste alphabétique, thèmes ajoutés le jour où la source les renseigne.
 - Import du 26/09/2026 : 718 démarches, 0 échec ; faits renseignés à la source : coût 95, délai 104, conditions 7, pièces à fournir 6, démarches en ligne 7 ; services administratifs, FAQ et thèmes : aucun (après filtrage des bouche-trous).
+
+### Classement des démarches par thème (26/09/2026)
+
+e-senegal.sn publie 15 thèmes officiels mais ne rattache aucune démarche à un thème. Le classement est fait sur la plateforme :
+
+- **Fichier de référence** : `apps/api/data/procedure-classification.json` (versionné, relu) : thèmes ajoutés et thème de chaque démarche (par identifiant de la démarche).
+- **Application** : `pnpm --filter @bgs/api procedures:classify` (idempotent ; ne remplace jamais une validation faite par une personne dans la console ; chaque lot est journalisé).
+- **Thèmes ajoutés** (`origin: platform`) : Agriculture, élevage et pêche · Environnement et ressources naturelles · Énergie, mines et hydrocarbures. Une nouvelle collecte des thèmes officiels ne les supprime pas.
+- **Nouvelles démarches** : proposées automatiquement par mots clés (`procedures:themes`), puis validées dans la console.
+- **Ordre de mise en service** : déployer d'abord la version du serveur qui connaît le champ `origin`, puis appliquer le classement.
