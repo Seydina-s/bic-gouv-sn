@@ -4,6 +4,7 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
 import type { AdminSignIn } from "../admin/sign-in-service";
+import { bearerToken } from "./admin-guard";
 
 export interface AdminAuthRoutesOptions {
   signIn: AdminSignIn;
@@ -27,12 +28,6 @@ function refuse(
   message: string,
 ) {
   return reply.code(status).send({ code, message, requestId: request.id });
-}
-
-function bearerToken(request: FastifyRequest): string | null {
-  const header = request.headers.authorization ?? "";
-  const match = /^Bearer ([A-Za-z0-9_-]{20,})$/.exec(header);
-  return match?.[1] ?? null;
 }
 
 /**

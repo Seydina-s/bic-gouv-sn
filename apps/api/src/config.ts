@@ -15,6 +15,8 @@ const envSchema = z.object({
   NEWS_STORE_PATH: z.string().min(1).default(".data/news.json"),
   /** Provisional procedure store written by the e-senegal.sn collection. */
   PROCEDURES_STORE_PATH: z.string().min(1).default(".data/procedures.json"),
+  /** Official procedure themes and the theme of each procedure (validated in the console). */
+  PROCEDURE_THEMES_PATH: z.string().min(1).default(".data/procedure-themes.json"),
   /** Report written by the real-time collection after each pass (console supervision). */
   INGESTION_STATUS_PATH: z.string().min(1).default(".data/ingestion-status.json"),
   /** Folder of processed media (cover photos) written by the ingestion job. */

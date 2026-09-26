@@ -14,8 +14,10 @@ import {
   procedureDetailSchema,
   procedureListResponseSchema,
   procedureSummarySchema,
+  procedureThemesResponseSchema,
   type ProcedureDetail,
   type ProcedureListResponse,
+  type ProcedureThemesResponse,
 } from "./procedures.schema";
 
 /*
@@ -122,5 +124,17 @@ export function readProcedureList(raw: unknown): ProcedureListResponse | null {
 /** One procedure, without the blocks this version cannot display. Null if broken. */
 export function readProcedureDetail(raw: unknown): ProcedureDetail | null {
   const parsed = procedureDetailSchema.safeParse(withReadableBlocks(raw));
+  return parsed.success ? parsed.data : null;
+}
+
+/** Procedure themes: an unreadable theme is left out. Null if the list is broken. */
+export function readProcedureThemes(raw: unknown): ProcedureThemesResponse | null {
+  if (!isRecord(raw) || !Array.isArray(raw["themes"])) {
+    return null;
+  }
+  const parsed = procedureThemesResponseSchema.safeParse({
+    ...raw,
+    themes: keepValid(raw["themes"], procedureThemesResponseSchema.shape.themes.element),
+  });
   return parsed.success ? parsed.data : null;
 }

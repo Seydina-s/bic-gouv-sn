@@ -59,3 +59,18 @@ export const procedureDetailSchema = procedureSummarySchema.extend({
   version: z.int().positive(),
 });
 export type ProcedureDetail = z.infer<typeof procedureDetailSchema>;
+
+/** Official themes with the number of procedures a person has filed under them. */
+export const procedureThemesResponseSchema = z.object({
+  themes: z.array(
+    z.object({
+      id: z.string().min(1),
+      title: z.string().min(1),
+      /** Icon name at the source (e.g. "fa-bus-alt"); the app maps it to its own. */
+      icon: z.string().nullable(),
+      /** Validated procedures only: proposals are never shown. */
+      count: z.int().nonnegative(),
+    }),
+  ),
+});
+export type ProcedureThemesResponse = z.infer<typeof procedureThemesResponseSchema>;
