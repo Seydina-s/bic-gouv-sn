@@ -13,6 +13,7 @@ import {
 import { Icon } from "../../components/Icon";
 import { useTranslation } from "../../i18n/useTranslation";
 import { ScrollTopButton, useScrollTop } from "../../components/ScrollTopButton";
+import { FloatingAppBar } from "../shell/FloatingAppBar";
 import { useTheme } from "../../theme/useTheme";
 import { useFavorites } from "../favorites/FavoritesProvider";
 import { BlockRenderer } from "./BlockRenderer";
@@ -42,10 +43,18 @@ export interface ArticleViewProps {
   paneWidth: number;
   /** Space kept free at the bottom (system bars). */
   bottomInset: number;
+  /** The app bar slides in on scroll; off in the two-pane layout (the front page has it). */
+  withAppBar?: boolean;
 }
 
 /** One official article, identical to the source, with its link back to it. */
-export function ArticleView({ detail, isPending, paneWidth, bottomInset }: ArticleViewProps) {
+export function ArticleView({
+  detail,
+  isPending,
+  paneWidth,
+  bottomInset,
+  withAppBar = true,
+}: ArticleViewProps) {
   const { theme } = useTheme();
   const { t, lang } = useTranslation();
   const scroller = useRef<ScrollView>(null);
@@ -162,6 +171,7 @@ export function ArticleView({ detail, isPending, paneWidth, bottomInset }: Artic
           scroller.current?.scrollTo({ y: 0, animated: true });
         }}
       />
+      {withAppBar && <FloatingAppBar visible={scrollTop.visible} />}
     </View>
   );
 }

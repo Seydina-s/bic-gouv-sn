@@ -9,6 +9,7 @@ import { useFavorites } from "../features/favorites/FavoritesProvider";
 import { StoryRow } from "../features/news/Stories";
 import { useTranslation } from "../i18n/useTranslation";
 import { ScrollTopButton, useScrollTop } from "../components/ScrollTopButton";
+import { FloatingAppBar } from "../features/shell/FloatingAppBar";
 import { useTheme } from "../theme/useTheme";
 
 /** Articles kept by the reader, newest first, all readable offline. */
@@ -64,6 +65,7 @@ export default function FavoritesScreen() {
           list.current?.scrollToOffset({ offset: 0, animated: true });
         }}
       />
+      <FloatingAppBar visible={scrollTop.visible} />
     </View>
   );
 }

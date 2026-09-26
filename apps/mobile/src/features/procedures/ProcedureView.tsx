@@ -14,6 +14,7 @@ import {
 import { Icon } from "../../components/Icon";
 import { useTranslation } from "../../i18n/useTranslation";
 import { ScrollTopButton, useScrollTop } from "../../components/ScrollTopButton";
+import { FloatingAppBar } from "../shell/FloatingAppBar";
 import { useTheme } from "../../theme/useTheme";
 import { BlockRenderer } from "../news/BlockRenderer";
 import { FactCards, useProcedureFacts } from "./ProcedureFacts";
@@ -242,6 +243,7 @@ export function ProcedureView({
           scroller.current?.scrollTo({ y: 0, animated: true });
         }}
       />
+      <FloatingAppBar visible={scrollTop.visible} />
     </View>
   );
 }

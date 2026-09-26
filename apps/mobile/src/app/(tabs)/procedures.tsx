@@ -11,6 +11,7 @@ import { ProcedureRow } from "../../features/procedures/ProcedureRow";
 import { useProcedures } from "../../features/procedures/useProcedures";
 import { useTranslation } from "../../i18n/useTranslation";
 import { ScrollTopButton, useScrollTop } from "../../components/ScrollTopButton";
+import { FloatingAppBar } from "../../features/shell/FloatingAppBar";
 import { useTheme } from "../../theme/useTheme";
 
 /** Pause after typing before the search is sent (fewer requests on slow networks). */
@@ -146,6 +147,7 @@ export default function ProceduresScreen() {
           list.current?.scrollToOffset({ offset: 0, animated: true });
         }}
       />
+      <FloatingAppBar visible={scrollTop.visible} top={insets.top} />
     </View>
   );
 }

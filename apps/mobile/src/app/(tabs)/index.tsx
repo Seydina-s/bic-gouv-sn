@@ -11,11 +11,7 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
-import { BookmarkSimpleIcon as BookmarkSimple } from "phosphor-react-native/src/icons/BookmarkSimple";
-import { GearSixIcon as GearSix } from "phosphor-react-native/src/icons/GearSix";
-import { MagnifyingGlassIcon as MagnifyingGlass } from "phosphor-react-native/src/icons/MagnifyingGlass";
 import { useTabBarInset } from "../../components/GlassTabBar";
-import { IconButton } from "../../components/IconButton";
 import { ScrollTopButton, useScrollTop } from "../../components/ScrollTopButton";
 import { ArticlePane } from "../../features/news/ArticlePane";
 import { freshnessOf, type Freshness } from "../../features/news/format";
@@ -24,7 +20,7 @@ import { HeroCarousel } from "../../features/news/HeroCarousel";
 import { Masthead } from "../../features/news/Masthead";
 import { SectionFilter } from "../../features/news/SectionFilter";
 import { SectionRail } from "../../features/news/SectionRail";
-import { SettingsSheet } from "../../features/settings/SettingsSheet";
+import { AppActions } from "../../features/shell/AppActions";
 import { CouncilCard } from "../../features/news/Stories";
 import { useLastOpened } from "../../features/news/useLastOpened";
 import { useFrontSections, useLatestIn, useNewsFeed } from "../../features/news/useNews";
@@ -92,7 +88,6 @@ export default function HomeScreen() {
   const { lastOpened, markOpened } = useLastOpened();
   const scroller = useRef<ScrollView>(null);
   const scrollTop = useScrollTop();
-  const [settingsOpen, setSettingsOpen] = useState(false);
   const { color, space, layout } = theme;
   const { width } = useWindowDimensions();
   // Tablets and unfolded foldables: front page and article side by side (recomputed live).
@@ -127,36 +122,10 @@ export default function HomeScreen() {
     void front.refetch();
   };
 
-  const masthead = (
+  // Pinned: stays at the top while the page scrolls beneath it.
+  const masthead = <Masthead today={new Date()} actions={<AppActions />} />;
+  const filters = (
     <View>
-      <Masthead
-        today={new Date()}
-        actions={
-          <>
-            <IconButton
-              icon={MagnifyingGlass}
-              label={t("search.title")}
-              onPress={() => {
-                router.push("/search");
-              }}
-            />
-            <IconButton
-              icon={BookmarkSimple}
-              label={t("favorites.title")}
-              onPress={() => {
-                router.push("/favorites");
-              }}
-            />
-            <IconButton
-              icon={GearSix}
-              label={t("settings.title")}
-              onPress={() => {
-                setSettingsOpen(true);
-              }}
-            />
-          </>
-        }
-      />
       <SectionFilter
         selected={null}
         onSelect={(category) => {
@@ -215,6 +184,7 @@ export default function HomeScreen() {
 
   const page = (
     <View style={styles.flex}>
+      {masthead}
       <ScrollView
         ref={scroller}
         contentContainerStyle={{ paddingBottom: bottomInset + space.xl }}
@@ -230,15 +200,9 @@ export default function HomeScreen() {
         }
         testID="news-feed"
       >
-        {masthead}
+        {filters}
         {body}
       </ScrollView>
-      <SettingsSheet
-        visible={settingsOpen}
-        onClose={() => {
-          setSettingsOpen(false);
-        }}
-      />
       <ScrollTopButton
         visible={scrollTop.visible}
         bottom={bottomInset + space.sm}

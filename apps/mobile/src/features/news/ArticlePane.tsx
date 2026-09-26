@@ -20,6 +20,7 @@ export function ArticlePane({ id, paneWidth, bottomInset }: ArticlePaneProps) {
         {detail !== undefined && <ArticleActions detail={detail} />}
       </View>
       <ArticleView
+        withAppBar={false}
         detail={detail}
         isPending={isPending}
         paneWidth={paneWidth}

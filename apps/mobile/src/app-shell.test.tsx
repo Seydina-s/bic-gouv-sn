@@ -372,7 +372,7 @@ describe("app shell", () => {
     expect(screen.getAllByText("Titre de test A")[0]).toBeOnTheScreen();
   });
 
-  it("offers a way back to the top once a list has been scrolled", async () => {
+  it("offers a way back to the top and the app bar once a list has been scrolled", async () => {
     await renderRouter(routes, { initialUrl: "/section/discours" });
     const list = await screen.findByTestId("section-list");
     expect(screen.queryByRole("button", { name: "Revenir en haut" })).toBeNull();
@@ -384,6 +384,9 @@ describe("app shell", () => {
       },
     });
     expect(await screen.findByRole("button", { name: "Revenir en haut" })).toBeOnTheScreen();
+    // The app bar slides in at the same moment: settings are one tap away.
+    await fireEvent.press(screen.getByRole("button", { name: "Réglages" }));
+    expect(await screen.findByRole("radio", { name: "Sombre" })).toBeOnTheScreen();
   });
 
   it("shows an honest coming-soon screen for sections not built yet", async () => {
