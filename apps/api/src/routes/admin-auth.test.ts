@@ -182,6 +182,16 @@ describe("admin sign-in", () => {
     expect(unknown.json<{ code: string }>().code).toBe(wrong.json<{ code: string }>().code);
   });
 
+  // Regression (26/09/2026): a typo at account creation left sign-ins failing silently.
+  it("journals attempts on an unknown address, with the address masked", async () => {
+    await accounts.save(account());
+    await post("password", { email: "relecteur@bic.tset", password: PASSWORD });
+    const [entry] = (await journal.entries()).slice(-1);
+    expect(entry?.action).toBe("sign-in.unknown-address");
+    expect(entry?.details["address"]).toBe("rel…(9)@bic.tset");
+    expect(JSON.stringify(entry)).not.toContain("relecteur@");
+  });
+
   it("locks the account after 5 failures, even with the right password afterwards", async () => {
     await accounts.save(account());
     for (let attempt = 0; attempt < 5; attempt += 1) {
