@@ -17,6 +17,8 @@
   --color-primary-container: var(--bgs-color-primary-container);
   --color-on-primary-container: var(--bgs-color-on-primary-container);
   --color-accent: var(--bgs-color-accent);
+  --color-accent-container: var(--bgs-color-accent-container);
+  --color-on-accent-container: var(--bgs-color-on-accent-container);
   --color-danger: var(--bgs-color-danger);
   --color-danger-surface: var(--bgs-color-danger-surface);
   --color-on-danger-surface: var(--bgs-color-on-danger-surface);

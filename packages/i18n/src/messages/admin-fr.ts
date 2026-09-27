@@ -147,6 +147,8 @@ export const adminFr = {
     corrected: "Correction enregistrée.",
     correctedFrom: "Corrigé (à la source : {name}, {category})",
     back: "Retour aux services",
+    hintNotState: "Nom d'entreprise ou d'organisme privé : probablement pas un service de l'État",
+    hintVague: "Nom trop général : vérifiez l'emplacement sur la carte",
     unknown: "Ce service n'existe pas.",
     none: "Rien à vérifier ici.",
     doneVerified: {
