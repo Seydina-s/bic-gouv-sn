@@ -41,6 +41,12 @@ export async function AppHeader() {
               >
                 {t("nav.procedures")}
               </Link>
+              <Link
+                href="/services"
+                className="rounded-md px-3 py-2 font-semibold hover:bg-surface"
+              >
+                {t("nav.services")}
+              </Link>
             </nav>
             <form action={signOut} className="ml-auto flex items-center gap-3">
               <span className="text-sm text-ink-soft">

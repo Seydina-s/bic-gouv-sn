@@ -11,6 +11,7 @@ import {
 import {
   FileProcedureRepository,
   FileProcedureThemeStore,
+  FileStateServiceStore,
   type ArticleRepository,
   type ProcedureRepository,
 } from "@bgs/content-store";
@@ -23,10 +24,12 @@ import { registerErrorHandlers } from "./errors";
 import { registerSecurity } from "./security";
 import { adminAuthRoutes } from "./routes/admin-auth";
 import { adminProcedureThemesRoutes } from "./routes/admin-procedure-themes";
+import { adminServicesRoutes } from "./routes/admin-services";
 import { healthRoutes } from "./routes/health";
 import { registerMedia } from "./routes/media";
 import { newsRoutes } from "./routes/news";
 import { proceduresRoutes } from "./routes/procedures";
+import { servicesRoutes } from "./routes/services";
 import { statusRoutes } from "./routes/status";
 
 /** Longest path parameter accepted (a procedure slug, an article id). */
@@ -40,6 +43,8 @@ export interface AppOptions {
   procedures?: ProcedureRepository;
   /** Defaults to the theme store at PROCEDURE_THEMES_PATH. */
   procedureThemes?: FileProcedureThemeStore;
+  /** Defaults to the state services store at STATE_SERVICES_PATH. */
+  stateServices?: FileStateServiceStore;
   /** Defaults to the file stores when ADMIN_SECRET_KEY is set; none otherwise. */
   admin?: AdminServices | null;
 }
@@ -71,6 +76,7 @@ export async function buildApp({
   articles,
   procedures = new FileProcedureRepository(config.PROCEDURES_STORE_PATH),
   procedureThemes = new FileProcedureThemeStore(config.PROCEDURE_THEMES_PATH),
+  stateServices = new FileStateServiceStore(config.STATE_SERVICES_PATH),
   admin = defaultAdmin(config),
 }: AppOptions): Promise<FastifyInstance> {
   const app = Fastify({
@@ -126,6 +132,7 @@ export async function buildApp({
     procedures,
     themes: procedureThemes,
   });
+  await app.register(servicesRoutes, { prefix: "/v1", services: stateServices });
   await app.register(statusRoutes, {
     prefix: "/v1",
     ingestionStatusPath: config.INGESTION_STATUS_PATH,
@@ -146,6 +153,11 @@ export async function buildApp({
       ...admin,
       procedures,
       themes: procedureThemes,
+    });
+    await app.register(adminServicesRoutes, {
+      prefix: "/admin/v1",
+      ...admin,
+      services: stateServices,
     });
   }
   app.get("/v1/openapi.json", { schema: { hide: true } }, () => app.swagger());

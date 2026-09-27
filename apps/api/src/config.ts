@@ -30,6 +30,12 @@ const envSchema = z.object({
     .min(1)
     .default(".data/procedure-themes.json")
     .transform((path) => resolveDataPath(path)),
+  /** State services (imported proposals, verified in the console) and towns. */
+  STATE_SERVICES_PATH: z
+    .string()
+    .min(1)
+    .default(".data/state-services.json")
+    .transform((path) => resolveDataPath(path)),
   /** Report written by the real-time collection after each pass (console supervision). */
   INGESTION_STATUS_PATH: z
     .string()
