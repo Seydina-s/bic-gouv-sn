@@ -6,7 +6,7 @@ import { Linking } from "react-native";
 import { I18nProvider } from "../../i18n/I18nProvider";
 import { PROCEDURE_DETAIL } from "../../testing/procedure-fixtures";
 import { ThemeProvider } from "../../theme/ThemeProvider";
-import { ProcedureView } from "./ProcedureView";
+import { ProcedureView, type ProcedureViewProps } from "./ProcedureView";
 
 jest.mock("expo-localization", () => ({ getLocales: () => [{ languageTag: "fr-SN" }] }));
 // Rendered outside a navigator: the page is always "focused".
@@ -41,7 +41,11 @@ const SHEET: ProcedureDetail = {
   ],
 };
 
-async function show(detail: ProcedureDetail, onOpenRelated = jest.fn()) {
+async function show(
+  detail: ProcedureDetail,
+  onOpenRelated = jest.fn(),
+  services?: ProcedureViewProps["services"],
+) {
   await render(
     <ThemeProvider>
       <I18nProvider>
@@ -50,6 +54,7 @@ async function show(detail: ProcedureDetail, onOpenRelated = jest.fn()) {
           isPending={false}
           bottomInset={0}
           onOpenRelated={onOpenRelated}
+          services={services}
         />
       </I18nProvider>
     </ThemeProvider>,
@@ -120,6 +125,19 @@ describe("the page of a procedure", () => {
     await fireEvent.press(screen.getByRole("button", { name: "Arrêter" }));
     expect(Speech.stop).toHaveBeenCalled();
     expect(screen.getByRole("button", { name: "Écouter" })).toBeOnTheScreen();
+  });
+
+  it("leads to the nearest service the sheet names, only when one is verified", async () => {
+    const where = { ...SHEET, blocks: [p("Où s'adresser ?"), p("Au commissariat de police.")] };
+    const onOpen = jest.fn();
+    await show(where, jest.fn(), { kinds: new Set(["police"]), onOpen });
+    await fireEvent.press(
+      screen.getByRole("button", { name: "Trouver le commissariat le plus proche" }),
+    );
+    expect(onOpen).toHaveBeenCalledWith("police");
+    await screen.unmount();
+    await show(where, jest.fn(), { kinds: new Set(["mairie"]), onOpen });
+    expect(screen.queryByRole("button", { name: /le plus proche/ })).toBeNull();
   });
 
   it("shows a sheet without questions as plain text, without a brief", async () => {

@@ -66,6 +66,19 @@ function plain(inlines: readonly Inline[]): string {
     .trim();
 }
 
+/** The whole text of some sheet items on one line: for matching, never shown. */
+export function plainOf(items: readonly SheetItem[]): string {
+  return items
+    .map((item) =>
+      item.type === "text" || item.type === "note"
+        ? plain(item.inlines)
+        : item.type === "list"
+          ? item.items.map(plain).join(" ")
+          : "",
+    )
+    .join(" ");
+}
+
 /** Letters and digits only: compares two texts whatever their spaces, quotes or case. */
 function letters(text: string): string {
   return text.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "");
