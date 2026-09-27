@@ -1,4 +1,5 @@
 import type { ProcedureSummary } from "@bgs/shared-types";
+import { useCallback } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
@@ -9,17 +10,25 @@ export interface ProcedureFact {
   value: string;
 }
 
+/** A fee in words: a fee of 0 at the source means the procedure is free. */
+export function useFeeWording(): (amount: number) => string {
+  const { t } = useTranslation();
+  return useCallback(
+    (amount: number) => (amount === 0 ? t("procedures.free") : formatFcfa(amount)),
+    [t],
+  );
+}
+
 /**
  * The known facts of a procedure (cost, delay, online). A fact the source does not
  * give is left out: "unknown" is never shown as "free" or "immediate".
  */
 export function useProcedureFacts(procedure: ProcedureSummary): ProcedureFact[] {
   const { t } = useTranslation();
+  const fee = useFeeWording();
   const facts: ProcedureFact[] = [];
   if (procedure.costFcfa !== null) {
-    // A fee of 0 at the source means the procedure is free: said in words.
-    const value = procedure.costFcfa === 0 ? t("procedures.free") : formatFcfa(procedure.costFcfa);
-    facts.push({ label: t("procedures.cost"), value });
+    facts.push({ label: t("procedures.cost"), value: fee(procedure.costFcfa) });
   }
   if (procedure.delayDays !== null) {
     facts.push({
@@ -61,40 +70,6 @@ export function FactChips({ facts }: { facts: ProcedureFact[] }) {
   );
 }
 
-/** Large fact cards at the top of a procedure: the answers people look for first. */
-export function FactCards({ facts }: { facts: ProcedureFact[] }) {
-  const { theme } = useTheme();
-  const { color, space, textStyle, radius } = theme;
-  if (facts.length === 0) {
-    return null;
-  }
-  return (
-    <View style={[styles.row, { gap: space.sm, marginBottom: space.xl }]}>
-      {facts.map((fact) => (
-        <View
-          key={fact.label}
-          accessible
-          accessibilityLabel={`${fact.label} : ${fact.value}`}
-          style={[
-            styles.card,
-            {
-              backgroundColor: color.surface,
-              borderColor: color.border,
-              borderRadius: radius.md,
-              padding: space.md,
-              gap: space.xxs,
-            },
-          ]}
-        >
-          <Text style={[textStyle.caption, { color: color.textSecondary }]}>{fact.label}</Text>
-          <Text style={[textStyle.subtitle, { color: color.textPrimary }]}>{fact.value}</Text>
-        </View>
-      ))}
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   row: { flexDirection: "row", flexWrap: "wrap" },
-  card: { flexGrow: 1, minWidth: 120, borderWidth: StyleSheet.hairlineWidth },
 });

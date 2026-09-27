@@ -29,6 +29,9 @@ import { newsRoutes } from "./routes/news";
 import { proceduresRoutes } from "./routes/procedures";
 import { statusRoutes } from "./routes/status";
 
+/** Longest path parameter accepted (a procedure slug, an article id). */
+const MAX_PARAM_LENGTH = 200;
+
 export interface AppOptions {
   config: Config;
   version: string;
@@ -76,6 +79,9 @@ export async function buildApp({
       redact: ["req.headers.authorization", "req.headers.cookie"],
     },
     genReqId: () => randomUUID(),
+    // Official procedure slugs exceed the default 100 characters: those procedures
+    // were answered 414 and could not be opened. Matches the routes' own limit (200).
+    routerOptions: { maxParamLength: MAX_PARAM_LENGTH },
   });
 
   // Reports unexpected (5xx) errors to Sentry when monitoring is on (see instrument.ts).

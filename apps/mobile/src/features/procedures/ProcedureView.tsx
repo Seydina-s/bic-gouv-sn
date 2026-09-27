@@ -1,65 +1,34 @@
 import type { ProcedureDetail } from "@bgs/shared-types";
-import { ArrowSquareOutIcon as ArrowSquareOut } from "phosphor-react-native/src/icons/ArrowSquareOut";
-import { CheckSquareIcon as CheckSquare } from "phosphor-react-native/src/icons/CheckSquare";
-import { useRef, type ReactNode } from "react";
-import {
-  ActivityIndicator,
-  Linking,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import { Icon } from "../../components/Icon";
-import { useTranslation } from "../../i18n/useTranslation";
+import { useMemo, useRef, useState } from "react";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
 import { ScrollTopButton, useScrollTop } from "../../components/ScrollTopButton";
-import { FloatingAppBar } from "../shell/FloatingAppBar";
+import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
-import { BlockRenderer } from "../news/BlockRenderer";
-import { FactCards, useProcedureFacts } from "./ProcedureFacts";
+import { Runs } from "../news/BlockRenderer";
+import { FloatingAppBar } from "../shell/FloatingAppBar";
+import { ProcedureActionBar } from "./ProcedureActionBar";
+import { ProcedureBrief } from "./ProcedureBrief";
+import { ProcedureExtras } from "./ProcedureExtras";
+import { useFeeWording } from "./ProcedureFacts";
+import { procedurePage, type PageWords } from "./procedure-page";
+import { SheetItems, SheetSectionView } from "./SheetContent";
+import { useDocumentChecklist } from "./useDocumentChecklist";
 
 const SOURCE = "e-senegal.sn";
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
-  const { theme } = useTheme();
-  const { color, space, textStyle } = theme;
-  return (
-    <View style={{ marginBottom: space.xl }}>
-      <Text
-        accessibilityRole="header"
-        style={[textStyle.title, { color: color.textPrimary, marginBottom: space.md }]}
-      >
-        {title}
-      </Text>
-      {children}
-    </View>
-  );
-}
-
-/** Documents to bring, as a checklist (Service-Public.fr): easy to go through at home. */
-function DocumentList({ documents }: { documents: string[] }) {
-  const { theme } = useTheme();
-  const { color, space, textStyle } = theme;
-  return documents.map((document) => (
-    <View key={document} style={[styles.line, { gap: space.sm, marginBottom: space.sm }]}>
-      <Icon icon={CheckSquare} size="sm" color={color.textBrand} />
-      <Text style={[textStyle.body, styles.flex, { color: color.textPrimary }]}>{document}</Text>
-    </View>
-  ));
-}
-
-function LinkRow({ label, onPress }: { label: string; onPress: () => void }) {
-  const { theme } = useTheme();
-  const { color, space, textStyle } = theme;
-  return (
-    <Pressable
-      accessibilityRole="link"
-      onPress={onPress}
-      style={[styles.line, { minHeight: theme.touchTarget.min, gap: space.sm }]}
-    >
-      <Text style={[textStyle.label, styles.flex, { color: color.textBrand }]}>{label}</Text>
-    </Pressable>
+function usePageWords(): PageWords {
+  const { t } = useTranslation();
+  const fee = useFeeWording();
+  return useMemo(
+    () => ({
+      eligibility: t("procedures.eligibility"),
+      documents: t("procedures.documents"),
+      fee,
+      delay: (days: number) => t("procedures.delayDays", { count: days }),
+      pieces: (count: number) => t("procedures.documentsCount", { count }),
+      online: t("procedures.onlinePossible"),
+    }),
+    [t, fee],
   );
 }
 
@@ -71,8 +40,10 @@ export interface ProcedureViewProps {
 }
 
 /**
- * One procedure, explained: key facts first, then who, what to bring, how, and the
- * official page where it is actually done. Only what e-senegal.sn publishes.
+ * One procedure, in the app's own layout: the answers people look for first ("En
+ * bref"), then each question of the official sheet with its icon, the documents
+ * to tick off, the steps in order, and the official page one tap away at all times.
+ * Only what e-senegal.sn publishes, in its own words.
  */
 export function ProcedureView({
   detail,
@@ -82,9 +53,7 @@ export function ProcedureView({
 }: ProcedureViewProps) {
   const { theme } = useTheme();
   const { t } = useTranslation();
-  const scroller = useRef<ScrollView>(null);
-  const scrollTop = useScrollTop();
-  const { color, space, textStyle, layout, radius } = theme;
+  const { color, space, textStyle } = theme;
 
   if (detail === undefined) {
     return (
@@ -99,17 +68,52 @@ export function ProcedureView({
       </View>
     );
   }
-
-  const open = (url: string) => () => void Linking.openURL(url);
   return (
-    <View style={styles.scrollRoot}>
+    <ProcedureSheetView
+      key={detail.slug}
+      detail={detail}
+      bottomInset={bottomInset}
+      onOpenRelated={onOpenRelated}
+    />
+  );
+}
+
+function ProcedureSheetView({
+  detail,
+  bottomInset,
+  onOpenRelated,
+}: {
+  detail: ProcedureDetail;
+  bottomInset: number;
+  onOpenRelated: (slug: string) => void;
+}) {
+  const { theme } = useTheme();
+  const { t } = useTranslation();
+  const words = usePageWords();
+  const page = useMemo(() => procedurePage(detail, words), [detail, words]);
+  const checklist = useDocumentChecklist(detail.slug);
+  const scroller = useRef<ScrollView>(null);
+  // Where each section starts in the page, to lead the reader there.
+  const offsets = useRef(new Map<number, number>());
+  const scrollTop = useScrollTop();
+  const [barHeight, setBarHeight] = useState(0);
+  const { color, space, textStyle, layout, touchTarget } = theme;
+  // The floating app bar covers the top of the page once scrolled.
+  const coveredTop = touchTarget.min + layout.flagStripe + space.md;
+
+  const scrollTo = (y: number) => {
+    scroller.current?.scrollTo({ y: Math.max(0, y), animated: true });
+  };
+
+  return (
+    <View style={styles.root}>
       <ScrollView
         ref={scroller}
         onScroll={scrollTop.onScroll}
         scrollEventThrottle={100}
         contentContainerStyle={{
           paddingHorizontal: space.lg,
-          paddingBottom: bottomInset + space.xxxl,
+          paddingBottom: barHeight + space.xxl,
           alignSelf: "center",
           width: "100%",
           maxWidth: layout.readingMaxWidth,
@@ -121,9 +125,9 @@ export function ProcedureView({
         >
           {detail.title}
         </Text>
-        {detail.summary !== null && (
+        {page.lead !== null && (
           <Text style={[textStyle.body, { color: color.textSecondary, marginTop: space.sm }]}>
-            {detail.summary}
+            <Runs inlines={page.lead} />
           </Text>
         )}
         {detail.translationStatus === "machine" && (
@@ -131,132 +135,68 @@ export function ProcedureView({
             {t("content.machineTranslation")}
           </Text>
         )}
-        <View style={{ height: space.xl }} />
-        <ProcedureFactCards detail={detail} />
-        {detail.eligibility !== null && (
-          <Section title={t("procedures.eligibility")}>
-            <Text style={[textStyle.body, { color: color.textPrimary }]}>{detail.eligibility}</Text>
-          </Section>
+        {page.facts.length > 0 && (
+          <View style={{ marginTop: space.xl }}>
+            <ProcedureBrief
+              facts={page.facts}
+              onShowSection={(section) => {
+                scrollTo((offsets.current.get(section) ?? 0) - coveredTop);
+              }}
+            />
+          </View>
         )}
-        {detail.documents.length > 0 && (
-          <Section title={t("procedures.documents")}>
-            <DocumentList documents={detail.documents} />
-          </Section>
+        {page.intro.length > 0 && (
+          <View style={{ marginTop: space.xl }}>
+            <SheetItems items={page.intro} kind={null} />
+          </View>
         )}
-        {detail.blocks.length > 0 && (
-          <Section title={t("procedures.steps")}>
-            <BlockRenderer blocks={detail.blocks} />
-          </Section>
-        )}
-        {detail.offices.length > 0 && (
-          <Section title={t("procedures.offices")}>
-            {detail.offices.map((office) => (
-              <View key={office.name} style={{ marginBottom: space.md }}>
-                <Text style={[textStyle.label, { color: color.textPrimary }]}>{office.name}</Text>
-                {[office.address, office.town, office.region, office.phone, office.email]
-                  .filter((part): part is string => part !== null)
-                  .map((part) => (
-                    <Text key={part} style={[textStyle.bodySmall, { color: color.textSecondary }]}>
-                      {part}
-                    </Text>
-                  ))}
-              </View>
-            ))}
-          </Section>
-        )}
-        {detail.faqs.length > 0 && (
-          <Section title={t("procedures.faqs")}>
-            {detail.faqs.map((faq) => (
-              <View key={faq.question}>
-                <Text
-                  style={[textStyle.subtitle, { color: color.textPrimary, marginBottom: space.sm }]}
-                >
-                  {faq.question}
-                </Text>
-                <BlockRenderer blocks={faq.blocks} />
-              </View>
-            ))}
-          </Section>
-        )}
-        {detail.legalTexts.length > 0 && (
-          <Section title={t("procedures.legalTexts")}>
-            {detail.legalTexts.map((text) => (
-              <View key={text.name} style={{ marginBottom: space.sm }}>
-                <Text style={[textStyle.label, { color: color.textPrimary }]}>{text.name}</Text>
-                {text.description !== null && (
-                  <Text style={[textStyle.bodySmall, { color: color.textSecondary }]}>
-                    {text.description}
-                  </Text>
-                )}
-              </View>
-            ))}
-          </Section>
-        )}
-        {detail.usefulLinks.length > 0 && (
-          <Section title={t("procedures.usefulLinks")}>
-            {detail.usefulLinks.map((link) => (
-              <LinkRow key={link.url} label={link.name} onPress={open(link.url)} />
-            ))}
-          </Section>
-        )}
-        {detail.related.length > 0 && (
-          <Section title={t("procedures.related")}>
-            {detail.related.map((related) => (
-              <LinkRow
-                key={related.slug}
-                label={related.title}
-                onPress={() => {
-                  onOpenRelated(related.slug);
-                }}
-              />
-            ))}
-          </Section>
-        )}
-        <Pressable
-          accessibilityRole="link"
-          onPress={open(detail.sourceUrl)}
-          style={({ pressed }) => [
-            styles.primary,
+        {page.sections.map((section, index) => (
+          <SheetSectionView
+            key={`${section.kind}-${String(index)}`}
+            section={section}
+            checklist={checklist}
+            onLayout={(event) => {
+              offsets.current.set(index, event.nativeEvent.layout.y);
+            }}
+          />
+        ))}
+        <ProcedureExtras detail={detail} onOpenRelated={onOpenRelated} />
+        <Text
+          style={[
+            textStyle.bodySmall,
+            styles.source,
             {
-              backgroundColor: pressed ? color.primaryPressed : color.primary,
-              borderRadius: radius.md,
-              minHeight: theme.touchTarget.min,
-              paddingHorizontal: space.xl,
-              paddingVertical: space.md,
-              gap: space.sm,
+              color: color.textTertiary,
+              borderTopColor: color.border,
+              marginTop: space.xxl,
+              paddingTop: space.lg,
             },
           ]}
         >
-          <Text style={[textStyle.label, styles.buttonText, { color: color.onPrimary }]}>
-            {t("procedures.goOfficial")}
-          </Text>
-          <Icon icon={ArrowSquareOut} size="sm" color={color.onPrimary} />
-        </Pressable>
-        <Text style={[textStyle.bodySmall, { color: color.textSecondary, marginTop: space.lg }]}>
           {t("content.sourceAttribution", { source: SOURCE })}
         </Text>
       </ScrollView>
       <ScrollTopButton
         visible={scrollTop.visible}
-        bottom={bottomInset + space.lg}
+        bottom={barHeight + space.md}
         onPress={() => {
-          scroller.current?.scrollTo({ y: 0, animated: true });
+          scrollTo(0);
         }}
       />
       <FloatingAppBar visible={scrollTop.visible} />
+      <ProcedureActionBar
+        url={detail.sourceUrl}
+        bottomInset={bottomInset}
+        onLayout={(event) => {
+          setBarHeight(event.nativeEvent.layout.height);
+        }}
+      />
     </View>
   );
 }
 
-function ProcedureFactCards({ detail }: { detail: ProcedureDetail }) {
-  return <FactCards facts={useProcedureFacts(detail)} />;
-}
-
 const styles = StyleSheet.create({
-  scrollRoot: { flex: 1 },
+  root: { flex: 1 },
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
-  line: { flexDirection: "row", alignItems: "center" },
-  flex: { flex: 1 },
-  buttonText: { flexShrink: 1, textAlign: "center" },
-  primary: { flexDirection: "row", alignItems: "center", justifyContent: "center" },
+  source: { borderTopWidth: StyleSheet.hairlineWidth },
 });
