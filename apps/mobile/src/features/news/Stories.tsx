@@ -33,13 +33,23 @@ export interface LeadStoryProps extends StoryProps {
   width: number;
   /** Spoken position in the carousel, e.g. "Article 2 sur 5". */
   position?: string;
+  /** Off on a section page, whose title already names the section. */
+  showSection?: boolean;
 }
 
 /**
- * The lead story (one slide of the carousel): full-bleed photo, newspaper headline,
- * opening words, source. Line counts are capped so every slide has the same height.
+ * The lead story (one slide of the carousel, the opening of a section page):
+ * full-bleed photo, newspaper headline, opening words, source. Line counts are
+ * capped so every slide has the same height.
  */
-export function LeadStory({ item, lastOpened, onPress, width, position }: LeadStoryProps) {
+export function LeadStory({
+  item,
+  lastOpened,
+  onPress,
+  width,
+  position,
+  showSection = true,
+}: LeadStoryProps) {
   const { theme } = useTheme();
   const { label, day } = useStoryLabel(item);
   const { color, space, textStyle, layout } = theme;
@@ -64,7 +74,7 @@ export function LeadStory({ item, lastOpened, onPress, width, position }: LeadSt
         />
       )}
       <View style={{ padding: space.lg, gap: space.sm }}>
-        <SectionTag category={item.category} lastOpened={lastOpened} />
+        {showSection && <SectionTag category={item.category} lastOpened={lastOpened} />}
         <Text style={[textStyle.leadHeadline, { color: color.textPrimary }]} numberOfLines={3}>
           {item.title}
         </Text>

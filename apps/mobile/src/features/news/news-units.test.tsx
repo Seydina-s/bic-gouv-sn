@@ -289,6 +289,32 @@ describe("stories", () => {
     expect(screen.queryByTestId("cover-image", { includeHiddenElements: true })).toBeNull();
   });
 
+  it("lays the woven patterns over their box, never sizing the row", async () => {
+    // A drawing in the flow of the row made each story 150 px taller on the web.
+    await show("row", null);
+    const weaves = screen.getAllByTestId("weave", { includeHiddenElements: true });
+    expect(weaves.length).toBeGreaterThan(0);
+    for (const weave of weaves) {
+      expect(weave).toHaveStyle({ position: "absolute" });
+    }
+  });
+
+  it("leaves the section name out of a lead story on a section page", async () => {
+    const item = LIST.items[0];
+    if (item === undefined) {
+      throw new Error("fixture");
+    }
+    await render(
+      <ThemeProvider>
+        <I18nProvider>
+          <LeadStory item={item} lastOpened width={390} showSection={false} onPress={jest.fn()} />
+        </I18nProvider>
+      </ThemeProvider>,
+    );
+    expect(screen.getByText(item.title)).toBeOnTheScreen();
+    expect(screen.queryByText("Dernière lecture")).toBeNull();
+  });
+
   it("opens the latest Conseil des ministres from its card", async () => {
     const onPress = await show("council", null);
     expect(screen.getByText("Dernier Conseil des ministres")).toBeOnTheScreen();

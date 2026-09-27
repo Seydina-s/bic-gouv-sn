@@ -2,19 +2,25 @@ import { FlashList, type FlashListRef } from "@shopify/flash-list";
 import type { NewsSummary } from "@bgs/shared-types";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useRef } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SECTION_PAGE_SIZE } from "../../api/news-client";
+import { PageBand, usePageMeta } from "../../components/PageBand";
+import { PageNavigation } from "../../components/PageNavigation";
+import { pageCount } from "../../components/page-slots";
+import {
+  ScrollTopButton,
+  useScrollTop,
+  useScrollTopClearance,
+} from "../../components/ScrollTopButton";
 import { categoryLabelKey } from "../../features/news/category";
 import { CategoryIcon, useCategoryTone } from "../../features/news/CategoryIcon";
-import { Pagination } from "../../components/Pagination";
-import { pageCount } from "../../components/page-slots";
 import { SectionFilter } from "../../features/news/SectionFilter";
-import { StoryRow } from "../../features/news/Stories";
+import { WovenStrip } from "../../features/news/Selvage";
+import { LeadStory, StoryRow } from "../../features/news/Stories";
 import { useSectionPage } from "../../features/news/useNews";
-import { useTranslation } from "../../i18n/useTranslation";
-import { ScrollTopButton, useScrollTop } from "../../components/ScrollTopButton";
 import { FloatingAppBar } from "../../features/shell/FloatingAppBar";
+import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 
 /** A page number from the address; anything else reads as the first page. */
@@ -24,8 +30,10 @@ function parsePage(raw: string | undefined): number {
 }
 
 /**
- * One section of the news, 20 stories per numbered page. The section chips stay on
- * top to jump to another section; "Tout" goes back to the front page.
+ * One section of the news, 20 stories per numbered page: the section chips on top
+ * to jump to another section ("Tout" goes back to the front page), a band in the
+ * section's colours saying which page this is, the page's first story in large,
+ * the others in the list, then a clear way to the next page.
  */
 export default function SectionScreen() {
   const params = useLocalSearchParams<{ slug: string; page?: string }>();
@@ -35,18 +43,30 @@ export default function SectionScreen() {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
   const tone = useCategoryTone(slug);
   const list = useRef<FlashListRef<NewsSummary>>(null);
   const section = useSectionPage(slug, page);
   const scrollTop = useScrollTop();
+  const clearance = useScrollTopClearance();
   const { color, space, textStyle, layout } = theme;
   const items = section.data?.items ?? [];
   const total = section.data?.total;
+  const pages = total === undefined ? null : pageCount(total, SECTION_PAGE_SIZE);
   const label = t(categoryLabelKey(slug));
+  const meta = usePageMeta(
+    total === undefined ? null : t("section.count", { count: total }),
+    page,
+    pages,
+  );
+  const columnWidth = Math.min(width, layout.readingMaxWidth + space.xxxl);
 
   const goTo = (next: { slug?: string; page: number }) => {
     router.setParams({ slug: next.slug ?? slug, page: String(next.page) });
     list.current?.scrollToOffset({ offset: 0, animated: true });
+  };
+  const open = (id: string) => {
+    router.push({ pathname: "/article/[id]", params: { id } });
   };
 
   const header = (
@@ -61,45 +81,29 @@ export default function SectionScreen() {
           }
         }}
       />
-      <View
-        style={[
-          styles.title,
-          {
-            backgroundColor: tone.container,
-            paddingHorizontal: space.lg,
-            paddingVertical: space.lg,
-            gap: space.md,
-          },
-        ]}
-      >
-        <CategoryIcon category={slug} size="lg" />
-        <View style={styles.flex}>
-          <Text accessibilityRole="header" style={[textStyle.title, { color: tone.ink }]}>
-            {label}
-          </Text>
-          {total !== undefined && (
-            <Text style={[textStyle.bodySmall, { color: tone.ink }]}>
-              {t("section.count", { count: total })}
-            </Text>
-          )}
-        </View>
-      </View>
+      <PageBand
+        icon={<CategoryIcon category={slug} size="lg" />}
+        title={label}
+        meta={meta}
+        background={tone.container}
+        ink={tone.ink}
+        strip={<WovenStrip category={slug} color={tone.solid} />}
+      />
     </View>
   );
 
   const footer =
-    items.length === 0 ? null : (
-      <View style={{ paddingVertical: space.xl, paddingHorizontal: space.sm }}>
-        <Pagination
-          current={page}
-          count={total === undefined ? null : pageCount(total, SECTION_PAGE_SIZE)}
-          hasNext={(section.data?.nextCursor ?? null) !== null}
-          tone={tone}
-          onChange={(next) => {
-            goTo({ page: next });
-          }}
-        />
-      </View>
+    items.length === 0 || (pages !== null && pages <= 1) ? null : (
+      <PageNavigation
+        current={page}
+        count={pages}
+        hasNext={(section.data?.nextCursor ?? null) !== null}
+        tone={tone}
+        nextLabel={t("section.nextStories")}
+        onChange={(next) => {
+          goTo({ page: next });
+        }}
+      />
     );
 
   const empty = section.isPending ? (
@@ -115,10 +119,10 @@ export default function SectionScreen() {
       <Stack.Screen
         options={{
           headerShown: true,
-          title: label,
+          // The band below names the section: the bar stays empty.
+          title: "",
           headerBackTitle: t("article.back"),
           headerTintColor: color.textBrand,
-          headerTitleStyle: { fontFamily: textStyle.subtitle.fontFamily, color: color.textPrimary },
           headerStyle: { backgroundColor: color.background },
           headerShadowVisible: false,
         }}
@@ -130,20 +134,24 @@ export default function SectionScreen() {
           scrollEventThrottle={100}
           data={items}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <StoryRow
-              item={item}
-              lastOpened={false}
-              showSection={false}
-              onPress={(id) => {
-                router.push({ pathname: "/article/[id]", params: { id } });
-              }}
-            />
-          )}
+          getItemType={(_, index) => (index === 0 ? "lead" : "row")}
+          renderItem={({ item, index }) =>
+            index === 0 ? (
+              <LeadStory
+                item={item}
+                lastOpened={false}
+                showSection={false}
+                width={columnWidth}
+                onPress={open}
+              />
+            ) : (
+              <StoryRow item={item} lastOpened={false} showSection={false} onPress={open} />
+            )
+          }
           ListHeaderComponent={header}
           ListFooterComponent={footer}
           ListEmptyComponent={empty}
-          contentContainerStyle={{ paddingBottom: insets.bottom + space.xl }}
+          contentContainerStyle={{ paddingBottom: insets.bottom + space.lg + clearance }}
           testID="section-list"
         />
       </View>
@@ -162,6 +170,4 @@ export default function SectionScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1, alignItems: "center" },
   column: { flex: 1, width: "100%" },
-  title: { flexDirection: "row", alignItems: "center" },
-  flex: { flex: 1 },
 });
