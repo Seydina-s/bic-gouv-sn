@@ -7,7 +7,7 @@ import { USER_AGENT } from "../presidence/presidence-provider";
 export const OVERPASS_API = "https://overpass-api.de/api/interpreter";
 
 /**
- * State services of Senegal and its cities and towns, in one query. "out center"
+ * State services of Senegal and its cities, towns and districts, in one query. "out center"
  * gives a point for buildings and areas too.
  */
 export const SERVICES_QUERY = `[out:json][timeout:180];
@@ -15,7 +15,7 @@ area["ISO3166-1"="SN"][admin_level=2]->.sn;
 (
   nwr["amenity"~"^(townhall|police|courthouse)$"](area.sn);
   nwr["office"="government"](area.sn);
-  node["place"~"^(city|town)$"](area.sn);
+  node["place"~"^(city|town|suburb|quarter)$"](area.sn);
 );
 out center tags;`;
 

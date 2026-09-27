@@ -112,13 +112,15 @@ export function toImportedService(
   };
 }
 
-/** A city or town, to search services by town when the location is not shared. */
+const PLACE_KINDS = ["city", "town", "suburb", "quarter"] as const;
+
+/** A city, town or district, to search services by place when the location is not shared. */
 export function toPlace(element: OverpassElement): Place | null {
   const tags = element.tags ?? {};
-  const kind = tags["place"];
+  const kind = PLACE_KINDS.find((known) => known === tags["place"]);
   const name = nonEmpty(tags["name:fr"] ?? tags["name"]);
   const location = pointOf(element);
-  if ((kind !== "city" && kind !== "town") || name === null || location === null) {
+  if (kind === undefined || name === null || location === null) {
     return null;
   }
   return { id: `osm-${ID_PREFIX[element.type]}${String(element.id)}`, name, kind, location };

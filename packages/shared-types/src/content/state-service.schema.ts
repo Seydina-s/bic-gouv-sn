@@ -102,11 +102,14 @@ export function correctedFacts(service: StateService): ServiceFacts {
   };
 }
 
-/** A town of the country, to find services when the phone's location is not shared. */
+/**
+ * A town, or a district of a city ("Grand Yoff", "Médina"), to find services when the
+ * phone's location is not shared.
+ */
 export const placeSchema = z.strictObject({
   id: z.string().regex(/^osm-[nwr]\d+$/),
   name: z.string().min(1),
-  kind: z.enum(["city", "town"]),
+  kind: z.enum(["city", "town", "suburb", "quarter"]),
   location: geoPointSchema,
 });
 export type Place = z.infer<typeof placeSchema>;
