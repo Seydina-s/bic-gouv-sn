@@ -6,15 +6,36 @@ import { MoonIcon as Moon } from "phosphor-react-native/src/icons/Moon";
 import { SunIcon as Sun } from "phosphor-react-native/src/icons/Sun";
 import { XIcon as X } from "phosphor-react-native/src/icons/X";
 import { useEffect, useState } from "react";
-import { Animated, Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Animated,
+  Linking,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { GlassBackdrop } from "../../components/GlassBackdrop";
 import { IconButton } from "../../components/IconButton";
+import { LinkRow } from "../../components/LinkRow";
 import { SegmentedChoice, type Segment } from "../../components/SegmentedChoice";
 import type { LangChoice } from "../../i18n/I18nProvider";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useReduceMotion } from "../../theme/useSystemAccessibility";
 import { useTheme } from "../../theme/useTheme";
+
+/** Data, fonts and icons the app shows, each with the licence text it asks to credit. */
+const LICENCES = [
+  { key: "licenceData", url: "https://www.openstreetmap.org/copyright" },
+  { key: "licenceFonts", url: "https://openfontlicense.org" },
+  { key: "licenceMapIcons", url: "https://github.com/tangrams/icons/blob/master/LICENSE.md" },
+  {
+    key: "licenceAppIcons",
+    url: "https://github.com/duongdev/phosphor-react-native/blob/main/LICENSE",
+  },
+] as const;
 
 /**
  * Settings as a pop-up laid over the current screen, never a new page: the screen
@@ -148,6 +169,24 @@ export function SettingsSheet({ visible, onClose }: { visible: boolean; onClose:
                   {t(`settings.${key}`)}
                 </Text>
               ))}
+            </View>
+            <View style={{ gap: space.sm }}>
+              <Text
+                accessibilityRole="header"
+                style={[textStyle.label, { color: color.textSecondary }]}
+              >
+                {t("settings.licences")}
+              </Text>
+              <View>
+                {LICENCES.map(({ key, url }) => (
+                  <LinkRow
+                    key={key}
+                    label={t(`settings.${key}`)}
+                    role="link"
+                    onPress={() => void Linking.openURL(url)}
+                  />
+                ))}
+              </View>
               <Text style={[textStyle.bodySmall, { color: color.textTertiary }]}>
                 {t("settings.version", { version: Constants.expoConfig?.version ?? "—" })}
               </Text>
