@@ -5,6 +5,7 @@ import { adminRequest } from "../../lib/admin-api";
 import { formatDay } from "../../lib/format";
 import { secondaryLink } from "../../lib/form-styles";
 import { t } from "../../lib/i18n";
+import { checkLink, movedFrom, positionText } from "../../lib/position";
 import { serviceHints } from "../../lib/service-hints";
 import { requireAccount } from "../../lib/session";
 import { ServiceReviewForm, type ReviewService } from "./ServiceReviewForm";
@@ -30,9 +31,14 @@ const listSchema = z.object({
       pendingUpdate: z.object({ name: z.string() }).nullable(),
       osmUrl: z.string().nullable(),
       nearTown: z.string().nullable().default(null),
-      /** What the source says, when a person corrected the kind or the name. */
+      /** What the source says, when a person corrected the kind, the name or the place. */
       source: z
-        .object({ category: serviceCategorySchema, name: z.string() })
+        .object({
+          category: serviceCategorySchema,
+          name: z.string(),
+          // Older API versions did not send the source's place.
+          location: z.object({ lat: z.number(), lng: z.number() }).optional(),
+        })
         .nullable()
         .default(null),
     }),
@@ -65,14 +71,17 @@ function toReview(row: Row): ReviewService {
             category: label(row.source.category),
           }),
         ];
+  const from = movedFrom(row.location, row.source?.location);
+  const moved =
+    from === null ? [] : [t("services.sourcePosition", { position: positionText(from) })];
   return {
     id: row.id,
     name: row.name,
-    details: [...corrected, ...changed, ...details],
+    details: [...corrected, ...moved, ...changed, ...details],
     hints: serviceHints(row.name).map((hint) =>
       hint === "notState" ? t("services.hintNotState") : t("services.hintVague"),
     ),
-    osmUrl: row.osmUrl,
+    mapUrl: checkLink(row.osmUrl, row.location, from !== null),
   };
 }
 

@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { parsePosition, positionLink, positionText, samePosition } from "./position";
+import {
+  checkLink,
+  movedFrom,
+  parsePosition,
+  positionLink,
+  positionText,
+  samePosition,
+} from "./position";
 
 const PLACE = { lat: 14.6928, lng: -17.4467 };
 
@@ -46,5 +53,16 @@ describe("position pasted in the console", () => {
     );
     expect(samePosition(PLACE, { ...PLACE })).toBe(true);
     expect(samePosition(PLACE, { ...PLACE, lng: -17.4468 })).toBe(false);
+  });
+
+  it("checks a moved or hand-typed service at its own point, others at their source", () => {
+    const source = { lat: 14.7, lng: -17.4 };
+    expect(movedFrom(PLACE, source)).toEqual(source);
+    expect(movedFrom(PLACE, { ...PLACE })).toBeNull();
+    expect(movedFrom(PLACE, undefined)).toBeNull();
+    const osm = "https://www.openstreetmap.org/node/1";
+    expect(checkLink(osm, PLACE, false)).toBe(osm);
+    expect(checkLink(osm, PLACE, true)).toBe(positionLink(PLACE));
+    expect(checkLink(null, PLACE, false)).toBe(positionLink(PLACE));
   });
 });

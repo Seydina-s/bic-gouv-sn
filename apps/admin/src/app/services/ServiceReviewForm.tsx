@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
+import { primaryButton, secondaryButton } from "../../lib/form-styles";
 import { t } from "../../lib/i18n";
 import { reviewServices, type ServiceReviewState } from "./actions";
+import { FormOutcome } from "./ServiceFormParts";
 
 export interface ReviewService {
   id: string;
@@ -12,30 +14,8 @@ export interface ReviewService {
   details: string[];
   /** What deserves a closer look (a company's name, a vague name). */
   hints: string[];
-  osmUrl: string | null;
-}
-
-const primaryButton =
-  "inline-flex min-h-12 items-center justify-center rounded-md bg-primary px-6 font-semibold text-on-primary hover:bg-primary-pressed disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus";
-const secondaryButton =
-  "inline-flex min-h-12 items-center justify-center rounded-md border border-line-strong px-6 font-semibold text-brand hover:bg-surface disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus";
-
-function Feedback({ state }: { state: ServiceReviewState }) {
-  if (state.error !== undefined) {
-    return (
-      <p role="alert" className="rounded-md bg-danger-surface px-4 py-3 text-on-danger-surface">
-        {state.error}
-      </p>
-    );
-  }
-  return state.message === undefined ? null : (
-    <p
-      role="status"
-      className="rounded-md bg-primary-container px-4 py-3 text-on-primary-container"
-    >
-      {state.message}
-    </p>
-  );
+  /** Where to check it: its object on OpenStreetMap, or the point moved or typed by hand. */
+  mapUrl: string;
 }
 
 /**
@@ -79,20 +59,18 @@ export function ServiceReviewForm({ services }: { services: ReviewService[] }) {
             >
               {t("services.correct")}
             </Link>
-            {service.osmUrl !== null && (
-              <a
-                href={service.osmUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="text-sm font-semibold text-brand underline underline-offset-4"
-              >
-                {t("services.openMap")}
-              </a>
-            )}
+            <a
+              href={service.mapUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="text-sm font-semibold text-brand underline underline-offset-4"
+            >
+              {t("services.openMap")}
+            </a>
           </li>
         ))}
       </ul>
-      <Feedback state={state} />
+      <FormOutcome state={state} />
       <div className="flex flex-wrap gap-3">
         <button
           type="submit"
