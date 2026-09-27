@@ -482,6 +482,8 @@ describe("app shell", () => {
     }) as unknown as typeof fetch;
     await renderRouter(routes, { initialUrl: "/near-me" });
     expect(await screen.findByText(/arrivent bientôt ici/)).toBeOnTheScreen();
+    // Nothing to show yet: the location is not asked for.
+    expect(screen.queryByRole("button", { name: "Utiliser ma position" })).toBeNull();
   });
 
   it("lists the procedures with their known facts while no theme is validated, and searches", async () => {
