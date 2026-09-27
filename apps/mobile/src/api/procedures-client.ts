@@ -8,6 +8,9 @@ import {
 } from "@bgs/shared-types";
 import { createJsonGetter, type ApiClientOptions } from "./json-getter";
 
+/** Procedures per numbered page of a theme. */
+export const THEME_PAGE_SIZE = 20;
+
 /** Talks to /v1/procedures (procedures explained, linked to e-senegal.sn). */
 export function createProceduresClient(options: ApiClientOptions) {
   const getJson = createJsonGetter(options);
@@ -29,6 +32,15 @@ export function createProceduresClient(options: ApiClientOptions) {
       if (cursor !== null) {
         params.set("cursor", cursor);
       }
+      return getJson(`/v1/procedures?${params.toString()}`, readProcedureList, signal);
+    },
+    /** One numbered page (from 1) of the procedures filed under a theme. */
+    themePage(theme: string, page: number, signal?: AbortSignal): Promise<ProcedureListResponse> {
+      const params = new URLSearchParams({
+        limit: String(THEME_PAGE_SIZE),
+        theme,
+        page: String(page),
+      });
       return getJson(`/v1/procedures?${params.toString()}`, readProcedureList, signal);
     },
     /** Official themes with their validated procedures count. */

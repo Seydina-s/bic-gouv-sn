@@ -83,11 +83,14 @@ export function newsFetch(
     search?: () => Response;
     sections?: () => Response;
     procedures?: () => Response;
+    procedureThemes?: () => Response;
   } = {},
 ) {
   return jest.fn((input: string) => {
     if (input.includes("/v1/procedures/themes")) {
-      return Promise.resolve(new Response(JSON.stringify(PROCEDURE_THEMES)));
+      return Promise.resolve(
+        overrides.procedureThemes?.() ?? new Response(JSON.stringify(PROCEDURE_THEMES)),
+      );
     }
     if (input.includes("/v1/procedures?")) {
       return Promise.resolve(

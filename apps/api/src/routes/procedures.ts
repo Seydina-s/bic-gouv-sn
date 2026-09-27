@@ -106,6 +106,8 @@ export const proceduresRoutes: FastifyPluginAsyncZod<ProceduresRoutesOptions> = 
           limit: z.coerce.number().int().min(1).max(100).default(30),
           /** Slug of the last procedure of the previous page. */
           cursor: z.string().min(1).max(200).optional(),
+          /** Numbered page, from 1 (ignored when a cursor is given). */
+          page: z.coerce.number().int().min(1).max(10_000).optional(),
           /** Only the procedures a person has filed under this official theme. */
           theme: z
             .string()
@@ -117,18 +119,22 @@ export const proceduresRoutes: FastifyPluginAsyncZod<ProceduresRoutesOptions> = 
       },
     },
     async (request, reply) => {
-      const { q, limit, cursor, theme } = request.query;
+      const { q, limit, cursor, page: pageNumber, theme } = request.query;
       const inTheme =
         theme === undefined ? null : ((await validatedByTheme()).get(theme) ?? new Set());
       const all = matching(await procedures.all(), q).filter(
         (procedure) => inTheme === null || inTheme.has(procedure.slug),
       );
-      const start = cursor === undefined ? 0 : all.findIndex((p) => p.slug === cursor) + 1;
+      const start =
+        cursor !== undefined
+          ? all.findIndex((p) => p.slug === cursor) + 1
+          : ((pageNumber ?? 1) - 1) * limit;
       const page = all.slice(start, start + limit);
       const last = page.at(-1);
       const etag = fingerprint([
         q ?? "",
         cursor ?? "",
+        String(start),
         theme ?? "",
         String(all.length),
         ...page.map((p) => p.contentHash),

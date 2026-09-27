@@ -110,7 +110,6 @@ export const fr = {
       other: "{count} démarches",
     },
     byTheme: "Par thème",
-    allProcedures: "Toutes les démarches",
     emptyTheme: "Aucune démarche dans ce thème pour le moment.",
     searchLabel: "Rechercher une démarche",
     searchPlaceholder: "Un document, une démarche…",
@@ -118,6 +117,7 @@ export const fr = {
     error: "Les démarches n'ont pas pu être chargées.",
     notFound: "Cette démarche n'est pas disponible.",
     cost: "Coût",
+    free: "Gratuit",
     delay: "Délai",
     delayDays: {
       one: "{count} jour",

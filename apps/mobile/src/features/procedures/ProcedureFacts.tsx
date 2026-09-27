@@ -17,7 +17,9 @@ export function useProcedureFacts(procedure: ProcedureSummary): ProcedureFact[] 
   const { t } = useTranslation();
   const facts: ProcedureFact[] = [];
   if (procedure.costFcfa !== null) {
-    facts.push({ label: t("procedures.cost"), value: formatFcfa(procedure.costFcfa) });
+    // A fee of 0 at the source means the procedure is free: said in words.
+    const value = procedure.costFcfa === 0 ? t("procedures.free") : formatFcfa(procedure.costFcfa);
+    facts.push({ label: t("procedures.cost"), value });
   }
   if (procedure.delayDays !== null) {
     facts.push({
