@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { createProceduresClient } from "../../api/procedures-client";
 
 // EXPO_PUBLIC_* must be read literally to be inlined at build time.
@@ -30,5 +30,14 @@ export function useProcedureThemes() {
   return useQuery({
     queryKey: ["procedures", "themes"],
     queryFn: ({ signal }) => client.listThemes(signal),
+  });
+}
+
+/** One numbered page of a theme; the previous page stays shown while the next loads. */
+export function useProcedureThemePage(theme: string, page: number) {
+  return useQuery({
+    queryKey: ["procedures", "theme", theme, page],
+    queryFn: ({ signal }) => client.themePage(theme, page, signal),
+    placeholderData: keepPreviousData,
   });
 }

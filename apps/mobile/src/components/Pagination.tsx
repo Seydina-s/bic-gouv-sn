@@ -4,9 +4,9 @@ import { CaretRightIcon as CaretRight } from "phosphor-react-native/src/icons/Ca
 import type { ComponentType } from "react";
 import type { IconProps as PhosphorProps } from "phosphor-react-native";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { Icon } from "../../components/Icon";
-import { useTranslation } from "../../i18n/useTranslation";
-import { useTheme } from "../../theme/useTheme";
+import { Icon } from "./Icon";
+import { useTranslation } from "../i18n/useTranslation";
+import { useTheme } from "../theme/useTheme";
 import { pageSlots } from "./page-slots";
 
 export interface PaginationProps {
@@ -14,7 +14,8 @@ export interface PaginationProps {
   /** Null when the API did not give a total: only previous / next are offered. */
   count: number | null;
   hasNext: boolean;
-  tone: CategoryTone;
+  /** Colour of the arrows and of the current page (a section tone, or the brand green). */
+  tone: Pick<CategoryTone, "ink">;
   onChange: (page: number) => void;
 }
 

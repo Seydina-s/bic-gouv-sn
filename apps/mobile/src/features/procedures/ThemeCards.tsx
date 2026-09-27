@@ -50,6 +50,45 @@ const GLYPHS: Record<string, ComponentType<PhosphorProps>> = {
   "fa-bolt": Lightning,
 };
 
+/** The icon of a theme: the source's icon redrawn in our family (a file when unknown). */
+export function ThemeIcon({
+  icon,
+  color,
+  size = "md",
+}: {
+  icon: string | null;
+  color: string;
+  size?: "sm" | "md" | "lg";
+}) {
+  return <Icon icon={GLYPHS[icon ?? ""] ?? FileText} weight="duotone" color={color} size={size} />;
+}
+
+/** Size of the faint theme motif in the corner of a card. */
+const WATERMARK_SIZE = 96;
+
+/** The theme's icon, large and faint in the lower corner: decoration, never read aloud. */
+function ThemeWatermark({
+  icon,
+  color,
+  opacity,
+}: {
+  icon: string | null;
+  color: string;
+  opacity: number;
+}) {
+  const Glyph = GLYPHS[icon ?? ""] ?? FileText;
+  return (
+    <View
+      pointerEvents="none"
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+      style={[styles.watermark, { opacity }]}
+    >
+      <Glyph size={WATERMARK_SIZE} weight="duotone" color={color} />
+    </View>
+  );
+}
+
 /** Cards per row: two on phones, more as the window widens (tablets, unfolded). */
 function columnsFor(width: number): number {
   return Math.max(2, Math.min(5, Math.floor(width / 180)));
@@ -116,11 +155,7 @@ export function ThemeCards({
                     },
                   ]}
                 >
-                  <Icon
-                    icon={GLYPHS[item.icon ?? ""] ?? FileText}
-                    weight="duotone"
-                    color={color.onPrimaryContainer}
-                  />
+                  <ThemeIcon icon={item.icon} color={color.onPrimaryContainer} />
                 </View>
                 <Text
                   numberOfLines={4}
@@ -129,6 +164,11 @@ export function ThemeCards({
                   {item.title}
                 </Text>
                 <Text style={[textStyle.caption, { color: color.textSecondary }]}>{count}</Text>
+                <ThemeWatermark
+                  icon={item.icon}
+                  color={color.textBrand}
+                  opacity={theme.opacity.watermark * 2}
+                />
               </Pressable>
             </View>
           );
@@ -141,7 +181,9 @@ export function ThemeCards({
 const styles = StyleSheet.create({
   grid: { flexDirection: "row", flexWrap: "wrap" },
   // Upright but compact: 15 themes stay quick to scan.
-  card: { aspectRatio: 5 / 6, borderWidth: StyleSheet.hairlineWidth },
+  card: { aspectRatio: 5 / 6, borderWidth: StyleSheet.hairlineWidth, overflow: "hidden" },
+  // Bleeds past the corner: only part of the motif shows, like a watermark.
+  watermark: { position: "absolute", right: -WATERMARK_SIZE / 5, bottom: -WATERMARK_SIZE / 5 },
   badge: { alignItems: "center", justifyContent: "center" },
   flex: { flex: 1 },
 });

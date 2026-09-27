@@ -65,6 +65,18 @@ describe("/v1/procedures", () => {
     expect(next.nextCursor).toBeNull();
   });
 
+  it("serves numbered pages", async () => {
+    const page2 = procedureListResponseSchema.parse(
+      (await app.inject({ method: "GET", url: "/v1/procedures?limit=2&page=2" })).json(),
+    );
+    expect(page2.items.map((item) => item.title)).toEqual(["Passeport"]);
+    expect(page2.total).toBe(3);
+    expect(page2.nextCursor).toBeNull();
+    expect((await app.inject({ method: "GET", url: "/v1/procedures?page=0" })).statusCode).toBe(
+      400,
+    );
+  });
+
   it("searches, title matches first, accents and case ignored", async () => {
     const found = procedureListResponseSchema.parse(
       (await app.inject({ method: "GET", url: "/v1/procedures?q=EXTRAIT%20naissance" })).json(),

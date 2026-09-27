@@ -36,6 +36,8 @@ export default function ProceduresScreen() {
   const themes = useProcedureThemes();
   const browsing = query === "";
   const hasThemes = (themes.data?.themes ?? []).some((theme) => theme.count > 0);
+  // Browsing shows the themes only; the list is for a search (or when themes are missing).
+  const showCards = browsing && hasThemes;
   const { color, space, textStyle, radius, touchTarget } = theme;
   const items = procedures.data?.pages.flatMap((page) => page.items) ?? [];
   const total = procedures.data?.pages[0]?.total;
@@ -71,8 +73,8 @@ export default function ProceduresScreen() {
           },
         ]}
       />
-      {browsing && hasThemes && (
-        <View style={{ marginTop: space.xl }}>
+      {showCards ? (
+        <View style={{ marginVertical: space.xl }}>
           <ThemeCards
             themes={themes.data?.themes ?? []}
             onOpen={(theme) => {
@@ -82,20 +84,15 @@ export default function ProceduresScreen() {
               });
             }}
           />
-          <Text
-            accessibilityRole="header"
-            style={[textStyle.subtitle, { color: color.textPrimary, marginTop: space.xl }]}
-          >
-            {t("procedures.allProcedures")}
-          </Text>
         </View>
+      ) : (
+        <Text
+          accessibilityLiveRegion="polite"
+          style={[textStyle.label, { color: color.textSecondary, marginVertical: space.md }]}
+        >
+          {total === undefined ? " " : t("procedures.count", { count: total })}
+        </Text>
       )}
-      <Text
-        accessibilityLiveRegion="polite"
-        style={[textStyle.label, { color: color.textSecondary, marginVertical: space.md }]}
-      >
-        {total === undefined ? " " : t("procedures.count", { count: total })}
-      </Text>
     </View>
   );
 
@@ -132,12 +129,12 @@ export default function ProceduresScreen() {
         ref={list}
         onScroll={scrollTop.onScroll}
         scrollEventThrottle={100}
-        data={items}
+        data={showCards ? [] : items}
         keyExtractor={(item) => item.id}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
         ListHeaderComponent={header}
-        ListEmptyComponent={empty}
+        ListEmptyComponent={showCards ? null : empty}
         renderItem={({ item }) => (
           <ProcedureRow
             item={item}
@@ -147,7 +144,7 @@ export default function ProceduresScreen() {
           />
         )}
         onEndReached={() => {
-          if (procedures.hasNextPage && !procedures.isFetchingNextPage) {
+          if (!showCards && procedures.hasNextPage && !procedures.isFetchingNextPage) {
             void procedures.fetchNextPage();
           }
         }}

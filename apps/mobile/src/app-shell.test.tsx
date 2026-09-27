@@ -16,6 +16,7 @@ import SectionScreen from "./app/section/[slug]";
 import FavoritesScreen from "./app/favorites";
 import SearchScreen from "./app/search";
 import { DETAIL, LIST, newsFetch } from "./testing/news-fixtures";
+import { PROCEDURE_LIST } from "./testing/procedure-fixtures";
 
 jest.mock("expo-localization", () => ({ getLocales: () => [{ languageTag: "fr-SN" }] }));
 jest.mock("expo-system-ui", () => ({ setBackgroundColorAsync: jest.fn(() => Promise.resolve()) }));
@@ -26,6 +27,9 @@ jest.mock("expo-splash-screen", () => ({
 
 let mockFontState: [boolean, Error | null] = [true, null];
 jest.mock("expo-font", () => ({ useFonts: () => mockFontState }));
+
+/** Official themes with nothing validated yet: the Démarches tab falls back to the list. */
+const noValidatedTheme = () => new Response(JSON.stringify({ themes: [] }));
 
 /** The first match (a story shows in the carousel and in its section row). */
 function first<T>(matches: T[]): T {
@@ -398,8 +402,8 @@ describe("app shell", () => {
     });
   });
 
-  it("lists the procedures with their known facts, and searches them", async () => {
-    const fetchMock = newsFetch();
+  it("lists the procedures with their known facts while no theme is validated, and searches", async () => {
+    const fetchMock = newsFetch({ procedureThemes: noValidatedTheme });
     globalThis.fetch = fetchMock as unknown as typeof fetch;
     await renderRouter(routes, { initialUrl: "/procedures" });
     expect(await screen.findByText("2 démarches")).toBeOnTheScreen();
@@ -435,10 +439,39 @@ describe("app shell", () => {
       procedures: () => new Response(JSON.stringify({ items: [], nextCursor: null, total: 0 })),
     }) as unknown as typeof fetch;
     await renderRouter(routes, { initialUrl: "/procedures" });
-    expect(await screen.findByText("0 démarche")).toBeOnTheScreen();
+    await fireEvent.changeText(
+      await screen.findByLabelText("Rechercher une démarche"),
+      "introuvable",
+    );
+    expect(await screen.findByText("0 démarche", {}, { timeout: 3000 })).toBeOnTheScreen();
+  });
+
+  it("shows only the theme cards while browsing, and the results of a search", async () => {
+    await renderRouter(routes, { initialUrl: "/procedures" });
+    expect(
+      await screen.findByRole("button", { name: "Transports. 3 démarches" }),
+    ).toBeOnTheScreen();
+    expect(screen.queryByText("Démarche de test A")).toBeNull();
+    await fireEvent.changeText(screen.getByLabelText("Rechercher une démarche"), "test");
+    expect(await screen.findByText("Démarche de test A", {}, { timeout: 3000 })).toBeOnTheScreen();
+    expect(screen.queryByRole("button", { name: "Transports. 3 démarches" })).toBeNull();
+  });
+
+  it("pages through a theme, 20 procedures per numbered page", async () => {
+    const fetchMock = newsFetch({
+      procedures: () => new Response(JSON.stringify({ ...PROCEDURE_LIST, total: 45 })),
+    });
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    await renderRouter(routes, { initialUrl: "/procedure-theme/a1" });
+    expect(await screen.findByText("45 démarches · Page 1 sur 3")).toBeOnTheScreen();
+    expect(fetchMock.mock.calls.some(([url]) => url.includes("theme=a1&page=1"))).toBe(true);
+    await fireEvent.press(screen.getByRole("button", { name: "Page 3" }));
+    expect(await screen.findByText("Page 3 sur 3")).toBeOnTheScreen();
+    expect(fetchMock.mock.calls.some(([url]) => url.includes("theme=a1&page=3"))).toBe(true);
   });
 
   it("explains a procedure and leads to its official page", async () => {
+    globalThis.fetch = newsFetch({ procedureThemes: noValidatedTheme }) as unknown as typeof fetch;
     const openURL = jest.spyOn(Linking, "openURL").mockResolvedValue(true);
     await renderRouter(routes, { initialUrl: "/procedures" });
     await fireEvent.press(await screen.findByText("Démarche de test A"));
