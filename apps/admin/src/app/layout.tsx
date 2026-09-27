@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Noto_Sans } from "next/font/google";
+import { connection } from "next/server";
 import type { ReactNode } from "react";
 import { AppHeader } from "../components/AppHeader";
 import { t } from "../lib/i18n";
@@ -20,7 +21,10 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  // Every page is rendered per request, so its scripts carry that request's nonce
+  // (Content Security Policy, src/proxy.ts); a page built ahead would be blocked.
+  await connection();
   return (
     <html lang="fr" className={notoSans.variable}>
       <head>

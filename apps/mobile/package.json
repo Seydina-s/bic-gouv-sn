@@ -28,7 +28,8 @@
     "setupFiles": [
       "./src/testing/jest-setup.ts"
     ],
-    "testTimeout": 30000
+    "testTimeout": 30000,
+    "maxWorkers": "50%"
   },
   "dependencies": {
     "@bgs/i18n": "workspace:*",
