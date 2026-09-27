@@ -2,6 +2,7 @@ import type { FileStateServiceStore } from "@bgs/content-store";
 import {
   apiErrorSchema,
   byDistance,
+  correctedFacts,
   geoPointSchema,
   serviceCategorySchema,
   serviceFactsSchema,
@@ -42,6 +43,8 @@ const reviewItemSchema = z.object({
   osmUrl: z.string().nullable(),
   /** Nearest town, a hint for services named only "Mairie" or "Annexe". */
   nearTown: z.string().nullable(),
+  /** What the source says, when a person corrected the kind or the name. */
+  source: z.object({ category: serviceCategorySchema, name: z.string() }).nullable(),
 });
 
 /** Beyond this, the nearest town says nothing useful about where a service is. */
@@ -96,20 +99,17 @@ export const adminServicesRoutes: FastifyPluginAsyncZod<AdminServicesOptions> = 
           .sort((a, b) => a.name.localeCompare(b.name, "fr"))
           .map((service) => ({
             id: service.id,
-            category: service.category,
-            name: service.name,
-            address: service.address,
-            town: service.town,
-            location: service.location,
-            phone: service.phone,
-            website: service.website,
-            openingHours: service.openingHours,
+            ...correctedFacts(service),
             status: service.status,
             reviewedBy: service.reviewedBy,
             reviewedAt: service.reviewedAt,
             pendingUpdate: service.pendingUpdate,
             osmUrl: osmUrlOf(service),
             nearTown: nearTownOf(service, file.places),
+            source:
+              Object.keys(service.corrections).length === 0
+                ? null
+                : { category: service.category, name: service.name },
           })),
       };
     },
@@ -157,6 +157,57 @@ export const adminServicesRoutes: FastifyPluginAsyncZod<AdminServicesOptions> = 
         details: { count: reviewed.length, ids: reviewed.join(",") },
       });
       return { reviewed: reviewed.length };
+    },
+  );
+
+  app.patch(
+    "/services/:id/correction",
+    {
+      schema: {
+        tags: ["admin"],
+        summary: "A person corrects the kind or the name of a service (kept over imports)",
+        params: z.object({ id: z.string().min(1).max(64) }),
+        body: z
+          .object({
+            category: serviceCategorySchema.optional(),
+            name: z.string().trim().min(1).max(200).optional(),
+          })
+          .refine((body) => body.category !== undefined || body.name !== undefined),
+        response: {
+          200: z.object({ corrected: z.boolean() }),
+          400: apiErrorSchema,
+          401: apiErrorSchema,
+          403: apiErrorSchema,
+          404: apiErrorSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const account = await authorize(request, reply, signIn, "services.edit");
+      if (account === null) {
+        return reply;
+      }
+      const { category, name } = request.body;
+      const correction = {
+        ...(category === undefined ? {} : { category }),
+        ...(name === undefined ? {} : { name }),
+      };
+      const corrected = await services.correct(request.params.id, correction);
+      if (corrected === null) {
+        return reply.code(404).send({
+          code: "REQUEST_INVALID",
+          message: "Unknown service",
+          requestId: request.id,
+        });
+      }
+      await journal.append({
+        at: new Date().toISOString(),
+        actor: account.id,
+        action: "service.corrected",
+        target: corrected.id,
+        details: { ...correction },
+      });
+      return { corrected: true };
     },
   );
 

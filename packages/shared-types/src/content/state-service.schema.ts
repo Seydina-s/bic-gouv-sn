@@ -74,8 +74,33 @@ export const stateServiceSchema = serviceFactsSchema.extend({
    * stay as reviewed (never overwritten silently) until a person checks the change.
    */
   pendingUpdate: serviceFactsSchema.nullable(),
+  /**
+   * Corrections a person made in the console (a commissariat tagged as a town hall
+   * at the source): they win over the source's facts, whatever a new import brings.
+   */
+  corrections: z
+    .strictObject({
+      category: serviceCategorySchema.optional(),
+      name: z.string().min(1).optional(),
+    })
+    .default({}),
 });
 export type StateService = z.infer<typeof stateServiceSchema>;
+
+/** What a service shows: the source's facts, with a person's corrections on top. */
+export function correctedFacts(service: StateService): ServiceFacts {
+  const { category, name, address, town, location, phone, website, openingHours } = service;
+  return {
+    category: service.corrections.category ?? category,
+    name: service.corrections.name ?? name,
+    address,
+    town,
+    location,
+    phone,
+    website,
+    openingHours,
+  };
+}
 
 /** A town of the country, to find services when the phone's location is not shared. */
 export const placeSchema = z.strictObject({

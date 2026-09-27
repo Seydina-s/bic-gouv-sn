@@ -1,7 +1,7 @@
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { Place } from "@bgs/shared-types";
+import { correctedFacts, type Place } from "@bgs/shared-types";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { FileStateServiceStore, type ImportedService } from "./state-service-store";
 
@@ -31,6 +31,10 @@ const TOWN: Place = {
   kind: "city",
   location: { lat: 14.7, lng: -17.4 },
 };
+
+function fail(): never {
+  throw new Error("expected a service");
+}
 
 let dir: string;
 let store: FileStateServiceStore;
@@ -99,6 +103,25 @@ describe("FileStateServiceStore", () => {
     expect(checked?.location).toEqual({ lat: 14.8, lng: -17.3 });
     expect(checked?.pendingUpdate).toBeNull();
     expect(checked?.reviewedBy).toBe("compte-2");
+  });
+
+  it("keeps a person's corrections whatever a new import brings", async () => {
+    await store.importServices([service("osm-n1", { name: "Commissariat de test" })], []);
+    const corrected = await store.correct("osm-n1", { category: "police" });
+    expect(corrected?.corrections).toEqual({ category: "police" });
+    expect(correctedFacts(corrected ?? fail())).toMatchObject({
+      category: "police",
+      name: "Commissariat de test",
+    });
+    await store.importServices([service("osm-n1", { name: "Commissariat de test (nouveau)" })], []);
+    const again = (await store.read()).services["osm-n1"];
+    expect(again?.corrections).toEqual({ category: "police" });
+    expect(again === undefined ? null : correctedFacts(again).name).toBe(
+      "Commissariat de test (nouveau)",
+    );
+    // A correction equal to the source is dropped; an unknown service is refused.
+    expect((await store.correct("osm-n1", { category: "mairie" }))?.corrections).toEqual({});
+    expect(await store.correct("osm-n404", { name: "X" })).toBeNull();
   });
 
   it("keeps the towns when an import brings none, and leaves missing services alone", async () => {

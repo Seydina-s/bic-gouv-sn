@@ -45,3 +45,32 @@ export async function reviewServices(
         : t("services.doneRejected", { count }),
   };
 }
+
+/**
+ * A person corrects the kind or the name of a service. The API keeps the correction
+ * apart from the source's facts, so no import undoes it, and journals it.
+ */
+export async function correctService(
+  _previous: ServiceReviewState,
+  form: FormData,
+): Promise<ServiceReviewState> {
+  const { token } = await requireAccount();
+  const id = formText(form, "id");
+  const name = formText(form, "name").trim();
+  const category = formText(form, "category");
+  if (id === "" || name === "") {
+    return {};
+  }
+  const result = await adminRequest({
+    path: `/services/${encodeURIComponent(id)}/correction`,
+    method: "PATCH",
+    token,
+    body: { name, category },
+    schema: z.object({ corrected: z.boolean() }),
+  });
+  if (!result.ok) {
+    return { error: result.status === 403 ? t("review.forbidden") : t("review.failed") };
+  }
+  revalidatePath("/services");
+  return { message: t("services.corrected") };
+}

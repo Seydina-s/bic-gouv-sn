@@ -61,3 +61,30 @@ describe("verifying state services", () => {
     expect((await reviewServices({}, form("verified", ["osm-n1"]))).error).toMatch(/rôle/);
   });
 });
+
+describe("correcting a state service", () => {
+  it("sends the corrected name and kind, and says it is saved", async () => {
+    const { correctService } = await import("./actions");
+    adminRequest.mockResolvedValue({ ok: true, data: { corrected: true } });
+    const data = new FormData();
+    data.set("id", "osm-n3");
+    data.set("name", " Commissariat de test ");
+    data.set("category", "police");
+    expect(await correctService({}, data)).toEqual({ message: "Correction enregistrée." });
+    expect(adminRequest.mock.calls[0]?.[0]).toMatchObject({
+      path: "/services/osm-n3/correction",
+      method: "PATCH",
+      body: { name: "Commissariat de test", category: "police" },
+    });
+    expect(revalidatePath).toHaveBeenCalledWith("/services");
+  });
+
+  it("does nothing without a name", async () => {
+    const { correctService } = await import("./actions");
+    const data = new FormData();
+    data.set("id", "osm-n3");
+    data.set("name", "  ");
+    expect(await correctService({}, data)).toEqual({});
+    expect(adminRequest).not.toHaveBeenCalled();
+  });
+});

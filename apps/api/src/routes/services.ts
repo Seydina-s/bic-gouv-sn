@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import type { FileStateServiceStore } from "@bgs/content-store";
-import { stateServicesResponseSchema, type StateService } from "@bgs/shared-types";
+import { correctedFacts, stateServicesResponseSchema, type StateService } from "@bgs/shared-types";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
 
@@ -18,19 +18,11 @@ function isShown(service: StateService): service is ShownService {
   return service.status === "verified" && service.reviewedAt !== null;
 }
 
-/** The public face of a service: its facts, when it was verified, where it comes from. */
+/** The public face of a service: its corrected facts, when it was verified, its origin. */
 function toPublic(service: ShownService) {
-  const { id, category, name, address, town, location, phone, website, openingHours } = service;
   return {
-    id,
-    category,
-    name,
-    address,
-    town,
-    location,
-    phone,
-    website,
-    openingHours,
+    id: service.id,
+    ...correctedFacts(service),
     verifiedAt: service.reviewedAt,
     origin: service.origin.kind,
   };
@@ -54,8 +46,9 @@ export const servicesRoutes: FastifyPluginAsyncZod<ServicesRoutesOptions> = (app
       const file = await services.read();
       const verified = Object.values(file.services)
         .filter(isShown)
+        .map(toPublic)
         .sort((a, b) => a.name.localeCompare(b.name, "fr"));
-      const body = { services: verified.map(toPublic), places: file.places };
+      const body = { services: verified, places: file.places };
       const etag = `"${createHash("sha256").update(JSON.stringify(body)).digest("base64url").slice(0, 27)}"`;
       void reply.header("etag", etag).header("cache-control", CACHE_CONTROL);
       if (request.headers["if-none-match"] === etag) {

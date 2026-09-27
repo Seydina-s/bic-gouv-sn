@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 import { t } from "../../lib/i18n";
 import { reviewServices, type ServiceReviewState } from "./actions";
@@ -62,6 +63,12 @@ export function ServiceReviewForm({ services }: { services: ReviewService[] }) {
                 )}
               </span>
             </label>
+            <Link
+              href={`/services/${service.id}`}
+              className="text-sm font-semibold text-brand underline underline-offset-4"
+            >
+              {t("services.correct")}
+            </Link>
             {service.osmUrl !== null && (
               <a
                 href={service.osmUrl}

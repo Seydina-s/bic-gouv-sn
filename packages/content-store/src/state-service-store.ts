@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import {
   stateServicesFileSchema,
   type Place,
+  type ServiceCategory,
   type ServiceFacts,
   type StateService,
   type StateServicesFile,
@@ -13,8 +14,14 @@ const EMPTY: StateServicesFile = { schemaVersion: 1, services: {}, places: [] };
 /** A service as an import finds it: everything but the review. */
 export type ImportedService = Omit<
   StateService,
-  "status" | "reviewedBy" | "reviewedAt" | "pendingUpdate"
+  "status" | "reviewedBy" | "reviewedAt" | "pendingUpdate" | "corrections"
 >;
+
+/** What a person may correct in the console. */
+export interface ServiceCorrection {
+  category?: ServiceCategory;
+  name?: string;
+}
 
 export interface ImportOutcome {
   added: number;
@@ -82,6 +89,7 @@ export class FileStateServiceStore {
           reviewedBy: null,
           reviewedAt: null,
           pendingUpdate: null,
+          corrections: {},
         };
         outcome.added += 1;
       } else if (sameFacts(current, found)) {
@@ -132,6 +140,29 @@ export class FileStateServiceStore {
     }
     await this.write({ ...file, services });
     return reviewed;
+  }
+
+  /**
+   * A person's corrections to a service (its kind, its name), kept apart from the
+   * source's facts so that no import undoes them. A correction equal to what the
+   * source says is dropped. Null when the service is unknown.
+   */
+  async correct(id: string, correction: ServiceCorrection): Promise<StateService | null> {
+    const file = await this.read();
+    const current = file.services[id];
+    if (current === undefined) {
+      return null;
+    }
+    const corrections = { ...current.corrections, ...correction };
+    if (corrections.category === current.category) {
+      delete corrections.category;
+    }
+    if (corrections.name === current.name) {
+      delete corrections.name;
+    }
+    const corrected = { ...current, corrections };
+    await this.write({ ...file, services: { ...file.services, [id]: corrected } });
+    return corrected;
   }
 
   private async write(file: StateServicesFile): Promise<void> {

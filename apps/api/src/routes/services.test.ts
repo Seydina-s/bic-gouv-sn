@@ -116,6 +116,40 @@ describe("state services", () => {
     expect(firstBrokenEntry(entries)).toBe(-1);
   });
 
+  it("lets an editor correct the kind or the name, shown publicly once verified", async () => {
+    const token = await admin.tokenFor("editor");
+    const correct = (id: string, payload: object) =>
+      app.inject({
+        method: "PATCH",
+        url: `/admin/v1/services/${id}/correction`,
+        headers: { authorization: `Bearer ${token}` },
+        payload,
+      });
+    expect(
+      (await correct("osm-n3", { category: "police", name: "Commissariat C" })).json(),
+    ).toEqual({
+      corrected: true,
+    });
+    expect((await correct("osm-n404", { name: "X" })).statusCode).toBe(404);
+    expect((await correct("osm-n3", {})).statusCode).toBe(400);
+    const listing = await app.inject({
+      method: "GET",
+      url: "/admin/v1/services",
+      headers: { authorization: `Bearer ${token}` },
+    });
+    expect(
+      listing
+        .json<{ services: { id: string; category: string; source: unknown }[] }>()
+        .services.find((item) => item.id === "osm-n3"),
+    ).toMatchObject({ category: "police", source: { category: "mairie", name: "Mairie C" } });
+    await review(token, "verified", ["osm-n3"]);
+    expect((await publicList()).body.services.map((item) => [item.name, item.category])).toEqual([
+      ["Commissariat C", "police"],
+    ]);
+    const entries = await admin.journal.entries();
+    expect(entries.filter((entry) => entry.action === "service.corrected")).toHaveLength(1);
+  });
+
   it("refuses without a session, a reviewer's role, and unknown services", async () => {
     expect((await app.inject({ method: "GET", url: "/admin/v1/services" })).statusCode).toBe(401);
     const reviewer = await admin.tokenFor("reviewer");
