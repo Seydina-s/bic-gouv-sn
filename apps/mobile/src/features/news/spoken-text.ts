@@ -26,27 +26,31 @@ function cut(text: string, maxLength: number): string[] {
   return rest === "" ? pieces : [...pieces, rest];
 }
 
+/** Texts in reading order, empty ones left out, each cut to fit one reading. */
+export function spokenTexts(texts: readonly string[], maxLength: number): string[] {
+  return texts.filter((text) => text !== "").flatMap((text) => cut(text, maxLength));
+}
+
+/** What a block says aloud: its text, each list item apart; nothing for pictures. */
+export function blockTexts(block: Block): string[] {
+  switch (block.type) {
+    case "paragraph":
+    case "heading":
+    case "quote":
+      return [plain(block.inlines)];
+    case "list":
+      return block.items.map(plain);
+    case "image":
+    case "video":
+      return [];
+  }
+}
+
 /**
  * What the voice reads: the title, then the text in reading order (headings,
  * paragraphs, quotes, list items). Pictures and videos are skipped. Each piece fits
  * the phone's limit for one reading.
  */
 export function spokenPieces(title: string, blocks: readonly Block[], maxLength: number): string[] {
-  const texts = [title];
-  for (const block of blocks) {
-    switch (block.type) {
-      case "paragraph":
-      case "heading":
-      case "quote":
-        texts.push(plain(block.inlines));
-        break;
-      case "list":
-        texts.push(...block.items.map(plain));
-        break;
-      case "image":
-      case "video":
-        break;
-    }
-  }
-  return texts.filter((text) => text !== "").flatMap((text) => cut(text, maxLength));
+  return spokenTexts([title, ...blocks.flatMap(blockTexts)], maxLength);
 }

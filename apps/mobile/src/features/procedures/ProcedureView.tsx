@@ -1,17 +1,20 @@
 import type { ProcedureDetail } from "@bgs/shared-types";
+import * as Speech from "expo-speech";
 import { useMemo, useRef, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
 import { ScrollTopButton, useScrollTop } from "../../components/ScrollTopButton";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 import { Runs } from "../news/BlockRenderer";
+import { FRENCH_VOICE, ReadAloudButton } from "../news/ListenButton";
 import { FloatingAppBar } from "../shell/FloatingAppBar";
 import { ProcedureActionBar } from "./ProcedureActionBar";
-import { ProcedureBrief } from "./ProcedureBrief";
+import { ProcedureBrief, useBriefLabels } from "./ProcedureBrief";
 import { ProcedureExtras } from "./ProcedureExtras";
 import { useFeeWording } from "./ProcedureFacts";
 import { procedurePage, type PageWords } from "./procedure-page";
 import { SheetItems, SheetSectionView } from "./SheetContent";
+import { spokenProcedure } from "./spoken-procedure";
 import { useDocumentChecklist } from "./useDocumentChecklist";
 
 const SOURCE = "e-senegal.sn";
@@ -90,6 +93,7 @@ function ProcedureSheetView({
   const { theme } = useTheme();
   const { t } = useTranslation();
   const words = usePageWords();
+  const labels = useBriefLabels();
   const page = useMemo(() => procedurePage(detail, words), [detail, words]);
   const checklist = useDocumentChecklist(detail.slug);
   const scroller = useRef<ScrollView>(null);
@@ -135,6 +139,23 @@ function ProcedureSheetView({
             {t("content.machineTranslation")}
           </Text>
         )}
+        <View style={[styles.listen, { marginTop: space.lg }]}>
+          <ReadAloudButton
+            language={FRENCH_VOICE}
+            pieces={() =>
+              spokenProcedure(
+                detail.title,
+                page,
+                {
+                  brief: t("procedures.brief"),
+                  fact: (fact) => `${labels[fact.kind]} : ${fact.value}`,
+                  note: t("procedures.note"),
+                },
+                Speech.maxSpeechInputLength,
+              )
+            }
+          />
+        </View>
         {page.facts.length > 0 && (
           <View style={{ marginTop: space.xl }}>
             <ProcedureBrief
@@ -198,5 +219,6 @@ function ProcedureSheetView({
 const styles = StyleSheet.create({
   root: { flex: 1 },
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
+  listen: { alignSelf: "flex-start" },
   source: { borderTopWidth: StyleSheet.hairlineWidth },
 });

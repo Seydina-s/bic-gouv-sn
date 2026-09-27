@@ -10,22 +10,39 @@ import { useTheme } from "../../theme/useTheme";
 import { spokenPieces } from "./spoken-text";
 import { useReadAloud } from "./useReadAloud";
 
-/** Voices the phone has: French everywhere; no phone ships a Wolof voice yet. */
-const VOICES: Partial<Record<NewsDetail["lang"], string>> = { fr: "fr-FR" };
+/** The phone's French voice: every phone has one; none ships a Wolof voice yet. */
+export const FRENCH_VOICE = "fr-FR";
+const VOICES: Partial<Record<NewsDetail["lang"], string>> = { fr: FRENCH_VOICE };
 
 /** True when this article can be read aloud on the phone. */
 export function canListen(detail: NewsDetail): boolean {
   return VOICES[detail.lang] !== undefined;
 }
 
-/**
- * "Écouter" pill, set in the top right corner of the article photo (on glass, so
- * it reads over any picture). Becomes "Arrêter" while the article is being read.
- */
+/** The article's "Écouter": its title, then its text. */
 export function ListenButton({ detail }: { detail: NewsDetail }) {
+  return (
+    <ReadAloudButton
+      language={VOICES[detail.lang] ?? FRENCH_VOICE}
+      pieces={() => spokenPieces(detail.title, detail.blocks, Speech.maxSpeechInputLength)}
+    />
+  );
+}
+
+/**
+ * "Écouter" pill on glass (it reads over any picture, as on an article photo).
+ * Becomes "Arrêter" while reading. `pieces` is only computed when pressed.
+ */
+export function ReadAloudButton({
+  language,
+  pieces,
+}: {
+  language: string;
+  pieces: () => readonly string[];
+}) {
   const { theme } = useTheme();
   const { t } = useTranslation();
-  const { speaking, start, stop } = useReadAloud(VOICES[detail.lang] ?? "fr-FR");
+  const { speaking, start, stop } = useReadAloud(language);
   const { color, space, textStyle, radius, touchTarget } = theme;
   const label = speaking ? t("content.stopListening") : t("content.listen");
 
@@ -38,7 +55,7 @@ export function ListenButton({ detail }: { detail: NewsDetail }) {
         if (speaking) {
           stop();
         } else {
-          start(spokenPieces(detail.title, detail.blocks, Speech.maxSpeechInputLength));
+          start(pieces());
         }
       }}
       style={({ pressed }) => [

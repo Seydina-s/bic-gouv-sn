@@ -181,7 +181,10 @@ describe("app shell", () => {
       // Both at once: on a phone, the paragraph only shows after opening the article.
       expect(screen.getAllByText("Titre de test B")[0]).toBeOnTheScreen();
     } finally {
-      Dimensions.set({ window: phone });
+      // The screens still mounted re-render for the new size: inside act, like any update.
+      await act(() => {
+        Dimensions.set({ window: phone });
+      });
     }
   });
 

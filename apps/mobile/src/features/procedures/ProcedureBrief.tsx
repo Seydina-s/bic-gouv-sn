@@ -27,7 +27,8 @@ const ICONS: Record<BriefKind, ComponentType<PhosphorProps>> = {
   online: Globe,
 };
 
-function useBriefLabels(): Record<BriefKind, string> {
+/** The name of each fact, shown in the panel and read aloud. */
+export function useBriefLabels(): Record<BriefKind, string> {
   const { t } = useTranslation();
   return {
     who: t("procedures.briefWho"),

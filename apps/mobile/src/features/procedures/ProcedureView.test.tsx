@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { Block, ProcedureDetail } from "@bgs/shared-types";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react-native";
+import * as Speech from "expo-speech";
 import { Linking } from "react-native";
 import { I18nProvider } from "../../i18n/I18nProvider";
 import { PROCEDURE_DETAIL } from "../../testing/procedure-fixtures";
@@ -8,6 +9,13 @@ import { ThemeProvider } from "../../theme/ThemeProvider";
 import { ProcedureView } from "./ProcedureView";
 
 jest.mock("expo-localization", () => ({ getLocales: () => [{ languageTag: "fr-SN" }] }));
+// Rendered outside a navigator: the page is always "focused".
+jest.mock("expo-router", () => ({ useIsFocused: () => true }));
+jest.mock("expo-speech", () => ({
+  speak: jest.fn(),
+  stop: jest.fn(() => Promise.resolve()),
+  maxSpeechInputLength: 4000,
+}));
 
 // Placeholder texts shaped like an e-senegal.sn sheet, not real administrative content.
 const p = (text: string): Block => ({ type: "paragraph", inlines: [{ text }] });
@@ -100,6 +108,18 @@ describe("the page of a procedure", () => {
     await fireEvent.press(screen.getByRole("link", { name: "Faire la démarche sur e-senegal.sn" }));
     expect(openURL).toHaveBeenCalledWith(SHEET.sourceUrl);
     openURL.mockRestore();
+  });
+
+  it("reads the procedure aloud with the phone's French voice, then stops", async () => {
+    await show(SHEET);
+    await fireEvent.press(screen.getByRole("button", { name: "Écouter" }));
+    expect(Speech.speak).toHaveBeenCalledWith(
+      SHEET.title,
+      expect.objectContaining({ language: "fr-FR" }),
+    );
+    await fireEvent.press(screen.getByRole("button", { name: "Arrêter" }));
+    expect(Speech.stop).toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Écouter" })).toBeOnTheScreen();
   });
 
   it("shows a sheet without questions as plain text, without a brief", async () => {
