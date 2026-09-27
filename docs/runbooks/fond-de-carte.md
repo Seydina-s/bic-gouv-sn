@@ -20,6 +20,8 @@ Adresses servies :
 
 Ces adresses ne comptent pas dans la limite de 600 demandes par minute : ce sont des fichiers statiques, et une carte en demande des dizaines d'un coup.
 
+**Confidentialité** : les tuiles qu'une personne charge autour d'elle indiquent à peu près où elle se trouve. Les requêtes de carte ne sont donc **pas journalisées** par l'API (seuls les avertissements et les erreurs le sont). En production, les journaux d'accès du CDN pour `/v1/map/` doivent être désactivés ou anonymisés (MAP-10).
+
 ## Installer ou rafraîchir (équipe technique)
 
 Lettres et icônes, avec leurs textes de licence (rejouable sans risque) :

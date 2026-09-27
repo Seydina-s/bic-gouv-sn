@@ -17,12 +17,26 @@ const TINY_ARCHIVE = fileURLToPath(
 let assets: string;
 let app: FastifyInstance;
 
-async function start(tilesPath: string): Promise<void> {
+/** Starts the API on this archive; with `logs`, its log lines are collected there. */
+async function start(tilesPath: string, logs?: string[]): Promise<void> {
   app = await buildApp({
-    config: loadConfig({ LOG_LEVEL: "silent", MAP_TILES_PATH: tilesPath, MAP_ASSETS_ROOT: assets }),
+    config: loadConfig({
+      LOG_LEVEL: logs === undefined ? "silent" : "info",
+      MAP_TILES_PATH: tilesPath,
+      MAP_ASSETS_ROOT: assets,
+    }),
     version: "1.0.0",
     articles: temporaryStore(),
     admin: null,
+    ...(logs === undefined
+      ? {}
+      : {
+          logStream: {
+            write: (line: string) => {
+              logs.push(line);
+            },
+          },
+        }),
   });
 }
 
@@ -80,6 +94,17 @@ describe("base map", () => {
     expect(gunzipSync(tile.rawPayload).length).toBeGreaterThan(100);
     expect((await app.inject({ method: "GET", url: "/v1/map/tiles/2/3/3" })).statusCode).toBe(204);
     expect((await app.inject({ method: "GET", url: "/v1/map/tiles/16/0/0" })).statusCode).toBe(400);
+  });
+
+  it("keeps the areas people look at out of the logs", async () => {
+    const logs: string[] = [];
+    await start(TINY_ARCHIVE, logs);
+    await app.inject({ method: "GET", url: "/v1/map/style.json" });
+    await app.inject({ method: "GET", url: "/v1/map/tiles/2/1/1" });
+    await app.inject({ method: "GET", url: "/v1/health" });
+    // Other requests are logged as usual: the logs are really collected.
+    expect(logs.some((line) => line.includes("/v1/health"))).toBe(true);
+    expect(logs.filter((line) => line.includes("/v1/map/"))).toEqual([]);
   });
 
   it("says plainly when the archive is missing", async () => {
