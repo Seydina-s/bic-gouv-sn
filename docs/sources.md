@@ -120,7 +120,7 @@ CLAUDE.md autorise un import initial depuis OpenStreetMap pour la carte des serv
 
 ### Requête
 
-Une requête pour tout le Sénégal (zone `ISO3166-1=SN`) : `amenity=townhall|police|courthouse`, `office=government`, et les villes (`place=city|town`) pour chercher sans localisation. Commande : `pnpm --filter @bgs/ingestion services:osm` (rejouable : aucun doublon, identifiant = type et numéro de l'objet OpenStreetMap).
+Une requête pour tout le Sénégal (zone `ISO3166-1=SN`) : `amenity=townhall|police|courthouse`, `office=government`, et les villes et quartiers (`place=city|town|suburb|quarter`) pour chercher sans localisation. Commande : `pnpm --filter @bgs/ingestion services:osm` (rejouable : aucun doublon, identifiant = type et numéro de l'objet OpenStreetMap).
 
 ### Classement
 
@@ -128,7 +128,7 @@ Par les étiquettes, puis par le nom : tribunal, commissariat, gendarmerie, mair
 
 ### Import du 27/09/2026
 
-880 services lus (454 administrations, 175 mairies, 115 commissariats, 67 gendarmeries, 29 préfectures et gouvernances, 22 tribunaux, 18 ministères) et 251 villes ; 331 services dans la région de Dakar (zone pilote). Données rarement complètes : adresse 99, téléphone 46, horaires 34. Certaines entrées ne sont pas des services de l'État (fédération sportive, banque…) : la vérification humaine les écarte.
+880 services lus (454 administrations, 175 mairies, 115 commissariats, 67 gendarmeries, 29 préfectures et gouvernances, 22 tribunaux, 18 ministères) et 251 villes (334 lieux avec les 83 quartiers ajoutés le même jour) ; 331 services dans la région de Dakar (zone pilote). Données rarement complètes : adresse 99, téléphone 46, horaires 34. Certaines entrées ne sont pas des services de l'État (fédération sportive, banque…) : la vérification humaine les écarte.
 
 ### Points d'attention
 

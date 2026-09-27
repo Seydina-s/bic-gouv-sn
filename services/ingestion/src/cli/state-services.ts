@@ -27,7 +27,7 @@ for (const [category, count] of [...counts].sort((a, b) => b[1] - a[1])) {
 }
 process.stdout.write(
   [
-    `${String(services.length)} services lus, ${String(places.length)} villes.`,
+    `${String(services.length)} services lus, ${String(places.length)} villes et quartiers.`,
     `${String(outcome.added)} nouveaux (à vérifier dans la console), ${String(outcome.updated)} propositions mises à jour, ${String(outcome.unchanged)} inchangés.`,
     `${String(outcome.changedAfterReview)} services déjà vérifiés ont changé à la source : le changement attend une vérification.`,
     "",

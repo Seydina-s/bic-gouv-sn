@@ -92,6 +92,15 @@ describe("reading OpenStreetMap objects as state services", () => {
     expect(
       toPlace({ type: "node", id: 10, lat: 1, lon: 1, tags: { place: "village", name: "V" } }),
     ).toBeNull();
+    expect(
+      toPlace({
+        type: "node",
+        id: 11,
+        lat: 1,
+        lon: 1,
+        tags: { place: "suburb", name: "Quartier de test" },
+      })?.kind,
+    ).toBe("suburb");
   });
 });
 
