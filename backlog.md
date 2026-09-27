@@ -205,3 +205,15 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 27/09/2026 | MAP-06 🔴 Fond de carte MapLibre (tuiles PMTiles auto-hébergées) : choix de l'utilisateur à faire entre un build de développement (module natif, l'app ne s'ouvre plus dans Expo Go) et une carte web intégrée à l'app | Phase 3 |
 | 27/09/2026 | L-03 🔴 Licence ODbL des données OpenStreetMap : attribution « © les contributeurs d'OpenStreetMap » dans l'app ; une base publiée qui mélange OpenStreetMap et nos saisies doit pouvoir être partagée sous la même licence : à valider avec le BIC | MAP-02 |
 | 26/09/2026 | DEM-04 🔵 (27/09 : première étape faite : quand la fiche dit où aller (« au commissariat », « à la mairie », « au greffe du tribunal »…), un bouton « Trouver le commissariat le plus proche » ouvre « Près de moi » filtré sur ce type, seulement s’il existe des services vérifiés de ce type ; reste : relier une démarche à des bureaux précis) Relier les démarches aux services de la carte (les services administratifs de la source sont souvent vides : la base interne validée prendra le relais) | Phase 3/5 |
+
+## Audit croisé de fin de lot autonome (27/09/2026)
+
+| # | Agent | Constat → tâche | Priorité |
+|---|---|---|---|
+| AUD2-01 | Ingestion & Données | 331 services à vérifier à Dakar, dont des entrées qui ne sont pas des services de l'État (entreprises « SARL », banque, fédération sportive). MAP-07 ✅ (27/09) : aide à la vérification dans la console : noms d'entreprise ou d'organisme privé signalés et placés en fin de liste, noms trop généraux signalés (« vérifiez l'emplacement »), jamais rien vérifié à la place d'une personne | Haute |
+| AUD2-02 | QA | « Près de moi » testé en web et en tests automatiques seulement : essayer sur un vrai téléphone la demande de localisation (iOS et Android), le refus, puis la recherche de ville, en grande police (QA-02) | Haute |
+| AUD2-03 | Sécurité | Nouvelle route de correction des services : protégée (rôle éditeur), validée, journalisée. Avant tout déploiement de la console : CSP à nonce (SEC-03) et licence ODbL validée (L-03) | Haute |
+| AUD2-04 | Design (challenge Développeur) | Le fond de carte manque encore : la liste est un bon départ (accessibilité, téléphones modestes), mais la charte prévoit une expérience de type carte ; décision MAP-06 à obtenir | Moyenne |
+| AUD2-05 | Performance | Liste complète des services envoyée au téléphone : environ 250 Ko si les 880 étaient vérifiés (une seule réponse mise en cache) ; à compresser au CDN et à mesurer sur réseau 3G | Moyenne |
+| AUD2-06 | UX writing | Les horaires sont montrés tels qu'écrits à la source (syntaxe OpenStreetMap, ex. « Mo-Fr 08:00-17:00 ») : les traduire en phrases françaises (« du lundi au vendredi, 8 h à 17 h ») sans rien inventer (MAP-08 🔴) | Moyenne |
+| AUD2-07 | Orchestrateur | Démarches ↔ services : le lien par type est fait ; relier une démarche à des bureaux précis demandera des services vérifiés et la liste des bureaux de chaque démarche (DEM-04) | Basse |

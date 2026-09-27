@@ -4,6 +4,7 @@ import { z } from "zod";
 import { adminRequest } from "../../lib/admin-api";
 import { formatDay } from "../../lib/format";
 import { t } from "../../lib/i18n";
+import { serviceHints } from "../../lib/service-hints";
 import { requireAccount } from "../../lib/session";
 import { ServiceReviewForm, type ReviewService } from "./ServiceReviewForm";
 
@@ -67,6 +68,9 @@ function toReview(row: Row): ReviewService {
     id: row.id,
     name: row.name,
     details: [...corrected, ...changed, ...details],
+    hints: serviceHints(row.name).map((hint) =>
+      hint === "notState" ? t("services.hintNotState") : t("services.hintVague"),
+    ),
     osmUrl: row.osmUrl,
   };
 }
@@ -104,7 +108,11 @@ export default async function StateServicesPage({
     categories.find((category) => count(category, "proposed") > 0) ??
     "mairie";
   const rows = inZone.filter((row) => row.category === selected);
-  const proposed = rows.filter((row) => row.status === "proposed");
+  // Names of companies last: the likely state services come first.
+  const likelyPrivate = (row: Row) => serviceHints(row.name).includes("notState");
+  const proposed = rows
+    .filter((row) => row.status === "proposed")
+    .sort((a, b) => Number(likelyPrivate(a)) - Number(likelyPrivate(b)));
   const verified = rows.filter((row) => row.status === "verified");
   const changed = inZone.filter((row) => row.pendingUpdate !== null);
   const href = (next: { category?: string; zone?: string }) =>

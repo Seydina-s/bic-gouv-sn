@@ -10,6 +10,8 @@ export interface ReviewService {
   name: string;
   /** Town, address, hours: what the source says, to compare with the map. */
   details: string[];
+  /** What deserves a closer look (a company's name, a vague name). */
+  hints: string[];
   osmUrl: string | null;
 }
 
@@ -56,6 +58,14 @@ export function ServiceReviewForm({ services }: { services: ReviewService[] }) {
               />
               <span className="min-w-0">
                 <span className="block font-semibold">{service.name}</span>
+                {service.hints.map((hint) => (
+                  <span
+                    key={hint}
+                    className="mt-1 mr-2 inline-block rounded-sm bg-accent-container px-2 py-0.5 text-sm font-semibold text-on-accent-container"
+                  >
+                    {hint}
+                  </span>
+                ))}
                 {service.details.length > 0 && (
                   <span className="mt-1 block text-sm text-ink-soft">
                     {service.details.join(" · ")}
