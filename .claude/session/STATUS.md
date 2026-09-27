@@ -27,6 +27,6 @@ Avec l'accord de l'utilisateur : redémarrer l'API locale (AUD3-01). Puis LIC-01
 - API locale : dans `apps/api`, `pnpm build` puis `PORT=3100 pnpm start`. Arrêter l'ancien processus `node … dist/server.mjs` avant de relancer (arrêter la tâche de fond ne suffit pas). **Le redémarrage déconnecte la console.**
 - Fond de carte : `.data/tiles/senegal.pmtiles` (217 Mo) et `.data/map/` (`pnpm map:assets`) ; procédure `docs/runbooks/fond-de-carte.md`.
 - Après un changement de branche dont le fichier de verrouillage diffère : `pnpm install --frozen-lockfile` avant toute commande (ERREURS.md, 27/09).
-- Expo : le module de version de développement est installé ; pour Expo Go, lancer le serveur avec `npx expo start --go`.
+- Expo : le module de version de développement est installé ; pour Expo Go, lancer le serveur avec `npx expo start --go` (serveur relancé ainsi le 27/09 à 15 h 50 : `EXPO_PUBLIC_API_URL=http://192.168.1.14:3100 npx expo start --lan --port 8081 --clear --go`). Après toute installation de dépendances : redémarrer le serveur Expo et demander le paquet de contrôle.
 - Vérification visuelle : export web + Chrome headless (`scratchpad/cdp-shot.mjs`, variables WAIT, EVAL, AFTER, POST). Données de test : toujours une copie jetable, jamais `.data/`.
 - Pas de Python sur la machine : scripts en Node. Tout texte contenant un accent grave, `$` ou un antislash s'écrit avec l'éditeur ; une espace insécable s'écrit en séquence d'échappement (vérifier les octets).
