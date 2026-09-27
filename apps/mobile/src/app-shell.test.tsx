@@ -17,6 +17,7 @@ import SectionScreen from "./app/section/[slug]";
 import FavoritesScreen from "./app/favorites";
 import SearchScreen from "./app/search";
 import ServiceScreen from "./app/service/[id]";
+import { clearMapCalls, mapCalls } from "./testing/maplibre-mock";
 import { DETAIL, LIST, newsFetch } from "./testing/news-fixtures";
 import { PROCEDURE_LIST } from "./testing/procedure-fixtures";
 
@@ -36,6 +37,20 @@ jest.mock("expo-location", () => ({
 
 let mockFontState: [boolean, Error | null] = [true, null];
 jest.mock("expo-font", () => ({ useFonts: () => mockFontState }));
+
+// The native map exists only in the app's own builds: a stand-in draws it here.
+let mockMapAvailable = false;
+jest.mock("./features/near-me/map-support", () => ({
+  nativeMapAvailable: () => mockMapAvailable,
+}));
+jest.mock("@maplibre/maplibre-react-native", () =>
+  jest.requireActual<object>("./testing/maplibre-mock"),
+);
+// Jest cannot run import(): the map is handed over directly.
+jest.mock("./features/near-me/load-service-map", () => ({
+  loadServiceMap: () =>
+    Promise.resolve(jest.requireActual<object>("./features/near-me/ServiceMap")),
+}));
 
 /** Official themes with nothing validated yet: the Démarches tab falls back to the list. */
 const noValidatedTheme = () => new Response(JSON.stringify({ themes: [] }));
@@ -71,8 +86,20 @@ beforeEach(async () => {
   // Most journeys start after the welcome screens (tested on their own below).
   await AsyncStorage.setItem("bgs-onboarding", "done");
   mockFontState = [true, null];
+  mockMapAvailable = false;
+  clearMapCalls();
   globalThis.fetch = newsFetch() as unknown as typeof fetch;
 });
+
+/** A touch on the map's points, as the native map reports it. */
+function touchOnPoints(properties: Record<string, unknown>, coordinates: [number, number]) {
+  return {
+    stopPropagation: jest.fn(),
+    nativeEvent: {
+      features: [{ type: "Feature", geometry: { type: "Point", coordinates }, properties }],
+    },
+  };
+}
 
 describe("first run", () => {
   it("welcomes with the language first, then one idea per screen, then the app", async () => {
@@ -423,6 +450,8 @@ describe("app shell", () => {
     const openURL = jest.spyOn(Linking, "openURL").mockResolvedValue(true);
     await renderRouter(routes, { initialUrl: "/near-me" });
     expect(await screen.findByText("Commissariat de test proche")).toBeOnTheScreen();
+    // Expo Go and the web have no native map: the list is all there is.
+    expect(screen.queryByRole("button", { name: "Afficher les services sur la carte" })).toBeNull();
     await fireEvent.press(screen.getByRole("button", { name: "Choisir une ville" }));
     await fireEvent.changeText(screen.getByLabelText("Rechercher une ville"), "ville de");
     await fireEvent.press(screen.getByRole("button", { name: "Ville de test" }));
@@ -477,13 +506,127 @@ describe("app shell", () => {
   });
 
   it("says honestly when no service has been verified yet", async () => {
+    mockMapAvailable = true;
     globalThis.fetch = newsFetch({
       services: () => new Response(JSON.stringify({ services: [], places: [] })),
     }) as unknown as typeof fetch;
     await renderRouter(routes, { initialUrl: "/near-me" });
     expect(await screen.findByText(/arrivent bientôt ici/)).toBeOnTheScreen();
-    // Nothing to show yet: the location is not asked for.
+    // Nothing to show yet: neither the location nor an empty map is offered.
     expect(screen.queryByRole("button", { name: "Utiliser ma position" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Afficher les services sur la carte" })).toBeNull();
+  });
+
+  it("shows the verified services on the map, then the one touched, its page and the way there", async () => {
+    mockMapAvailable = true;
+    const openURL = jest.spyOn(Linking, "openURL").mockResolvedValue(true);
+    await renderRouter(routes, { initialUrl: "/near-me" });
+    await screen.findByText("Commissariat de test proche");
+    await fireEvent.press(
+      screen.getByRole("button", { name: "Afficher les services sur la carte" }),
+    );
+    const map = await screen.findByTestId("service-map");
+    // The base map comes from our API, in the app's theme.
+    expect(map).toHaveProp(
+      "mapStyle",
+      expect.stringMatching(/\/v1\/map\/style\.json\?theme=light$/),
+    );
+    expect(map).toHaveProp("accessibilityLabel", "Carte des services de l'État vérifiés");
+    expect(screen.getByRole("button", { name: "Tribunaux" })).toBeOnTheScreen();
+    expect(
+      screen.getByRole("link", { name: "Données © les contributeurs d'OpenStreetMap" }),
+    ).toBeOnTheScreen();
+    const points = screen.getByTestId("service-points");
+    const drawn = points.props as { data: { features: unknown[] } };
+    expect(drawn.data.features).toHaveLength(3);
+
+    await fireEvent.press(
+      points,
+      touchOnPoints({ id: "osm-n2", name: "Commissariat de test proche" }, [-17.4, 14.701]),
+    );
+    expect(
+      await screen.findByRole("header", { name: "Commissariat de test proche" }),
+    ).toBeOnTheScreen();
+    expect(mapCalls.camera.easeTo).toHaveBeenCalledWith(
+      expect.objectContaining({ center: [-17.4, 14.701] }),
+    );
+    await fireEvent.press(screen.getByRole("link", { name: "Itinéraire" }));
+    expect(openURL).toHaveBeenCalledWith(expect.stringContaining("14.701,-17.4"));
+    // A touch on the map itself closes the preview; the list is one tap away again.
+    await fireEvent.press(map);
+    expect(screen.queryByTestId("service-preview")).toBeNull();
+    await fireEvent.press(
+      points,
+      touchOnPoints({ id: "osm-n2", name: "Commissariat de test proche" }, [-17.4, 14.701]),
+    );
+    await fireEvent.press(await screen.findByRole("button", { name: "Voir la fiche" }));
+    expect(await screen.findByText(/^Du lundi au vendredi, de 8.h à 17.h.$/)).toBeOnTheScreen();
+    openURL.mockRestore();
+  });
+
+  it("opens a group of nearby services by zooming in on it", async () => {
+    mockMapAvailable = true;
+    await renderRouter(routes, { initialUrl: "/near-me" });
+    await screen.findByText("Commissariat de test proche");
+    await fireEvent.press(
+      screen.getByRole("button", { name: "Afficher les services sur la carte" }),
+    );
+    await fireEvent.press(
+      await screen.findByTestId("service-points"),
+      touchOnPoints({ cluster: true, cluster_id: 3, point_count: 2 }, [-17.4, 14.75]),
+    );
+    await waitFor(() => {
+      expect(mapCalls.camera.easeTo).toHaveBeenCalledWith(
+        expect.objectContaining({ center: [-17.4, 14.75], zoom: 16 }),
+      );
+    });
+    expect(mapCalls.source.getClusterExpansionZoom).toHaveBeenCalledWith(3);
+    expect(screen.queryByTestId("service-preview")).toBeNull();
+  });
+
+  it("finds the person on the map only when asked, and keeps the position on the phone", async () => {
+    mockMapAvailable = true;
+    jest.mocked(Location.requestForegroundPermissionsAsync).mockClear();
+    jest
+      .mocked(Location.requestForegroundPermissionsAsync)
+      .mockResolvedValue({ granted: true } as never);
+    jest
+      .mocked(Location.getLastKnownPositionAsync)
+      .mockResolvedValue({ coords: { latitude: 14.7, longitude: -17.4 } } as never);
+    const fetchMock = newsFetch();
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    await renderRouter(routes, { initialUrl: "/near-me" });
+    await screen.findByText("Commissariat de test proche");
+    await fireEvent.press(
+      screen.getByRole("button", { name: "Afficher les services sur la carte" }),
+    );
+    await screen.findByTestId("service-map");
+    expect(Location.requestForegroundPermissionsAsync).not.toHaveBeenCalled();
+    expect(screen.queryByTestId("user-location")).toBeNull();
+    await fireEvent.press(screen.getByRole("button", { name: "Me localiser sur la carte" }));
+    expect(await screen.findByTestId("user-location")).toBeOnTheScreen();
+    await waitFor(() => {
+      expect(mapCalls.camera.flyTo).toHaveBeenCalledWith(
+        expect.objectContaining({ center: [-17.4, 14.7] }),
+      );
+    });
+    expect(
+      fetchMock.mock.calls.some(([url]) => url.includes("14.7") || url.includes("-17.4")),
+    ).toBe(false);
+  });
+
+  it("falls back to the list when the map cannot load", async () => {
+    mockMapAvailable = true;
+    await renderRouter(routes, { initialUrl: "/near-me" });
+    await screen.findByText("Commissariat de test proche");
+    await fireEvent.press(
+      screen.getByRole("button", { name: "Afficher les services sur la carte" }),
+    );
+    await fireEvent(await screen.findByTestId("service-map"), "didFailLoadingMap");
+    expect(await screen.findByText(/La carte n'a pas pu s'afficher/)).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole("button", { name: "Liste" }));
+    expect(await screen.findByText("Commissariat de test proche")).toBeOnTheScreen();
+    expect(screen.queryByTestId("service-map")).toBeNull();
   });
 
   it("lists the procedures with their known facts while no theme is validated, and searches", async () => {
