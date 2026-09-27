@@ -1,0 +1,110 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import type { Block, ProcedureDetail } from "@bgs/shared-types";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react-native";
+import { Linking } from "react-native";
+import { I18nProvider } from "../../i18n/I18nProvider";
+import { PROCEDURE_DETAIL } from "../../testing/procedure-fixtures";
+import { ThemeProvider } from "../../theme/ThemeProvider";
+import { ProcedureView } from "./ProcedureView";
+
+jest.mock("expo-localization", () => ({ getLocales: () => [{ languageTag: "fr-SN" }] }));
+
+// Placeholder texts shaped like an e-senegal.sn sheet, not real administrative content.
+const p = (text: string): Block => ({ type: "paragraph", inlines: [{ text }] });
+const SHEET: ProcedureDetail = {
+  ...PROCEDURE_DETAIL,
+  summary: null,
+  costFcfa: null,
+  delayDays: null,
+  online: false,
+  eligibility: null,
+  documents: [],
+  faqs: [],
+  blocks: [
+    p("Qui peut faire la demande ?"),
+    p("Toute personne majeure."),
+    p("Quelles sont les pièces à fournir ?"),
+    p("• Une demande manuscrite"),
+    p("• Un extrait de naissance"),
+    p("Comment faire ?"),
+    p("• Déposer le dossier au guichet"),
+    p("• Retirer le récépissé"),
+    p("NB : Un dossier incomplet est rejeté."),
+  ],
+};
+
+async function show(detail: ProcedureDetail, onOpenRelated = jest.fn()) {
+  await render(
+    <ThemeProvider>
+      <I18nProvider>
+        <ProcedureView
+          detail={detail}
+          isPending={false}
+          bottomInset={0}
+          onOpenRelated={onOpenRelated}
+        />
+      </I18nProvider>
+    </ThemeProvider>,
+  );
+}
+
+describe("the page of a procedure", () => {
+  beforeEach(async () => {
+    await AsyncStorage.clear();
+  });
+
+  it("answers first in brief, then lays out each question of the sheet", async () => {
+    await show(SHEET);
+    expect(screen.getByRole("header", { name: "En bref" })).toBeOnTheScreen();
+    expect(screen.getByLabelText("Pour qui : Toute personne majeure.")).toBeOnTheScreen();
+    expect(screen.getByRole("button", { name: "Pièces à fournir : 2 pièces" })).toBeOnTheScreen();
+    // Its whole answer stands in the brief: the question is not repeated below.
+    expect(screen.queryByRole("header", { name: "Qui peut faire la demande ?" })).toBeNull();
+    expect(screen.getByRole("header", { name: "Comment faire ?" })).toBeOnTheScreen();
+    expect(screen.getByText("1")).toBeOnTheScreen();
+    expect(screen.getByText("2")).toBeOnTheScreen();
+    expect(screen.getByLabelText("Remarque : Un dossier incomplet est rejeté.")).toBeOnTheScreen();
+    expect(screen.getByText(/Source.: e-senegal.sn/)).toBeOnTheScreen();
+  });
+
+  it("lets the documents be ticked off, and keeps them on the phone", async () => {
+    await show(SHEET);
+    expect(screen.getByText("Cochez les pièces déjà réunies.")).toBeOnTheScreen();
+    const letter = screen.getByRole("checkbox", { name: "Une demande manuscrite" });
+    expect(letter).not.toBeChecked();
+    await fireEvent.press(letter);
+    expect(screen.getByRole("checkbox", { name: "Une demande manuscrite" })).toBeChecked();
+    expect(screen.getByText("1 sur 2 réunie")).toBeOnTheScreen();
+    expect(await AsyncStorage.getItem("bgs-checklist:demarche-test-a")).toBe(
+      JSON.stringify(["Une demande manuscrite"]),
+    );
+  });
+
+  it("finds the documents ticked on an earlier visit", async () => {
+    await AsyncStorage.setItem(
+      "bgs-checklist:demarche-test-a",
+      JSON.stringify(["Un extrait de naissance"]),
+    );
+    await show(SHEET);
+    await waitFor(() => {
+      expect(screen.getByRole("checkbox", { name: "Un extrait de naissance" })).toBeChecked();
+    });
+  });
+
+  it("opens related procedures and the official page", async () => {
+    const onOpenRelated = jest.fn();
+    const openURL = jest.spyOn(Linking, "openURL").mockResolvedValue(true);
+    await show(SHEET, onOpenRelated);
+    await fireEvent.press(screen.getByRole("button", { name: "Démarche de test B" }));
+    expect(onOpenRelated).toHaveBeenCalledWith("demarche-test-b");
+    await fireEvent.press(screen.getByRole("link", { name: "Faire la démarche sur e-senegal.sn" }));
+    expect(openURL).toHaveBeenCalledWith(SHEET.sourceUrl);
+    openURL.mockRestore();
+  });
+
+  it("shows a sheet without questions as plain text, without a brief", async () => {
+    await show({ ...SHEET, blocks: [p("Les informations sont sur le site du ministère.")] });
+    expect(screen.getByText("Les informations sont sur le site du ministère.")).toBeOnTheScreen();
+    expect(screen.queryByRole("header", { name: "En bref" })).toBeNull();
+  });
+});

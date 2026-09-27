@@ -110,6 +110,17 @@ describe("/v1/procedures", () => {
     expect(again.statusCode).toBe(304);
   });
 
+  it("opens a procedure whose official name makes a long address", async () => {
+    // Real slugs reach 104 characters: over the server's default limit (100), they
+    // were refused (414) and the procedure could not be opened.
+    const slug = `${"demander-une-autorisation-".repeat(5)}6918`;
+    const procedures = new FileProcedureRepository(join(dir, "procedures.json"));
+    await procedures.save(procedure(4, "Autorisation", "<p>Au guichet.</p>", { slug }));
+    const response = await app.inject({ method: "GET", url: `/v1/procedures/${slug}` });
+    expect(response.statusCode).toBe(200);
+    expect(procedureDetailSchema.parse(response.json()).slug).toBe(slug);
+  });
+
   it("says when a procedure does not exist", async () => {
     const response = await app.inject({ method: "GET", url: "/v1/procedures/absente" });
     expect(response.statusCode).toBe(404);

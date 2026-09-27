@@ -206,7 +206,7 @@ La densité est celle d'un quotidien lisible sur petit écran : une colonne, des
 - Une de journal : bandeau tricolore, nom + date, filet, photo pleine largeur, titre serif Literata.
 - Un motif tissé par rubrique, toujours décoratif, jamais derrière un texte.
 - Vert dominant, jaune en petite touche, rouge réservé aux alertes ; tokens sémantiques pour les deux thèmes.
-- Plat par défaut ; une seule surface flottante : la barre d'onglets en verre.
+- Plat par défaut ; seules les surfaces de navigation et d'action flottent, toutes sur le même verre.
 - Le baobab une seule fois par vue, en filigrane très léger.
 
 ## Colors
@@ -286,13 +286,13 @@ Sur Android, `fontWeight` ne sélectionne pas la graisse d'une police personnali
 
 ## Elevation & Depth
 
-Le système est plat : les couches se distinguent par le ton (`background` → `surface` → `surface-raised`) et par des filets fins. Une seule surface porte une ombre et un effet de verre : la barre d'onglets flottante. Sur iOS, un vrai flou système (`BlurView`, intensité 40) est posé sous un voile `glass` à `opacity.glass` (0,82). Sur Android, il n'y a pas de flou, trop coûteux pour les GPU d'entrée de gamme : la même forme utilise un voile presque opaque à `opacity.glassOpaque` (0,94).
+Le système est plat : les couches se distinguent par le ton (`background` → `surface` → `surface-raised`) et par des filets fins. Seules les surfaces flottantes (voir « La règle du verre commun ») portent l'effet de verre. Sur iOS, un vrai flou système (`BlurView`, intensité 40) est posé sous un voile `glass` à `opacity.glass` (0,82). Sur Android, il n'y a pas de flou, trop coûteux pour les GPU d'entrée de gamme : la même forme utilise un voile presque opaque à `opacity.glassOpaque` (0,94).
 
 ### Shadow Vocabulary
 - **Flottement de la barre** (iOS : `shadowColor: scrim`, décalage 0/8, rayon 24, opacité 0,14 ; Android : `elevation: 8`) : barre d'onglets uniquement.
 
 ### Named Rules
-**La règle de la seule surface flottante.** Seule la barre d'onglets flotte. Les cartes, articles et photos restent posés à plat : aucune ombre et aucun flou ailleurs.
+**La règle du verre commun.** Seules les surfaces de navigation et d'action flottent, toutes sur le même verre (`components/GlassBackdrop.tsx` : même flou, même voile, même contour) : la barre d'onglets, la barre du haut qui descend au défilement (`FloatingAppBar`), le bouton « Revenir en haut », le panneau des réglages et, sur une fiche de démarche, la barre d'action du bas. Demandes de l'utilisateur des 26 et 27/09/2026. Les cartes, articles, encadrés et photos restent posés à plat : aucune ombre et aucun flou ailleurs.
 
 **La règle du verre lisible.** Tout texte posé sur le verre doit atteindre 4,5:1 contre le pire fond possible (photo entièrement blanche ou entièrement noire qui défile dessous), calculé avec `composite(glass, opacity, fond)`, dans les deux thèmes et pour les deux opacités. Le test `packages/ui/src/tokens/colors.test.ts` en est la garde.
 
@@ -351,6 +351,17 @@ Le tissage identifie la rubrique.
 
 ### Page article (`app/article/[id].tsx`)
 - Photo, rubrique, titre `lead-headline` (rôle `header`), date (et « traduction automatique » si c'est le cas), corps, puis un filet et la mention « Source : presidence.sn », suivie du lien vers l'original (`source-link`, 48 dp, icône Phosphor, `text-brand`).
+
+### Fiche de démarche (`features/procedures/ProcedureView.tsx`)
+Demande de l'utilisateur (27/09/2026) : une présentation propre à l'application, pas celle de la source. Le texte officiel reste mot pour mot ; seule la mise en page change (`procedure-sheet.ts` reconnaît les questions de la fiche, `procedure-page.ts` agence la page, tous deux testés sur les 718 fiches réelles).
+- **En-tête** : titre `lead-headline` (rôle `header`), résumé `body` `text-secondary`.
+- **Encadré « En bref »** (`ProcedureBrief`) : fond `primary-container`, `rounded.lg`, titre `subtitle`, puis une ligne par réponse clé (pour qui, pièces à fournir, coût, délai, validité, document délivré, où s'adresser, en ligne) : icône Phosphor duotone, libellé `body-small`, valeur `body` en Manrope 700, le tout en `on-primary-container`, filets `withAlpha(on-primary-container, opacity.pressed)`. La ligne « Pièces à fournir » est un bouton (chevron bas) qui descend à la liste.
+- **Sections** (`SheetContent`) : pastille ronde de 40 dp en `surface` avec l'icône du sujet en `text-brand` (13 sujets : public, moment, pièces, coût, délai, validité, lieu, étapes, perte ou refus, document délivré, obligations, textes, contacts), puis la question de la source en `subtitle`. `xxl` au-dessus de chaque section.
+- **Pièces à cocher** : case Phosphor (`Square` en `border-strong`, `CheckSquare` plein en `primary`), 48 dp par ligne, rôle `checkbox` ; « Cochez les pièces déjà réunies. » puis « x sur y réunies » sous le titre. Les coches restent sur le téléphone.
+- **Étapes** : numéros dans des pastilles `primary` / `on-primary` de 28 dp (grandissent avec la taille du texte), reliées par un rail de 2 dp en `border` (GOV.UK). Utilisées pour les listes numérotées et les listes des sections « étapes ».
+- **Remarques « NB »** : encadré `accent-container` / `on-accent-container`, icône `Info`, `rounded.md`, sans bordure colorée ; lu « Remarque : … » par les lecteurs d'écran.
+- **Bas de page** : textes officiels et démarches liées en lignes séparées par des filets `border` (48 dp, chevron ou flèche sortante), puis un filet et « Source : e-senegal.sn » en `body-small` `text-tertiary`.
+- **Barre d'action** (`ProcedureActionBar`) : verre commun, filet `glass-border` en haut, bouton principal « Faire la démarche sur e-senegal.sn » avec flèche sortante, pleine largeur (640 dp au plus), au-dessus de la zone gestuelle. Le bouton « Revenir en haut » se place au-dessus d'elle.
 
 ### Bouton principal (`button-primary`, message d'erreur du fil)
 - Fond `primary`, texte `label` `on-primary`, `rounded.md`, 48 dp de haut au minimum, marge intérieure horizontale `xl`.

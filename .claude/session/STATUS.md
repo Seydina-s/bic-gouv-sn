@@ -1,25 +1,26 @@
 # STATUS — Bic Gouv SN
 
-**Dernière mise à jour** : 26/09/2026 (soir) · **Mode** : autonome
+**Dernière mise à jour** : 27/09/2026 (nuit) · **Mode** : autonome prolongé jusqu'à 11 h (demande de l'utilisateur) ; résumé complet à lui remettre à son retour
 
 ## Où on en est
-- Dépôt **public et sécurisé** : https://github.com/Seydina-s/bic-gouv-sn. `main` protégée : tout passe par PR + 3 contrôles verts. Secret `SENTRY_AUTH_TOKEN` en place (utilisateur, 25/09).
-- Incident du 25/09 (fichier des articles remis à zéro) corrigé : écriture durable + copie `.bak`. Reconstruction faite : 953 articles (316 FR+WO, 94 Conseils des ministres), 713 couvertures ; images du texte en cours (script `scratchpad/rebuild.sh`, journaux `scratchpad/rebuild-logs/`, reprenable).
-- Design D-05 (« La Une » + pagne tissé + verre) documenté dans DESIGN.md ; constantes passées en jetons ; utilisateur « un peu satisfait », améliorations futures prévues.
-- Démarches (e-senegal.sn) : 718 fiches collectées, API /v1/procedures, onglet « Démarches » de l'app (recherche, fiche, lien officiel) : DEM-01 à DEM-03 faits.
-- Données : copies quotidiennes par le veilleur (7 gardées), supervision de la collecte dans l'admin.
-- Paquet de l'app allégé (Android 4,96 Mo, iOS 4,68 Mo). 462 tests, contrôle complet vert.
+- Dépôt **public et sécurisé** : https://github.com/Seydina-s/bic-gouv-sn. `main` protégée : tout passe par PR + 3 contrôles verts.
+- Articles : 953 (FR + WO), une « La Une » défilante, rangées par rubrique, pages de rubrique à 20 articles numérotées ; barre du haut et bouton « Revenir en haut » sur tous les écrans qui défilent ; réglages sur verre.
+- Démarches : 718 fiches, 18 thèmes (15 officiels + 3 ajoutés), toutes classées (716 par délégation, 2 par l'utilisateur). Onglet « Démarches » = cartes de thèmes ; page de thème à 20 démarches numérotées (DEM-06).
+- **DEM-07 (27/09)** : fiche de démarche repensée (« En bref », sections illustrées, pièces à cocher, étapes numérotées, remarques en encadrés, bouton fixe vers e-senegal.sn). Reconnaissance vérifiée sur les 718 fiches réelles (aucun texte perdu). Défaut serveur découvert et corrigé : 7 démarches au nom long ne s'ouvraient pas (API-06).
+- Console d'administration : connexion interne (mot de passe + second code), l'utilisateur est administrateur ; écran de validation des thèmes.
+- Garde-fou de langue : crochets Claude Code (français obligatoire pour tout texte destiné à l'utilisateur).
 
-## En attente de l'utilisateur
+## En attente de l'utilisateur (mis de côté pendant le mode autonome)
 1. W-01 locuteurs wolof ; A-01 logo ; A-02 identifiant de l'app ; L-02 questions au BIC (dont la licence du code) ; S1-02 budget d'hébergement.
 
 ## Prochaine tâche
-DEM-04 (lier démarches et carte), PERF-03 (poids de Sentry), PERF-04 (sous-ensemble des polices). ADM-02 (connexion admin) : options à présenter à l'utilisateur (décision de sécurité). SPLASH-01 attend le logo ; UX-01 attend les retours design. UPG-01 attend la version stable d'Expo SDK 58.
+NEWS-05 (page de catégorie d'articles plus belle, pagination plus visible), puis le backlog : TEST-05, DEM-04 (lier démarches et carte), PERF-03 (poids de Sentry), SEARCH-01, MED-02b, DATA-01. SPLASH-01 attend le logo ; UX-01 attend les retours design ; UPG-01 attend la version stable d'Expo SDK 58.
 
 ## Constat environnement
 - Node système 20.20.0 (inchangé). Projet : Node 24 — ajouter `C:\Users\HP\tools\fnm\data\node-versions\v24.21.0\installation` en tête du PATH.
 - Git : e-mail local du dépôt = adresse anonyme GitHub (ne jamais revenir à l'e-mail personnel). Sauvegarde de l'ancien historique : `C:\Users\HP\tools\backup-bic-gouv-sn.git`.
 - GitHub CLI : `C:\Users\HP\tools\gh\bin\gh.exe` (absent du PATH des shells de Claude : appeler par chemin complet).
-- API locale : dans `apps/api`, après `pnpm build` : `PORT=3100 NEWS_STORE_PATH=C:/bic-gouv-sn/.data/news.json PROCEDURES_STORE_PATH=C:/bic-gouv-sn/.data/procedures.json MEDIA_ROOT=C:/bic-gouv-sn/.data/media INGESTION_STATUS_PATH=C:/bic-gouv-sn/.data/ingestion-status.json pnpm start` (le DSN Sentry est lu dans `.env.local`).
-- Vérification visuelle : export web (`expo export --clear`, API via relais du serveur local port 8084) + Chrome headless (émulation mobile).
+- API locale : dans `apps/api`, `pnpm build` puis `PORT=3100 pnpm start` (chemins de données résolus depuis la racine, clé admin lue dans `.env.local`). Arrêter l'ancien processus `node` avant de relancer : arrêter la tâche de fond ne suffit pas toujours (le port reste pris).
+- Vérification visuelle : export web (`EXPO_PUBLIC_API_URL= npx expo export -p web`, API via le relais du serveur local port 8084) + Chrome headless (émulation mobile, `scratchpad/cdp-shot.mjs`).
+- Vérification des fiches de démarche : `scratchpad/audit-sheets.mts` (tsx, pause de 150 ms entre deux requêtes).
 - Pas de Python sur la machine : scripts en Node. Tout texte contenant un accent grave, `$` ou un antislash s'écrit avec l'éditeur, jamais via le shell.

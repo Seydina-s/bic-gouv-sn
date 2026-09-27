@@ -16,7 +16,8 @@ import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 import { CoverImage } from "./CoverImage";
 
-function Runs({ inlines }: { inlines: Inline[] }) {
+/** Formatted text runs (bold, italic, links), inside a parent <Text>. */
+export function Runs({ inlines }: { inlines: Inline[] }) {
   const { theme } = useTheme();
   return inlines.map((run, index) => {
     const style: TextStyle = {
