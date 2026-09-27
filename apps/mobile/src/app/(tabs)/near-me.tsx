@@ -1,6 +1,11 @@
 import { FlashList, type FlashListRef } from "@shopify/flash-list";
-import type { Place, PublicService, ServiceCategory } from "@bgs/shared-types";
-import { useRouter } from "expo-router";
+import {
+  serviceCategorySchema,
+  type Place,
+  type PublicService,
+  type ServiceCategory,
+} from "@bgs/shared-types";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useMemo, useRef, useState } from "react";
 import { ActivityIndicator, Linking, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -18,6 +23,12 @@ import { useTheme } from "../../theme/useTheme";
 const OSM_COPYRIGHT = "https://www.openstreetmap.org/copyright";
 
 type Around = { kind: "position" } | { kind: "town"; place: Place } | null;
+
+/** The kind asked by the address (a procedure's "find the nearest…"), if it is one. */
+function askedKind(raw: string | undefined): ServiceCategory | null {
+  const parsed = serviceCategorySchema.safeParse(raw);
+  return parsed.success ? parsed.data : null;
+}
 
 /** A service in the list, with its distance once a place to measure from is known. */
 interface Row {
@@ -41,7 +52,14 @@ export default function NearMeScreen() {
   const services = useStateServices();
   const location = useLocation();
   const [chosen, setChosen] = useState<Around>(null);
-  const [category, setCategory] = useState<ServiceCategory | null>(null);
+  const asked = useLocalSearchParams<{ category?: string }>().category;
+  const [category, setCategory] = useState<ServiceCategory | null>(() => askedKind(asked));
+  // Arriving again from a procedure (the tab stays mounted): its kind is shown.
+  const [seen, setSeen] = useState(asked);
+  if (asked !== seen) {
+    setSeen(asked);
+    setCategory(askedKind(asked));
+  }
   const { color, space, textStyle, touchTarget } = theme;
 
   // The phone's position counts once found; a town chosen by hand replaces it.

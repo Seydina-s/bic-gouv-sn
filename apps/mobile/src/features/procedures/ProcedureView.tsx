@@ -1,7 +1,10 @@
-import type { ProcedureDetail } from "@bgs/shared-types";
+import type { ProcedureDetail, ServiceCategory } from "@bgs/shared-types";
+import { CaretRightIcon as CaretRight } from "phosphor-react-native/src/icons/CaretRight";
+import { MapPinIcon as MapPin } from "phosphor-react-native/src/icons/MapPin";
 import * as Speech from "expo-speech";
 import { useMemo, useRef, useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Icon } from "../../components/Icon";
 import { ScrollTopButton, useScrollTop } from "../../components/ScrollTopButton";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
@@ -13,6 +16,7 @@ import { ProcedureBrief, useBriefLabels } from "./ProcedureBrief";
 import { ProcedureExtras } from "./ProcedureExtras";
 import { useFeeWording } from "./ProcedureFacts";
 import { procedurePage, type PageWords } from "./procedure-page";
+import { whereToGo, type LinkedKind } from "./service-link";
 import { SheetItems, SheetSectionView } from "./SheetContent";
 import { spokenProcedure } from "./spoken-procedure";
 import { useDocumentChecklist } from "./useDocumentChecklist";
@@ -40,6 +44,9 @@ export interface ProcedureViewProps {
   isPending: boolean;
   bottomInset: number;
   onOpenRelated: (slug: string) => void;
+  /** Kinds of state services with at least one verified entry, and how to show them. */
+  services?:
+    { kinds: ReadonlySet<ServiceCategory>; onOpen: (kind: LinkedKind) => void } | undefined;
 }
 
 /**
@@ -53,6 +60,7 @@ export function ProcedureView({
   isPending,
   bottomInset,
   onOpenRelated,
+  services,
 }: ProcedureViewProps) {
   const { theme } = useTheme();
   const { t } = useTranslation();
@@ -77,6 +85,7 @@ export function ProcedureView({
       detail={detail}
       bottomInset={bottomInset}
       onOpenRelated={onOpenRelated}
+      services={services}
     />
   );
 }
@@ -85,16 +94,21 @@ function ProcedureSheetView({
   detail,
   bottomInset,
   onOpenRelated,
+  services,
 }: {
   detail: ProcedureDetail;
   bottomInset: number;
-  onOpenRelated: (slug: string) => void;
+  onOpenRelated: ProcedureViewProps["onOpenRelated"];
+  services: ProcedureViewProps["services"];
 }) {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const words = usePageWords();
   const labels = useBriefLabels();
   const page = useMemo(() => procedurePage(detail, words), [detail, words]);
+  // Only offered when it leads somewhere: a verified service of that kind exists.
+  const goTo = whereToGo(page);
+  const nearest = goTo !== null && services?.kinds.has(goTo) === true ? goTo : null;
   const checklist = useDocumentChecklist(detail.slug);
   const scroller = useRef<ScrollView>(null);
   // Where each section starts in the page, to lead the reader there.
@@ -166,6 +180,33 @@ function ProcedureSheetView({
             />
           </View>
         )}
+        {nearest !== null && services !== undefined && (
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => {
+              services.onOpen(nearest);
+            }}
+            style={({ pressed }) => [
+              styles.nearest,
+              {
+                marginTop: space.md,
+                gap: space.md,
+                minHeight: touchTarget.min,
+                paddingHorizontal: space.lg,
+                paddingVertical: space.md,
+                borderRadius: theme.radius.lg,
+                borderColor: color.border,
+                backgroundColor: pressed ? color.surface : color.background,
+              },
+            ]}
+          >
+            <Icon icon={MapPin} weight="duotone" color={color.textBrand} />
+            <Text style={[textStyle.label, styles.grow, { color: color.textBrand }]}>
+              {t(`procedures.nearest.${nearest}`)}
+            </Text>
+            <Icon icon={CaretRight} size="sm" color={color.textBrand} />
+          </Pressable>
+        )}
         {page.intro.length > 0 && (
           <View style={{ marginTop: space.xl }}>
             <SheetItems items={page.intro} kind={null} />
@@ -220,5 +261,11 @@ const styles = StyleSheet.create({
   root: { flex: 1 },
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
   listen: { alignSelf: "flex-start" },
+  nearest: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  grow: { flex: 1 },
   source: { borderTopWidth: StyleSheet.hairlineWidth },
 });

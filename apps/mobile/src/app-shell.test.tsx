@@ -469,6 +469,13 @@ describe("app shell", () => {
     ).toBe(false);
   });
 
+  it("arrives filtered on the kind a procedure asked for", async () => {
+    await renderRouter(routes, { initialUrl: "/near-me?category=tribunal" });
+    expect(await screen.findByText("Tribunal de test")).toBeOnTheScreen();
+    expect(screen.getByRole("button", { name: "Tribunaux", selected: true })).toBeOnTheScreen();
+    expect(screen.queryByText("Commissariat de test proche")).toBeNull();
+  });
+
   it("says honestly when no service has been verified yet", async () => {
     globalThis.fetch = newsFetch({
       services: () => new Response(JSON.stringify({ services: [], places: [] })),

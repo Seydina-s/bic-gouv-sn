@@ -135,6 +135,13 @@ export const fr = {
     related: "Démarches liées",
     goOfficial: "Faire la démarche sur e-senegal.sn",
     nextProcedures: "Démarches suivantes",
+    nearest: {
+      mairie: "Trouver la mairie la plus proche",
+      prefecture: "Trouver la préfecture la plus proche",
+      police: "Trouver le commissariat le plus proche",
+      gendarmerie: "Trouver la gendarmerie la plus proche",
+      tribunal: "Trouver le tribunal le plus proche",
+    },
     brief: "En bref",
     briefWho: "Pour qui",
     briefValidity: "Validité",
