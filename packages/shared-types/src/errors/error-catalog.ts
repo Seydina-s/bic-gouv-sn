@@ -102,6 +102,14 @@ export const ERROR_CATALOG = {
     severity: "critical",
     action: "Vérifiez que presidence.sn est accessible ; la collecte reprend seule dès son retour.",
   },
+  MAP_UNAVAILABLE: {
+    what: "Le fond de carte n'est pas disponible : le fichier des tuiles du Sénégal manque sur le serveur.",
+    where: "API publique (/v1/map)",
+    impact:
+      "La carte de « Près de moi » reste vide ; la liste des services et les itinéraires fonctionnent toujours.",
+    severity: "warning",
+    action: "Replacez le fichier des tuiles (procédure « fond de carte ») puis redémarrez l'API.",
+  },
   PROCEDURE_NOT_FOUND: {
     what: "Une démarche demandée n'existe pas (ou plus).",
     where: "API publique (/v1/procedures)",

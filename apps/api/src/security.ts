@@ -24,7 +24,10 @@ export async function registerSecurity(app: FastifyInstance, config: Config): Pr
     max: config.RATE_LIMIT_PER_MINUTE,
     timeWindow: "1 minute",
     // Probes from the load balancer and monitoring are never limited.
-    allowList: (request) => request.url.startsWith("/v1/health"),
+    // The map's tiles and assets are static and cached (a CDN in production): a map
+    // view asks for dozens of them at once, which must not use up a person's quota.
+    allowList: (request) =>
+      request.url.startsWith("/v1/health") || request.url.startsWith("/v1/map/"),
     errorResponseBuilder: (_request, context) => ({
       statusCode: 429,
       code: "RATE_LIMITED",

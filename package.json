@@ -17,7 +17,8 @@
     "errors:doc": "tsx scripts/generate-errors-doc.ts",
     "bundle:size": "tsx scripts/check-bundle-size.ts",
     "fonts": "tsx scripts/fonts.ts",
-    "fonts:check": "tsx scripts/fonts.ts --check"
+    "fonts:check": "tsx scripts/fonts.ts --check",
+    "map:assets": "tsx scripts/map-assets.ts"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

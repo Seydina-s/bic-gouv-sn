@@ -30,6 +30,18 @@ const envSchema = z.object({
     .min(1)
     .default(".data/procedure-themes.json")
     .transform((path) => resolveDataPath(path)),
+  /** Vector tiles of Senegal (PMTiles, Protomaps schema) for the base map. */
+  MAP_TILES_PATH: z
+    .string()
+    .min(1)
+    .default(".data/tiles/senegal.pmtiles")
+    .transform((path) => resolveDataPath(path)),
+  /** Glyphs and icons of the base map style (pnpm map:assets). */
+  MAP_ASSETS_ROOT: z
+    .string()
+    .min(1)
+    .default(".data/map")
+    .transform((path) => resolveDataPath(path)),
   /** State services (imported proposals, verified in the console) and towns. */
   STATE_SERVICES_PATH: z
     .string()
