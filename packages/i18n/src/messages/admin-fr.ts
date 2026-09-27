@@ -137,6 +137,17 @@ export const adminFr = {
     verifiedOn: "vérifié le {date}",
     sourceNow: "Selon la source : {name}",
     nearTown: "près de {town}",
+    correct: "Corriger",
+    correctTitle: "Corriger un service",
+    correctIntro:
+      "Le nom et le type corrigés ici l'emportent sur ceux d'OpenStreetMap, même après un nouvel import.",
+    nameLabel: "Nom",
+    categoryLabel: "Type de service",
+    saveCorrection: "Enregistrer la correction",
+    corrected: "Correction enregistrée.",
+    correctedFrom: "Corrigé (à la source : {name}, {category})",
+    back: "Retour aux services",
+    unknown: "Ce service n'existe pas.",
     none: "Rien à vérifier ici.",
     doneVerified: {
       one: "{count} service vérifié : il apparaît dans l'application.",

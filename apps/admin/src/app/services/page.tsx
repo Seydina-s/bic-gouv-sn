@@ -28,6 +28,11 @@ const listSchema = z.object({
       pendingUpdate: z.object({ name: z.string() }).nullable(),
       osmUrl: z.string().nullable(),
       nearTown: z.string().nullable().default(null),
+      /** What the source says, when a person corrected the kind or the name. */
+      source: z
+        .object({ category: serviceCategorySchema, name: z.string() })
+        .nullable()
+        .default(null),
     }),
   ),
 });
@@ -49,10 +54,26 @@ function toReview(row: Row): ReviewService {
   );
   const changed =
     row.pendingUpdate === null ? [] : [t("services.sourceNow", { name: row.pendingUpdate.name })];
-  return { id: row.id, name: row.name, details: [...changed, ...details], osmUrl: row.osmUrl };
+  const corrected =
+    row.source === null
+      ? []
+      : [
+          t("services.correctedFrom", {
+            name: row.source.name,
+            category: label(row.source.category),
+          }),
+        ];
+  return {
+    id: row.id,
+    name: row.name,
+    details: [...corrected, ...changed, ...details],
+    osmUrl: row.osmUrl,
+  };
 }
 
-const label = (category: ServiceCategory) => t(`services.category.${category}`);
+function label(category: ServiceCategory): string {
+  return t(`services.category.${category}`);
+}
 
 /**
  * Verification of the state services imported from OpenStreetMap: nothing reaches
