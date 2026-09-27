@@ -1,4 +1,4 @@
-import type { GeoPoint, PublicService } from "@bgs/shared-types";
+import { type GeoPoint, type PublicService, SENEGAL_BOUNDS } from "@bgs/shared-types";
 import {
   Camera,
   type CameraRef,
@@ -13,16 +13,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { StyleSheet } from "react-native";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
-import {
-  AROUND_ZOOM,
-  SENEGAL_BOUNDS,
-  initialView,
-  mapStyleUrl,
-  servicePoints,
-  touchedPoint,
-} from "./service-map";
+import { AROUND_ZOOM, initialView, mapStyleUrl, servicePoints, touchedPoint } from "./service-map";
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL ?? "";
+/** The map never leaves Senegal, the area of our tiles and of the services. */
+const COUNTRY: [number, number, number, number] = [...SENEGAL_BOUNDS];
 /** Labels are drawn with the letters our API serves next to the tiles. */
 const LABEL_FONT = ["Noto Sans Medium"];
 /**
@@ -149,9 +144,9 @@ export default function ServiceMap({
         ref={camera}
         minZoom={5}
         maxZoom={17}
-        maxBounds={SENEGAL_BOUNDS}
+        maxBounds={COUNTRY}
         initialViewState={
-          firstView === null ? { bounds: SENEGAL_BOUNDS, padding } : { ...firstView, padding }
+          firstView === null ? { bounds: COUNTRY, padding } : { ...firstView, padding }
         }
       />
       <GeoJSONSource

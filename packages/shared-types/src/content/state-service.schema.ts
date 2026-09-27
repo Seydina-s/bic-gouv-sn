@@ -76,12 +76,14 @@ export const stateServiceSchema = serviceFactsSchema.extend({
   pendingUpdate: serviceFactsSchema.nullable(),
   /**
    * Corrections a person made in the console (a commissariat tagged as a town hall
-   * at the source): they win over the source's facts, whatever a new import brings.
+   * at the source, a point placed on the wrong street): they win over the source's
+   * facts, whatever a new import brings.
    */
   corrections: z
     .strictObject({
       category: serviceCategorySchema.optional(),
       name: z.string().min(1).optional(),
+      location: geoPointSchema.optional(),
     })
     .default({}),
 });
@@ -95,7 +97,7 @@ export function correctedFacts(service: StateService): ServiceFacts {
     name: service.corrections.name ?? name,
     address,
     town,
-    location,
+    location: service.corrections.location ?? location,
     phone,
     website,
     openingHours,

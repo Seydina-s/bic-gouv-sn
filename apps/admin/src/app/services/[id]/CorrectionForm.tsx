@@ -14,22 +14,29 @@ const field =
 const primaryButton =
   "inline-flex min-h-12 items-center justify-center rounded-md bg-primary px-6 font-semibold text-on-primary hover:bg-primary-pressed disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus";
 
-/** The name and the kind of one service, as a person corrects them. */
+/** The name, the kind and the place of one service, as a person corrects them. */
 export function CorrectionForm({
   id,
   name,
   category,
   categories,
+  position,
+  positionLink,
 }: {
   id: string;
   name: string;
   category: string;
   categories: CorrectionChoice[];
+  /** The place shown now, as "latitude, longitude". */
+  position: string;
+  /** That place on openstreetmap.org. */
+  positionLink: string;
 }) {
   const [state, action, pending] = useActionState<ServiceReviewState, FormData>(correctService, {});
   return (
     <form action={action} className="max-w-xl space-y-5">
       <input type="hidden" name="id" value={id} />
+      <input type="hidden" name="positionBefore" value={position} />
       <div className="space-y-2">
         <label htmlFor="name" className="block font-semibold">
           {t("services.nameLabel")}
@@ -47,6 +54,32 @@ export function CorrectionForm({
             </option>
           ))}
         </select>
+      </div>
+      <div className="space-y-2">
+        <label htmlFor="position" className="block font-semibold">
+          {t("services.positionLabel")}
+        </label>
+        <p id="position-help" className="text-sm text-ink-soft">
+          {t("services.positionHelp")}
+        </p>
+        <input
+          id="position"
+          name="position"
+          defaultValue={position}
+          required
+          autoComplete="off"
+          spellCheck={false}
+          aria-describedby="position-help"
+          className={field}
+        />
+        <a
+          href={positionLink}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-block text-sm font-semibold text-brand underline underline-offset-4"
+        >
+          {t("services.openPosition")}
+        </a>
       </div>
       {state.error !== undefined && (
         <p role="alert" className="rounded-md bg-danger-surface px-4 py-3 text-on-danger-surface">

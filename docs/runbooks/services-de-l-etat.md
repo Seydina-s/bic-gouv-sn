@@ -14,6 +14,19 @@ La carte « Près de moi » ne montre **que des services vérifiés par une pers
 
 Chaque décision et chaque correction sont inscrites au journal d'audit. Une correction n'est jamais annulée par un nouvel import.
 
+### Déplacer un service mal placé
+
+1. **Corriger** sur la ligne du service.
+2. Trouver l'emplacement exact sur https://www.openstreetmap.org (ou Google Maps), puis copier :
+   - sur OpenStreetMap : clic droit sur le bâtiment → « Afficher l'adresse » ou « Centrer la carte ici », puis copier l'adresse de la page ;
+   - sur Google Maps : clic droit sur le point → cliquer sur les coordonnées affichées (elles sont copiées).
+3. Coller dans le champ **Emplacement** (un lien ou des coordonnées « latitude, longitude », par exemple `14.6928, -17.4467`), puis **Enregistrer la correction**.
+4. **Voir cet emplacement sur la carte** permet de contrôler le résultat.
+
+La console refuse un emplacement illisible ou hors du Sénégal (souvent la latitude et la longitude inversées : la latitude, entre 12 et 17, vient en premier). L'emplacement de la source reste affiché pour mémoire.
+
+**Mise en service** : l'API doit être mise à jour avant la console. Face à une API plus ancienne, la console ne fait pas croire au déplacement : elle affiche « Nom et type enregistrés, mais pas l'emplacement ».
+
 ## Relancer l'import (équipe technique)
 
 ```

@@ -124,6 +124,18 @@ describe("FileStateServiceStore", () => {
     expect(await store.correct("osm-n404", { name: "X" })).toBeNull();
   });
 
+  it("keeps a service moved by a person, even when the source moves it elsewhere", async () => {
+    await store.importServices([service("osm-n1")], []);
+    const moved = await store.correct("osm-n1", { location: { lat: 14.71, lng: -17.45 } });
+    expect(correctedFacts(moved ?? fail()).location).toEqual({ lat: 14.71, lng: -17.45 });
+    await store.importServices([service("osm-n1", { location: { lat: 14.9, lng: -17.2 } })], []);
+    const again = (await store.read()).services["osm-n1"] ?? fail();
+    expect(correctedFacts(again).location).toEqual({ lat: 14.71, lng: -17.45 });
+    // Moved back onto the source's point: nothing is left to correct.
+    const back = await store.correct("osm-n1", { location: { lat: 14.9, lng: -17.2 } });
+    expect(back?.corrections).toEqual({});
+  });
+
   it("keeps the towns when an import brings none, and leaves missing services alone", async () => {
     await store.importServices([service("osm-n1")], [TOWN]);
     const outcome = await store.importServices([], []);

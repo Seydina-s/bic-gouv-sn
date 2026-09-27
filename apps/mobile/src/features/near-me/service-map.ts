@@ -3,9 +3,6 @@ import type { GeoPoint, PublicService } from "@bgs/shared-types";
 /** Zoom where the streets around a place can be read. */
 export const AROUND_ZOOM = 14;
 
-/** Senegal with a margin (west, south, east, north): the area our tiles cover. */
-export const SENEGAL_BOUNDS: [number, number, number, number] = [-17.6, 12.2, -11.3, 16.8];
-
 /** Properties a point of the map carries: enough to select its service. */
 export interface ServicePointProperties {
   id: string;

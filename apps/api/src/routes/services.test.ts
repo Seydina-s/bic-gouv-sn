@@ -129,6 +129,7 @@ describe("state services", () => {
       (await correct("osm-n3", { category: "police", name: "Commissariat C" })).json(),
     ).toEqual({
       corrected: true,
+      location: { lat: 14.7, lng: -17.4 },
     });
     expect((await correct("osm-n404", { name: "X" })).statusCode).toBe(404);
     expect((await correct("osm-n3", {})).statusCode).toBe(400);
@@ -148,6 +149,46 @@ describe("state services", () => {
     ]);
     const entries = await admin.journal.entries();
     expect(entries.filter((entry) => entry.action === "service.corrected")).toHaveLength(1);
+  });
+
+  it("lets an editor move a service to its true place, never outside Senegal", async () => {
+    const token = await admin.tokenFor("editor");
+    const move = (location: object) =>
+      app.inject({
+        method: "PATCH",
+        url: "/admin/v1/services/osm-n1/correction",
+        headers: { authorization: `Bearer ${token}` },
+        payload: { location },
+      });
+    // Latitude and longitude swapped: a slip, refused.
+    expect((await move({ lat: -17.44, lng: 14.69 })).statusCode).toBe(400);
+    // The answer gives the place now shown: the console checks the move was saved.
+    expect((await move({ lat: 14.6928, lng: -17.4467 })).json()).toEqual({
+      corrected: true,
+      location: { lat: 14.6928, lng: -17.4467 },
+    });
+    const listing = await app.inject({
+      method: "GET",
+      url: "/admin/v1/services",
+      headers: { authorization: `Bearer ${token}` },
+    });
+    expect(
+      listing
+        .json<{ services: { id: string; location: unknown; source: unknown }[] }>()
+        .services.find((item) => item.id === "osm-n1"),
+    ).toMatchObject({
+      location: { lat: 14.6928, lng: -17.4467 },
+      source: { location: { lat: 14.7, lng: -17.4 } },
+    });
+    await review(token, "verified", ["osm-n1"]);
+    expect((await publicList()).body.services[0]?.location).toEqual({
+      lat: 14.6928,
+      lng: -17.4467,
+    });
+    const [entry] = (await admin.journal.entries()).filter(
+      (item) => item.action === "service.corrected",
+    );
+    expect(entry?.details).toEqual({ location: "14.6928,-17.4467" });
   });
 
   it("refuses without a session, a reviewer's role, and unknown services", async () => {

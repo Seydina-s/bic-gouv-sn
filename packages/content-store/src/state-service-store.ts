@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import {
   stateServicesFileSchema,
+  type GeoPoint,
   type Place,
   type ServiceCategory,
   type ServiceFacts,
@@ -21,6 +22,7 @@ export type ImportedService = Omit<
 export interface ServiceCorrection {
   category?: ServiceCategory;
   name?: string;
+  location?: GeoPoint;
 }
 
 export interface ImportOutcome {
@@ -143,9 +145,9 @@ export class FileStateServiceStore {
   }
 
   /**
-   * A person's corrections to a service (its kind, its name), kept apart from the
-   * source's facts so that no import undoes them. A correction equal to what the
-   * source says is dropped. Null when the service is unknown.
+   * A person's corrections to a service (its kind, its name, its place on the map),
+   * kept apart from the source's facts so that no import undoes them. A correction
+   * equal to what the source says is dropped. Null when the service is unknown.
    */
   async correct(id: string, correction: ServiceCorrection): Promise<StateService | null> {
     const file = await this.read();
@@ -159,6 +161,10 @@ export class FileStateServiceStore {
     }
     if (corrections.name === current.name) {
       delete corrections.name;
+    }
+    const { location } = corrections;
+    if (location?.lat === current.location.lat && location.lng === current.location.lng) {
+      delete corrections.location;
     }
     const corrected = { ...current, corrections };
     await this.write({ ...file, services: { ...file.services, [id]: corrected } });

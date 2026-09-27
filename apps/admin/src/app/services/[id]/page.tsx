@@ -1,8 +1,9 @@
-import { serviceCategorySchema } from "@bgs/shared-types";
+import { geoPointSchema, serviceCategorySchema } from "@bgs/shared-types";
 import Link from "next/link";
 import { z } from "zod";
 import { adminRequest } from "../../../lib/admin-api";
 import { t } from "../../../lib/i18n";
+import { positionLink, positionText, samePosition } from "../../../lib/position";
 import { requireAccount } from "../../../lib/session";
 import { CorrectionForm } from "./CorrectionForm";
 
@@ -14,9 +15,15 @@ const listSchema = z.object({
       id: z.string(),
       category: serviceCategorySchema,
       name: z.string(),
+      location: geoPointSchema,
       osmUrl: z.string().nullable(),
       source: z
-        .object({ category: serviceCategorySchema, name: z.string() })
+        .object({
+          category: serviceCategorySchema,
+          name: z.string(),
+          // Older API versions did not send the source's place.
+          location: geoPointSchema.optional(),
+        })
         .nullable()
         .default(null),
     }),
@@ -72,6 +79,12 @@ export default async function CorrectServicePage({ params }: { params: Promise<{
           })}
         </p>
       )}
+      {service.source?.location !== undefined &&
+        !samePosition(service.source.location, service.location) && (
+          <p className="text-sm text-ink-soft">
+            {t("services.sourcePosition", { position: positionText(service.source.location) })}
+          </p>
+        )}
       {service.osmUrl !== null && (
         <a
           href={service.osmUrl}
@@ -87,6 +100,8 @@ export default async function CorrectServicePage({ params }: { params: Promise<{
         name={service.name}
         category={service.category}
         categories={categories}
+        position={positionText(service.location)}
+        positionLink={positionLink(service.location)}
       />
     </section>
   );
