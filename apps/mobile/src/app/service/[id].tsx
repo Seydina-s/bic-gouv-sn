@@ -19,6 +19,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Icon } from "../../components/Icon";
 import { directionsUrl } from "../../features/near-me/directions";
+import { describeHours, type HoursWords } from "../../features/near-me/opening-hours";
 import { ServiceBadge } from "../../features/near-me/ServiceParts";
 import { useStateServices } from "../../features/near-me/useStateServices";
 import { formatPublishedOn } from "../../features/news/format";
@@ -119,6 +120,21 @@ export default function ServiceScreen() {
   }
 
   const open = (url: string) => () => void Linking.openURL(url);
+  const hoursWords: HoursWords = {
+    always: t("nearMe.hoursAlways"),
+    everyDay: t("nearMe.hoursEveryDay"),
+    dayRange: (from, to) => t("nearMe.hoursDayRange", { from, to }),
+    oneDay: (day) => t("nearMe.hoursOneDay", { day }),
+    rule: (days, times) => t("nearMe.hoursRule", { days, times }),
+    time: (start, end) => t("nearMe.hoursTime", { start, end }),
+    and: t("nearMe.hoursAnd"),
+    day: (key) => t(`nearMe.day.${key}`),
+  };
+  // In plain French when fully understood; as the source wrote it otherwise.
+  const hours =
+    service.openingHours === null
+      ? null
+      : (describeHours(service.openingHours, hoursWords) ?? service.openingHours);
   const verifiedOn = formatPublishedOn(service.verifiedAt.slice(0, 10), lang);
 
   return (
@@ -172,9 +188,7 @@ export default function ServiceScreen() {
               value={[service.address, service.town].filter(Boolean).join(", ")}
             />
           )}
-          {service.openingHours !== null && (
-            <Fact icon={Clock} label={t("nearMe.hours")} value={service.openingHours} />
-          )}
+          {hours !== null && <Fact icon={Clock} label={t("nearMe.hours")} value={hours} />}
           {service.phone !== null && (
             <Fact
               icon={Phone}
