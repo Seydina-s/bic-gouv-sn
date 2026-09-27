@@ -136,6 +136,19 @@ describe("FileStateServiceStore", () => {
     expect(back?.corrections).toEqual({});
   });
 
+  it("adds a service typed by hand as a proposal, which no import removes", async () => {
+    const typed: ImportedService = {
+      ...service("osm-n1"),
+      id: "manual-test-1",
+      origin: { kind: "manual", createdBy: "compte-1", createdAt: NOW },
+    };
+    expect((await store.add(typed))?.status).toBe("proposed");
+    expect(await store.add(typed)).toBeNull();
+    await store.importServices([service("osm-n2")], []);
+    expect((await store.read()).services["manual-test-1"]?.origin).toEqual(typed.origin);
+    expect(await store.verified()).toEqual([]);
+  });
+
   it("keeps the towns when an import brings none, and leaves missing services alone", async () => {
     await store.importServices([service("osm-n1")], [TOWN]);
     const outcome = await store.importServices([], []);

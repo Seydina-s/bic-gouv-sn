@@ -44,6 +44,18 @@ function sameFacts(a: ServiceFacts, b: ServiceFacts): boolean {
   return JSON.stringify(factsOf(a)) === JSON.stringify(factsOf(b));
 }
 
+/** A new service waiting for a person's review: never shown before it. */
+function asProposal(found: ImportedService): StateService {
+  return {
+    ...found,
+    status: "proposed",
+    reviewedBy: null,
+    reviewedAt: null,
+    pendingUpdate: null,
+    corrections: {},
+  };
+}
+
 /**
  * The internal base of state services and the towns used to search them. Imports
  * only ever add proposals; a person verifies or rejects each service in the console,
@@ -85,14 +97,7 @@ export class FileStateServiceStore {
     for (const found of imported) {
       const current = services[found.id];
       if (current === undefined) {
-        services[found.id] = {
-          ...found,
-          status: "proposed",
-          reviewedBy: null,
-          reviewedAt: null,
-          pendingUpdate: null,
-          corrections: {},
-        };
+        services[found.id] = asProposal(found);
         outcome.added += 1;
       } else if (sameFacts(current, found)) {
         services[found.id] = { ...current, origin: found.origin };
@@ -142,6 +147,20 @@ export class FileStateServiceStore {
     }
     await this.write({ ...file, services });
     return reviewed;
+  }
+
+  /**
+   * A service a person typed in the console because the source misses it: a proposal
+   * like the imported ones, shown once verified. Null when its id is already taken.
+   */
+  async add(service: ImportedService): Promise<StateService | null> {
+    const file = await this.read();
+    if (file.services[service.id] !== undefined) {
+      return null;
+    }
+    const added = asProposal(service);
+    await this.write({ ...file, services: { ...file.services, [service.id]: added } });
+    return added;
   }
 
   /**

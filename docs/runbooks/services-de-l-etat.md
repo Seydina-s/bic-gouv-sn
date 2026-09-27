@@ -25,6 +25,12 @@ Chaque décision et chaque correction sont inscrites au journal d'audit. Une cor
 
 La console refuse un emplacement illisible ou hors du Sénégal (souvent la latitude et la longitude inversées : la latitude, entre 12 et 17, vient en premier). L'emplacement de la source reste affiché pour mémoire.
 
+### Ajouter un service absent de la liste
+
+1. Sur la page **Services de l'État** : **Ajouter un service absent de la liste**.
+2. Saisir le nom, le type et l'emplacement (même principe que ci-dessus : coordonnées ou lien de carte) ; l'adresse et le téléphone sont facultatifs.
+3. **Ajouter le service** : il rejoint la liste « À vérifier » de sa catégorie. Il n'apparaît dans l'application qu'une fois vérifié, comme les services importés. Aucun import ne le supprime.
+
 **Mise en service** : l'API doit être mise à jour avant la console. Face à une API plus ancienne, la console ne fait pas croire au déplacement : elle affiche « Nom et type enregistrés, mais pas l'emplacement ».
 
 ## Relancer l'import (équipe technique)

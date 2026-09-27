@@ -191,6 +191,49 @@ describe("state services", () => {
     expect(entry?.details).toEqual({ location: "14.6928,-17.4467" });
   });
 
+  it("lets an editor add a service the source misses, shown once verified", async () => {
+    const token = await admin.tokenFor("editor");
+    const add = (payload: object) =>
+      app.inject({
+        method: "POST",
+        url: "/admin/v1/services",
+        headers: { authorization: `Bearer ${token}` },
+        payload,
+      });
+    const typed = {
+      category: "prefecture",
+      name: " Sous-préfecture de test ",
+      location: { lat: 14.75, lng: -17.35 },
+      phone: "+221 00 000 00 00",
+    };
+    expect((await add({ ...typed, location: { lat: 48.86, lng: 2.35 } })).statusCode).toBe(400);
+    const created = await add(typed);
+    expect(created.statusCode).toBe(201);
+    const { id } = created.json<{ id: string }>();
+    expect(id).toMatch(/^manual-[0-9a-f-]+$/);
+    // A proposal like the imported ones: nothing public before a person verifies it.
+    expect((await publicList()).body.services).toEqual([]);
+    await review(token, "verified", [id]);
+    expect((await publicList()).body.services).toMatchObject([
+      { id, name: "Sous-préfecture de test", origin: "manual", address: null },
+    ]);
+    const [entry] = (await admin.journal.entries()).filter(
+      (item) => item.action === "service.added",
+    );
+    expect(entry).toMatchObject({ target: id, details: { location: "14.75,-17.35" } });
+    const reviewer = await admin.tokenFor("reviewer");
+    expect(
+      (
+        await app.inject({
+          method: "POST",
+          url: "/admin/v1/services",
+          headers: { authorization: `Bearer ${reviewer}` },
+          payload: typed,
+        })
+      ).statusCode,
+    ).toBe(403);
+  });
+
   it("refuses without a session, a reviewer's role, and unknown services", async () => {
     expect((await app.inject({ method: "GET", url: "/admin/v1/services" })).statusCode).toBe(401);
     const reviewer = await admin.tokenFor("reviewer");
