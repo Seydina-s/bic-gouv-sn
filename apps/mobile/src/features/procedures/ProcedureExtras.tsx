@@ -1,6 +1,4 @@
 import type { ProcedureDetail } from "@bgs/shared-types";
-import { ArrowSquareOutIcon as ArrowSquareOut } from "phosphor-react-native/src/icons/ArrowSquareOut";
-import { CaretRightIcon as CaretRight } from "phosphor-react-native/src/icons/CaretRight";
 import { ChatCircleTextIcon as ChatCircleText } from "phosphor-react-native/src/icons/ChatCircleText";
 import { LinkSimpleIcon as LinkSimple } from "phosphor-react-native/src/icons/LinkSimple";
 import { MapPinIcon as MapPin } from "phosphor-react-native/src/icons/MapPin";
@@ -8,8 +6,8 @@ import { ScalesIcon as Scales } from "phosphor-react-native/src/icons/Scales";
 import { SignpostIcon as Signpost } from "phosphor-react-native/src/icons/Signpost";
 import type { IconProps as PhosphorProps } from "phosphor-react-native";
 import type { ComponentType, ReactNode } from "react";
-import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
-import { Icon } from "../../components/Icon";
+import { Linking, StyleSheet, Text, View } from "react-native";
+import { LinkRow } from "../../components/LinkRow";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 import { BlockRenderer } from "../news/BlockRenderer";
@@ -30,44 +28,6 @@ function Extra({
       <SectionHeading icon={icon} title={title} />
       <View>{children}</View>
     </View>
-  );
-}
-
-/** A row leading elsewhere: another procedure, or a page outside the app. */
-function LinkRow({
-  label,
-  role,
-  onPress,
-}: {
-  label: string;
-  role: "link" | "button";
-  onPress: () => void;
-}) {
-  const { theme } = useTheme();
-  const { color, space, textStyle, touchTarget } = theme;
-  return (
-    <Pressable
-      accessibilityRole={role}
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.row,
-        {
-          gap: space.md,
-          minHeight: touchTarget.min,
-          paddingVertical: space.md,
-          borderTopWidth: StyleSheet.hairlineWidth,
-          borderTopColor: color.border,
-          backgroundColor: pressed ? color.surface : undefined,
-        },
-      ]}
-    >
-      <Text style={[textStyle.body, styles.flex, { color: color.textPrimary }]}>{label}</Text>
-      <Icon
-        icon={role === "link" ? ArrowSquareOut : CaretRight}
-        size="sm"
-        color={color.textBrand}
-      />
-    </Pressable>
   );
 }
 
@@ -169,8 +129,3 @@ export function ProcedureExtras({
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  row: { flexDirection: "row", alignItems: "center" },
-  flex: { flex: 1 },
-});

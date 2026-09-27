@@ -257,6 +257,12 @@ export const fr = {
       "Pour vos démarches administratives, l'application explique chaque procédure publiée sur e-senegal.sn avec les pièces à fournir, le coût, le délai et le lien pour la faire en ligne.",
     aboutSources:
       "Chaque contenu renvoie à sa source officielle, sans ajout ni commentaire. Les articles que vous gardez en favoris restent lisibles même sans connexion.",
+    licences: "Données et licences",
+    licenceData:
+      "Carte et services de l'État\u00a0: © les contributeurs d'OpenStreetMap, licence ODbL",
+    licenceFonts: "Polices Noto Sans et Noto Serif\u00a0: SIL Open Font License",
+    licenceMapIcons: "Icônes du fond de carte\u00a0: © 2017 Mapzen, licence MIT",
+    licenceAppIcons: "Icônes de l'application\u00a0: Phosphor Icons, © 2020 Dustin Do, licence MIT",
     version: "Version {version}",
   },
   favorites: {
