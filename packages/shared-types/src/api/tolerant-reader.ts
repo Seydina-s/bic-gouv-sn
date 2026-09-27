@@ -19,6 +19,12 @@ import {
   type ProcedureListResponse,
   type ProcedureThemesResponse,
 } from "./procedures.schema";
+import { placeSchema } from "../content/state-service.schema";
+import {
+  publicServiceSchema,
+  stateServicesResponseSchema,
+  type StateServicesResponse,
+} from "./services.schema";
 
 /*
  * Tolerant reader for clients (the app): a newer API may add block types, image
@@ -135,6 +141,22 @@ export function readProcedureThemes(raw: unknown): ProcedureThemesResponse | nul
   const parsed = procedureThemesResponseSchema.safeParse({
     ...raw,
     themes: keepValid(raw["themes"], procedureThemesResponseSchema.shape.themes.element),
+  });
+  return parsed.success ? parsed.data : null;
+}
+
+/**
+ * State services and towns: a service of a category this version does not know yet
+ * is left out, like an unreadable town. Null if the answer's shape is broken.
+ */
+export function readStateServices(raw: unknown): StateServicesResponse | null {
+  if (!isRecord(raw) || !Array.isArray(raw["services"]) || !Array.isArray(raw["places"])) {
+    return null;
+  }
+  const parsed = stateServicesResponseSchema.safeParse({
+    ...raw,
+    services: keepValid(raw["services"], publicServiceSchema),
+    places: keepValid(raw["places"], placeSchema),
   });
   return parsed.success ? parsed.data : null;
 }
