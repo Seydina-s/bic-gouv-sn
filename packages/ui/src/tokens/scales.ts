@@ -54,19 +54,20 @@ export const opacity = {
 /**
  * Font faces, one per weight: on Android, `fontWeight` does not select a weight
  * of a custom family, so each weight is its own face. Names match the keys the
- * app registers with expo-font. Provisional families from the reference mockup
- * (OFL, all Wolof glyphs verified), pending the typography comparison (S1-04).
+ * app registers with expo-font. Noto Sans and Noto Serif (OFL), chosen by the user
+ * on 27/09/2026 (S1-04): the only families drawing every letter of the country's
+ * languages (Wolof, Pulaar, Serer), checked in CI by `pnpm fonts:check`.
  */
 export const fontFace = {
-  displaySemibold: "BricolageGrotesque_600SemiBold",
-  displayBold: "BricolageGrotesque_700Bold",
-  displayExtrabold: "BricolageGrotesque_800ExtraBold",
-  bodyRegular: "Manrope_400Regular",
-  bodySemibold: "Manrope_600SemiBold",
-  bodyBold: "Manrope_700Bold",
-  /** Newspaper serif for headlines ("La Une", D-05): Literata, OFL, Wolof glyphs verified. */
-  serifSemibold: "Literata_600SemiBold",
-  serifBold: "Literata_700Bold",
+  displaySemibold: "NotoSans_600SemiBold",
+  displayBold: "NotoSans_700Bold",
+  displayExtrabold: "NotoSans_800ExtraBold",
+  bodyRegular: "NotoSans_400Regular",
+  bodySemibold: "NotoSans_600SemiBold",
+  bodyBold: "NotoSans_700Bold",
+  /** Serif for the headlines of official texts ("La Une", D-05). */
+  serifSemibold: "NotoSerif_600SemiBold",
+  serifBold: "NotoSerif_700Bold",
 } as const;
 
 export interface TextStyle {

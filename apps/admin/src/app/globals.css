@@ -26,8 +26,8 @@
   --color-flag-green: var(--bgs-flag-green);
   --color-flag-yellow: var(--bgs-flag-yellow);
   --color-flag-red: var(--bgs-flag-red);
-  --font-display: var(--font-bricolage);
-  --font-body: var(--font-manrope);
+  --font-display: var(--font-noto-sans);
+  --font-body: var(--font-noto-sans);
   --radius-sm: var(--bgs-radius-sm);
   --radius-md: var(--bgs-radius-md);
   --radius-lg: var(--bgs-radius-lg);
@@ -37,7 +37,7 @@
   html {
     background: var(--bgs-color-background);
     color: var(--bgs-color-text-primary);
-    font-family: var(--font-manrope), system-ui, sans-serif;
+    font-family: var(--font-noto-sans), system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }

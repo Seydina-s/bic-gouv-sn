@@ -8,16 +8,17 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import subsetFont from "subset-font";
 
-/** The faces declared in the design tokens (packages/ui fontFace), by package. */
+/**
+ * The faces declared in the design tokens (packages/ui fontFace), by package: Noto
+ * Sans and Noto Serif, chosen by the user on 27/09/2026 (S1-04).
+ */
 const FACES = [
-  ["bricolage-grotesque", "600SemiBold", "BricolageGrotesque_600SemiBold"],
-  ["bricolage-grotesque", "700Bold", "BricolageGrotesque_700Bold"],
-  ["bricolage-grotesque", "800ExtraBold", "BricolageGrotesque_800ExtraBold"],
-  ["manrope", "400Regular", "Manrope_400Regular"],
-  ["manrope", "600SemiBold", "Manrope_600SemiBold"],
-  ["manrope", "700Bold", "Manrope_700Bold"],
-  ["literata", "600SemiBold", "Literata_600SemiBold"],
-  ["literata", "700Bold", "Literata_700Bold"],
+  ["noto-sans", "400Regular", "NotoSans_400Regular"],
+  ["noto-sans", "600SemiBold", "NotoSans_600SemiBold"],
+  ["noto-sans", "700Bold", "NotoSans_700Bold"],
+  ["noto-sans", "800ExtraBold", "NotoSans_800ExtraBold"],
+  ["noto-serif", "600SemiBold", "NotoSerif_600SemiBold"],
+  ["noto-serif", "700Bold", "NotoSerif_700Bold"],
 ] as const;
 
 /**
@@ -28,6 +29,9 @@ const FACES = [
 const KEPT_RANGES: [number, number][] = [
   [0x20, 0x7e],
   [0xa0, 0x24f],
+  // ɓ and ɗ of Pulaar and Serer sit in the IPA block: only these two are kept.
+  [0x253, 0x253],
+  [0x257, 0x257],
   [0x300, 0x36f],
   [0x2000, 0x206f],
   [0x20a0, 0x20cf],
@@ -37,15 +41,15 @@ const KEPT_RANGES: [number, number][] = [
 /**
  * Letters every face must draw (CLAUDE.md: all Wolof characters), as code points:
  * French accents and ligatures, Wolof (ë é à ó ñ ŋ), French quotes, apostrophe,
- * ellipsis, dashes and the non-breaking space used before « : ; ? ! ».
- * Not required: the hooked letters of Pulaar and Serer (Ɓ Ɗ Ƴ) and the narrow
- * non-breaking space, absent from the original files (to weigh in S1-04); the
- * phone draws them with its system font.
+ * ellipsis, dashes and the non-breaking space used before « : ; ? ! ». Since the
+ * Noto faces (27/09/2026), also the hooked letters of Pulaar and Serer (Ɓ ɓ Ɗ ɗ
+ * Ƴ ƴ) and the narrow non-breaking space: every language of the country is drawn.
  */
 const REQUIRED = [
   0xe0, 0xe2, 0xe7, 0xe8, 0xe9, 0xea, 0xeb, 0xee, 0xef, 0xf3, 0xf4, 0xf9, 0xfb, 0xfc, 0xff, 0x153,
   0xe6, 0xc0, 0xc2, 0xc7, 0xc8, 0xc9, 0xca, 0xcb, 0xce, 0xcf, 0xd3, 0xd4, 0xd9, 0xdb, 0xdc, 0x152,
-  0xf1, 0xd1, 0x14b, 0x14a, 0xab, 0xbb, 0x2019, 0x2026, 0xa0, 0x2013, 0x2014,
+  0xf1, 0xd1, 0x14b, 0x14a, 0xab, 0xbb, 0x2019, 0x2026, 0xa0, 0x2013, 0x2014, 0x181, 0x253, 0x18a,
+  0x257, 0x1b3, 0x1b4, 0x202f,
 ];
 
 const root = fileURLToPath(new URL("..", import.meta.url));

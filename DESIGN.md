@@ -61,52 +61,52 @@ colors:
   glass-border-dark: "#3F4440"
 typography:
   display:
-    fontFamily: "Bricolage Grotesque"
+    fontFamily: "Noto Sans"
     fontSize: "34px"
     fontWeight: 800
     lineHeight: "44px"
   headline:
-    fontFamily: "Bricolage Grotesque"
+    fontFamily: "Noto Sans"
     fontSize: "28px"
     fontWeight: 700
     lineHeight: "36px"
   lead-headline:
-    fontFamily: "Literata, Georgia, serif"
+    fontFamily: "Noto Serif, Georgia, serif"
     fontSize: "26px"
     fontWeight: 700
     lineHeight: "34px"
   title:
-    fontFamily: "Bricolage Grotesque"
+    fontFamily: "Noto Sans"
     fontSize: "22px"
     fontWeight: 600
     lineHeight: "30px"
   subtitle:
-    fontFamily: "Manrope"
+    fontFamily: "Noto Sans"
     fontSize: "18px"
     fontWeight: 700
     lineHeight: "26px"
   story-title:
-    fontFamily: "Literata, Georgia, serif"
+    fontFamily: "Noto Serif, Georgia, serif"
     fontSize: "18px"
     fontWeight: 600
     lineHeight: "24px"
   body:
-    fontFamily: "Manrope"
+    fontFamily: "Noto Sans"
     fontSize: "16px"
     fontWeight: 400
     lineHeight: "24px"
   body-small:
-    fontFamily: "Manrope"
+    fontFamily: "Noto Sans"
     fontSize: "14px"
     fontWeight: 400
     lineHeight: "20px"
   label:
-    fontFamily: "Manrope"
+    fontFamily: "Noto Sans"
     fontSize: "14px"
     fontWeight: 600
     lineHeight: "20px"
   caption:
-    fontFamily: "Manrope"
+    fontFamily: "Noto Sans"
     fontSize: "12px"
     fontWeight: 600
     lineHeight: "16px"
@@ -203,7 +203,7 @@ Le pagne tissé en bandes (manjak / wolof) reste le fil conducteur : chaque rubr
 La densité est celle d'un quotidien lisible sur petit écran : une colonne, des filets fins entre les articles, beaucoup d'air autour des titres. La profondeur se limite à une seule surface flottante, la barre d'onglets en verre dépoli. Le mouvement se réduit à une entrée « tissée » des articles, supprimée si le système demande de réduire les animations.
 
 **Key Characteristics:**
-- Une de journal : bandeau tricolore, nom + date, filet, photo pleine largeur, titre serif Literata.
+- Une de journal : bandeau tricolore, nom + date, filet, photo pleine largeur, titre serif Noto Serif.
 - Un motif tissé par rubrique, toujours décoratif, jamais derrière un texte.
 - Vert dominant, jaune en petite touche, rouge réservé aux alertes ; tokens sémantiques pour les deux thèmes.
 - Plat par défaut ; seules les surfaces de navigation et d'action flottent, toutes sur le même verre.
@@ -245,30 +245,30 @@ La palette est celle du drapeau, déclinée en échelles de 50 à 900 (OKLCH), a
 
 ## Typography
 
-**Display Font:** Bricolage Grotesque (600, 700, 800)
-**Headline Font:** Literata (600, 700), serif de journal
-**Body Font:** Manrope (400, 600, 700)
+**Display Font:** Noto Sans (600, 700, 800)
+**Headline Font:** Noto Serif (600, 700), serif des titres officiels
+**Body Font:** Noto Sans (400, 600, 700)
 
-**Character:** Literata donne aux titres d'articles le ton d'un quotidien sérieux. Bricolage Grotesque, plus expressif, signe le nom de l'application. Manrope, net et ouvert, porte la lecture et l'interface. Les trois polices sont sous licence OFL et affichent tous les caractères wolof (ë, é, à, ó, ñ, ŋ).
+**Character:** Choix de l'utilisateur le 27/09/2026 (S1-04, option C de la comparaison). Noto Serif donne aux titres d'articles le ton sobre d'un texte officiel ; Noto Sans, ouverte et très lisible en petit, porte l'interface et la lecture. Ce sont les seules familles comparées qui écrivent toutes les lettres des langues du pays (wolof, pulaar, sérère : ë ñ ŋ Ɓ ɓ Ɗ ɗ Ƴ ƴ) et l'espace fine ; licence OFL ; 673 Ko pour les 6 fichiers réduits au latin.
 
 **Statut : provisoire.** Le choix final des polices reste **ouvert (S1-04)** : comparaison FR + WO avec 2 ou 3 alternatives, décision de l'utilisateur. Changer de police revient à modifier `fontFace` dans `scales.ts` et le chargement expo-font, sans toucher aux écrans.
 
 Sur Android, `fontWeight` ne sélectionne pas la graisse d'une police personnalisée : chaque graisse est un fichier distinct (`fontFace.*`). On change de graisse en changeant de `fontFamily`, jamais avec `fontWeight`.
 
 ### Hierarchy
-- **Display** (Bricolage 800, 34/44) : réservé aux très grands titres d'écran. Sa famille sert aussi au nom de l'application dans l'en-tête, en taille `title`.
-- **Headline** (Bricolage 700, 28/36) : titres d'écrans secondaires.
-- **Lead headline** (Literata 700, 26/34) : titre de l'article à la une et titre de la page article. 5 lignes au plus dans le fil.
-- **Title** (Bricolage 600, 22/30) : nom de l'application dans l'en-tête, titres de section.
-- **Subtitle** (Manrope 700, 18/26) : intertitres dans le corps d'un article. Sa famille sert aussi au gras dans le texte et au libellé de l'onglet actif.
-- **Story title** (Literata 600, 18/24) : titres d'articles dans la liste (3 lignes au plus) et dans la carte du Conseil (4 lignes au plus).
-- **Body** (Manrope 400, 16/24) : lecture et extraits. Colonne de lecture limitée à 640 dp (≈ 65 caractères).
-- **Body small** (Manrope 400, 14/20) : date, source, mention « traduction automatique ».
-- **Label** (Manrope 600, 14/20) : boutons, liens d'action, date de l'en-tête.
-- **Caption** (Manrope 600, 12/16) : libellés d'onglets et nom de rubrique. Uniquement pour des libellés courts, jamais pour de la lecture.
+- **Display** (Noto Sans 800, 34/44) : réservé aux très grands titres d'écran. Sa famille sert aussi au nom de l'application dans l'en-tête, en taille `title`.
+- **Headline** (Noto Sans 700, 28/36) : titres d'écrans secondaires.
+- **Lead headline** (Noto Serif 700, 26/34) : titre de l'article à la une et titre de la page article. 5 lignes au plus dans le fil.
+- **Title** (Noto Sans 600, 22/30) : nom de l'application dans l'en-tête, titres de section.
+- **Subtitle** (Noto Sans 700, 18/26) : intertitres dans le corps d'un article. Sa famille sert aussi au gras dans le texte et au libellé de l'onglet actif.
+- **Story title** (Noto Serif 600, 18/24) : titres d'articles dans la liste (3 lignes au plus) et dans la carte du Conseil (4 lignes au plus).
+- **Body** (Noto Sans 400, 16/24) : lecture et extraits. Colonne de lecture limitée à 640 dp (≈ 65 caractères).
+- **Body small** (Noto Sans 400, 14/20) : date, source, mention « traduction automatique ».
+- **Label** (Noto Sans 600, 14/20) : boutons, liens d'action, date de l'en-tête.
+- **Caption** (Noto Sans 600, 12/16) : libellés d'onglets et nom de rubrique. Uniquement pour des libellés courts, jamais pour de la lecture.
 
 ### Named Rules
-**La règle du serif pour l'information.** Literata est réservée aux titres d'articles officiels (`lead-headline`, `story-title`). L'interface (boutons, onglets, libellés) reste en Manrope.
+**La règle du serif pour l'information.** Noto Serif est réservée aux titres d'articles officiels (`lead-headline`, `story-title`). L'interface (boutons, onglets, libellés) reste en Noto Sans.
 
 **La règle de l'interligne large.** L'interligne vaut au moins 1,25 fois la taille pour que les diacritiques français et wolof (É, Ë, Ñ, Ŋ) ne soient jamais rognés.
 
@@ -312,7 +312,7 @@ Chaque changement visuel passe par les tokens (`packages/ui/src/tokens/`) ou par
 Une pilule flottante, discrète, par-dessus le contenu qui défile.
 - **Forme** : pilule (`rounded.full`), 64 dp de haut, à 12 dp des bords (plus les zones sûres), contour `glass-border` fin.
 - **Matière** : flou réel sur iOS et le web, translucide sans flou sur Android (voir Elevation & Depth).
-- **États** : onglet actif = indicateur vert tendre de 56 × 32 dp, icône Phosphor pleine (`fill`) en `on-primary-container`, libellé en Manrope 700 `text-primary` (le vert de marque descend sous 4,5:1 sur le verre dans le pire cas ; l'état actif se lit à la pilule verte, à l'icône pleine et à la graisse, jamais à la couleur seule). Onglet inactif = icône `regular` et libellé `caption` en `text-secondary`. Pression = opacité réduite.
+- **États** : onglet actif = indicateur vert tendre de 56 × 32 dp, icône Phosphor pleine (`fill`) en `on-primary-container`, libellé en Noto Sans 700 `text-primary` (le vert de marque descend sous 4,5:1 sur le verre dans le pire cas ; l'état actif se lit à la pilule verte, à l'icône pleine et à la graisse, jamais à la couleur seule). Onglet inactif = icône `regular` et libellé `caption` en `text-secondary`. Pression = opacité réduite.
 - **Règles** : une icône est toujours accompagnée de son libellé. Rôles d'accessibilité `tablist` / `tab` avec l'état `selected`. Les écrans réservent l'espace de la barre avec `useTabBarInset()`.
 
 ### En-tête de la une (`features/news/Masthead.tsx`)
@@ -362,14 +362,14 @@ Demande de l'utilisateur (27/09/2026) : 20 éléments par page, une présentatio
 Services de l'État vérifiés, les plus proches d'abord, calculés sur le téléphone (la position n'est jamais envoyée).
 - **Panneau de localisation** (`LocationPanel`) : fond `surface`, `rounded.lg` ; bouton principal « Utiliser ma position » (flèche de navigation pleine), bouton secondaire à contour « Choisir une ville » qui ouvre une recherche de ville (lettres sans accents, villes d'abord), puis la phrase de confidentialité en `body-small`. La permission n'est demandée qu'au toucher du bouton. Une fois choisi : ligne compacte « Autour de … » avec « Changer ».
 - **Filtres** (`ServiceFilters`) : pastilles comme celles des rubriques, en vert tendre quand elles sont actives, avec l'icône du type de service.
-- **Ligne de service** (`ServiceRow`) : pastille ronde de 48 dp en `primary-container` avec l'icône du type (mairie : bâtiment à colonnes ; préfecture : drapeau ; police : bouclier coché ; gendarmerie : bouclier étoilé ; tribunal : balance ; ministère : immeubles ; direction ou agence : porte-documents), nom en Manrope 700, « type · à 850 m », adresse en `text-tertiary`, chevron, filet fin au-dessus.
+- **Ligne de service** (`ServiceRow`) : pastille ronde de 48 dp en `primary-container` avec l'icône du type (mairie : bâtiment à colonnes ; préfecture : drapeau ; police : bouclier coché ; gendarmerie : bouclier étoilé ; tribunal : balance ; ministère : immeubles ; direction ou agence : porte-documents), nom en Noto Sans 700, « type · à 850 m », adresse en `text-tertiary`, chevron, filet fin au-dessus.
 - **Fiche service** (`app/service/[id].tsx`) : nom en `title`, type avec sa pastille (sous le nom, jamais en sur-titre), bouton principal « Itinéraire » qui ouvre l'application de navigation du téléphone, puis adresse, horaires tels qu'écrits à la source, téléphone et site en lignes séparées par des filets, enfin « Vérifié le … » et l'attribution OpenStreetMap.
 - **États** : rien de vérifié encore → phrase honnête (« Les services de l'État arrivent bientôt ici… ») ; localisation refusée → explication et recherche de ville.
 
 ### Fiche de démarche (`features/procedures/ProcedureView.tsx`)
 Demande de l'utilisateur (27/09/2026) : une présentation propre à l'application, pas celle de la source. Le texte officiel reste mot pour mot ; seule la mise en page change (`procedure-sheet.ts` reconnaît les questions de la fiche, `procedure-page.ts` agence la page, tous deux testés sur les 718 fiches réelles).
 - **En-tête** : titre `lead-headline` (rôle `header`), résumé `body` `text-secondary`, puis la pilule « Écouter » (`ReadAloudButton`, la même que sur la photo d'un article) qui lit la page dans son ordre.
-- **Encadré « En bref »** (`ProcedureBrief`) : fond `primary-container`, `rounded.lg`, titre `subtitle`, puis une ligne par réponse clé (pour qui, pièces à fournir, coût, délai, validité, document délivré, où s'adresser, en ligne) : icône Phosphor duotone, libellé `body-small`, valeur `body` en Manrope 700, le tout en `on-primary-container`, filets `withAlpha(on-primary-container, opacity.pressed)`. La ligne « Pièces à fournir » est un bouton (chevron bas) qui descend à la liste.
+- **Encadré « En bref »** (`ProcedureBrief`) : fond `primary-container`, `rounded.lg`, titre `subtitle`, puis une ligne par réponse clé (pour qui, pièces à fournir, coût, délai, validité, document délivré, où s'adresser, en ligne) : icône Phosphor duotone, libellé `body-small`, valeur `body` en Noto Sans 700, le tout en `on-primary-container`, filets `withAlpha(on-primary-container, opacity.pressed)`. La ligne « Pièces à fournir » est un bouton (chevron bas) qui descend à la liste.
 - **Sections** (`SheetContent`) : pastille ronde de 40 dp en `surface` avec l'icône du sujet en `text-brand` (13 sujets : public, moment, pièces, coût, délai, validité, lieu, étapes, perte ou refus, document délivré, obligations, textes, contacts), puis la question de la source en `subtitle`. `xxl` au-dessus de chaque section.
 - **Pièces à cocher** : case Phosphor (`Square` en `border-strong`, `CheckSquare` plein en `primary`), 48 dp par ligne, rôle `checkbox` ; « Cochez les pièces déjà réunies. » puis « x sur y réunies » sous le titre. Les coches restent sur le téléphone.
 - **Étapes** : numéros dans des pastilles `primary` / `on-primary` de 28 dp (grandissent avec la taille du texte), reliées par un rail de 2 dp en `border` (GOV.UK). Utilisées pour les listes numérotées et les listes des sections « étapes ».
@@ -411,7 +411,7 @@ Demande de l'utilisateur (27/09/2026) : une présentation propre à l'applicatio
 
 ## Points ouverts
 
-- **Polices finales (S1-04)** : Bricolage Grotesque, Manrope et Literata sont provisoires en attendant la comparaison FR + WO et le choix de l'utilisateur.
+- **Polices (S1-04)** : tranché le 27/09/2026 par l'utilisateur : Noto Sans et Noto Serif.
 - **Textes d'interface en wolof (W-01)** : en attente de rédacteurs natifs. Les longueurs wolof n'ont pas encore été vérifiées dans les libellés d'onglets ni dans les rubriques.
 - **Deux volets sur grand écran (RESP-01)** : pour l'instant, une colonne centrée.
 - **Validation sur téléphone** de D-05 (décisions du 25/09/2026) : DESIGN.md sera régénéré après cette validation.
