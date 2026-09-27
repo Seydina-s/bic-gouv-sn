@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import * as Sentry from "@sentry/node";
-import Fastify, { type FastifyInstance } from "fastify";
+import Fastify, { type FastifyInstance, type FastifyLoggerOptions } from "fastify";
 import {
   jsonSchemaTransform,
   serializerCompiler,
@@ -48,6 +48,8 @@ export interface AppOptions {
   stateServices?: FileStateServiceStore;
   /** Defaults to the file stores when ADMIN_SECRET_KEY is set; none otherwise. */
   admin?: AdminServices | null;
+  /** Where the logs go: standard output by default, tests read them here. */
+  logStream?: FastifyLoggerOptions["stream"];
 }
 
 export interface AdminServices {
@@ -79,11 +81,13 @@ export async function buildApp({
   procedureThemes = new FileProcedureThemeStore(config.PROCEDURE_THEMES_PATH),
   stateServices = new FileStateServiceStore(config.STATE_SERVICES_PATH),
   admin = defaultAdmin(config),
+  logStream,
 }: AppOptions): Promise<FastifyInstance> {
   const app = Fastify({
     logger: {
       level: config.LOG_LEVEL,
       redact: ["req.headers.authorization", "req.headers.cookie"],
+      ...(logStream === undefined ? {} : { stream: logStream }),
     },
     genReqId: () => randomUUID(),
     // Official procedure slugs exceed the default 100 characters: those procedures
@@ -136,6 +140,9 @@ export async function buildApp({
   await app.register(servicesRoutes, { prefix: "/v1", services: stateServices });
   await app.register(mapRoutes, {
     prefix: "/v1",
+    // The tiles someone loads around them tell roughly where they are: map requests
+    // stay out of the logs (warnings and errors are still logged).
+    logLevel: "warn",
     tilesPath: config.MAP_TILES_PATH,
     assetsRoot: config.MAP_ASSETS_ROOT,
   });
