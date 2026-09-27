@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react-native";
+import * as Location from "expo-location";
 import { renderRouter } from "expo-router/testing-library";
 import { Dimensions, Linking } from "react-native";
 import RootLayout from "./app/_layout";
@@ -15,6 +16,7 @@ import ProcedureThemeScreen from "./app/procedure-theme/[id]";
 import SectionScreen from "./app/section/[slug]";
 import FavoritesScreen from "./app/favorites";
 import SearchScreen from "./app/search";
+import ServiceScreen from "./app/service/[id]";
 import { DETAIL, LIST, newsFetch } from "./testing/news-fixtures";
 import { PROCEDURE_LIST } from "./testing/procedure-fixtures";
 
@@ -23,6 +25,13 @@ jest.mock("expo-system-ui", () => ({ setBackgroundColorAsync: jest.fn(() => Prom
 jest.mock("expo-splash-screen", () => ({
   preventAutoHideAsync: jest.fn(() => Promise.resolve()),
   hideAsync: jest.fn(() => Promise.resolve()),
+}));
+
+jest.mock("expo-location", () => ({
+  requestForegroundPermissionsAsync: jest.fn(),
+  getLastKnownPositionAsync: jest.fn(),
+  getCurrentPositionAsync: jest.fn(),
+  Accuracy: { Balanced: 3 },
 }));
 
 let mockFontState: [boolean, Error | null] = [true, null];
@@ -52,6 +61,7 @@ const routes = {
   "procedure/[slug]": ProcedureScreen,
   "procedure-theme/[id]": ProcedureThemeScreen,
   "section/[slug]": SectionScreen,
+  "service/[id]": ServiceScreen,
   favorites: FavoritesScreen,
   search: SearchScreen,
 };
@@ -403,10 +413,68 @@ describe("app shell", () => {
   });
 
   it("shows an honest coming-soon screen for sections not built yet", async () => {
-    await renderRouter(routes, { initialUrl: "/near-me" });
+    await renderRouter(routes, { initialUrl: "/assistant" });
     await waitFor(() => {
       expect(screen.getByText("Bientôt disponible")).toBeOnTheScreen();
     });
+  });
+
+  it("lists the verified services, then the nearest from a chosen town, with directions", async () => {
+    const openURL = jest.spyOn(Linking, "openURL").mockResolvedValue(true);
+    await renderRouter(routes, { initialUrl: "/near-me" });
+    expect(await screen.findByText("Commissariat de test proche")).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole("button", { name: "Choisir une ville" }));
+    await fireEvent.changeText(screen.getByLabelText("Rechercher une ville"), "ville de");
+    await fireEvent.press(screen.getByRole("button", { name: "Ville de test" }));
+    expect(await screen.findByText("Autour de Ville de test")).toBeOnTheScreen();
+    expect(screen.getByText(/^Police · à 110.m$/)).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole("button", { name: /^Commissariat de test proche/ }));
+    expect(
+      await screen.findByRole("header", { name: "Commissariat de test proche" }),
+    ).toBeOnTheScreen();
+    expect(screen.getByText("Mo-Fr 08:00-17:00")).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole("link", { name: "Itinéraire" }));
+    expect(openURL).toHaveBeenCalledWith(expect.stringContaining("14.701,-17.4"));
+    openURL.mockRestore();
+  });
+
+  it("asks for the location only when asked, and offers a town after a refusal", async () => {
+    jest
+      .mocked(Location.requestForegroundPermissionsAsync)
+      .mockResolvedValue({ granted: false } as never);
+    await renderRouter(routes, { initialUrl: "/near-me" });
+    await screen.findByText("Commissariat de test proche");
+    expect(Location.requestForegroundPermissionsAsync).not.toHaveBeenCalled();
+    await fireEvent.press(screen.getByRole("button", { name: "Utiliser ma position" }));
+    expect(await screen.findByText(/La localisation n'est pas autorisée/)).toBeOnTheScreen();
+    expect(screen.getByRole("button", { name: "Choisir une ville" })).toBeOnTheScreen();
+  });
+
+  it("ranks the services from the phone's position, which is never sent", async () => {
+    jest
+      .mocked(Location.requestForegroundPermissionsAsync)
+      .mockResolvedValue({ granted: true } as never);
+    jest
+      .mocked(Location.getLastKnownPositionAsync)
+      .mockResolvedValue({ coords: { latitude: 14.7, longitude: -17.4 } } as never);
+    const fetchMock = newsFetch();
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    await renderRouter(routes, { initialUrl: "/near-me" });
+    await screen.findByText("Tribunal de test");
+    await fireEvent.press(screen.getByRole("button", { name: "Utiliser ma position" }));
+    expect(await screen.findByText("Autour de votre position")).toBeOnTheScreen();
+    expect(screen.getByText(/^Police · à 110.m$/)).toBeOnTheScreen();
+    expect(
+      fetchMock.mock.calls.some(([url]) => url.includes("14.7") || url.includes("-17.4")),
+    ).toBe(false);
+  });
+
+  it("says honestly when no service has been verified yet", async () => {
+    globalThis.fetch = newsFetch({
+      services: () => new Response(JSON.stringify({ services: [], places: [] })),
+    }) as unknown as typeof fetch;
+    await renderRouter(routes, { initialUrl: "/near-me" });
+    expect(await screen.findByText(/arrivent bientôt ici/)).toBeOnTheScreen();
   });
 
   it("lists the procedures with their known facts while no theme is validated, and searches", async () => {

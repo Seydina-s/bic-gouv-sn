@@ -27,6 +27,14 @@
       "expo-splash-screen",
       "expo-image",
       [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Bic Gouv SN utilise votre position sur votre téléphone, sans jamais l’envoyer, pour trouver les services de l’État les plus proches.",
+          "isAndroidBackgroundLocationEnabled": false,
+          "isIosBackgroundLocationEnabled": false
+        }
+      ],
+      [
         "@sentry/react-native/expo",
         {
           "url": "https://de.sentry.io/",

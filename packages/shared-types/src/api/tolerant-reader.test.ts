@@ -6,6 +6,7 @@ import {
   readProcedureDetail,
   readProcedureList,
   readProcedureThemes,
+  readStateServices,
 } from "./tolerant-reader";
 
 // Placeholder texts, not real content.
@@ -168,5 +169,42 @@ describe("readProcedureThemes", () => {
     });
     expect(read?.themes).toEqual([{ id: "a1", title: "Transports", icon: "fa-bus-alt", count: 3 }]);
     expect(readProcedureThemes({ items: [] })).toBeNull();
+  });
+});
+
+describe("readStateServices", () => {
+  const service = {
+    id: "osm-n1",
+    category: "mairie",
+    name: "Mairie de test",
+    address: null,
+    town: null,
+    location: { lat: 14.7, lng: -17.4 },
+    phone: null,
+    website: null,
+    openingHours: null,
+    verifiedAt: "2026-09-27T04:00:00Z",
+    origin: "osm",
+  };
+  const place = {
+    id: "osm-n9",
+    name: "Ville de test",
+    kind: "city",
+    location: { lat: 14.7, lng: -17.4 },
+  };
+
+  it("leaves out a service of a category this version does not know yet", () => {
+    const read = readStateServices({
+      services: [service, { ...service, id: "osm-n2", category: "hopital" }],
+      places: [place, { id: "x" }],
+      attribution: "nouveau champ",
+    });
+    expect(read?.services.map((item) => item.id)).toEqual(["osm-n1"]);
+    expect(read?.places).toEqual([place]);
+  });
+
+  it("refuses a broken answer", () => {
+    expect(readStateServices({ services: [] })).toBeNull();
+    expect(readStateServices(null)).toBeNull();
   });
 });

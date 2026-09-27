@@ -1,5 +1,6 @@
 import type { Cover, NewsDetail, NewsListResponse, NewsSectionsResponse } from "@bgs/shared-types";
 import { PROCEDURE_DETAIL, PROCEDURE_LIST, PROCEDURE_THEMES } from "./procedure-fixtures";
+import { STATE_SERVICES } from "./service-fixtures";
 
 export const COVER: Cover = {
   width: 1200,
@@ -84,9 +85,15 @@ export function newsFetch(
     sections?: () => Response;
     procedures?: () => Response;
     procedureThemes?: () => Response;
+    services?: () => Response;
   } = {},
 ) {
   return jest.fn((input: string) => {
+    if (input.includes("/v1/services")) {
+      return Promise.resolve(
+        overrides.services?.() ?? new Response(JSON.stringify(STATE_SERVICES)),
+      );
+    }
     if (input.includes("/v1/procedures/themes")) {
       return Promise.resolve(
         overrides.procedureThemes?.() ?? new Response(JSON.stringify(PROCEDURE_THEMES)),
