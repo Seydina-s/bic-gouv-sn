@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { readApiUrl } from "./config";
-import { formatClockTime, formatDuration } from "./format";
+import { formatClockTime, formatDay, formatDuration } from "./format";
 import { t } from "./i18n";
 import { themeCss } from "./theme-css";
 
@@ -21,6 +21,12 @@ describe("formatDuration", () => {
 describe("formatClockTime", () => {
   it("shows Dakar time", () => {
     expect(formatClockTime(new Date("2026-09-24T14:32:00Z"))).toBe("14:32");
+  });
+});
+
+describe("formatDay", () => {
+  it("writes the day in words, in Dakar time", () => {
+    expect(formatDay(new Date("2026-09-27T04:00:00Z"))).toBe("27 septembre 2026");
   });
 });
 

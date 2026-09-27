@@ -19,6 +19,7 @@ describe("reading OpenStreetMap objects as state services", () => {
     [{ office: "government", name: "Mayor's Office" }, "mairie"],
     [{ office: "government", name: "Gouvernance de test" }, "prefecture"],
     [{ amenity: "townhall", name: "Gouvernance de test" }, "prefecture"],
+    [{ amenity: "townhall", name: "Comissariat de test" }, "police"],
     [{ office: "government", name: "Brigade de gendarmerie de test" }, "gendarmerie"],
     [{ office: "government", name: "Commissariat de test" }, "police"],
     [{ office: "government", name: "Direction de test" }, "administration"],

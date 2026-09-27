@@ -33,3 +33,13 @@ export function formatClockTime(date: Date): string {
     timeZone: "Africa/Dakar",
   }).format(date);
 }
+
+/** Day in Dakar, in words, e.g. "27 septembre 2026". */
+export function formatDay(date: Date): string {
+  return new Intl.DateTimeFormat("fr-SN", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "Africa/Dakar",
+  }).format(date);
+}

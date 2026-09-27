@@ -48,6 +48,7 @@ export const adminFr = {
     label: "Sections de l'administration",
     status: "État du service",
     procedures: "Thèmes des démarches",
+    services: "Services de l'État",
     signOut: "Se déconnecter",
     signedInAs: "Connecté : {name}",
   },
@@ -100,6 +101,52 @@ export const adminFr = {
     },
     failed: "L'enregistrement a échoué. Réessayez ; si cela persiste, vérifiez l'état du service.",
     forbidden: "Votre rôle ne permet pas cette action.",
+  },
+  services: {
+    title: "Services de l'État",
+    intro:
+      "Importés d'OpenStreetMap. Rien n'apparaît dans l'application avant d'être vérifié ici : ouvrez chaque service sur la carte, puis cochez ceux qui sont justes.",
+    categories: "Catégories",
+    category: {
+      mairie: "Mairies",
+      prefecture: "Gouvernances et préfectures",
+      police: "Police",
+      gendarmerie: "Gendarmerie",
+      tribunal: "Tribunaux",
+      ministere: "Ministères",
+      administration: "Directions et agences",
+    },
+    zone: "Zone",
+    zoneDakar: "Région de Dakar (zone pilote)",
+    zoneAll: "Tout le Sénégal",
+    toCheck: "{count} à vérifier",
+    verified: {
+      one: "{count} vérifié",
+      other: "{count} vérifiés",
+    },
+    proposedTitle: "À vérifier : {category}",
+    proposedIntro:
+      "Cochez les services que vous avez vérifiés (nom et emplacement). Ceux qui ne sont pas des services de l'État, ou qui n'existent plus, s'écartent de la même façon.",
+    openMap: "Voir sur la carte",
+    verifyChecked: "Vérifier les services cochés",
+    rejectChecked: "Écarter les services cochés",
+    changedTitle: "Changés à la source depuis leur vérification",
+    changedIntro:
+      "OpenStreetMap indique un changement pour ces services ; l'application montre toujours la version vérifiée. Vérifiez-les de nouveau pour prendre le changement.",
+    verifiedTitle: "Déjà vérifiés : {category}",
+    verifiedOn: "vérifié le {date}",
+    sourceNow: "Selon la source : {name}",
+    nearTown: "près de {town}",
+    none: "Rien à vérifier ici.",
+    doneVerified: {
+      one: "{count} service vérifié : il apparaît dans l'application.",
+      other: "{count} services vérifiés : ils apparaissent dans l'application.",
+    },
+    doneRejected: {
+      one: "{count} service écarté.",
+      other: "{count} services écartés.",
+    },
+    attribution: "Données © les contributeurs d'OpenStreetMap (licence ODbL).",
   },
 } as const;
 

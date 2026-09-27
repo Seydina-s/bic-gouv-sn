@@ -12,16 +12,29 @@ type Tags = Readonly<Record<string, string>>;
 /** Préfectures, sous-préfectures and gouvernances (the regional level of the State). */
 const PREFECTURE = /\b(?:sous[- ]?)?pr[ée]fecture\b|\bgouvernance\b/i;
 const GENDARMERIE = /\bgendarmerie\b|\bbrigade\b/i;
-const POLICE = /\bcommissariat\b|\bpolice\b/i;
+/** "Comissariat" is a spelling found at the source. */
+const POLICE = /\bcomm?issariat\b|\bpolice\b/i;
 const MINISTRY = /\bminist[èe]re\b/i;
 const TOWN_HALL = /\bmairie\b|\bh[ôo]tel de ville\b|\bmayor/i;
 const COURT = /\btribunal\b|\bcour d/i;
+
+/** What a name says a service is, whatever its tag ("Commissariat…" tagged as a town hall). */
+function byName(name: string): ServiceCategory | null {
+  const rules: [RegExp, ServiceCategory][] = [
+    [PREFECTURE, "prefecture"],
+    [GENDARMERIE, "gendarmerie"],
+    [POLICE, "police"],
+    [TOWN_HALL, "mairie"],
+    [COURT, "tribunal"],
+  ];
+  return rules.find(([pattern]) => pattern.test(name))?.[1] ?? null;
+}
 
 /** Services recognised by their amenity tag, refined by their name. */
 const BY_AMENITY: Readonly<Record<string, (name: string) => ServiceCategory>> = {
   courthouse: () => "tribunal",
   police: (name) => (GENDARMERIE.test(name) ? "gendarmerie" : "police"),
-  townhall: (name) => (PREFECTURE.test(name) ? "prefecture" : "mairie"),
+  townhall: (name) => byName(name) ?? "mairie",
 };
 
 /** The kind of state service an object is, or null when it is none of ours. */
@@ -38,17 +51,10 @@ export function categoryOf(tags: Tags): ServiceCategory | null {
   if (government === "ministry" || MINISTRY.test(name)) {
     return "ministere";
   }
-  if (government === "prefecture" || PREFECTURE.test(name)) {
+  if (government === "prefecture") {
     return "prefecture";
   }
-  // Named for what they are, whatever their tag: "Brigade de gendarmerie", "Mayor's office".
-  const byName: [RegExp, ServiceCategory][] = [
-    [GENDARMERIE, "gendarmerie"],
-    [POLICE, "police"],
-    [TOWN_HALL, "mairie"],
-    [COURT, "tribunal"],
-  ];
-  return byName.find(([pattern]) => pattern.test(name))?.[1] ?? "administration";
+  return byName(name) ?? "administration";
 }
 
 function pointOf(element: OverpassElement): GeoPoint | null {
