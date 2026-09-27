@@ -18,6 +18,8 @@ describe("loadConfig", () => {
       NEWS_STORE_PATH: fromRoot(".data/news.json"),
       PROCEDURES_STORE_PATH: fromRoot(".data/procedures.json"),
       PROCEDURE_THEMES_PATH: fromRoot(".data/procedure-themes.json"),
+      MAP_TILES_PATH: fromRoot(".data/tiles/senegal.pmtiles"),
+      MAP_ASSETS_ROOT: fromRoot(".data/map"),
       STATE_SERVICES_PATH: fromRoot(".data/state-services.json"),
       INGESTION_STATUS_PATH: fromRoot(".data/ingestion-status.json"),
       MEDIA_ROOT: fromRoot(".data/media"),

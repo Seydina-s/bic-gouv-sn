@@ -134,3 +134,12 @@ Par les étiquettes, puis par le nom : tribunal, commissariat, gendarmerie, mair
 
 - Un service vérifié n'est jamais modifié en silence par un nouvel import : le changement est mis de côté et attend une nouvelle vérification.
 - Les services qu'un import ne trouve plus restent en place (rien n'est supprimé automatiquement).
+
+## Fond de carte (Protomaps, données OpenStreetMap)
+
+Rues, quartiers, eau et noms de lieux sous les services de « Près de moi ». Ce fond ne sert qu'à se repérer : ses propres points d'intérêt sont retirés, la carte ne montre comme lieux que les services de l'État vérifiés.
+
+- Tuiles vectorielles construites chaque jour par Protomaps à partir d'OpenStreetMap (et de Natural Earth aux petits zooms) ; seule la zone du Sénégal est découpée et stockée chez nous (`.data/tiles/senegal.pmtiles`).
+- Servies par notre API avec le style, les lettres et les icônes : aucun service de carte extérieur n'est appelé par l'application.
+- Même licence ODbL que ci-dessus : l'attribution avec son lien fait partie du style.
+- Fichier en place : Protomaps Basemap 4.15.2, données du 27/09/2026 à 04 h (UTC). Procédure de mise à jour et pannes : `docs/runbooks/fond-de-carte.md`.

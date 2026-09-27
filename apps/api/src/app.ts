@@ -30,6 +30,7 @@ import { registerMedia } from "./routes/media";
 import { newsRoutes } from "./routes/news";
 import { proceduresRoutes } from "./routes/procedures";
 import { servicesRoutes } from "./routes/services";
+import { mapRoutes } from "./routes/map";
 import { statusRoutes } from "./routes/status";
 
 /** Longest path parameter accepted (a procedure slug, an article id). */
@@ -133,6 +134,11 @@ export async function buildApp({
     themes: procedureThemes,
   });
   await app.register(servicesRoutes, { prefix: "/v1", services: stateServices });
+  await app.register(mapRoutes, {
+    prefix: "/v1",
+    tilesPath: config.MAP_TILES_PATH,
+    assetsRoot: config.MAP_ASSETS_ROOT,
+  });
   await app.register(statusRoutes, {
     prefix: "/v1",
     ingestionStatusPath: config.INGESTION_STATUS_PATH,
