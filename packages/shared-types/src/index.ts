@@ -11,6 +11,7 @@ export * from "./content/media.schema";
 export * from "./content/news-article.schema";
 export * from "./content/procedure.schema";
 export * from "./content/procedure-theme.schema";
+export * from "./content/state-service.schema";
 export * from "./content/traceable-content.schema";
 export * from "./content/translation.schema";
 export * from "./errors/error-catalog";

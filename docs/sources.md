@@ -107,3 +107,30 @@ e-senegal.sn publie 15 thèmes officiels mais ne rattache aucune démarche à un
 - **Thèmes ajoutés** (`origin: platform`) : Agriculture, élevage et pêche · Environnement et ressources naturelles · Énergie, mines et hydrocarbures. Une nouvelle collecte des thèmes officiels ne les supprime pas.
 - **Nouvelles démarches** : proposées automatiquement par mots clés (`procedures:themes`), puis validées dans la console.
 - **Ordre de mise en service** : déployer d'abord la version du serveur qui connaît le champ `origin`, puis appliquer le classement.
+
+## OpenStreetMap (services de l'État, import initial)
+
+CLAUDE.md autorise un import initial depuis OpenStreetMap pour la carte des services, **jamais publié sans vérification** dans la console.
+
+### Règles d'accès
+
+- Données sous licence **ODbL** (Open Database License) : attribution obligatoire « © les contributeurs d'OpenStreetMap » avec un lien vers https://www.openstreetmap.org/copyright partout où les données sont montrées.
+- Une base qui mélange les données d'OpenStreetMap et nos saisies devient une « base dérivée » : si elle est publiée, elle doit pouvoir être partagée sous la même licence. Point à valider avec le BIC (L-03).
+- API publique Overpass (https://overpass-api.de/api/interpreter) : usage raisonnable, une seule requête par import, identifiant de l'application dans l'en-tête `User-Agent`.
+
+### Requête
+
+Une requête pour tout le Sénégal (zone `ISO3166-1=SN`) : `amenity=townhall|police|courthouse`, `office=government`, et les villes (`place=city|town`) pour chercher sans localisation. Commande : `pnpm --filter @bgs/ingestion services:osm` (rejouable : aucun doublon, identifiant = type et numéro de l'objet OpenStreetMap).
+
+### Classement
+
+Par les étiquettes, puis par le nom : tribunal, commissariat, gendarmerie, mairie, préfecture (gouvernances, préfectures, sous-préfectures), ministère, sinon « administration ». Rien n'est deviné : ni horaires, ni téléphone, ni adresse s'ils manquent. Un site web non sécurisé (http) est écarté, jamais réécrit.
+
+### Import du 27/09/2026
+
+880 services lus (454 administrations, 175 mairies, 115 commissariats, 67 gendarmeries, 29 préfectures et gouvernances, 22 tribunaux, 18 ministères) et 251 villes ; 331 services dans la région de Dakar (zone pilote). Données rarement complètes : adresse 99, téléphone 46, horaires 34. Certaines entrées ne sont pas des services de l'État (fédération sportive, banque…) : la vérification humaine les écarte.
+
+### Points d'attention
+
+- Un service vérifié n'est jamais modifié en silence par un nouvel import : le changement est mis de côté et attend une nouvelle vérification.
+- Les services qu'un import ne trouve plus restent en place (rien n'est supprimé automatiquement).

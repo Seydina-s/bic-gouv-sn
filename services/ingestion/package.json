@@ -13,7 +13,8 @@
     "procedures": "tsx src/cli/procedures.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --coverage",
-    "procedures:themes": "tsx src/cli/procedure-themes.ts"
+    "procedures:themes": "tsx src/cli/procedure-themes.ts",
+    "services:osm": "tsx src/cli/state-services.ts"
   },
   "dependencies": {
     "@bgs/content-store": "workspace:*",
