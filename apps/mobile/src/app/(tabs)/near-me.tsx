@@ -12,6 +12,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTabBarInset } from "../../components/GlassTabBar";
 import { ScrollTopButton, useScrollTop } from "../../components/ScrollTopButton";
 import { LocationPanel } from "../../features/near-me/LocationPanel";
+import { ViewToggle } from "../../features/near-me/MapOverlays";
+import { nativeMapAvailable } from "../../features/near-me/map-support";
+import { NearMeMap } from "../../features/near-me/NearMeMap";
 import { nearestServices } from "../../features/near-me/nearby";
 import { ServiceFilters, ServiceRow } from "../../features/near-me/ServiceParts";
 import { useLocation } from "../../features/near-me/useLocation";
@@ -39,7 +42,8 @@ interface Row {
 /**
  * "Près de moi": the verified state services around the person, nearest first,
  * measured on the phone (the location is never sent). Without a location, a town
- * can be chosen; before any choice, the services are listed by name.
+ * can be chosen; before any choice, the services are listed by name. Where the
+ * native map exists (the app's own builds), the same services show on a map.
  */
 export default function NearMeScreen() {
   const { theme } = useTheme();
@@ -60,6 +64,8 @@ export default function NearMeScreen() {
     setSeen(asked);
     setCategory(askedKind(asked));
   }
+  const [mapExists] = useState(nativeMapAvailable);
+  const [showing, setShowing] = useState<"list" | "map">("list");
   const { color, space, textStyle, touchTarget } = theme;
 
   // The phone's position counts once found; a town chosen by hand replaces it.
@@ -73,13 +79,43 @@ export default function NearMeScreen() {
         ? location.point
         : null;
   const all = useMemo(() => services.data?.services ?? [], [services.data]);
-  const rows = useMemo<Row[]>(() => {
-    if (origin !== null) {
-      return nearestServices(all, origin, category);
-    }
-    const kept = category === null ? all : all.filter((service) => service.category === category);
-    return kept.map((service) => ({ service, meters: null }));
-  }, [all, origin, category]);
+  const kept = useMemo(
+    () => (category === null ? all : all.filter((service) => service.category === category)),
+    [all, category],
+  );
+  const rows = useMemo<Row[]>(
+    () =>
+      origin === null
+        ? kept.map((service) => ({ service, meters: null }))
+        : nearestServices(kept, origin, null),
+    [kept, origin],
+  );
+  // The map is offered only with something to show on it.
+  const canMap = mapExists && all.length > 0;
+  const openService = (id: string) => {
+    router.push({ pathname: "/service/[id]", params: { id } });
+  };
+  const locateMe = () => {
+    setChosen(null);
+    void location.locate();
+  };
+
+  if (canMap && showing === "map") {
+    return (
+      <NearMeMap
+        services={kept}
+        origin={origin}
+        locationStatus={location.status}
+        category={category}
+        onCategory={setCategory}
+        onLocate={locateMe}
+        onOpen={openService}
+        onShowList={() => {
+          setShowing("list");
+        }}
+      />
+    );
+  }
 
   const header = (
     <View style={{ paddingTop: insets.top + space.xl, gap: space.md }}>
@@ -98,10 +134,7 @@ export default function NearMeScreen() {
             around={around}
             status={location.status}
             places={services.data?.places ?? []}
-            onUsePosition={() => {
-              setChosen(null);
-              void location.locate();
-            }}
+            onUsePosition={locateMe}
             onChooseTown={(place) => {
               setChosen({ kind: "town", place });
             }}
@@ -155,13 +188,7 @@ export default function NearMeScreen() {
         ListHeaderComponent={header}
         ListEmptyComponent={empty}
         renderItem={({ item }) => (
-          <ServiceRow
-            service={item.service}
-            meters={item.meters}
-            onPress={(id) => {
-              router.push({ pathname: "/service/[id]", params: { id } });
-            }}
-          />
+          <ServiceRow service={item.service} meters={item.meters} onPress={openService} />
         )}
         ListFooterComponent={
           all.length === 0 ? null : (
@@ -176,7 +203,10 @@ export default function NearMeScreen() {
             </Pressable>
           )
         }
-        contentContainerStyle={{ paddingBottom: bottomInset + space.xl }}
+        contentContainerStyle={{
+          // The last rows stay clear of the floating "Carte" pill.
+          paddingBottom: bottomInset + space.xl + (canMap ? touchTarget.min + space.sm : 0),
+        }}
         testID="near-me-list"
       />
       <ScrollTopButton
@@ -186,6 +216,15 @@ export default function NearMeScreen() {
           list.current?.scrollToOffset({ offset: 0, animated: true });
         }}
       />
+      {canMap && (
+        <ViewToggle
+          showing="list"
+          onToggle={() => {
+            setShowing("map");
+          }}
+          bottom={bottomInset + space.sm}
+        />
+      )}
       <FloatingAppBar visible={scrollTop.visible} top={insets.top} />
     </View>
   );
