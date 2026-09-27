@@ -14,6 +14,8 @@ import {
 import { Icon } from "../../components/Icon";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
+import { useDataSaver } from "../data-saver/DataSaverProvider";
+import { ShowPhotoButton } from "../data-saver/ShowPhotoButton";
 import { CoverImage } from "./CoverImage";
 
 /** Formatted text runs (bold, italic, links), inside a parent <Text>. */
@@ -50,11 +52,14 @@ function ArticleImage({ block }: { block: ImageBlock }) {
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
   const [ratio, setRatio] = useState(16 / 9);
+  const { saving } = useDataSaver();
+  const [asked, setAsked] = useState(false);
   const { src, alt, media } = block;
   if (media !== undefined) {
     return (
       <CoverImage
         cover={media}
+        onDemand
         slotWidth={Math.min(width, theme.layout.readingMaxWidth)}
         label={alt ?? t("article.image")}
         style={[
@@ -62,6 +67,22 @@ function ArticleImage({ block }: { block: ImageBlock }) {
           { aspectRatio: media.width / media.height, borderRadius: theme.radius.md },
         ]}
       />
+    );
+  }
+  const frame = [
+    styles.image,
+    { aspectRatio: ratio, borderRadius: theme.radius.md, backgroundColor: theme.color.surface },
+  ];
+  if (saving && !asked) {
+    // The official file, not our lighter copies: nothing loads until asked for.
+    return (
+      <View style={frame} accessibilityLabel={alt ?? t("article.image")}>
+        <ShowPhotoButton
+          onPress={() => {
+            setAsked(true);
+          }}
+        />
+      </View>
     );
   }
   return (
@@ -73,10 +94,7 @@ function ArticleImage({ block }: { block: ImageBlock }) {
       onLoad={(event) => {
         setRatio(event.source.width / Math.max(event.source.height, 1));
       }}
-      style={[
-        styles.image,
-        { aspectRatio: ratio, borderRadius: theme.radius.md, backgroundColor: theme.color.surface },
-      ]}
+      style={frame}
     />
   );
 }

@@ -3,9 +3,8 @@ import type { Block, ProcedureDetail } from "@bgs/shared-types";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react-native";
 import * as Speech from "expo-speech";
 import { Linking } from "react-native";
-import { I18nProvider } from "../../i18n/I18nProvider";
 import { PROCEDURE_DETAIL } from "../../testing/procedure-fixtures";
-import { ThemeProvider } from "../../theme/ThemeProvider";
+import { TestProviders } from "../../testing/TestProviders";
 import { ProcedureView, type ProcedureViewProps } from "./ProcedureView";
 
 jest.mock("expo-localization", () => ({ getLocales: () => [{ languageTag: "fr-SN" }] }));
@@ -47,17 +46,15 @@ async function show(
   services?: ProcedureViewProps["services"],
 ) {
   await render(
-    <ThemeProvider>
-      <I18nProvider>
-        <ProcedureView
-          detail={detail}
-          isPending={false}
-          bottomInset={0}
-          onOpenRelated={onOpenRelated}
-          services={services}
-        />
-      </I18nProvider>
-    </ThemeProvider>,
+    <TestProviders>
+      <ProcedureView
+        detail={detail}
+        isPending={false}
+        bottomInset={0}
+        onOpenRelated={onOpenRelated}
+        services={services}
+      />
+    </TestProviders>,
   );
 }
 

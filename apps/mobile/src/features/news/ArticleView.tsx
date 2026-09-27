@@ -95,6 +95,7 @@ export function ArticleView({
           <View>
             <CoverImage
               cover={detail.cover}
+              onDemand
               slotWidth={Math.min(paneWidth, layout.readingMaxWidth)}
               style={{
                 aspectRatio: layout.coverAspectRatio,

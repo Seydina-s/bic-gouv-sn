@@ -6,6 +6,7 @@ import * as SystemUI from "expo-system-ui";
 import { useEffect, type ComponentType } from "react";
 import { StyleSheet, View } from "react-native";
 import { QueryProvider } from "../data/QueryProvider";
+import { DataSaverProvider } from "../features/data-saver/DataSaverProvider";
 import { SettingsProvider } from "../features/shell/SettingsProvider";
 import { FavoritesProvider } from "../features/favorites/FavoritesProvider";
 import { Onboarding } from "../features/onboarding/Onboarding";
@@ -72,9 +73,11 @@ function RootLayout() {
       <ThemeProvider>
         <I18nProvider>
           <FavoritesProvider>
-            <SettingsProvider>
-              <ThemedStack />
-            </SettingsProvider>
+            <DataSaverProvider>
+              <SettingsProvider>
+                <ThemedStack />
+              </SettingsProvider>
+            </DataSaverProvider>
           </FavoritesProvider>
         </I18nProvider>
       </ThemeProvider>
