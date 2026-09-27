@@ -145,7 +145,7 @@ export const adminFr = {
     categoryLabel: "Type de service",
     positionLabel: "Emplacement (latitude, longitude)",
     positionHelp:
-      "Pour déplacer le service : collez des coordonnées, ou le lien de l'emplacement exact copié depuis OpenStreetMap ou Google Maps.",
+      "Collez des coordonnées, ou le lien de l'emplacement exact copié depuis OpenStreetMap ou Google Maps.",
     positionInvalid: "Emplacement illisible : collez des coordonnées ou un lien de carte.",
     positionOutside:
       "Cet emplacement n'est pas au Sénégal. Vérifiez l'ordre : la latitude (entre 12 et 17) vient en premier.",
@@ -153,6 +153,14 @@ export const adminFr = {
     positionNotSaved:
       "Nom et type enregistrés, mais pas l'emplacement : le serveur doit d'abord être mis à jour. Réessayez ensuite.",
     sourcePosition: "Emplacement à la source : {position}",
+    addService: "Ajouter un service absent de la liste",
+    addTitle: "Ajouter un service de l'État",
+    addIntro:
+      "Pour un service qu'OpenStreetMap ne connaît pas. Il rejoint les services à vérifier : il n'apparaît dans l'application qu'une fois vérifié.",
+    addressLabel: "Adresse (facultatif)",
+    phoneLabel: "Téléphone (facultatif)",
+    saveAdd: "Ajouter le service",
+    added: "Service ajouté. Il attend maintenant sa vérification dans la liste « À vérifier ».",
     saveCorrection: "Enregistrer la correction",
     corrected: "Correction enregistrée.",
     correctedFrom: "Corrigé (à la source : {name}, {category})",

@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import type { FileStateServiceStore } from "@bgs/content-store";
 import {
   apiErrorSchema,
@@ -160,6 +161,60 @@ export const adminServicesRoutes: FastifyPluginAsyncZod<AdminServicesOptions> = 
         details: { count: reviewed.length, ids: reviewed.join(",") },
       });
       return { reviewed: reviewed.length };
+    },
+  );
+
+  app.post(
+    "/services",
+    {
+      schema: {
+        tags: ["admin"],
+        summary: "A person adds a service the source misses (a proposal, verified next)",
+        body: z.object({
+          category: serviceCategorySchema,
+          name: z.string().trim().min(1).max(200),
+          location: geoPointSchema.refine(inSenegal),
+          address: z.string().trim().min(1).max(300).nullable().default(null),
+          phone: z.string().trim().min(1).max(40).nullable().default(null),
+        }),
+        response: {
+          201: z.object({ id: z.string() }),
+          400: apiErrorSchema,
+          401: apiErrorSchema,
+          403: apiErrorSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const account = await authorize(request, reply, signIn, "services.edit");
+      if (account === null) {
+        return reply;
+      }
+      const at = new Date().toISOString();
+      const { category, name, location, address, phone } = request.body;
+      const added = await services.add({
+        id: `manual-${randomUUID()}`,
+        category,
+        name,
+        address,
+        town: null,
+        location,
+        phone,
+        website: null,
+        openingHours: null,
+        origin: { kind: "manual", createdBy: account.id, createdAt: at },
+      });
+      if (added === null) {
+        throw new Error("A new service id was already taken");
+      }
+      await journal.append({
+        at,
+        actor: account.id,
+        action: "service.added",
+        target: added.id,
+        details: { name, category, location: `${String(location.lat)},${String(location.lng)}` },
+      });
+      return reply.code(201).send({ id: added.id });
     },
   );
 

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { z } from "zod";
 import { adminRequest } from "../../lib/admin-api";
 import { formatDay } from "../../lib/format";
+import { secondaryLink } from "../../lib/form-styles";
 import { t } from "../../lib/i18n";
 import { serviceHints } from "../../lib/service-hints";
 import { requireAccount } from "../../lib/session";
@@ -127,6 +128,9 @@ export default async function StateServicesPage({
       </h1>
       <p className="mt-2 max-w-prose text-ink-soft">{t("services.intro")}</p>
       <p className="mt-1 text-sm text-ink-faint">{t("services.attribution")}</p>
+      <Link href="/services/nouveau" className={`mt-4 ${secondaryLink}`}>
+        {t("services.addService")}
+      </Link>
 
       <nav aria-label={t("services.zone")} className="mt-6 flex flex-wrap gap-2">
         <Link

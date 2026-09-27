@@ -128,6 +128,37 @@ describe("correcting a state service", () => {
     expect(adminRequest).not.toHaveBeenCalled();
   });
 
+  it("adds a service the source misses, which then waits for its verification", async () => {
+    const { addService } = await import("./actions");
+    adminRequest.mockResolvedValue({ ok: true, data: { id: "manual-1" } });
+    const data = new FormData();
+    data.set("name", " Sous-préfecture de test ");
+    data.set("category", "prefecture");
+    data.set("position", "14,75 -17,35");
+    data.set("address", "  ");
+    data.set("phone", "+221 00 000 00 00");
+    expect(await addService({}, data)).toEqual({
+      message: "Service ajouté. Il attend maintenant sa vérification dans la liste « À vérifier ».",
+    });
+    expect(adminRequest.mock.calls[0]?.[0]).toMatchObject({
+      path: "/services",
+      method: "POST",
+      body: {
+        name: "Sous-préfecture de test",
+        category: "prefecture",
+        location: { lat: 14.75, lng: -17.35 },
+        address: null,
+        phone: "+221 00 000 00 00",
+      },
+    });
+    // Without a place, or outside Senegal: nothing is sent.
+    data.set("position", "");
+    expect((await addService({}, data)).error).toMatch(/illisible/);
+    data.set("position", "48.86, 2.35");
+    expect((await addService({}, data)).error).toMatch(/pas au Sénégal/);
+    expect(adminRequest).toHaveBeenCalledTimes(1);
+  });
+
   it("does nothing without a name", async () => {
     const { correctService } = await import("./actions");
     const data = new FormData();

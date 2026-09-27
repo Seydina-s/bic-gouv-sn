@@ -48,24 +48,76 @@ export async function reviewServices(
   };
 }
 
+type Place = { location: GeoPoint } | { error: string };
+
+/** The place typed or pasted in the form: null when empty, else a point in Senegal. */
+function placeIn(form: FormData): Place | null {
+  const text = formText(form, "position").trim();
+  if (text === "") {
+    return null;
+  }
+  const typed = parsePosition(text);
+  if (typed === null) {
+    return { error: t("services.positionInvalid") };
+  }
+  return inSenegal(typed) ? { location: typed } : { error: t("services.positionOutside") };
+}
+
 /**
  * The place typed or pasted in the form, when it moves the service: unchanged, it is
  * not sent (no correction appears in the journal for a place nobody moved).
  */
 function movedTo(form: FormData): { location?: GeoPoint; error?: string } {
-  const text = formText(form, "position").trim();
-  if (text === "") {
+  const place = placeIn(form);
+  if (place === null || "error" in place) {
+    return place ?? {};
+  }
+  const before = parsePosition(formText(form, "positionBefore"));
+  return before !== null && samePosition(place.location, before) ? {} : place;
+}
+
+/** An optional text of the form: null when left empty. */
+function optionalText(form: FormData, key: string): string | null {
+  const value = formText(form, key).trim();
+  return value === "" ? null : value;
+}
+
+/**
+ * A person adds a service the source misses. It joins the services to verify:
+ * nothing reaches the app before a person verifies it.
+ */
+export async function addService(
+  _previous: ServiceReviewState,
+  form: FormData,
+): Promise<ServiceReviewState> {
+  const { token } = await requireAccount();
+  const name = formText(form, "name").trim();
+  const category = formText(form, "category");
+  if (name === "") {
     return {};
   }
-  const typed = parsePosition(text);
-  const before = parsePosition(formText(form, "positionBefore"));
-  if (typed === null) {
-    return { error: t("services.positionInvalid") };
+  const place = placeIn(form) ?? { error: t("services.positionInvalid") };
+  if ("error" in place) {
+    return { error: place.error };
   }
-  if (!inSenegal(typed)) {
-    return { error: t("services.positionOutside") };
+  const result = await adminRequest({
+    path: "/services",
+    method: "POST",
+    token,
+    body: {
+      name,
+      category,
+      location: place.location,
+      address: optionalText(form, "address"),
+      phone: optionalText(form, "phone"),
+    },
+    schema: z.object({ id: z.string() }),
+  });
+  if (!result.ok) {
+    return { error: result.status === 403 ? t("review.forbidden") : t("review.failed") };
   }
-  return before !== null && samePosition(typed, before) ? {} : { location: typed };
+  revalidatePath("/services");
+  return { message: t("services.added") };
 }
 
 /**
