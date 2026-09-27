@@ -432,7 +432,7 @@ describe("app shell", () => {
     expect(
       await screen.findByRole("header", { name: "Commissariat de test proche" }),
     ).toBeOnTheScreen();
-    expect(screen.getByText("Mo-Fr 08:00-17:00")).toBeOnTheScreen();
+    expect(screen.getByText(/^Du lundi au vendredi, de 8.h à 17.h.$/)).toBeOnTheScreen();
     await fireEvent.press(screen.getByRole("link", { name: "Itinéraire" }));
     expect(openURL).toHaveBeenCalledWith(expect.stringContaining("14.701,-17.4"));
     openURL.mockRestore();
