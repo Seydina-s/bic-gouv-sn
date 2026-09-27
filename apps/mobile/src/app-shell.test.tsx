@@ -235,18 +235,22 @@ describe("app shell", () => {
     await renderRouter(routes, { initialUrl: "/" });
     await screen.findAllByText("Titre de test A");
     await fireEvent.press(screen.getByRole("button", { name: "Communiqués" }));
-    expect(await screen.findByText("45 articles")).toBeOnTheScreen();
+    // The band says which page this is, the section name is not repeated in the top bar.
+    expect(await screen.findByText("45 articles · Page 1 sur 3")).toBeOnTheScreen();
     expect(screen.getByRole("button", { name: "Communiqués", selected: true })).toBeOnTheScreen();
     expect(screen.getByText("Page 1 sur 3")).toBeOnTheScreen();
     expect(fetchMock.mock.calls.some(([url]) => url.includes("category=communiques&page=1"))).toBe(
       true,
     );
+    await fireEvent.press(screen.getByRole("button", { name: "Articles suivants" }));
+    expect(await screen.findByText("45 articles · Page 2 sur 3")).toBeOnTheScreen();
     await fireEvent.press(screen.getByRole("button", { name: "Page 3" }));
     expect(await screen.findByText("Page 3 sur 3")).toBeOnTheScreen();
     expect(fetchMock.mock.calls.some(([url]) => url.includes("category=communiques&page=3"))).toBe(
       true,
     );
     expect(screen.getByRole("button", { name: "Page suivante" })).toBeDisabled();
+    expect(screen.queryByRole("button", { name: "Articles suivants" })).toBeNull();
   });
 
   it('goes back to the front page from the section\'s "Tout" chip', async () => {
@@ -465,6 +469,8 @@ describe("app shell", () => {
     await renderRouter(routes, { initialUrl: "/procedure-theme/a1" });
     expect(await screen.findByText("45 démarches · Page 1 sur 3")).toBeOnTheScreen();
     expect(fetchMock.mock.calls.some(([url]) => url.includes("theme=a1&page=1"))).toBe(true);
+    await fireEvent.press(screen.getByRole("button", { name: "Démarches suivantes" }));
+    expect(await screen.findByText("45 démarches · Page 2 sur 3")).toBeOnTheScreen();
     await fireEvent.press(screen.getByRole("button", { name: "Page 3" }));
     expect(await screen.findByText("Page 3 sur 3")).toBeOnTheScreen();
     expect(fetchMock.mock.calls.some(([url]) => url.includes("theme=a1&page=3"))).toBe(true);

@@ -1,4 +1,4 @@
-import { View, type DimensionValue } from "react-native";
+import { StyleSheet, View, type DimensionValue } from "react-native";
 import Svg, { Circle, Defs, Line, Path, Pattern, Rect } from "react-native-svg";
 
 /**
@@ -35,7 +35,8 @@ interface WeaveProps {
   category: string;
   color: string;
   width: DimensionValue;
-  height: DimensionValue;
+  /** Missing: the box stretches along its row (the selvage of a story). */
+  height?: DimensionValue;
   /** Lays the pattern sideways, for a horizontal strip. */
   sideways?: boolean;
 }
@@ -48,9 +49,10 @@ function Weave({ category, color, width, height, sideways = false }: WeaveProps)
     <View
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
-      style={{ width, height }}
+      style={[{ width }, height === undefined ? styles.stretch : { height }]}
     >
-      <Svg width="100%" height="100%">
+      {/* Absolute: an SVG has its own height on the web and would size the row. */}
+      <Svg testID="weave" style={StyleSheet.absoluteFill} width="100%" height="100%">
         <Defs>
           <Pattern
             id={id}
@@ -70,7 +72,7 @@ function Weave({ category, color, width, height, sideways = false }: WeaveProps)
 
 /** Woven selvage along the leading edge of a story. */
 export function Selvage({ category, color }: { category: string; color: string }) {
-  return <Weave category={category} color={color} width={SELVAGE_WIDTH} height="100%" />;
+  return <Weave category={category} color={color} width={SELVAGE_WIDTH} />;
 }
 
 /** Horizontal woven stripe, e.g. across the top of a highlighted card. */
@@ -82,3 +84,7 @@ export function WovenStrip({ category, color }: { category: string; color: strin
 export function WovenSwatch({ category, color }: { category: string; color: string }) {
   return <Weave category={category} color={color} width={SELVAGE_WIDTH * 2} height={TILE * 1.5} />;
 }
+
+const styles = StyleSheet.create({
+  stretch: { alignSelf: "stretch" },
+});

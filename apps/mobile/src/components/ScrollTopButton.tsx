@@ -33,6 +33,15 @@ export function useScrollTop() {
   return { visible, onScroll };
 }
 
+/**
+ * Room to leave under the end of a list, above the button's own distance from the
+ * bottom edge, so the button never covers the last controls (the page numbers).
+ */
+export function useScrollTopClearance(): number {
+  const { theme } = useTheme();
+  return theme.touchTarget.min + theme.space.md;
+}
+
 export interface ScrollTopButtonProps {
   visible: boolean;
   /** Distance kept from the bottom edge (tab bar, system bar). */

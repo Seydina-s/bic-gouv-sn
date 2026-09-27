@@ -352,6 +352,12 @@ Le tissage identifie la rubrique.
 ### Page article (`app/article/[id].tsx`)
 - Photo, rubrique, titre `lead-headline` (rôle `header`), date (et « traduction automatique » si c'est le cas), corps, puis un filet et la mention « Source : presidence.sn », suivie du lien vers l'original (`source-link`, 48 dp, icône Phosphor, `text-brand`).
 
+### Pages paginées : rubrique d'articles et thème de démarches (`app/section/[slug].tsx`, `app/procedure-theme/[id].tsx`)
+Demande de l'utilisateur (27/09/2026) : 20 éléments par page, une présentation plus belle et une pagination plus visible.
+- **Bandeau** (`components/PageBand.tsx`) : fond aux couleurs de la liste (`container` / `ink` du ton de la rubrique, ou `primary-container` / `on-primary-container` pour un thème), bande tissée de la rubrique en haut, pastille ronde `background` de 64 dp avec l'icône, nom en `title` (rôle `header`), puis « 500 articles · Page 2 sur 25 » en `body-small`. La barre du haut de l'écran reste vide : le nom n'est jamais dit deux fois.
+- **Rubrique** : les pastilles des rubriques restent au-dessus ; le premier article de chaque page est présenté en grand (`LeadStory` sans le nom de rubrique : photo 16:10, titre `lead-headline`, extrait, date · source), les suivants en lignes (`StoryRow`).
+- **Fin de page** (`components/PageNavigation.tsx`) : filet `border`, grand bouton « Articles suivants » / « Démarches suivantes » (fond `ink` du ton, texte `background`, 48 dp, flèche), puis les pages numérotées et « Page x sur y ». Le bouton disparaît sur la dernière page. La liste réserve sous elle la place du bouton « Revenir en haut » (`useScrollTopClearance`).
+
 ### Fiche de démarche (`features/procedures/ProcedureView.tsx`)
 Demande de l'utilisateur (27/09/2026) : une présentation propre à l'application, pas celle de la source. Le texte officiel reste mot pour mot ; seule la mise en page change (`procedure-sheet.ts` reconnaît les questions de la fiche, `procedure-page.ts` agence la page, tous deux testés sur les 718 fiches réelles).
 - **En-tête** : titre `lead-headline` (rôle `header`), résumé `body` `text-secondary`.
