@@ -53,3 +53,16 @@ export function positionLink({ lat, lng }: GeoPoint): string {
 export function samePosition(a: GeoPoint, b: GeoPoint): boolean {
   return a.lat === b.lat && a.lng === b.lng;
 }
+
+/** Where the source placed a service a person has moved since; null when not moved. */
+export function movedFrom(location: GeoPoint, source: GeoPoint | undefined): GeoPoint | null {
+  return source === undefined || samePosition(source, location) ? null : source;
+}
+
+/**
+ * The link to check a service against: its object on OpenStreetMap (name, tags), or
+ * the point itself when a person moved it or typed it by hand.
+ */
+export function checkLink(osmUrl: string | null, location: GeoPoint, moved: boolean): string {
+  return osmUrl !== null && !moved ? osmUrl : positionLink(location);
+}

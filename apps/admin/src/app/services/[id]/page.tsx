@@ -3,7 +3,7 @@ import Link from "next/link";
 import { z } from "zod";
 import { adminRequest } from "../../../lib/admin-api";
 import { t } from "../../../lib/i18n";
-import { positionLink, positionText, samePosition } from "../../../lib/position";
+import { movedFrom, positionLink, positionText } from "../../../lib/position";
 import { requireAccount } from "../../../lib/session";
 import { CorrectionForm } from "./CorrectionForm";
 
@@ -63,6 +63,7 @@ export default async function CorrectServicePage({ params }: { params: Promise<{
     value,
     label: t(`services.category.${value}`),
   }));
+  const from = movedFrom(service.location, service.source?.location);
 
   return (
     <section aria-labelledby="correct-title" className="space-y-6">
@@ -79,12 +80,11 @@ export default async function CorrectServicePage({ params }: { params: Promise<{
           })}
         </p>
       )}
-      {service.source?.location !== undefined &&
-        !samePosition(service.source.location, service.location) && (
-          <p className="text-sm text-ink-soft">
-            {t("services.sourcePosition", { position: positionText(service.source.location) })}
-          </p>
-        )}
+      {from !== null && (
+        <p className="text-sm text-ink-soft">
+          {t("services.sourcePosition", { position: positionText(from) })}
+        </p>
+      )}
       {service.osmUrl !== null && (
         <a
           href={service.osmUrl}
