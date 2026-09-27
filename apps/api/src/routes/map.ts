@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { layers, namedFlavor } from "@protomaps/basemaps";
-import type { ErrorCode } from "@bgs/shared-types";
+import { type ErrorCode, SENEGAL_BOUNDS } from "@bgs/shared-types";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { Compression, type DecompressFunc, PMTiles } from "pmtiles";
 import { z } from "zod";
@@ -15,8 +15,6 @@ export interface MapRoutesOptions {
   assetsRoot: string;
 }
 
-/** Area the archive covers: Senegal with a margin (west, south, east, north). */
-const BOUNDS = [-17.6, 12.2, -11.3, 16.8];
 const MAX_ZOOM = 15;
 /** ODbL: the credit links to OpenStreetMap's copyright page wherever the map shows. */
 const ATTRIBUTION =
@@ -84,7 +82,8 @@ export const mapRoutes: FastifyPluginAsyncZod<MapRoutesOptions> = (
             tiles: [`${base}/tiles/{z}/{x}/{y}`],
             minzoom: 0,
             maxzoom: MAX_ZOOM,
-            bounds: BOUNDS,
+            // The archive covers Senegal with a margin, like the services themselves.
+            bounds: SENEGAL_BOUNDS,
             attribution: ATTRIBUTION,
           },
         },

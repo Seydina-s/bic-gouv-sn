@@ -140,9 +140,19 @@ export const adminFr = {
     correct: "Corriger",
     correctTitle: "Corriger un service",
     correctIntro:
-      "Le nom et le type corrigés ici l'emportent sur ceux d'OpenStreetMap, même après un nouvel import.",
+      "Le nom, le type et l'emplacement corrigés ici l'emportent sur ceux d'OpenStreetMap, même après un nouvel import.",
     nameLabel: "Nom",
     categoryLabel: "Type de service",
+    positionLabel: "Emplacement (latitude, longitude)",
+    positionHelp:
+      "Pour déplacer le service : collez des coordonnées, ou le lien de l'emplacement exact copié depuis OpenStreetMap ou Google Maps.",
+    positionInvalid: "Emplacement illisible : collez des coordonnées ou un lien de carte.",
+    positionOutside:
+      "Cet emplacement n'est pas au Sénégal. Vérifiez l'ordre : la latitude (entre 12 et 17) vient en premier.",
+    openPosition: "Voir cet emplacement sur la carte",
+    positionNotSaved:
+      "Nom et type enregistrés, mais pas l'emplacement : le serveur doit d'abord être mis à jour. Réessayez ensuite.",
+    sourcePosition: "Emplacement à la source : {position}",
     saveCorrection: "Enregistrer la correction",
     corrected: "Correction enregistrée.",
     correctedFrom: "Corrigé (à la source : {name}, {category})",

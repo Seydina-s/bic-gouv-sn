@@ -79,6 +79,55 @@ describe("correcting a state service", () => {
     expect(revalidatePath).toHaveBeenCalledWith("/services");
   });
 
+  it("moves the service to the place pasted from a map, and only when it changed", async () => {
+    const { correctService } = await import("./actions");
+    adminRequest.mockResolvedValue({
+      ok: true,
+      data: { corrected: true, location: { lat: 14.6928, lng: -17.4467 } },
+    });
+    const data = new FormData();
+    data.set("id", "osm-n3");
+    data.set("name", "Commissariat de test");
+    data.set("category", "police");
+    data.set("positionBefore", "14.7, -17.4");
+    data.set("position", "https://www.openstreetmap.org/#map=19/14.6928/-17.4467");
+    expect(await correctService({}, data)).toEqual({ message: "Correction enregistrée." });
+    expect(adminRequest.mock.calls[0]?.[0]).toMatchObject({
+      body: { location: { lat: 14.6928, lng: -17.4467 } },
+    });
+    // The same place, written differently: nothing moves.
+    data.set("position", "14,7 ; -17,4");
+    await correctService({}, data);
+    expect(adminRequest.mock.calls[1]?.[0]).not.toHaveProperty("body.location");
+  });
+
+  it("says plainly when the server did not save the move (older version)", async () => {
+    const { correctService } = await import("./actions");
+    adminRequest.mockResolvedValue({ ok: true, data: { corrected: true } });
+    const data = new FormData();
+    data.set("id", "osm-n3");
+    data.set("name", "Commissariat de test");
+    data.set("category", "police");
+    data.set("positionBefore", "14.7, -17.4");
+    data.set("position", "14.6928, -17.4467");
+    expect((await correctService({}, data)).error).toMatch(/pas l'emplacement/);
+  });
+
+  it("explains an unreadable place, or one outside Senegal, and sends nothing", async () => {
+    const { correctService } = await import("./actions");
+    const data = new FormData();
+    data.set("id", "osm-n3");
+    data.set("name", "Commissariat de test");
+    data.set("category", "police");
+    data.set("positionBefore", "14.7, -17.4");
+    data.set("position", "Dakar");
+    expect((await correctService({}, data)).error).toMatch(/illisible/);
+    // Latitude and longitude swapped: the South Atlantic.
+    data.set("position", "-17.4467, 14.6928");
+    expect((await correctService({}, data)).error).toMatch(/pas au Sénégal/);
+    expect(adminRequest).not.toHaveBeenCalled();
+  });
+
   it("does nothing without a name", async () => {
     const { correctService } = await import("./actions");
     const data = new FormData();

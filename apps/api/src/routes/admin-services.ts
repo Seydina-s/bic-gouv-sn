@@ -4,6 +4,7 @@ import {
   byDistance,
   correctedFacts,
   geoPointSchema,
+  inSenegal,
   serviceCategorySchema,
   serviceFactsSchema,
   type Place,
@@ -43,8 +44,10 @@ const reviewItemSchema = z.object({
   osmUrl: z.string().nullable(),
   /** Nearest town, a hint for services named only "Mairie" or "Annexe". */
   nearTown: z.string().nullable(),
-  /** What the source says, when a person corrected the kind or the name. */
-  source: z.object({ category: serviceCategorySchema, name: z.string() }).nullable(),
+  /** What the source says, when a person corrected the kind, the name or the place. */
+  source: z
+    .object({ category: serviceCategorySchema, name: z.string(), location: geoPointSchema })
+    .nullable(),
 });
 
 /** Beyond this, the nearest town says nothing useful about where a service is. */
@@ -109,7 +112,7 @@ export const adminServicesRoutes: FastifyPluginAsyncZod<AdminServicesOptions> = 
             source:
               Object.keys(service.corrections).length === 0
                 ? null
-                : { category: service.category, name: service.name },
+                : { category: service.category, name: service.name, location: service.location },
           })),
       };
     },
@@ -165,16 +168,23 @@ export const adminServicesRoutes: FastifyPluginAsyncZod<AdminServicesOptions> = 
     {
       schema: {
         tags: ["admin"],
-        summary: "A person corrects the kind or the name of a service (kept over imports)",
+        summary:
+          "A person corrects the kind, the name or the place of a service (kept over imports)",
         params: z.object({ id: z.string().min(1).max(64) }),
         body: z
           .object({
             category: serviceCategorySchema.optional(),
             name: z.string().trim().min(1).max(200).optional(),
+            // A point outside Senegal is a typing slip (latitude and longitude swapped).
+            location: geoPointSchema.refine(inSenegal).optional(),
           })
-          .refine((body) => body.category !== undefined || body.name !== undefined),
+          .refine(
+            (body) =>
+              body.category !== undefined || body.name !== undefined || body.location !== undefined,
+          ),
         response: {
-          200: z.object({ corrected: z.boolean() }),
+          // The place now shown: the console checks a move was really saved.
+          200: z.object({ corrected: z.boolean(), location: geoPointSchema }),
           400: apiErrorSchema,
           401: apiErrorSchema,
           403: apiErrorSchema,
@@ -187,10 +197,11 @@ export const adminServicesRoutes: FastifyPluginAsyncZod<AdminServicesOptions> = 
       if (account === null) {
         return reply;
       }
-      const { category, name } = request.body;
+      const { category, name, location } = request.body;
       const correction = {
         ...(category === undefined ? {} : { category }),
         ...(name === undefined ? {} : { name }),
+        ...(location === undefined ? {} : { location }),
       };
       const corrected = await services.correct(request.params.id, correction);
       if (corrected === null) {
@@ -205,9 +216,15 @@ export const adminServicesRoutes: FastifyPluginAsyncZod<AdminServicesOptions> = 
         actor: account.id,
         action: "service.corrected",
         target: corrected.id,
-        details: { ...correction },
+        details: {
+          ...(category === undefined ? {} : { category }),
+          ...(name === undefined ? {} : { name }),
+          ...(location === undefined
+            ? {}
+            : { location: `${String(location.lat)},${String(location.lng)}` }),
+        },
       });
-      return { corrected: true };
+      return { corrected: true, location: correctedFacts(corrected).location };
     },
   );
 

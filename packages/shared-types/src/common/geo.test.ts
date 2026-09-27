@@ -1,9 +1,19 @@
 import { describe, expect, it } from "vitest";
-import { byDistance, distanceMeters } from "./geo";
+import { byDistance, distanceMeters, inSenegal } from "./geo";
 
 // Two public landmarks of Dakar, for orders of magnitude only.
 const PLATEAU = { lat: 14.6692, lng: -17.4364 };
 const YOFF = { lat: 14.7469, lng: -17.4903 };
+
+describe("Senegal", () => {
+  it("holds the points of the country, not their mirror nor elsewhere", () => {
+    expect(inSenegal(PLATEAU)).toBe(true);
+    expect(inSenegal({ lat: 12.56, lng: -12.17 })).toBe(true); // Kédougou, south-east
+    // Latitude and longitude swapped: the South Atlantic, not Dakar.
+    expect(inSenegal({ lat: PLATEAU.lng, lng: PLATEAU.lat })).toBe(false);
+    expect(inSenegal({ lat: 48.86, lng: 2.35 })).toBe(false);
+  });
+});
 
 describe("distances", () => {
   it("measures the ground distance between two points", () => {
