@@ -222,3 +222,15 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | AUD2-05 | Performance | Liste complète des services envoyée au téléphone : environ 250 Ko si les 880 étaient vérifiés (une seule réponse mise en cache) ; à compresser au CDN et à mesurer sur réseau 3G | Moyenne |
 | AUD2-06 | UX writing | Les horaires sont montrés tels qu'écrits à la source (syntaxe OpenStreetMap, ex. « Mo-Fr 08:00-17:00 ») : les traduire en phrases françaises (« du lundi au vendredi, 8 h à 17 h ») sans rien inventer (MAP-08 ✅ le 27/09 : formes simples traduites mot pour mot, les autres montrées telles quelles) | Moyenne |
 | AUD2-07 | Orchestrateur | Démarches ↔ services : le lien par type est fait ; relier une démarche à des bureaux précis demandera des services vérifiés et la liste des bureaux de chaque démarche (DEM-04) | Basse |
+
+## Audit croisé de fin de sprint « Carte des services » (27/09/2026, après-midi)
+
+| # | Agent | Constat → tâche | Priorité |
+|---|---|---|---|
+| AUD3-01 | Orchestrateur | Mise en service locale en attente : l'API du port 3100 date d'avant la carte (#70 à #72), le déplacement et l'ajout de services (#74, #75). La redémarrer déconnecte la console (sessions en mémoire) : à faire avec l'accord de l'utilisateur, puis contrôler `/v1/map/style.json` et `/v1/services`. En attendant, la console n'annonce jamais un déplacement ou un ajout que l'API n'a pas enregistré | Haute |
+| AUD3-02 | QA | Carte native jamais lancée sur un appareil (fond simulé en web et tests automatiques seulement) : dès la version de test, vérifier affichage, groupes, aperçu, « Me localiser », thème sombre en direct, grande police, écran plié et déplié, repli sur la liste hors ligne (A-03, QA-02) | Haute |
+| AUD3-03 | Performance | Le module natif MapLibre ajoute plusieurs Mo au paquet installé (bibliothèque native par architecture) : mesurer la taille réelle de l'APK/AAB et de l'IPA dès la première compilation et la comparer au budget (PERF-03 ne mesure que le code JS) | Haute |
+| AUD3-04 | Sécurité | Routes de carte publiques et hors limite de débit (fichiers statiques) : en production, derrière le CDN avec cache et WAF, sinon un téléchargement de tuiles en boucle coûte en bande passante (MAP-10). Ajout et déplacement de services : rôle éditeur, validation (Sénégal), journal d'audit ✓ | Moyenne |
+| AUD3-05 | Design / UI-UX | Commandes de la carte vérifiées sur un fond simulé (capture web) : valider sur iPhone les zones sûres (encoche, barre d'accueil), le verre posé sur la carte et la lisibilité des noms de services sur le fond sombre | Moyenne |
+| AUD3-06 | Ingestion & Données | Aucun service vérifié à 15 h : la liste et la carte restent vides dans l'app tant que la vérification de Dakar n'a pas commencé ; les outils (indices, déplacer, ajouter) sont prêts. Fond de carte daté du 27/09/2026 : rafraîchissement mensuel (MAP-10) | Moyenne |
+| AUD3-07 | UX writing | Textes de la carte et mentions de licence en français seulement : à traduire en wolof avec le reste de l'interface (W-01) | Basse |
