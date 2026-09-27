@@ -91,23 +91,28 @@ export default function NearMeScreen() {
           {t("nearMe.intro")}
         </Text>
       </View>
-      <LocationPanel
-        around={around}
-        status={location.status}
-        places={services.data?.places ?? []}
-        onUsePosition={() => {
-          setChosen(null);
-          void location.locate();
-        }}
-        onChooseTown={(place) => {
-          setChosen({ kind: "town", place });
-        }}
-        onChange={() => {
-          setChosen(null);
-          location.forget();
-        }}
-      />
-      {all.length > 0 && <ServiceFilters selected={category} onSelect={setCategory} />}
+      {/* Nothing verified yet: no reason to ask for the location (asked only when useful). */}
+      {all.length > 0 && (
+        <>
+          <LocationPanel
+            around={around}
+            status={location.status}
+            places={services.data?.places ?? []}
+            onUsePosition={() => {
+              setChosen(null);
+              void location.locate();
+            }}
+            onChooseTown={(place) => {
+              setChosen({ kind: "town", place });
+            }}
+            onChange={() => {
+              setChosen(null);
+              location.forget();
+            }}
+          />
+          <ServiceFilters selected={category} onSelect={setCategory} />
+        </>
+      )}
     </View>
   );
 
