@@ -30,7 +30,7 @@ function LanguageChoice() {
           <Pressable
             key={option.value}
             accessibilityRole="radio"
-            accessibilityState={{ checked }}
+            aria-checked={checked}
             onPress={() => {
               setLang(option.value);
             }}

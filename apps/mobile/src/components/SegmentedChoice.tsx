@@ -60,7 +60,7 @@ export function SegmentedChoice<T extends string>({
             <Pressable
               key={segment.value}
               accessibilityRole="radio"
-              accessibilityState={{ checked }}
+              aria-checked={checked}
               accessibilityLabel={segment.spokenLabel ?? segment.label}
               onPress={() => {
                 onSelect(segment.value);
