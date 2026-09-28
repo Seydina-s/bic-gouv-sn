@@ -15,6 +15,7 @@ import ProcedureScreen from "./app/procedure/[slug]";
 import ProcedureThemeScreen from "./app/procedure-theme/[id]";
 import SectionScreen from "./app/section/[slug]";
 import FavoritesScreen from "./app/favorites";
+import LicencesScreen from "./app/licences";
 import SearchScreen from "./app/search";
 import ServiceScreen from "./app/service/[id]";
 import { clearMapCalls, mapCalls } from "./testing/maplibre-mock";
@@ -78,6 +79,7 @@ const routes = {
   "section/[slug]": SectionScreen,
   "service/[id]": ServiceScreen,
   favorites: FavoritesScreen,
+  licences: LicencesScreen,
   search: SearchScreen,
 };
 
@@ -242,6 +244,18 @@ describe("app shell", () => {
     await fireEvent.press(first(screen.getAllByRole("button", { name: "Fermer les réglages" })));
     expect(screen.queryByRole("radio", { name: "Sombre" })).toBeNull();
     expect(screen.getByTestId("news-feed")).toBeOnTheScreen();
+  });
+
+  it("lists the free software of the app, each with its copyright and licence", async () => {
+    await renderRouter(routes, { initialUrl: "/" });
+    await fireEvent.press(await screen.findByRole("button", { name: "Réglages" }));
+    await fireEvent.press(
+      await screen.findByRole("button", { name: /^Logiciels libres utilisés \(\d+\)$/ }),
+    );
+    expect(await screen.findByText(/logiciels libres font fonctionner/)).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole("button", { name: /^zod \d/ }));
+    expect(screen.getByText(/Copyright \(c\) \d{4} Colin McDonnell/)).toBeOnTheScreen();
+    expect(screen.getByText(/Permission is hereby granted/)).toBeOnTheScreen();
   });
 
   it("remembers the appearance and language chosen in the settings", async () => {
