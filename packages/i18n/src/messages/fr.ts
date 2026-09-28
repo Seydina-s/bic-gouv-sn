@@ -197,6 +197,10 @@ export const fr = {
     mapFailed: "La carte n'a pas pu s'afficher. La liste présente les mêmes services.",
     openService: "Voir la fiche",
     closePreview: "Fermer l'aperçu",
+    keepOffline: "Garder le quartier hors ligne ({size} Mo)",
+    keepingOffline: "Quartier en cours d'enregistrement\u00a0: {percent}\u00a0%",
+    keptOffline: "Quartier disponible hors ligne",
+    keepOfflineFailed: "Le quartier n'a pas pu être gardé. Réessayer",
     category: {
       mairie: "Mairie",
       prefecture: "Gouvernance, préfecture",

@@ -18,7 +18,7 @@ import FavoritesScreen from "./app/favorites";
 import LicencesScreen from "./app/licences";
 import SearchScreen from "./app/search";
 import ServiceScreen from "./app/service/[id]";
-import { clearMapCalls, mapCalls } from "./testing/maplibre-mock";
+import { clearMapCalls, mapCalls, offlineRequests } from "./testing/maplibre-mock";
 import { DETAIL, LIST, newsFetch } from "./testing/news-fixtures";
 import { PROCEDURE_LIST } from "./testing/procedure-fixtures";
 
@@ -51,6 +51,10 @@ jest.mock("@maplibre/maplibre-react-native", () =>
 jest.mock("./features/near-me/load-service-map", () => ({
   loadServiceMap: () =>
     Promise.resolve(jest.requireActual<object>("./features/near-me/ServiceMap")),
+  loadOfflineManager: () =>
+    Promise.resolve(
+      jest.requireActual<{ OfflineManager: object }>("./testing/maplibre-mock").OfflineManager,
+    ),
 }));
 
 /** Official themes with nothing validated yet: the Démarches tab falls back to the list. */
@@ -682,6 +686,41 @@ describe("app shell", () => {
     expect(
       fetchMock.mock.calls.some(([url]) => url.includes("14.7") || url.includes("-17.4")),
     ).toBe(false);
+  });
+
+  it("keeps the streets around the person offline, one area at a time", async () => {
+    mockMapAvailable = true;
+    jest
+      .mocked(Location.requestForegroundPermissionsAsync)
+      .mockResolvedValue({ granted: true } as never);
+    jest
+      .mocked(Location.getLastKnownPositionAsync)
+      .mockResolvedValue({ coords: { latitude: 14.7, longitude: -17.4 } } as never);
+    await renderRouter(routes, { initialUrl: "/near-me" });
+    await screen.findByText("Commissariat de test proche");
+    await fireEvent.press(
+      screen.getByRole("button", { name: "Afficher les services sur la carte" }),
+    );
+    await fireEvent.press(await screen.findByRole("button", { name: "Me localiser sur la carte" }));
+    await fireEvent.press(
+      await screen.findByRole("button", { name: /^Garder le quartier hors ligne \(\d+ Mo\)$/ }),
+    );
+    await waitFor(() => {
+      expect(offlineRequests).toHaveLength(1);
+    });
+    expect(offlineRequests[0]?.options).toMatchObject({
+      minZoom: 12,
+      maxZoom: 15,
+      metadata: { place: "14.700,-17.400" },
+    });
+    await act(() => {
+      offlineRequests[0]?.progress({}, { state: "active", percentage: 40 });
+    });
+    expect(screen.getByText(/enregistrement.:.40.%$/)).toBeOnTheScreen();
+    await act(() => {
+      offlineRequests[0]?.progress({}, { state: "complete", percentage: 100 });
+    });
+    expect(screen.getByText("Quartier disponible hors ligne")).toBeOnTheScreen();
   });
 
   it("falls back to the list when the map cannot load", async () => {

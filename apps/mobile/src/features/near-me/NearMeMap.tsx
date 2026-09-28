@@ -11,10 +11,18 @@ import { GlassBackdrop } from "../../components/GlassBackdrop";
 import { useTabBarInset } from "../../components/GlassTabBar";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
-import { LocateButton, MapAttribution, MapNotice, ServicePreview, ViewToggle } from "./MapOverlays";
+import {
+  LocateButton,
+  MapAttribution,
+  MapNotice,
+  OfflineAreaButton,
+  ServicePreview,
+  ViewToggle,
+} from "./MapOverlays";
 import { loadServiceMap } from "./load-service-map";
 import { ServiceFilters } from "./ServiceParts";
 import type { LocationStatus } from "./useLocation";
+import { useOfflineArea } from "./useOfflineArea";
 
 const ServiceMap = lazy(loadServiceMap);
 
@@ -51,6 +59,7 @@ export function NearMeMap({
   const tabBar = useTabBarInset();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
+  const offline = useOfflineArea(origin);
   const [topBar, setTopBar] = useState(insets.top + theme.touchTarget.min);
   const { color, space, textStyle, touchTarget } = theme;
 
@@ -104,13 +113,21 @@ export function NearMeMap({
         <GlassBackdrop />
         <ServiceFilters selected={category} onSelect={onCategory} />
       </View>
-      {notice !== null && (
+      {notice !== null ? (
         <MapNotice
           message={notice.message}
           action={notice.action}
           onAction={onShowList}
           top={topBar + space.sm}
         />
+      ) : (
+        origin !== null && (
+          <OfflineAreaButton
+            state={offline.state}
+            onKeep={() => void offline.keep()}
+            top={topBar + space.sm}
+          />
+        )
       )}
       <MapAttribution bottom={creditBottom} />
       {selected === null ? (
