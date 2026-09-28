@@ -49,6 +49,7 @@ export const adminFr = {
     status: "État du service",
     procedures: "Thèmes des démarches",
     services: "Services de l'État",
+    errors: "Erreurs",
     signOut: "Se déconnecter",
     signedInAs: "Connecté : {name}",
   },
@@ -178,6 +179,35 @@ export const adminFr = {
       other: "{count} services écartés.",
     },
     attribution: "Données © les contributeurs d'OpenStreetMap (licence ODbL).",
+  },
+  errors: {
+    title: "Journal des erreurs",
+    intro:
+      "Chaque problème est expliqué simplement, avec ce qu'il faut faire. Les erreurs identiques sont regroupées ; les détails techniques sont repliés.",
+    none: "Aucune erreur enregistrée : tout fonctionne normalement.",
+    failed: "Le journal n'a pas pu être chargé. Vérifiez l'état du service.",
+    severity: {
+      critical: "Bloquant",
+      warning: "À surveiller",
+      info: "Pour information",
+    },
+    where: "Où",
+    impact: "Impact",
+    action: "Que faire",
+    count: {
+      one: "{count} fois",
+      other: "{count} fois",
+    },
+    ongoing: "En cours",
+    ended: "Terminé",
+    since: "Depuis le {day} à {time}",
+    last: "Dernière fois le {day} à {time}",
+    uncatalogued:
+      "Erreur non répertoriée : signalez ce code à l'équipe technique pour l'ajouter au catalogue.",
+    technical: "Détails techniques",
+    code: "Code",
+    place: "Endroit",
+    request: "Dernière requête",
   },
 } as const;
 
