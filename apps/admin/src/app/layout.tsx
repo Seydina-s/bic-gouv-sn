@@ -3,6 +3,7 @@ import { Noto_Sans } from "next/font/google";
 import { connection } from "next/server";
 import type { ReactNode } from "react";
 import { AppHeader } from "../components/AppHeader";
+import { ConsoleNav } from "../components/ConsoleNav";
 import { t } from "../lib/i18n";
 import { themeCss } from "../lib/theme-css";
 import "./globals.css";
@@ -38,9 +39,12 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           {t("shell.skipToContent")}
         </a>
         <AppHeader />
-        <main id="contenu" className="mx-auto w-full max-w-5xl px-6 pb-24 pt-12 md:px-10">
-          {children}
-        </main>
+        <div className="mx-auto w-full max-w-7xl px-6 md:px-10 lg:flex lg:gap-12">
+          <ConsoleNav />
+          <main id="contenu" className="min-w-0 max-w-5xl flex-1 pb-24 pt-12">
+            {children}
+          </main>
+        </div>
       </body>
     </html>
   );
