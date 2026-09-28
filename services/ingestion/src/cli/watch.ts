@@ -7,14 +7,24 @@ import {
   writeIngestionStatus,
 } from "@bgs/content-store";
 import { errorCodeOf } from "@bgs/shared-types";
+import { acquireLock } from "../lib/single-instance";
 import { FileMediaStorage } from "../media/media-storage";
 import { createPresidenceProvider } from "../sources/presidence/presidence-provider";
 import { nextIngestionStatus, type PassOutcome } from "../status";
 import { nextPollDelayMs, pollOnce, retryDelayMs, SeenIndex } from "../watch";
+import { isWithdrawalCheckDue, reconcileWithdrawals } from "../withdrawn";
 
 const storePath =
   process.env["NEWS_STORE_PATH"] ??
   fileURLToPath(new URL("../../../../.data/news.json", import.meta.url));
+// The store has a single writer: a second watcher refuses to start (ERREURS.md, 28/09).
+const lock = await acquireLock(`${storePath}.watch.lock`);
+if (!lock.acquired) {
+  process.stdout.write(
+    `Another watcher is already running (process ${String(lock.holder)}): not starting a second one.\n`,
+  );
+  process.exit(1);
+}
 const provider = createPresidenceProvider();
 const repository = new FileArticleRepository(storePath);
 const media = new FileMediaStorage(
@@ -70,6 +80,30 @@ async function report(outcome: PassOutcome, lastChangeAt: Date | null): Promise<
   return delay;
 }
 
+// Articles withdrawn by the source are hidden, once a night (ING-03).
+let lastWithdrawalCheckAt: Date | null = null;
+async function checkWithdrawalsIfDue() {
+  const now = new Date();
+  if (!isWithdrawalCheckDue(now, lastWithdrawalCheckAt)) {
+    return;
+  }
+  lastWithdrawalCheckAt = now;
+  try {
+    const { hidden, restored, missing } = await reconcileWithdrawals(
+      provider,
+      repository,
+      ["fr", "wo"],
+      { apply: true, now: () => new Date() },
+    );
+    process.stdout.write(
+      `${now.toISOString()} withdrawals checked · ${String(missing.length)} unlisted · newly hidden ${String(hidden)} · shown again ${String(restored)}\n`,
+    );
+  } catch (error) {
+    // Retried the next night; the ordinary passes are not affected.
+    process.stdout.write(`${now.toISOString()} ✗ withdrawal check: ${String(error)}\n`);
+  }
+}
+
 let lastChangeAt: Date | null = null;
 while (control.running) {
   const startedAt = new Date();
@@ -95,6 +129,7 @@ while (control.running) {
     for (const failure of result.failures) {
       process.stdout.write(`${startedAt.toISOString()} ✗ ${failure.code} ${failure.ref}\n`);
     }
+    await checkWithdrawalsIfDue();
   } catch (error) {
     delay = await report({ error: { code: errorCodeOf(error) ?? "UNKNOWN" } }, lastChangeAt);
     process.stdout.write(
@@ -106,4 +141,5 @@ while (control.running) {
     setTimeout(resolve, delay);
   });
 }
+await lock.release();
 process.stdout.write("Watcher stopped.\n");

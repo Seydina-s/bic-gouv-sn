@@ -12,7 +12,7 @@ Alertes concernées dans la console (carte « Collecte des actualités », journ
 ## Que faire
 
 1. **Site injoignable** (alerte rouge avec « nouvel essai automatique à … ») : rien à faire, sauf si la panne dure plus d'une journée. Vérifier alors dans un navigateur que https://www.presidence.sn/fr/ s'ouvre ; si le site est ouvert mais la collecte échoue toujours, son adresse ou son format a pu changer : prévenir l'équipe technique.
-2. **Collecte arrêtée** (« aucune vérification depuis 15 min ») : la collecte elle-même ne tourne plus (machine redémarrée, processus arrêté). La relancer : `pnpm --filter @bgs/ingestion watch`. Au redémarrage, elle rattrape d'elle-même les publications manquées.
+2. **Collecte arrêtée** (« aucune vérification depuis 15 min ») : la collecte elle-même ne tourne plus (machine redémarrée, processus arrêté). La relancer : `pnpm --filter @bgs/ingestion watch`. Au redémarrage, elle rattrape d'elle-même les publications manquées. Si elle répond « Another watcher is already running », une collecte tourne déjà : ne pas en lancer une seconde (le fichier de données n'admet qu'un seul écrivain) ; si ce processus est bloqué, l'arrêter d'abord (il apparaît avec `cli/watch.ts` dans la liste des processus).
 3. **Après une longue interruption** (plus de 200 articles publiés, cas exceptionnel) : lancer la reprise complète `pnpm --filter @bgs/ingestion backfill fr` puis `backfill wo` (sans risque : ce qui est déjà stocké est reconnu).
 
 ## Limite connue

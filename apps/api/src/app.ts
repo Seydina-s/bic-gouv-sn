@@ -27,6 +27,7 @@ import { registerSecurity } from "./security";
 import { adminAuthRoutes } from "./routes/admin-auth";
 import { adminProcedureThemesRoutes } from "./routes/admin-procedure-themes";
 import { adminErrorsRoutes } from "./routes/admin-errors";
+import { adminNewsRoutes } from "./routes/admin-news";
 import { adminServicesRoutes } from "./routes/admin-services";
 import { adminRemoteConfigRoutes, remoteConfigRoutes } from "./routes/remote-config";
 import { type ErrorJournal, journalErrors } from "./journal/error-journal";
@@ -199,6 +200,7 @@ export async function buildApp({
       ...admin,
       store: remoteConfig,
     });
+    await app.register(adminNewsRoutes, { prefix: "/admin/v1", signIn: admin.signIn, articles });
     if (errorJournal !== null) {
       await app.register(adminErrorsRoutes, {
         prefix: "/admin/v1",
