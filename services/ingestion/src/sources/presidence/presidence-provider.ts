@@ -33,13 +33,14 @@ export function createPresidenceProvider({
   intervalMs = 1000,
 }: PresidenceProviderOptions = {}): SourceProvider {
   const schedule = createRateLimiter(intervalMs);
+  const breaker = new CircuitBreaker({
+    dependency: "presidence.sn",
+    failureThreshold: 5,
+    resetTimeoutMs: 60_000,
+    isFailure: (error) => !(error instanceof QuarantineError),
+  });
   const call = createResilientCall({
-    breaker: new CircuitBreaker({
-      dependency: "presidence.sn",
-      failureThreshold: 5,
-      resetTimeoutMs: 60_000,
-      isFailure: (error) => !(error instanceof QuarantineError),
-    }),
+    breaker,
     timeoutMs: 15_000,
     retry: {
       idempotent: true,
@@ -81,6 +82,8 @@ export function createPresidenceProvider({
   }
 
   return {
+    circuits: () => [breaker.snapshot()],
+
     async listPage(lang, page) {
       const list = await getJson(
         `/articles?page=${String(page)}&q=&categoryIds=`,

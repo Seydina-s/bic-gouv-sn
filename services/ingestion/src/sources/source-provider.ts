@@ -1,3 +1,4 @@
+import type { CircuitSnapshot } from "@bgs/resilience";
 import type { Lang, NewsArticle } from "@bgs/shared-types";
 
 /** Lightweight entry from a source's "latest" listing, enough to decide what to fetch. */
@@ -30,6 +31,8 @@ export interface SourceProvider {
   articleIdFor(ref: SourceArticleRef): string;
   /** Downloads a media file from the source, with the same politeness and resilience. */
   downloadMedia(url: string): Promise<Buffer>;
+  /** State of the circuit breakers protecting this source, for the console. */
+  circuits?(): CircuitSnapshot[];
   /** Fetches and normalizes one article; throws QuarantineError when it fails validation. */
   fetchArticle(ref: SourceArticleRef): Promise<NewsArticle>;
 }

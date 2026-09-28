@@ -2,6 +2,18 @@ import { z } from "zod";
 import { isoDateTimeSchema } from "../common/primitives.schema";
 
 /**
+ * One circuit breaker: closed (calls go through), open (calls stopped after repeated
+ * failures, until a pause ends) or half-open (one trial call decides).
+ */
+export const circuitStatusSchema = z.object({
+  dependency: z.string().min(1),
+  state: z.enum(["closed", "open", "half-open"]),
+  consecutiveFailures: z.int().nonnegative(),
+  openedAt: isoDateTimeSchema.nullable(),
+});
+export type CircuitStatus = z.infer<typeof circuitStatusSchema>;
+
+/**
  * Report written by the real-time collection after each pass, exposed read-only by
  * the API for the administration console. Times and error codes only: no content,
  * no personal data.
@@ -27,6 +39,11 @@ export const ingestionStatusSchema = z.object({
    * Absent from reports written before this field.
    */
   nextAttemptAt: isoDateTimeSchema.nullable().optional(),
+  /**
+   * The circuit breakers protecting each source (CLAUDE.md §4.5: their state is
+   * visible in the console). Absent from reports written before this field.
+   */
+  circuits: z.array(circuitStatusSchema).optional(),
 });
 export type IngestionStatus = z.infer<typeof ingestionStatusSchema>;
 
