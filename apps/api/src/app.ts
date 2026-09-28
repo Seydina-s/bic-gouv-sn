@@ -17,7 +17,7 @@ import {
   type ArticleRepository,
   type ProcedureRepository,
 } from "@bgs/content-store";
-import { FileAdminAccountStore } from "./admin/account-store";
+import { FileAdminAccountStore, type AdminAccountStore } from "./admin/account-store";
 import { FileAuditJournal, type AuditJournal } from "./admin/audit-journal";
 import { SecretBox } from "./admin/secret-box";
 import { AdminSignIn } from "./admin/sign-in-service";
@@ -27,6 +27,7 @@ import { registerSecurity } from "./security";
 import { adminAuthRoutes } from "./routes/admin-auth";
 import { adminProcedureThemesRoutes } from "./routes/admin-procedure-themes";
 import { adminErrorsRoutes } from "./routes/admin-errors";
+import { adminAuditRoutes } from "./routes/admin-audit";
 import { adminNewsRoutes } from "./routes/admin-news";
 import { adminNotificationsRoutes } from "./routes/admin-notifications";
 import { adminSearchMissesRoutes } from "./routes/admin-search-misses";
@@ -80,6 +81,8 @@ export interface AppOptions {
 export interface AdminServices {
   signIn: AdminSignIn;
   journal: AuditJournal;
+  /** To show names instead of account ids in the audit journal. */
+  accounts?: AdminAccountStore;
 }
 
 function defaultAdmin(config: Config): AdminServices | null {
@@ -87,10 +90,12 @@ function defaultAdmin(config: Config): AdminServices | null {
     return null;
   }
   const journal = new FileAuditJournal(config.ADMIN_AUDIT_PATH);
+  const accounts = new FileAdminAccountStore(config.ADMIN_ACCOUNTS_PATH);
   return {
     journal,
+    accounts,
     signIn: new AdminSignIn({
-      accounts: new FileAdminAccountStore(config.ADMIN_ACCOUNTS_PATH),
+      accounts,
       journal,
       box: new SecretBox(config.ADMIN_SECRET_KEY),
     }),
@@ -223,6 +228,12 @@ export async function buildApp({
       store: remoteConfig,
     });
     await app.register(adminNewsRoutes, { prefix: "/admin/v1", signIn: admin.signIn, articles });
+    await app.register(adminAuditRoutes, {
+      prefix: "/admin/v1",
+      signIn: admin.signIn,
+      journal: admin.journal,
+      accounts: admin.accounts,
+    });
     await app.register(adminNotificationsRoutes, {
       prefix: "/admin/v1",
       signIn: admin.signIn,

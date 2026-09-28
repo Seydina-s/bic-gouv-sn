@@ -47,5 +47,5 @@ export async function adminForTests() {
     return done.token;
   }
 
-  return { admin: { signIn, journal }, journal, tokenFor };
+  return { admin: { signIn, journal, accounts }, journal, tokenFor };
 }

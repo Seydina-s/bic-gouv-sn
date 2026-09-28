@@ -30,7 +30,10 @@ const GROUPS = [
   {
     id: "settings",
     label: "nav.groups.settings",
-    links: [{ href: "/controle", label: "nav.remote" }],
+    links: [
+      { href: "/controle", label: "nav.remote" },
+      { href: "/journal", label: "nav.audit" },
+    ],
   },
 ] as const;
 
