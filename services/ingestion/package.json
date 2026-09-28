@@ -11,6 +11,7 @@
     "covers": "tsx src/cli/backfill-covers.ts",
     "inline-images": "tsx src/cli/inline-images.ts",
     "documents": "tsx src/cli/documents.ts",
+    "withdrawn": "tsx src/cli/withdrawn.ts",
     "procedures": "tsx src/cli/procedures.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --coverage",
