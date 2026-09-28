@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { nextIngestionStatus } from "./status";
+import { circuitStatuses, nextIngestionStatus } from "./status";
 import type { PollResult } from "./watch";
 
 const T1 = new Date("2026-09-26T10:00:00Z");
@@ -81,5 +81,29 @@ describe("nextIngestionStatus", () => {
       T1,
     );
     expect(allFailed.consecutiveFailures).toBe(1);
+  });
+});
+
+describe("circuitStatuses", () => {
+  it("reports each breaker with its opening time as a date", () => {
+    expect(
+      circuitStatuses([
+        {
+          dependency: "presidence.sn",
+          state: "open",
+          consecutiveFailures: 5,
+          openedAt: Date.UTC(2026, 8, 28, 9),
+        },
+        { dependency: "e-senegal.sn", state: "closed", consecutiveFailures: 0, openedAt: null },
+      ]),
+    ).toEqual([
+      {
+        dependency: "presidence.sn",
+        state: "open",
+        consecutiveFailures: 5,
+        openedAt: "2026-09-28T09:00:00.000Z",
+      },
+      { dependency: "e-senegal.sn", state: "closed", consecutiveFailures: 0, openedAt: null },
+    ]);
   });
 });

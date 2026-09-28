@@ -37,6 +37,13 @@ export const adminFr = {
         "Aucun rapport de la collecte n'est disponible : elle n'a peut-être jamais été lancée, ou l'API ne répond pas.",
     },
     since: "Depuis {time}",
+    circuits: {
+      title: "Protection des sources",
+      closed: "{name} : normale, les demandes passent.",
+      open: "{name} : demandes suspendues depuis {time} après {failures} échecs de suite, pour ne pas surcharger le site ; reprise automatique après une courte pause.",
+      halfOpen:
+        "{name} : reprise en cours, une demande d'essai vérifie que le site répond de nouveau.",
+    },
     nextAttempt:
       "La collecte ne s'arrête pas : nouvel essai automatique à {time}, puis toutes les 10 minutes au plus tant que le site ne répond pas ; tout ce qui aura été publié entre-temps sera rattrapé.",
   },
