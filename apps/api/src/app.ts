@@ -29,11 +29,18 @@ import { adminProcedureThemesRoutes } from "./routes/admin-procedure-themes";
 import { adminErrorsRoutes } from "./routes/admin-errors";
 import { adminAuditRoutes } from "./routes/admin-audit";
 import { adminNewsRoutes } from "./routes/admin-news";
+import { adminNotificationsRoutes } from "./routes/admin-notifications";
 import { adminSearchMissesRoutes } from "./routes/admin-search-misses";
 import { adminServicesRoutes } from "./routes/admin-services";
 import { adminRemoteConfigRoutes, remoteConfigRoutes } from "./routes/remote-config";
 import { type ErrorJournal, journalErrors } from "./journal/error-journal";
 import type { SearchMisses } from "./journal/search-misses";
+import {
+  FileNotificationStore,
+  NotificationService,
+  noPushProvider,
+  type PushProvider,
+} from "./notifications/notifications";
 import { healthRoutes } from "./routes/health";
 import { registerMedia } from "./routes/media";
 import { newsRoutes } from "./routes/news";
@@ -67,6 +74,8 @@ export interface AppOptions {
   errorJournal?: ErrorJournal | null;
   /** Searches that found nothing (server.ts opens it); none: not counted. */
   searchMisses?: SearchMisses | null;
+  /** Push service for approved notifications; none until the app can receive them. */
+  pushProvider?: PushProvider;
 }
 
 export interface AdminServices {
@@ -106,6 +115,7 @@ export async function buildApp({
   logStream,
   errorJournal = null,
   searchMisses = null,
+  pushProvider = noPushProvider,
 }: AppOptions): Promise<FastifyInstance> {
   const app = Fastify({
     logger: {
@@ -223,6 +233,16 @@ export async function buildApp({
       signIn: admin.signIn,
       journal: admin.journal,
       accounts: admin.accounts,
+    });
+    await app.register(adminNotificationsRoutes, {
+      prefix: "/admin/v1",
+      signIn: admin.signIn,
+      notifications: new NotificationService(
+        new FileNotificationStore(config.NOTIFICATIONS_PATH),
+        articles,
+        pushProvider,
+        admin.journal,
+      ),
     });
     if (searchMisses !== null) {
       await app.register(adminSearchMissesRoutes, {

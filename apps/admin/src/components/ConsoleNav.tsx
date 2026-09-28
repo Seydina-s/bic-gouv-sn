@@ -24,6 +24,7 @@ const GROUPS = [
       { href: "/demarches", label: "nav.procedures" },
       { href: "/services", label: "nav.services" },
       { href: "/masques", label: "nav.withdrawn" },
+      { href: "/notifications", label: "nav.notifications" },
     ],
   },
   {

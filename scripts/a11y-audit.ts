@@ -53,6 +53,7 @@ const CONSOLE_SCREENS = [
   "/masques",
   "/recherches",
   "/journal",
+  "/notifications",
 ];
 
 function startApi(dataDir: string): ChildProcess {
@@ -79,6 +80,7 @@ function startApi(dataDir: string): ChildProcess {
       MEDIA_ROOT: data("media"),
       ADMIN_ACCOUNTS_PATH: data("admin/accounts.json"),
       ADMIN_AUDIT_PATH: data("admin/audit.jsonl"),
+      NOTIFICATIONS_PATH: data("admin/notifications.json"),
     },
   });
 }
