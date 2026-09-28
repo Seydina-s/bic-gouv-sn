@@ -12,6 +12,7 @@ import { CoverImage } from "./CoverImage";
 import { formatPublishedOn } from "./format";
 import { SectionTag } from "./SectionTag";
 import { Selvage, SELVAGE_WIDTH, WovenStrip } from "./Selvage";
+import { usePrefetchArticle } from "./useNews";
 
 const SOURCE = "presidence.sn";
 
@@ -53,12 +54,17 @@ export function LeadStory({
 }: LeadStoryProps) {
   const { theme } = useTheme();
   const { label, day } = useStoryLabel(item);
+  const prefetch = usePrefetchArticle();
   const { color, space, textStyle, layout } = theme;
 
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={[position, label].filter(Boolean).join(". ")}
+      // Loading starts as the finger lands: the article is often ready when it lifts.
+      onPressIn={() => {
+        prefetch(item.id);
+      }}
       onPress={() => {
         onPress(item.id);
       }}
@@ -105,6 +111,7 @@ export function CouncilCard({ item, onPress }: Omit<StoryProps, "lastOpened">) {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const { label, day } = useStoryLabel(item);
+  const prefetch = usePrefetchArticle();
   const { color, space, textStyle, radius } = theme;
   const ink = color.onPrimaryContainer;
 
@@ -112,6 +119,10 @@ export function CouncilCard({ item, onPress }: Omit<StoryProps, "lastOpened">) {
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`${t("feed.latestCouncil")}. ${label}`}
+      // Loading starts as the finger lands: the article is often ready when it lifts.
+      onPressIn={() => {
+        prefetch(item.id);
+      }}
       onPress={() => {
         onPress(item.id);
       }}
@@ -160,6 +171,7 @@ export function StoryRow({
 }: StoryProps & { showSection?: boolean }) {
   const { theme } = useTheme();
   const { label, day } = useStoryLabel(item);
+  const prefetch = usePrefetchArticle();
   const tone = useCategoryTone(item.category);
   const { color, space, textStyle, radius, layout } = theme;
 
@@ -167,6 +179,10 @@ export function StoryRow({
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
+      // Loading starts as the finger lands: the article is often ready when it lifts.
+      onPressIn={() => {
+        prefetch(item.id);
+      }}
       onPress={() => {
         onPress(item.id);
       }}

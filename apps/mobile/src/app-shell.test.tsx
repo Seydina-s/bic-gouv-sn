@@ -140,6 +140,32 @@ describe("first run", () => {
 });
 
 describe("app shell", () => {
+  it("loads the first stories of the front page in advance", async () => {
+    const fetchMock = newsFetch();
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    await renderRouter(routes, { initialUrl: "/" });
+    const detailCalls = () =>
+      fetchMock.mock.calls.filter(([url]) => /\/v1\/news\/[0-9a-f-]{36}\?lang=fr/.test(url)).length;
+    await waitFor(() => {
+      expect(detailCalls()).toBe(2);
+    });
+  });
+
+  it("loads nothing in advance when saving data", async () => {
+    await AsyncStorage.setItem("bgs-data-saver", "always");
+    const fetchMock = newsFetch();
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    await renderRouter(routes, { initialUrl: "/" });
+    // Checked once the stories are shown: an advance load starts with that render.
+    expect(
+      await screen.findByRole("button", { name: /^Article 1 sur 2\. Conseil des ministres/ }),
+    ).toBeOnTheScreen();
+    const detailCalls = fetchMock.mock.calls.filter(([url]) =>
+      /\/v1\/news\/[0-9a-f-]{36}\?lang=fr/.test(url),
+    );
+    expect(detailCalls).toHaveLength(0);
+  });
+
   it("opens on the front page: carousel, then one row of cards per section", async () => {
     const fetchMock = newsFetch();
     globalThis.fetch = fetchMock as unknown as typeof fetch;
