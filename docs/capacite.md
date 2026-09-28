@@ -12,9 +12,9 @@ Sert au chiffrage de l'hébergement (S1-02) et à la préparation du lancement (
 | Détail d'un article `/v1/news/:id` | ~1 040 req/s | inchangé | 45 ms |
 | Liste `/v1/news?limit=20` | ~128 req/s | **~630 req/s** | 71 ms |
 | Rubriques `/v1/news/sections` | ~38 req/s | **~278 req/s** | 168 ms |
-| Recherche `/v1/news/search` | ~13 req/s | à optimiser | ~3,7 s sous 50 connexions |
+| Recherche `/v1/news/search` | ~13 req/s | ~13 req/s (première fois) ; **~300 req/s** pour une recherche répétée (PERF-06) | 154 ms répétée (max 0,56 s) |
 
-PERF-04 : fichier des articles gardé en mémoire tant qu'il ne change pas. PERF-05 : tri des articles et extraits mis en cache (invalidés dès que le contenu change).
+PERF-04 : fichier des articles gardé en mémoire tant qu'il ne change pas. PERF-05 : tri des articles et extraits mis en cache (invalidés dès que le contenu change). PERF-06 : une recherche répétée est réutilisée 60 s (comme le cache public de sa réponse), et une recherche en cours de calcul est partagée par les demandes identiques qui arrivent en même temps.
 
 ## Ce que cela veut dire pour 20 millions d'installations
 
