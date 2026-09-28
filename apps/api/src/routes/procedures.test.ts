@@ -11,15 +11,18 @@ import type { FastifyInstance } from "fastify";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { buildApp } from "../app";
 import { loadConfig } from "../config";
+import { SearchMisses } from "../journal/search-misses";
 import { procedure } from "../testing/procedure-fixture";
 import { temporaryStore } from "../testing/store";
 
 describe("/v1/procedures", () => {
   let dir: string;
   let app: FastifyInstance;
+  let searchMisses: SearchMisses;
 
   beforeEach(async () => {
     dir = await mkdtemp(join(tmpdir(), "bgs-api-procedures-"));
+    searchMisses = await SearchMisses.open(join(dir, "search-misses.json"));
     const procedures = new FileProcedureRepository(join(dir, "procedures.json"));
     await procedures.save(
       procedure(1, "Extrait de naissance", "<p>Se rendre à la mairie.</p>", {
@@ -36,7 +39,18 @@ describe("/v1/procedures", () => {
       version: "1.0.0",
       articles: temporaryStore(),
       procedures,
+      searchMisses,
     });
+  });
+
+  it("counts a search that found nothing, once per search, not a fruitful one", async () => {
+    for (let i = 0; i < 3; i += 1) {
+      await app.inject({ method: "GET", url: "/v1/procedures?q=bourse" });
+      await app.inject({ method: "GET", url: "/v1/procedures?q=passeport" });
+    }
+    expect(searchMisses.shown().map(({ area, query, count }) => [area, query, count])).toEqual([
+      ["procedures", "bourse", 3],
+    ]);
   });
 
   afterEach(async () => {
