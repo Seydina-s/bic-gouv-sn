@@ -5,3 +5,9 @@
 export function loadServiceMap() {
   return import("./ServiceMap");
 }
+
+/** The map's offline downloads, from the same library: only where the map shows. */
+export async function loadOfflineManager() {
+  const { OfflineManager } = await import("@maplibre/maplibre-react-native");
+  return OfflineManager;
+}

@@ -1,5 +1,7 @@
 import type { PublicService } from "@bgs/shared-types";
 import { ArrowRightIcon as ArrowRight } from "phosphor-react-native/src/icons/ArrowRight";
+import { CheckCircleIcon as CheckCircle } from "phosphor-react-native/src/icons/CheckCircle";
+import { DownloadSimpleIcon as DownloadSimple } from "phosphor-react-native/src/icons/DownloadSimple";
 import { ListBulletsIcon as ListBullets } from "phosphor-react-native/src/icons/ListBullets";
 import { MapTrifoldIcon as MapTrifold } from "phosphor-react-native/src/icons/MapTrifold";
 import { NavigationArrowIcon as NavigationArrow } from "phosphor-react-native/src/icons/NavigationArrow";
@@ -23,6 +25,7 @@ import { useTheme } from "../../theme/useTheme";
 import { directionsUrl } from "./directions";
 import { formatDistance } from "./nearby";
 import { ServiceBadge } from "./ServiceParts";
+import type { OfflineAreaState } from "./useOfflineArea";
 
 const OSM_COPYRIGHT = "https://www.openstreetmap.org/copyright";
 
@@ -254,6 +257,57 @@ export function ServicePreview({
           </Pressable>
         </View>
       </View>
+    </Glass>
+  );
+}
+
+/** Keeps the streets around the place on the phone: size first, then progress. */
+export function OfflineAreaButton({
+  state,
+  onKeep,
+  top,
+}: {
+  state: OfflineAreaState;
+  onKeep: () => void;
+  top: number;
+}) {
+  const { theme } = useTheme();
+  const { t } = useTranslation();
+  const { color, space, radius, textStyle, touchTarget } = theme;
+  const label =
+    state.kind === "idle"
+      ? t("nearMe.keepOffline", { size: String(state.megabytes) })
+      : state.kind === "saving"
+        ? t("nearMe.keepingOffline", { percent: String(state.percent) })
+        : state.kind === "saved"
+          ? t("nearMe.keptOffline")
+          : t("nearMe.keepOfflineFailed");
+  const actionable = state.kind === "idle" || state.kind === "failed";
+  return (
+    <Glass radius={radius.full} style={[styles.anchor, { top, right: space.lg }]}>
+      <Pressable
+        accessibilityRole={actionable ? "button" : "text"}
+        accessibilityLiveRegion="polite"
+        disabled={!actionable}
+        onPress={onKeep}
+        style={({ pressed }) => [
+          styles.row,
+          {
+            minHeight: touchTarget.min,
+            gap: space.sm,
+            paddingHorizontal: space.lg,
+            opacity: pressed ? theme.opacity.cardPressed : 1,
+          },
+        ]}
+      >
+        <Icon
+          icon={state.kind === "saved" ? CheckCircle : DownloadSimple}
+          size="sm"
+          weight={state.kind === "saved" ? "fill" : "regular"}
+          color={color.textBrand}
+        />
+        <Text style={[textStyle.label, { color: color.textPrimary }]}>{label}</Text>
+      </Pressable>
     </Glass>
   );
 }

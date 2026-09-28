@@ -10,11 +10,27 @@ export const mapCalls = {
   source: { getClusterExpansionZoom: jest.fn(() => Promise.resolve(16)) },
 };
 
+type Progress = (pack: unknown, status: { state: string; percentage: number }) => void;
+
+/** Offline areas asked for, with the callbacks the map library would call. */
+export const offlineRequests: { options: { metadata?: unknown }; progress: Progress }[] = [];
+
+export const OfflineManager = {
+  getPacks: jest.fn(() => Promise.resolve([] as { id: string; metadata: object }[])),
+  deletePack: jest.fn(() => Promise.resolve()),
+  createPack: jest.fn((options: { metadata?: unknown }, progress: Progress) => {
+    offlineRequests.push({ options, progress });
+    return Promise.resolve({ id: "pack-test" });
+  }),
+};
+
 /** Forget what earlier tests asked. */
 export function clearMapCalls(): void {
   mapCalls.camera.flyTo.mockClear();
   mapCalls.camera.easeTo.mockClear();
   mapCalls.source.getClusterExpansionZoom.mockClear();
+  OfflineManager.createPack.mockClear();
+  offlineRequests.length = 0;
 }
 
 interface MapStandInProps extends ViewProps {
