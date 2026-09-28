@@ -1,7 +1,10 @@
 import type { ThemePreference } from "@bgs/ui";
 import Constants from "expo-constants";
 
+import { CellSignalHighIcon as CellSignalHigh } from "phosphor-react-native/src/icons/CellSignalHigh";
 import { DeviceMobileIcon as DeviceMobile } from "phosphor-react-native/src/icons/DeviceMobile";
+import { ImageIcon } from "phosphor-react-native/src/icons/Image";
+import { LeafIcon as Leaf } from "phosphor-react-native/src/icons/Leaf";
 import { MoonIcon as Moon } from "phosphor-react-native/src/icons/Moon";
 import { SunIcon as Sun } from "phosphor-react-native/src/icons/Sun";
 import { XIcon as X } from "phosphor-react-native/src/icons/X";
@@ -22,6 +25,7 @@ import { IconButton } from "../../components/IconButton";
 import { LinkRow } from "../../components/LinkRow";
 import { SegmentedChoice, type Segment } from "../../components/SegmentedChoice";
 import type { LangChoice } from "../../i18n/I18nProvider";
+import { type DataSaverPreference, useDataSaver } from "../data-saver/DataSaverProvider";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useReduceMotion } from "../../theme/useSystemAccessibility";
 import { useTheme } from "../../theme/useTheme";
@@ -46,6 +50,7 @@ const LICENCES = [
 export function SettingsSheet({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const { theme, preference, setPreference } = useTheme();
   const { t, choice, setLang } = useTranslation();
+  const dataSaver = useDataSaver();
   const insets = useSafeAreaInsets();
   const { color, space, textStyle, radius, layout } = theme;
 
@@ -68,6 +73,16 @@ export function SettingsSheet({ visible, onClose }: { visible: boolean; onClose:
     },
     { value: "fr", label: t("settings.languageFr"), icon: "FR" },
     { value: "wo", label: t("settings.languageWo"), icon: "WO" },
+  ];
+  const dataSavings: Segment<DataSaverPreference>[] = [
+    { value: "never", label: t("settings.dataSaverNever"), icon: ImageIcon },
+    {
+      value: "cellular",
+      label: t("settings.dataSaverCellular"),
+      spokenLabel: t("settings.dataSaverCellularSpoken"),
+      icon: CellSignalHigh,
+    },
+    { value: "always", label: t("settings.dataSaverAlways"), icon: Leaf },
   ];
   const close = onClose;
   const reduceMotion = useReduceMotion();
@@ -157,6 +172,17 @@ export function SettingsSheet({ visible, onClose }: { visible: boolean; onClose:
               selected={choice}
               onSelect={setLang}
             />
+            <View style={{ gap: space.sm }}>
+              <SegmentedChoice
+                title={t("settings.dataSaver")}
+                segments={dataSavings}
+                selected={dataSaver.preference}
+                onSelect={dataSaver.setPreference}
+              />
+              <Text style={[textStyle.bodySmall, { color: color.textSecondary }]}>
+                {t("settings.dataSaverHelp")}
+              </Text>
+            </View>
             <View style={{ gap: space.sm }}>
               <Text
                 accessibilityRole="header"

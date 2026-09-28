@@ -347,6 +347,22 @@ describe("app shell", () => {
     expect(openURL).toHaveBeenCalledWith("https://www.presidence.sn/fr/actualites/test/");
   });
 
+  it("saves data on request: the photos of an article then wait for a tap", async () => {
+    await renderRouter(routes, { initialUrl: "/" });
+    await fireEvent.press(await screen.findByRole("button", { name: "Réglages" }));
+    await fireEvent.press(await screen.findByRole("radio", { name: "Toujours" }));
+    expect(await AsyncStorage.getItem("bgs-data-saver")).toBe("always");
+    await fireEvent.press(first(screen.getAllByRole("button", { name: "Fermer les réglages" })));
+    await fireEvent.press(first(await screen.findAllByText("Titre de test A")));
+    expect(await screen.findByText("Paragraphe de test.")).toBeOnTheScreen();
+    const showPhoto = screen.getAllByRole("button", { name: "Afficher la photo" });
+    expect(showPhoto.length).toBeGreaterThan(0);
+    await fireEvent.press(first(showPhoto));
+    expect(screen.getAllByRole("button", { name: "Afficher la photo" }).length).toBe(
+      showPhoto.length - 1,
+    );
+  });
+
   it("offers a retry when the feed cannot load and nothing is saved", async () => {
     globalThis.fetch = newsFetch({
       list: () => new Response("{}", { status: 500 }),

@@ -381,6 +381,10 @@ Demande de l'utilisateur (27/09/2026) : une présentation propre à l'applicatio
 ### Bouton principal (`button-primary`, message d'erreur du fil)
 - Fond `primary`, texte `label` `on-primary`, `rounded.md`, 48 dp de haut au minimum, marge intérieure horizontale `xl`.
 
+### Économie de données (`features/data-saver/`)
+- Réglage à trois choix, comme le thème et la langue : « Jamais » (par défaut), « Mobile » (sur réseau mobile seulement, suivi en direct), « Toujours », puis une phrase d'explication en `body-small`.
+- Actif : aucune photo n'est téléchargée d'office. Dans les listes, la photo garde ses couleurs (BlurHash) ; le titre ouvre l'article. Dans un article, la même empreinte colorée porte une pilule « Afficher la photo » (verre commun, icône de téléchargement `text-brand`, `label`), comme la pilule « Écouter » ; au toucher, la plus petite variante se charge. Une image du texte sans copie chez nous garde la surface neutre et la même pilule.
+
 ### Icônes (`components/Icon.tsx`)
 - Phosphor uniquement, un fichier d'icône importé à la fois, tailles `iconSize` (16 / 24 / 32), graisse `regular` (`fill` pour l'onglet actif). Un libellé d'accessibilité est obligatoire, sauf quand l'icône accompagne un texte visible.
 

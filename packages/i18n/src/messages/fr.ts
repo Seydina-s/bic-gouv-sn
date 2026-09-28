@@ -92,6 +92,7 @@ export const fr = {
     openSource: "Lire sur {source}",
     notFound: "Cet article n'est pas disponible.",
     image: "Photo de l'article",
+    showPhoto: "Afficher la photo",
     watchVideo: "Regarder la vidéo",
     videoHost: "Sur YouTube",
     share: "Partager",
@@ -250,6 +251,13 @@ export const fr = {
     languageAuto: "Comme le téléphone",
     languageFr: "Français",
     languageWo: "Wolof",
+    dataSaver: "Économie de données",
+    dataSaverNever: "Jamais",
+    dataSaverCellular: "Mobile",
+    dataSaverCellularSpoken: "Sur réseau mobile seulement",
+    dataSaverAlways: "Toujours",
+    dataSaverHelp:
+      "Les photos ne se chargent que si vous les demandez. Leurs couleurs restent visibles.",
     about: "À propos",
     aboutNews:
       "Bic Gouv SN réunit en un seul endroit l'actualité officielle du Gouvernement du Sénégal. Comptes rendus du Conseil des ministres, communiqués, discours, audiences et visites officielles arrivent dans l'application dès leur publication sur presidence.sn, en français et en wolof.",

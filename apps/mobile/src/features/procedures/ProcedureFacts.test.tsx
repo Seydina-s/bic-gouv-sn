@@ -1,7 +1,6 @@
 import { render, screen } from "@testing-library/react-native";
-import { I18nProvider } from "../../i18n/I18nProvider";
 import { PROCEDURE_LIST } from "../../testing/procedure-fixtures";
-import { ThemeProvider } from "../../theme/ThemeProvider";
+import { TestProviders } from "../../testing/TestProviders";
 import { ProcedureRow } from "./ProcedureRow";
 
 jest.mock("expo-localization", () => ({ getLocales: () => [{ languageTag: "fr-SN" }] }));
@@ -13,11 +12,9 @@ describe("procedure facts", () => {
       throw new Error("fixture");
     }
     await render(
-      <ThemeProvider>
-        <I18nProvider>
-          <ProcedureRow item={{ ...first, costFcfa: 0 }} onPress={jest.fn()} />
-        </I18nProvider>
-      </ThemeProvider>,
+      <TestProviders>
+        <ProcedureRow item={{ ...first, costFcfa: 0 }} onPress={jest.fn()} />
+      </TestProviders>,
     );
     expect(screen.getByText("Gratuit")).toBeOnTheScreen();
     expect(screen.queryByText(/0.F.CFA/)).toBeNull();

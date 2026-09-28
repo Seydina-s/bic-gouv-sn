@@ -3,9 +3,8 @@ import type { Block } from "@bgs/shared-types";
 import * as Speech from "expo-speech";
 import { Linking, StyleSheet } from "react-native";
 import { createNewsClient, NewsApiError } from "../../api/news-client";
-import { I18nProvider } from "../../i18n/I18nProvider";
 import { COVER, DETAIL, LIST } from "../../testing/news-fixtures";
-import { ThemeProvider } from "../../theme/ThemeProvider";
+import { TestProviders } from "../../testing/TestProviders";
 import { ArticleView } from "./ArticleView";
 import { BlockRenderer } from "./BlockRenderer";
 import { categoryLabelKey } from "./category";
@@ -103,11 +102,9 @@ describe("BlockRenderer", () => {
   it("renders every block type natively and opens links", async () => {
     const openURL = jest.spyOn(Linking, "openURL").mockResolvedValue(true);
     await render(
-      <ThemeProvider>
-        <I18nProvider>
-          <BlockRenderer blocks={DETAIL.blocks} />
-        </I18nProvider>
-      </ThemeProvider>,
+      <TestProviders>
+        <BlockRenderer blocks={DETAIL.blocks} />
+      </TestProviders>,
     );
     expect(screen.getByText("Paragraphe de test.")).toBeOnTheScreen();
     expect(screen.getByRole("header")).toHaveTextContent("Intertitre");
@@ -123,20 +120,18 @@ describe("BlockRenderer", () => {
     const openURL = jest.spyOn(Linking, "openURL").mockResolvedValue(true);
     openURL.mockClear();
     await render(
-      <ThemeProvider>
-        <I18nProvider>
-          <BlockRenderer
-            blocks={[
-              {
-                type: "video",
-                provider: "youtube",
-                videoId: "UMZm4iPcFWE",
-                url: "https://www.youtube.com/watch?v=UMZm4iPcFWE",
-              },
-            ]}
-          />
-        </I18nProvider>
-      </ThemeProvider>,
+      <TestProviders>
+        <BlockRenderer
+          blocks={[
+            {
+              type: "video",
+              provider: "youtube",
+              videoId: "UMZm4iPcFWE",
+              url: "https://www.youtube.com/watch?v=UMZm4iPcFWE",
+            },
+          ]}
+        />
+      </TestProviders>,
     );
     expect(openURL).not.toHaveBeenCalled();
     await fireEvent.press(screen.getByRole("link", { name: "Regarder la vidéo. Sur YouTube" }));
@@ -145,20 +140,18 @@ describe("BlockRenderer", () => {
 
   it("shows our stored copy of an image in the text, with its description", async () => {
     await render(
-      <ThemeProvider>
-        <I18nProvider>
-          <BlockRenderer
-            blocks={[
-              {
-                type: "image",
-                src: "https://bo-admin.presidence.sn/uploads/images/in.jpg",
-                alt: "Salle du Conseil",
-                media: COVER,
-              },
-            ]}
-          />
-        </I18nProvider>
-      </ThemeProvider>,
+      <TestProviders>
+        <BlockRenderer
+          blocks={[
+            {
+              type: "image",
+              src: "https://bo-admin.presidence.sn/uploads/images/in.jpg",
+              alt: "Salle du Conseil",
+              media: COVER,
+            },
+          ]}
+        />
+      </TestProviders>,
     );
     expect(screen.getByLabelText("Salle du Conseil")).toHaveProp("testID", "cover-image");
   });
@@ -167,11 +160,9 @@ describe("BlockRenderer", () => {
 describe("reading an article aloud", () => {
   const view = (detail: typeof DETAIL) =>
     render(
-      <ThemeProvider>
-        <I18nProvider>
-          <ArticleView detail={detail} isPending={false} paneWidth={390} bottomInset={0} />
-        </I18nProvider>
-      </ThemeProvider>,
+      <TestProviders>
+        <ArticleView detail={detail} isPending={false} paneWidth={390} bottomInset={0} />
+      </TestProviders>,
     );
 
   it("reads the title, then the text in order, skipping pictures", () => {
@@ -222,11 +213,9 @@ describe("reading an article aloud", () => {
 describe("ArticleView cover", () => {
   async function coverStyle(paneWidth: number) {
     await render(
-      <ThemeProvider>
-        <I18nProvider>
-          <ArticleView detail={DETAIL} isPending={false} paneWidth={paneWidth} bottomInset={0} />
-        </I18nProvider>
-      </ThemeProvider>,
+      <TestProviders>
+        <ArticleView detail={DETAIL} isPending={false} paneWidth={paneWidth} bottomInset={0} />
+      </TestProviders>,
     );
     const cover = screen.getByTestId("cover-image", { includeHiddenElements: true });
     return StyleSheet.flatten(cover.props["style"] as Parameters<typeof StyleSheet.flatten>[0]);
@@ -263,13 +252,11 @@ describe("stories", () => {
     const onPress = jest.fn();
     const props = { item, lastOpened: true, onPress };
     await render(
-      <ThemeProvider>
-        <I18nProvider>
-          {kind === "lead" && <LeadStory {...props} width={390} />}
-          {kind === "row" && <StoryRow {...props} />}
-          {kind === "council" && <CouncilCard item={item} onPress={onPress} />}
-        </I18nProvider>
-      </ThemeProvider>,
+      <TestProviders>
+        {kind === "lead" && <LeadStory {...props} width={390} />}
+        {kind === "row" && <StoryRow {...props} />}
+        {kind === "council" && <CouncilCard item={item} onPress={onPress} />}
+      </TestProviders>,
     );
     return onPress;
   }
@@ -305,11 +292,9 @@ describe("stories", () => {
       throw new Error("fixture");
     }
     await render(
-      <ThemeProvider>
-        <I18nProvider>
-          <LeadStory item={item} lastOpened width={390} showSection={false} onPress={jest.fn()} />
-        </I18nProvider>
-      </ThemeProvider>,
+      <TestProviders>
+        <LeadStory item={item} lastOpened width={390} showSection={false} onPress={jest.fn()} />
+      </TestProviders>,
     );
     expect(screen.getByText(item.title)).toBeOnTheScreen();
     expect(screen.queryByText("Dernière lecture")).toBeNull();
