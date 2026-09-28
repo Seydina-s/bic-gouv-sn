@@ -1,19 +1,19 @@
 # STATUS — Bic Gouv SN
 
-**Dernière mise à jour** : 28/09/2026 (9 h 30) · **Mode** : autonome jusqu'à 11 h (demande de l'utilisateur du 27/09), puis retour au mode standard. Actions de l'utilisateur reportées : `.claude/session/A-FAIRE-UTILISATEUR.md` (11 points).
+**Dernière mise à jour** : 28/09/2026 (10 h) · **Mode** : autonome jusqu'à 11 h (demande de l'utilisateur du 27/09), puis retour au mode standard. Actions de l'utilisateur reportées : `.claude/session/A-FAIRE-UTILISATEUR.md` (11 points).
 
 ## Où on en est
 - Dépôt **public et sécurisé** : https://github.com/Seydina-s/bic-gouv-sn. `main` protégée : tout passe par PR + 3 contrôles verts, dont désormais un **audit d'accessibilité** (42 écrans, clair et sombre).
 - Articles : 969 (FR + WO), **36 avec leurs PDF officiels** conservés chez nous (dont les communiqués du Conseil des ministres). Démarches : 718 fiches, 18 thèmes. Services : 880 proposés, vérification humaine dans la console.
-- Nuit du 27 au 28/09 (PR #79 à #91) : garde-fou shell ; CSP à nonce de la console ; économie de données ; mentions des logiciels libres ; journal des erreurs en langage simple ; réponses compressées ; contrôle à distance (coupures, version minimale) ; corrections d'accessibilité ; quartier gardé hors ligne sur la carte ; PDF officiels (texte et pièces jointes) ; audit d'accessibilité automatique étendu aux fiches.
-- Contrôle complet : 917 tests verts.
+- Nuit du 27 au 28/09 (PR #79 à #94) : garde-fou shell ; CSP à nonce de la console ; économie de données ; mentions des logiciels libres ; journal des erreurs en langage simple ; réponses compressées ; contrôle à distance (coupures, version minimale) ; corrections d'accessibilité ; quartier gardé hors ligne sur la carte ; PDF officiels (texte et pièces jointes) ; audit d'accessibilité automatique (42 écrans, photos comprises) ; photos décoratives enfin avec texte alternatif vide sur le web ; relevé en lecture seule des articles retirés (0 retrait, 74 versions absentes de la liste mais toujours publiées).
+- Contrôle complet : 919 tests verts.
 
 ## En attente de l'utilisateur
 Voir `.claude/session/A-FAIRE-UTILISATEUR.md`. Nouveaux cette nuit : choix d'affichage d'un article retiré par la source (ING-03) ; jeton Sentry en secret (MON-01, ADM-04).
 
 ## Prochaine tâche
-- ING-03 (détection des articles retirés) dès le choix d'affichage de l'utilisateur.
-- QA-07, suite : photos (fondu d'expo-image sur le web) et carte dans l'audit.
+- ING-03, suite (dès le choix d'affichage de l'utilisateur) : marquer « retiré » (versionné), l'appliquer dans l'API, le montrer dans la console, relevé périodique. Le relevé `withdrawn` existe déjà.
+- QA-07, suite : la carte dans l'audit (tuiles).
 - Dès la version de test installée : QA-02, QA-03, QA-04, LIC-02.
 
 ## Services locaux (au 28/09, 9 h 30)
