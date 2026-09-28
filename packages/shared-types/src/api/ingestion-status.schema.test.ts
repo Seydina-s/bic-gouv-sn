@@ -39,7 +39,10 @@ describe("assessIngestion", () => {
       state: "failing",
       code: "INGESTION_SOURCE_UNREACHABLE",
       since: "2026-09-26T11:50:00Z",
+      nextAttemptAt: null,
     });
+    const planned = { ...failing, nextAttemptAt: "2026-09-26T12:04:00Z" };
+    expect(assessIngestion(planned, NOW)).toMatchObject({ nextAttemptAt: "2026-09-26T12:04:00Z" });
   });
 
   it("reports a stopped collection when no pass happened for 15 minutes", () => {

@@ -22,6 +22,11 @@ export const ingestionStatusSchema = z.object({
       at: isoDateTimeSchema,
     })
     .nullable(),
+  /**
+   * When the watcher reads the source again: the planned retry while it fails.
+   * Absent from reports written before this field.
+   */
+  nextAttemptAt: isoDateTimeSchema.nullable().optional(),
 });
 export type IngestionStatus = z.infer<typeof ingestionStatusSchema>;
 
@@ -34,7 +39,7 @@ export type IngestionVerdict =
   | { state: "ok" }
   | { state: "unknown" }
   | { state: "stopped"; since: string }
-  | { state: "failing"; code: string; since: string };
+  | { state: "failing"; code: string; since: string; nextAttemptAt: string | null };
 
 /**
  * Plain verdict for the console: stopped (no pass for 15 min — the watcher is not
@@ -53,6 +58,7 @@ export function assessIngestion(status: IngestionStatus | null, now: Date): Inge
       state: "failing",
       code: status.lastFailure.code,
       since: status.lastSuccessAt ?? status.lastFailure.at,
+      nextAttemptAt: status.nextAttemptAt ?? null,
     };
   }
   return { state: "ok" };

@@ -69,6 +69,13 @@ export function IngestionPanel({ report, now }: { report: IngestionStatus | null
           <p className="mt-1 text-sm">
             {t("ingestion.since", { time: formatClockTime(new Date(verdict.since)) })}
           </p>
+          {verdict.state === "failing" && verdict.nextAttemptAt !== null && (
+            <p className="mt-3 max-w-prose text-base">
+              {t("ingestion.nextAttempt", {
+                time: formatClockTime(new Date(verdict.nextAttemptAt)),
+              })}
+            </p>
+          )}
         </div>
       </div>
       <div className="mt-6 border-t border-current/20 pt-5 md:ml-12">
