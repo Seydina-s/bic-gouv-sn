@@ -1,5 +1,6 @@
 import type { ArticleRepository } from "@bgs/content-store";
 import type { Lang, NewsArticle } from "@bgs/shared-types";
+import { RecentResults } from "../search/recent-results";
 import { PreparedTexts, searchTerms, type Searchable } from "../search/text-search";
 
 /** Search over the article store: title matches rank first, then the newest. */
@@ -7,6 +8,10 @@ import { PreparedTexts, searchTerms, type Searchable } from "../search/text-sear
 const PAGE_SIZE = 200;
 /** Articles made ready for searching once per version, not at every search. */
 const prepared = new PreparedTexts();
+/** A repeated search is reused for 60 s, as long as the public cache keeps its answer. */
+const RECENT_MS = 60_000;
+const RECENT_QUERIES = 500;
+const recentByStore = new WeakMap<ArticleRepository, RecentResults<NewsArticle[]>>();
 
 /** What is searched in one language version of an article (none if absent). */
 function searchableIn(article: NewsArticle, lang: Lang): Searchable | null {
@@ -40,7 +45,14 @@ export async function searchArticles(
   if (terms.length === 0) {
     return [];
   }
-  return prepared
-    .rank(await allArticles(articles, lang), terms, (article) => searchableIn(article, lang))
-    .slice(0, limit);
+  let recent = recentByStore.get(articles);
+  if (recent === undefined) {
+    recent = new RecentResults(RECENT_MS, RECENT_QUERIES);
+    recentByStore.set(articles, recent);
+  }
+  return recent.get(`${lang}|${String(limit)}|${terms.join(" ")}`, async () =>
+    prepared
+      .rank(await allArticles(articles, lang), terms, (article) => searchableIn(article, lang))
+      .slice(0, limit),
+  );
 }
