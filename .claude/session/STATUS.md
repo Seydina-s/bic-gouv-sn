@@ -1,23 +1,24 @@
 # STATUS — Bic Gouv SN
 
-**Dernière mise à jour** : 28/09/2026 (18 h) · **Mode** : autonome jusqu'à 20 h (demande de l'utilisateur), puis retour au mode standard. Actions de l'utilisateur reportées : `.claude/session/A-FAIRE-UTILISATEUR.md` (12 points, dont 1 réglé).
+**Dernière mise à jour** : 28/09/2026 (18 h 45) · **Mode** : autonome jusqu'à 20 h (demande de l'utilisateur), puis retour au mode standard. Actions de l'utilisateur reportées : `.claude/session/A-FAIRE-UTILISATEUR.md` (12 points, dont 1 réglé).
 
 ## Où on en est
-- Dépôt **public et sécurisé** : https://github.com/Seydina-s/bic-gouv-sn. `main` protégée : tout passe par PR + 3 contrôles verts, dont un **audit d'accessibilité** (48 écrans, clair et sombre, langue déclarée vérifiée).
+- Dépôt **public et sécurisé** : https://github.com/Seydina-s/bic-gouv-sn. `main` protégée : tout passe par PR + 3 contrôles verts, dont un **audit d'accessibilité** (50 écrans, clair et sombre, langue déclarée vérifiée).
 - Articles : 970 (FR + WO), 36 avec leurs PDF officiels. Démarches : 718 fiches, 18 thèmes. Services : 880 proposés, vérification humaine dans la console.
 - Nuit du 27 au 28/09 (PR #79 à #94) : voir l'historique du backlog (CSP, contrôle à distance, PDF officiels, audit d'accessibilité automatique…).
-- Journée du 28/09 (PR #95 à #110) :
+- Journée du 28/09 (PR #95 à #114) :
   - articles retirés par la Présidence **masqués** (décision de l'utilisateur), contrôle chaque nuit, onglet « Articles masqués » ;
   - collecte **ininterrompue** (réessais jusqu'à toutes les 10 min, rattrapage après panne) et **verrou d'instance unique** (3 collectes tournaient en même temps : corrigé, données intactes) ;
   - console : recherches sans résultat (seuil de 3), navigation groupée, état des protections des sources, **notifications à deux personnes** (envoi réel à brancher avec la version de test), **journal d'audit** avec contrôle d'intégrité ;
   - performances : lecture du stockage en cache, tri et extraits en cache, recherche tolérante aux fautes et réutilisée 60 s (liste ~30 ms, recherche répétée ~300 req/s ; `docs/capacite.md`) ;
   - fiabilité des contrôles : polices de la console dans le dépôt, démarrage de Chrome plus robuste ;
   - accessibilité : langue réellement affichée déclarée (page et articles en wolof) ;
-  - app : préchargement de l'article probable suivant (jamais en économie de données).
-- Contrôle complet : 982 tests verts.
+  - app : préchargement de l'article probable suivant (jamais en économie de données) ;
+  - notifications : compteur « à vérifier » dans la navigation, échec d'envoi noté dans l'historique.
+- Contrôle complet : 983 tests verts.
 
 ## En attente de l'utilisateur
-Voir `.claude/session/A-FAIRE-UTILISATEUR.md`. Nouveau aujourd'hui : point 12 (présentation « étape par étape » des démarches : la source est en questions-réponses).
+Voir `.claude/session/A-FAIRE-UTILISATEUR.md`. Nouveau aujourd'hui : point 12 (présentation « étape par étape » des démarches : la source est en questions-réponses) ; proposition ADM-10 (écran « Comptes » dans la console : touche à la sécurité, à valider).
 
 ## Prochaine tâche
 - Brancher l'envoi réel des notifications dès la version de test (A-03, FEED-04) : un fournisseur derrière l'interface `PushProvider`.
