@@ -47,6 +47,10 @@ jobs:
         run: pnpm --filter @bgs/mobile bundle:check
       - name: Mobile bundle weight budget
         run: pnpm bundle:size
+      - name: Mobile web export (accessibility audit)
+        run: pnpm --filter @bgs/mobile export:web
+      - name: Accessibility audit (axe-core, WCAG 2.2 A/AA, light and dark)
+        run: pnpm a11y
 
   security:
     name: Secrets and dependencies
