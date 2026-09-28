@@ -14,8 +14,11 @@ const personSchema = z.object({ id: z.string().min(1), name: z.string().min(1) }
 
 /** What happened when the approved notification was handed to the push service. */
 export const notificationDeliverySchema = z.object({
-  /** "sent": handed to the push service; "not-sent": no push service yet. */
-  outcome: z.enum(["sent", "not-sent"]),
+  /**
+   * "sent": handed to the push service; "not-sent": no push service yet;
+   * "failed": the push service refused or could not be reached.
+   */
+  outcome: z.enum(["sent", "not-sent", "failed"]),
   at: isoDateTimeSchema,
 });
 

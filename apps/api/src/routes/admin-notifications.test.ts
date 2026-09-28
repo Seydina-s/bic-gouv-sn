@@ -132,6 +132,20 @@ describe("notifications, two people", () => {
     );
   });
 
+  it("records a failed sending instead of leaving an approval without result", async () => {
+    await start({ ready: true, send: () => Promise.reject(new Error("push service down")) });
+    const prepared = await prepare(await admin.tokenFor("editor"));
+    const approved = await call(
+      await admin.tokenFor("editor"),
+      "POST",
+      `/notifications/${prepared.id}/approve`,
+    );
+    expect(notificationSchema.parse(approved.json())).toMatchObject({
+      status: "approved",
+      delivery: { outcome: "failed" },
+    });
+  });
+
   it("says nothing was sent while no push service is set up", async () => {
     await start();
     const prepared = await prepare(await admin.tokenFor("editor"));
