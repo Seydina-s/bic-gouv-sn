@@ -37,6 +37,8 @@ export const adminFr = {
         "Aucun rapport de la collecte n'est disponible : elle n'a peut-être jamais été lancée, ou l'API ne répond pas.",
     },
     since: "Depuis {time}",
+    nextAttempt:
+      "La collecte ne s'arrête pas : nouvel essai automatique à {time}, puis toutes les 10 minutes au plus tant que le site ne répond pas ; tout ce qui aura été publié entre-temps sera rattrapé.",
   },
   duration: {
     lessThanAMinute: "moins d'une minute",

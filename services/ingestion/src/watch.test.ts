@@ -2,11 +2,11 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { FileArticleRepository } from "@bgs/content-store";
-import type { Lang, NewsArticle } from "@bgs/shared-types";
+import { INGESTION_STOPPED_AFTER_MS, type Lang, type NewsArticle } from "@bgs/shared-types";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { articleContentHash } from "./merge";
 import type { SourceArticleRef, SourceProvider } from "./sources/source-provider";
-import { nextPollDelayMs, pollOnce, SeenIndex } from "./watch";
+import { nextPollDelayMs, pollOnce, retryDelayMs, SeenIndex } from "./watch";
 
 const NOW = new Date("2026-09-25T10:00:00Z");
 
@@ -148,6 +148,71 @@ describe("pollOnce", () => {
     provider.fetchArticle = () => Promise.reject("plain");
     const result = await pollOnce(provider, repo, ["fr"], new SeenIndex(), () => NOW);
     expect(result.failures[0]?.message).toBe("plain");
+  });
+});
+
+describe("catching up after an outage", () => {
+  let dir: string;
+  let repo: FileArticleRepository;
+
+  beforeEach(async () => {
+    dir = await mkdtemp(join(tmpdir(), "bgs-catch-up-"));
+    repo = new FileArticleRepository(join(dir, "news.json"));
+  });
+
+  afterEach(async () => {
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  /** Newest first, two per page: 6 5 | 4 3 | 2 1 | … */
+  function pagedSource(read: number[]): SourceProvider {
+    return {
+      articleIdFor: (ref) => idOf(ref.sourceId),
+      downloadMedia: () => Promise.reject(new Error("no media")),
+      listPage: (lang, page) => {
+        read.push(page);
+        const ids = [8 - 2 * page, 7 - 2 * page].filter((id) => id > 0);
+        return Promise.resolve({
+          lastPage: 9,
+          refs: ids.map((sourceId) => ({
+            sourceId,
+            slug: `s${String(sourceId)}`,
+            lang,
+            sourceUpdatedAt: "2026-09-25T09:00:00Z",
+            coverSourceUrl: null,
+          })),
+        });
+      },
+      fetchArticle: (ref) => Promise.resolve(article(ref.sourceId, ref.lang, `Titre ${ref.slug}`)),
+    };
+  }
+
+  it("reads older pages until it meets an article it already had", async () => {
+    await repo.save(article(1, "fr", "Titre s1"));
+    await repo.save(article(2, "fr", "Titre s2"));
+    const read: number[] = [];
+    const result = await pollOnce(pagedSource(read), repo, ["fr"], new SeenIndex(), () => NOW);
+    expect(result.outcomes.created).toBe(4);
+    expect(read).toEqual([1, 2, 3]);
+  });
+
+  it("reads only the first page on an ordinary pass", async () => {
+    const read: number[] = [];
+    const seen = new SeenIndex();
+    await pollOnce(pagedSource([]), repo, ["fr"], seen, () => NOW);
+    await pollOnce(pagedSource(read), repo, ["fr"], seen, () => NOW);
+    expect(read).toEqual([1]);
+  });
+});
+
+describe("retryDelayMs", () => {
+  it("spaces the tries while the source fails, up to every 10 minutes, never stopping", () => {
+    const minutes = [1, 2, 3, 4, 50].map((failures) => retryDelayMs(failures) / 60_000);
+    expect(minutes).toEqual([1, 2, 5, 10, 10]);
+  });
+
+  it("stays under the console's 'collection stopped' threshold", () => {
+    expect(retryDelayMs(1000)).toBeLessThan(INGESTION_STOPPED_AFTER_MS);
   });
 });
 

@@ -10,7 +10,7 @@ import { errorCodeOf } from "@bgs/shared-types";
 import { FileMediaStorage } from "../media/media-storage";
 import { createPresidenceProvider } from "../sources/presidence/presidence-provider";
 import { nextIngestionStatus, type PassOutcome } from "../status";
-import { nextPollDelayMs, pollOnce, SeenIndex } from "../watch";
+import { nextPollDelayMs, pollOnce, retryDelayMs, SeenIndex } from "../watch";
 
 const storePath =
   process.env["NEWS_STORE_PATH"] ??
@@ -43,8 +43,18 @@ const backupsDir =
   process.env["BACKUPS_DIR"] ??
   fileURLToPath(new URL("../../../../.data/backups", import.meta.url));
 
-async function report(outcome: PassOutcome) {
-  status = nextIngestionStatus(status, outcome, new Date());
+/**
+ * Records the pass and when the next one happens: the ordinary pace, or spaced
+ * retries while the source fails (never a stop). Returns the wait in milliseconds.
+ */
+async function report(outcome: PassOutcome, lastChangeAt: Date | null): Promise<number> {
+  const now = new Date();
+  const next = nextIngestionStatus(status, outcome, now);
+  const delay =
+    next.consecutiveFailures > 0
+      ? retryDelayMs(next.consecutiveFailures)
+      : nextPollDelayMs(now, lastChangeAt);
+  status = { ...next, nextAttemptAt: new Date(now.getTime() + delay).toISOString() };
   await writeIngestionStatus(statusPath, status).catch((error: unknown) => {
     process.stdout.write(`status report not written: ${String(error)}\n`);
   });
@@ -57,11 +67,13 @@ async function report(outcome: PassOutcome) {
     .catch((error: unknown) => {
       process.stdout.write(`daily backup failed: ${String(error)}\n`);
     });
+  return delay;
 }
 
 let lastChangeAt: Date | null = null;
 while (control.running) {
   const startedAt = new Date();
+  let delay: number;
   try {
     const result = await pollOnce(
       provider,
@@ -79,19 +91,19 @@ while (control.running) {
         `${startedAt.toISOString()} new ${String(created)} · edited ${String(updated)} · slowest detection ${slowest.toFixed(0)} s\n`,
       );
     }
-    await report({ result });
+    delay = await report({ result }, lastChangeAt);
     for (const failure of result.failures) {
       process.stdout.write(`${startedAt.toISOString()} ✗ ${failure.code} ${failure.ref}\n`);
     }
   } catch (error) {
-    await report({ error: { code: errorCodeOf(error) ?? "UNKNOWN" } });
+    delay = await report({ error: { code: errorCodeOf(error) ?? "UNKNOWN" } }, lastChangeAt);
     process.stdout.write(
-      `${startedAt.toISOString()} ✗ ${error instanceof Error ? error.message : String(error)}\n`,
+      `${startedAt.toISOString()} ✗ ${error instanceof Error ? error.message : String(error)} · next try in ${String(Math.round(delay / 1000))} s\n`,
     );
   }
   await new Promise<void>((resolve) => {
     wake = resolve;
-    setTimeout(resolve, nextPollDelayMs(new Date(), lastChangeAt));
+    setTimeout(resolve, delay);
   });
 }
 process.stdout.write("Watcher stopped.\n");
