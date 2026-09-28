@@ -40,9 +40,10 @@ function article(n: number, langs: ("fr" | "wo")[] = ["fr"]): NewsArticle {
 }
 
 let app: FastifyInstance;
+let articles: ReturnType<typeof temporaryStore>;
 
 beforeEach(async () => {
-  const articles = temporaryStore();
+  articles = temporaryStore();
   for (const item of [article(1), article(2, ["fr", "wo"]), article(3)]) {
     await articles.save(item);
   }
@@ -157,6 +158,29 @@ describe("GET /v1/news/:id", () => {
     expect(detail.blocks).toEqual([
       { type: "paragraph", inlines: [{ text: "Premier paragraphe 2." }] },
       { type: "paragraph", inlines: [{ text: "Suite." }] },
+    ]);
+  });
+
+  it("lists the official PDFs from our copies, and refreshes when one arrives", async () => {
+    const url = `/v1/news/${article(1).id}`;
+    const before = await app.inject({ method: "GET", url });
+    expect(newsDetailSchema.parse(before.json()).documents).toEqual([]);
+    const sourceUrl = "https://www.presidence.sn/fr/assets/documents/test.pdf";
+    const key = `documents/${"a".repeat(64)}.pdf`;
+    await articles.setAttachments(article(1).id, [
+      {
+        sourceUrl,
+        key,
+        title: null,
+        mimeType: "application/pdf",
+        bytes: 2048,
+        contentHash: "a".repeat(64),
+      },
+    ]);
+    const after = await app.inject({ method: "GET", url });
+    expect(after.headers.etag).not.toBe(before.headers.etag);
+    expect(newsDetailSchema.parse(after.json()).documents).toEqual([
+      { title: null, url: `http://localhost:80/media/${key}`, sourceUrl, bytes: 2048 },
     ]);
   });
 

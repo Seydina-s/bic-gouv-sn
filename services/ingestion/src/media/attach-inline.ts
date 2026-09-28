@@ -2,6 +2,7 @@ import type { ArticleRepository } from "@bgs/content-store";
 import { officialMediaUrl, type NewsArticle } from "@bgs/shared-types";
 import { MediaProcessingError } from "../lib/errors";
 import type { SourceProvider } from "../sources/source-provider";
+import type { AttachResult } from "./attach-result";
 import type { MediaStorage } from "./media-storage";
 import { processImage } from "./process-image";
 
@@ -21,11 +22,6 @@ export function inlineImageUrls(article: NewsArticle): string[] {
   return [...new Set(urls.filter((url): url is string => url !== null))];
 }
 
-export interface InlineImagesResult {
-  attached: number;
-  failures: MediaProcessingError[];
-}
-
 /**
  * Stores lighter copies of the images placed in an article's text. Each image is
  * saved as soon as it is ready, so an interrupted run resumes where it stopped.
@@ -36,9 +32,9 @@ export async function attachInlineImages(
   provider: SourceProvider,
   repository: ArticleRepository,
   storage: MediaStorage,
-): Promise<InlineImagesResult> {
+): Promise<AttachResult> {
   const stored = new Set(article.images.map((image) => image.originalUrl));
-  const result: InlineImagesResult = { attached: 0, failures: [] };
+  const result: AttachResult = { attached: 0, failures: [] };
   for (const url of inlineImageUrls(article).filter((candidate) => !stored.has(candidate))) {
     try {
       const original = await provider.downloadMedia(url);

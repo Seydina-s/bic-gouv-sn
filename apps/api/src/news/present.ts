@@ -5,6 +5,7 @@ import type {
   Lang,
   NewsArticle,
   NewsDetail,
+  NewsDocument,
   NewsSummary,
 } from "@bgs/shared-types";
 import { excerptOf, htmlToBlocks } from "./html-to-blocks";
@@ -44,6 +45,16 @@ function blocksOf(article: NewsArticle, bodyHtml: string, mediaBaseUrl: string):
     const image = block.type === "image" ? stored.get(block.src) : undefined;
     return image === undefined ? block : { ...block, media: presentImage(image, mediaBaseUrl) };
   });
+}
+
+/** Official PDFs of the article, served from our copies. */
+function documentsOf(article: NewsArticle, mediaBaseUrl: string): NewsDocument[] {
+  return article.attachments.map(({ title, key, sourceUrl, bytes }) => ({
+    title,
+    url: `${mediaBaseUrl}/${key}`,
+    sourceUrl,
+    bytes,
+  }));
 }
 
 /** Feed entry in `lang`, or null when the article has no version in that language. */
@@ -93,13 +104,18 @@ export function toDetail(
     sourceUpdatedAt: article.sourceUpdatedAt,
     fetchedAt: article.fetchedAt,
     version: article.version,
+    documents: documentsOf(article, mediaBaseUrl),
   };
 }
 
 /**
- * What makes a cached response stale: the words (content hash) and the images,
- * which are attached after the article without changing its content hash.
+ * What makes a cached response stale: the words (content hash), the images and the
+ * documents, which are attached after the article without changing its content hash.
  */
 export function freshnessKey(article: NewsArticle): string {
-  return [article.contentHash, ...article.images.map((image) => image.originalKey)].join(":");
+  return [
+    article.contentHash,
+    ...article.images.map((image) => image.originalKey),
+    ...article.attachments.map((attachment) => attachment.key),
+  ].join(":");
 }

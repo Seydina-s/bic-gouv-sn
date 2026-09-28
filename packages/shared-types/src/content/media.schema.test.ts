@@ -37,7 +37,7 @@ describe("mediaKeySchema", () => {
 describe("pdfAttachmentSchema", () => {
   const pdf = {
     sourceUrl: "https://www.presidence.sn/files/test.pdf",
-    url: "https://cdn.example.test/files/test.pdf",
+    key: `documents/${HASH}.pdf`,
     title: null,
     mimeType: "application/pdf",
     bytes: 2048,

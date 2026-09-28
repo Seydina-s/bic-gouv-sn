@@ -49,9 +49,13 @@ export const imageSchema = z
   });
 export type Image = z.infer<typeof imageSchema>;
 
+/** An official PDF linked from an article, kept in our storage (autonomy from the source). */
 export const pdfAttachmentSchema = z.strictObject({
+  /** The document's address on the source site (traceability). */
   sourceUrl: httpsUrlSchema,
-  url: httpsUrlSchema,
+  /** Where our copy is stored, relative to the media root (like images). */
+  key: mediaKeySchema,
+  /** The words of the link that points to it, when the source gives some. */
   title: z.string().trim().min(1).nullable(),
   mimeType: z.literal("application/pdf"),
   bytes: positiveIntSchema,

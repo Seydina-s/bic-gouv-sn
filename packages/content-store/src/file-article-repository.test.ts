@@ -90,6 +90,17 @@ describe("FileArticleRepository", () => {
     expect(stored?.images).toEqual([image]);
     expect(stored?.version).toBe(1);
     expect(await repo.setImages("missing", [image])).toBe(false);
+    const pdf = {
+      sourceUrl: "https://www.presidence.sn/fr/assets/documents/test.pdf",
+      key: "documents/test.pdf",
+      title: "Document de test",
+      mimeType: "application/pdf" as const,
+      bytes: 2048,
+      contentHash: "a".repeat(64),
+    };
+    expect(await repo.setAttachments(article(1).id, [pdf])).toBe(true);
+    expect((await repo.get(article(1).id))?.attachments).toEqual([pdf]);
+    expect((await repo.get(article(1).id))?.version).toBe(1);
   });
 
   it("lists newest first with cursor pagination", async () => {
