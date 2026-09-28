@@ -48,6 +48,12 @@ const envSchema = z.object({
     .min(1)
     .default(".data/state-services.json")
     .transform((path) => resolveDataPath(path)),
+  /** Remote control of the apps: kill switches and minimum version (console). */
+  REMOTE_CONFIG_PATH: z
+    .string()
+    .min(1)
+    .default(".data/remote-config.json")
+    .transform((path) => resolveDataPath(path)),
   /** Errors answered by the API, grouped, for the console's error journal. */
   ERROR_JOURNAL_PATH: z
     .string()

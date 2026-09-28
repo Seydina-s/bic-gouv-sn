@@ -10,7 +10,7 @@ export type AdminResult<T> =
 
 interface AdminRequest<S extends z.ZodType> {
   path: string;
-  method?: "GET" | "POST" | "PATCH";
+  method?: "GET" | "POST" | "PATCH" | "PUT";
   body?: unknown;
   /** Session token of the signed-in person (never sent to the browser). */
   token?: string | null;

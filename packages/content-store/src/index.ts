@@ -7,3 +7,4 @@ export * from "./versioned-json-store";
 export * from "./procedure-repository";
 export * from "./procedure-theme-store";
 export * from "./state-service-store";
+export * from "./remote-config-store";

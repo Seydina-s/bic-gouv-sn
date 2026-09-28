@@ -1,16 +1,11 @@
 "use client";
 
 import { useActionState } from "react";
+import { FormOutcome } from "../../../components/FormOutcome";
 import { field, primaryButton } from "../../../lib/form-styles";
 import { t } from "../../../lib/i18n";
 import { addService, type ServiceReviewState } from "../actions";
-import {
-  CategoryField,
-  FormOutcome,
-  NameField,
-  PositionField,
-  type ServiceChoice,
-} from "../ServiceFormParts";
+import { CategoryField, NameField, PositionField, type ServiceChoice } from "../ServiceFormParts";
 
 /** A service the source misses, typed by a person: it then waits for its verification. */
 export function AddServiceForm({ categories }: { categories: ServiceChoice[] }) {

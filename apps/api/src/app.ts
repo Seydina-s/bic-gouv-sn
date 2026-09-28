@@ -12,6 +12,7 @@ import {
 import {
   FileProcedureRepository,
   FileProcedureThemeStore,
+  FileRemoteConfigStore,
   FileStateServiceStore,
   type ArticleRepository,
   type ProcedureRepository,
@@ -27,6 +28,7 @@ import { adminAuthRoutes } from "./routes/admin-auth";
 import { adminProcedureThemesRoutes } from "./routes/admin-procedure-themes";
 import { adminErrorsRoutes } from "./routes/admin-errors";
 import { adminServicesRoutes } from "./routes/admin-services";
+import { adminRemoteConfigRoutes, remoteConfigRoutes } from "./routes/remote-config";
 import { type ErrorJournal, journalErrors } from "./journal/error-journal";
 import { healthRoutes } from "./routes/health";
 import { registerMedia } from "./routes/media";
@@ -51,6 +53,8 @@ export interface AppOptions {
   procedureThemes?: FileProcedureThemeStore;
   /** Defaults to the state services store at STATE_SERVICES_PATH. */
   stateServices?: FileStateServiceStore;
+  /** Defaults to the remote control file at REMOTE_CONFIG_PATH. */
+  remoteConfig?: FileRemoteConfigStore;
   /** Defaults to the file stores when ADMIN_SECRET_KEY is set; none otherwise. */
   admin?: AdminServices | null;
   /** Where the logs go: standard output by default, tests read them here. */
@@ -87,6 +91,7 @@ export async function buildApp({
   procedures = new FileProcedureRepository(config.PROCEDURES_STORE_PATH),
   procedureThemes = new FileProcedureThemeStore(config.PROCEDURE_THEMES_PATH),
   stateServices = new FileStateServiceStore(config.STATE_SERVICES_PATH),
+  remoteConfig = new FileRemoteConfigStore(config.REMOTE_CONFIG_PATH),
   admin = defaultAdmin(config),
   logStream,
   errorJournal = null,
@@ -162,6 +167,7 @@ export async function buildApp({
     tilesPath: config.MAP_TILES_PATH,
     assetsRoot: config.MAP_ASSETS_ROOT,
   });
+  await app.register(remoteConfigRoutes, { prefix: "/v1", store: remoteConfig });
   await app.register(statusRoutes, {
     prefix: "/v1",
     ingestionStatusPath: config.INGESTION_STATUS_PATH,
@@ -187,6 +193,11 @@ export async function buildApp({
       prefix: "/admin/v1",
       ...admin,
       services: stateServices,
+    });
+    await app.register(adminRemoteConfigRoutes, {
+      prefix: "/admin/v1",
+      ...admin,
+      store: remoteConfig,
     });
     if (errorJournal !== null) {
       await app.register(adminErrorsRoutes, {

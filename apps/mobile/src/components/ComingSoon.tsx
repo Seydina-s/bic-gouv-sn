@@ -4,10 +4,20 @@ import { useTranslation } from "../i18n/useTranslation";
 import { useTheme } from "../theme/useTheme";
 import { Baobab } from "./Baobab";
 
-/** Honest empty state for sections not built yet: no placeholder content. */
-export function ComingSoon({ title }: { title: string }) {
+/**
+ * A screen that honestly says why there is nothing here (not built yet, switched
+ * off for the moment, update needed): the baobab and two short lines, no filler.
+ */
+export function NoticeScreen({
+  title,
+  heading,
+  body,
+}: {
+  title: string;
+  heading: string;
+  body: string;
+}) {
   const { theme } = useTheme();
-  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { color, space, textStyle } = theme;
 
@@ -28,7 +38,7 @@ export function ComingSoon({ title }: { title: string }) {
       <View style={styles.center}>
         <Baobab size={120} color={color.textBrand} opacity={0.35} />
         <Text style={[textStyle.subtitle, { color: color.textPrimary, marginTop: space.lg }]}>
-          {t("comingSoon.title")}
+          {heading}
         </Text>
         <Text
           style={[
@@ -37,11 +47,17 @@ export function ComingSoon({ title }: { title: string }) {
             { color: color.textSecondary, marginTop: space.xs },
           ]}
         >
-          {t("comingSoon.body")}
+          {body}
         </Text>
       </View>
     </View>
   );
+}
+
+/** Honest empty state for sections not built yet: no placeholder content. */
+export function ComingSoon({ title }: { title: string }) {
+  const { t } = useTranslation();
+  return <NoticeScreen title={title} heading={t("comingSoon.title")} body={t("comingSoon.body")} />;
 }
 
 const styles = StyleSheet.create({

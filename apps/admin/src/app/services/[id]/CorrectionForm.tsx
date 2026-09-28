@@ -1,16 +1,11 @@
 "use client";
 
 import { useActionState } from "react";
+import { FormOutcome } from "../../../components/FormOutcome";
 import { primaryButton } from "../../../lib/form-styles";
 import { t } from "../../../lib/i18n";
 import { correctService, type ServiceReviewState } from "../actions";
-import {
-  CategoryField,
-  FormOutcome,
-  NameField,
-  PositionField,
-  type ServiceChoice,
-} from "../ServiceFormParts";
+import { CategoryField, NameField, PositionField, type ServiceChoice } from "../ServiceFormParts";
 
 /** The name, the kind and the place of one service, as a person corrects them. */
 export function CorrectionForm({

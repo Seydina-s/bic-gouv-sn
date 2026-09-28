@@ -17,6 +17,7 @@ import { ProcedureRow } from "../../features/procedures/ProcedureRow";
 import { ThemeIcon } from "../../features/procedures/ThemeCards";
 import { useProcedureThemePage, useProcedureThemes } from "../../features/procedures/useProcedures";
 import { FloatingAppBar } from "../../features/shell/FloatingAppBar";
+import { FeatureGate } from "../../features/remote-config/FeatureGate";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 
@@ -30,7 +31,7 @@ function parsePage(raw: string | undefined): number {
  * The procedures filed under one theme, 20 per numbered page, under a band in the
  * theme's colours (its icon, its name, how many procedures, which page).
  */
-export default function ProcedureThemeScreen() {
+function ProcedureTheme() {
   const params = useLocalSearchParams<{ id: string; title?: string; page?: string }>();
   const id = params.id;
   const page = parsePage(params.page);
@@ -132,6 +133,16 @@ export default function ProcedureThemeScreen() {
       />
       <FloatingAppBar visible={scrollTop.visible} />
     </View>
+  );
+}
+
+/** Behind the "procedures" kill switch: off, it says so plainly. */
+export default function ProcedureThemeScreen() {
+  const { t } = useTranslation();
+  return (
+    <FeatureGate feature="procedures" title={t("tabs.procedures")}>
+      <ProcedureTheme />
+    </FeatureGate>
   );
 }
 

@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useStateServices } from "../../features/near-me/useStateServices";
 import { ProcedureView } from "../../features/procedures/ProcedureView";
 import { useProcedure } from "../../features/procedures/useProcedures";
+import { FeatureGate } from "../../features/remote-config/FeatureGate";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 
@@ -12,7 +13,7 @@ import { useTheme } from "../../theme/useTheme";
  * One procedure on its own screen, linked to its official page on e-senegal.sn and,
  * when the sheet says where to go, to the nearest verified service of that kind.
  */
-export default function ProcedureScreen() {
+function Procedure() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const procedure = useProcedure(slug);
   const services = useStateServices();
@@ -53,6 +54,16 @@ export default function ProcedureScreen() {
         }}
       />
     </View>
+  );
+}
+
+/** Behind the "procedures" kill switch: off, it says so plainly. */
+export default function ProcedureScreen() {
+  const { t } = useTranslation();
+  return (
+    <FeatureGate feature="procedures" title={t("tabs.procedures")}>
+      <Procedure />
+    </FeatureGate>
   );
 }
 

@@ -246,6 +246,37 @@ describe("app shell", () => {
     expect(screen.getByTestId("news-feed")).toBeOnTheScreen();
   });
 
+  it("follows the console's kill switches: a feature switched off says so plainly", async () => {
+    mockMapAvailable = true;
+    globalThis.fetch = newsFetch({
+      remoteConfig: () =>
+        new Response(
+          JSON.stringify({
+            minVersion: null,
+            features: { nearMe: true, map: false, readAloud: false, procedures: false },
+          }),
+        ),
+    }) as unknown as typeof fetch;
+    await renderRouter(routes, { initialUrl: "/near-me" });
+    await screen.findByText("Commissariat de test proche");
+    // The map is off: the list stays, without the "Carte" pill.
+    await waitFor(() => {
+      expect(
+        screen.queryByRole("button", { name: "Afficher les services sur la carte" }),
+      ).toBeNull();
+    });
+    await fireEvent.press(screen.getByRole("tab", { name: /Démarches/ }));
+    expect(await screen.findByText("Momentanément indisponible")).toBeOnTheScreen();
+  });
+
+  it("asks for an update when this version is older than the oldest allowed", async () => {
+    globalThis.fetch = newsFetch({
+      remoteConfig: () => new Response(JSON.stringify({ minVersion: "99.0.0", features: {} })),
+    }) as unknown as typeof fetch;
+    await renderRouter(routes, { initialUrl: "/" });
+    expect(await screen.findByText("Une nouvelle version est nécessaire")).toBeOnTheScreen();
+  });
+
   it("lists the free software of the app, each with its copyright and licence", async () => {
     await renderRouter(routes, { initialUrl: "/" });
     await fireEvent.press(await screen.findByRole("button", { name: "Réglages" }));
