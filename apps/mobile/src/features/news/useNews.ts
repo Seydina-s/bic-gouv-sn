@@ -1,6 +1,13 @@
-import { keepPreviousData, useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { useCallback, useEffect } from "react";
 import { createNewsClient } from "../../api/news-client";
 import { useTranslation } from "../../i18n/useTranslation";
+import { useDataSaver } from "../data-saver/DataSaverProvider";
 
 // EXPO_PUBLIC_* must be read literally to be inlined at build time.
 const client = createNewsClient({ baseUrl: process.env.EXPO_PUBLIC_API_URL ?? "" });
@@ -66,4 +73,52 @@ export function useNewsArticle(id: string) {
     queryKey: ["news", lang, id],
     queryFn: ({ signal }) => client.getNews(id, lang, signal),
   });
+}
+
+/** Articles of the front page loaded in advance, in order. */
+const LIKELY_COUNT = 3;
+
+/**
+ * Loads in the background the articles people most often open next (the first
+ * stories of the front page), unless data saving is on: then nothing is loaded
+ * that was not asked for.
+ */
+export function usePrefetchLikely(ids: readonly string[]): void {
+  const prefetch = usePrefetchArticle();
+  const { saving } = useDataSaver();
+  const likely = ids.slice(0, LIKELY_COUNT).join(",");
+  useEffect(() => {
+    if (saving || likely === "") {
+      return;
+    }
+    for (const id of likely.split(",")) {
+      prefetch(id);
+    }
+  }, [likely, saving, prefetch]);
+}
+
+/** An article loaded in advance is not fetched again for this long. */
+const PREFETCH_FRESH_MS = 60_000;
+
+/**
+ * Starts loading an article before it is opened (the finger lands on it, or it is
+ * the likely next one): the article screen then shows it at once (CLAUDE.md,
+ * navigation: "préchargement de l'écran probable suivant").
+ */
+export function usePrefetchArticle(): (id: string) => void {
+  const { lang } = useTranslation();
+  const queryClient = useQueryClient();
+  return useCallback(
+    (id: string) => {
+      queryClient
+        .query({
+          queryKey: ["news", lang, id],
+          queryFn: ({ signal }) => client.getNews(id, lang, signal),
+          staleTime: PREFETCH_FRESH_MS,
+        })
+        // A failed advance load changes nothing: opening the article tries again.
+        .catch(() => undefined);
+    },
+    [lang, queryClient],
+  );
 }

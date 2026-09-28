@@ -9,6 +9,7 @@ import { categoryLabelKey } from "./category";
 import { CategoryIcon, useCategoryTone } from "./CategoryIcon";
 import { CoverImage } from "./CoverImage";
 import { useStoryLabel } from "./Stories";
+import { usePrefetchArticle } from "./useNews";
 
 export interface SectionRailProps {
   category: string;
@@ -34,6 +35,7 @@ function RailCard({
   const { theme } = useTheme();
   const tone = useCategoryTone(item.category);
   const { label, day } = useStoryLabel(item);
+  const prefetch = usePrefetchArticle();
   const { color, space, textStyle, radius, layout } = theme;
   const photoHeight = width / layout.railCard.photoAspectRatio;
 
@@ -41,6 +43,10 @@ function RailCard({
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
+      // Loading starts as the finger lands: the article is often ready when it lifts.
+      onPressIn={() => {
+        prefetch(item.id);
+      }}
       onPress={() => {
         onPress(item.id);
       }}
