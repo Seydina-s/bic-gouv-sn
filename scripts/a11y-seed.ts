@@ -2,7 +2,9 @@
 // throwaway folder, never published, deleted after the run.
 import { randomUUID } from "node:crypto";
 import { mkdirSync, writeFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { base32Decode, codeAt, hashPassword, timeStep } from "../packages/admin-auth/src/index";
 import {
   FileArticleRepository,
@@ -12,6 +14,7 @@ import {
 import { procedureSchema } from "../packages/shared-types/src/index";
 import { procedure } from "../packages/shared-types/src/testing/fixtures";
 
+const repo = fileURLToPath(new URL("..", import.meta.url));
 export const ARTICLE_ID = "00000000-0000-5000-8000-00000000a11e";
 export const PROCEDURE_SLUG = "test-demarche";
 export const SERVICE_ID = "osm-n1";
@@ -19,11 +22,61 @@ const ACCOUNT_EMAIL = "audit-accessibilite@bic.test";
 const PDF = Buffer.from("%PDF-1.7\n% document fictif\n");
 const PDF_HASH = "b".repeat(64);
 
+type SharpFactory = (options: {
+  create: { width: number; height: number; channels: 3; background: string };
+}) => { jpeg: () => { toBuffer: () => Promise<Buffer> } };
+
+const PHOTO_WIDTH = 480;
+const PHOTO_HEIGHT = 270;
+const INLINE_PHOTO = "https://bo-admin.presidence.sn/storage/image/audit-accessibilite.jpg";
+
+/** A plain placeholder photo (one colour), stored like the ingestion stores photos. */
+async function seedPhoto(dataDir: string, role: "cover" | "inline", originalUrl: string) {
+  // The image library of the ingestion (not a dependency of the root scripts).
+  const sharp = createRequire(join(repo, "services", "ingestion", "package.json"))(
+    "sharp",
+  ) as SharpFactory;
+  const jpeg = await sharp({
+    create: { width: PHOTO_WIDTH, height: PHOTO_HEIGHT, channels: 3, background: "#5a7d6a" },
+  })
+    .jpeg()
+    .toBuffer();
+  const folder = `images/audit-${role}`;
+  mkdirSync(join(dataDir, "media", folder), { recursive: true });
+  writeFileSync(join(dataDir, "media", folder, "original.jpg"), jpeg);
+  writeFileSync(join(dataDir, "media", folder, `${String(PHOTO_WIDTH)}.jpg`), jpeg);
+  return {
+    role,
+    originalUrl,
+    originalKey: `${folder}/original.jpg`,
+    width: PHOTO_WIDTH,
+    height: PHOTO_HEIGHT,
+    alt: role === "inline" ? "Photo fictive dans le texte" : null,
+    blurhash: "LEHV6nWB2yk8pyo0adR*.7kCMdnj",
+    variants: [
+      {
+        format: "jpeg" as const,
+        width: PHOTO_WIDTH,
+        key: `${folder}/${String(PHOTO_WIDTH)}.jpg`,
+        bytes: jpeg.length,
+      },
+    ],
+  };
+}
+
 async function seedArticle(dataDir: string): Promise<void> {
   const sourceUrl = "https://www.presidence.sn/fr/actualites/audit-accessibilite/";
   const key = `documents/${PDF_HASH}.pdf`;
   mkdirSync(join(dataDir, "media", "documents"), { recursive: true });
   writeFileSync(join(dataDir, "media", key), PDF);
+  const images = [
+    await seedPhoto(
+      dataDir,
+      "cover",
+      "https://bo-admin.presidence.sn/storage/image/couverture.jpg",
+    ),
+    await seedPhoto(dataDir, "inline", INLINE_PHOTO),
+  ];
   const document = (title: string | null, name: string) => ({
     sourceUrl: `https://bo-admin.presidence.sn/storage/documents/${name}.pdf`,
     key,
@@ -51,13 +104,14 @@ async function seedArticle(dataDir: string): Promise<void> {
         bodyHtml:
           '<p>Texte fictif, avec un <a href="https://www.presidence.sn/fr/">lien</a>.</p>' +
           "<h2>Intertitre</h2><ul><li>Premier point</li><li>Second point</li></ul>" +
-          "<blockquote><p>Citation fictive.</p></blockquote>",
+          "<blockquote><p>Citation fictive.</p></blockquote>" +
+          `<p><img src="${INLINE_PHOTO}" alt="Photo fictive dans le texte" /></p>`,
         sourceUrl,
       },
     ],
     audio: [],
     embedding: null,
-    images: [],
+    images,
     attachments: [document("Document fictif", "fictif"), document(null, "sans-titre")],
   });
 }

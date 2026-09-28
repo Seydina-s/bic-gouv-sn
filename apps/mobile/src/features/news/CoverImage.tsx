@@ -78,9 +78,9 @@ export function CoverImage({ cover, slotWidth, style, label, onDemand = false }:
       recyclingKey={source?.url ?? null}
       testID="cover-image"
       accessible={label !== undefined}
-      // On the web, a decorative photo still needs an empty text alternative.
-      alt={label ?? ""}
-      {...(label === undefined ? {} : { accessibilityLabel: label })}
+      // On the web, expo-image writes the photo's alt from accessibilityLabel only
+      // (alt reaches the blurred placeholder alone): a decorative photo gets "".
+      accessibilityLabel={label ?? ""}
       importantForAccessibility={label === undefined ? "no-hide-descendants" : "yes"}
       style={[
         { backgroundColor: theme.color.surface },
