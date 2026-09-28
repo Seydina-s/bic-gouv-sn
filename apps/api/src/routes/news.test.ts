@@ -148,6 +148,32 @@ describe("GET /v1/news", () => {
   });
 });
 
+describe("an article withdrawn by the source", () => {
+  it("disappears from lists, sections and search, and answers 410 NEWS_WITHDRAWN", async () => {
+    await articles.setWithdrawn(article(1).id, "fr", "2026-09-28T02:00:00Z");
+    const list = newsListResponseSchema.parse(
+      (await app.inject({ method: "GET", url: "/v1/news" })).json(),
+    );
+    expect(list.items.map((item) => item.id)).not.toContain(article(1).id);
+    expect(list.total).toBe(2);
+    const sections = newsSectionsResponseSchema.parse(
+      (await app.inject({ method: "GET", url: "/v1/news/sections" })).json(),
+    );
+    expect(sections.sections[0]?.total).toBe(2);
+    const detail = await app.inject({ method: "GET", url: `/v1/news/${article(1).id}` });
+    expect(detail.statusCode).toBe(410);
+    expect(apiErrorSchema.parse(detail.json()).code).toBe("NEWS_WITHDRAWN");
+  });
+
+  it("leaves the other language shown, without offering the withdrawn one", async () => {
+    await articles.setWithdrawn(article(2).id, "wo", "2026-09-28T02:00:00Z");
+    const url = `/v1/news/${article(2).id}`;
+    const french = newsDetailSchema.parse((await app.inject({ method: "GET", url })).json());
+    expect(french.availableLangs).toEqual(["fr"]);
+    expect((await app.inject({ method: "GET", url: `${url}?lang=wo` })).statusCode).toBe(410);
+  });
+});
+
 describe("GET /v1/news/:id", () => {
   it("returns the article as structured blocks with its official source", async () => {
     const response = await app.inject({ method: "GET", url: `/v1/news/${article(2).id}?lang=wo` });

@@ -23,6 +23,12 @@ export const translationSchema = z
     bodyHtml: z.string().trim().min(1),
     sourceUrl: officialSourceUrlSchema.optional(),
     review: humanReviewSchema.optional(),
+    /**
+     * When the source stopped publishing this version (confirmed by reading its page
+     * again). Kept in our store, hidden from the app; cleared if the source publishes
+     * it again (decision of 28/09/2026).
+     */
+    withdrawnAt: isoDateTimeSchema.optional(),
   })
   .superRefine((translation, ctx) => {
     if (translation.status === "official" && translation.sourceUrl === undefined) {

@@ -8,6 +8,8 @@ interface FavoritesContextValue {
   /** The saved copy of an article, readable offline, or undefined. */
   saved(id: string): NewsDetail | undefined;
   toggle(detail: NewsDetail): void;
+  /** Drops an article the source withdrew: its saved copy must not be shown any more. */
+  forget(id: string): void;
 }
 
 const FavoritesContext = createContext<FavoritesContextValue | null>(null);
@@ -26,6 +28,16 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     toggle: (detail) => {
       setFavorites((current) => {
         const next = toggleFavorite(current, detail, new Date());
+        void saveFavorites(AsyncStorage, next);
+        return next;
+      });
+    },
+    forget: (id) => {
+      setFavorites((current) => {
+        if (!current.some((favorite) => favorite.detail.id === id)) {
+          return current;
+        }
+        const next = current.filter((favorite) => favorite.detail.id !== id);
         void saveFavorites(AsyncStorage, next);
         return next;
       });

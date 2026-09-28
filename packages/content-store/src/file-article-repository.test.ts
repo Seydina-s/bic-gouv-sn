@@ -103,6 +103,29 @@ describe("FileArticleRepository", () => {
     expect((await repo.get(article(1).id))?.version).toBe(1);
   });
 
+  it("hides a version the source withdrew, keeps its words, and shows it again", async () => {
+    await repo.save(article(1));
+    await repo.save(article(2));
+    const id = article(1).id;
+    expect(await repo.setWithdrawn(id, "fr", "2026-09-28T02:00:00Z")).toBe(true);
+    expect((await repo.list({ lang: "fr", limit: 10 })).items.map((a) => a.id)).toEqual([
+      article(2).id,
+    ]);
+    expect((await repo.sections({ lang: "fr", perSection: 10 }))[0]?.total).toBe(1);
+    const all = await repo.list({ limit: 10, includeWithdrawn: true });
+    expect(all.total).toBe(2);
+    const stored = await repo.get(id);
+    expect(stored?.translations[0]).toMatchObject({
+      title: "Titre 1",
+      withdrawnAt: "2026-09-28T02:00:00Z",
+    });
+    expect(stored?.version).toBe(1);
+    await repo.setWithdrawn(id, "fr", null);
+    expect((await repo.get(id))?.translations[0]).not.toHaveProperty("withdrawnAt");
+    expect((await repo.list({ limit: 10 })).total).toBe(2);
+    expect(await repo.setWithdrawn("missing", "fr", null)).toBe(false);
+  });
+
   it("lists newest first with cursor pagination", async () => {
     for (const n of [1, 3, 2]) {
       await repo.save(article(n));

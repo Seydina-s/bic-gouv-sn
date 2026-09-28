@@ -12,7 +12,7 @@ export interface ArticlePaneProps {
 /** Detail pane of the two-pane layout: the article with its actions on top. */
 export function ArticlePane({ id, paneWidth, bottomInset }: ArticlePaneProps) {
   const { theme } = useTheme();
-  const { detail, isPending } = useArticleDetail(id);
+  const { detail, isPending, withdrawn } = useArticleDetail(id);
   const { space } = theme;
   return (
     <View style={styles.root}>
@@ -23,6 +23,7 @@ export function ArticlePane({ id, paneWidth, bottomInset }: ArticlePaneProps) {
         withAppBar={false}
         detail={detail}
         isPending={isPending}
+        withdrawn={withdrawn}
         paneWidth={paneWidth}
         bottomInset={bottomInset}
       />

@@ -15,3 +15,20 @@ export const newsArticleSchema = z
   })
   .superRefine(checkTraceableContent);
 export type NewsArticle = z.infer<typeof newsArticleSchema>;
+
+type NewsTranslation = NewsArticle["translations"][number];
+
+/** A version the source still publishes: the only kind the app may show. */
+export function isPublished(translation: NewsTranslation): boolean {
+  return translation.withdrawnAt === undefined;
+}
+
+/** The version of `article` in `lang` that the app may show, if any. */
+export function publishedTranslation(
+  article: NewsArticle,
+  lang: NewsTranslation["lang"],
+): NewsTranslation | undefined {
+  return article.translations.find(
+    (translation) => translation.lang === lang && isPublished(translation),
+  );
+}

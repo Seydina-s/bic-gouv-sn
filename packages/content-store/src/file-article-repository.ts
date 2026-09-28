@@ -1,4 +1,4 @@
-import { newsArticleSchema, type NewsArticle } from "@bgs/shared-types";
+import { isPublished, newsArticleSchema, type Lang, type NewsArticle } from "@bgs/shared-types";
 import {
   compareNewestFirst,
   type ArticlePage,
@@ -26,8 +26,15 @@ export class FileArticleRepository implements ArticleRepository {
     return this.store.get(id);
   }
 
-  async list({ lang, category, limit, cursor, offset = 0 }: ListQuery): Promise<ArticlePage> {
-    const all = (await this.newestFirst(lang)).filter(
+  async list({
+    lang,
+    category,
+    limit,
+    cursor,
+    offset = 0,
+    includeWithdrawn = false,
+  }: ListQuery): Promise<ArticlePage> {
+    const all = (await this.newestFirst(lang, includeWithdrawn)).filter(
       (article) => category === undefined || article.category === category,
     );
     const start =
@@ -56,10 +63,17 @@ export class FileArticleRepository implements ArticleRepository {
     return [...sections.values()];
   }
 
-  private async newestFirst(lang: ListQuery["lang"]): Promise<NewsArticle[]> {
+  /** Articles with a version in `lang` (any language if undefined) the app may show. */
+  private async newestFirst(
+    lang: ListQuery["lang"],
+    includeWithdrawn = false,
+  ): Promise<NewsArticle[]> {
+    const shown = (translation: NewsArticle["translations"][number]) =>
+      (lang === undefined || translation.lang === lang) &&
+      (includeWithdrawn || isPublished(translation));
     return Object.values(await this.store.entries())
       .map((entry) => entry.current)
-      .filter((article) => lang === undefined || article.translations.some((t) => t.lang === lang))
+      .filter((article) => article.translations.some(shown))
       .sort(compareNewestFirst);
   }
 
@@ -81,6 +95,23 @@ export class FileArticleRepository implements ArticleRepository {
   setAttachments(id: string, attachments: NewsArticle["attachments"]): Promise<boolean> {
     return this.store.replaceCurrent(id, (current) =>
       newsArticleSchema.parse({ ...current, attachments }),
+    );
+  }
+
+  /** A mark on the current version: its words stay as they are, no new version. */
+  setWithdrawn(id: string, lang: Lang, withdrawnAt: string | null): Promise<boolean> {
+    return this.store.replaceCurrent(id, (current) =>
+      newsArticleSchema.parse({
+        ...current,
+        translations: current.translations.map((translation) => {
+          if (translation.lang !== lang) {
+            return translation;
+          }
+          const marked = { ...translation };
+          delete marked.withdrawnAt;
+          return withdrawnAt === null ? marked : { ...marked, withdrawnAt };
+        }),
+      }),
     );
   }
 }

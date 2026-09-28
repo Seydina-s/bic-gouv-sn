@@ -12,7 +12,7 @@ import {
 import type { FastifyReply, FastifyRequest } from "fastify";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
-import { freshnessKey, toDetail, toSummary } from "../news/present";
+import { freshnessKey, isWithdrawnIn, toDetail, toSummary } from "../news/present";
 import { searchArticles } from "../news/search";
 import { mediaBaseUrlFor } from "./media";
 
@@ -29,6 +29,7 @@ export interface NewsRoutesOptions {
 const CACHE_CONTROL = "public, max-age=60, stale-while-revalidate=600";
 
 const NOT_FOUND: ErrorCode = "NEWS_NOT_FOUND";
+const WITHDRAWN: ErrorCode = "NEWS_WITHDRAWN";
 
 /** Searches change with every publication: a short shared cache only. */
 const SEARCH_CACHE_CONTROL = "public, max-age=60";
@@ -160,13 +161,26 @@ export const newsRoutes: FastifyPluginAsyncZod<NewsRoutesOptions> = (
         summary: "One article in the requested language",
         params: z.object({ id: z.uuid() }),
         querystring: z.object({ lang: langSchema.default("fr") }),
-        response: { 200: newsDetailSchema, 304: z.null(), 404: apiErrorSchema },
+        response: {
+          200: newsDetailSchema,
+          304: z.null(),
+          404: apiErrorSchema,
+          410: apiErrorSchema,
+        },
       },
     },
     async (request, reply) => {
       const article = await articles.get(request.params.id);
       const media = mediaBaseUrlFor(request, mediaBaseUrl);
       const detail = article === null ? null : toDetail(article, request.query.lang, media);
+      if (article !== null && isWithdrawnIn(article, request.query.lang)) {
+        // Gone for good, unlike a missing article: the app drops its saved copy too.
+        return reply.code(410).send({
+          code: WITHDRAWN,
+          message: "The source withdrew this article",
+          requestId: request.id,
+        });
+      }
       if (article === null || detail === null) {
         return reply.code(404).send({
           code: NOT_FOUND,

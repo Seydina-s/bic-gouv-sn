@@ -14,6 +14,11 @@ export interface ListQuery {
   cursor?: string | undefined;
   /** Numbered pages: articles to skip (ignored when a cursor is given). */
   offset?: number | undefined;
+  /**
+   * Also list versions the source withdrew (hidden from the app). For the
+   * collection only, which must be able to see them published again.
+   */
+  includeWithdrawn?: boolean | undefined;
 }
 
 export interface ArticlePage {
@@ -58,6 +63,11 @@ export interface ArticleRepository {
   setImages(id: string, images: NewsArticle["images"]): Promise<boolean>;
   /** Attaches the stored copies of official PDFs, like images: no new version. */
   setAttachments(id: string, attachments: NewsArticle["attachments"]): Promise<boolean>;
+  /**
+   * Marks the version in `lang` as withdrawn by the source at `withdrawnAt`, or as
+   * published again with null. The words are kept untouched. False if unknown.
+   */
+  setWithdrawn(id: string, lang: Lang, withdrawnAt: string | null): Promise<boolean>;
 }
 
 /** Sort key shared by every implementation: newest publication first, stable by id. */
