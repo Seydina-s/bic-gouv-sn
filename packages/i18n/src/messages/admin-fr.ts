@@ -67,6 +67,10 @@ export const adminFr = {
     withdrawn: "Articles masqués",
     searches: "Recherches sans résultat",
     notifications: "Notifications",
+    pending: {
+      one: "{count} à vérifier",
+      other: "{count} à vérifier",
+    },
     remote: "Contrôle à distance",
     audit: "Journal d'audit",
     signOut: "Se déconnecter",

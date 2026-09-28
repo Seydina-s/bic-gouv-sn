@@ -1,6 +1,7 @@
 import { t } from "../lib/i18n";
-import { currentAccount } from "../lib/session";
-import { NavLink } from "./NavLink";
+import { pendingNotificationCount } from "../lib/pending-notifications";
+import { currentAccount, readCookie, SESSION_COOKIE } from "../lib/session";
+import { NavLink, type NavBadge } from "./NavLink";
 
 /**
  * The console's sections, grouped by what the person comes to do: follow the
@@ -38,9 +39,14 @@ const GROUPS = [
 ] as const;
 
 export async function ConsoleNav() {
-  if ((await currentAccount()) === null) {
+  const token = await readCookie(SESSION_COOKIE);
+  if ((await currentAccount()) === null || token === null) {
     return null;
   }
+  const pending = await pendingNotificationCount(token);
+  const badges: Partial<Record<string, NavBadge>> = {
+    "/notifications": { count: pending, label: t("nav.pending", { count: pending }) },
+  };
   return (
     <nav
       aria-label={t("nav.label")}
@@ -54,7 +60,9 @@ export async function ConsoleNav() {
           <ul aria-labelledby={`nav-${group.id}`} className="mt-2 space-y-1">
             {group.links.map((link) => (
               <li key={link.href}>
-                <NavLink href={link.href}>{t(link.label)}</NavLink>
+                <NavLink href={link.href} badge={badges[link.href]}>
+                  {t(link.label)}
+                </NavLink>
               </li>
             ))}
           </ul>
