@@ -17,6 +17,7 @@
     "@bgs/admin-auth": "workspace:*",
     "@bgs/content-store": "workspace:*",
     "@bgs/shared-types": "workspace:*",
+    "@fastify/compress": "9.2.0",
     "@fastify/helmet": "13.1.1",
     "@fastify/rate-limit": "11.2.0",
     "@fastify/static": "10.1.4",
