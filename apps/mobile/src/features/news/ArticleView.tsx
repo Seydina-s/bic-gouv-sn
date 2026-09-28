@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { NewsApiError } from "../../api/news-client";
 import { Icon } from "../../components/Icon";
+import { languageProps } from "../../i18n/language";
 import { useTranslation } from "../../i18n/useTranslation";
 import { ScrollTopButton, useScrollTop } from "../../components/ScrollTopButton";
 import { FloatingAppBar } from "../shell/FloatingAppBar";
@@ -151,6 +152,7 @@ export function ArticleView({
         </View>
         <Text
           accessibilityRole="header"
+          {...languageProps(detail.lang)}
           style={[textStyle.leadHeadline, { color: color.textPrimary, marginTop: space.md }]}
         >
           {detail.title}
@@ -164,7 +166,9 @@ export function ArticleView({
           {formatPublishedOn(detail.publishedOn, lang)}
           {detail.translationStatus === "machine" ? ` · ${t("content.machineTranslation")}` : ""}
         </Text>
-        <BlockRenderer blocks={detail.blocks} />
+        <View {...languageProps(detail.lang)}>
+          <BlockRenderer blocks={detail.blocks} />
+        </View>
         <DocumentList documents={detail.documents ?? []} />
         <View
           style={[

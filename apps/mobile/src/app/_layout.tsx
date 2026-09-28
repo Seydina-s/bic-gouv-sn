@@ -13,6 +13,7 @@ import { FavoritesProvider } from "../features/favorites/FavoritesProvider";
 import { Onboarding } from "../features/onboarding/Onboarding";
 import { useOnboardingDone } from "../features/onboarding/useOnboardingDone";
 import { I18nProvider } from "../i18n/I18nProvider";
+import { useDocumentLanguage } from "../i18n/language";
 import { initMonitoring } from "../monitoring/monitoring";
 import { ThemeProvider } from "../theme/ThemeProvider";
 import { useAppFonts } from "../theme/useAppFonts";
@@ -33,6 +34,7 @@ function ThemedStack() {
   const fontsReady = useAppFonts();
   const onboarding = useOnboardingDone();
   const ready = fontsReady && onboarding.done !== null;
+  useDocumentLanguage();
 
   // Root background behind every screen: no white flash in dark mode.
   useEffect(() => {

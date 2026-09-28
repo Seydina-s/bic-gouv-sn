@@ -231,6 +231,25 @@ describe("ArticleView cover", () => {
   });
 });
 
+describe("ArticleView language", () => {
+  it("declares a Wolof article as Wolof, so screen readers use the right voice", async () => {
+    await render(
+      <TestProviders>
+        <ArticleView
+          detail={{ ...DETAIL, lang: "wo" }}
+          isPending={false}
+          paneWidth={390}
+          bottomInset={0}
+        />
+      </TestProviders>,
+    );
+    expect(screen.getByRole("header", { name: DETAIL.title })).toHaveProp(
+      "accessibilityLanguage",
+      "wo",
+    );
+  });
+});
+
 describe("ArticleView documents", () => {
   it("lists the official PDFs with their size, opened from our copy", async () => {
     const openURL = jest.spyOn(Linking, "openURL").mockResolvedValue(true);

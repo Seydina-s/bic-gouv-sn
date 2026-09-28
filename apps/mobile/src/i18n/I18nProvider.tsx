@@ -1,11 +1,22 @@
-import { createTranslator, fr, resolveLang, wo, type FrCatalog, type Translate } from "@bgs/i18n";
+import {
+  createTranslator,
+  fr,
+  interfaceLanguage,
+  resolveLang,
+  wo,
+  type FrCatalog,
+  type Translate,
+} from "@bgs/i18n";
 import type { Lang } from "@bgs/shared-types";
 import { getLocales } from "expo-localization";
 import { createContext, useMemo, type ReactNode } from "react";
 import { usePersistentChoice } from "../data/usePersistentChoice";
 
 export interface I18nContextValue {
+  /** Language chosen (or the phone's): that of the contents asked from the API. */
   lang: Lang;
+  /** Language the interface is really written in (French while Wolof misses words). */
+  interfaceLang: Lang;
   t: Translate<FrCatalog>;
   /** Language chosen in the settings, or "auto" to follow the phone. */
   choice: LangChoice;
@@ -31,6 +42,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       lang,
+      interfaceLang: interfaceLanguage(lang, fr, catalogs[lang]),
       t: createTranslator({ lang, reference: fr, catalog: catalogs[lang] }),
       choice,
       setLang,
