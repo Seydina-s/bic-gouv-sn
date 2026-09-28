@@ -42,8 +42,47 @@ const wait = (ms: number) =>
     setTimeout(resolve, ms);
   });
 
-async function pageSocketUrl(): Promise<string> {
-  for (let attempt = 0; attempt < 100; attempt += 1) {
+/** A shared CI runner can be slow to start Chrome: up to 45 s before giving up. */
+const START_TIMEOUT_MS = 45_000;
+const START_ATTEMPTS = 2;
+
+interface StartedChrome {
+  process: ChildProcess;
+  /** Its last error lines, to explain a failed start. */
+  errors: () => string;
+  exited: () => boolean;
+}
+
+function startChrome(executable: string): StartedChrome {
+  const chrome = spawn(executable, [
+    "--headless=new",
+    "--disable-gpu",
+    "--disable-dev-shm-usage",
+    "--no-first-run",
+    // CI containers run as root without a user namespace for the sandbox.
+    ...(process.env["CI"] === undefined ? [] : ["--no-sandbox"]),
+    `--remote-debugging-port=${String(DEBUG_PORT)}`,
+    `--user-data-dir=${mkdtempSync(join(tmpdir(), "bgs-a11y-chrome-"))}`,
+    "about:blank",
+  ]);
+  let stderr = "";
+  let exited = false;
+  chrome.stderr.on("data", (chunk: Buffer) => {
+    stderr = (stderr + chunk.toString()).slice(-2000);
+  });
+  chrome.on("exit", () => {
+    exited = true;
+  });
+  chrome.on("error", (error) => {
+    exited = true;
+    stderr += String(error);
+  });
+  return { process: chrome, errors: () => stderr, exited: () => exited };
+}
+
+async function pageSocketUrl(chrome: StartedChrome): Promise<string> {
+  const deadline = Date.now() + START_TIMEOUT_MS;
+  while (Date.now() < deadline && !chrome.exited()) {
     try {
       const response = await fetch(`http://127.0.0.1:${String(DEBUG_PORT)}/json`);
       const targets = (await response.json()) as { type: string; webSocketDebuggerUrl: string }[];
@@ -56,7 +95,23 @@ async function pageSocketUrl(): Promise<string> {
     }
     await wait(200);
   }
-  throw new Error("Chrome did not start");
+  throw new Error(`Chrome did not start. Its last messages:\n${chrome.errors()}`);
+}
+
+/** Starts Chrome, trying a second time if the first start fails. */
+async function launchChrome(executable: string): Promise<{ chrome: ChildProcess; url: string }> {
+  let lastError: unknown = null;
+  for (let attempt = 1; attempt <= START_ATTEMPTS; attempt += 1) {
+    const chrome = startChrome(executable);
+    try {
+      return { chrome: chrome.process, url: await pageSocketUrl(chrome) };
+    } catch (error) {
+      lastError = error;
+      chrome.process.kill();
+      await wait(1000);
+    }
+  }
+  throw lastError;
 }
 
 export class AuditBrowser {
@@ -81,17 +136,8 @@ export class AuditBrowser {
     if (executable === undefined) {
       throw new Error("Set CHROME_PATH to a Chrome or Chromium executable");
     }
-    const chrome = spawn(executable, [
-      "--headless=new",
-      "--disable-gpu",
-      "--no-first-run",
-      // CI containers run as root without a user namespace for the sandbox.
-      ...(process.env["CI"] === undefined ? [] : ["--no-sandbox"]),
-      `--remote-debugging-port=${String(DEBUG_PORT)}`,
-      `--user-data-dir=${mkdtempSync(join(tmpdir(), "bgs-a11y-chrome-"))}`,
-      "about:blank",
-    ]);
-    const socket = new WebSocket(await pageSocketUrl());
+    const { chrome, url } = await launchChrome(executable);
+    const socket = new WebSocket(url);
     await new Promise((resolve) => {
       socket.addEventListener("open", resolve, { once: true });
     });

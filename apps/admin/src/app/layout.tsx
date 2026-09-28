@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Noto_Sans } from "next/font/google";
+import localFont from "next/font/local";
 import { connection } from "next/server";
 import type { ReactNode } from "react";
 import { AppHeader } from "../components/AppHeader";
@@ -8,11 +8,16 @@ import { t } from "../lib/i18n";
 import { themeCss } from "../lib/theme-css";
 import "./globals.css";
 
-// Self-hosted at build time by Next.js: no request to Google from the browser.
-// Noto Sans, the app's family (S1-04, chosen by the user on 27/09/2026).
-const notoSans = Noto_Sans({
-  subsets: ["latin", "latin-ext"],
-  weight: ["400", "600", "700", "800"],
+// Noto Sans, the app's family (S1-04, chosen by the user on 27/09/2026), from the
+// repository (`pnpm fonts`, French and Wolof letters checked): no request to Google,
+// neither from the browser nor at build time (a build once failed on that download).
+const notoSans = localFont({
+  src: [
+    { path: "../fonts/NotoSans_400Regular.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/NotoSans_600SemiBold.woff2", weight: "600", style: "normal" },
+    { path: "../fonts/NotoSans_700Bold.woff2", weight: "700", style: "normal" },
+    { path: "../fonts/NotoSans_800ExtraBold.woff2", weight: "800", style: "normal" },
+  ],
   variable: "--font-noto-sans",
   display: "swap",
 });
