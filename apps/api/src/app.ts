@@ -24,7 +24,9 @@ import { registerErrorHandlers } from "./errors";
 import { registerSecurity } from "./security";
 import { adminAuthRoutes } from "./routes/admin-auth";
 import { adminProcedureThemesRoutes } from "./routes/admin-procedure-themes";
+import { adminErrorsRoutes } from "./routes/admin-errors";
 import { adminServicesRoutes } from "./routes/admin-services";
+import { type ErrorJournal, journalErrors } from "./journal/error-journal";
 import { healthRoutes } from "./routes/health";
 import { registerMedia } from "./routes/media";
 import { newsRoutes } from "./routes/news";
@@ -50,6 +52,8 @@ export interface AppOptions {
   admin?: AdminServices | null;
   /** Where the logs go: standard output by default, tests read them here. */
   logStream?: FastifyLoggerOptions["stream"];
+  /** The console's error journal (server.ts opens it); none: errors are only logged. */
+  errorJournal?: ErrorJournal | null;
 }
 
 export interface AdminServices {
@@ -82,6 +86,7 @@ export async function buildApp({
   stateServices = new FileStateServiceStore(config.STATE_SERVICES_PATH),
   admin = defaultAdmin(config),
   logStream,
+  errorJournal = null,
 }: AppOptions): Promise<FastifyInstance> {
   const app = Fastify({
     logger: {
@@ -102,6 +107,9 @@ export async function buildApp({
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
   registerErrorHandlers(app);
+  if (errorJournal !== null) {
+    journalErrors(app, errorJournal);
+  }
   // Returned to the client so an incident can be traced from the app to the logs.
   app.addHook("onRequest", (request, reply, done) => {
     void reply.header("x-request-id", request.id);
@@ -172,6 +180,13 @@ export async function buildApp({
       ...admin,
       services: stateServices,
     });
+    if (errorJournal !== null) {
+      await app.register(adminErrorsRoutes, {
+        prefix: "/admin/v1",
+        signIn: admin.signIn,
+        errorJournal,
+      });
+    }
   }
   app.get("/v1/openapi.json", { schema: { hide: true } }, () => app.swagger());
 

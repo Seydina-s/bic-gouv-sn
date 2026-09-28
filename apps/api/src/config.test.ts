@@ -21,6 +21,7 @@ describe("loadConfig", () => {
       MAP_TILES_PATH: fromRoot(".data/tiles/senegal.pmtiles"),
       MAP_ASSETS_ROOT: fromRoot(".data/map"),
       STATE_SERVICES_PATH: fromRoot(".data/state-services.json"),
+      ERROR_JOURNAL_PATH: fromRoot(".data/error-journal.json"),
       INGESTION_STATUS_PATH: fromRoot(".data/ingestion-status.json"),
       MEDIA_ROOT: fromRoot(".data/media"),
       ADMIN_ACCOUNTS_PATH: fromRoot(".data/admin/accounts.json"),

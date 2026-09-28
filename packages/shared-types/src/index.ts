@@ -17,6 +17,7 @@ export * from "./content/traceable-content.schema";
 export * from "./content/translation.schema";
 export * from "./errors/error-catalog";
 export * from "./errors/error-code";
+export * from "./errors/error-journal.schema";
 export * from "./api/news.schema";
 export * from "./api/procedures.schema";
 export * from "./api/services.schema";

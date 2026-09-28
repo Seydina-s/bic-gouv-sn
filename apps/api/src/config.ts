@@ -48,6 +48,12 @@ const envSchema = z.object({
     .min(1)
     .default(".data/state-services.json")
     .transform((path) => resolveDataPath(path)),
+  /** Errors answered by the API, grouped, for the console's error journal. */
+  ERROR_JOURNAL_PATH: z
+    .string()
+    .min(1)
+    .default(".data/error-journal.json")
+    .transform((path) => resolveDataPath(path)),
   /** Report written by the real-time collection after each pass (console supervision). */
   INGESTION_STATUS_PATH: z
     .string()
