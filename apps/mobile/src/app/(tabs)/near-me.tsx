@@ -15,6 +15,8 @@ import { LocationPanel } from "../../features/near-me/LocationPanel";
 import { ViewToggle } from "../../features/near-me/MapOverlays";
 import { nativeMapAvailable } from "../../features/near-me/map-support";
 import { NearMeMap } from "../../features/near-me/NearMeMap";
+import { FeatureGate } from "../../features/remote-config/FeatureGate";
+import { useFeature } from "../../features/remote-config/useRemoteConfig";
 import { nearestServices } from "../../features/near-me/nearby";
 import { ServiceFilters, ServiceRow } from "../../features/near-me/ServiceParts";
 import { useLocation } from "../../features/near-me/useLocation";
@@ -45,7 +47,7 @@ interface Row {
  * can be chosen; before any choice, the services are listed by name. Where the
  * native map exists (the app's own builds), the same services show on a map.
  */
-export default function NearMeScreen() {
+function NearMe() {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const router = useRouter();
@@ -65,6 +67,7 @@ export default function NearMeScreen() {
     setCategory(askedKind(asked));
   }
   const [mapExists] = useState(nativeMapAvailable);
+  const mapSwitchedOn = useFeature("map");
   const [showing, setShowing] = useState<"list" | "map">("list");
   const { color, space, textStyle, touchTarget } = theme;
 
@@ -91,7 +94,7 @@ export default function NearMeScreen() {
     [kept, origin],
   );
   // The map is offered only with something to show on it.
-  const canMap = mapExists && all.length > 0;
+  const canMap = mapExists && mapSwitchedOn && all.length > 0;
   const openService = (id: string) => {
     router.push({ pathname: "/service/[id]", params: { id } });
   };
@@ -227,6 +230,16 @@ export default function NearMeScreen() {
       )}
       <FloatingAppBar visible={scrollTop.visible} top={insets.top} />
     </View>
+  );
+}
+
+/** "Près de moi", unless the console switched it off for the moment. */
+export default function NearMeScreen() {
+  const { t } = useTranslation();
+  return (
+    <FeatureGate feature="nearMe" title={t("nearMe.title")}>
+      <NearMe />
+    </FeatureGate>
   );
 }
 

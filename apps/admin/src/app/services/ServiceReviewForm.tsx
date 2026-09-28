@@ -5,7 +5,7 @@ import { useActionState } from "react";
 import { primaryButton, secondaryButton } from "../../lib/form-styles";
 import { t } from "../../lib/i18n";
 import { reviewServices, type ServiceReviewState } from "./actions";
-import { FormOutcome } from "./ServiceFormParts";
+import { FormOutcome } from "../../components/FormOutcome";
 
 export interface ReviewService {
   id: string;

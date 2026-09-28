@@ -1,4 +1,10 @@
-import type { Cover, NewsDetail, NewsListResponse, NewsSectionsResponse } from "@bgs/shared-types";
+import {
+  DEFAULT_REMOTE_CONFIG,
+  type Cover,
+  type NewsDetail,
+  type NewsListResponse,
+  type NewsSectionsResponse,
+} from "@bgs/shared-types";
 import { PROCEDURE_DETAIL, PROCEDURE_LIST, PROCEDURE_THEMES } from "./procedure-fixtures";
 import { STATE_SERVICES } from "./service-fixtures";
 
@@ -86,9 +92,15 @@ export function newsFetch(
     procedures?: () => Response;
     procedureThemes?: () => Response;
     services?: () => Response;
+    remoteConfig?: () => Response;
   } = {},
 ) {
   return jest.fn((input: string) => {
+    if (input.includes("/v1/remote-config")) {
+      return Promise.resolve(
+        overrides.remoteConfig?.() ?? new Response(JSON.stringify(DEFAULT_REMOTE_CONFIG)),
+      );
+    }
     if (input.includes("/v1/services")) {
       return Promise.resolve(
         overrides.services?.() ?? new Response(JSON.stringify(STATE_SERVICES)),

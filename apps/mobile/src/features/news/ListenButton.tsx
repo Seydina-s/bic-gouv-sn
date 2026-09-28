@@ -7,6 +7,7 @@ import { GlassBackdrop } from "../../components/GlassBackdrop";
 import { Icon } from "../../components/Icon";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
+import { useFeature } from "../remote-config/useRemoteConfig";
 import { spokenPieces } from "./spoken-text";
 import { useReadAloud } from "./useReadAloud";
 
@@ -29,11 +30,16 @@ export function ListenButton({ detail }: { detail: NewsDetail }) {
   );
 }
 
+/** "Écouter", unless the console switched reading aloud off for the moment. */
+export function ReadAloudButton(props: { language: string; pieces: () => readonly string[] }) {
+  return useFeature("readAloud") ? <ReadAloudPill {...props} /> : null;
+}
+
 /**
  * "Écouter" pill on glass (it reads over any picture, as on an article photo).
  * Becomes "Arrêter" while reading. `pieces` is only computed when pressed.
  */
-export function ReadAloudButton({
+function ReadAloudPill({
   language,
   pieces,
 }: {

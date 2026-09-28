@@ -10,6 +10,7 @@ import { useDebouncedValue } from "../../features/news/useDebouncedValue";
 import { ProcedureRow } from "../../features/procedures/ProcedureRow";
 import { ThemeCards } from "../../features/procedures/ThemeCards";
 import { useProcedureThemes, useProcedures } from "../../features/procedures/useProcedures";
+import { FeatureGate } from "../../features/remote-config/FeatureGate";
 import { useTranslation } from "../../i18n/useTranslation";
 import { ScrollTopButton, useScrollTop } from "../../components/ScrollTopButton";
 import { FloatingAppBar } from "../../features/shell/FloatingAppBar";
@@ -22,7 +23,7 @@ const TYPING_PAUSE_MS = 300;
  * Procedures, search first (GOV.UK): most people arrive knowing what they need.
  * The alphabetical list stays below for those who browse.
  */
-export default function ProceduresScreen() {
+function Procedures() {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const router = useRouter();
@@ -169,6 +170,16 @@ export default function ProceduresScreen() {
       />
       <FloatingAppBar visible={scrollTop.visible} top={insets.top} />
     </View>
+  );
+}
+
+/** Behind the "procedures" kill switch: off, it says so plainly. */
+export default function ProceduresScreen() {
+  const { t } = useTranslation();
+  return (
+    <FeatureGate feature="procedures" title={t("tabs.procedures")}>
+      <Procedures />
+    </FeatureGate>
   );
 }
 

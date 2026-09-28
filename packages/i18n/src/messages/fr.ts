@@ -287,6 +287,14 @@ export const fr = {
     empty:
       "Aucun favori pour l'instant. Touchez le marque-page d'un article pour le garder\u00a0: il restera lisible hors ligne.",
   },
+  remote: {
+    offTitle: "Momentanément indisponible",
+    offBody:
+      "Cette partie de l'application est suspendue pour le moment. Le reste fonctionne normalement.",
+    updateTitle: "Une nouvelle version est nécessaire",
+    updateBody:
+      "Cette version de Bic Gouv SN n'est plus prise en charge. Mettez l'application à jour depuis votre magasin d'applications pour continuer.",
+  },
   comingSoon: {
     title: "Bientôt disponible",
     body: "Cette partie de l'application est en préparation.",

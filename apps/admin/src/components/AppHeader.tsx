@@ -31,7 +31,7 @@ export async function AppHeader() {
         <span className="text-sm font-semibold text-ink-soft">{t("shell.area")}</span>
         {account !== null && (
           <>
-            <nav aria-label={t("nav.label")} className="flex gap-1">
+            <nav aria-label={t("nav.label")} className="flex flex-wrap gap-1">
               <Link href="/" className="rounded-md px-3 py-2 font-semibold hover:bg-surface">
                 {t("nav.status")}
               </Link>
@@ -49,6 +49,12 @@ export async function AppHeader() {
               </Link>
               <Link href="/erreurs" className="rounded-md px-3 py-2 font-semibold hover:bg-surface">
                 {t("nav.errors")}
+              </Link>
+              <Link
+                href="/controle"
+                className="rounded-md px-3 py-2 font-semibold hover:bg-surface"
+              >
+                {t("nav.remote")}
               </Link>
             </nav>
             <form action={signOut} className="ml-auto flex items-center gap-3">

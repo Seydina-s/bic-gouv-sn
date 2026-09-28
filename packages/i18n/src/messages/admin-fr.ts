@@ -50,6 +50,7 @@ export const adminFr = {
     procedures: "Thèmes des démarches",
     services: "Services de l'État",
     errors: "Erreurs",
+    remote: "Contrôle à distance",
     signOut: "Se déconnecter",
     signedInAs: "Connecté : {name}",
   },
@@ -179,6 +180,27 @@ export const adminFr = {
       other: "{count} services écartés.",
     },
     attribution: "Données © les contributeurs d'OpenStreetMap (licence ODbL).",
+  },
+  remote: {
+    title: "Contrôle à distance",
+    intro:
+      "Couper une fonction qui pose problème dans toutes les applications installées, sans nouvelle version, ou exiger une mise à jour. Les téléphones appliquent le changement en une minute environ. Chaque changement est inscrit au journal d'audit.",
+    features: "Fonctions de l'application",
+    feature: {
+      nearMe: "Près de moi (services de l'État)",
+      map: "Carte de « Près de moi »",
+      readAloud: "Écouter (lecture à voix haute)",
+      procedures: "Démarches",
+    },
+    minVersion: "Version minimale de l'application",
+    minVersionHelp:
+      "Les versions plus anciennes demandent une mise à jour. Laissez vide pour n'en exiger aucune. Format : 1.2.0",
+    minVersionInvalid:
+      "Version illisible : écrivez trois nombres séparés par des points, par exemple 1.2.0.",
+    save: "Enregistrer",
+    saved: "Enregistré : les applications suivent dans la minute.",
+    adminOnly: "Seul un compte administrateur peut modifier ces réglages.",
+    failed: "Les réglages n'ont pas pu être chargés.",
   },
   errors: {
     title: "Journal des erreurs",

@@ -1,6 +1,5 @@
 import { field } from "../../lib/form-styles";
 import { t } from "../../lib/i18n";
-import type { ServiceReviewState } from "./actions";
 
 export interface ServiceChoice {
   value: string;
@@ -65,26 +64,4 @@ export function CategoryField({
       </select>
     </div>
   );
-}
-
-/** What became of the last submission: saved, or why not. */
-export function FormOutcome({ state }: { state: ServiceReviewState }) {
-  if (state.error !== undefined) {
-    return (
-      <p role="alert" className="rounded-md bg-danger-surface px-4 py-3 text-on-danger-surface">
-        {state.error}
-      </p>
-    );
-  }
-  if (state.message !== undefined) {
-    return (
-      <p
-        role="status"
-        className="rounded-md bg-primary-container px-4 py-3 text-on-primary-container"
-      >
-        {state.message}
-      </p>
-    );
-  }
-  return null;
 }
