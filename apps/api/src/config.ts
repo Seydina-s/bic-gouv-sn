@@ -100,6 +100,12 @@ const envSchema = z.object({
     .min(1)
     .default(".data/admin/accounts.json")
     .transform((path) => resolveDataPath(path)),
+  /** Notifications prepared and decided in the console (two-person rule). */
+  NOTIFICATIONS_PATH: z
+    .string()
+    .min(1)
+    .default(".data/admin/notifications.json")
+    .transform((path) => resolveDataPath(path)),
   /** Append-only, hash-chained audit journal of the admin console. */
   ADMIN_AUDIT_PATH: z
     .string()
