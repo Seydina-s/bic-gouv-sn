@@ -44,7 +44,7 @@ export function useBriefLabels(): Record<BriefKind, string> {
 
 /**
  * "En bref" (Service-Public.fr): the answers people look for first, in one panel.
- * The documents line leads to the checklist further down.
+ * The documents line leads to their section further down the path.
  */
 export function ProcedureBrief({
   facts,

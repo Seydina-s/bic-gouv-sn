@@ -159,11 +159,6 @@ export const fr = {
     onlinePossible: "Possible",
     note: "Remarque",
     showDocuments: "Aller aux pièces à fournir",
-    checklistHint: "Cochez les pièces déjà réunies.",
-    checklistDone: {
-      one: "{count} sur {total} réunie",
-      other: "{count} sur {total} réunies",
-    },
   },
   nearMe: {
     title: "Près de moi",

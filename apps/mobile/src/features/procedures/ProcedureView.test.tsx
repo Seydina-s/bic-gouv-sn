@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { Block, ProcedureDetail } from "@bgs/shared-types";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react-native";
+import { fireEvent, render, screen } from "@testing-library/react-native";
 import * as Speech from "expo-speech";
 import { Linking } from "react-native";
 import { PROCEDURE_DETAIL } from "../../testing/procedure-fixtures";
@@ -77,29 +77,20 @@ describe("the page of a procedure", () => {
     expect(screen.getByText(/Source.: e-senegal.sn/)).toBeOnTheScreen();
   });
 
-  it("lets the documents be ticked off, and keeps them on the phone", async () => {
+  it("lists the documents plainly, with nothing to tick", async () => {
     await show(SHEET);
-    expect(screen.getByText("Cochez les pièces déjà réunies.")).toBeOnTheScreen();
-    const letter = screen.getByRole("checkbox", { name: "Une demande manuscrite" });
-    expect(letter).not.toBeChecked();
-    await fireEvent.press(letter);
-    // The web state (aria-checked) is guarded by `pnpm a11y` on this very sheet (QA-07).
-    expect(screen.getByRole("checkbox", { name: "Une demande manuscrite" })).toBeChecked();
-    expect(screen.getByText("1 sur 2 réunie")).toBeOnTheScreen();
-    expect(await AsyncStorage.getItem("bgs-checklist:demarche-test-a")).toBe(
-      JSON.stringify(["Une demande manuscrite"]),
-    );
+    expect(screen.getByText("Une demande manuscrite")).toBeOnTheScreen();
+    expect(screen.getByText("Un extrait de naissance")).toBeOnTheScreen();
+    expect(screen.queryAllByRole("checkbox")).toHaveLength(0);
   });
 
-  it("finds the documents ticked on an earlier visit", async () => {
-    await AsyncStorage.setItem(
-      "bgs-checklist:demarche-test-a",
-      JSON.stringify(["Un extrait de naissance"]),
-    );
+  it("follows the sections in the order of the source", async () => {
     await show(SHEET);
-    await waitFor(() => {
-      expect(screen.getByRole("checkbox", { name: "Un extrait de naissance" })).toBeChecked();
-    });
+    const headers = screen.getAllByRole("header");
+    const at = (name: string) => headers.indexOf(screen.getByRole("header", { name }));
+    const documents = at("Quelles sont les pièces à fournir ?");
+    expect(documents).toBeGreaterThan(-1);
+    expect(at("Comment faire ?")).toBeGreaterThan(documents);
   });
 
   it("opens related procedures and the official page", async () => {

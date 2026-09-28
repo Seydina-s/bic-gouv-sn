@@ -19,7 +19,6 @@ import { procedurePage, type PageWords } from "./procedure-page";
 import { whereToGo, type LinkedKind } from "./service-link";
 import { SheetItems, SheetSectionView } from "./SheetContent";
 import { spokenProcedure } from "./spoken-procedure";
-import { useDocumentChecklist } from "./useDocumentChecklist";
 
 const SOURCE = "e-senegal.sn";
 
@@ -109,7 +108,6 @@ function ProcedureSheetView({
   // Only offered when it leads somewhere: a verified service of that kind exists.
   const goTo = whereToGo(page);
   const nearest = goTo !== null && services?.kinds.has(goTo) === true ? goTo : null;
-  const checklist = useDocumentChecklist(detail.slug);
   const scroller = useRef<ScrollView>(null);
   // Where each section starts in the page, to lead the reader there.
   const offsets = useRef(new Map<number, number>());
@@ -216,7 +214,8 @@ function ProcedureSheetView({
           <SheetSectionView
             key={`${section.kind}-${String(index)}`}
             section={section}
-            checklist={checklist}
+            first={index === 0}
+            last={index === page.sections.length - 1}
             onLayout={(event) => {
               offsets.current.set(index, event.nativeEvent.layout.y);
             }}
