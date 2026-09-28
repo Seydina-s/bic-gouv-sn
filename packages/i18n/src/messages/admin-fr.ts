@@ -278,6 +278,8 @@ export const adminFr = {
     cancelledWord: "Annulée",
     sent: "Envoyée",
     notSent: "Non envoyée : l'app ne reçoit pas encore de notifications",
+    failedSending:
+      "Échec de l'envoi : le service de notifications n'a pas répondu. Préparez-la de nouveau si elle reste utile.",
     approve: "Vérifier et envoyer",
     cancel: "Annuler",
     yours: "Vous l'avez préparée : une autre personne doit la vérifier et l'envoyer.",

@@ -8,6 +8,13 @@ import { DecisionForm, PrepareForm } from "./NotificationForms";
 
 export const dynamic = "force-dynamic";
 
+/** What became of an approved notification, in plain words. */
+const DELIVERY_WORDING = {
+  sent: "notifications.sent",
+  "not-sent": "notifications.notSent",
+  failed: "notifications.failedSending",
+} as const;
+
 function when(iso: string) {
   const at = new Date(iso);
   return { day: formatDay(at), time: formatClockTime(at) };
@@ -135,11 +142,7 @@ export default async function NotificationsPage() {
                 <p className="text-sm text-ink-soft">{decisionLine(notification)}</p>
                 {notification.delivery !== null && (
                   <p className="text-sm font-semibold">
-                    {t(
-                      notification.delivery.outcome === "sent"
-                        ? "notifications.sent"
-                        : "notifications.notSent",
-                    )}
+                    {t(DELIVERY_WORDING[notification.delivery.outcome])}
                   </p>
                 )}
               </li>
