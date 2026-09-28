@@ -4,8 +4,22 @@ import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persi
 import { QueryClient } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { useState, type ReactNode } from "react";
+import { NewsApiError } from "../api/json-getter";
 
 const WEEK = 7 * 24 * 60 * 60 * 1000;
+
+/**
+ * One more try for a passing failure (network, server); none for an answer that
+ * will not change, such as "not found" or "withdrawn by the source" (4xx).
+ */
+export function retryPassingFailure(failures: number, error: unknown): boolean {
+  const final =
+    error instanceof NewsApiError &&
+    error.status !== null &&
+    error.status >= 400 &&
+    error.status < 500;
+  return !final && failures < 1;
+}
 
 /**
  * Offline-first cache (CLAUDE.md §1, navigation): screens show the last saved data
@@ -18,7 +32,7 @@ export function createQueryClient(): QueryClient {
         staleTime: 60_000,
         gcTime: WEEK,
         networkMode: "offlineFirst",
-        retry: 1,
+        retry: retryPassingFailure,
       },
     },
   });

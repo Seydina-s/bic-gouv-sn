@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import type { NewsDetail } from "@bgs/shared-types";
 import { ArrowSquareOutIcon as ArrowSquareOut } from "phosphor-react-native/src/icons/ArrowSquareOut";
 import {
@@ -10,6 +10,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { NewsApiError } from "../../api/news-client";
 import { Icon } from "../../components/Icon";
 import { useTranslation } from "../../i18n/useTranslation";
 import { ScrollTopButton, useScrollTop } from "../../components/ScrollTopButton";
@@ -26,20 +27,43 @@ import { useNewsArticle } from "./useNews";
 
 const SOURCE = "presidence.sn";
 
+/** HTTP answer of the API for an article the source withdrew (hidden, decision of 28/09). */
+const GONE = 410;
+
+export interface ArticleDetailState {
+  detail?: NewsDetail;
+  isPending: boolean;
+  /** The source withdrew it: nothing is shown, not even a saved copy. */
+  withdrawn: boolean;
+}
+
 /**
  * One article, from the network or, offline, from its saved copy in the favorites.
  * `isPending` is true while nothing can be shown yet.
  */
-export function useArticleDetail(id: string): { detail?: NewsDetail; isPending: boolean } {
+export function useArticleDetail(id: string): ArticleDetailState {
   const article = useNewsArticle(id);
   const favorites = useFavorites();
+  const withdrawn = article.error instanceof NewsApiError && article.error.status === GONE;
+  useEffect(() => {
+    if (withdrawn) {
+      favorites.forget(id);
+    }
+  }, [withdrawn, favorites, id]);
+  if (withdrawn) {
+    return { isPending: false, withdrawn };
+  }
   const detail = article.data ?? favorites.saved(id);
-  return detail === undefined ? { isPending: article.isPending } : { detail, isPending: false };
+  return detail === undefined
+    ? { isPending: article.isPending, withdrawn }
+    : { detail, isPending: false, withdrawn };
 }
 
 export interface ArticleViewProps {
   detail: NewsDetail | undefined;
   isPending: boolean;
+  /** The source withdrew the article: say so instead of "not available". */
+  withdrawn?: boolean;
   /** Width of the area the article is shown in (a full screen or one pane). */
   paneWidth: number;
   /** Space kept free at the bottom (system bars). */
@@ -52,6 +76,7 @@ export interface ArticleViewProps {
 export function ArticleView({
   detail,
   isPending,
+  withdrawn = false,
   paneWidth,
   bottomInset,
   withAppBar = true,
@@ -69,7 +94,7 @@ export function ArticleView({
           <ActivityIndicator color={color.primary} />
         ) : (
           <Text style={[textStyle.body, { color: color.textSecondary }]}>
-            {t("article.notFound")}
+            {t(withdrawn ? "article.withdrawn" : "article.notFound")}
           </Text>
         )}
       </View>

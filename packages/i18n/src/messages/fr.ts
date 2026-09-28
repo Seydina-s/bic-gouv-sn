@@ -91,6 +91,7 @@ export const fr = {
     back: "Retour",
     openSource: "Lire sur {source}",
     notFound: "Cet article n'est pas disponible.",
+    withdrawn: "Cet article a été retiré du site de la Présidence.",
     image: "Photo de l'article",
     showPhoto: "Afficher la photo",
     watchVideo: "Regarder la vidéo",

@@ -1,21 +1,34 @@
-import type {
-  Block,
-  Cover,
-  Image,
-  Lang,
-  NewsArticle,
-  NewsDetail,
-  NewsDocument,
-  NewsSummary,
+import {
+  isPublished,
+  publishedTranslation,
+  type Block,
+  type Cover,
+  type Image,
+  type Lang,
+  type NewsArticle,
+  type NewsDetail,
+  type NewsDocument,
+  type NewsSummary,
 } from "@bgs/shared-types";
 import { excerptOf, htmlToBlocks } from "./html-to-blocks";
 
+/** The version the app may show in `lang`: withdrawn versions are hidden. */
 function translationIn(article: NewsArticle, lang: Lang) {
-  return article.translations.find((translation) => translation.lang === lang);
+  return publishedTranslation(article, lang);
+}
+
+/** The source withdrew the version in `lang` (it existed, it is gone for good). */
+export function isWithdrawnIn(article: NewsArticle, lang: Lang): boolean {
+  return article.translations.some(
+    (translation) => translation.lang === lang && !isPublished(translation),
+  );
 }
 
 function availableLangs(article: NewsArticle): Lang[] {
-  return article.translations.map((translation) => translation.lang).sort();
+  return article.translations
+    .filter(isPublished)
+    .map((translation) => translation.lang)
+    .sort();
 }
 
 /** A stored image as the public API shows it, with URLs under `mediaBaseUrl`. */
@@ -109,13 +122,15 @@ export function toDetail(
 }
 
 /**
- * What makes a cached response stale: the words (content hash), the images and the
- * documents, which are attached after the article without changing its content hash.
+ * What makes a cached response stale: the words (content hash), the images, the
+ * documents and the withdrawals, which all change without changing the content hash.
  */
 export function freshnessKey(article: NewsArticle): string {
   return [
     article.contentHash,
     ...article.images.map((image) => image.originalKey),
     ...article.attachments.map((attachment) => attachment.key),
+    // A withdrawn version leaves the "available languages" of the other one.
+    ...article.translations.map(({ lang, withdrawnAt }) => `${lang}=${withdrawnAt ?? ""}`),
   ].join(":");
 }

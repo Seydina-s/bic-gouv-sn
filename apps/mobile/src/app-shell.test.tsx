@@ -379,6 +379,24 @@ describe("app shell", () => {
     expect(await screen.findByText("Paragraphe de test.")).toBeOnTheScreen();
   });
 
+  it("hides an article the source withdrew, even its saved copy", async () => {
+    await AsyncStorage.setItem(
+      "bgs-favorites-v1",
+      JSON.stringify([{ detail: DETAIL, savedAt: "2026-09-26T08:00:00Z" }]),
+    );
+    globalThis.fetch = newsFetch({
+      detail: () => new Response(JSON.stringify({ code: "NEWS_WITHDRAWN" }), { status: 410 }),
+    }) as unknown as typeof fetch;
+    await renderRouter(routes, { initialUrl: `/article/${DETAIL.id}` });
+    expect(
+      await screen.findByText("Cet article a été retiré du site de la Présidence."),
+    ).toBeOnTheScreen();
+    expect(screen.queryByText("Paragraphe de test.")).toBeNull();
+    await waitFor(async () => {
+      expect(await AsyncStorage.getItem("bgs-favorites-v1")).not.toContain(DETAIL.id);
+    });
+  });
+
   it("shows how to keep articles when there is no favorite yet", async () => {
     await renderRouter(routes, { initialUrl: "/favorites" });
     expect(

@@ -12,7 +12,7 @@ import { useTheme } from "../../theme/useTheme";
  */
 export default function ArticleScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { detail, isPending } = useArticleDetail(id);
+  const { detail, isPending, withdrawn } = useArticleDetail(id);
   const { theme } = useTheme();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
@@ -35,6 +35,7 @@ export default function ArticleScreen() {
       <ArticleView
         detail={detail}
         isPending={isPending}
+        withdrawn={withdrawn}
         paneWidth={width}
         bottomInset={insets.bottom}
       />

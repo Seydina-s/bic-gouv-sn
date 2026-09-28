@@ -69,6 +69,13 @@ export const ERROR_CATALOG = {
     severity: "info",
     action: "Rien à faire, sauf si le nombre augmente (lien cassé dans une notification ?).",
   },
+  NEWS_WITHDRAWN: {
+    what: "Un article demandé a été retiré du site de la Présidence ; l'app ne le montre plus.",
+    where: "API publique, actualités",
+    impact: "L'utilisateur voit « Cet article a été retiré par la Présidence ».",
+    severity: "info",
+    action: "Rien à faire : c'est le masquage voulu d'un article retiré par la source.",
+  },
   RATE_LIMITED: {
     what: "Trop de demandes sont arrivées depuis la même adresse réseau.",
     where: "API publique (protection contre les abus)",
