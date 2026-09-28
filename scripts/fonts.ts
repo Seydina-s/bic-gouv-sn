@@ -1,6 +1,7 @@
 // Latin-only subsets of the app fonts (PERF-04): the Google Fonts files also carry
 // Cyrillic, Greek and Vietnamese, which the app never shows.
-//   pnpm fonts          regenerate apps/mobile/assets/fonts from the font packages
+//   pnpm fonts          regenerate apps/mobile/assets/fonts (and the console's web fonts
+//                       in apps/admin/src/fonts) from the font packages
 //   pnpm fonts:check    fail if a committed font lacks a French or Wolof letter
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
@@ -54,6 +55,14 @@ const REQUIRED = [
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 const outDir = join(root, "apps/mobile/assets/fonts");
+/** The console builds with these files: no request to Google Fonts at build time. */
+const consoleDir = join(root, "apps/admin/src/fonts");
+const CONSOLE_FACES: ReadonlySet<string> = new Set([
+  "NotoSans_400Regular",
+  "NotoSans_600SemiBold",
+  "NotoSans_700Bold",
+  "NotoSans_800ExtraBold",
+]);
 const requireFromMobile = createRequire(join(root, "apps/mobile/package.json"));
 
 function keptText(): string {
@@ -84,6 +93,11 @@ async function generate(): Promise<void> {
     );
     const subset = await subsetFont(source, text, { targetFormat: "truetype" });
     writeFileSync(join(outDir, `${name}.ttf`), subset);
+    if (CONSOLE_FACES.has(name)) {
+      mkdirSync(consoleDir, { recursive: true });
+      const web = await subsetFont(source, text, { targetFormat: "woff2" });
+      writeFileSync(join(consoleDir, `${name}.woff2`), web);
+    }
     process.stdout.write(`${name}: ${String(source.length)} -> ${String(subset.length)} bytes\n`);
   }
 }
