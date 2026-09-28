@@ -25,6 +25,8 @@ const SETTLE_MS = Number(process.env["A11Y_SETTLE_MS"] ?? 4000);
 const PHONE: Viewport = { width: 412, height: 915, mobile: true };
 const DESKTOP: Viewport = { width: 1280, height: 900, mobile: false };
 const SCHEMES = ["light", "dark"] as const;
+/** The interface is French until the Wolof catalog is complete (W-01). */
+const INTERFACE_LANG = "fr";
 
 const APP_SCREENS = [
   "/",
@@ -169,13 +171,23 @@ async function auditScreens(
   for (const screen of screens) {
     await browser.open(base + screen, SETTLE_MS);
     // An empty page or a redirect (e.g. to the sign-in) would pass axe unaudited.
-    const { path, characters } = await browser.rendered();
+    const { path, characters, lang } = await browser.rendered();
     if (path !== screen || characters === 0) {
       throw new Error(
         `${base}${screen} did not render (at ${path}, ${String(characters)} characters)`,
       );
     }
-    reports.push({ screen: base + screen, scheme, violations: await browser.audit() });
+    const violations = await browser.audit();
+    // axe only checks that a language is declared, not that it is the right one.
+    if (lang !== INTERFACE_LANG) {
+      violations.push({
+        rule: "interface-language",
+        impact: "serious",
+        help: `The page declares "${lang}" but its interface is in "${INTERFACE_LANG}" (WCAG 3.1.1)`,
+        targets: ["html"],
+      });
+    }
+    reports.push({ screen: base + screen, scheme, violations });
   }
   return reports;
 }

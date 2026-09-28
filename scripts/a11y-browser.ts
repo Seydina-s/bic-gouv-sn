@@ -204,11 +204,11 @@ export class AuditBrowser {
   }
 
   /** Where the page ended up and how much text it shows: proof the screen really rendered. */
-  async rendered(): Promise<{ path: string; characters: number }> {
+  async rendered(): Promise<{ path: string; characters: number; lang: string }> {
     const state = await this.evaluate(
-      "({ path: location.pathname, characters: document.body.innerText.trim().length })",
+      "({ path: location.pathname, characters: document.body.innerText.trim().length, lang: document.documentElement.lang })",
     );
-    return state as { path: string; characters: number };
+    return state as { path: string; characters: number; lang: string };
   }
 
   /** WCAG A/AA rules axe finds broken on the open page. */

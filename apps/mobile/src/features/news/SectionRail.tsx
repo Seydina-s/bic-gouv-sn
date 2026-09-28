@@ -2,6 +2,7 @@ import type { NewsSummary } from "@bgs/shared-types";
 import { ArrowRightIcon as ArrowRight } from "phosphor-react-native/src/icons/ArrowRight";
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { Icon } from "../../components/Icon";
+import { languageProps } from "../../i18n/language";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 import { categoryLabelKey } from "./category";
@@ -67,7 +68,11 @@ function RailCard({
         <CoverImage cover={item.cover} slotWidth={width} style={{ width, height: photoHeight }} />
       )}
       <View style={{ padding: space.md, gap: space.xs }}>
-        <Text style={[textStyle.storyTitle, { color: color.textPrimary }]} numberOfLines={3}>
+        <Text
+          {...languageProps(item.lang)}
+          style={[textStyle.storyTitle, { color: color.textPrimary }]}
+          numberOfLines={3}
+        >
           {item.title}
         </Text>
         {day !== "" && (

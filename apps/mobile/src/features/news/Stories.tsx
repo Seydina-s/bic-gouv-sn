@@ -3,6 +3,7 @@ import { tracking } from "@bgs/ui";
 import { ArrowRightIcon as ArrowRight } from "phosphor-react-native/src/icons/ArrowRight";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Icon } from "../../components/Icon";
+import { languageProps } from "../../i18n/language";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 import { categoryLabelKey } from "./category";
@@ -75,11 +76,19 @@ export function LeadStory({
       )}
       <View style={{ padding: space.lg, gap: space.sm }}>
         {showSection && <SectionTag category={item.category} lastOpened={lastOpened} />}
-        <Text style={[textStyle.leadHeadline, { color: color.textPrimary }]} numberOfLines={3}>
+        <Text
+          {...languageProps(item.lang)}
+          style={[textStyle.leadHeadline, { color: color.textPrimary }]}
+          numberOfLines={3}
+        >
           {item.title}
         </Text>
         {item.excerpt !== "" && (
-          <Text style={[textStyle.body, { color: color.textSecondary }]} numberOfLines={2}>
+          <Text
+            {...languageProps(item.lang)}
+            style={[textStyle.body, { color: color.textSecondary }]}
+            numberOfLines={2}
+          >
             {item.excerpt}
           </Text>
         )}
@@ -122,7 +131,11 @@ export function CouncilCard({ item, onPress }: Omit<StoryProps, "lastOpened">) {
         <Text style={[textStyle.caption, styles.caps, { color: ink }]}>
           {t("feed.latestCouncil")}
         </Text>
-        <Text style={[textStyle.storyTitle, { color: ink }]} numberOfLines={4}>
+        <Text
+          {...languageProps(item.lang)}
+          style={[textStyle.storyTitle, { color: ink }]}
+          numberOfLines={4}
+        >
           {item.title}
         </Text>
         {day !== "" && <Text style={[textStyle.bodySmall, { color: ink }]}>{day}</Text>}
@@ -171,7 +184,11 @@ export function StoryRow({
       <Selvage category={item.category} color={tone.solid} />
       <View style={[styles.body, { marginLeft: space.lg - SELVAGE_WIDTH, gap: space.xs }]}>
         {showSection && <SectionTag category={item.category} lastOpened={lastOpened} />}
-        <Text style={[textStyle.storyTitle, { color: color.textPrimary }]} numberOfLines={3}>
+        <Text
+          {...languageProps(item.lang)}
+          style={[textStyle.storyTitle, { color: color.textPrimary }]}
+          numberOfLines={3}
+        >
           {item.title}
         </Text>
         {day !== "" && (
