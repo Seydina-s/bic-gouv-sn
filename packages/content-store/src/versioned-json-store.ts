@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import { z } from "zod";
 import { writeFileDurably } from "./durable-file";
 
@@ -24,13 +24,17 @@ const headerSchema = z.object({ schemaVersion: z.literal(1) });
 
 /**
  * One JSON file of versioned items (`{ schemaVersion: 1, [collection]: { id: entry } }`),
- * validated on every read, written durably with a backup copy read back if the main
+ * validated whenever it changed (read again only when its size or time changed: the
+ * API no longer parses 9 MB at every request), written durably with a backup copy read back if the main
  * file is unreadable (e.g. zeroed by a power cut). Never overwrites silently: a
  * changed item keeps its previous versions in `history`. Single writer.
  * Provisional until PostgreSQL, behind the repository interfaces.
  */
 export class VersionedJsonStore<T extends Versioned> {
   private readonly entriesSchema: z.ZodType<Record<string, VersionedEntry<T>>>;
+  /** Last validated read of the main file, and the size and time it had then. */
+  private cache: { stamp: string; entries: Readonly<Record<string, VersionedEntry<T>>> } | null =
+    null;
 
   constructor(
     private readonly path: string,
@@ -43,9 +47,19 @@ export class VersionedJsonStore<T extends Versioned> {
     );
   }
 
-  async entries(): Promise<Record<string, VersionedEntry<T>>> {
+  /**
+   * Every entry, validated. Shared between callers until the file changes: read-only
+   * (writers work on a copy).
+   */
+  async entries(): Promise<Readonly<Record<string, VersionedEntry<T>>>> {
     try {
-      return await this.readFile(this.path);
+      const stamp = await this.stampOf(this.path);
+      if (this.cache?.stamp === stamp) {
+        return this.cache.entries;
+      }
+      const entries = await this.readFile(this.path);
+      this.cache = { stamp, entries };
+      return entries;
     } catch (error) {
       try {
         return await this.readFile(this.backupPath);
@@ -68,7 +82,7 @@ export class VersionedJsonStore<T extends Versioned> {
 
   /** Saves a new version only when the content fingerprint changed. */
   async save(item: T): Promise<SaveOutcome> {
-    const entries = await this.entries();
+    const entries = { ...(await this.entries()) };
     const existing = entries[item.id];
     if (existing?.current.contentHash === item.contentHash) {
       return "unchanged";
@@ -86,14 +100,20 @@ export class VersionedJsonStore<T extends Versioned> {
 
   /** Replaces the current version in place (enrichments such as images). */
   async replaceCurrent(id: string, update: (current: T) => T): Promise<boolean> {
-    const entries = await this.entries();
+    const entries = { ...(await this.entries()) };
     const entry = entries[id];
     if (entry === undefined) {
       return false;
     }
-    entry.current = update(entry.current);
+    entries[id] = { ...entry, current: update(entry.current) };
     await this.write(entries);
     return true;
+  }
+
+  /** Changes whenever the file is replaced or rewritten (size, time, file id). */
+  private async stampOf(path: string): Promise<string> {
+    const { size, mtimeMs, ino } = await stat(path);
+    return `${String(size)}:${String(mtimeMs)}:${String(ino)}`;
   }
 
   private get backupPath(): string {
