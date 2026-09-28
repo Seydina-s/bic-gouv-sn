@@ -45,3 +45,19 @@ process.once("SIGTERM", shutdown);
 process.once("SIGINT", shutdown);
 
 await app.listen({ host: config.HOST, port: config.PORT });
+
+/**
+ * The first search prepares every text (about 1.5 s); done here, right after start,
+ * so no one waits for it. Common words: these warm-up searches find something and
+ * are never counted as searches without result.
+ */
+const WARM_UP = [
+  "/v1/news/search?q=conseil",
+  "/v1/news/search?q=conseil&lang=wo",
+  "/v1/procedures?q=acte",
+];
+for (const url of WARM_UP) {
+  await app.inject({ method: "GET", url }).catch((error: unknown) => {
+    app.log.warn({ err: error, url }, "Search warm-up failed");
+  });
+}

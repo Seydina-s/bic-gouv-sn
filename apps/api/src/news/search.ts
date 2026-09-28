@@ -1,15 +1,23 @@
 import type { ArticleRepository } from "@bgs/content-store";
 import type { Lang, NewsArticle } from "@bgs/shared-types";
-import { scoreText, searchTerms } from "../search/text-search";
+import { PreparedTexts, searchTerms, type Searchable } from "../search/text-search";
 
 /** Search over the article store: title matches rank first, then the newest. */
 
 const PAGE_SIZE = 200;
+/** Articles made ready for searching once per version, not at every search. */
+const prepared = new PreparedTexts();
 
-/** Relevance of one language version, or 0 when a term is missing. */
-export function scoreArticle(article: NewsArticle, lang: Lang, terms: readonly string[]): number {
+/** What is searched in one language version of an article (none if absent). */
+function searchableIn(article: NewsArticle, lang: Lang): Searchable | null {
   const translation = article.translations.find((candidate) => candidate.lang === lang);
-  return translation === undefined ? 0 : scoreText(translation.title, translation.bodyHtml, terms);
+  return translation === undefined
+    ? null
+    : {
+        key: `${article.id}:${lang}:${article.contentHash}`,
+        title: translation.title,
+        body: () => translation.bodyHtml,
+      };
 }
 
 async function allArticles(articles: ArticleRepository, lang: Lang): Promise<NewsArticle[]> {
@@ -32,10 +40,7 @@ export async function searchArticles(
   if (terms.length === 0) {
     return [];
   }
-  return (await allArticles(articles, lang))
-    .map((article, rank) => ({ article, rank, score: scoreArticle(article, lang, terms) }))
-    .filter((hit) => hit.score > 0)
-    .sort((a, b) => b.score - a.score || a.rank - b.rank)
-    .slice(0, limit)
-    .map((hit) => hit.article);
+  return prepared
+    .rank(await allArticles(articles, lang), terms, (article) => searchableIn(article, lang))
+    .slice(0, limit);
 }
