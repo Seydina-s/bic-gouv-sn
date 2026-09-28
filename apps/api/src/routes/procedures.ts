@@ -12,7 +12,7 @@ import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
 import type { SearchMisses } from "../journal/search-misses";
 import { toProcedureDetail, toProcedureSummary } from "../procedures/present";
-import { scoreText, searchTerms } from "../search/text-search";
+import { PreparedTexts, searchTerms } from "../search/text-search";
 
 export interface ProceduresRoutesOptions {
   procedures: ProcedureRepository;
@@ -30,21 +30,23 @@ function fingerprint(parts: readonly string[]): string {
   return `"${createHash("sha256").update(parts.join("|")).digest("base64url").slice(0, 27)}"`;
 }
 
+/** Procedures made ready for searching once per version, not at every search. */
+const prepared = new PreparedTexts();
+
 /** Matching procedures: all when no query, else best matches first (title, summary, text). */
 function matching(all: readonly Procedure[], query: string | undefined): Procedure[] {
   const terms = searchTerms(query ?? "");
   if (terms.length === 0) {
     return [...all];
   }
-  return all
-    .map((procedure, rank) => {
-      const fr = procedure.translations.find((t) => t.lang === "fr");
-      const body = `${procedure.summary ?? ""} ${fr?.bodyHtml ?? ""}`;
-      return { procedure, rank, score: scoreText(fr?.title ?? "", body, terms) };
-    })
-    .filter((hit) => hit.score > 0)
-    .sort((a, b) => b.score - a.score || a.rank - b.rank)
-    .map((hit) => hit.procedure);
+  return prepared.rank(all, terms, (procedure) => {
+    const fr = procedure.translations.find((t) => t.lang === "fr");
+    return {
+      key: `${procedure.id}:${procedure.contentHash}`,
+      title: fr?.title ?? "",
+      body: () => `${procedure.summary ?? ""} ${fr?.bodyHtml ?? ""}`,
+    };
+  });
 }
 
 /**
