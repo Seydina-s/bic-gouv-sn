@@ -23,6 +23,7 @@ describe("loadConfig", () => {
       STATE_SERVICES_PATH: fromRoot(".data/state-services.json"),
       REMOTE_CONFIG_PATH: fromRoot(".data/remote-config.json"),
       ERROR_JOURNAL_PATH: fromRoot(".data/error-journal.json"),
+      SEARCH_MISSES_PATH: fromRoot(".data/search-misses.json"),
       INGESTION_STATUS_PATH: fromRoot(".data/ingestion-status.json"),
       MEDIA_ROOT: fromRoot(".data/media"),
       ADMIN_ACCOUNTS_PATH: fromRoot(".data/admin/accounts.json"),

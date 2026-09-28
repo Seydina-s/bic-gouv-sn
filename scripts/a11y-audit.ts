@@ -49,6 +49,7 @@ const CONSOLE_SCREENS = [
   `/services/${SERVICE_ID}`,
   "/services/nouveau",
   "/masques",
+  "/recherches",
 ];
 
 function startApi(dataDir: string): ChildProcess {
@@ -70,6 +71,7 @@ function startApi(dataDir: string): ChildProcess {
       STATE_SERVICES_PATH: data("state-services.json"),
       REMOTE_CONFIG_PATH: data("remote-config.json"),
       ERROR_JOURNAL_PATH: data("error-journal.json"),
+      SEARCH_MISSES_PATH: data("search-misses.json"),
       INGESTION_STATUS_PATH: data("ingestion-status.json"),
       MEDIA_ROOT: data("media"),
       ADMIN_ACCOUNTS_PATH: data("admin/accounts.json"),

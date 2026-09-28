@@ -10,6 +10,7 @@ import {
 } from "@bgs/shared-types";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
+import type { SearchMisses } from "../journal/search-misses";
 import { toProcedureDetail, toProcedureSummary } from "../procedures/present";
 import { scoreText, searchTerms } from "../search/text-search";
 
@@ -17,6 +18,8 @@ export interface ProceduresRoutesOptions {
   procedures: ProcedureRepository;
   /** Official themes and the theme of each procedure (only validated ones are public). */
   themes: FileProcedureThemeStore;
+  /** Counts searches that found nothing, for the console; none in tests by default. */
+  searchMisses?: SearchMisses | null;
 }
 
 /** Procedures change rarely: longer freshness than the news, same stale window. */
@@ -50,7 +53,7 @@ function matching(all: readonly Procedure[], query: string | undefined): Procedu
  */
 export const proceduresRoutes: FastifyPluginAsyncZod<ProceduresRoutesOptions> = (
   app,
-  { procedures, themes },
+  { procedures, themes, searchMisses = null },
 ) => {
   /** Slugs a person has filed under each theme (proposals are never public). */
   async function validatedByTheme(): Promise<Map<string, Set<string>>> {
@@ -125,6 +128,16 @@ export const proceduresRoutes: FastifyPluginAsyncZod<ProceduresRoutesOptions> = 
       const all = matching(await procedures.all(), q).filter(
         (procedure) => inTheme === null || inTheme.has(procedure.slug),
       );
+      // A search that finds nothing, once (first page, all themes): counted for the console.
+      if (
+        q !== undefined &&
+        q.length >= 2 &&
+        all.length === 0 &&
+        theme === undefined &&
+        cursor === undefined
+      ) {
+        searchMisses?.record("procedures", "fr", q);
+      }
       const start =
         cursor !== undefined
           ? all.findIndex((p) => p.slug === cursor) + 1

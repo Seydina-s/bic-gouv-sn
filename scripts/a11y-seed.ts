@@ -201,7 +201,26 @@ async function seedAccount(dataDir: string, password: string): Promise<void> {
   );
 }
 
+/** Placeholder searches that found nothing, frequent enough to be shown. */
+function seedSearchMisses(dataDir: string): void {
+  const miss = (area: "news" | "procedures", query: string, count: number) => ({
+    area,
+    lang: "fr",
+    query,
+    count,
+    lastOn: "2026-09-28",
+  });
+  writeFileSync(
+    join(dataDir, "search-misses.json"),
+    JSON.stringify({
+      schemaVersion: 1,
+      entries: [miss("procedures", "recherche fictive", 5), miss("news", "autre recherche", 3)],
+    }),
+  );
+}
+
 export async function seed(dataDir: string, password: string): Promise<void> {
+  seedSearchMisses(dataDir);
   await seedArticle(dataDir);
   await seedProcedure(dataDir);
   await seedServices(dataDir);

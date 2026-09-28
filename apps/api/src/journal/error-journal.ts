@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
-import { writeFileDurably } from "@bgs/content-store";
 import { errorJournalFileSchema, type ErrorJournalEntry } from "@bgs/shared-types";
 import type { FastifyInstance } from "fastify";
+import { PeriodicallySaved } from "./periodically-saved";
 
 /** The place of a request whose address matched no route. */
 export const UNKNOWN_ROUTE = "(adresse inconnue)";
@@ -54,12 +54,12 @@ const MAX_GROUPS = 300;
  * durably now and then (never on the request's path). Read by the console's error
  * journal (CLAUDE.md §4.5).
  */
-export class ErrorJournal {
+export class ErrorJournal extends PeriodicallySaved {
   private readonly groups = new Map<string, ErrorJournalEntry>();
-  private dirty = false;
-  private timer: NodeJS.Timeout | null = null;
 
-  private constructor(private readonly path: string) {}
+  private constructor(path: string) {
+    super(path);
+  }
 
   /** The journal saved at `path`, or an empty one (missing or unreadable file). */
   static async open(path: string): Promise<ErrorJournal> {
@@ -96,7 +96,7 @@ export class ErrorJournal {
       lastAt: time,
       lastRequestId: requestId,
     });
-    this.dirty = true;
+    this.changed();
   }
 
   /** Latest first. */
@@ -104,28 +104,7 @@ export class ErrorJournal {
     return [...this.groups.values()].reverse();
   }
 
-  async flush(): Promise<void> {
-    if (!this.dirty) {
-      return;
-    }
-    this.dirty = false;
-    const file = { schemaVersion: 1 as const, entries: [...this.groups.values()] };
-    await writeFileDurably(this.path, JSON.stringify(file, null, 2));
-  }
-
-  /** Writes every `intervalMs` while something changed. */
-  start(intervalMs: number, onError: (error: unknown) => void): void {
-    this.timer = setInterval(() => {
-      this.flush().catch(onError);
-    }, intervalMs);
-    this.timer.unref();
-  }
-
-  async close(): Promise<void> {
-    if (this.timer !== null) {
-      clearInterval(this.timer);
-      this.timer = null;
-    }
-    await this.flush();
+  protected snapshot() {
+    return { schemaVersion: 1 as const, entries: [...this.groups.values()] };
   }
 }

@@ -50,6 +50,12 @@ export async function AppHeader() {
               <Link href="/masques" className="rounded-md px-3 py-2 font-semibold hover:bg-surface">
                 {t("nav.withdrawn")}
               </Link>
+              <Link
+                href="/recherches"
+                className="rounded-md px-3 py-2 font-semibold hover:bg-surface"
+              >
+                {t("nav.searches")}
+              </Link>
               <Link href="/erreurs" className="rounded-md px-3 py-2 font-semibold hover:bg-surface">
                 {t("nav.errors")}
               </Link>

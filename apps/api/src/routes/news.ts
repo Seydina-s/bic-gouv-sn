@@ -12,6 +12,7 @@ import {
 import type { FastifyReply, FastifyRequest } from "fastify";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
+import type { SearchMisses } from "../journal/search-misses";
 import { freshnessKey, isWithdrawnIn, toDetail, toSummary } from "../news/present";
 import { searchArticles } from "../news/search";
 import { mediaBaseUrlFor } from "./media";
@@ -20,6 +21,8 @@ export interface NewsRoutesOptions {
   articles: ArticleRepository;
   /** Public address of media; absent in development (served by this API). */
   mediaBaseUrl: string | undefined;
+  /** Counts searches that found nothing, for the console; none in tests by default. */
+  searchMisses?: SearchMisses | null;
 }
 
 /**
@@ -46,7 +49,7 @@ function sendCached<T>(request: FastifyRequest, reply: FastifyReply, fingerprint
 
 export const newsRoutes: FastifyPluginAsyncZod<NewsRoutesOptions> = (
   app,
-  { articles, mediaBaseUrl },
+  { articles, mediaBaseUrl, searchMisses = null },
 ) => {
   app.get(
     "/news/search",
@@ -66,6 +69,9 @@ export const newsRoutes: FastifyPluginAsyncZod<NewsRoutesOptions> = (
       const { q, lang, limit } = request.query;
       const media = mediaBaseUrlFor(request, mediaBaseUrl);
       const hits = await searchArticles(articles, { query: q, lang, limit });
+      if (hits.length === 0) {
+        searchMisses?.record("news", lang, q);
+      }
       void reply.header("cache-control", SEARCH_CACHE_CONTROL);
       return {
         items: hits.flatMap((article) => toSummary(article, lang, media) ?? []),

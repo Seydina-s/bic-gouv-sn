@@ -60,6 +60,12 @@ const envSchema = z.object({
     .min(1)
     .default(".data/error-journal.json")
     .transform((path) => resolveDataPath(path)),
+  /** Searches that found nothing, counted without anything about who searched. */
+  SEARCH_MISSES_PATH: z
+    .string()
+    .min(1)
+    .default(".data/search-misses.json")
+    .transform((path) => resolveDataPath(path)),
   /** Report written by the real-time collection after each pass (console supervision). */
   INGESTION_STATUS_PATH: z
     .string()

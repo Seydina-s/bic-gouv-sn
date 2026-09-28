@@ -53,6 +53,7 @@ export const adminFr = {
     services: "Services de l'État",
     errors: "Erreurs",
     withdrawn: "Articles masqués",
+    searches: "Recherches sans résultat",
     remote: "Contrôle à distance",
     signOut: "Se déconnecter",
     signedInAs: "Connecté : {name}",
@@ -204,6 +205,21 @@ export const adminFr = {
     saved: "Enregistré : les applications suivent dans la minute.",
     adminOnly: "Seul un compte administrateur peut modifier ces réglages.",
     failed: "Les réglages n'ont pas pu être chargés.",
+  },
+  searches: {
+    title: "Recherches sans résultat",
+    intro:
+      "Ce que les gens cherchent dans l'app sans rien trouver : une piste pour voir ce qui manque. Seules les recherches faites au moins {minCount} fois apparaissent, et rien n'est gardé sur les personnes (ni adresse, ni appareil, ni heure) : uniquement le texte cherché et le jour.",
+    none: "Aucune recherche sans résultat faite au moins {minCount} fois pour l'instant.",
+    failed: "La liste n'a pas pu être chargée. Vérifiez l'état du service.",
+    area: { news: "Actualités", procedures: "Démarches" },
+    language: { fr: "Français", wo: "Wolof" },
+    times: {
+      one: "{count} fois",
+      other: "{count} fois",
+    },
+    lastOn: "dernière fois le {day}",
+    quoted: "«\u00a0{query}\u00a0»",
   },
   withdrawn: {
     title: "Articles masqués",

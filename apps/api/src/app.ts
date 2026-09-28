@@ -28,9 +28,11 @@ import { adminAuthRoutes } from "./routes/admin-auth";
 import { adminProcedureThemesRoutes } from "./routes/admin-procedure-themes";
 import { adminErrorsRoutes } from "./routes/admin-errors";
 import { adminNewsRoutes } from "./routes/admin-news";
+import { adminSearchMissesRoutes } from "./routes/admin-search-misses";
 import { adminServicesRoutes } from "./routes/admin-services";
 import { adminRemoteConfigRoutes, remoteConfigRoutes } from "./routes/remote-config";
 import { type ErrorJournal, journalErrors } from "./journal/error-journal";
+import type { SearchMisses } from "./journal/search-misses";
 import { healthRoutes } from "./routes/health";
 import { registerMedia } from "./routes/media";
 import { newsRoutes } from "./routes/news";
@@ -62,6 +64,8 @@ export interface AppOptions {
   logStream?: FastifyLoggerOptions["stream"];
   /** The console's error journal (server.ts opens it); none: errors are only logged. */
   errorJournal?: ErrorJournal | null;
+  /** Searches that found nothing (server.ts opens it); none: not counted. */
+  searchMisses?: SearchMisses | null;
 }
 
 export interface AdminServices {
@@ -96,6 +100,7 @@ export async function buildApp({
   admin = defaultAdmin(config),
   logStream,
   errorJournal = null,
+  searchMisses = null,
 }: AppOptions): Promise<FastifyInstance> {
   const app = Fastify({
     logger: {
@@ -158,6 +163,7 @@ export async function buildApp({
     prefix: "/v1",
     procedures,
     themes: procedureThemes,
+    searchMisses,
   });
   await app.register(servicesRoutes, { prefix: "/v1", services: stateServices });
   await app.register(mapRoutes, {
@@ -177,7 +183,13 @@ export async function buildApp({
     prefix: "/v1",
     articles,
     mediaBaseUrl: config.MEDIA_BASE_URL,
+    searchMisses,
   });
+  if (searchMisses !== null) {
+    app.addHook("onClose", async () => {
+      await searchMisses.close();
+    });
+  }
   // With a CDN configured, media are served from there, not by the API.
   if (config.MEDIA_BASE_URL === undefined) {
     await registerMedia(app, config.MEDIA_ROOT);
@@ -201,6 +213,13 @@ export async function buildApp({
       store: remoteConfig,
     });
     await app.register(adminNewsRoutes, { prefix: "/admin/v1", signIn: admin.signIn, articles });
+    if (searchMisses !== null) {
+      await app.register(adminSearchMissesRoutes, {
+        prefix: "/admin/v1",
+        signIn: admin.signIn,
+        searchMisses,
+      });
+    }
     if (errorJournal !== null) {
       await app.register(adminErrorsRoutes, {
         prefix: "/admin/v1",
