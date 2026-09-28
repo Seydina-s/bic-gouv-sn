@@ -57,6 +57,7 @@ Le plan du site liste aussi des versions EN et AR, hors périmètre.
 4. **Les URL d'images contiennent un double slash** (`//storage/…`). Il faut les normaliser, tout en conservant l'URL d'origine pour la traçabilité.
 5. **La date s'affiche mal sur le site** (« 22 MONTHS.DECEMBER 2025 ») : c'est une clé de traduction non résolue dans le front. L'API, elle, renvoie la bonne valeur.
 6. **Temps réel** : pour détecter les nouveautés, on interroge la page 1 (tri par date décroissante) et on compare `id` et `updated_at`.
+7. **Pièces jointes PDF** (relevé du 28/09/2026) : `document_1` et `document_2` sont des **chemins relatifs** (`/storage/documents/<nom>.pdf`), servis par `https://bo-admin.presidence.sn`. Ils portent surtout le PDF officiel des communiqués du Conseil des ministres, et quelques dossiers de presse. 29 entrées de la liste en ont un (16 en français, 13 en wolof, souvent le même fichier pour les deux langues) ; `document_2` est toujours vide à cette date. Ces champs ne figurent que dans la liste et le détail, jamais dans le texte : la collecte les lit dans la liste. D'autres PDF sont liés dans le texte même (ex. brochure Vision Sénégal 2050) ; les deux sortes sont conservées chez nous.
 
 ### Piste à proposer au BIC
 

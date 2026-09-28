@@ -10,6 +10,8 @@ export interface SourceArticleRef {
   sourceUpdatedAt: string;
   /** Cover photo on the source site, if any. */
   coverSourceUrl: string | null;
+  /** Official documents (PDF) the source attaches to the article, outside its text. */
+  documentUrls?: string[];
 }
 
 /** One page of a source listing, newest first. */

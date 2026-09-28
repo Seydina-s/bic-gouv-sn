@@ -4,6 +4,7 @@ import type { CollectionReport } from "./collect";
 import { attachCover } from "./media/attach-cover";
 import { attachDocuments } from "./media/attach-documents";
 import { attachInlineImages } from "./media/attach-inline";
+import type { AttachMedia } from "./media/attach-result";
 import type { MediaStorage } from "./media/media-storage";
 import { mergeArticle } from "./merge";
 import type { SourceArticleRef, SourceProvider } from "./sources/source-provider";
@@ -72,7 +73,11 @@ export async function pollOnce(
           await attachCover(ref, provider, repository, media);
           // Images in the text and official documents: failures are reported but never
           // block the article; the inline-images and documents jobs pick them up again.
-          for (const attach of [attachInlineImages, attachDocuments]) {
+          const attachAll: AttachMedia[] = [
+            attachInlineImages,
+            (...args) => attachDocuments(...args, ref.documentUrls ?? []),
+          ];
+          for (const attach of attachAll) {
             const saved = await repository.get(provider.articleIdFor(ref));
             if (saved !== null) {
               const { failures } = await attach(saved, provider, repository, media);

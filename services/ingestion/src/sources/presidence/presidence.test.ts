@@ -120,6 +120,23 @@ describe("createPresidenceProvider", () => {
     expect(init?.headers).toMatchObject({ "Accept-Language": "fr", "User-Agent": USER_AGENT });
   });
 
+  it("gives the official address of the documents attached outside the text", async () => {
+    const list = fixture("list-fr") as { data: { data: Record<string, unknown>[] } };
+    const [first, second] = list.data.data;
+    Object.assign(first ?? {}, { document_1: "/storage/documents/test.pdf" });
+    Object.assign(second ?? {}, { document_2: "https://example.com/ailleurs.pdf" });
+    const provider = createPresidenceProvider({
+      fetchImpl: () => jsonResponse(list),
+      intervalMs: 0,
+    });
+    const { refs } = await provider.listPage("fr", 1);
+    expect(refs.map((ref) => ref.documentUrls)).toEqual([
+      ["https://bo-admin.presidence.sn/storage/documents/test.pdf"],
+      [],
+      [],
+    ]);
+  });
+
   it("fetches and normalizes one article", async () => {
     const fetchImpl = vi.fn<typeof fetch>(() => jsonResponse(fixture("detail-fr")));
     const provider = createPresidenceProvider({
