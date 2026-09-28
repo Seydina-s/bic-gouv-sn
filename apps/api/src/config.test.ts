@@ -24,6 +24,7 @@ describe("loadConfig", () => {
       REMOTE_CONFIG_PATH: fromRoot(".data/remote-config.json"),
       ERROR_JOURNAL_PATH: fromRoot(".data/error-journal.json"),
       SEARCH_MISSES_PATH: fromRoot(".data/search-misses.json"),
+      NOTIFICATIONS_PATH: fromRoot(".data/admin/notifications.json"),
       INGESTION_STATUS_PATH: fromRoot(".data/ingestion-status.json"),
       MEDIA_ROOT: fromRoot(".data/media"),
       ADMIN_ACCOUNTS_PATH: fromRoot(".data/admin/accounts.json"),

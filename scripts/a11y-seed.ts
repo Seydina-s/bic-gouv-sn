@@ -239,8 +239,47 @@ function seedIngestionStatus(dataDir: string): void {
   );
 }
 
+/** One notification waiting for a second person, one already approved (not sent). */
+function seedNotifications(dataDir: string): void {
+  const someone = { id: "audit-autre-personne", name: "Autre personne (fictive)" };
+  const base = {
+    articleId: ARTICLE_ID,
+    lang: "fr",
+    title: "Article fictif pour l'audit d'accessibilité",
+    category: "communiques",
+    preparedBy: someone,
+    preparedAt: "2026-09-28T09:00:00Z",
+  };
+  mkdirSync(join(dataDir, "admin"), { recursive: true });
+  writeFileSync(
+    join(dataDir, "admin", "notifications.json"),
+    JSON.stringify({
+      schemaVersion: 1,
+      notifications: [
+        {
+          ...base,
+          id: "00000000-0000-4000-8000-00000000a131",
+          status: "pending",
+          decidedBy: null,
+          decidedAt: null,
+          delivery: null,
+        },
+        {
+          ...base,
+          id: "00000000-0000-4000-8000-00000000a132",
+          status: "approved",
+          decidedBy: { id: "audit-troisieme", name: "Troisième personne (fictive)" },
+          decidedAt: "2026-09-28T09:30:00Z",
+          delivery: { outcome: "not-sent", at: "2026-09-28T09:30:00Z" },
+        },
+      ],
+    }),
+  );
+}
+
 export async function seed(dataDir: string, password: string): Promise<void> {
   seedSearchMisses(dataDir);
+  seedNotifications(dataDir);
   seedIngestionStatus(dataDir);
   await seedArticle(dataDir);
   await seedProcedure(dataDir);
