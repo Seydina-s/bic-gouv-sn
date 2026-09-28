@@ -77,4 +77,10 @@ export class FileArticleRepository implements ArticleRepository {
       newsArticleSchema.parse({ ...current, images }),
     );
   }
+
+  setAttachments(id: string, attachments: NewsArticle["attachments"]): Promise<boolean> {
+    return this.store.replaceCurrent(id, (current) =>
+      newsArticleSchema.parse({ ...current, attachments }),
+    );
+  }
 }

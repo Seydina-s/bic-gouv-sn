@@ -2,6 +2,7 @@ import type { ArticleRepository, SaveOutcome } from "@bgs/content-store";
 import { errorCodeOf, type Lang } from "@bgs/shared-types";
 import type { CollectionReport } from "./collect";
 import { attachCover } from "./media/attach-cover";
+import { attachDocuments } from "./media/attach-documents";
 import { attachInlineImages } from "./media/attach-inline";
 import type { MediaStorage } from "./media/media-storage";
 import { mergeArticle } from "./merge";
@@ -69,13 +70,19 @@ export async function pollOnce(
           // Throws MediaProcessingError: the article stays saved but the ref is not
           // remembered, so the cover is retried on the next pass.
           await attachCover(ref, provider, repository, media);
-          // Images in the text: failures are reported but never block the article;
-          // the inline-images job picks them up again.
-          const saved = await repository.get(provider.articleIdFor(ref));
-          if (saved !== null) {
-            const inline = await attachInlineImages(saved, provider, repository, media);
-            for (const failure of inline.failures) {
-              result.failures.push({ ref: ref.slug, code: failure.code, message: failure.message });
+          // Images in the text and official documents: failures are reported but never
+          // block the article; the inline-images and documents jobs pick them up again.
+          for (const attach of [attachInlineImages, attachDocuments]) {
+            const saved = await repository.get(provider.articleIdFor(ref));
+            if (saved !== null) {
+              const { failures } = await attach(saved, provider, repository, media);
+              for (const failure of failures) {
+                result.failures.push({
+                  ref: ref.slug,
+                  code: failure.code,
+                  message: failure.message,
+                });
+              }
             }
           }
         }

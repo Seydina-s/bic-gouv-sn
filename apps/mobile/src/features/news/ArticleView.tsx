@@ -18,6 +18,7 @@ import { useTheme } from "../../theme/useTheme";
 import { useFavorites } from "../favorites/FavoritesProvider";
 import { BlockRenderer } from "./BlockRenderer";
 import { CoverImage } from "./CoverImage";
+import { DocumentList } from "./DocumentList";
 import { canListen, ListenButton } from "./ListenButton";
 import { formatPublishedOn } from "./format";
 import { SectionTag } from "./SectionTag";
@@ -139,6 +140,7 @@ export function ArticleView({
           {detail.translationStatus === "machine" ? ` · ${t("content.machineTranslation")}` : ""}
         </Text>
         <BlockRenderer blocks={detail.blocks} />
+        <DocumentList documents={detail.documents ?? []} />
         <View
           style={[
             styles.source,

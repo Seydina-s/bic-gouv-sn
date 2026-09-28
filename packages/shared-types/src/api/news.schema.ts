@@ -81,6 +81,21 @@ export const blockSchema = z.discriminatedUnion("type", [
 ]);
 export type Block = z.infer<typeof blockSchema>;
 
+/**
+ * Official PDF linked from the article, served from our own copy so it stays
+ * available if the source moves it. Its size lets people decide before downloading.
+ */
+export const newsDocumentSchema = z.object({
+  /** The words of the link on the official page, when it gives some. */
+  title: z.string().min(1).nullable(),
+  /** Our copy: https in production; plain http only on a local development network. */
+  url: z.url({ protocol: /^https?$/ }),
+  /** The document on the official site (traceability). */
+  sourceUrl: httpsUrlSchema,
+  bytes: z.int().positive(),
+});
+export type NewsDocument = z.infer<typeof newsDocumentSchema>;
+
 /** One article in a feed, in the requested language. */
 export const newsSummarySchema = z.object({
   id: z.uuid(),
@@ -128,5 +143,7 @@ export const newsDetailSchema = newsSummarySchema.omit({ excerpt: true }).extend
   sourceUpdatedAt: isoDateTimeSchema.nullable(),
   fetchedAt: isoDateTimeSchema,
   version: z.int().positive(),
+  /** Official PDFs linked from the article. Absent from APIs older than this field. */
+  documents: z.array(newsDocumentSchema).optional(),
 });
 export type NewsDetail = z.infer<typeof newsDetailSchema>;

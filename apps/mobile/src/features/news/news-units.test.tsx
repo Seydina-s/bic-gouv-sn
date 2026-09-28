@@ -231,6 +231,46 @@ describe("ArticleView cover", () => {
   });
 });
 
+describe("ArticleView documents", () => {
+  it("lists the official PDFs with their size, opened from our copy", async () => {
+    const openURL = jest.spyOn(Linking, "openURL").mockResolvedValue(true);
+    openURL.mockClear();
+    const url = "https://cdn.test/media/documents/brochure.pdf";
+    const documents = [
+      { title: "Brochure", url, sourceUrl: "https://www.presidence.sn/fr/a.pdf", bytes: 2_411_724 },
+      {
+        title: null,
+        url: "https://cdn.test/media/documents/b.pdf",
+        sourceUrl: "https://www.presidence.sn/fr/b.pdf",
+        bytes: 300,
+      },
+    ];
+    await render(
+      <TestProviders>
+        <ArticleView
+          detail={{ ...DETAIL, documents }}
+          isPending={false}
+          paneWidth={390}
+          bottomInset={0}
+        />
+      </TestProviders>,
+    );
+    expect(screen.getByRole("header", { name: "Documents officiels" })).toBeOnTheScreen();
+    expect(screen.getByRole("link", { name: "Document PDF. PDF · 1 Ko" })).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole("link", { name: "Brochure. PDF · 2,3 Mo" }));
+    expect(openURL).toHaveBeenCalledWith(url);
+  });
+
+  it("shows nothing for an article without documents, or from an older API", async () => {
+    await render(
+      <TestProviders>
+        <ArticleView detail={DETAIL} isPending={false} paneWidth={390} bottomInset={0} />
+      </TestProviders>,
+    );
+    expect(screen.queryByText("Documents officiels")).toBeNull();
+  });
+});
+
 describe("pickCoverSource", () => {
   it("picks the smallest WebP sharp enough for the slot on this screen", () => {
     expect(pickCoverSource(COVER, 72, 3)?.url).toMatch(/480\.webp$/);

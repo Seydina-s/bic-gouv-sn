@@ -56,6 +56,8 @@ export interface ArticleRepository {
    * source, not editorial content: no new version. Returns false if unknown.
    */
   setImages(id: string, images: NewsArticle["images"]): Promise<boolean>;
+  /** Attaches the stored copies of official PDFs, like images: no new version. */
+  setAttachments(id: string, attachments: NewsArticle["attachments"]): Promise<boolean>;
 }
 
 /** Sort key shared by every implementation: newest publication first, stable by id. */

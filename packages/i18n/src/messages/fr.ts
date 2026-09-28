@@ -96,6 +96,10 @@ export const fr = {
     watchVideo: "Regarder la vidéo",
     videoHost: "Sur YouTube",
     share: "Partager",
+    documents: "Documents officiels",
+    document: "Document PDF",
+    documentSizeMb: "PDF · {size} Mo",
+    documentSizeKb: "PDF · {size} Ko",
   },
   search: {
     title: "Rechercher",

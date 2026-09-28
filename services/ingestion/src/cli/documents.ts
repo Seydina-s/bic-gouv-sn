@@ -1,8 +1,8 @@
-// Images placed in the text of stored articles: `pnpm --filter @bgs/ingestion inline-images`.
-// Resumable: images already stored are skipped. ~1 request per second.
+// Official PDF documents linked from stored articles: `pnpm --filter @bgs/ingestion documents`.
+// Resumable: documents already stored are skipped. ~1 request per second.
 import { fileURLToPath } from "node:url";
 import { FileArticleRepository } from "@bgs/content-store";
-import { attachInlineImages } from "../media/attach-inline";
+import { attachDocuments } from "../media/attach-documents";
 import { backfillMedia } from "../media/backfill-media";
 import { FileMediaStorage } from "../media/media-storage";
 import { createPresidenceProvider } from "../sources/presidence/presidence-provider";
@@ -14,21 +14,21 @@ const mediaRoot = process.env["MEDIA_ROOT"] ?? fileURLToPath(new URL("media", da
 const REPORT_EVERY = 25;
 
 const result = await backfillMedia(
-  attachInlineImages,
+  attachDocuments,
   createPresidenceProvider(),
   new FileArticleRepository(storePath),
   new FileMediaStorage(mediaRoot),
   (p) => {
     if (p.articles % REPORT_EVERY === 0) {
       process.stdout.write(
-        `${String(p.articles)} articles · ${String(p.attached)} images · ${String(p.failures.length)} failed\n`,
+        `${String(p.articles)} articles · ${String(p.attached)} documents · ${String(p.failures.length)} failed\n`,
       );
     }
   },
 );
 
 process.stdout.write(
-  `Done: ${String(result.articles)} articles · ${String(result.attached)} images · ${String(result.failures.length)} failed\n`,
+  `Done: ${String(result.articles)} articles · ${String(result.attached)} documents · ${String(result.failures.length)} failed\n`,
 );
 for (const failure of result.failures) {
   process.stdout.write(`  ✗ ${failure.code} ${failure.ref}: ${failure.message}\n`);

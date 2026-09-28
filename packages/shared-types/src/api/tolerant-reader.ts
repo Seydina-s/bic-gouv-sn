@@ -3,6 +3,7 @@ import {
   blockSchema,
   coverSchema,
   newsDetailSchema,
+  newsDocumentSchema,
   newsListResponseSchema,
   newsSectionsResponseSchema,
   newsSummarySchema,
@@ -59,6 +60,9 @@ function withReadableParts(raw: unknown): unknown {
   const readable: Record<string, unknown> = { ...raw, cover: readCover(raw["cover"]) };
   if ("blocks" in raw) {
     readable["blocks"] = keepValid(raw["blocks"], blockSchema);
+  }
+  if ("documents" in raw) {
+    readable["documents"] = keepValid(raw["documents"], newsDocumentSchema);
   }
   return readable;
 }
