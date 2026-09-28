@@ -24,3 +24,4 @@ export * from "./api/procedures.schema";
 export * from "./api/services.schema";
 export * from "./api/withdrawn-articles.schema";
 export * from "./api/search-misses.schema";
+export * from "./api/audit.schema";

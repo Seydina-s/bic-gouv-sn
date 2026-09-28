@@ -52,6 +52,7 @@ const CONSOLE_SCREENS = [
   "/services/nouveau",
   "/masques",
   "/recherches",
+  "/journal",
 ];
 
 function startApi(dataDir: string): ChildProcess {
