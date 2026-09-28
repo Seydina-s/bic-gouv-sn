@@ -23,7 +23,12 @@ import { SectionRail } from "../../features/news/SectionRail";
 import { AppActions } from "../../features/shell/AppActions";
 import { CouncilCard } from "../../features/news/Stories";
 import { useLastOpened } from "../../features/news/useLastOpened";
-import { useFrontSections, useLatestIn, useNewsFeed } from "../../features/news/useNews";
+import {
+  useFrontSections,
+  useLatestIn,
+  useNewsFeed,
+  usePrefetchLikely,
+} from "../../features/news/useNews";
 import { WovenIn } from "../../features/news/WovenIn";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
@@ -99,6 +104,7 @@ export default function HomeScreen() {
     ? listPaneWidth
     : Math.min(width, layout.readingMaxWidth + space.xxxl);
   const hero = heroStories(feed.data?.pages[0]?.items ?? []);
+  usePrefetchLikely(hero.map((story) => story.id));
   const rails = orderSections(front.data?.sections ?? []);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const shownId = selectedId ?? hero[0]?.id ?? null;
