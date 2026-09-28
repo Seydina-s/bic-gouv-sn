@@ -271,7 +271,14 @@ export const fr = {
     licenceFonts: "Polices Noto Sans et Noto Serif\u00a0: SIL Open Font License",
     licenceMapIcons: "Icônes du fond de carte\u00a0: © 2017 Mapzen, licence MIT",
     licenceAppIcons: "Icônes de l'application\u00a0: Phosphor Icons, © 2020 Dustin Do, licence MIT",
+    openSource: "Logiciels libres utilisés ({count})",
     version: "Version {version}",
+  },
+  licences: {
+    title: "Logiciels libres",
+    intro: "Ces {count} logiciels libres font fonctionner l'application. Merci à leurs auteurs.",
+    openHint: "Affiche le copyright et le texte de la licence",
+    projectSite: "Site du projet",
   },
   favorites: {
     title: "Mes favoris",

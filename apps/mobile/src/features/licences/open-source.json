@@ -1,0 +1,786 @@
+{
+  "packages": [
+    {
+      "name": "@babel/runtime",
+      "version": "7.29.7",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2014-present Sebastian McKenzie and other contributors"],
+      "url": "https://babel.dev/docs/en/next/babel-runtime",
+      "text": 0
+    },
+    {
+      "name": "@expo/cli",
+      "version": "57.0.27",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)"],
+      "url": "https://github.com/expo/expo/tree/main/packages/@expo/cli",
+      "text": 1
+    },
+    {
+      "name": "@expo/metro-runtime",
+      "version": "57.0.16",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)"],
+      "url": "https://github.com/expo/expo/tree/main/packages/@expo/metro-runtime",
+      "text": 1
+    },
+    {
+      "name": "@expo/ui",
+      "version": "57.0.20",
+      "licence": "MIT",
+      "copyright": ["© 650 Industries, Inc."],
+      "url": "https://docs.expo.dev/versions/latest/sdk/ui/",
+      "text": 0
+    },
+    {
+      "name": "@maplibre/maplibre-react-native",
+      "version": "11.4.0",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2022 MapLibre contributors", "Copyright (c) 2015-2020 Mapbox"],
+      "url": "https://github.com/maplibre/maplibre-react-native#readme",
+      "text": 2
+    },
+    {
+      "name": "@radix-ui/react-compose-refs",
+      "version": "1.1.5",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2022 WorkOS"],
+      "url": "https://radix-ui.com/primitives",
+      "text": 3
+    },
+    {
+      "name": "@radix-ui/react-slot",
+      "version": "1.3.3",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2022 WorkOS"],
+      "url": "https://radix-ui.com/primitives",
+      "text": 3
+    },
+    {
+      "name": "@react-native-async-storage/async-storage",
+      "version": "2.2.0",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2015-present, Facebook, Inc."],
+      "url": "https://github.com/react-native-async-storage/async-storage#readme",
+      "text": 3
+    },
+    {
+      "name": "@react-native-masked-view/masked-view",
+      "version": "0.3.2",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2015-present, Facebook, Inc."],
+      "url": "https://github.com/react-native-masked-view/masked-view#readme",
+      "text": 3
+    },
+    {
+      "name": "@react-native/assets-registry",
+      "version": "0.86.3",
+      "licence": "MIT",
+      "copyright": [],
+      "url": "https://github.com/react/react-native/tree/HEAD/packages/assets#readme",
+      "text": 0
+    },
+    {
+      "name": "@react-native/js-polyfills",
+      "version": "0.86.3",
+      "licence": "MIT",
+      "copyright": [],
+      "url": "https://github.com/react/react-native/tree/HEAD/packages/polyfills#readme",
+      "text": 0
+    },
+    {
+      "name": "@react-native/normalize-colors",
+      "version": "0.86.3",
+      "licence": "MIT",
+      "copyright": [],
+      "url": "https://github.com/react/react-native/tree/HEAD/packages/normalize-color#readme",
+      "text": 0
+    },
+    {
+      "name": "@react-native/virtualized-lists",
+      "version": "0.86.3",
+      "licence": "MIT",
+      "copyright": [],
+      "url": "https://github.com/react/react-native/tree/HEAD/packages/virtualized-lists#readme",
+      "text": 0
+    },
+    {
+      "name": "@sentry-internal/browser-utils",
+      "version": "10.37.0",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2020 Functional Software, Inc. dba Sentry"],
+      "url": "https://github.com/getsentry/sentry-javascript/tree/master/packages/browser-utils",
+      "text": 4
+    },
+    {
+      "name": "@sentry-internal/feedback",
+      "version": "10.37.0",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2023 Functional Software, Inc. dba Sentry"],
+      "url": "https://github.com/getsentry/sentry-javascript/tree/master/packages/feedback",
+      "text": 4
+    },
+    {
+      "name": "@sentry-internal/replay",
+      "version": "10.37.0",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2022 Functional Software, Inc. dba Sentry"],
+      "url": "https://docs.sentry.io/platforms/javascript/session-replay/",
+      "text": 4
+    },
+    {
+      "name": "@sentry-internal/replay-canvas",
+      "version": "10.37.0",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2024 Functional Software, Inc. dba Sentry"],
+      "url": "https://docs.sentry.io/platforms/javascript/session-replay/",
+      "text": 4
+    },
+    {
+      "name": "@sentry/browser",
+      "version": "10.37.0",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2019 Functional Software, Inc. dba Sentry"],
+      "url": "https://github.com/getsentry/sentry-javascript/tree/master/packages/browser",
+      "text": 4
+    },
+    {
+      "name": "@sentry/core",
+      "version": "10.37.0",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2019 Functional Software, Inc. dba Sentry"],
+      "url": "https://github.com/getsentry/sentry-javascript/tree/master/packages/core",
+      "text": 4
+    },
+    {
+      "name": "@sentry/react",
+      "version": "10.37.0",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2019 Functional Software, Inc. dba Sentry"],
+      "url": "https://github.com/getsentry/sentry-javascript/tree/master/packages/react",
+      "text": 4
+    },
+    {
+      "name": "@sentry/react-native",
+      "version": "7.11.0",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2017-2024 Sentry"],
+      "url": "https://github.com/getsentry/sentry-react-native",
+      "text": 1
+    },
+    {
+      "name": "@shopify/flash-list",
+      "version": "2.0.2",
+      "licence": "MIT",
+      "copyright": ["Copyright 2022-present, Shopify Inc."],
+      "url": "https://shopify.github.io/flash-list/",
+      "text": 5
+    },
+    {
+      "name": "@tanstack/query-async-storage-persister",
+      "version": "5.103.2",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2021-present Tanner Linsley"],
+      "url": "https://tanstack.com/query",
+      "text": 3
+    },
+    {
+      "name": "@tanstack/query-core",
+      "version": "5.103.2",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2021-present Tanner Linsley"],
+      "url": "https://tanstack.com/query",
+      "text": 3
+    },
+    {
+      "name": "@tanstack/query-persist-client-core",
+      "version": "5.103.2",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2021-present Tanner Linsley"],
+      "url": "https://tanstack.com/query",
+      "text": 3
+    },
+    {
+      "name": "@tanstack/react-query",
+      "version": "5.103.2",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2021-present Tanner Linsley"],
+      "url": "https://tanstack.com/query",
+      "text": 3
+    },
+    {
+      "name": "@tanstack/react-query-persist-client",
+      "version": "5.103.2",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2021-present Tanner Linsley"],
+      "url": "https://tanstack.com/query",
+      "text": 3
+    },
+    {
+      "name": "@turf/distance",
+      "version": "7.4.0",
+      "licence": "MIT",
+      "copyright": [
+        "Copyright (c) 2017 TurfJS",
+        "COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER"
+      ],
+      "url": "https://github.com/Turfjs/turf",
+      "text": 6
+    },
+    {
+      "name": "@turf/helpers",
+      "version": "7.4.0",
+      "licence": "MIT",
+      "copyright": [
+        "Copyright (c) 2017 TurfJS",
+        "COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER"
+      ],
+      "url": "https://github.com/Turfjs/turf",
+      "text": 6
+    },
+    {
+      "name": "@turf/invariant",
+      "version": "7.4.0",
+      "licence": "MIT",
+      "copyright": [
+        "Copyright (c) 2017 TurfJS",
+        "COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER"
+      ],
+      "url": "https://github.com/Turfjs/turf",
+      "text": 6
+    },
+    {
+      "name": "@turf/length",
+      "version": "7.4.0",
+      "licence": "MIT",
+      "copyright": [
+        "Copyright (c) 2017 TurfJS",
+        "COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER"
+      ],
+      "url": "https://github.com/Turfjs/turf",
+      "text": 6
+    },
+    {
+      "name": "@turf/meta",
+      "version": "7.4.0",
+      "licence": "MIT",
+      "copyright": [
+        "Copyright (c) 2017 TurfJS",
+        "COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER"
+      ],
+      "url": "https://github.com/Turfjs/turf",
+      "text": 6
+    },
+    {
+      "name": "@turf/nearest-point-on-line",
+      "version": "7.4.0",
+      "licence": "MIT",
+      "copyright": [
+        "Copyright (c) 2017 TurfJS",
+        "COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER"
+      ],
+      "url": "https://github.com/Turfjs/turf",
+      "text": 6
+    },
+    {
+      "name": "@ungap/structured-clone",
+      "version": "1.4.0",
+      "licence": "ISC",
+      "copyright": [
+        "Copyright (c) 2021, Andrea Giammarchi, @WebReflection",
+        "copyright notice and this permission notice appear in all copies."
+      ],
+      "url": "https://github.com/ungap/structured-clone#readme",
+      "text": 7
+    },
+    {
+      "name": "abort-controller",
+      "version": "3.0.0",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2017 Toru Nagashima"],
+      "url": "https://github.com/mysticatea/abort-controller#readme",
+      "text": 3
+    },
+    {
+      "name": "base64-js",
+      "version": "1.5.1",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2014 Jameson Little"],
+      "url": "https://github.com/beatgammit/base64-js",
+      "text": 8
+    },
+    {
+      "name": "color",
+      "version": "4.2.3",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2012 Heather Arthur"],
+      "url": "https://www.npmjs.com/package/color",
+      "text": 9
+    },
+    {
+      "name": "color-convert",
+      "version": "2.0.1",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2011-2016 Heather Arthur <fayearthur@gmail.com>"],
+      "url": "https://www.npmjs.com/package/color-convert",
+      "text": 9
+    },
+    {
+      "name": "color-name",
+      "version": "1.1.4",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2015 Dmitry Ivanov"],
+      "url": "https://github.com/colorjs/color-name",
+      "text": 10
+    },
+    {
+      "name": "color-string",
+      "version": "1.9.1",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2011 Heather Arthur <fayearthur@gmail.com>"],
+      "url": "https://www.npmjs.com/package/color-string",
+      "text": 9
+    },
+    {
+      "name": "decode-uri-component",
+      "version": "0.2.2",
+      "licence": "MIT",
+      "copyright": [
+        "Copyright (c) 2017, Sam Verschueren <sam.verschueren@gmail.com> (github.com/SamVerschueren)"
+      ],
+      "url": "https://www.npmjs.com/package/decode-uri-component",
+      "text": 11
+    },
+    {
+      "name": "escape-string-regexp",
+      "version": "4.0.0",
+      "licence": "MIT",
+      "copyright": [
+        "Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com)"
+      ],
+      "url": "https://www.npmjs.com/package/escape-string-regexp",
+      "text": 12
+    },
+    {
+      "name": "event-target-shim",
+      "version": "5.0.1",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2015 Toru Nagashima"],
+      "url": "https://github.com/mysticatea/event-target-shim",
+      "text": 1
+    },
+    {
+      "name": "expo",
+      "version": "57.0.25",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)"],
+      "url": "https://github.com/expo/expo/tree/main/packages/expo",
+      "text": 1
+    },
+    {
+      "name": "expo-asset",
+      "version": "57.0.18",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)"],
+      "url": "https://docs.expo.dev/versions/latest/sdk/asset/",
+      "text": 1
+    },
+    {
+      "name": "expo-blur",
+      "version": "57.0.3",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)"],
+      "url": "https://docs.expo.dev/versions/latest/sdk/blur-view/",
+      "text": 1
+    },
+    {
+      "name": "expo-constants",
+      "version": "57.0.19",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)"],
+      "url": "https://docs.expo.dev/versions/latest/sdk/constants/",
+      "text": 1
+    },
+    {
+      "name": "expo-font",
+      "version": "57.0.4",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)"],
+      "url": "https://docs.expo.dev/versions/latest/sdk/font/",
+      "text": 1
+    },
+    {
+      "name": "expo-glass-effect",
+      "version": "57.0.4",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)"],
+      "url": "https://docs.expo.dev/versions/latest/sdk/glass-effect/",
+      "text": 1
+    },
+    {
+      "name": "expo-image",
+      "version": "57.0.5",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)"],
+      "url": "https://docs.expo.dev/versions/latest/sdk/image/",
+      "text": 1
+    },
+    {
+      "name": "expo-linking",
+      "version": "57.0.11",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)"],
+      "url": "https://docs.expo.dev/versions/latest/sdk/linking",
+      "text": 1
+    },
+    {
+      "name": "expo-localization",
+      "version": "57.0.2",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)"],
+      "url": "https://docs.expo.dev/versions/latest/sdk/localization/",
+      "text": 1
+    },
+    {
+      "name": "expo-location",
+      "version": "57.0.20",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)"],
+      "url": "https://docs.expo.dev/versions/latest/sdk/location/",
+      "text": 1
+    },
+    {
+      "name": "expo-modules-core",
+      "version": "57.0.19",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)"],
+      "url": "https://github.com/expo/expo/tree/main/packages/expo-modules-core",
+      "text": 1
+    },
+    {
+      "name": "expo-network",
+      "version": "57.0.2",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)"],
+      "url": "https://docs.expo.dev/versions/latest/sdk/network/",
+      "text": 1
+    },
+    {
+      "name": "expo-router",
+      "version": "57.0.23",
+      "licence": "MIT",
+      "copyright": ["© 650 Industries, Inc."],
+      "url": "https://docs.expo.dev/routing/introduction/",
+      "text": 0
+    },
+    {
+      "name": "expo-speech",
+      "version": "57.0.3",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)"],
+      "url": "https://docs.expo.dev/versions/latest/sdk/speech/",
+      "text": 1
+    },
+    {
+      "name": "expo-splash-screen",
+      "version": "57.0.9",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)"],
+      "url": "https://docs.expo.dev/versions/latest/sdk/splash-screen/",
+      "text": 1
+    },
+    {
+      "name": "expo-status-bar",
+      "version": "57.0.1",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)"],
+      "url": "https://docs.expo.dev/versions/latest/sdk/status-bar/",
+      "text": 1
+    },
+    {
+      "name": "expo-system-ui",
+      "version": "57.0.4",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)"],
+      "url": "https://docs.expo.dev/versions/latest/sdk/system-ui",
+      "text": 1
+    },
+    {
+      "name": "fast-deep-equal",
+      "version": "3.1.3",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2017 Evgeny Poberezkin"],
+      "url": "https://github.com/epoberezkin/fast-deep-equal#readme",
+      "text": 3
+    },
+    {
+      "name": "filter-obj",
+      "version": "1.1.0",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)"],
+      "url": "https://www.npmjs.com/package/filter-obj",
+      "text": 8
+    },
+    {
+      "name": "flow-enums-runtime",
+      "version": "0.0.6",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) Facebook, Inc. and its affiliates."],
+      "url": "https://github.com/facebook/flow",
+      "text": 3
+    },
+    {
+      "name": "invariant",
+      "version": "2.2.4",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2013-present, Facebook, Inc."],
+      "url": "https://github.com/zertosh/invariant",
+      "text": 3
+    },
+    {
+      "name": "is-arrayish",
+      "version": "0.3.4",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2015 JD Ballard"],
+      "url": "https://github.com/qix-/node-is-arrayish",
+      "text": 8
+    },
+    {
+      "name": "memoize-one",
+      "version": "5.2.1",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2019 Alexander Reardon"],
+      "url": "https://github.com/alexreardon/memoize-one",
+      "text": 3
+    },
+    {
+      "name": "nanoid",
+      "version": "3.3.19",
+      "licence": "MIT",
+      "copyright": [
+        "Copyright 2017 Andrey Sitnik <andrey@sitnik.ru>",
+        "COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER"
+      ],
+      "url": "https://www.npmjs.com/package/nanoid",
+      "text": 6
+    },
+    {
+      "name": "nullthrows",
+      "version": "1.1.1",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2016 Andres Suarez"],
+      "url": "https://github.com/zertosh/nullthrows",
+      "text": 10
+    },
+    {
+      "name": "phosphor-react-native",
+      "version": "3.0.6",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2020 Dustin Do"],
+      "url": "https://github.com/duongdev/phosphor-react-native#readme",
+      "text": 3
+    },
+    {
+      "name": "promise",
+      "version": "8.3.0",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2014 Forbes Lindesay"],
+      "url": "https://github.com/then/promise",
+      "text": 13
+    },
+    {
+      "name": "query-string",
+      "version": "7.1.3",
+      "licence": "MIT",
+      "copyright": [
+        "Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (http://sindresorhus.com)"
+      ],
+      "url": "https://www.npmjs.com/package/query-string",
+      "text": 12
+    },
+    {
+      "name": "react",
+      "version": "19.2.3",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) Meta Platforms, Inc. and affiliates."],
+      "url": "https://react.dev/",
+      "text": 3
+    },
+    {
+      "name": "react-freeze",
+      "version": "1.0.4",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2021 Software Mansion"],
+      "url": "https://www.npmjs.com/package/react-freeze",
+      "text": 1
+    },
+    {
+      "name": "react-is",
+      "version": "19.3.0",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) Meta Platforms, Inc. and affiliates."],
+      "url": "https://react.dev/",
+      "text": 3
+    },
+    {
+      "name": "react-native",
+      "version": "0.86.3",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) Meta Platforms, Inc. and affiliates."],
+      "url": "https://reactnative.dev/",
+      "text": 3
+    },
+    {
+      "name": "react-native-safe-area-context",
+      "version": "5.7.0",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2019 Th3rd Wave"],
+      "url": "https://github.com/AppAndFlow/react-native-safe-area-context#readme",
+      "text": 3
+    },
+    {
+      "name": "react-native-screens",
+      "version": "4.26.2",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2018 Software Mansion <swmansion.com>"],
+      "url": "https://github.com/software-mansion/react-native-screens#readme",
+      "text": 1
+    },
+    {
+      "name": "react-native-svg",
+      "version": "15.15.4",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) [2015-2016] [Horcrux]"],
+      "url": "https://github.com/react-native-community/react-native-svg",
+      "text": 1
+    },
+    {
+      "name": "react-native-worklets",
+      "version": "0.10.1",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2024 nobody"],
+      "url": "https://docs.swmansion.com/react-native-worklets",
+      "text": 14
+    },
+    {
+      "name": "regenerator-runtime",
+      "version": "0.13.11",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2014-present, Facebook, Inc."],
+      "url": "https://github.com/facebook/regenerator/tree/main/packages/runtime",
+      "text": 3
+    },
+    {
+      "name": "scheduler",
+      "version": "0.27.0",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) Meta Platforms, Inc. and affiliates."],
+      "url": "https://react.dev/",
+      "text": 3
+    },
+    {
+      "name": "simple-swizzle",
+      "version": "0.2.4",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2015 Josh Junon"],
+      "url": "https://www.npmjs.com/package/simple-swizzle",
+      "text": 8
+    },
+    {
+      "name": "split-on-first",
+      "version": "1.1.0",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)"],
+      "url": "https://www.npmjs.com/package/split-on-first",
+      "text": 12
+    },
+    {
+      "name": "stacktrace-parser",
+      "version": "0.1.11",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2014-2019 Georg Tavonius"],
+      "url": "https://github.com/errwischt/stacktrace-parser",
+      "text": 3
+    },
+    {
+      "name": "standard-navigation",
+      "version": "0.0.5",
+      "licence": "MIT",
+      "copyright": ["© Satyajit Sahoo"],
+      "url": "https://github.com/react-navigation/standard-navigation#readme",
+      "text": 0
+    },
+    {
+      "name": "strict-uri-encode",
+      "version": "2.0.0",
+      "licence": "MIT",
+      "copyright": [
+        "Copyright (c) Kevin Martensson <kevinmartensson@gmail.com> (github.com/kevva)"
+      ],
+      "url": "https://www.npmjs.com/package/strict-uri-encode",
+      "text": 8
+    },
+    {
+      "name": "tslib",
+      "version": "2.8.1",
+      "licence": "0BSD",
+      "copyright": ["Copyright (c) Microsoft Corporation."],
+      "url": "https://www.typescriptlang.org/",
+      "text": 15
+    },
+    {
+      "name": "warn-once",
+      "version": "0.1.1",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2022 Satyajit Sahoo"],
+      "url": "https://github.com/satya164/warn-once",
+      "text": 3
+    },
+    {
+      "name": "whatwg-fetch",
+      "version": "3.6.20",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2014-2023 GitHub, Inc."],
+      "url": "https://www.npmjs.com/package/whatwg-fetch",
+      "text": 9
+    },
+    {
+      "name": "whatwg-url-minimum",
+      "version": "0.1.2",
+      "licence": "MIT",
+      "copyright": [
+        "Copyright (c) Phil Pluckthun,",
+        "Copyright (c) 650 Industries, Inc. (aka Expo),",
+        "Copyright (c) Sebastian Mayr"
+      ],
+      "url": "https://github.com/kitten/whatwg-url-minimum",
+      "text": 3
+    },
+    {
+      "name": "zod",
+      "version": "4.6.5",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2025 Colin McDonnell"],
+      "url": "https://zod.dev",
+      "text": 3
+    }
+  ],
+  "texts": [
+    "MIT License\n\n\nPermission is hereby granted, free of charge, to any person obtaining\na copy of this software and associated documentation files (the\n\"Software\"), to deal in the Software without restriction, including\nwithout limitation the rights to use, copy, modify, merge, publish,\ndistribute, sublicense, and/or sell copies of the Software, and to\npermit persons to whom the Software is furnished to do so, subject to\nthe following conditions:\n\nThe above copyright notice and this permission notice shall be\nincluded in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND,\nEXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF\nMERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND\nNONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE\nLIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION\nOF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION\nWITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.",
+    "The MIT License (MIT)\n\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.",
+    "Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.",
+    "MIT License\n\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.",
+    "MIT License\n\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of\nthis software and associated documentation files (the \"Software\"), to deal in\nthe Software without restriction, including without limitation the rights to\nuse, copy, modify, merge, publish, distribute, sublicense, and/or sell copies\nof the Software, and to permit persons to whom the Software is furnished to do\nso, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.",
+    "Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.",
+    "The MIT License (MIT)\n\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of\nthis software and associated documentation files (the \"Software\"), to deal in\nthe Software without restriction, including without limitation the rights to\nuse, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of\nthe Software, and to permit persons to whom the Software is furnished to do so,\nsubject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS\nFOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR\nIN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN\nCONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.",
+    "ISC License\n\n\nPermission to use, copy, modify, and/or distribute this software for any\npurpose with or without fee is hereby granted, provided that the above\n\nTHE SOFTWARE IS PROVIDED \"AS IS\" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH\nREGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY\nAND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,\nINDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM\nLOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE\nOR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR\nPERFORMANCE OF THIS SOFTWARE.",
+    "The MIT License (MIT)\n\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in\nall copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\nTHE SOFTWARE.",
+    "Permission is hereby granted, free of charge, to any person obtaining\na copy of this software and associated documentation files (the\n\"Software\"), to deal in the Software without restriction, including\nwithout limitation the rights to use, copy, modify, merge, publish,\ndistribute, sublicense, and/or sell copies of the Software, and to\npermit persons to whom the Software is furnished to do so, subject to\nthe following conditions:\n\nThe above copyright notice and this permission notice shall be\nincluded in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND,\nEXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF\nMERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND\nNONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE\nLIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION\nOF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION\nWITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.",
+    "The MIT License (MIT)\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.",
+    "The MIT License (MIT)\n\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.",
+    "MIT License\n\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.",
+    "Permission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in\nall copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\nTHE SOFTWARE.",
+    "MIT License\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.",
+    "Permission to use, copy, modify, and/or distribute this software for any\npurpose with or without fee is hereby granted.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH\nREGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY\nAND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,\nINDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM\nLOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR\nOTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR\nPERFORMANCE OF THIS SOFTWARE."
+  ]
+}

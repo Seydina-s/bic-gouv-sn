@@ -1,5 +1,6 @@
 import type { ThemePreference } from "@bgs/ui";
 import Constants from "expo-constants";
+import { useRouter } from "expo-router";
 
 import { CellSignalHighIcon as CellSignalHigh } from "phosphor-react-native/src/icons/CellSignalHigh";
 import { DeviceMobileIcon as DeviceMobile } from "phosphor-react-native/src/icons/DeviceMobile";
@@ -26,6 +27,7 @@ import { LinkRow } from "../../components/LinkRow";
 import { SegmentedChoice, type Segment } from "../../components/SegmentedChoice";
 import type { LangChoice } from "../../i18n/I18nProvider";
 import { type DataSaverPreference, useDataSaver } from "../data-saver/DataSaverProvider";
+import { OPEN_SOURCE } from "../licences/open-source";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useReduceMotion } from "../../theme/useSystemAccessibility";
 import { useTheme } from "../../theme/useTheme";
@@ -51,6 +53,7 @@ export function SettingsSheet({ visible, onClose }: { visible: boolean; onClose:
   const { theme, preference, setPreference } = useTheme();
   const { t, choice, setLang } = useTranslation();
   const dataSaver = useDataSaver();
+  const router = useRouter();
   const insets = useSafeAreaInsets();
   const { color, space, textStyle, radius, layout } = theme;
 
@@ -212,6 +215,14 @@ export function SettingsSheet({ visible, onClose }: { visible: boolean; onClose:
                     onPress={() => void Linking.openURL(url)}
                   />
                 ))}
+                <LinkRow
+                  label={t("settings.openSource", { count: OPEN_SOURCE.packages.length })}
+                  role="button"
+                  onPress={() => {
+                    close();
+                    router.push("/licences");
+                  }}
+                />
               </View>
               <Text style={[textStyle.bodySmall, { color: color.textTertiary }]}>
                 {t("settings.version", { version: Constants.expoConfig?.version ?? "—" })}
