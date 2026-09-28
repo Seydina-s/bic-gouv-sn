@@ -10,7 +10,7 @@ import { errorCodeOf } from "@bgs/shared-types";
 import { acquireLock } from "../lib/single-instance";
 import { FileMediaStorage } from "../media/media-storage";
 import { createPresidenceProvider } from "../sources/presidence/presidence-provider";
-import { nextIngestionStatus, type PassOutcome } from "../status";
+import { circuitStatuses, nextIngestionStatus, type PassOutcome } from "../status";
 import { nextPollDelayMs, pollOnce, retryDelayMs, SeenIndex } from "../watch";
 import { isWithdrawalCheckDue, reconcileWithdrawals } from "../withdrawn";
 
@@ -64,7 +64,11 @@ async function report(outcome: PassOutcome, lastChangeAt: Date | null): Promise<
     next.consecutiveFailures > 0
       ? retryDelayMs(next.consecutiveFailures)
       : nextPollDelayMs(now, lastChangeAt);
-  status = { ...next, nextAttemptAt: new Date(now.getTime() + delay).toISOString() };
+  status = {
+    ...next,
+    nextAttemptAt: new Date(now.getTime() + delay).toISOString(),
+    circuits: circuitStatuses(provider.circuits?.() ?? []),
+  };
   await writeIngestionStatus(statusPath, status).catch((error: unknown) => {
     process.stdout.write(`status report not written: ${String(error)}\n`);
   });

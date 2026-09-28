@@ -219,8 +219,29 @@ function seedSearchMisses(dataDir: string): void {
   );
 }
 
+/** A collection report with the source's protection suspended, as after an outage. */
+function seedIngestionStatus(dataDir: string): void {
+  const now = new Date().toISOString();
+  writeFileSync(
+    join(dataDir, "ingestion-status.json"),
+    JSON.stringify({
+      checkedAt: now,
+      lastSuccessAt: now,
+      lastChangeAt: null,
+      lastDetectionSeconds: null,
+      consecutiveFailures: 0,
+      lastFailure: null,
+      nextAttemptAt: now,
+      circuits: [
+        { dependency: "presidence.sn", state: "open", consecutiveFailures: 5, openedAt: now },
+      ],
+    }),
+  );
+}
+
 export async function seed(dataDir: string, password: string): Promise<void> {
   seedSearchMisses(dataDir);
+  seedIngestionStatus(dataDir);
   await seedArticle(dataDir);
   await seedProcedure(dataDir);
   await seedServices(dataDir);

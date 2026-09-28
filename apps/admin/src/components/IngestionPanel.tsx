@@ -1,14 +1,58 @@
 import { NewspaperIcon, QuestionIcon, WarningOctagonIcon } from "@phosphor-icons/react/dist/ssr";
-import { assessIngestion, describeError, type IngestionStatus } from "@bgs/shared-types";
+import {
+  assessIngestion,
+  describeError,
+  type CircuitStatus,
+  type IngestionStatus,
+} from "@bgs/shared-types";
 import { formatClockTime, formatDuration } from "../lib/format";
 import { t } from "../lib/i18n";
 
+/** One source's protection, in plain words (CLAUDE.md §4.5: visible in the console). */
+function circuitLine(circuit: CircuitStatus): string {
+  const name = circuit.dependency;
+  if (circuit.state === "closed") {
+    return t("ingestion.circuits.closed", { name });
+  }
+  if (circuit.state === "half-open") {
+    return t("ingestion.circuits.halfOpen", { name });
+  }
+  return t("ingestion.circuits.open", {
+    name,
+    time: circuit.openedAt === null ? "" : formatClockTime(new Date(circuit.openedAt)),
+    failures: circuit.consecutiveFailures,
+  });
+}
+
 /**
  * News collection at a glance, for a non-technical reader: is presidence.sn being
- * followed, when was the last article picked up, and if not, what to do. Failure
- * wording comes from the shared error catalog (single source).
+ * followed, when was the last article picked up, and if not, what to do; then how
+ * each source's protection stands. Failure wording comes from the shared catalog.
  */
 export function IngestionPanel({ report, now }: { report: IngestionStatus | null; now: Date }) {
+  const circuits = report?.circuits ?? [];
+  return (
+    <div className="space-y-4">
+      <IngestionVerdict report={report} now={now} />
+      {circuits.length > 0 && (
+        <section aria-labelledby="circuits-title" className="px-1">
+          <h3 id="circuits-title" className="text-sm font-bold">
+            {t("ingestion.circuits.title")}
+          </h3>
+          <ul className="mt-1 space-y-1 text-sm text-ink-soft">
+            {circuits.map((circuit) => (
+              <li key={circuit.dependency} className={circuit.state === "closed" ? "" : "text-ink"}>
+                {circuitLine(circuit)}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </div>
+  );
+}
+
+function IngestionVerdict({ report, now }: { report: IngestionStatus | null; now: Date }) {
   const verdict = assessIngestion(report, now);
 
   if (verdict.state === "ok" && report !== null) {

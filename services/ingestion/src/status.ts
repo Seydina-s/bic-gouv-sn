@@ -1,5 +1,16 @@
-import type { IngestionStatus } from "@bgs/shared-types";
+import type { CircuitSnapshot } from "@bgs/resilience";
+import type { CircuitStatus, IngestionStatus } from "@bgs/shared-types";
 import type { PollResult } from "./watch";
+
+/** The breakers of the sources as the console reads them (times as dates). */
+export function circuitStatuses(snapshots: readonly CircuitSnapshot[]): CircuitStatus[] {
+  return snapshots.map(({ dependency, state, consecutiveFailures, openedAt }) => ({
+    dependency,
+    state,
+    consecutiveFailures,
+    openedAt: openedAt === null ? null : new Date(openedAt).toISOString(),
+  }));
+}
 
 /** What one pass of the watcher produced: a result, or the error that stopped it. */
 export type PassOutcome = { result: PollResult } | { error: { code: string } };
