@@ -127,7 +127,8 @@ export class NotificationService {
 
   async approve(person: Person, id: string): Promise<Notification> {
     const approved = await this.decide(person, id, "approved");
-    const outcome = await this.push.send(approved);
+    // A push service that fails leaves a trace, never an approval without a result.
+    const outcome = await this.push.send(approved).catch(() => "failed" as const);
     const delivered = await this.store.update((all) => {
       const next = all.map((item) =>
         item.id === id ? { ...item, delivery: { outcome, at: this.now().toISOString() } } : item,
