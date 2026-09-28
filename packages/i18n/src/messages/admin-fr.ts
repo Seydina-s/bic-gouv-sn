@@ -48,6 +48,11 @@ export const adminFr = {
   },
   nav: {
     label: "Sections de l'administration",
+    groups: {
+      follow: "Suivi",
+      contents: "Contenus",
+      settings: "Réglages",
+    },
     status: "État du service",
     procedures: "Thèmes des démarches",
     services: "Services de l'État",

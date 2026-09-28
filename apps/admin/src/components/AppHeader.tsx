@@ -18,66 +18,32 @@ function FlagStripe() {
   );
 }
 
-/** Product identity, the console's sections and the signed-in person. */
+/** Product identity and the signed-in person; the sections are in ConsoleNav. */
 export async function AppHeader() {
   const account = await currentAccount();
   return (
     <header className="border-b border-line">
       <FlagStripe />
-      <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center gap-x-6 gap-y-3 px-6 py-5 md:px-10">
-        <span className="font-display text-xl font-extrabold tracking-tight text-brand">
+      <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center gap-x-6 gap-y-3 px-6 py-5 md:px-10">
+        <Link
+          href="/"
+          className="rounded-md font-display text-xl font-extrabold tracking-tight text-brand focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus"
+        >
           {t("shell.productName")}
-        </span>
+        </Link>
         <span className="text-sm font-semibold text-ink-soft">{t("shell.area")}</span>
         {account !== null && (
-          <>
-            <nav aria-label={t("nav.label")} className="flex flex-wrap gap-1">
-              <Link href="/" className="rounded-md px-3 py-2 font-semibold hover:bg-surface">
-                {t("nav.status")}
-              </Link>
-              <Link
-                href="/demarches"
-                className="rounded-md px-3 py-2 font-semibold hover:bg-surface"
-              >
-                {t("nav.procedures")}
-              </Link>
-              <Link
-                href="/services"
-                className="rounded-md px-3 py-2 font-semibold hover:bg-surface"
-              >
-                {t("nav.services")}
-              </Link>
-              <Link href="/masques" className="rounded-md px-3 py-2 font-semibold hover:bg-surface">
-                {t("nav.withdrawn")}
-              </Link>
-              <Link
-                href="/recherches"
-                className="rounded-md px-3 py-2 font-semibold hover:bg-surface"
-              >
-                {t("nav.searches")}
-              </Link>
-              <Link href="/erreurs" className="rounded-md px-3 py-2 font-semibold hover:bg-surface">
-                {t("nav.errors")}
-              </Link>
-              <Link
-                href="/controle"
-                className="rounded-md px-3 py-2 font-semibold hover:bg-surface"
-              >
-                {t("nav.remote")}
-              </Link>
-            </nav>
-            <form action={signOut} className="ml-auto flex items-center gap-3">
-              <span className="text-sm text-ink-soft">
-                {t("nav.signedInAs", { name: account.name })}
-              </span>
-              <button
-                type="submit"
-                className="min-h-11 rounded-md border border-line-strong px-4 font-semibold text-brand hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
-              >
-                {t("nav.signOut")}
-              </button>
-            </form>
-          </>
+          <form action={signOut} className="ml-auto flex items-center gap-3">
+            <span className="text-sm text-ink-soft">
+              {t("nav.signedInAs", { name: account.name })}
+            </span>
+            <button
+              type="submit"
+              className="min-h-11 rounded-md border border-line-strong px-4 font-semibold text-brand hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+            >
+              {t("nav.signOut")}
+            </button>
+          </form>
         )}
       </div>
     </header>
