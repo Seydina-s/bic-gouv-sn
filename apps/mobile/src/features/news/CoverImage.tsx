@@ -78,6 +78,8 @@ export function CoverImage({ cover, slotWidth, style, label, onDemand = false }:
       recyclingKey={source?.url ?? null}
       testID="cover-image"
       accessible={label !== undefined}
+      // On the web, a decorative photo still needs an empty text alternative.
+      alt={label ?? ""}
       {...(label === undefined ? {} : { accessibilityLabel: label })}
       importantForAccessibility={label === undefined ? "no-hide-descendants" : "yes"}
       style={[
