@@ -47,6 +47,9 @@ export async function AppHeader() {
               >
                 {t("nav.services")}
               </Link>
+              <Link href="/masques" className="rounded-md px-3 py-2 font-semibold hover:bg-surface">
+                {t("nav.withdrawn")}
+              </Link>
               <Link href="/erreurs" className="rounded-md px-3 py-2 font-semibold hover:bg-surface">
                 {t("nav.errors")}
               </Link>

@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { QuarantineError, SourceUnreachableError } from "./lib/errors";
 import { articleContentHash } from "./merge";
 import type { SourceArticleRef, SourceProvider } from "./sources/source-provider";
-import { findWithdrawn } from "./withdrawn";
+import { isWithdrawalCheckDue, reconcileWithdrawals } from "./withdrawn";
 
 // Placeholder articles, not real content.
 const idOf = (n: number) => `00000000-0000-5000-8000-${String(n).padStart(12, "0")}`;
@@ -97,11 +97,38 @@ afterEach(async () => {
   await rm(dir, { recursive: true, force: true });
 });
 
-describe("findWithdrawn", () => {
+const NOW = new Date("2026-09-28T02:00:00Z");
+const APPLY = { apply: true, now: () => NOW };
+
+/** Which stored versions are hidden, by slug. */
+async function hidden(): Promise<string[]> {
+  const page = await repo.list({ limit: 10, includeWithdrawn: true });
+  return page.items
+    .filter((item) => item.translations.some((t) => t.withdrawnAt !== undefined))
+    .map((item) => item.sourceUrl)
+    .sort();
+}
+
+describe("isWithdrawalCheckDue", () => {
+  it("runs once a night, in the quiet hours", () => {
+    const at = (iso: string) => new Date(iso);
+    expect(isWithdrawalCheckDue(at("2026-09-28T02:30:00Z"), null)).toBe(true);
+    expect(isWithdrawalCheckDue(at("2026-09-28T11:00:00Z"), null)).toBe(false);
+    expect(isWithdrawalCheckDue(at("2026-09-28T03:00:00Z"), at("2026-09-28T02:30:00Z"))).toBe(
+      false,
+    );
+    expect(isWithdrawalCheckDue(at("2026-09-29T02:10:00Z"), at("2026-09-28T02:30:00Z"))).toBe(true);
+  });
+});
+
+describe("reconcileWithdrawals", () => {
   it("reads again only what the listing lost, and tells gone from a passing failure", async () => {
     const provider = source();
-    const missing = await findWithdrawn(provider, repo, ["fr"]);
-    expect(Object.fromEntries(missing.map(({ sourceUrl, check }) => [sourceUrl, check]))).toEqual({
+    const report = await reconcileWithdrawals(provider, repo, ["fr"], APPLY);
+    const checks = Object.fromEntries(
+      report.missing.map(({ sourceUrl, check }) => [sourceUrl, check]),
+    );
+    expect(checks).toEqual({
       [urlOf("retire")]: "withdrawn",
       [urlOf("hors-liste")]: "still-published",
       [urlOf("depublie")]: "withdrawn",
@@ -110,8 +137,31 @@ describe("findWithdrawn", () => {
     expect(provider.read).not.toContain("encore-la");
   });
 
-  it("changes nothing in the store", async () => {
-    await findWithdrawn(source(), repo, ["fr"]);
-    expect((await repo.get(idOf(2)))?.version).toBe(1);
+  it("hides only what the source withdrew, with the date, words kept", async () => {
+    const report = await reconcileWithdrawals(source(), repo, ["fr"], APPLY);
+    expect(report).toMatchObject({ hidden: 2, restored: 0 });
+    expect(await hidden()).toEqual([urlOf("depublie"), urlOf("retire")]);
+    const stored = await repo.get(idOf(2));
+    expect(stored?.translations[0]).toMatchObject({
+      title: "Titre retire",
+      withdrawnAt: NOW.toISOString(),
+    });
+    expect(stored?.version).toBe(1);
+    // A second run changes nothing: the mark and its date stay.
+    expect(await reconcileWithdrawals(source(), repo, ["fr"], APPLY)).toMatchObject({ hidden: 0 });
+  });
+
+  it("shows again what the source publishes again, listed or not", async () => {
+    await repo.setWithdrawn(idOf(1), "fr", "2026-09-20T02:00:00Z");
+    await repo.setWithdrawn(idOf(3), "fr", "2026-09-20T02:00:00Z");
+    const report = await reconcileWithdrawals(source(), repo, ["fr"], APPLY);
+    expect(report.restored).toBe(2);
+    expect(await hidden()).toEqual([urlOf("depublie"), urlOf("retire")]);
+  });
+
+  it("changes nothing when only asked for a report", async () => {
+    const report = await reconcileWithdrawals(source(), repo, ["fr"], { ...APPLY, apply: false });
+    expect(report.hidden).toBe(2);
+    expect(await hidden()).toEqual([]);
   });
 });

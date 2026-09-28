@@ -52,6 +52,7 @@ export const adminFr = {
     procedures: "Thèmes des démarches",
     services: "Services de l'État",
     errors: "Erreurs",
+    withdrawn: "Articles masqués",
     remote: "Contrôle à distance",
     signOut: "Se déconnecter",
     signedInAs: "Connecté : {name}",
@@ -203,6 +204,20 @@ export const adminFr = {
     saved: "Enregistré : les applications suivent dans la minute.",
     adminOnly: "Seul un compte administrateur peut modifier ces réglages.",
     failed: "Les réglages n'ont pas pu être chargés.",
+  },
+  withdrawn: {
+    title: "Articles masqués",
+    intro:
+      "Articles retirés du site de la Présidence : l'app ne les montre plus. Ils restent conservés ici, tels qu'ils étaient publiés, pour la traçabilité. Un retrait n'est retenu qu'après une seconde lecture de la page ; si la Présidence republie l'article, il réapparaît de lui-même.",
+    none: "Aucun article masqué : tous les articles collectés sont encore publiés par la Présidence.",
+    failed: "La liste n'a pas pu être chargée. Vérifiez l'état du service.",
+    count: {
+      one: "{count} version masquée",
+      other: "{count} versions masquées",
+    },
+    withdrawnOn: "Retiré le {day} à {time}",
+    language: { fr: "Français", wo: "Wolof" },
+    source: "Ancienne page (lien d'origine)",
   },
   errors: {
     title: "Journal des erreurs",

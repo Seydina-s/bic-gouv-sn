@@ -22,3 +22,4 @@ export * from "./errors/error-journal.schema";
 export * from "./api/news.schema";
 export * from "./api/procedures.schema";
 export * from "./api/services.schema";
+export * from "./api/withdrawn-articles.schema";

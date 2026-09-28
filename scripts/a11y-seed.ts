@@ -114,6 +114,40 @@ async function seedArticle(dataDir: string): Promise<void> {
     images,
     attachments: [document("Document fictif", "fictif"), document(null, "sans-titre")],
   });
+  await seedWithdrawnArticle(join(dataDir, "news.json"));
+}
+
+/** An article the source withdrew: hidden in the app, listed in the console. */
+async function seedWithdrawnArticle(storePath: string): Promise<void> {
+  const repository = new FileArticleRepository(storePath);
+  const sourceUrl = "https://www.presidence.sn/fr/actualites/article-retire-fictif/";
+  const id = "00000000-0000-5000-8000-00000000a12e";
+  await repository.save({
+    id,
+    kind: "news-article",
+    category: "communiques",
+    sourceUrl,
+    sourcePublishedOn: "2026-09-27",
+    sourceUpdatedAt: null,
+    fetchedAt: "2026-09-27T08:01:00Z",
+    contentHash: "c".repeat(64),
+    version: 1,
+    lang: "fr",
+    translations: [
+      {
+        lang: "fr",
+        status: "official",
+        title: "Article fictif retiré par la source",
+        bodyHtml: "<p>Texte fictif.</p>",
+        sourceUrl,
+      },
+    ],
+    audio: [],
+    embedding: null,
+    images: [],
+    attachments: [],
+  });
+  await repository.setWithdrawn(id, "fr", "2026-09-28T02:00:00Z");
 }
 
 async function seedProcedure(dataDir: string): Promise<void> {
