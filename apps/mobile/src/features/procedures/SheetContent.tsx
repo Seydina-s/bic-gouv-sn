@@ -244,6 +244,8 @@ function Checklist({ entries, checklist }: { entries: Inline[][]; checklist: Doc
             key={index}
             accessibilityRole="checkbox"
             accessibilityState={{ checked }}
+            // The web export ignores accessibilityState: without it a checkbox has no state.
+            aria-checked={checked}
             accessibilityLabel={label}
             onPress={() => {
               checklist.toggle(label);

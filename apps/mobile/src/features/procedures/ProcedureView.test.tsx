@@ -83,6 +83,7 @@ describe("the page of a procedure", () => {
     const letter = screen.getByRole("checkbox", { name: "Une demande manuscrite" });
     expect(letter).not.toBeChecked();
     await fireEvent.press(letter);
+    // The web state (aria-checked) is guarded by `pnpm a11y` on this very sheet (QA-07).
     expect(screen.getByRole("checkbox", { name: "Une demande manuscrite" })).toBeChecked();
     expect(screen.getByText("1 sur 2 réunie")).toBeOnTheScreen();
     expect(await AsyncStorage.getItem("bgs-checklist:demarche-test-a")).toBe(

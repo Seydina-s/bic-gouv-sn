@@ -1,33 +1,32 @@
 # STATUS — Bic Gouv SN
 
-**Dernière mise à jour** : 27/09/2026 (16 h 15) · **Mode** : autonome prolongé jusqu'à 17 h (demande de l'utilisateur, qui vérifie les services dans la console en parallèle) ; résumé complet à 17 h, avec le guide d'installation sur iPhone
+**Dernière mise à jour** : 28/09/2026 (9 h 30) · **Mode** : autonome jusqu'à 11 h (demande de l'utilisateur du 27/09), puis retour au mode standard. Actions de l'utilisateur reportées : `.claude/session/A-FAIRE-UTILISATEUR.md` (11 points).
 
 ## Où on en est
-- Dépôt **public et sécurisé** : https://github.com/Seydina-s/bic-gouv-sn. `main` protégée : tout passe par PR + 3 contrôles verts.
-- Articles : 953 (FR + WO). Démarches : 718 fiches, 18 thèmes. Polices **Noto Sans + Noto Serif** (choix de l'utilisateur, PR #69).
-- **Carte des services (Phase 3)** : 880 services proposés (OpenStreetMap), console de vérification et de correction, onglet « Près de moi » (liste, calcul sur le téléphone). **Aucun service vérifié à 13 h 30** : l'onglet affiche un message d'attente honnête.
-- **Fond de carte (MAP-06, option A)** : tuiles du Sénégal, style clair/sombre sans points d'intérêt, lettres et icônes servis par notre API (PR #70) ; requêtes de carte non journalisées (PR #71) ; carte native dans l'app avec pilule « Carte / Liste », aperçu, « Me localiser » sur demande, repli sur la liste (PR #72). Expo Go et le web gardent la liste.
-- Version de test : profil `development` dans `apps/mobile/eas.json`, guide `docs/guides/installer-la-version-de-test-iphone.md`. **Aucune compilation lancée** : attend le compte Apple Developer (A-03, 99 USD/an, à valider).
-- Console : mentions de licence dans « À propos » de l'app (PR #73) ; **déplacer un service** mal placé (coordonnées ou lien de carte, refus hors du Sénégal, PR #74) et **ajouter un service** absent de la source (PR #75). Actifs seulement après le redémarrage de l'API (AUD3-01) ; d'ici là, la console le dit au lieu de faire croire à l'enregistrement.
-- Audit croisé de fin de sprint : AUD3-01 à AUD3-07 dans le backlog. Correctif #77 : dans la liste de vérification, « Voir sur la carte » montre le point réel d'un service déplacé ou ajouté à la main.
-- Pré-contrôle de la version de test (16 h) : diagnostic Expo 21/21, projet Android généré avec la carte reliée, liaison iOS déclarée. La première compilation EAS ne devrait pas échouer sur la configuration.
+- Dépôt **public et sécurisé** : https://github.com/Seydina-s/bic-gouv-sn. `main` protégée : tout passe par PR + 3 contrôles verts, dont désormais un **audit d'accessibilité** (42 écrans, clair et sombre).
+- Articles : 969 (FR + WO), **36 avec leurs PDF officiels** conservés chez nous (dont les communiqués du Conseil des ministres). Démarches : 718 fiches, 18 thèmes. Services : 880 proposés, vérification humaine dans la console.
+- Nuit du 27 au 28/09 (PR #79 à #91) : garde-fou shell ; CSP à nonce de la console ; économie de données ; mentions des logiciels libres ; journal des erreurs en langage simple ; réponses compressées ; contrôle à distance (coupures, version minimale) ; corrections d'accessibilité ; quartier gardé hors ligne sur la carte ; PDF officiels (texte et pièces jointes) ; audit d'accessibilité automatique étendu aux fiches.
+- Contrôle complet : 917 tests verts.
 
 ## En attente de l'utilisateur
-1. Vérifier les services de Dakar dans la console : c'est ce qui les fait apparaître dans l'app (liste et carte).
-2. A-03 : accepter ou non le coût du compte Apple Developer (sans lui : test de la carte sur Android, gratuit).
-3. Redémarrage de l'API locale (port 3100) pour qu'elle serve la carte : **il déconnecte la console** (sessions en mémoire) ; à faire seulement avec son accord.
-4. Restés en attente ce soir (réponse du 27/09) : A-01 logo, A-02 identifiant officiel, W-01 wolof, L-02 questions au BIC, S1-02 hébergement.
+Voir `.claude/session/A-FAIRE-UTILISATEUR.md`. Nouveaux cette nuit : choix d'affichage d'un article retiré par la source (ING-03) ; jeton Sentry en secret (MON-01, ADM-04).
 
 ## Prochaine tâche
-Avec l'accord de l'utilisateur : redémarrer l'API locale (AUD3-01). Puis LIC-01 (liste générée des bibliothèques libres), MAP-11 (carte hors ligne), et QA-02 / AUD3-02 / AUD3-03 dès la version de test installée.
+- ING-03 (détection des articles retirés) dès le choix d'affichage de l'utilisateur.
+- QA-07, suite : photos (fondu d'expo-image sur le web) et carte dans l'audit.
+- Dès la version de test installée : QA-02, QA-03, QA-04, LIC-02.
+
+## Services locaux (au 28/09, 9 h 30)
+- API sur 3100 reconstruite sur `main` à jour des PDF (sert `/media/documents/…`) ; console en développement sur 3001 ; Expo sur 8081 (`--go --offline`, relancé après l'ajout d'axe-core) ; collecte temps réel relancée avec le traitement des pièces jointes.
 
 ## Constat environnement
 - Node système 20.20.0 (inchangé). Projet : Node 24 — ajouter `C:\Users\HP\tools\fnm\data\node-versions\v24.21.0\installation` en tête du PATH.
 - Git : e-mail local du dépôt = adresse anonyme GitHub (ne jamais revenir à l'e-mail personnel).
 - GitHub CLI : `C:\Users\HP\tools\gh\bin\gh.exe` (appeler par chemin complet). gitleaks : `C:\Users\HP\tools\gitleaks\gitleaks.exe`. pmtiles : `C:\Users\HP\tools\pmtiles\pmtiles.exe`.
 - API locale : dans `apps/api`, `pnpm build` puis `PORT=3100 pnpm start`. Arrêter l'ancien processus `node … dist/server.mjs` avant de relancer (arrêter la tâche de fond ne suffit pas). **Le redémarrage déconnecte la console.**
+- Audit d'accessibilité en local : `pnpm --filter @bgs/admin build`, `pnpm --filter @bgs/mobile export:web`, puis `pnpm a11y` (ports 3190-3192, données fictives jetables). Le build de la console n'interrompt pas le serveur de développement sur 3001.
 - Fond de carte : `.data/tiles/senegal.pmtiles` (217 Mo) et `.data/map/` (`pnpm map:assets`) ; procédure `docs/runbooks/fond-de-carte.md`.
 - Après un changement de branche dont le fichier de verrouillage diffère : `pnpm install --frozen-lockfile` avant toute commande (ERREURS.md, 27/09).
-- Expo : le module de version de développement est installé ; pour Expo Go, lancer le serveur avec `npx expo start --go` (serveur relancé ainsi le 27/09 à 15 h 50 : `EXPO_PUBLIC_API_URL=http://192.168.1.14:3100 npx expo start --lan --port 8081 --clear --go`). Après toute installation de dépendances : redémarrer le serveur Expo et demander le paquet de contrôle.
-- Vérification visuelle : export web + Chrome headless (`scratchpad/cdp-shot.mjs`, variables WAIT, EVAL, AFTER, POST). Données de test : toujours une copie jetable, jamais `.data/`.
-- Pas de Python sur la machine : scripts en Node. Tout texte contenant un accent grave, `$` ou un antislash s'écrit avec l'éditeur ; une espace insécable s'écrit en séquence d'échappement (vérifier les octets).
+- Expo : pour Expo Go, `EXPO_PUBLIC_API_URL=http://192.168.1.14:3100 npx expo start --port 8081 --clear --go --offline` (sans `--lan`). Après toute installation de dépendances : arrêter l'ancien processus sur 8081, relancer, puis demander le paquet de contrôle.
+- Vérification visuelle : export web + Chrome headless (`scratchpad/cdp-shot.mjs`). Données de test : toujours une copie jetable, jamais `.data/`.
+- Pas de Python sur la machine : scripts en Node. Tout texte ou code contenant un accent grave, `$`, un antislash ou une séquence d'échappement s'écrit avec l'éditeur, jamais par le shell (ERREURS.md, 27/09 et 28/09).

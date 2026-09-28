@@ -1,20 +1,19 @@
-// Accessibility audit (QA-06): axe-core's WCAG 2.2 A/AA rules on every screen of
-// the app (web export) and of the console, light and dark, with placeholder data
-// in a throwaway folder. Any broken rule fails the run.
+// Accessibility audit (QA-06, QA-07): axe-core's WCAG 2.2 A/AA rules on every
+// screen of the app (web export) and of the console, light and dark, with
+// placeholder data in a throwaway folder (a11y-seed.ts). Any broken rule fails.
 //   pnpm --filter @bgs/api build && pnpm --filter @bgs/admin build
 //   pnpm --filter @bgs/mobile export:web
 //   pnpm a11y
 import { spawn, type ChildProcess } from "node:child_process";
-import { randomBytes, randomUUID } from "node:crypto";
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { randomBytes } from "node:crypto";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { createServer, request, type Server } from "node:http";
 import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
-import { base32Decode, codeAt, hashPassword, timeStep } from "../packages/admin-auth/src/index";
-import { FileArticleRepository } from "../packages/content-store/src/index";
 import { AuditBrowser, type Viewport, type Violation } from "./a11y-browser";
+import { ARTICLE_ID, PROCEDURE_SLUG, SERVICE_ID, seed, signIn, verifyService } from "./a11y-seed";
 
 const repo = fileURLToPath(new URL("..", import.meta.url));
 const webExport = join(repo, "apps", "mobile", "build", "web");
@@ -27,10 +26,6 @@ const PHONE: Viewport = { width: 412, height: 915, mobile: true };
 const DESKTOP: Viewport = { width: 1280, height: 900, mobile: false };
 const SCHEMES = ["light", "dark"] as const;
 
-// Placeholder content for the audit only: never published, deleted afterwards.
-const ARTICLE_ID = "00000000-0000-5000-8000-00000000a11e";
-const ACCOUNT_EMAIL = "audit-accessibilite@bic.test";
-
 const APP_SCREENS = [
   "/",
   "/section/communiques",
@@ -38,85 +33,22 @@ const APP_SCREENS = [
   "/search",
   "/favorites",
   "/procedures",
+  `/procedure/${PROCEDURE_SLUG}`,
   "/near-me",
+  `/service/${SERVICE_ID}`,
   "/assistant",
   "/participate",
   "/licences",
 ];
-const CONSOLE_SCREENS = ["/", "/erreurs", "/controle", "/demarches", "/services"];
-
-async function seedArticle(storePath: string): Promise<void> {
-  const sourceUrl = "https://www.presidence.sn/fr/actualites/audit-accessibilite/";
-  await new FileArticleRepository(storePath).save({
-    id: ARTICLE_ID,
-    kind: "news-article",
-    category: "communiques",
-    sourceUrl,
-    sourcePublishedOn: "2026-09-28",
-    sourceUpdatedAt: "2026-09-28T08:00:00Z",
-    fetchedAt: "2026-09-28T08:01:00Z",
-    contentHash: "a".repeat(64),
-    version: 1,
-    lang: "fr",
-    translations: [
-      {
-        lang: "fr",
-        status: "official",
-        title: "Article fictif pour l'audit d'accessibilité",
-        bodyHtml:
-          '<p>Texte fictif, avec un <a href="https://www.presidence.sn/fr/">lien</a>.</p>' +
-          "<h2>Intertitre</h2><ul><li>Premier point</li><li>Second point</li></ul>",
-        sourceUrl,
-      },
-    ],
-    audio: [],
-    embedding: null,
-    images: [],
-    attachments: [],
-  });
-}
-
-/** A console account known only to this run; the password never leaves memory. */
-async function seedAccount(accountsPath: string, password: string): Promise<void> {
-  const account = {
-    id: randomUUID(),
-    email: ACCOUNT_EMAIL,
-    name: "Audit d'accessibilité",
-    role: "admin",
-    passwordHash: await hashPassword(password),
-    totp: { sealedSecret: null, enrolledAt: null, lastStep: null },
-    attempts: { failures: [], lockedUntil: null },
-    disabled: false,
-    createdAt: new Date().toISOString(),
-  };
-  writeFileSync(accountsPath, JSON.stringify({ schemaVersion: 1, accounts: [account] }));
-}
-
-/** Signs in through the real API (password, then a computed code): a session token. */
-async function signIn(password: string): Promise<string> {
-  const post = async (step: string, body: unknown) => {
-    const response = await fetch(`http://127.0.0.1:${String(API_PORT)}/admin/v1/auth/${step}`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    return (await response.json()) as Record<string, string | undefined>;
-  };
-  const first = await post("password", { email: ACCOUNT_EMAIL, password });
-  const secret = base32Decode(first["secret"] ?? "");
-  if (secret === null) {
-    throw new Error("The sign-in did not offer a second factor to set up");
-  }
-  const second = await post("code", {
-    challenge: first["challenge"],
-    code: codeAt(secret, timeStep(Date.now())),
-  });
-  const token = second["token"];
-  if (token === undefined) {
-    throw new Error("The sign-in did not return a session");
-  }
-  return token;
-}
+const CONSOLE_SCREENS = [
+  "/",
+  "/erreurs",
+  "/controle",
+  "/demarches",
+  "/services",
+  `/services/${SERVICE_ID}`,
+  "/services/nouveau",
+];
 
 function startApi(dataDir: string): ChildProcess {
   const data = (name: string) => join(dataDir, name);
@@ -247,19 +179,19 @@ async function auditScreens(
 
 async function main(): Promise<number> {
   const dataDir = mkdtempSync(join(tmpdir(), "bgs-a11y-data-"));
-  mkdirSync(join(dataDir, "admin"));
   const password = randomBytes(24).toString("base64url");
-  await seedArticle(join(dataDir, "news.json"));
-  await seedAccount(join(dataDir, "admin", "accounts.json"), password);
+  await seed(dataDir, password);
 
   const api = startApi(dataDir);
   const admin = startConsole();
   const app = serveApp();
   let browser: AuditBrowser | null = null;
   try {
-    await waitUntilUp(`http://127.0.0.1:${String(API_PORT)}/v1/health`);
+    const apiBase = `http://127.0.0.1:${String(API_PORT)}`;
+    await waitUntilUp(`${apiBase}/v1/health`);
     await waitUntilUp(`http://127.0.0.1:${String(CONSOLE_PORT)}/connexion`);
-    const token = await signIn(password);
+    const token = await signIn(apiBase, password);
+    await verifyService(apiBase, token);
     browser = await AuditBrowser.launch();
     const appBase = `http://localhost:${String(APP_PORT)}`;
     // Console on "localhost": its session cookie is Secure, allowed there over http.
