@@ -13,6 +13,23 @@ import {
 import { excerptOf, htmlToBlocks } from "./html-to-blocks";
 
 /** The version the app may show in `lang`: withdrawn versions are hidden. */
+/** Excerpts already cut, per version: reading the HTML of each item was most of a list's cost. */
+const excerpts = new Map<string, string>();
+const MAX_EXCERPTS = 20_000;
+
+function excerptIn(article: NewsArticle, lang: Lang, bodyHtml: string): string {
+  const key = `${article.id}:${lang}:${article.contentHash}`;
+  let excerpt = excerpts.get(key);
+  if (excerpt === undefined) {
+    if (excerpts.size >= MAX_EXCERPTS) {
+      excerpts.clear();
+    }
+    excerpt = excerptOf(htmlToBlocks(bodyHtml));
+    excerpts.set(key, excerpt);
+  }
+  return excerpt;
+}
+
 function translationIn(article: NewsArticle, lang: Lang) {
   return publishedTranslation(article, lang);
 }
@@ -86,7 +103,7 @@ export function toSummary(
     publishedOn: article.sourcePublishedOn,
     lang,
     title: translation.title,
-    excerpt: excerptOf(htmlToBlocks(translation.bodyHtml)),
+    excerpt: excerptIn(article, lang, translation.bodyHtml),
     translationStatus: translation.status,
     availableLangs: availableLangs(article),
     cover: coverOf(article, mediaBaseUrl),
