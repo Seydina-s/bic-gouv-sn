@@ -17,6 +17,8 @@ import { VersionedJsonStore } from "./versioned-json-store";
  */
 export class FileArticleRepository implements ArticleRepository {
   private readonly store: VersionedJsonStore<NewsArticle>;
+  /** Sorted lists, per read of the file: dropped with it when the file changes. */
+  private readonly sorted = new WeakMap<object, Map<string, readonly NewsArticle[]>>();
 
   constructor(path: string) {
     this.store = new VersionedJsonStore(path, newsArticleSchema, "articles");
@@ -63,18 +65,35 @@ export class FileArticleRepository implements ArticleRepository {
     return [...sections.values()];
   }
 
-  /** Articles with a version in `lang` (any language if undefined) the app may show. */
+  /**
+   * Articles with a version in `lang` (any language if undefined) the app may show,
+   * newest first. Sorted once per read of the file (the store keeps the same entries
+   * object until the file changes), not at every request. Read-only for callers.
+   */
   private async newestFirst(
     lang: ListQuery["lang"],
     includeWithdrawn = false,
-  ): Promise<NewsArticle[]> {
+  ): Promise<readonly NewsArticle[]> {
+    const entries = await this.store.entries();
+    const key = `${lang ?? "*"}:${String(includeWithdrawn)}`;
+    let sorted = this.sorted.get(entries);
+    if (sorted === undefined) {
+      sorted = new Map();
+      this.sorted.set(entries, sorted);
+    }
+    const known = sorted.get(key);
+    if (known !== undefined) {
+      return known;
+    }
     const shown = (translation: NewsArticle["translations"][number]) =>
       (lang === undefined || translation.lang === lang) &&
       (includeWithdrawn || isPublished(translation));
-    return Object.values(await this.store.entries())
+    const articles = Object.values(entries)
       .map((entry) => entry.current)
       .filter((article) => article.translations.some(shown))
       .sort(compareNewestFirst);
+    sorted.set(key, articles);
+    return articles;
   }
 
   history(id: string): Promise<NewsArticle[]> {
