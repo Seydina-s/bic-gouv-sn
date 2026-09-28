@@ -54,20 +54,31 @@ export function asPdfAttachment(link: DocumentLink, data: Buffer): PdfAttachment
   };
 }
 
+/** Links of the text first (they have words), then the documents attached apart. */
+function allDocuments(article: NewsArticle, attachedUrls: readonly string[]): DocumentLink[] {
+  const links = documentLinks(article);
+  const known = new Set(links.map(({ url }) => url));
+  const apart = [...new Set(attachedUrls)].filter((url) => !known.has(url));
+  return [...links, ...apart.map((url) => ({ url, title: null }))];
+}
+
 /**
- * Keeps our own copy of the official PDFs an article links to (CLAUDE.md: the
- * collection stores documents too). Resumable: stored documents are skipped; a
- * failing document never blocks the others nor the article (reported, retried).
+ * Keeps our own copy of the official PDFs of an article: those its text links to
+ * and those the source attaches apart (`attachedUrls`, e.g. the Council of
+ * Ministers report). Resumable: stored documents are skipped; a failing document
+ * never blocks the others nor the article (reported, retried).
  */
 export async function attachDocuments(
   article: NewsArticle,
   provider: SourceProvider,
   repository: ArticleRepository,
   storage: MediaStorage,
+  attachedUrls: readonly string[] = [],
 ): Promise<AttachResult> {
   const stored = new Set(article.attachments.map((attachment) => attachment.sourceUrl));
   const result: AttachResult = { attached: 0, failures: [] };
-  for (const link of documentLinks(article).filter(({ url }) => !stored.has(url))) {
+  const missing = allDocuments(article, attachedUrls).filter(({ url }) => !stored.has(url));
+  for (const link of missing) {
     try {
       const data = await provider.downloadMedia(link.url);
       const attachment = asPdfAttachment(link, data);

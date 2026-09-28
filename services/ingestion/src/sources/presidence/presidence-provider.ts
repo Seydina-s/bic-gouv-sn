@@ -8,6 +8,13 @@ import { detailResponseSchema, listResponseSchema } from "./api-schemas";
 import { normalizeDetail, presidenceArticleId } from "./normalize";
 
 export const PRESIDENCE_API = "https://bo-admin.presidence.sn/api/front";
+/** Where the API's relative file paths ("/storage/documents/…") are served. */
+const PRESIDENCE_FILES = "https://bo-admin.presidence.sn";
+
+/** Official address of a document the API gives as a path, or null if not official. */
+function documentUrl(path: string | null): string | null {
+  return path === null ? null : officialMediaUrl(new URL(path, PRESIDENCE_FILES).href);
+}
 
 /** Identifies the project to the source, as a polite crawler should. */
 export const USER_AGENT = "BicGouvSN-ingestion/0.1 (+https://github.com/Seydina-s/bic-gouv-sn)";
@@ -88,6 +95,9 @@ export function createPresidenceProvider({
           lang,
           sourceUpdatedAt: item.updated_at,
           coverSourceUrl: item.image === null ? null : officialMediaUrl(item.image),
+          documentUrls: [item.document_1, item.document_2]
+            .map(documentUrl)
+            .filter((url): url is string => url !== null),
         })),
       };
     },

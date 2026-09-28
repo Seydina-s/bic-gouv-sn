@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { articleContentHash } from "../merge";
 import type { SourceProvider } from "../sources/source-provider";
 import { asPdfAttachment, attachDocuments, documentLinks } from "./attach-documents";
+import { backfillDocuments } from "./backfill-documents";
 import type { MediaStorage } from "./media-storage";
 
 // Placeholder texts and addresses, not real content.
@@ -103,6 +104,45 @@ describe("official PDF documents", () => {
     expect(storage.files.get(saved?.attachments[0]?.key ?? "")).toEqual(PDF);
     await attachDocuments(saved ?? article(), providerWith(download), repo, storage);
     expect(download).toHaveBeenCalledTimes(1);
+  });
+
+  it("also keeps the documents the source attaches apart, once each", async () => {
+    const apart = "https://bo-admin.presidence.sn/storage/documents/compte-rendu.pdf";
+    const download = vi.fn(() => Promise.resolve(PDF));
+    const result = await attachDocuments(
+      article(),
+      providerWith(download),
+      repo,
+      new MemoryStorage(),
+      [apart, PDF_URL, apart],
+    );
+    expect(result.attached).toBe(2);
+    expect(
+      (await repo.get(ID))?.attachments.map(({ sourceUrl, title }) => [sourceUrl, title]),
+    ).toEqual([
+      [PDF_URL, "Découvrir la brochure"],
+      [apart, null],
+    ]);
+  });
+
+  it("goes through the source listing to find the documents attached apart", async () => {
+    const apart = "https://bo-admin.presidence.sn/storage/documents/compte-rendu.pdf";
+    const ref = {
+      sourceId: 42,
+      slug: "test",
+      lang: "fr" as const,
+      sourceUpdatedAt: "",
+      coverSourceUrl: null,
+      documentUrls: [apart],
+    };
+    const provider: SourceProvider = {
+      ...providerWith(() => Promise.resolve(PDF)),
+      listPage: () => Promise.resolve({ refs: [ref, { ...ref, sourceId: 43 }], lastPage: 1 }),
+      articleIdFor: ({ sourceId }) =>
+        sourceId === 42 ? ID : "00000000-0000-5000-8000-000000000043",
+    };
+    const progress = await backfillDocuments(provider, repo, new MemoryStorage(), "fr");
+    expect(progress).toEqual({ articles: 1, attached: 2, failures: [] });
   });
 
   it("reports what is not a PDF, or cannot be downloaded, without blocking the article", async () => {

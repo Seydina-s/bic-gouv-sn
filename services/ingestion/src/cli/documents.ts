@@ -1,29 +1,29 @@
-// Official PDF documents linked from stored articles: `pnpm --filter @bgs/ingestion documents`.
+// Official PDFs of the stored history (linked in the text or attached apart by the
+// source): `pnpm --filter @bgs/ingestion documents [fr|wo] [maxPages]`.
 // Resumable: documents already stored are skipped. ~1 request per second.
 import { fileURLToPath } from "node:url";
 import { FileArticleRepository } from "@bgs/content-store";
-import { attachDocuments } from "../media/attach-documents";
-import { backfillMedia } from "../media/backfill-media";
+import { langSchema } from "@bgs/shared-types";
+import { backfillDocuments } from "../media/backfill-documents";
 import { FileMediaStorage } from "../media/media-storage";
 import { createPresidenceProvider } from "../sources/presidence/presidence-provider";
 
+const lang = langSchema.parse(process.argv[2] ?? "fr");
+const maxPages = process.argv[3] === undefined ? undefined : Number(process.argv[3]);
 const dataDir = new URL("../../../../.data/", import.meta.url);
 const storePath = process.env["NEWS_STORE_PATH"] ?? fileURLToPath(new URL("news.json", dataDir));
 const mediaRoot = process.env["MEDIA_ROOT"] ?? fileURLToPath(new URL("media", dataDir));
 
-const REPORT_EVERY = 25;
-
-const result = await backfillMedia(
-  attachDocuments,
+const result = await backfillDocuments(
   createPresidenceProvider(),
   new FileArticleRepository(storePath),
   new FileMediaStorage(mediaRoot),
-  (p) => {
-    if (p.articles % REPORT_EVERY === 0) {
-      process.stdout.write(
-        `${String(p.articles)} articles · ${String(p.attached)} documents · ${String(p.failures.length)} failed\n`,
-      );
-    }
+  lang,
+  {
+    ...(maxPages === undefined ? {} : { maxPages }),
+    onPage: ({ page, lastPage }) => {
+      process.stdout.write(`[${lang}] page ${String(page)}/${String(lastPage)}\n`);
+    },
   },
 );
 
