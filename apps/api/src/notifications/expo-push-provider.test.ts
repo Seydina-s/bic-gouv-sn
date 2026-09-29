@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { writeFileDurably } from "@bgs/content-store";
 import type { Notification, PushSubscription } from "@bgs/shared-types";
 import { describe, expect, it } from "vitest";
 import { ExpoPushProvider } from "./expo-push-provider";
@@ -35,10 +36,10 @@ function subscription(n: number, overrides: Partial<PushSubscription> = {}): Pus
 }
 
 async function setUp(subscriptions: PushSubscription[], answer?: (to: string) => object) {
-  const store = new FilePushSubscriptionStore(join(tmpdir(), "bgs-push", `${randomUUID()}.json`));
-  for (const item of subscriptions) {
-    await store.save(item);
-  }
+  const path = join(tmpdir(), "bgs-push", `${randomUUID()}.json`);
+  // Written in one go: 150 durable saves in a row took over 30 s on a busy machine (QA-11).
+  await writeFileDurably(path, JSON.stringify({ schemaVersion: 1, subscriptions }));
+  const store = new FilePushSubscriptionStore(path);
   const requests: { to: string; title: string; body: string }[][] = [];
   const fetchImpl = ((_url: string, init?: RequestInit) => {
     const body = typeof init?.body === "string" ? init.body : "[]";
