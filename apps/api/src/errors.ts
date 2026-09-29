@@ -38,6 +38,14 @@ export function registerErrorHandlers(app: FastifyInstance): void {
           body(API_ERROR_CODES.rateLimited, "Too many requests, please retry shortly", request.id),
         );
     }
+    // The client's fault, as Fastify itself sees it (broken JSON, "__proto__", body
+    // too large, unexpected content type…): refused as invalid, never a 500.
+    const status = error.statusCode ?? 500;
+    if (status >= 400 && status < 500) {
+      return reply
+        .code(status)
+        .send(body(API_ERROR_CODES.invalidRequest, "The request is invalid", request.id));
+    }
     request.log.error({ err: error }, "Unhandled API error");
     return reply
       .code(500)
