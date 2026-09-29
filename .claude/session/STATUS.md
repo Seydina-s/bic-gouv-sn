@@ -1,6 +1,6 @@
 # STATUS — Bic Gouv SN
 
-**Dernière mise à jour** : 28/09/2026 (18 h 45) · **Mode** : autonome jusqu'à 20 h (demande de l'utilisateur), puis retour au mode standard. Actions de l'utilisateur reportées : `.claude/session/A-FAIRE-UTILISATEUR.md` (12 points, dont 1 réglé).
+**Dernière mise à jour** : 29/09/2026 (1 h 40) · **Mode** : autonome jusqu'au 29/09 à 12 h (demande de l'utilisateur), puis retour au mode standard. Actions de l'utilisateur reportées : `.claude/session/A-FAIRE-UTILISATEUR.md` (13 points).
 
 ## Où on en est
 - Dépôt **public et sécurisé** : https://github.com/Seydina-s/bic-gouv-sn. `main` protégée : tout passe par PR + 3 contrôles verts, dont un **audit d'accessibilité** (50 écrans, clair et sombre, langue déclarée vérifiée).
@@ -15,18 +15,23 @@
   - accessibilité : langue réellement affichée déclarée (page et articles en wolof) ;
   - app : préchargement de l'article probable suivant (jamais en économie de données) ;
   - notifications : compteur « à vérifier » dans la navigation, échec d'envoi noté dans l'historique.
-- Contrôle complet : 983 tests verts.
+- Soir du 28/09 (PR #115) : décisions de l'utilisateur consignées (banc d'essai wolof, parcours des démarches, écran « Comptes », compte Apple individuel).
+- Nuit du 28 au 29/09 (PR #116 à #117) :
+  - fiche démarche en **parcours visuel** (rubriques de la source reliées par un fil, dans leur ordre) ; documents à fournir en simple liste, **plus de cases à cocher** ;
+  - console : écran **« Comptes »** (lien d'activation à usage unique, rôle, désactivation, second code, rien sur son propre compte, tout au journal) ; écritures des comptes sécurisées ;
+  - audit d'accessibilité : 54 écrans, captures possibles (`A11Y_SHOTS`).
+- Contrôle complet : 1 016 tests verts.
 
 ## En attente de l'utilisateur
-Voir `.claude/session/A-FAIRE-UTILISATEUR.md`. Nouveau aujourd'hui : point 12 (présentation « étape par étape » des démarches : la source est en questions-réponses) ; proposition ADM-10 (écran « Comptes » dans la console : touche à la sécurité, à valider).
+Voir `.claude/session/A-FAIRE-UTILISATEUR.md`. Nouveau cette nuit : point 13 (mot de passe oublié, proposition ADM-11). Compte Apple : inscription en cours côté utilisateur.
 
 ## Prochaine tâche
 - Brancher l'envoi réel des notifications dès la version de test (A-03, FEED-04) : un fournisseur derrière l'interface `PushProvider`.
 - QA-07, suite : la carte dans l'audit (tuiles).
 - Dès la version de test installée : QA-02, QA-03, QA-04, LIC-02.
 
-## Services locaux (au 28/09, 18 h)
-- API sur 3100 reconstruite sur `main` (notifications, journal d'audit, performances) ; console en développement sur 3001 ; Expo sur 8081 ; une seule collecte temps réel (verrou actif, contrôle des retraits chaque nuit).
+## Services locaux (au 29/09, 1 h 40)
+- API sur 3100 reconstruite sur `main` (écran « Comptes » compris : la console demande une nouvelle connexion) ; console en développement sur 3001 ; Expo sur 8081 ; export web de l'app servi sur 8084 (relais vers l'API) ; une seule collecte temps réel (verrou actif, contrôle des retraits chaque nuit).
 - Arrêt de la collecte : chercher le processus dont la ligne de commande contient `cli/watch.ts` (arrêter la tâche pnpm ne suffit pas), puis vérifier qu'il n'en reste aucun avant de relancer.
 
 
