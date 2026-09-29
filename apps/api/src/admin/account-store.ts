@@ -52,7 +52,10 @@ export interface AdminAccountStore {
    * Changes one account from its latest saved state, so a change made meanwhile
    * (a role, a failed sign-in) is never undone. Null when there is no such account.
    */
-  update(id: string, change: (account: AdminAccount) => AdminAccount): Promise<AdminAccount | null>;
+  update(
+    id: string,
+    change: (account: AdminAccount, all: readonly AdminAccount[]) => AdminAccount,
+  ): Promise<AdminAccount | null>;
 }
 
 /**
@@ -102,14 +105,14 @@ export class FileAdminAccountStore implements AdminAccountStore {
 
   update(
     id: string,
-    change: (account: AdminAccount) => AdminAccount,
+    change: (account: AdminAccount, all: readonly AdminAccount[]) => AdminAccount,
   ): Promise<AdminAccount | null> {
     return this.change((accounts) => {
       const current = accounts.find((account) => account.id === id);
       if (current === undefined) {
         return { next: null, result: null };
       }
-      const updated = adminAccountSchema.parse(change(current));
+      const updated = adminAccountSchema.parse(change(current, accounts));
       return {
         next: accounts.map((account) => (account.id === id ? updated : account)),
         result: updated,

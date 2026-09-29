@@ -26,6 +26,7 @@ const ACTIVATION_RATE = { max: 10, timeWindow: "1 minute" } as const;
 const STATUS_OF: Record<string, number> = {
   ACCOUNT_NOT_FOUND: 404,
   ACCOUNT_SELF: 403,
+  ADMIN_FORBIDDEN: 403,
   ACCOUNT_EMAIL_TAKEN: 409,
   ACCOUNT_ALREADY_ACTIVE: 409,
   ACCOUNT_ACTIVATION_INVALID: 401,

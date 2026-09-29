@@ -59,6 +59,23 @@ describe("activation links", () => {
   });
 });
 
+describe("administrators", () => {
+  it("never all lose their rights, even when two remove each other's at once", async () => {
+    const { accountAdmin, actorId, signedIn, accounts } = await setUp();
+    const other = await signedIn("admin");
+    const outcomes = await Promise.allSettled([
+      accountAdmin.changeRole(actorId, other.id, "reviewer"),
+      accountAdmin.changeRole(other.id, actorId, "reviewer"),
+    ]);
+    expect(outcomes.map((outcome) => outcome.status).sort()).toEqual(["fulfilled", "rejected"]);
+    expect(outcomes.find((outcome) => outcome.status === "rejected")).toMatchObject({
+      reason: { code: "ADMIN_FORBIDDEN" },
+    });
+    const admins = (await accounts.list()).filter((account) => account.role === "admin");
+    expect(admins).toHaveLength(1);
+  });
+});
+
 describe("role changes", () => {
   it("journal nothing when the role stays the same", async () => {
     const { accountAdmin, actorId, journal, signedIn } = await setUp();

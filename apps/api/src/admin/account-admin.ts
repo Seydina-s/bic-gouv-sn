@@ -205,7 +205,13 @@ export class AccountAdmin {
       throw new AccountRuleError("ACCOUNT_SELF");
     }
     const seen: { before?: AdminAccount } = {};
-    const after = await this.deps.accounts.update(id, (account) => {
+    const after = await this.deps.accounts.update(id, (account, all) => {
+      // Checked again at the moment of writing: two administrators removing each
+      // other's rights at the same instant would otherwise leave none.
+      const actor = all.find((candidate) => candidate.id === actorId);
+      if (actor?.role !== "admin" || actor.disabled) {
+        throw new AccountRuleError("ADMIN_FORBIDDEN");
+      }
       seen.before = account;
       return change(account);
     });
