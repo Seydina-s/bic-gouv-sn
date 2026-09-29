@@ -1,5 +1,5 @@
-// Placeholder data for the accessibility audit (QA-06, QA-07): written to a
-// throwaway folder, never published, deleted after the run.
+// Placeholder data for the browser tests (accessibility audit, end-to-end journeys):
+// written to a throwaway folder, never published, deleted after the run.
 import { randomUUID } from "node:crypto";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";

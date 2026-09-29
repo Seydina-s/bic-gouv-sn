@@ -20,7 +20,8 @@
     "fonts:check": "tsx scripts/fonts.ts --check",
     "map:assets": "tsx scripts/map-assets.ts",
     "notices": "tsx scripts/licences.ts",
-    "a11y": "tsx scripts/a11y-audit.ts"
+    "a11y": "tsx scripts/a11y-audit.ts",
+    "e2e": "tsx scripts/e2e.ts"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

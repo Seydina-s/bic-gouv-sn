@@ -51,6 +51,8 @@ jobs:
         run: pnpm --filter @bgs/mobile export:web
       - name: Accessibility audit (axe-core, WCAG 2.2 A/AA, light and dark)
         run: pnpm a11y
+      - name: End-to-end journeys (app web export and console)
+        run: pnpm e2e
 
   security:
     name: Secrets and dependencies
