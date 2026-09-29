@@ -36,3 +36,9 @@ Mise à jour du 29/09/2026 (midi) : décisions de l’utilisateur sur les points
 |---|---|---|---|
 | 16 | ✅ **Validé et fait le 29/09.** — Autoriser l'ajout du contrôle « Container images » aux contrôles exigés avant toute fusion dans `main` (réglage du dépôt GitHub, que je peux faire sur votre accord) | Aujourd'hui, une image cassée serait signalée mais n'empêcherait pas la fusion | AUD4-04 |
 | 17 | ✅ **Validé et fait le 29/09** (demande comme une permission, activation immédiate). — Dire si l'on prépare une invitation, une seule fois et facile à refuser, à activer les statistiques anonymes (texte et écran vous seront soumis avant toute mise en place) | Sans elle, peu de personnes les activeront et les tableaux de bord resteront maigres | AUD4-03 |
+
+Mise à jour du 30/09/2026 (minuit, mode autonome) : point 18 ajouté.
+
+| # | Quoi | Pourquoi / effet si ça attend | Réf. backlog |
+|---|---|---|---|
+| 18 | Autoriser la suite du passage à PostgreSQL pour les données sensibles, dans cet ordre : (a) abonnements aux notifications (jeton de l'appareil, rubriques, heures calmes) ; (b) notifications préparées et décidées dans la console ; (c) comptes de l'équipe et journal d'audit. Ce qui est enregistré ne change pas, seulement l'endroit où c'est rangé. Le déplacement est testé en CI sur un vrai PostgreSQL et reste réversible. | Rien ne presse tant qu'il n'y a qu'un serveur d'API. Avant d'en ajouter un second, ces données doivent être en base commune, sinon elles s'écraseraient | SCALE-02 |
