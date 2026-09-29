@@ -15,6 +15,8 @@ const SETTLE_MS = Number(process.env["A11Y_SETTLE_MS"] ?? 4000);
 const SHOTS_DIR = process.env["A11Y_SHOTS"];
 const PHONE: Viewport = { width: 412, height: 915, mobile: true };
 const DESKTOP: Viewport = { width: 1280, height: 900, mobile: false };
+/** The narrowest phones in use (WCAG 1.4.10 reflow width). */
+const NARROW: Viewport = { width: 320, height: 640, mobile: true };
 const SCHEMES = ["light", "dark"] as const;
 /** The interface is French until the Wolof catalog is complete (W-01). */
 const INTERFACE_LANG = "fr";
@@ -53,6 +55,35 @@ interface ScreenReport {
   screen: string;
   scheme: string;
   violations: Violation[];
+}
+
+/** Each screen at 320 px wide: text cut by an edge is a failure (WCAG 1.4.10). */
+async function reflowScreens(
+  browser: TestBrowser,
+  base: string,
+  screens: readonly string[],
+): Promise<ScreenReport[]> {
+  const reports: ScreenReport[] = [];
+  for (const screen of screens) {
+    await browser.open(base + screen, SETTLE_MS);
+    const cut = await browser.overflowingText();
+    reports.push({
+      screen: base + screen,
+      scheme: "narrow",
+      violations:
+        cut.length === 0
+          ? []
+          : [
+              {
+                rule: "reflow-320",
+                impact: "serious",
+                help: "Texte coupé par le bord d'un écran de 320 px (WCAG 1.4.10)",
+                targets: cut,
+              },
+            ],
+    });
+  }
+  return reports;
 }
 
 async function auditScreens(
@@ -118,6 +149,11 @@ async function main(): Promise<number> {
     for (const scheme of SCHEMES) {
       reports.push(...(await auditScreens(browser, consoleBase, CONSOLE_SCREENS, scheme)));
     }
+    // The narrowest phones: nothing cut by the screen's edges (WCAG 1.4.10).
+    await browser.setViewport(NARROW);
+    await browser.setScheme("light");
+    reports.push(...(await reflowScreens(browser, appBase, ["/", ...APP_SCREENS])));
+    reports.push(...(await reflowScreens(browser, consoleBase, CONSOLE_SCREENS)));
     return report(reports);
   } finally {
     browser?.close();
@@ -131,7 +167,8 @@ const say = (line: string) => process.stdout.write(`${line}\n`);
 function report(reports: readonly ScreenReport[]): number {
   const failing = reports.filter((entry) => entry.violations.length > 0);
   for (const { screen, scheme, violations } of failing) {
-    say(`\n✗ ${screen} (${scheme === "dark" ? "sombre" : "clair"})`);
+    const shown = scheme === "narrow" ? "320 px" : scheme === "dark" ? "sombre" : "clair";
+    say(`\n✗ ${screen} (${shown})`);
     for (const violation of violations) {
       say(`  - [${violation.impact}] ${violation.rule} : ${violation.help}`);
       for (const target of violation.targets) {
@@ -141,7 +178,7 @@ function report(reports: readonly ScreenReport[]): number {
   }
   const clean = reports.length - failing.length;
   say(
-    `\n${String(clean)}/${String(reports.length)} écrans sans défaut d'accessibilité (WCAG 2.2 A/AA, axe-core).`,
+    `\n${String(clean)}/${String(reports.length)} écrans sans défaut d'accessibilité (WCAG 2.2 A/AA avec axe-core, et lecture à 320 px).`,
   );
   return failing.length === 0 ? 0 : 1;
 }

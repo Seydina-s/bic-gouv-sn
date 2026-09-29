@@ -68,7 +68,7 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 24/09/2026 | O-01 🔴 Section « Opportunités » conservée : définir contenu, sources officielles et priorité | Réponse utilisateur |
 | 24/09/2026 | S1-06 ✅ Node 24 LTS isolé par projet via fnm (Node 20 système conservé) | Revue du stack |
 | 24/09/2026 | L-01 🔴 Obtenir la preuve écrite d'autorisation de la Présidence avant soumission aux stores | Réponse utilisateur |
-| 24/09/2026 | T-01 🔴 Passer à TypeScript 7 dès que typescript-eslint le supporte | F-02 |
+| 24/09/2026 | T-01 🔴 (29/09 : TypeScript 7.0.2 est sorti, mais typescript-eslint n’accepte encore que les versions inférieures à 6.1 : toujours bloqué) Passer à TypeScript 7 dès que typescript-eslint le supporte | F-02 |
 | 24/09/2026 | W-01 🔴 Identifier qui rédige et valide les textes wolof de l'interface (catalogue `packages/i18n/src/messages/wo.ts`) | F-05 |
 | 24/09/2026 | A-01 🔴 Logo officiel, icônes d'app et écran de lancement (actuellement icônes génériques du modèle Expo — à remplacer, ne rien inventer) | F-07 |
 | 24/09/2026 | A-02 🔴 Identifiant de publication de l'app (ex. `sn.gouv.bic…`) à valider avec le BIC avant tout build de store | F-07 |
@@ -76,7 +76,7 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 24/09/2026 | SEC-01 🔵 (29/09 : le blocage en CI existe depuis le premier jour (`pnpm audit --audit-level high`) ; relevé du 29/09 : 2 alertes modérées seulement, celles déjà connues ; reste la revérification à chaque mise à jour du SDK Expo) Revérifier `pnpm audit` à chaque mise à jour du SDK Expo (decode-uri-component via expo-router, uuid via xcode) ; bloquer en CI toute vulnérabilité haute/critique | F-08 |
 | 24/09/2026 | API-01 ✅ (25/09) Limitation de débit (600/min/adresse, CGNAT), en-têtes de sécurité (CSP stricte en production), sonde `/v1/health/ready` ; 43 tests API | F-08 |
 | 24/09/2026 | D-01 ✅ Audit des tokens de design + corrections (docs/design/audit-tokens-2026-09-24.md) | Demande utilisateur |
-| 24/09/2026 | D-02 🔴 `/impeccable init` (PRODUCT.md + DESIGN.md) au début de la prochaine session | Audit D-01 |
+| 24/09/2026 | D-02 ✅ (29/09 : constaté fait, PRODUCT.md le 25/09 et DESIGN.md le 28/09) `/impeccable init` (PRODUCT.md + DESIGN.md) au début de la prochaine session | Audit D-01 |
 | 24/09/2026 | D-03 🔴 Réparer l'installation de ui-ux-pro-max (dossiers data/scripts = liens cassés) + Python pour ses scripts | Audit D-01 |
 | 24/09/2026 | PERF-02 ✅ Sous-ensemble des polices (latin + wolof) pour réduire les 564 Ko — réalisé avec PERF-04 (26/09/2026) | Audit D-01 |
 | 24/09/2026 | Q-01 ✅ Délai des tests porté à 30 s (échec intermittent sous charge : 12,6 s pour un démarrage à froid) | Contrôle complet |
@@ -281,3 +281,4 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | AUD4-05 | Données | Un fichier temporaire de 9 Mo restait depuis l'incident des trois collectes (écriture interrompue). ✅ Corrigé : la collecte supprime au démarrage les fichiers temporaires de plus d'une heure (jamais une écriture en cours) | ✅ |
 | AUD4-06 | Performance | La tâche CI « Production builds » dure maintenant environ 7 min (audit de 56 écrans + 6 parcours) : à surveiller, à paralléliser si elle dépasse 10 min | Basse |
 | AUD4-07 | UX writing | Nouveaux textes (statistiques, comptes, usage) en français seulement : wolof avec W-02 (reporté par l'utilisateur) | Basse |
+| 29/09/2026 | QA-10 ✅ Audit d’accessibilité : passe « 320 px » (WCAG 1.4.10) sur les 26 écrans de l’app et de la console ; aucun texte coupé par le bord de l’écran, en dehors des bandeaux faits pour défiler ; une page sans balise viewport est signalée ; contrôle prouvé sur trois pages d’essai (débordement voulu détecté, bandeau défilant ignoré, page sans viewport signalée) ; 82/82 | Charte §1 (du plus petit téléphone) |
