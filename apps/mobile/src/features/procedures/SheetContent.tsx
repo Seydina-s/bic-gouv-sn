@@ -4,7 +4,6 @@ import { AddressBookIcon as AddressBook } from "phosphor-react-native/src/icons/
 import { CalendarBlankIcon as CalendarBlank } from "phosphor-react-native/src/icons/CalendarBlank";
 import { CalendarCheckIcon as CalendarCheck } from "phosphor-react-native/src/icons/CalendarCheck";
 import { CertificateIcon as Certificate } from "phosphor-react-native/src/icons/Certificate";
-import { CheckSquareIcon as CheckSquare } from "phosphor-react-native/src/icons/CheckSquare";
 import { ClipboardTextIcon as ClipboardText } from "phosphor-react-native/src/icons/ClipboardText";
 import { CoinsIcon as Coins } from "phosphor-react-native/src/icons/Coins";
 import { FilesIcon as Files } from "phosphor-react-native/src/icons/Files";
@@ -15,23 +14,14 @@ import { ListNumbersIcon as ListNumbers } from "phosphor-react-native/src/icons/
 import { MapPinIcon as MapPin } from "phosphor-react-native/src/icons/MapPin";
 import { QuestionIcon as Question } from "phosphor-react-native/src/icons/Question";
 import { ScalesIcon as Scales } from "phosphor-react-native/src/icons/Scales";
-import { SquareIcon as Square } from "phosphor-react-native/src/icons/Square";
 import { UsersThreeIcon as UsersThree } from "phosphor-react-native/src/icons/UsersThree";
-import type { ComponentType, ReactNode } from "react";
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-  useWindowDimensions,
-  type LayoutChangeEvent,
-} from "react-native";
+import type { ComponentType } from "react";
+import { StyleSheet, Text, View, useWindowDimensions, type LayoutChangeEvent } from "react-native";
 import { Icon } from "../../components/Icon";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 import { BlockRenderer, Runs } from "../news/BlockRenderer";
 import type { SectionKind, SheetItem, SheetSection } from "./procedure-sheet";
-import type { DocumentChecklist } from "./useDocumentChecklist";
 
 type Glyph = ComponentType<PhosphorProps>;
 
@@ -58,7 +48,8 @@ const BADGE_SIZE = 40;
 /** List bullet and numbered step marker, at the default text size. */
 const BULLET_SIZE = 6;
 const STEP_SIZE = 28;
-const STEP_RAIL_WIDTH = 2;
+/** The thin line joining numbered steps, and the sections of the path. */
+const RAIL_WIDTH = 2;
 
 function plain(inlines: readonly Inline[]): string {
   return inlines
@@ -68,39 +59,40 @@ function plain(inlines: readonly Inline[]): string {
     .trim();
 }
 
-/** A section's heading: its icon in a round badge, the source's question beside it. */
-export function SectionHeading({
-  icon,
-  title,
-  children,
-}: {
-  icon: Glyph;
-  title: string;
-  children?: ReactNode;
-}) {
+/** A section's icon in a round badge. */
+function SectionBadge({ icon }: { icon: Glyph }) {
   const { theme } = useTheme();
-  const { color, space, textStyle, radius } = theme;
+  const { color, radius } = theme;
+  return (
+    <View
+      style={[
+        styles.badge,
+        {
+          width: BADGE_SIZE,
+          height: BADGE_SIZE,
+          borderRadius: radius.full,
+          backgroundColor: color.surface,
+        },
+      ]}
+    >
+      <Icon icon={icon} weight="duotone" color={color.textBrand} />
+    </View>
+  );
+}
+
+/** A section's heading: its icon in a round badge, the title beside it. */
+export function SectionHeading({ icon, title }: { icon: Glyph; title: string }) {
+  const { theme } = useTheme();
+  const { color, space, textStyle } = theme;
   return (
     <View style={[styles.row, styles.centered, { gap: space.md }]}>
-      <View
-        style={[
-          styles.badge,
-          {
-            width: BADGE_SIZE,
-            height: BADGE_SIZE,
-            borderRadius: radius.full,
-            backgroundColor: color.surface,
-          },
-        ]}
+      <SectionBadge icon={icon} />
+      <Text
+        accessibilityRole="header"
+        style={[textStyle.subtitle, styles.flex, { color: color.textPrimary }]}
       >
-        <Icon icon={icon} weight="duotone" color={color.textBrand} />
-      </View>
-      <View style={styles.flex}>
-        <Text accessibilityRole="header" style={[textStyle.subtitle, { color: color.textPrimary }]}>
-          {title}
-        </Text>
-        {children}
-      </View>
+        {title}
+      </Text>
     </View>
   );
 }
@@ -202,7 +194,7 @@ function Steps({ entries }: { entries: Inline[][] }) {
                   style={[
                     styles.flex,
                     {
-                      width: STEP_RAIL_WIDTH,
+                      width: RAIL_WIDTH,
                       marginVertical: space.xs,
                       backgroundColor: color.border,
                     },
@@ -230,67 +222,11 @@ function Steps({ entries }: { entries: Inline[][] }) {
   );
 }
 
-/** Documents to bring, to tick off at home (Service-Public.fr): kept on the phone. */
-function Checklist({ entries, checklist }: { entries: Inline[][]; checklist: DocumentChecklist }) {
-  const { theme } = useTheme();
-  const { color, space, textStyle, radius, touchTarget } = theme;
-  return (
-    <View>
-      {entries.map((entry, index) => {
-        const label = plain(entry);
-        const checked = checklist.ticked.has(label);
-        return (
-          <Pressable
-            key={index}
-            accessibilityRole="checkbox"
-            accessibilityState={{ checked }}
-            // The web export ignores accessibilityState: without it a checkbox has no state.
-            aria-checked={checked}
-            accessibilityLabel={label}
-            onPress={() => {
-              checklist.toggle(label);
-            }}
-            style={({ pressed }) => [
-              styles.row,
-              {
-                gap: space.md,
-                minHeight: touchTarget.min,
-                paddingVertical: space.sm,
-                paddingHorizontal: space.xs,
-                marginHorizontal: -space.xs,
-                borderRadius: radius.sm,
-                backgroundColor: pressed ? color.surface : undefined,
-              },
-            ]}
-          >
-            <Icon
-              icon={checked ? CheckSquare : Square}
-              weight={checked ? "fill" : "regular"}
-              color={checked ? color.primary : color.borderStrong}
-            />
-            <Text style={[textStyle.body, styles.flex, { color: color.textPrimary }]}>
-              <Runs inlines={entry} />
-            </Text>
-          </Pressable>
-        );
-      })}
-    </View>
-  );
-}
-
 /**
- * The content of a section, laid out by kind: documents to tick, steps numbered,
- * other lists bulleted, remarks in a notice.
+ * The content of a section, laid out by kind: steps numbered, other lists
+ * bulleted, remarks in a notice.
  */
-export function SheetItems({
-  items,
-  kind,
-  checklist,
-}: {
-  items: SheetItem[];
-  kind: SectionKind | null;
-  checklist?: DocumentChecklist;
-}) {
+export function SheetItems({ items, kind }: { items: SheetItem[]; kind: SectionKind | null }) {
   const { theme } = useTheme();
   return (
     <View style={{ gap: theme.space.md }}>
@@ -304,9 +240,6 @@ export function SheetItems({
           case "block":
             return <BlockRenderer key={key} blocks={[item.block]} />;
           case "list":
-            if (kind === "documents" && checklist !== undefined) {
-              return <Checklist key={key} entries={item.items} checklist={checklist} />;
-            }
             return item.ordered || (kind === "how" && item.items.length > 1) ? (
               <Steps key={key} entries={item.items} />
             ) : (
@@ -318,43 +251,49 @@ export function SheetItems({
   );
 }
 
-/** The documents a section asks for, as the checklist names them. */
-function documentsOf(section: SheetSection): string[] {
-  return section.kind === "documents"
-    ? section.items.flatMap((item) => (item.type === "list" ? item.items.map(plain) : []))
-    : [];
-}
-
-/** One section of the sheet: heading, then content; documents show how many are ticked. */
+/**
+ * One section of the sheet as a stop on the path: its icon on a thin rail that
+ * leads to the next section, the source's question and content beside it.
+ * The sections keep the source's order; nothing is added between them.
+ */
 export function SheetSectionView({
   section,
-  checklist,
+  first,
+  last,
   onLayout,
 }: {
   section: SheetSection;
-  checklist: DocumentChecklist;
+  first: boolean;
+  last: boolean;
   onLayout?: (event: LayoutChangeEvent) => void;
 }) {
   const { theme } = useTheme();
-  const { t } = useTranslation();
+  const { fontScale } = useWindowDimensions();
   const { color, space, textStyle } = theme;
-  const documents = documentsOf(section);
-  const done = documents.filter((entry) => checklist.ticked.has(entry)).length;
+  // The question sits level with its badge, whatever the system text size.
+  const titleOffset = Math.max(0, (BADGE_SIZE - textStyle.subtitle.lineHeight * fontScale) / 2);
   return (
-    <View onLayout={onLayout} style={{ marginTop: space.xxl, gap: space.lg }}>
-      <SectionHeading icon={SECTION_ICONS[section.kind]} title={section.title}>
-        {documents.length > 0 && (
-          <Text
-            accessibilityLiveRegion="polite"
-            style={[textStyle.bodySmall, { color: color.textSecondary, marginTop: space.xxs }]}
-          >
-            {done > 0
-              ? t("procedures.checklistDone", { count: done, total: documents.length })
-              : t("procedures.checklistHint")}
-          </Text>
+    <View onLayout={onLayout} style={[styles.row, { marginTop: first ? space.xxl : 0 }]}>
+      <View style={[styles.rail, { width: BADGE_SIZE, marginRight: space.md }]}>
+        <SectionBadge icon={SECTION_ICONS[section.kind]} />
+        {!last && (
+          <View
+            style={[
+              styles.flex,
+              { width: RAIL_WIDTH, marginVertical: space.xs, backgroundColor: color.border },
+            ]}
+          />
         )}
-      </SectionHeading>
-      <SheetItems items={section.items} kind={section.kind} checklist={checklist} />
+      </View>
+      <View style={[styles.flex, { gap: space.lg, paddingBottom: last ? 0 : space.xxl }]}>
+        <Text
+          accessibilityRole="header"
+          style={[textStyle.subtitle, { color: color.textPrimary, paddingTop: titleOffset }]}
+        >
+          {section.title}
+        </Text>
+        <SheetItems items={section.items} kind={section.kind} />
+      </View>
     </View>
   );
 }
