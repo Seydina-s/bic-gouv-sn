@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   assessIngestion,
+  detectionObjective,
   ingestionStatusSchema,
   type IngestionStatus,
 } from "./ingestion-status.schema";
@@ -61,5 +62,31 @@ describe("assessIngestion", () => {
     expect(ingestionStatusSchema.safeParse(status({ consecutiveFailures: -1 })).success).toBe(
       false,
     );
+  });
+});
+
+describe("the < 2 minutes objective", () => {
+  const at = (daysAgo: number) =>
+    new Date(NOW.getTime() - daysAgo * 24 * 60 * 60 * 1000).toISOString();
+
+  it("gives the share on time, the median and the 95th percentile of the last 30 days", () => {
+    const seconds = [30, 40, 50, 60, 70, 80, 90, 100, 110, 400];
+    const detections = seconds.map((value) => ({ at: at(1), seconds: value }));
+    // Older than 30 days: left out.
+    detections.push({ at: at(40), seconds: 9000 });
+    expect(detectionObjective(status({ detections }), NOW)).toEqual({
+      count: 10,
+      withinTarget: 0.9,
+      medianSeconds: 70,
+      p95Seconds: 400,
+    });
+  });
+
+  it("says nothing without a measure", () => {
+    expect(detectionObjective(null, NOW)).toBeNull();
+    expect(detectionObjective(status(), NOW)).toBeNull();
+    expect(
+      detectionObjective(status({ detections: [{ at: at(45), seconds: 30 }] }), NOW),
+    ).toBeNull();
   });
 });

@@ -1,5 +1,5 @@
 import type { CircuitSnapshot } from "@bgs/resilience";
-import type { CircuitStatus, IngestionStatus } from "@bgs/shared-types";
+import { DETECTION_HISTORY, type CircuitStatus, type IngestionStatus } from "@bgs/shared-types";
 import type { PollResult } from "./watch";
 
 /** The breakers of the sources as the console reads them (times as dates). */
@@ -32,6 +32,7 @@ export function nextIngestionStatus(
     lastDetectionSeconds: previous?.lastDetectionSeconds ?? null,
     consecutiveFailures: previous?.consecutiveFailures ?? 0,
     lastFailure: previous?.lastFailure ?? null,
+    detections: previous?.detections ?? [],
   };
   if ("error" in outcome) {
     return {
@@ -58,5 +59,9 @@ export function nextIngestionStatus(
     lastDetectionSeconds: measured.length > 0 ? Math.max(...measured) : base.lastDetectionSeconds,
     consecutiveFailures: allFailed ? base.consecutiveFailures + 1 : 0,
     lastFailure: firstFailure === undefined ? base.lastFailure : { code: firstFailure.code, at },
+    // Each measured article kept, for the "< 2 minutes" objective (bounded).
+    detections: [...base.detections, ...measured.map((seconds) => ({ at, seconds }))].slice(
+      -DETECTION_HISTORY,
+    ),
   };
 }

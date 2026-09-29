@@ -2,11 +2,14 @@ import { NewspaperIcon, QuestionIcon, WarningOctagonIcon } from "@phosphor-icons
 import {
   assessIngestion,
   describeError,
+  detectionObjective,
   type CircuitStatus,
   type IngestionStatus,
 } from "@bgs/shared-types";
 import { formatClockTime, formatDuration } from "../lib/format";
 import { t } from "../lib/i18n";
+
+const SHARE = new Intl.NumberFormat("fr-FR", { style: "percent", maximumFractionDigits: 0 });
 
 /** One source's protection, in plain words (CLAUDE.md §4.5: visible in the console). */
 function circuitLine(circuit: CircuitStatus): string {
@@ -31,9 +34,25 @@ function circuitLine(circuit: CircuitStatus): string {
  */
 export function IngestionPanel({ report, now }: { report: IngestionStatus | null; now: Date }) {
   const circuits = report?.circuits ?? [];
+  const objective = detectionObjective(report, now);
   return (
     <div className="space-y-4">
       <IngestionVerdict report={report} now={now} />
+      <section aria-labelledby="objective-title" className="px-1">
+        <h3 id="objective-title" className="text-sm font-bold">
+          {t("ingestion.objective.title")}
+        </h3>
+        <p className="mt-1 text-sm text-ink-soft">
+          {objective === null
+            ? t("ingestion.objective.none")
+            : t("ingestion.objective.measured", {
+                share: SHARE.format(objective.withinTarget),
+                count: objective.count,
+                median: formatDuration(objective.medianSeconds, t),
+                p95: formatDuration(objective.p95Seconds, t),
+              })}
+        </p>
+      </section>
       {circuits.length > 0 && (
         <section aria-labelledby="circuits-title" className="px-1">
           <h3 id="circuits-title" className="text-sm font-bold">
