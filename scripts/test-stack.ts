@@ -40,6 +40,7 @@ function startApi(dataDir: string): ChildProcess {
       REMOTE_CONFIG_PATH: data("remote-config.json"),
       ERROR_JOURNAL_PATH: data("error-journal.json"),
       SEARCH_MISSES_PATH: data("search-misses.json"),
+      USAGE_STATS_PATH: data("usage-stats.json"),
       INGESTION_STATUS_PATH: data("ingestion-status.json"),
       MEDIA_ROOT: data("media"),
       ADMIN_ACCOUNTS_PATH: data("admin/accounts.json"),

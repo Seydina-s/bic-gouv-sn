@@ -16,6 +16,7 @@ const GROUPS = [
       { href: "/", label: "nav.status" },
       { href: "/erreurs", label: "nav.errors" },
       { href: "/recherches", label: "nav.searches" },
+      { href: "/usage", label: "nav.usage" },
     ],
   },
   {

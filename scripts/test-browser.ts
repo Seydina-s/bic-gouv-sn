@@ -71,15 +71,19 @@ const wait = (ms: number) =>
 /** How long a page may take to load before the test goes on anyway. */
 const LOAD_TIMEOUT_MS = 30_000;
 
+/** A target is still when it has not moved between two looks this far apart. */
+const STILL_INTERVAL_MS = 120;
+const STILL_ATTEMPTS = 25;
+
 /** How long a gesture waits for its target to appear (a slow CI runner included). */
 const GESTURE_TIMEOUT_MS = 15_000;
 
 /**
- * Page function finding a visible control by its accessible name: the exact name
- * first, then a name that starts with it (a row's label adds its details), then
- * one that contains it (a card's label starts with its section).
+ * Page function listing the visible controls with an accessible name: the exact
+ * name first, then names that start with it (a row's label adds its details),
+ * then names that contain it (a card's label starts with its section).
  */
-const FIND_CONTROL = `((name) => {
+const FIND_CONTROLS = `((name) => {
   const shown = (element) => {
     const box = element.getBoundingClientRect();
     return box.width > 0 && box.height > 0;
@@ -91,12 +95,43 @@ const FIND_CONTROL = `((name) => {
       'button, a, [role="button"], [role="link"], [role="tab"], [role="checkbox"], [role="radio"]',
     ),
   ].filter(shown);
-  return (
-    controls.find((element) => nameOf(element) === name) ??
-    controls.find((element) => nameOf(element).startsWith(name)) ??
-    controls.find((element) => nameOf(element).includes(name)) ??
-    null
-  );
+  for (const matches of [
+    (label) => label === name,
+    (label) => label.startsWith(name),
+    (label) => label.includes(name),
+  ]) {
+    const named = controls.filter((element) => matches(nameOf(element)));
+    if (named.length > 0) {
+      return named;
+    }
+  }
+  return [];
+})`;
+
+/** The first control with this name, or null. */
+const FIND_CONTROL = `((name) => ${FIND_CONTROLS}(name)[0] ?? null)`;
+
+/**
+ * Page function giving where to press a control: among those of the same name, the
+ * first a finger would reach once scrolled into view (never a backdrop covered by
+ * a sheet), else the first one.
+ */
+const REACH_CONTROL = `((name) => {
+  const centre = (element) => {
+    const box = element.getBoundingClientRect();
+    return { x: box.left + box.width / 2, y: box.top + box.height / 2 };
+  };
+  const candidates = ${FIND_CONTROLS}(name);
+  for (const element of candidates) {
+    element.scrollIntoView({ block: "center" });
+    const point = centre(element);
+    const hit = document.elementFromPoint(point.x, point.y);
+    if (hit !== null && element.contains(hit)) {
+      return point;
+    }
+  }
+  candidates[0].scrollIntoView({ block: "center" });
+  return centre(candidates[0]);
 })`;
 
 /** Page function finding a visible text field by its label, accessible name or placeholder. */
@@ -368,7 +403,23 @@ export class TestBrowser {
 
   /** Presses the button, link or choice with this accessible name, like a finger would. */
   async press(name: string): Promise<void> {
-    const point = await this.locate(`${FIND_CONTROL}(${JSON.stringify(name)})`, name);
+    await this.locate(`${FIND_CONTROL}(${JSON.stringify(name)})`, name);
+    // A sheet still sliding in moves its buttons: press once the target stands still.
+    const reach = async () =>
+      (await this.evaluate(`${REACH_CONTROL}(${JSON.stringify(name)})`)) as {
+        x: number;
+        y: number;
+      };
+    let point = await reach();
+    for (let attempt = 0; attempt < STILL_ATTEMPTS; attempt += 1) {
+      await wait(STILL_INTERVAL_MS);
+      const next = await reach();
+      const still = Math.abs(next.x - point.x) < 1 && Math.abs(next.y - point.y) < 1;
+      point = next;
+      if (still) {
+        break;
+      }
+    }
     for (const type of ["mouseMoved", "mousePressed", "mouseReleased"]) {
       await this.send("Input.dispatchMouseEvent", {
         type,
@@ -383,6 +434,13 @@ export class TestBrowser {
   /** Waits for a control with this accessible name, without pressing it. */
   async waitForControl(name: string): Promise<void> {
     await this.locate(`${FIND_CONTROL}(${JSON.stringify(name)})`, name);
+  }
+
+  /** Waits until no control has this name any more (a sheet closed, a dialog left). */
+  async waitForControlGone(name: string): Promise<void> {
+    if (!(await this.waitUntil(`!${FIND_CONTROL}(${JSON.stringify(name)})`))) {
+      throw new Error(`« ${name} » est toujours à l'écran`);
+    }
   }
 
   /** What the field with this label holds (e.g. a link shown to be copied). */

@@ -4,18 +4,24 @@ import { buildApp } from "./app";
 import { loadConfig } from "./config";
 import { ErrorJournal } from "./journal/error-journal";
 import { SearchMisses } from "./journal/search-misses";
+import { UsageStats } from "./usage/usage-stats";
 
 const config = loadConfig(process.env);
 /** The error journal is written at most this often, never on a request's path. */
 const JOURNAL_FLUSH_MS = 30_000;
 const errorJournal = await ErrorJournal.open(config.ERROR_JOURNAL_PATH);
 const searchMisses = await SearchMisses.open(config.SEARCH_MISSES_PATH);
+const usageStats = await UsageStats.open(config.USAGE_STATS_PATH);
 const app = await buildApp({
   config,
   version: packageJson.version,
   articles: new FileArticleRepository(config.NEWS_STORE_PATH),
   errorJournal,
   searchMisses,
+  usageStats,
+});
+usageStats.start(JOURNAL_FLUSH_MS, (error) => {
+  app.log.error({ err: error }, "Usage counters could not be written");
 });
 searchMisses.start(JOURNAL_FLUSH_MS, (error) => {
   app.log.error({ err: error }, "Search misses could not be written");

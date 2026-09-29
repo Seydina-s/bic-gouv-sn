@@ -43,6 +43,7 @@ const CONSOLE_SCREENS = [
   "/services/nouveau",
   "/masques",
   "/recherches",
+  "/usage",
   "/journal",
   "/notifications",
   "/comptes",

@@ -66,6 +66,12 @@ const envSchema = z.object({
     .min(1)
     .default(".data/search-misses.json")
     .transform((path) => resolveDataPath(path)),
+  /** Anonymous usage counters (ADM-12): nothing about who sent the signals. */
+  USAGE_STATS_PATH: z
+    .string()
+    .min(1)
+    .default(".data/usage-stats.json")
+    .transform((path) => resolveDataPath(path)),
   /** Report written by the real-time collection after each pass (console supervision). */
   INGESTION_STATUS_PATH: z
     .string()

@@ -2,6 +2,7 @@ import { DEFAULT_REMOTE_CONFIG } from "@bgs/shared-types";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
 import { DataSaverProvider } from "../features/data-saver/DataSaverProvider";
+import { UsageStatsProvider } from "../features/usage-stats/UsageStatsProvider";
 import { I18nProvider } from "../i18n/I18nProvider";
 import { ThemeProvider } from "../theme/ThemeProvider";
 
@@ -19,7 +20,9 @@ export function TestProviders({ children }: { children: ReactNode }) {
     <QueryClientProvider client={client}>
       <ThemeProvider>
         <I18nProvider>
-          <DataSaverProvider>{children}</DataSaverProvider>
+          <DataSaverProvider>
+            <UsageStatsProvider>{children}</UsageStatsProvider>
+          </DataSaverProvider>
         </I18nProvider>
       </ThemeProvider>
     </QueryClientProvider>

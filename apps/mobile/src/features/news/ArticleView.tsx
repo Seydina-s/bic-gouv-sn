@@ -21,6 +21,7 @@ import { useFavorites } from "../favorites/FavoritesProvider";
 import { BlockRenderer } from "./BlockRenderer";
 import { CoverImage } from "./CoverImage";
 import { DocumentList } from "./DocumentList";
+import { useRecordRead } from "../usage-stats/UsageStatsProvider";
 import { canListen, ListenButton } from "./ListenButton";
 import { formatPublishedOn } from "./format";
 import { SectionTag } from "./SectionTag";
@@ -71,6 +72,8 @@ export interface ArticleViewProps {
   bottomInset: number;
   /** The app bar slides in on scroll; off in the two-pane layout (the front page has it). */
   withAppBar?: boolean;
+  /** False when shown without the person choosing it (the first story beside the list). */
+  countsAsRead?: boolean;
 }
 
 /** One official article, identical to the source, with its link back to it. */
@@ -81,7 +84,9 @@ export function ArticleView({
   paneWidth,
   bottomInset,
   withAppBar = true,
+  countsAsRead = true,
 }: ArticleViewProps) {
+  useRecordRead(countsAsRead ? detail?.id : undefined);
   const { theme } = useTheme();
   const { t, lang } = useTranslation();
   const scroller = useRef<ScrollView>(null);
