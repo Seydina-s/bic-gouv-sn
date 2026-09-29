@@ -98,6 +98,10 @@ export class AdminSignIn {
     if (account === null || account.disabled) {
       return this.refuseUnknown(key, password, now);
     }
+    // Not activated yet (no password chosen): answered like an unknown address.
+    if (account.passwordHash === null) {
+      return this.refuseUnknown(key, password, now);
+    }
     if (isLocked(account.attempts, now)) {
       await this.audit(account.id, "sign-in.locked");
       return { kind: "locked" };
@@ -156,15 +160,15 @@ export class AdminSignIn {
     }
     this.challenges.delete(challengeId);
     const firstTime = challenge.pendingSecret !== null;
-    await this.deps.accounts.save({
-      ...account,
+    await this.deps.accounts.update(account.id, (current) => ({
+      ...current,
       totp: {
         sealedSecret: firstTime ? this.deps.box.seal(secret ?? "") : account.totp.sealedSecret,
         enrolledAt: account.totp.enrolledAt ?? new Date(now).toISOString(),
         lastStep: step,
       },
       attempts: recordSuccess(),
-    });
+    }));
     const { token, session } = openSession(account.id, now);
     this.dropDeadSessions(now);
     this.sessions.set(session.tokenHash, session);
@@ -188,6 +192,15 @@ export class AdminSignIn {
     }
     this.sessions.set(tokenHash, touchSession(session, now));
     return publicAccount(account);
+  }
+
+  /** Closes every session of an account (disabled, or second factor reset). */
+  endSessionsOf(accountId: string): void {
+    for (const [hash, session] of this.sessions) {
+      if (session.userId === accountId) {
+        this.sessions.delete(hash);
+      }
+    }
   }
 
   async signOut(token: string): Promise<void> {
@@ -223,9 +236,11 @@ export class AdminSignIn {
     now: number,
     action: string,
   ): Promise<{ kind: "failed" } | { kind: "locked" }> {
-    const attempts = recordFailure(account.attempts, now);
-    await this.deps.accounts.save({ ...account, attempts });
-    const locked = isLocked(attempts, now);
+    const updated = await this.deps.accounts.update(account.id, (current) => ({
+      ...current,
+      attempts: recordFailure(current.attempts, now),
+    }));
+    const locked = updated !== null && isLocked(updated.attempts, now);
     await this.audit(account.id, locked ? "sign-in.locked" : action);
     return locked ? { kind: "locked" } : { kind: "failed" };
   }

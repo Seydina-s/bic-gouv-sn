@@ -194,10 +194,35 @@ async function seedAccount(dataDir: string, password: string): Promise<void> {
     disabled: false,
     createdAt: new Date().toISOString(),
   };
+  // Placeholder team members, one per state, so every form of "Comptes" is audited.
+  const teammate = (name: string, role: string, changes: object) => ({
+    ...account,
+    id: randomUUID(),
+    email: `${randomUUID()}@audit.test`,
+    name,
+    role,
+    passwordHash: null,
+    activation: null,
+    ...changes,
+  });
+  const inAnHour = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+  const team = [
+    teammate("Personne invitée (fictive)", "reviewer", {
+      activation: { codeHash: "0".repeat(64), expiresAt: inAnHour },
+    }),
+    teammate("Personne active (fictive)", "editor", {
+      passwordHash: account.passwordHash,
+      totp: { sealedSecret: null, enrolledAt: new Date().toISOString(), lastStep: null },
+    }),
+    teammate("Personne désactivée (fictive)", "reviewer", {
+      passwordHash: account.passwordHash,
+      disabled: true,
+    }),
+  ];
   mkdirSync(join(dataDir, "admin"), { recursive: true });
   writeFileSync(
     join(dataDir, "admin", "accounts.json"),
-    JSON.stringify({ schemaVersion: 1, accounts: [account] }),
+    JSON.stringify({ schemaVersion: 1, accounts: [account, ...team] }),
   );
 }
 

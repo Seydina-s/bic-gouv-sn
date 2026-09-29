@@ -40,6 +40,7 @@ function account(overrides: Partial<AdminAccount> = {}): AdminAccount {
     name: "Relecteur de test",
     role: "reviewer",
     passwordHash,
+    activation: null,
     totp: { sealedSecret: null, enrolledAt: null, lastStep: null },
     attempts: { failures: [], lockedUntil: null },
     disabled: false,
@@ -63,7 +64,7 @@ beforeEach(async () => {
     config: loadConfig({ LOG_LEVEL: "silent" }),
     version: "1.0.0",
     articles: temporaryStore(),
-    admin: { signIn, journal },
+    admin: { signIn, journal, accounts },
   });
 });
 

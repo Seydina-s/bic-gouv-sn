@@ -21,6 +21,7 @@ import { FileAdminAccountStore, type AdminAccountStore } from "./admin/account-s
 import { FileAuditJournal, type AuditJournal } from "./admin/audit-journal";
 import { SecretBox } from "./admin/secret-box";
 import { AdminSignIn } from "./admin/sign-in-service";
+import { AccountAdmin } from "./admin/account-admin";
 import type { Config } from "./config";
 import { registerErrorHandlers } from "./errors";
 import { registerSecurity } from "./security";
@@ -30,6 +31,7 @@ import { adminErrorsRoutes } from "./routes/admin-errors";
 import { adminAuditRoutes } from "./routes/admin-audit";
 import { adminNewsRoutes } from "./routes/admin-news";
 import { adminNotificationsRoutes } from "./routes/admin-notifications";
+import { adminAccountsRoutes } from "./routes/admin-accounts";
 import { adminSearchMissesRoutes } from "./routes/admin-search-misses";
 import { adminServicesRoutes } from "./routes/admin-services";
 import { adminRemoteConfigRoutes, remoteConfigRoutes } from "./routes/remote-config";
@@ -81,8 +83,8 @@ export interface AppOptions {
 export interface AdminServices {
   signIn: AdminSignIn;
   journal: AuditJournal;
-  /** To show names instead of account ids in the audit journal. */
-  accounts?: AdminAccountStore;
+  /** The team's accounts: managed in the console, names shown in the audit journal. */
+  accounts: AdminAccountStore;
 }
 
 function defaultAdmin(config: Config): AdminServices | null {
@@ -233,6 +235,11 @@ export async function buildApp({
       signIn: admin.signIn,
       journal: admin.journal,
       accounts: admin.accounts,
+    });
+    await app.register(adminAccountsRoutes, {
+      prefix: "/admin/v1",
+      signIn: admin.signIn,
+      accountAdmin: new AccountAdmin(admin),
     });
     await app.register(adminNotificationsRoutes, {
       prefix: "/admin/v1",

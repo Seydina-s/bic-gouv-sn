@@ -6,7 +6,7 @@
 //   pnpm a11y
 import { spawn, type ChildProcess } from "node:child_process";
 import { randomBytes } from "node:crypto";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { createServer, request, type Server } from "node:http";
 import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
@@ -22,6 +22,8 @@ const API_PORT = 3190;
 const CONSOLE_PORT = 3191;
 const APP_PORT = 3192;
 const SETTLE_MS = Number(process.env["A11Y_SETTLE_MS"] ?? 4000);
+/** A folder to keep a picture of every audited screen (visual check); none by default. */
+const SHOTS_DIR = process.env["A11Y_SHOTS"];
 const PHONE: Viewport = { width: 412, height: 915, mobile: true };
 const DESKTOP: Viewport = { width: 1280, height: 900, mobile: false };
 const SCHEMES = ["light", "dark"] as const;
@@ -54,6 +56,7 @@ const CONSOLE_SCREENS = [
   "/recherches",
   "/journal",
   "/notifications",
+  "/comptes",
 ];
 
 function startApi(dataDir: string): ChildProcess {
@@ -191,6 +194,10 @@ async function auditScreens(
       });
     }
     reports.push({ screen: base + screen, scheme, violations });
+    if (SHOTS_DIR !== undefined) {
+      const name = `${new URL(base).port}${screen.replaceAll("/", "_")}-${scheme}.png`;
+      writeFileSync(join(SHOTS_DIR, name), await browser.screenshot());
+    }
   }
   return reports;
 }
@@ -227,7 +234,9 @@ async function main(): Promise<number> {
     await browser.setViewport(DESKTOP);
     // Signed out first: once signed in, the sign-in page leads to the console.
     for (const scheme of SCHEMES) {
-      reports.push(...(await auditScreens(browser, consoleBase, ["/connexion"], scheme)));
+      reports.push(
+        ...(await auditScreens(browser, consoleBase, ["/connexion", "/connexion/activer"], scheme)),
+      );
     }
     await browser.setCookie("bgs_admin_session", token, consoleBase);
     for (const scheme of SCHEMES) {

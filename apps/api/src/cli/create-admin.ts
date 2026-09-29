@@ -117,6 +117,7 @@ async function main(): Promise<void> {
     name: values.name,
     role: values.role,
     passwordHash: await hashPassword(password),
+    activation: null,
     totp: { sealedSecret: null, enrolledAt: null, lastStep: null },
     attempts: { failures: [], lockedUntil: null },
     disabled: false,
