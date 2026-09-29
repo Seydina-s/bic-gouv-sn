@@ -1,6 +1,8 @@
 import { createHash } from "node:crypto";
 import type { ErrorCode } from "@bgs/shared-types";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
+import { z } from "zod";
+import type { KeyValueStore } from "../shared-state/key-value-store";
 
 /** Header a client sends to make a write safe to repeat (CLAUDE.md §4.5). */
 export const IDEMPOTENCY_HEADER = "idempotency-key";
@@ -10,22 +12,24 @@ export const REPLAYED_HEADER = "idempotent-replayed";
 const KEY_PATTERN = /^[A-Za-z0-9_-]{16,128}$/;
 /** How long a completed write is remembered: longer than any retry. */
 const REMEMBER_MS = 24 * 60 * 60 * 1000;
-/** Keys remembered at most; beyond, the oldest give way (memory stays bounded). */
-const MAX_KEYS = 10_000;
 const WRITES = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
-interface Entry {
+const entrySchema = z.object({
   /** What was asked: the same key with another request is refused. */
-  fingerprint: string;
-  expiresAt: number;
+  fingerprint: z.string(),
   /** Null while the first request is still running. */
-  answer: { status: number; contentType: string | null; body: string } | null;
-}
+  answer: z
+    .object({ status: z.int(), contentType: z.string().nullable(), body: z.string() })
+    .nullable(),
+});
+type Entry = z.infer<typeof entrySchema>;
 
 declare module "fastify" {
   interface FastifyRequest {
     /** The remembered key of this write, when it came with one and runs for the first time. */
     idempotencySlot?: string;
+    /** The answer was remembered (a success): nothing to clean up afterwards. */
+    idempotencyAnswered?: boolean;
   }
 }
 
@@ -45,25 +49,28 @@ function refuse(request: FastifyRequest, reply: FastifyReply, status: number, co
   return reply.code(status).send({ code, message: code, requestId: request.id });
 }
 
+function readEntry(raw: string | null): Entry | null {
+  if (raw === null) {
+    return null;
+  }
+  try {
+    const parsed = entrySchema.safeParse(JSON.parse(raw));
+    return parsed.success ? parsed.data : null;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Idempotency keys on every write (CLAUDE.md §4.5): a write sent again with the
  * same key (a double submission, a retry after a lost answer) is not done twice;
  * the first answer is given again. Only successful answers are remembered: after
- * a refusal or a failure, nothing was written and the retry really runs. Kept in
- * memory: a restart forgets the keys (a shared store when the API has several
- * instances, like the sessions).
+ * a refusal or a failure, nothing was written and the retry really runs. The keys
+ * live in the shared state (SCALE-01): claiming one is atomic, so two instances
+ * never both run the same write.
  */
-export function registerIdempotency(app: FastifyInstance, now: () => number = Date.now): void {
-  const entries = new Map<string, Entry>();
-
-  const forgetExpired = (time: number) => {
-    for (const [slot, entry] of entries) {
-      if (entry.expiresAt > time && entries.size <= MAX_KEYS) {
-        break;
-      }
-      entries.delete(slot);
-    }
-  };
+export function registerIdempotency(app: FastifyInstance, state: KeyValueStore): void {
+  const keyOf = (slot: string) => `idempotency:${slot}`;
 
   app.addHook("preHandler", async (request, reply) => {
     const key = request.headers[IDEMPOTENCY_HEADER];
@@ -73,55 +80,61 @@ export function registerIdempotency(app: FastifyInstance, now: () => number = Da
     if (typeof key !== "string" || !KEY_PATTERN.test(key)) {
       return refuse(request, reply, 400, "IDEMPOTENCY_KEY_INVALID");
     }
-    const time = now();
-    forgetExpired(time);
-    const slot = `${scopeOf(request)}:${key}`;
+    const slot = keyOf(`${scopeOf(request)}:${key}`);
     const fingerprint = fingerprintOf(request);
-    const known = entries.get(slot);
-    if (known !== undefined) {
-      if (known.fingerprint !== fingerprint) {
-        return refuse(request, reply, 422, "IDEMPOTENCY_KEY_REUSED");
-      }
-      if (known.answer === null) {
-        return refuse(request, reply, 409, "IDEMPOTENCY_IN_PROGRESS");
-      }
-      void reply.header(REPLAYED_HEADER, "true");
-      if (known.answer.contentType !== null) {
-        void reply.header("content-type", known.answer.contentType);
-      }
-      return reply.code(known.answer.status).send(known.answer.body);
+    const pending: Entry = { fingerprint, answer: null };
+    if (await state.setIfAbsent(slot, JSON.stringify(pending), REMEMBER_MS)) {
+      request.idempotencySlot = slot;
+      return;
     }
-    entries.set(slot, { fingerprint, expiresAt: time + REMEMBER_MS, answer: null });
-    request.idempotencySlot = slot;
+    const known = readEntry(await state.get(slot));
+    if (known === null) {
+      // Expired or damaged between the two reads: treated as still running.
+      return refuse(request, reply, 409, "IDEMPOTENCY_IN_PROGRESS");
+    }
+    if (known.fingerprint !== fingerprint) {
+      return refuse(request, reply, 422, "IDEMPOTENCY_KEY_REUSED");
+    }
+    if (known.answer === null) {
+      return refuse(request, reply, 409, "IDEMPOTENCY_IN_PROGRESS");
+    }
+    void reply.header(REPLAYED_HEADER, "true");
+    if (known.answer.contentType !== null) {
+      void reply.header("content-type", known.answer.contentType);
+    }
+    return reply.code(known.answer.status).send(known.answer.body);
   });
 
-  app.addHook("onSend", (request, reply, payload, done) => {
+  app.addHook("onSend", async (request, reply, payload) => {
     const slot = request.idempotencySlot;
-    if (slot !== undefined) {
-      const entry = entries.get(slot);
-      const status = reply.statusCode;
-      if (entry !== undefined && status >= 200 && status < 300) {
-        const contentType = reply.getHeader("content-type");
-        entry.answer = {
+    if (slot === undefined) {
+      return payload;
+    }
+    const status = reply.statusCode;
+    if (status >= 200 && status < 300) {
+      const contentType = reply.getHeader("content-type");
+      const done: Entry = {
+        fingerprint: fingerprintOf(request),
+        answer: {
           status,
           contentType: typeof contentType === "string" ? contentType : null,
           // Writes answer JSON, or nothing at all (204).
           body: typeof payload === "string" ? payload : "",
-        };
-      } else {
-        // Refused or failed: nothing was written, a retry must really run.
-        entries.delete(slot);
-      }
+        },
+      };
+      await state.set(slot, JSON.stringify(done), REMEMBER_MS);
+      request.idempotencyAnswered = true;
+    } else {
+      // Refused or failed: nothing was written, a retry must really run.
+      await state.delete(slot);
     }
-    done(null, payload);
+    return payload;
   });
 
   // An answer that never went out (connection closed, crash) leaves no stuck key.
-  app.addHook("onResponse", (request, _reply, done) => {
-    const slot = request.idempotencySlot;
-    if (slot !== undefined && entries.get(slot)?.answer === null) {
-      entries.delete(slot);
+  app.addHook("onResponse", async (request) => {
+    if (request.idempotencySlot !== undefined && request.idempotencyAnswered !== true) {
+      await state.delete(request.idempotencySlot);
     }
-    done();
   });
 }

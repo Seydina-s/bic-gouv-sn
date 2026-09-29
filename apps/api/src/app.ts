@@ -29,6 +29,12 @@ import {
 } from "./notifications/push-subscriptions";
 import { pushSubscriptionRoutes } from "./routes/push-subscriptions";
 import { registerIdempotency } from "./idempotency/idempotency";
+import { Redis } from "ioredis";
+import {
+  MemoryKeyValueStore,
+  RedisKeyValueStore,
+  type KeyValueStore,
+} from "./shared-state/key-value-store";
 import type { Config } from "./config";
 import { registerErrorHandlers } from "./errors";
 import { registerSecurity } from "./security";
@@ -89,6 +95,10 @@ export interface AppOptions {
   usageStats?: UsageStats | null;
   /** Push service for approved notifications; none until the app can receive them. */
   pushProvider?: PushProvider;
+  /** Redis shared by the instances (REDIS_URL); none: this process only. */
+  redis?: Redis | null;
+  /** Sessions, sign-in steps, idempotency keys (SCALE-01); defaults from redis. */
+  sharedState?: KeyValueStore;
   /** Sections each phone follows (FEED-04); defaults to the file store. */
   pushSubscriptions?: PushSubscriptionStore;
 }
@@ -107,7 +117,12 @@ function defaultPushProvider(config: Config, subscriptions: PushSubscriptionStor
     : noPushProvider;
 }
 
-function defaultAdmin(config: Config): AdminServices | null {
+/** A Redis client that fails fast: every command has a time limit (CLAUDE.md §4.5). */
+function connectRedis(url: string): Redis {
+  return new Redis(url, { commandTimeout: 2000, maxRetriesPerRequest: 2, connectTimeout: 5000 });
+}
+
+function defaultAdmin(config: Config, state: KeyValueStore): AdminServices | null {
   if (config.ADMIN_SECRET_KEY === undefined) {
     return null;
   }
@@ -120,6 +135,7 @@ function defaultAdmin(config: Config): AdminServices | null {
       accounts,
       journal,
       box: new SecretBox(config.ADMIN_SECRET_KEY, config.ADMIN_SECRET_KEYS_PREVIOUS),
+      state,
     }),
   };
 }
@@ -133,7 +149,9 @@ export async function buildApp({
   procedureThemes = new FileProcedureThemeStore(config.PROCEDURE_THEMES_PATH),
   stateServices = new FileStateServiceStore(config.STATE_SERVICES_PATH),
   remoteConfig = new FileRemoteConfigStore(config.REMOTE_CONFIG_PATH),
-  admin = defaultAdmin(config),
+  redis = config.REDIS_URL === undefined ? null : connectRedis(config.REDIS_URL),
+  sharedState = redis === null ? new MemoryKeyValueStore() : new RedisKeyValueStore(redis),
+  admin = defaultAdmin(config, sharedState),
   logStream,
   errorJournal = null,
   searchMisses = null,
@@ -164,7 +182,7 @@ export async function buildApp({
     journalErrors(app, errorJournal);
   }
   // Before compression: a repeated write gets the first answer as it was sent.
-  registerIdempotency(app);
+  registerIdempotency(app, sharedState);
   // Answers leave compressed (gzip, or brotli when asked): on 3G, the services list
   // goes from 35 to 9 KB and the map style from 60 to 4 KB. Registered after the
   // journal, which reads error bodies before compression. Tiles are already
@@ -176,7 +194,13 @@ export async function buildApp({
     done();
   });
 
-  await registerSecurity(app, config);
+  await registerSecurity(app, config, redis);
+  redis?.on("error", (error: unknown) => {
+    app.log.warn({ err: error }, "Shared state (Redis) unavailable");
+  });
+  app.addHook("onClose", async () => {
+    await sharedState.close();
+  });
 
   await app.register(swagger, {
     openapi: {

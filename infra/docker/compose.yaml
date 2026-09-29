@@ -13,10 +13,20 @@ services:
     environment:
       ADMIN_SECRET_KEY: ${ADMIN_SECRET_KEY:?the API needs its secret key from the environment}
       LOG_LEVEL: info
+      # Sessions, sign-in steps, idempotency keys and the rate limit, shared (SCALE-01).
+      REDIS_URL: redis://redis:6379
     ports:
       - "3000:3000"
     volumes:
       - data:/app/.data
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  redis:
+    image: redis:7.4-alpine
+    # Short-lived state only: nothing to keep across restarts.
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
     restart: unless-stopped
 
   console:

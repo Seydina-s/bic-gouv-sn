@@ -1,6 +1,7 @@
 import helmet from "@fastify/helmet";
 import rateLimit from "@fastify/rate-limit";
 import type { FastifyInstance } from "fastify";
+import type { Redis } from "ioredis";
 import type { Config } from "./config";
 
 /**
@@ -10,7 +11,11 @@ import type { Config } from "./config";
  *   operators put many subscribers behind one public address (carrier-grade NAT).
  *   The CDN in front absorbs normal peaks; this limit only stops abuse.
  */
-export async function registerSecurity(app: FastifyInstance, config: Config): Promise<void> {
+export async function registerSecurity(
+  app: FastifyInstance,
+  config: Config,
+  redis: Redis | null = null,
+): Promise<void> {
   await app.register(helmet, {
     // Swagger UI (development only) needs inline scripts and styles.
     contentSecurityPolicy:
@@ -23,6 +28,9 @@ export async function registerSecurity(app: FastifyInstance, config: Config): Pr
   await app.register(rateLimit, {
     max: config.RATE_LIMIT_PER_MINUTE,
     timeWindow: "1 minute",
+    // Several instances count together in Redis (SCALE-01). If Redis fails, requests
+    // go through: a citizen is never blocked because the counter is unreachable.
+    ...(redis === null ? {} : { redis, nameSpace: "bgs:rate:", skipOnError: true }),
     // Probes from the load balancer and monitoring are never limited.
     // The map's tiles and assets are static and cached (a CDN in production): a map
     // view asks for dozens of them at once, which must not use up a person's quota.

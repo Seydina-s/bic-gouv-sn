@@ -1,5 +1,6 @@
 import Fastify, { type FastifyInstance } from "fastify";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { MemoryKeyValueStore } from "../shared-state/key-value-store";
 import { IDEMPOTENCY_HEADER, REPLAYED_HEADER, registerIdempotency } from "./idempotency";
 
 const KEY = "cle-de-test-idempotence";
@@ -14,7 +15,7 @@ beforeEach(async () => {
   writes = 0;
   time = Date.parse("2026-09-29T08:00:00Z");
   app = Fastify();
-  registerIdempotency(app, () => time);
+  registerIdempotency(app, new MemoryKeyValueStore(() => time));
   app.post("/write", (request) => {
     writes += 1;
     return { writes, body: request.body };
