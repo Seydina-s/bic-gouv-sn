@@ -1,0 +1,18 @@
+/**
+ * The database schema, one step at a time. A step is never edited once merged:
+ * a change is a new step. Steps live in the code so the API bundle carries them.
+ */
+export const MIGRATIONS: readonly { id: string; sql: string }[] = [
+  {
+    // Anonymous usage counters (ADM-12): one number per period, measure and name,
+    // added to by every API instance. Nothing about who sent the signals.
+    id: "001-usage-counts",
+    sql: `CREATE TABLE usage_counts (
+      period text NOT NULL,
+      metric text NOT NULL,
+      name text NOT NULL DEFAULT '',
+      count bigint NOT NULL CHECK (count >= 0),
+      PRIMARY KEY (period, metric, name)
+    )`,
+  },
+];

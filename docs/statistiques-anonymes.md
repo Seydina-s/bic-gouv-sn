@@ -17,6 +17,8 @@ Décision de l'utilisateur du 29/09/2026 (ADM-12) : les tableaux de bord de la c
 
 Le serveur compte chaque signal pour le jour où il le reçoit, puis l'oublie. Il ne garde pas l'adresse de l'envoi, et le contenu des signaux n'est jamais écrit dans les journaux. Il refuse tout champ en trop.
 
+Seuls des totaux sont gardés : un nombre par jour et par mesure (par exemple « 12 personnes actives sur Android le 29/09 »), jamais un signal isolé. Avec PostgreSQL (`DATABASE_URL`), chaque serveur ajoute ses totaux à ceux des autres toutes les 30 secondes ; sans base, ils sont gardés dans un fichier. Les jours de plus de 400 jours sont effacés.
+
 ## Ce qui n'est jamais mesuré
 
 - Aucun identifiant : ni compte, ni numéro de téléphone, ni identifiant publicitaire ou d'appareil, ni adresse IP conservée.

@@ -1,44 +1,22 @@
-import { readFile } from "node:fs/promises";
 import {
   calendarDay,
   calendarMonth,
   calendarWeek,
-  usageFileSchema,
-  type UsageDay,
-  type UsageFile,
   type UsageReport,
   type UsageSignal,
 } from "@bgs/shared-types";
 import { PeriodicallySaved } from "../journal/periodically-saved";
+import { addTo, addToDay, addUsage, emptyDay, emptyUsage } from "./usage-counts";
+import type { UsageStore } from "./usage-store";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 /** Days kept: a little over a year, enough for yearly comparisons. */
 const KEPT_DAYS = 400;
-/** Distinct articles counted per day: beyond, new ones are not counted that day. */
-const MAX_ARTICLES_PER_DAY = 1000;
 /** Rows shown per list in the console. */
 const TOP = 10;
 const REPORT_DAYS = 30;
-
-function emptyDay(): UsageDay {
-  return {
-    active: 0,
-    firstEver: 0,
-    returned: { d1: 0, d7: 0, d30: 0 },
-    platforms: {},
-    osVersions: {},
-    appVersions: {},
-    reads: {},
-    listens: {},
-  };
-}
-
-function add(counts: Record<string, number>, key: string, limit = Infinity): void {
-  if (counts[key] === undefined && Object.keys(counts).length >= limit) {
-    return;
-  }
-  counts[key] = (counts[key] ?? 0) + 1;
-}
+/** Days the report reads: its 30 days, and 30 more for the retention after 30 days. */
+const REPORT_SPAN_DAYS = REPORT_DAYS + 30;
 
 function sumCounts(maps: readonly Record<string, number>[]): [string, number][] {
   const total = new Map<string, number>();
@@ -52,39 +30,31 @@ function sumCounts(maps: readonly Record<string, number>[]): [string, number][] 
 
 /**
  * Anonymous usage counters (ADM-12): what the app's signals add up to, per day,
- * week and month. Nothing about who sent them. Kept in memory and written now
- * and then, never on a request's path.
+ * week and month. Nothing about who sent them. Counted in memory, then added to
+ * the store now and then, never on a request's path: several API instances add
+ * up their counts (SCALE-02).
  */
 export class UsageStats extends PeriodicallySaved {
-  private constructor(
-    path: string,
-    private readonly data: UsageFile,
+  /** Counted here since the last save. */
+  private pending = emptyUsage();
+
+  constructor(
+    private readonly store: UsageStore,
+    private readonly clock: () => number = Date.now,
   ) {
-    super(path);
+    super();
   }
 
-  /** The counters saved at `path`, or empty ones (missing or unreadable file). */
-  static async open(path: string): Promise<UsageStats> {
-    let data: UsageFile = { schemaVersion: 1, days: {}, weeks: {}, months: {} };
-    try {
-      data = usageFileSchema.parse(JSON.parse(await readFile(path, "utf8")));
-    } catch {
-      // Nothing saved yet, or damaged: the counts start again.
-    }
-    return new UsageStats(path, data);
-  }
-
-  record(signals: readonly UsageSignal[], now = Date.now()): void {
-    const key = calendarDay(now);
-    const day = (this.data.days[key] ??= emptyDay());
+  record(signals: readonly UsageSignal[], now = this.clock()): void {
+    const day = (this.pending.days[calendarDay(now)] ??= emptyDay());
     for (const signal of signals) {
       if (signal.type === "active") {
         day.active += 1;
         if (signal.firstThisWeek) {
-          add(this.data.weeks, calendarWeek(now));
+          addTo(this.pending.weeks, calendarWeek(now));
         }
         if (signal.firstThisMonth) {
-          add(this.data.months, calendarMonth(now));
+          addTo(this.pending.months, calendarMonth(now));
         }
         if (signal.firstEver) {
           day.firstEver += 1;
@@ -92,34 +62,40 @@ export class UsageStats extends PeriodicallySaved {
         if (signal.returnedAfterDays !== null) {
           day.returned[`d${String(signal.returnedAfterDays)}` as "d1" | "d7" | "d30"] += 1;
         }
-        add(day.platforms, signal.platform);
-        add(day.osVersions, `${signal.platform} ${signal.osVersion}`);
-        add(day.appVersions, signal.appVersion);
+        addToDay(day, "platforms", signal.platform);
+        addToDay(day, "osVersions", `${signal.platform} ${signal.osVersion}`);
+        addToDay(day, "appVersions", signal.appVersion);
       } else {
-        add(
-          signal.type === "read" ? day.reads : day.listens,
-          signal.articleId,
-          MAX_ARTICLES_PER_DAY,
-        );
+        addToDay(day, signal.type === "read" ? "reads" : "listens", signal.articleId);
       }
     }
-    this.forgetOldDays(now);
     this.changed();
   }
 
-  private forgetOldDays(now: number): void {
-    const oldest = calendarDay(now - KEPT_DAYS * DAY_MS);
-    this.data.days = Object.fromEntries(
-      Object.entries(this.data.days).filter(([key]) => key >= oldest),
-    );
+  /** Adds what was counted here to the store; kept for the next save if it fails. */
+  protected async save(): Promise<void> {
+    const delta = this.pending;
+    this.pending = emptyUsage();
+    try {
+      await this.store.add(delta, calendarDay(this.clock() - KEPT_DAYS * DAY_MS));
+    } catch (error) {
+      addUsage(this.pending, delta);
+      throw error;
+    }
   }
 
   /** The console's view; `titleOf` names an article (null when no longer published). */
   async report(
     titleOf: (articleId: string) => Promise<string | null>,
-    now = Date.now(),
+    now = this.clock(),
   ): Promise<UsageReport> {
-    const day = (offset: number) => this.data.days[calendarDay(now - offset * DAY_MS)];
+    const kept = await this.store.load(calendarDay(now - REPORT_SPAN_DAYS * DAY_MS));
+    const usage = kept.usage;
+    addUsage(usage, this.pending);
+    const since = [kept.since, ...Object.keys(this.pending.days)]
+      .filter((key) => key !== null)
+      .sort()[0];
+    const day = (offset: number) => usage.days[calendarDay(now - offset * DAY_MS)];
     const recent = Array.from({ length: REPORT_DAYS }, (_, index) => REPORT_DAYS - 1 - index);
     const recentDays = recent.map((offset) => day(offset)).filter((item) => item !== undefined);
     const newOver = (days: number) =>
@@ -146,13 +122,12 @@ export class UsageStats extends PeriodicallySaved {
       );
     const shares = (counts: Record<string, number>[]) =>
       sumCounts(counts).map(([name, count]) => ({ name, count }));
-    const known = Object.keys(this.data.days).sort();
     return {
-      since: known[0] ?? null,
+      since: since ?? null,
       activeToday: day(0)?.active ?? 0,
       activeYesterday: day(1)?.active ?? 0,
-      activeThisWeek: this.data.weeks[calendarWeek(now)] ?? 0,
-      activeThisMonth: this.data.months[calendarMonth(now)] ?? 0,
+      activeThisWeek: usage.weeks[calendarWeek(now)] ?? 0,
+      activeThisMonth: usage.months[calendarMonth(now)] ?? 0,
       newLast7Days: newOver(7),
       newLast30Days: newOver(30),
       retention: { d1: retention(1), d7: retention(7), d30: retention(30) },
@@ -167,9 +142,5 @@ export class UsageStats extends PeriodicallySaved {
       topRead: await top(recentDays.map((item) => item.reads)),
       topListened: await top(recentDays.map((item) => item.listens)),
     };
-  }
-
-  protected snapshot(): UsageFile {
-    return this.data;
   }
 }

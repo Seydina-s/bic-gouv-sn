@@ -8,6 +8,7 @@ import { buildApp } from "./app";
 import { loadConfig } from "./config";
 import { temporaryStore } from "./testing/store";
 import { UsageStats } from "./usage/usage-stats";
+import { FileUsageStore } from "./usage/usage-store";
 
 let app: FastifyInstance;
 
@@ -16,7 +17,9 @@ beforeEach(async () => {
     config: loadConfig({ LOG_LEVEL: "silent" }),
     version: "1.0.0",
     articles: temporaryStore(),
-    usageStats: await UsageStats.open(join(tmpdir(), "bgs-errors", `${randomUUID()}.json`)),
+    usageStats: new UsageStats(
+      new FileUsageStore(join(tmpdir(), "bgs-errors", `${randomUUID()}.json`)),
+    ),
   });
 });
 

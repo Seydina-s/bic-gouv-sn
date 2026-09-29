@@ -9,6 +9,7 @@ import { loadConfig } from "../config";
 import { adminForTests } from "../testing/admin-session";
 import { temporaryStore } from "../testing/store";
 import { UsageStats } from "../usage/usage-stats";
+import { FileUsageStore } from "../usage/usage-store";
 
 const ACTIVE = {
   type: "active",
@@ -31,7 +32,9 @@ beforeEach(async () => {
     version: "1.0.0",
     articles: temporaryStore(),
     admin: admin.admin,
-    usageStats: await UsageStats.open(join(tmpdir(), "bgs-usage", `${randomUUID()}.json`)),
+    usageStats: new UsageStats(
+      new FileUsageStore(join(tmpdir(), "bgs-usage", `${randomUUID()}.json`)),
+    ),
   });
 });
 

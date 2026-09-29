@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { errorJournalFileSchema, type ErrorJournalEntry } from "@bgs/shared-types";
 import type { FastifyInstance } from "fastify";
-import { PeriodicallySaved } from "./periodically-saved";
+import { SavedToFile } from "./periodically-saved";
 
 /** The place of a request whose address matched no route. */
 export const UNKNOWN_ROUTE = "(adresse inconnue)";
@@ -54,7 +54,7 @@ const MAX_GROUPS = 300;
  * durably now and then (never on the request's path). Read by the console's error
  * journal (CLAUDE.md §4.5).
  */
-export class ErrorJournal extends PeriodicallySaved {
+export class ErrorJournal extends SavedToFile {
   private readonly groups = new Map<string, ErrorJournalEntry>();
 
   private constructor(path: string) {

@@ -73,6 +73,12 @@ const envSchema = z.object({
    */
   REDIS_URL: z.url({ protocol: /^rediss?$/ }).optional(),
   /**
+   * PostgreSQL shared by the API instances (SCALE-02): anonymous usage counters
+   * for now. Absent: kept in files (one instance). Carries a password: from the
+   * secret manager only.
+   */
+  DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }).optional(),
+  /**
    * Push service for approved notifications: "none" records them without sending;
    * "expo" sends through Expo's free service (once the app can receive them).
    */

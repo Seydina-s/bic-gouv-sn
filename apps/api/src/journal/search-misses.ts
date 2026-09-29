@@ -7,7 +7,7 @@ import {
   type SearchArea,
   type SearchMiss,
 } from "@bgs/shared-types";
-import { PeriodicallySaved } from "./periodically-saved";
+import { SavedToFile } from "./periodically-saved";
 
 /** Distinct searches kept: beyond, the least searched gives way (bounded on disk). */
 const MAX_QUERIES = 2000;
@@ -17,7 +17,7 @@ const MAX_QUERIES = 2000;
  * about who searched (decision of 28/09/2026). The console sees only those made
  * at least SEARCH_MISS_MIN_COUNT times.
  */
-export class SearchMisses extends PeriodicallySaved {
+export class SearchMisses extends SavedToFile {
   private readonly misses = new Map<string, SearchMiss>();
 
   private constructor(path: string) {
