@@ -144,13 +144,18 @@ describe("cover photos", () => {
     expect(file.body).toBe("webp");
     expect(file.headers["cache-control"]).toContain("max-age=604800");
 
+    // Refused as the client's fault, never served and never an internal error
+    // (self-check of 29/09/2026: encoded slashes answered 500).
     for (const url of [
       "/media/.secret",
       "/media/../package.json",
       "/media/%2e%2e/package.json",
+      "/media/..%2f..%2fpackage.json",
+      "/media/images/..%5c..%5c..%5cpackage.json",
       "/media/images/",
     ]) {
-      expect((await app.inject({ method: "GET", url })).statusCode).toBeGreaterThanOrEqual(400);
+      const status = (await app.inject({ method: "GET", url })).statusCode;
+      expect([url, status >= 400 && status < 500]).toEqual([url, true]);
     }
   });
 
