@@ -2,8 +2,10 @@ import type { ThemePreference } from "@bgs/ui";
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 
+import { ChartBarIcon as ChartBar } from "phosphor-react-native/src/icons/ChartBar";
 import { CellSignalHighIcon as CellSignalHigh } from "phosphor-react-native/src/icons/CellSignalHigh";
 import { DeviceMobileIcon as DeviceMobile } from "phosphor-react-native/src/icons/DeviceMobile";
+import { EyeSlashIcon as EyeSlash } from "phosphor-react-native/src/icons/EyeSlash";
 import { ImageIcon } from "phosphor-react-native/src/icons/Image";
 import { LeafIcon as Leaf } from "phosphor-react-native/src/icons/Leaf";
 import { MoonIcon as Moon } from "phosphor-react-native/src/icons/Moon";
@@ -27,6 +29,7 @@ import { LinkRow } from "../../components/LinkRow";
 import { SegmentedChoice, type Segment } from "../../components/SegmentedChoice";
 import type { LangChoice } from "../../i18n/I18nProvider";
 import { type DataSaverPreference, useDataSaver } from "../data-saver/DataSaverProvider";
+import { type UsageConsent, useUsageStats } from "../usage-stats/UsageStatsProvider";
 import { OPEN_SOURCE } from "../licences/open-source";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useReduceMotion } from "../../theme/useSystemAccessibility";
@@ -53,6 +56,7 @@ export function SettingsSheet({ visible, onClose }: { visible: boolean; onClose:
   const { theme, preference, setPreference } = useTheme();
   const { t, choice, setLang } = useTranslation();
   const dataSaver = useDataSaver();
+  const usageStats = useUsageStats();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { color, space, textStyle, radius, layout } = theme;
@@ -86,6 +90,15 @@ export function SettingsSheet({ visible, onClose }: { visible: boolean; onClose:
       icon: CellSignalHigh,
     },
     { value: "always", label: t("settings.dataSaverAlways"), icon: Leaf },
+  ];
+  const usageChoices: Segment<UsageConsent>[] = [
+    { value: "off", label: t("settings.usageStatsOff"), icon: EyeSlash },
+    {
+      value: "on",
+      label: t("settings.usageStatsOn"),
+      spokenLabel: t("settings.usageStatsOnSpoken"),
+      icon: ChartBar,
+    },
   ];
   const close = onClose;
   const reduceMotion = useReduceMotion();
@@ -184,6 +197,17 @@ export function SettingsSheet({ visible, onClose }: { visible: boolean; onClose:
               />
               <Text style={[textStyle.bodySmall, { color: color.textSecondary }]}>
                 {t("settings.dataSaverHelp")}
+              </Text>
+            </View>
+            <View style={{ gap: space.sm }}>
+              <SegmentedChoice
+                title={t("settings.usageStats")}
+                segments={usageChoices}
+                selected={usageStats.consent}
+                onSelect={usageStats.setConsent}
+              />
+              <Text style={[textStyle.bodySmall, { color: color.textSecondary }]}>
+                {t("settings.usageStatsHelp")}
               </Text>
             </View>
             <View style={{ gap: space.sm }}>

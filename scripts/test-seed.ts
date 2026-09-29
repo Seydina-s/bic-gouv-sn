@@ -231,6 +231,31 @@ async function seedAccount(dataDir: string, password: string): Promise<void> {
 }
 
 /** Placeholder searches that found nothing, frequent enough to be shown. */
+/** Placeholder usage counters for the two days before the run (no article read). */
+function seedUsage(dataDir: string): void {
+  const day = (daysAgo: number) =>
+    new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const counts = (active: number, firstEver: number) => ({
+    active,
+    firstEver,
+    returned: { d1: 1, d7: 0, d30: 0 },
+    platforms: { android: active - 1, ios: 1 },
+    osVersions: { "android 14": active - 1, "ios 18": 1 },
+    appVersions: { "1.0.0": active },
+    reads: {},
+    listens: {},
+  });
+  writeFileSync(
+    join(dataDir, "usage-stats.json"),
+    JSON.stringify({
+      schemaVersion: 1,
+      days: { [day(2)]: counts(4, 4), [day(1)]: counts(6, 2) },
+      weeks: {},
+      months: {},
+    }),
+  );
+}
+
 function seedSearchMisses(dataDir: string): void {
   const miss = (area: "news" | "procedures", query: string, count: number) => ({
     area,
@@ -308,6 +333,7 @@ function seedNotifications(dataDir: string): void {
 
 export async function seed(dataDir: string, password: string): Promise<void> {
   seedSearchMisses(dataDir);
+  seedUsage(dataDir);
   seedNotifications(dataDir);
   seedIngestionStatus(dataDir);
   await seedArticle(dataDir);

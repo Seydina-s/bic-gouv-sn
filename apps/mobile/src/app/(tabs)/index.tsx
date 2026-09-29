@@ -223,7 +223,12 @@ export default function HomeScreen() {
           {page}
         </View>
         {shownId !== null && (
-          <ArticlePane id={shownId} paneWidth={detailPaneWidth} bottomInset={bottomInset} />
+          <ArticlePane
+            id={shownId}
+            paneWidth={detailPaneWidth}
+            bottomInset={bottomInset}
+            chosen={selectedId !== null}
+          />
         )}
       </View>
     );

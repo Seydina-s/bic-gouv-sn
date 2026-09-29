@@ -8,6 +8,7 @@ import { Icon } from "../../components/Icon";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 import { useFeature } from "../remote-config/useRemoteConfig";
+import { useUsageStats } from "../usage-stats/UsageStatsProvider";
 import { spokenPieces } from "./spoken-text";
 import { useReadAloud } from "./useReadAloud";
 
@@ -22,16 +23,25 @@ export function canListen(detail: NewsDetail): boolean {
 
 /** The article's "Écouter": its title, then its text. */
 export function ListenButton({ detail }: { detail: NewsDetail }) {
+  const { record } = useUsageStats();
   return (
     <ReadAloudButton
       language={VOICES[detail.lang] ?? FRENCH_VOICE}
+      onStart={() => {
+        record({ type: "listen", articleId: detail.id });
+      }}
       pieces={() => spokenPieces(detail.title, detail.blocks, Speech.maxSpeechInputLength)}
     />
   );
 }
 
 /** "Écouter", unless the console switched reading aloud off for the moment. */
-export function ReadAloudButton(props: { language: string; pieces: () => readonly string[] }) {
+export function ReadAloudButton(props: {
+  language: string;
+  pieces: () => readonly string[];
+  /** Called when reading starts (an article listened to is counted, ADM-12). */
+  onStart?: () => void;
+}) {
   return useFeature("readAloud") ? <ReadAloudPill {...props} /> : null;
 }
 
@@ -42,9 +52,11 @@ export function ReadAloudButton(props: { language: string; pieces: () => readonl
 function ReadAloudPill({
   language,
   pieces,
+  onStart,
 }: {
   language: string;
   pieces: () => readonly string[];
+  onStart?: (() => void) | undefined;
 }) {
   const { theme } = useTheme();
   const { t } = useTranslation();
@@ -62,6 +74,7 @@ function ReadAloudPill({
           stop();
         } else {
           start(pieces());
+          onStart?.();
         }
       }}
       style={({ pressed }) => [

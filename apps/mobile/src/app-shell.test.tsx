@@ -430,6 +430,63 @@ describe("app shell", () => {
     ).toBeOnTheScreen();
   });
 
+  it("sends usage statistics only once turned on, anonymous, and forgets them when off", async () => {
+    const fetchMock = newsFetch();
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    // The fake server is typed for GET requests: the body of a POST is read as sent.
+    const sentSignals = () =>
+      (fetchMock.mock.calls as unknown as [string, RequestInit | undefined][])
+        .filter(([url]) => url.includes("/v1/stats"))
+        .flatMap(
+          ([, init]) =>
+            (JSON.parse(typeof init?.body === "string" ? init.body : "{}") as { signals: object[] })
+              .signals,
+        );
+    await renderRouter(routes, { initialUrl: "/" });
+    await fireEvent.press(await screen.findByRole("button", { name: "Réglages" }));
+    // Off by default: nothing has left the phone.
+    expect(screen.getByRole("radio", { name: "Non", checked: true })).toBeOnTheScreen();
+    expect(sentSignals()).toEqual([]);
+    await fireEvent.press(
+      screen.getByRole("radio", { name: "Oui, envoyer des statistiques anonymes" }),
+    );
+    await waitFor(() => {
+      expect(sentSignals()).toEqual([
+        expect.objectContaining({ type: "active", firstEver: true, platform: "ios" }),
+      ]);
+    });
+    // Nothing that could single anyone out.
+    expect(Object.keys(sentSignals()[0] ?? {}).sort()).toEqual([
+      "appVersion",
+      "firstEver",
+      "firstThisMonth",
+      "firstThisWeek",
+      "osVersion",
+      "platform",
+      "returnedAfterDays",
+      "type",
+    ]);
+    await fireEvent.press(screen.getByRole("button", { name: "Fermer les réglages" }));
+    await fireEvent.press(first(await screen.findAllByText("Titre de test A")));
+    expect(await screen.findByText("Paragraphe de test.")).toBeOnTheScreen();
+    expect(sentSignals()).toContainEqual({ type: "read", articleId: DETAIL.id });
+  });
+
+  it("erases what the phone kept for statistics when they are turned off", async () => {
+    await AsyncStorage.multiSet([
+      ["bgs-usage-stats", "on"],
+      [
+        "bgs-usage-memory",
+        JSON.stringify({ firstDay: "2026-09-28", lastDay: null, lastWeek: null, lastMonth: null }),
+      ],
+    ]);
+    await renderRouter(routes, { initialUrl: "/" });
+    await fireEvent.press(await screen.findByRole("button", { name: "Réglages" }));
+    await fireEvent.press(await screen.findByRole("radio", { name: "Non" }));
+    expect(await AsyncStorage.getItem("bgs-usage-memory")).toBeNull();
+    expect(await AsyncStorage.getItem("bgs-usage-stats")).toBe("off");
+  });
+
   it("opens an article with its official source link", async () => {
     const openURL = jest.spyOn(Linking, "openURL").mockResolvedValue(true);
     await renderRouter(routes, { initialUrl: "/" });

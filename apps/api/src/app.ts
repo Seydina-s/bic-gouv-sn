@@ -38,6 +38,8 @@ import { adminServicesRoutes } from "./routes/admin-services";
 import { adminRemoteConfigRoutes, remoteConfigRoutes } from "./routes/remote-config";
 import { type ErrorJournal, journalErrors } from "./journal/error-journal";
 import type { SearchMisses } from "./journal/search-misses";
+import { adminUsageRoutes, usageSignalsRoutes } from "./routes/usage";
+import type { UsageStats } from "./usage/usage-stats";
 import {
   FileNotificationStore,
   NotificationService,
@@ -77,6 +79,8 @@ export interface AppOptions {
   errorJournal?: ErrorJournal | null;
   /** Searches that found nothing (server.ts opens it); none: not counted. */
   searchMisses?: SearchMisses | null;
+  /** Anonymous usage counters (server.ts opens them); none: signals not accepted. */
+  usageStats?: UsageStats | null;
   /** Push service for approved notifications; none until the app can receive them. */
   pushProvider?: PushProvider;
 }
@@ -118,6 +122,7 @@ export async function buildApp({
   logStream,
   errorJournal = null,
   searchMisses = null,
+  usageStats = null,
   pushProvider = noPushProvider,
 }: AppOptions): Promise<FastifyInstance> {
   const app = Fastify({
@@ -210,6 +215,12 @@ export async function buildApp({
       await searchMisses.close();
     });
   }
+  if (usageStats !== null) {
+    await app.register(usageSignalsRoutes, { prefix: "/v1", usageStats });
+    app.addHook("onClose", async () => {
+      await usageStats.close();
+    });
+  }
   // With a CDN configured, media are served from there, not by the API.
   if (config.MEDIA_BASE_URL === undefined) {
     await registerMedia(app, config.MEDIA_ROOT);
@@ -254,6 +265,14 @@ export async function buildApp({
         admin.journal,
       ),
     });
+    if (usageStats !== null) {
+      await app.register(adminUsageRoutes, {
+        prefix: "/admin/v1",
+        signIn: admin.signIn,
+        usageStats,
+        articles,
+      });
+    }
     if (searchMisses !== null) {
       await app.register(adminSearchMissesRoutes, {
         prefix: "/admin/v1",

@@ -7,10 +7,12 @@ export interface ArticlePaneProps {
   id: string;
   paneWidth: number;
   bottomInset: number;
+  /** False for the story shown by default, before the person chose one. */
+  chosen: boolean;
 }
 
 /** Detail pane of the two-pane layout: the article with its actions on top. */
-export function ArticlePane({ id, paneWidth, bottomInset }: ArticlePaneProps) {
+export function ArticlePane({ id, paneWidth, bottomInset, chosen }: ArticlePaneProps) {
   const { theme } = useTheme();
   const { detail, isPending, withdrawn } = useArticleDetail(id);
   const { space } = theme;
@@ -21,6 +23,7 @@ export function ArticlePane({ id, paneWidth, bottomInset }: ArticlePaneProps) {
       </View>
       <ArticleView
         withAppBar={false}
+        countsAsRead={chosen}
         detail={detail}
         isPending={isPending}
         withdrawn={withdrawn}

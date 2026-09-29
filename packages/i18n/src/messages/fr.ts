@@ -262,6 +262,12 @@ export const fr = {
     dataSaverAlways: "Toujours",
     dataSaverHelp:
       "Les photos ne se chargent que si vous les demandez. Leurs couleurs restent visibles.",
+    usageStats: "Statistiques anonymes",
+    usageStatsOff: "Non",
+    usageStatsOn: "Oui",
+    usageStatsOnSpoken: "Oui, envoyer des statistiques anonymes",
+    usageStatsHelp:
+      "Aidez-nous à améliorer l'application\u00a0: elle compte combien de personnes l'utilisent et quels articles sont lus, sans jamais savoir qui vous êtes. Aucun identifiant, aucune position.",
     about: "À propos",
     aboutNews:
       "Bic Gouv SN réunit en un seul endroit l'actualité officielle du Gouvernement du Sénégal. Comptes rendus du Conseil des ministres, communiqués, discours, audiences et visites officielles arrivent dans l'application dès leur publication sur presidence.sn, en français et en wolof.",

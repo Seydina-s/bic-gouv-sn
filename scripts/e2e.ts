@@ -105,6 +105,25 @@ const JOURNEYS: Journey[] = [
       await browser.waitForText("Mot de passe enregistré");
     },
   },
+  {
+    name: "Statistiques anonymes : les accepter dans l'app, lire un article, le voir dans la console",
+    run: async (browser, { appBase, consoleBase, token }) => {
+      await browser.setViewport(PHONE);
+      await browser.open(appBase, 0);
+      await browser.press("Réglages");
+      await browser.press("Oui, envoyer des statistiques anonymes");
+      await browser.press("Fermer les réglages");
+      await browser.waitForControlGone("Fermer les réglages");
+      await browser.press(ARTICLE_TITLE);
+      await browser.waitForPath(`/article/${ARTICLE_ID}`);
+      await browser.setViewport(DESKTOP);
+      await browser.setCookie("bgs_admin_session", token, consoleBase);
+      await browser.open(`${consoleBase}/usage`, SETTLE_MS);
+      await browser.waitForText("Articles les plus lus");
+      // Only this journey reads it with statistics on: the count comes from the app.
+      await browser.waitForText(ARTICLE_TITLE);
+    },
+  },
 ];
 
 const say = (line: string) => process.stdout.write(`${line}\n`);

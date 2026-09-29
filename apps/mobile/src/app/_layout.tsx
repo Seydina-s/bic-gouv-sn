@@ -7,6 +7,7 @@ import { useEffect, type ComponentType } from "react";
 import { StyleSheet, View } from "react-native";
 import { QueryProvider } from "../data/QueryProvider";
 import { DataSaverProvider } from "../features/data-saver/DataSaverProvider";
+import { UsageStatsProvider } from "../features/usage-stats/UsageStatsProvider";
 import { UpdateGate } from "../features/remote-config/FeatureGate";
 import { SettingsProvider } from "../features/shell/SettingsProvider";
 import { FavoritesProvider } from "../features/favorites/FavoritesProvider";
@@ -77,11 +78,13 @@ function RootLayout() {
         <I18nProvider>
           <FavoritesProvider>
             <DataSaverProvider>
-              <SettingsProvider>
-                <UpdateGate>
-                  <ThemedStack />
-                </UpdateGate>
-              </SettingsProvider>
+              <UsageStatsProvider>
+                <SettingsProvider>
+                  <UpdateGate>
+                    <ThemedStack />
+                  </UpdateGate>
+                </SettingsProvider>
+              </UsageStatsProvider>
             </DataSaverProvider>
           </FavoritesProvider>
         </I18nProvider>
