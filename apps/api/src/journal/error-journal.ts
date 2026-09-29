@@ -1,7 +1,13 @@
-import { readFile } from "node:fs/promises";
-import { errorJournalFileSchema, type ErrorJournalEntry } from "@bgs/shared-types";
+import type { ErrorJournalEntry } from "@bgs/shared-types";
 import type { FastifyInstance } from "fastify";
-import { SavedToFile } from "./periodically-saved";
+import {
+  addGroups,
+  type ErrorJournalStore,
+  groupKey,
+  latestGroups,
+  MAX_GROUPS,
+} from "./error-journal-store";
+import { PeriodicallySaved } from "./periodically-saved";
 
 /** The place of a request whose address matched no route. */
 export const UNKNOWN_ROUTE = "(adresse inconnue)";
@@ -46,65 +52,50 @@ export function journalErrors(app: FastifyInstance, journal: ErrorJournal): void
   });
 }
 
-/** Groups kept: beyond, the oldest group gives way (a flood never fills the disk). */
-const MAX_GROUPS = 300;
-
 /**
- * Errors the API answered, grouped by code and place, kept in memory and written
- * durably now and then (never on the request's path). Read by the console's error
- * journal (CLAUDE.md §4.5).
+ * Errors the API answered, grouped by code and place. Counted in memory, then added
+ * to the store now and then (never on the request's path): several API instances
+ * journal into the same groups (SCALE-02). Read by the console's error journal
+ * (CLAUDE.md §4.5).
  */
-export class ErrorJournal extends SavedToFile {
-  private readonly groups = new Map<string, ErrorJournalEntry>();
+export class ErrorJournal extends PeriodicallySaved {
+  /** Journaled here since the last save. */
+  private pending = new Map<string, ErrorJournalEntry>();
 
-  private constructor(path: string) {
-    super(path);
-  }
-
-  /** The journal saved at `path`, or an empty one (missing or unreadable file). */
-  static async open(path: string): Promise<ErrorJournal> {
-    const journal = new ErrorJournal(path);
-    try {
-      const saved = errorJournalFileSchema.parse(JSON.parse(await readFile(path, "utf8")));
-      for (const entry of saved.entries) {
-        journal.groups.set(`${entry.code} ${entry.where}`, entry);
-      }
-    } catch {
-      // Nothing saved yet, or damaged: the journal starts again.
-    }
-    return journal;
+  constructor(private readonly store: ErrorJournalStore) {
+    super();
   }
 
   record(code: string, where: string, requestId: string | null, at = new Date()): void {
-    const key = `${code} ${where}`;
-    const seen = this.groups.get(key);
     const time = at.toISOString();
-    if (seen !== undefined) {
-      this.groups.delete(key);
-    } else if (this.groups.size >= MAX_GROUPS) {
-      const [oldest] = this.groups.keys();
-      if (oldest !== undefined) {
-        this.groups.delete(oldest);
-      }
+    addGroups(this.pending, [
+      { code, where, count: 1, firstAt: time, lastAt: time, lastRequestId: requestId },
+    ]);
+    if (this.pending.size > MAX_GROUPS) {
+      this.pending = new Map(
+        latestGroups(this.pending.values()).map((group) => [groupKey(group), group]),
+      );
     }
-    // Re-inserted last: the map's order is the order of the latest occurrence.
-    this.groups.set(key, {
-      code,
-      where,
-      count: (seen?.count ?? 0) + 1,
-      firstAt: seen?.firstAt ?? time,
-      lastAt: time,
-      lastRequestId: requestId,
-    });
     this.changed();
   }
 
-  /** Latest first. */
-  entries(): ErrorJournalEntry[] {
-    return [...this.groups.values()].reverse();
+  /** Adds what was journaled here to the store; kept for the next save if it fails. */
+  protected async save(): Promise<void> {
+    const journaled = this.pending;
+    this.pending = new Map();
+    try {
+      await this.store.add([...journaled.values()]);
+    } catch (error) {
+      addGroups(this.pending, journaled.values());
+      throw error;
+    }
   }
 
-  protected snapshot() {
-    return { schemaVersion: 1 as const, entries: [...this.groups.values()] };
+  /** Latest first. */
+  async entries(): Promise<ErrorJournalEntry[]> {
+    const all = new Map<string, ErrorJournalEntry>();
+    addGroups(all, await this.store.all());
+    addGroups(all, this.pending.values());
+    return latestGroups(all.values());
   }
 }

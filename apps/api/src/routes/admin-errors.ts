@@ -36,7 +36,7 @@ export const adminErrorsRoutes: FastifyPluginAsyncZod<AdminErrorsOptions> = (
         return reply;
       }
       void reply.header("cache-control", "no-store");
-      return { entries: errorJournal.entries() };
+      return { entries: await errorJournal.entries() };
     },
   );
   return Promise.resolve();

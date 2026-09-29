@@ -28,4 +28,18 @@ export const MIGRATIONS: readonly { id: string; sql: string }[] = [
       PRIMARY KEY (area, lang, query)
     )`,
   },
+  {
+    // Errors the API answered, grouped by code and place (a route pattern, never
+    // the address itself). Times as ISO text in UTC: they sort as they read.
+    id: "003-error-journal",
+    sql: `CREATE TABLE error_journal (
+      code text NOT NULL,
+      place text NOT NULL,
+      count bigint NOT NULL CHECK (count > 0),
+      first_at text NOT NULL,
+      last_at text NOT NULL,
+      last_request_id text,
+      PRIMARY KEY (code, place)
+    )`,
+  },
 ];

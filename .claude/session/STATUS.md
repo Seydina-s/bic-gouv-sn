@@ -1,6 +1,6 @@
 # STATUS — Bic Gouv SN
 
-**Dernière mise à jour** : 29/09/2026 (20 h 15) · **Mode** : autonome jusqu'au 29/09 à 22 h (demande de l'utilisateur), puis retour au mode standard. Actions de l'utilisateur reportées : `.claude/session/A-FAIRE-UTILISATEUR.md` (17 points, dont plusieurs réglés).
+**Dernière mise à jour** : 30/09/2026 (0 h 15) · **Mode** : autonome jusqu'au 30/09 à 2 h (demande de l'utilisateur), puis retour au mode standard. Actions de l'utilisateur reportées : `.claude/session/A-FAIRE-UTILISATEUR.md` (17 points, dont plusieurs réglés).
 
 ## Où on en est
 - Dépôt **public et sécurisé** : https://github.com/Seydina-s/bic-gouv-sn. `main` protégée : tout passe par PR + **4 contrôles verts** (qualité et tests, constructions avec **audit d'accessibilité** sur 82 écrans dont 26 à 320 px et **6 parcours de bout en bout**, secrets et dépendances, **conteneurs**).
@@ -30,7 +30,11 @@
   - **conteneurs** API, console, collecte (`infra/`), exigés en CI ; **chiffrage de l'hébergement** (`docs/hebergement.md`, environ 65 €/mois au départ, une seule instance de l'API tant que SCALE-01 n'est pas fait) ;
   - **notifications push, partie serveur** (abonnements par rubrique, heures calmes, envoi Expo) ; l'écran de l'app attend la version de test ;
   - **objectif « moins de 2 minutes »** mesuré dans la console ; **contrôle à 320 px** ; **auto-vérification offensive** de l'API (défaut 500 corrigé) ; audit croisé AUD4 ; nettoyage des fichiers temporaires orphelins.
-- Contrôle complet : 1 078 tests verts.
+- Soir du 29/09 (PR #137 à #140), **préparation à plusieurs serveurs d'API** :
+  - **SCALE-01** : sessions et étapes de connexion de la console, clés anti-doublons et limite de débit partagées dans **Redis** (`REDIS_URL`) ;
+  - **SCALE-02** (tranches 1 à 3) : **PostgreSQL** entre dans l'API (`DATABASE_URL`, schéma mis à jour au démarrage) ; statistiques d'usage, recherches sans résultat et journal des erreurs **additionnés** en base par chaque serveur ; sans base, les fichiers restent utilisés ;
+  - tout est testé en CI contre un vrai Redis et un vrai PostgreSQL 18 (PGlite en local) ; Redis et PostgreSQL ajoutés à `infra/docker/compose.yaml`.
+- Contrôle complet : plus de 1 100 tests verts.
 - Incident du 29/09 : clé de l'API **locale** apparue dans la conversation ; remplacée le jour même (ERREURS.md).
 
 ## En attente de l'utilisateur
@@ -38,11 +42,11 @@ Voir `.claude/session/A-FAIRE-UTILISATEUR.md`. Toujours ouverts : compte Apple (
 
 ## Prochaine tâche
 - Dès la version de test : écran des notifications dans l'app (PUSH-01, FEED-04), QA-02, QA-03, QA-04, QA-09 (carte native), E2E-02 (Maestro), LIC-02.
-- Avant le lancement à grande échelle : SCALE-01 (sessions, clés anti-doublons, compteurs et abonnements dans PostgreSQL ou Redis).
+- Avant une seconde instance de l'API : fin de SCALE-02 (articles et démarches écrits par la collecte, abonnements push, notifications, comptes et journal d'audit, dans PostgreSQL). Tranches suivantes : abonnements push, puis notifications, puis comptes (données de l'équipe : à faire avec soin, journal d'audit chaîné).
 - QA-11 réglé (test instable : préparation trop lente sous charge).
 
-## Services locaux (au 29/09, 20 h 15)
-- API sur 3100 relancée sur `main` (statistiques, notifications, nouvelle clé : la console demande une nouvelle connexion) ; console en développement sur 3001 ; Expo sur 8081 ; export web de l'app servi sur 8084 (relais vers l'API) ; une seule collecte temps réel (verrou actif, contrôle des retraits chaque nuit ; elle nettoiera les fichiers temporaires orphelins à son prochain démarrage).
+## Services locaux (au 30/09, 0 h 15)
+- API sur 3100 lancée avant SCALE-01 (code de 20 h 15, toujours sur fichiers : pas de `REDIS_URL` ni de `DATABASE_URL` en local, pas de Redis ni de PostgreSQL installés sur la machine) ; console en développement sur 3001 ; Expo sur 8081 ; export web de l'app servi sur 8084 (relais vers l'API) ; une seule collecte temps réel (verrou actif, contrôle des retraits chaque nuit ; elle nettoiera les fichiers temporaires orphelins à son prochain démarrage).
 - Changer la clé locale des seconds codes : arrêter l'API, `pnpm --filter @bgs/api admin:rotate-key`, relancer (aucune clé n'est jamais affichée).
 - Secrets : gitleaks toujours avec `--redact` et sur le commit (`gitleaks git`), jamais `gitleaks dir` sur le dépôt (ERREURS.md, 29/09).
 - Arrêt de la collecte : chercher le processus dont la ligne de commande contient `cli/watch.ts` (arrêter la tâche pnpm ne suffit pas), puis vérifier qu'il n'en reste aucun avant de relancer.
