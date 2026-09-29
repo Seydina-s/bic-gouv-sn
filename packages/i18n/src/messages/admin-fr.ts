@@ -31,6 +31,12 @@ export const adminFr = {
       detail: "Dernière vérification de presidence.sn à {time}.",
     },
     lastArticle: "Dernier nouvel article repéré à {time}, {delay} après sa mise en ligne.",
+    objective: {
+      title: "Objectif : moins de 2 minutes",
+      measured:
+        "{share} des {count} articles des 30 derniers jours sont arrivés dans l'app en moins de 2 minutes. Délai médian : {median}. 95 % en moins de {p95}.",
+      none: "Pas encore de mesure : aucun nouvel article n'a été publié pendant que la collecte surveillait le site.",
+    },
     unknown: {
       verdict: "État de la collecte inconnu",
       detail:

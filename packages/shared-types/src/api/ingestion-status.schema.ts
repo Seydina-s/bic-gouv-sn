@@ -44,8 +44,59 @@ export const ingestionStatusSchema = z.object({
    * visible in the console). Absent from reports written before this field.
    */
   circuits: z.array(circuitStatusSchema).optional(),
+  /**
+   * Recent detection times, newest last, at most DETECTION_HISTORY (CLAUDE.md §1:
+   * the "< 2 minutes" objective is measured in the console). Absent before.
+   */
+  detections: z
+    .array(z.object({ at: isoDateTimeSchema, seconds: z.number().nonnegative() }))
+    .optional(),
 });
 export type IngestionStatus = z.infer<typeof ingestionStatusSchema>;
+
+/** CLAUDE.md §1: a new article in the app less than 2 minutes after publication. */
+export const DETECTION_TARGET_SECONDS = 120;
+/** Detection times kept in the report (enough for a month of publications). */
+export const DETECTION_HISTORY = 500;
+const DETECTION_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
+
+export interface DetectionObjective {
+  /** Articles measured over the last 30 days. */
+  count: number;
+  /** Share of them available within the target (0 to 1). */
+  withinTarget: number;
+  /** Half the articles took at most this many seconds. */
+  medianSeconds: number;
+  /** 95 % of the articles took at most this many seconds. */
+  p95Seconds: number;
+}
+
+/** Nearest-rank percentile of sorted values (p between 0 and 1). */
+function percentile(sorted: readonly number[], p: number): number {
+  return sorted[Math.max(0, Math.ceil(p * sorted.length) - 1)] ?? 0;
+}
+
+/** The "< 2 minutes" objective over the last 30 days; null without any measure. */
+export function detectionObjective(
+  status: IngestionStatus | null,
+  now: Date,
+): DetectionObjective | null {
+  const since = now.getTime() - DETECTION_WINDOW_MS;
+  const seconds = (status?.detections ?? [])
+    .filter((entry) => Date.parse(entry.at) >= since)
+    .map((entry) => entry.seconds)
+    .sort((a, b) => a - b);
+  if (seconds.length === 0) {
+    return null;
+  }
+  return {
+    count: seconds.length,
+    withinTarget:
+      seconds.filter((value) => value <= DETECTION_TARGET_SECONDS).length / seconds.length,
+    medianSeconds: percentile(seconds, 0.5),
+    p95Seconds: percentile(seconds, 0.95),
+  };
+}
 
 /** Collection is considered stopped when no pass happened for this long. */
 export const INGESTION_STOPPED_AFTER_MS = 15 * 60_000;
