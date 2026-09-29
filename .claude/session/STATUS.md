@@ -1,9 +1,9 @@
 # STATUS — Bic Gouv SN
 
-**Dernière mise à jour** : 29/09/2026 (1 h 40) · **Mode** : autonome jusqu'au 29/09 à 12 h (demande de l'utilisateur), puis retour au mode standard. Actions de l'utilisateur reportées : `.claude/session/A-FAIRE-UTILISATEUR.md` (13 points).
+**Dernière mise à jour** : 29/09/2026 (10 h 15) · **Mode** : autonome jusqu'au 29/09 à 12 h (demande de l'utilisateur), puis retour au mode standard. Actions de l'utilisateur reportées : `.claude/session/A-FAIRE-UTILISATEUR.md` (15 points).
 
 ## Où on en est
-- Dépôt **public et sécurisé** : https://github.com/Seydina-s/bic-gouv-sn. `main` protégée : tout passe par PR + 3 contrôles verts, dont un **audit d'accessibilité** (50 écrans, clair et sombre, langue déclarée vérifiée).
+- Dépôt **public et sécurisé** : https://github.com/Seydina-s/bic-gouv-sn. `main` protégée : tout passe par PR + 3 contrôles verts, dont un **audit d'accessibilité** (54 écrans, clair et sombre, langue déclarée vérifiée) et des **parcours de bout en bout** (5 parcours, `pnpm e2e`).
 - Articles : 970 (FR + WO), 36 avec leurs PDF officiels. Démarches : 718 fiches, 18 thèmes. Services : 880 proposés, vérification humaine dans la console.
 - Nuit du 27 au 28/09 (PR #79 à #94) : voir l'historique du backlog (CSP, contrôle à distance, PDF officiels, audit d'accessibilité automatique…).
 - Journée du 28/09 (PR #95 à #114) :
@@ -16,22 +16,27 @@
   - app : préchargement de l'article probable suivant (jamais en économie de données) ;
   - notifications : compteur « à vérifier » dans la navigation, échec d'envoi noté dans l'historique.
 - Soir du 28/09 (PR #115) : décisions de l'utilisateur consignées (banc d'essai wolof, parcours des démarches, écran « Comptes », compte Apple individuel).
-- Nuit du 28 au 29/09 (PR #116 à #117) :
+- Nuit du 28 au 29/09 (PR #116 à #121) :
   - fiche démarche en **parcours visuel** (rubriques de la source reliées par un fil, dans leur ordre) ; documents à fournir en simple liste, **plus de cases à cocher** ;
   - console : écran **« Comptes »** (lien d'activation à usage unique, rôle, désactivation, second code, rien sur son propre compte, tout au journal) ; écritures des comptes sécurisées ;
-  - audit d'accessibilité : 54 écrans, captures possibles (`A11Y_SHOTS`).
-- Contrôle complet : 1 016 tests verts.
+  - **deux volets** sur tablette et pliable déplié pour les démarches et « Près de moi » ;
+  - **parcours de bout en bout** dans la CI (ils ont révélé que l'audit validait, en local, un Accueil en erreur : cache corrigé) ;
+  - **clés d'idempotence** sur les écritures (un formulaire envoyé deux fois n'agit qu'une fois) ; une seule notification en attente par article ;
+  - protection du shell durcie (JavaScript en ligne avec accent grave refusé).
+- Contrôle complet : 1 036 tests verts.
+- Incident de la nuit : une clé de l'API **locale** est apparue dans la conversation (ERREURS.md, 29/09) ; rien de publié.
 
 ## En attente de l'utilisateur
-Voir `.claude/session/A-FAIRE-UTILISATEUR.md`. Nouveau cette nuit : point 13 (mot de passe oublié, proposition ADM-11). Compte Apple : inscription en cours côté utilisateur.
+Voir `.claude/session/A-FAIRE-UTILISATEUR.md`. Nouveau cette nuit : points 13 (mot de passe oublié, ADM-11), 14 (incident de clé locale), 15 (tableaux de bord d'usage, ADM-12). Compte Apple : inscription en cours côté utilisateur.
 
 ## Prochaine tâche
 - Brancher l'envoi réel des notifications dès la version de test (A-03, FEED-04) : un fournisseur derrière l'interface `PushProvider`.
-- QA-07, suite : la carte dans l'audit (tuiles).
-- Dès la version de test installée : QA-02, QA-03, QA-04, LIC-02.
+- Dès la version de test installée : QA-02, QA-03, QA-04, QA-09 (carte native), E2E-02 (Maestro), LIC-02.
+- Selon les décisions de l'utilisateur : ADM-11, ADM-12, W-02.
 
-## Services locaux (au 29/09, 1 h 40)
-- API sur 3100 reconstruite sur `main` (écran « Comptes » compris : la console demande une nouvelle connexion) ; console en développement sur 3001 ; Expo sur 8081 ; export web de l'app servi sur 8084 (relais vers l'API) ; une seule collecte temps réel (verrou actif, contrôle des retraits chaque nuit).
+## Services locaux (au 29/09, 10 h 15)
+- API sur 3100 relancée sur `main` (la console demande une nouvelle connexion) ; console en développement sur 3001 ; Expo sur 8081 ; export web de l'app servi sur 8084 (relais vers l'API) ; une seule collecte temps réel (verrou actif, contrôle des retraits chaque nuit).
+- Secrets : gitleaks toujours avec `--redact` et sur le commit (`gitleaks git`), jamais `gitleaks dir` sur le dépôt (ERREURS.md, 29/09).
 - Arrêt de la collecte : chercher le processus dont la ligne de commande contient `cli/watch.ts` (arrêter la tâche pnpm ne suffit pas), puis vérifier qu'il n'en reste aucun avant de relancer.
 
 
