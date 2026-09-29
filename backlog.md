@@ -73,7 +73,7 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 24/09/2026 | A-01 🔴 Logo officiel, icônes d'app et écran de lancement (actuellement icônes génériques du modèle Expo — à remplacer, ne rien inventer) | F-07 |
 | 24/09/2026 | A-02 🔴 Identifiant de publication de l'app (ex. `sn.gouv.bic…`) à valider avec le BIC avant tout build de store | F-07 |
 | 24/09/2026 | PERF-01 ✅ Expo Router embarque une police d'icônes Material Symbols de 967 Ko : exclue le 26/09/2026 (import d'expo-symbols par les « onglets natifs » inutilisés redirigé vers un module vide, comme pour Zod) ; Android 6,58 → 5,57 Mo | F-07 |
-| 24/09/2026 | SEC-01 🔴 Revérifier `pnpm audit` à chaque mise à jour du SDK Expo (decode-uri-component via expo-router, uuid via xcode) ; bloquer en CI toute vulnérabilité haute/critique | F-08 |
+| 24/09/2026 | SEC-01 🔵 (29/09 : le blocage en CI existe depuis le premier jour (`pnpm audit --audit-level high`) ; relevé du 29/09 : 2 alertes modérées seulement, celles déjà connues ; reste la revérification à chaque mise à jour du SDK Expo) Revérifier `pnpm audit` à chaque mise à jour du SDK Expo (decode-uri-component via expo-router, uuid via xcode) ; bloquer en CI toute vulnérabilité haute/critique | F-08 |
 | 24/09/2026 | API-01 ✅ (25/09) Limitation de débit (600/min/adresse, CGNAT), en-têtes de sécurité (CSP stricte en production), sonde `/v1/health/ready` ; 43 tests API | F-08 |
 | 24/09/2026 | D-01 ✅ Audit des tokens de design + corrections (docs/design/audit-tokens-2026-09-24.md) | Demande utilisateur |
 | 24/09/2026 | D-02 🔴 `/impeccable init` (PRODUCT.md + DESIGN.md) au début de la prochaine session | Audit D-01 |
