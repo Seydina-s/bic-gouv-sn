@@ -262,6 +262,8 @@ export const adminFr = {
       accountEnabled: "Compte réactivé",
       accountSecondFactorReset: "Second code réinitialisé",
       accountActivationRenewed: "Nouveau lien d'activation",
+      secretKeyRotated: "Clé des seconds codes remplacée",
+      secretsResealed: "Seconds codes rechiffrés avec la nouvelle clé",
     },
   },
   accounts: {

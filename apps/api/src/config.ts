@@ -94,6 +94,26 @@ const envSchema = z.object({
     .base64()
     .refine((key) => Buffer.from(key, "base64").length === 32, "must decode to 32 bytes")
     .optional(),
+  /**
+   * Keys replaced by ADMIN_SECRET_KEY, comma-separated, kept only while the secrets
+   * they sealed are sealed again (admin:reseal); then removed (SEC-05).
+   */
+  ADMIN_SECRET_KEYS_PREVIOUS: z
+    .string()
+    .default("")
+    .transform((list) =>
+      list
+        .split(",")
+        .map((key) => key.trim())
+        .filter((key) => key !== ""),
+    )
+    .pipe(
+      z.array(
+        z
+          .base64()
+          .refine((key) => Buffer.from(key, "base64").length === 32, "must decode to 32 bytes"),
+      ),
+    ),
   /** Provisional admin account store (PostgreSQL later). */
   ADMIN_ACCOUNTS_PATH: z
     .string()

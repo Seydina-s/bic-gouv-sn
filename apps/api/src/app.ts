@@ -100,7 +100,7 @@ function defaultAdmin(config: Config): AdminServices | null {
     signIn: new AdminSignIn({
       accounts,
       journal,
-      box: new SecretBox(config.ADMIN_SECRET_KEY),
+      box: new SecretBox(config.ADMIN_SECRET_KEY, config.ADMIN_SECRET_KEYS_PREVIOUS),
     }),
   };
 }

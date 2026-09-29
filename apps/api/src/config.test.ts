@@ -27,6 +27,7 @@ describe("loadConfig", () => {
       NOTIFICATIONS_PATH: fromRoot(".data/admin/notifications.json"),
       INGESTION_STATUS_PATH: fromRoot(".data/ingestion-status.json"),
       MEDIA_ROOT: fromRoot(".data/media"),
+      ADMIN_SECRET_KEYS_PREVIOUS: [],
       ADMIN_ACCOUNTS_PATH: fromRoot(".data/admin/accounts.json"),
       ADMIN_AUDIT_PATH: fromRoot(".data/admin/audit.jsonl"),
       SENTRY_TRACES_SAMPLE_RATE: 0.02,
