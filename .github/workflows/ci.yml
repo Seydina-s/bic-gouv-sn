@@ -70,7 +70,7 @@ jobs:
       - name: No secret or data inside the images
         run: |
           for image in bgs-api bgs-console bgs-ingestion; do
-            found=$(docker run --rm --entrypoint sh "$image" -c 'find / -xdev \( -name ".env" -o -name ".env.local" -o -name "accounts.json" \) 2>/dev/null')
+            found=$(docker run --rm --entrypoint sh "$image" -c 'find / -xdev \( -name ".env" -o -name ".env.local" -o -name "accounts.json" \) 2>/dev/null || true')
             if [ -n "$found" ]; then echo "Found in $image: $found"; exit 1; fi
           done
       - name: The API and the console start and answer
