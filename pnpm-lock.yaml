@@ -281,6 +281,12 @@ importers:
       '@bgs/content-store':
         specifier: workspace:*
         version: link:../../packages/content-store
+      '@bgs/i18n':
+        specifier: workspace:*
+        version: link:../../packages/i18n
+      '@bgs/resilience':
+        specifier: workspace:*
+        version: link:../../packages/resilience
       '@bgs/shared-types':
         specifier: workspace:*
         version: link:../../packages/shared-types

@@ -22,6 +22,12 @@ import { FileAuditJournal, type AuditJournal } from "./admin/audit-journal";
 import { SecretBox } from "./admin/secret-box";
 import { AdminSignIn } from "./admin/sign-in-service";
 import { AccountAdmin } from "./admin/account-admin";
+import { ExpoPushProvider } from "./notifications/expo-push-provider";
+import {
+  FilePushSubscriptionStore,
+  type PushSubscriptionStore,
+} from "./notifications/push-subscriptions";
+import { pushSubscriptionRoutes } from "./routes/push-subscriptions";
 import { registerIdempotency } from "./idempotency/idempotency";
 import type { Config } from "./config";
 import { registerErrorHandlers } from "./errors";
@@ -83,6 +89,8 @@ export interface AppOptions {
   usageStats?: UsageStats | null;
   /** Push service for approved notifications; none until the app can receive them. */
   pushProvider?: PushProvider;
+  /** Sections each phone follows (FEED-04); defaults to the file store. */
+  pushSubscriptions?: PushSubscriptionStore;
 }
 
 export interface AdminServices {
@@ -90,6 +98,13 @@ export interface AdminServices {
   journal: AuditJournal;
   /** The team's accounts: managed in the console, names shown in the audit journal. */
   accounts: AdminAccountStore;
+}
+
+/** Expo's free push service when configured; otherwise approvals send nothing. */
+function defaultPushProvider(config: Config, subscriptions: PushSubscriptionStore): PushProvider {
+  return config.PUSH_PROVIDER === "expo"
+    ? new ExpoPushProvider({ subscriptions, accessToken: config.EXPO_ACCESS_TOKEN })
+    : noPushProvider;
 }
 
 function defaultAdmin(config: Config): AdminServices | null {
@@ -123,7 +138,8 @@ export async function buildApp({
   errorJournal = null,
   searchMisses = null,
   usageStats = null,
-  pushProvider = noPushProvider,
+  pushSubscriptions = new FilePushSubscriptionStore(config.PUSH_SUBSCRIPTIONS_PATH),
+  pushProvider = defaultPushProvider(config, pushSubscriptions),
 }: AppOptions): Promise<FastifyInstance> {
   const app = Fastify({
     logger: {
@@ -191,6 +207,7 @@ export async function buildApp({
     searchMisses,
   });
   await app.register(servicesRoutes, { prefix: "/v1", services: stateServices });
+  await app.register(pushSubscriptionRoutes, { prefix: "/v1", subscriptions: pushSubscriptions });
   await app.register(mapRoutes, {
     prefix: "/v1",
     // The tiles someone loads around them tell roughly where they are: map requests
