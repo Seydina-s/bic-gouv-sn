@@ -1,6 +1,5 @@
 import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
-import { windowClass } from "@bgs/ui";
 import {
   ActivityIndicator,
   Pressable,
@@ -13,6 +12,7 @@ import {
 } from "react-native";
 import { useTabBarInset } from "../../components/GlassTabBar";
 import { ScrollTopButton, useScrollTop } from "../../components/ScrollTopButton";
+import { useTwoPane } from "../../components/useTwoPane";
 import { ArticlePane } from "../../features/news/ArticlePane";
 import { freshnessOf, type Freshness } from "../../features/news/format";
 import { COUNCIL_CATEGORY, heroStories, orderSections } from "../../features/news/front-page";
@@ -96,10 +96,7 @@ export default function HomeScreen() {
   const { color, space, layout } = theme;
   const { width } = useWindowDimensions();
   // Tablets and unfolded foldables: front page and article side by side (recomputed live).
-  const twoPane = windowClass(width) === "expanded";
-  const listPaneWidth = Math.round(
-    Math.min(Math.max(width * layout.listPane.share, layout.listPane.min), layout.listPane.max),
-  );
+  const { twoPane, listPaneWidth, detailPaneWidth } = useTwoPane();
   const columnWidth = twoPane
     ? listPaneWidth
     : Math.min(width, layout.readingMaxWidth + space.xxxl);
@@ -226,7 +223,7 @@ export default function HomeScreen() {
           {page}
         </View>
         {shownId !== null && (
-          <ArticlePane id={shownId} paneWidth={width - listPaneWidth} bottomInset={bottomInset} />
+          <ArticlePane id={shownId} paneWidth={detailPaneWidth} bottomInset={bottomInset} />
         )}
       </View>
     );

@@ -1,7 +1,7 @@
 import { FlashList, type FlashListRef } from "@shopify/flash-list";
 import type { ProcedureSummary } from "@bgs/shared-types";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { THEME_PAGE_SIZE } from "../../api/procedures-client";
@@ -13,6 +13,8 @@ import {
   useScrollTop,
   useScrollTopClearance,
 } from "../../components/ScrollTopButton";
+import { useTwoPane } from "../../components/useTwoPane";
+import { ProcedurePane } from "../../features/procedures/ProcedurePane";
 import { ProcedureRow } from "../../features/procedures/ProcedureRow";
 import { ThemeIcon } from "../../features/procedures/ThemeCards";
 import { useProcedureThemePage, useProcedureThemes } from "../../features/procedures/useProcedures";
@@ -29,7 +31,8 @@ function parsePage(raw: string | undefined): number {
 
 /**
  * The procedures filed under one theme, 20 per numbered page, under a band in the
- * theme's colours (its icon, its name, how many procedures, which page).
+ * theme's colours (its icon, its name, how many procedures, which page). On a large
+ * screen, the list and the chosen procedure side by side.
  */
 function ProcedureTheme() {
   const params = useLocalSearchParams<{ id: string; title?: string; page?: string }>();
@@ -44,17 +47,28 @@ function ProcedureTheme() {
   const clearance = useScrollTopClearance();
   const themes = useProcedureThemes();
   const procedures = useProcedureThemePage(id, page);
+  const { twoPane, listPaneWidth } = useTwoPane();
+  const [selected, setSelected] = useState<string | null>(null);
   const { color, space, textStyle } = theme;
   const info = themes.data?.themes.find((item) => item.id === id);
   const title = info?.title ?? params.title ?? t("procedures.title");
   const items = procedures.data?.items ?? [];
   const total = procedures.data?.total;
   const pages = total === undefined ? null : pageCount(total, THEME_PAGE_SIZE);
+  const shownSlug = selected ?? items[0]?.slug ?? null;
   const meta = usePageMeta(
     total === undefined ? null : t("procedures.count", { count: total }),
     page,
     pages,
   );
+
+  const open = (slug: string) => {
+    if (twoPane) {
+      setSelected(slug);
+    } else {
+      router.push({ pathname: "/procedure/[slug]", params: { slug } });
+    }
+  };
 
   const goTo = (next: number) => {
     router.setParams({ page: String(next) });
@@ -96,42 +110,60 @@ function ProcedureTheme() {
           headerShadowVisible: false,
         }}
       />
-      <FlashList
-        ref={list}
-        onScroll={scrollTop.onScroll}
-        scrollEventThrottle={100}
-        data={items}
-        keyExtractor={(item) => item.id}
-        ListHeaderComponent={header}
-        ListFooterComponent={footer}
-        ListEmptyComponent={
-          procedures.isPending ? (
-            <ActivityIndicator color={color.primary} style={{ marginTop: space.xl }} />
-          ) : (
-            <Text style={[textStyle.body, { color: color.textSecondary, padding: space.lg }]}>
-              {procedures.isError ? t("procedures.error") : t("procedures.emptyTheme")}
-            </Text>
-          )
-        }
-        renderItem={({ item }) => (
-          <ProcedureRow
-            item={item}
-            onPress={(slug) => {
-              router.push({ pathname: "/procedure/[slug]", params: { slug } });
+      <View style={twoPane ? styles.split : styles.root}>
+        <View
+          style={
+            twoPane
+              ? [styles.listPane, { width: listPaneWidth, borderRightColor: color.border }]
+              : styles.root
+          }
+        >
+          <FlashList
+            ref={list}
+            onScroll={scrollTop.onScroll}
+            scrollEventThrottle={100}
+            data={items}
+            keyExtractor={(item) => item.id}
+            ListHeaderComponent={header}
+            ListFooterComponent={footer}
+            ListEmptyComponent={
+              procedures.isPending ? (
+                <ActivityIndicator color={color.primary} style={{ marginTop: space.xl }} />
+              ) : (
+                <Text style={[textStyle.body, { color: color.textSecondary, padding: space.lg }]}>
+                  {procedures.isError ? t("procedures.error") : t("procedures.emptyTheme")}
+                </Text>
+              )
+            }
+            extraData={twoPane ? shownSlug : null}
+            renderItem={({ item }) => (
+              <ProcedureRow
+                item={item}
+                selected={twoPane && item.slug === shownSlug}
+                onPress={open}
+              />
+            )}
+            contentContainerStyle={{ paddingBottom: insets.bottom + space.lg + clearance }}
+            testID="theme-list"
+          />
+          <ScrollTopButton
+            visible={scrollTop.visible}
+            bottom={insets.bottom + space.lg}
+            onPress={() => {
+              list.current?.scrollToOffset({ offset: 0, animated: true });
             }}
           />
+        </View>
+        {twoPane && shownSlug !== null && (
+          <ProcedurePane
+            slug={shownSlug}
+            bottomInset={insets.bottom}
+            withAppBar={false}
+            onOpenRelated={setSelected}
+          />
         )}
-        contentContainerStyle={{ paddingBottom: insets.bottom + space.lg + clearance }}
-        testID="theme-list"
-      />
-      <ScrollTopButton
-        visible={scrollTop.visible}
-        bottom={insets.bottom + space.lg}
-        onPress={() => {
-          list.current?.scrollToOffset({ offset: 0, animated: true });
-        }}
-      />
-      <FloatingAppBar visible={scrollTop.visible} />
+      </View>
+      {!twoPane && <FloatingAppBar visible={scrollTop.visible} />}
     </View>
   );
 }
@@ -148,4 +180,6 @@ export default function ProcedureThemeScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  split: { flex: 1, flexDirection: "row" },
+  listPane: { borderRightWidth: StyleSheet.hairlineWidth },
 });
