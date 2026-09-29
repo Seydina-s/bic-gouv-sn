@@ -1,5 +1,33 @@
-import { mkdir, open, rename } from "node:fs/promises";
-import { dirname } from "node:path";
+import { mkdir, open, readdir, rename, stat, unlink } from "node:fs/promises";
+import { dirname, join } from "node:path";
+
+/** A temporary file of writeFileDurably: "<name>.<process id>.tmp". */
+const TEMP_FILE = /\.\d+\.tmp$/;
+
+/**
+ * Removes the temporary files a write interrupted by a crash left in `folder`
+ * (ERREURS.md, 29/09/2026), only when older than `olderThanMs`: a write still in
+ * progress is never touched. Returns how many were removed.
+ */
+export async function removeStaleTemps(
+  folder: string,
+  olderThanMs: number,
+  now = Date.now(),
+): Promise<number> {
+  let removed = 0;
+  for (const name of await readdir(folder).catch(() => [])) {
+    if (!TEMP_FILE.test(name)) {
+      continue;
+    }
+    const path = join(folder, name);
+    const info = await stat(path).catch(() => null);
+    if (info?.isFile() === true && now - info.mtimeMs > olderThanMs) {
+      await unlink(path).catch(() => undefined);
+      removed += 1;
+    }
+  }
+  return removed;
+}
 
 /**
  * Writes a temporary file, forces it onto the disk (fsync), then renames it over
