@@ -29,3 +29,4 @@ export * from "./api/notifications.schema";
 export * from "./api/accounts.schema";
 export * from "./api/usage.schema";
 export * from "./common/calendar";
+export * from "./api/push.schema";

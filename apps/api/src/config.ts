@@ -66,6 +66,19 @@ const envSchema = z.object({
     .min(1)
     .default(".data/search-misses.json")
     .transform((path) => resolveDataPath(path)),
+  /**
+   * Push service for approved notifications: "none" records them without sending;
+   * "expo" sends through Expo's free service (once the app can receive them).
+   */
+  PUSH_PROVIDER: z.enum(["none", "expo"]).default("none"),
+  /** Optional Expo access token (push security), from the secret manager only. */
+  EXPO_ACCESS_TOKEN: z.string().min(1).optional(),
+  /** Sections each phone follows (push token, sections, quiet hours, language). */
+  PUSH_SUBSCRIPTIONS_PATH: z
+    .string()
+    .min(1)
+    .default(".data/push-subscriptions.json")
+    .transform((path) => resolveDataPath(path)),
   /** Anonymous usage counters (ADM-12): nothing about who sent the signals. */
   USAGE_STATS_PATH: z
     .string()

@@ -18,6 +18,8 @@
   "dependencies": {
     "@bgs/admin-auth": "workspace:*",
     "@bgs/content-store": "workspace:*",
+    "@bgs/i18n": "workspace:*",
+    "@bgs/resilience": "workspace:*",
     "@bgs/shared-types": "workspace:*",
     "@fastify/compress": "9.2.0",
     "@fastify/helmet": "13.1.1",
