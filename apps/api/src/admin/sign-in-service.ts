@@ -160,10 +160,13 @@ export class AdminSignIn {
     }
     this.challenges.delete(challengeId);
     const firstTime = challenge.pendingSecret !== null;
+    const stored = account.totp.sealedSecret;
+    // Sealed with a key since replaced: sealed again with the current one (SEC-05).
+    const reseal = firstTime || stored === null || !this.deps.box.isCurrent(stored);
     await this.deps.accounts.update(account.id, (current) => ({
       ...current,
       totp: {
-        sealedSecret: firstTime ? this.deps.box.seal(secret ?? "") : account.totp.sealedSecret,
+        sealedSecret: reseal ? this.deps.box.seal(secret ?? "") : stored,
         enrolledAt: account.totp.enrolledAt ?? new Date(now).toISOString(),
         lastStep: step,
       },

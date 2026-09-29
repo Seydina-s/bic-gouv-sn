@@ -45,7 +45,43 @@ export function hasInlineTemplate(command) {
   return /\bnode(\.exe)?\s+(-e|--eval|-p|--print)\b/.test(text) && text.includes("`");
 }
 
+/**
+ * Ways a command could show a secret (SEC-05, decision of 29/09/2026): reading a
+ * secrets file, printing the environment, or running the secret scanner without
+ * masking what it finds. The API reads its own .env.local when it starts
+ * (package scripts), so nothing legitimate needs these in a typed command.
+ */
+const SECRET_ACCESS = [
+  // Env files holding real values (the committed .env.example is documentation).
+  /(^|[\s"'=/\\])\.env(\.(?!example\b)[\w.-]+)?(?=$|[\s"';|&)])/,
+  // Accounts (password hashes, sealed second factors) and key files.
+  /\.data[/\\]admin\b/,
+  /\w\.(pem|p12|pfx|key)(?=$|[\s"';|&])/,
+  // The environment printed whole, or a secret variable by name.
+  /(^|[;&|]\s*)(printenv|env|set|export\s+-p)\s*($|[;&|])/,
+  /\b(Get-ChildItem|gci|dir|ls)\s+env:|\$env:[A-Z_]*(SECRET|TOKEN|KEY|PASSWORD|DSN)/i,
+  /\$\{?[A-Z_]*(SECRET|TOKEN|PASSWORD)[A-Z_]*\}?/,
+  // JavaScript run from the command line that reads the environment.
+  /\b(node|tsx)(\.exe)?\s+(-e|-p|--eval|--print)\b[\s\S]*process\.env/,
+];
+
+/** True when the command could show a secret; the secret scanner must mask (--redact). */
+export function touchesSecrets(command) {
+  const text = withoutQuotedHeredocs(command);
+  if (/\bgitleaks(\.exe)?\b/.test(text) && (!text.includes("--redact") || /\bgitleaks(\.exe)?\s+dir\b/.test(text))) {
+    return true;
+  }
+  return SECRET_ACCESS.some((pattern) => pattern.test(text));
+}
+
 export function refusal(command) {
+  if (touchesSecrets(command)) {
+    return (
+      "Commande refusée : elle pourrait afficher un secret (fichier .env, comptes, clé, variables d'environnement, " +
+      "ou gitleaks sans --redact / en mode dir). Les secrets ne se lisent jamais, ni dans le terminal ni dans la conversation " +
+      "(SEC-05). Utiliser les commandes prévues (pnpm --filter @bgs/api admin:rotate-key, gitleaks git --redact)."
+    );
+  }
   if (hasInlineTemplate(command)) {
     return (
       "Commande refusée : du JavaScript passé à « node -e » contient un accent grave (même échappé). " +
