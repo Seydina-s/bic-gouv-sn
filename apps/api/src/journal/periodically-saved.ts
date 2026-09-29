@@ -1,18 +1,15 @@
 import { writeFileDurably } from "@bgs/content-store";
 
 /**
- * Something the API keeps in memory and writes durably now and then, never on a
- * request's path (error journal, search misses). Written again only when it changed,
- * and once more when the API stops.
+ * Something the API keeps in memory and saves now and then, never on a request's
+ * path (error journal, search misses, usage counters). Saved again only when it
+ * changed, again after a failed save, and once more when the API stops.
  */
 export abstract class PeriodicallySaved {
   private dirty = false;
   private timer: NodeJS.Timeout | null = null;
 
-  protected constructor(private readonly path: string) {}
-
-  /** What goes to the file. */
-  protected abstract snapshot(): unknown;
+  protected abstract save(): Promise<void>;
 
   protected changed(): void {
     this.dirty = true;
@@ -23,10 +20,15 @@ export abstract class PeriodicallySaved {
       return;
     }
     this.dirty = false;
-    await writeFileDurably(this.path, JSON.stringify(this.snapshot(), null, 2));
+    try {
+      await this.save();
+    } catch (error) {
+      this.dirty = true;
+      throw error;
+    }
   }
 
-  /** Writes every `intervalMs` while something changed. */
+  /** Saves every `intervalMs` while something changed. */
   start(intervalMs: number, onError: (error: unknown) => void): void {
     this.timer = setInterval(() => {
       this.flush().catch(onError);
@@ -40,5 +42,19 @@ export abstract class PeriodicallySaved {
       this.timer = null;
     }
     await this.flush();
+  }
+}
+
+/** Saved whole to a JSON file: for what a single instance writes. */
+export abstract class SavedToFile extends PeriodicallySaved {
+  protected constructor(private readonly path: string) {
+    super();
+  }
+
+  /** What goes to the file. */
+  protected abstract snapshot(): unknown;
+
+  protected save(): Promise<void> {
+    return writeFileDurably(this.path, JSON.stringify(this.snapshot(), null, 2));
   }
 }

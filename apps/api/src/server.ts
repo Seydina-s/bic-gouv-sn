@@ -2,16 +2,32 @@ import packageJson from "../package.json" with { type: "json" };
 import { FileArticleRepository } from "@bgs/content-store";
 import { buildApp } from "./app";
 import { loadConfig } from "./config";
+import { connectPostgres, type Database, migrate } from "./database/database";
 import { ErrorJournal } from "./journal/error-journal";
 import { SearchMisses } from "./journal/search-misses";
 import { UsageStats } from "./usage/usage-stats";
+import { FileUsageStore, PostgresUsageStore } from "./usage/usage-store";
 
 const config = loadConfig(process.env);
 /** The error journal is written at most this often, never on a request's path. */
 const JOURNAL_FLUSH_MS = 30_000;
 const errorJournal = await ErrorJournal.open(config.ERROR_JOURNAL_PATH);
 const searchMisses = await SearchMisses.open(config.SEARCH_MISSES_PATH);
-const usageStats = await UsageStats.open(config.USAGE_STATS_PATH);
+/** PostgreSQL when configured (SCALE-02), its schema brought up to date first. */
+async function openDatabase(url: string | undefined): Promise<Database | null> {
+  if (url === undefined) {
+    return null;
+  }
+  const database = connectPostgres(url);
+  await migrate(database);
+  return database;
+}
+const database = await openDatabase(config.DATABASE_URL);
+const usageStats = new UsageStats(
+  database === null
+    ? new FileUsageStore(config.USAGE_STATS_PATH)
+    : new PostgresUsageStore(database),
+);
 const app = await buildApp({
   config,
   version: packageJson.version,
@@ -19,6 +35,9 @@ const app = await buildApp({
   errorJournal,
   searchMisses,
   usageStats,
+});
+database?.onConnectionError((error) => {
+  app.log.warn({ err: error }, "A database connection was lost");
 });
 usageStats.start(JOURNAL_FLUSH_MS, (error) => {
   app.log.error({ err: error }, "Usage counters could not be written");
@@ -38,13 +57,17 @@ function shutdown(signal: NodeJS.Signals): void {
     process.exit(1);
   }, config.SHUTDOWN_TIMEOUT_MS);
   forceExit.unref();
-  app.close().then(
-    () => process.exit(0),
-    (error: unknown) => {
-      app.log.error({ err: error }, "Error during shutdown");
-      process.exit(1);
-    },
-  );
+  app
+    .close()
+    // The counters are saved while the app closes, before the database goes.
+    .then(() => database?.close())
+    .then(
+      () => process.exit(0),
+      (error: unknown) => {
+        app.log.error({ err: error }, "Error during shutdown");
+        process.exit(1);
+      },
+    );
 }
 
 process.once("SIGTERM", shutdown);

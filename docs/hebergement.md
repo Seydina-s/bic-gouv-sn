@@ -49,7 +49,8 @@ Le trafic massif (après un Conseil des ministres) porte sur des réponses publi
 
 **Plusieurs instances de l'API (audit du 29/09).**
 - **Fait (SCALE-01)** : avec `REDIS_URL`, les instances partagent dans Redis les sessions et étapes de connexion de la console, les clés anti-doublons et la limite de débit. Une personne connectée sur l'une l'est sur toutes (testé en CI contre un vrai Redis). Redis tourne dans un petit conteneur de plus ; il ne garde que des états de courte durée, rien à sauvegarder.
-- **Reste (SCALE-02)** : les compteurs (statistiques, recherches sans résultat, journal des erreurs) et les fichiers de données partagés (abonnements, notifications, comptes). Écrits par plusieurs instances à la fois, ils s'écraseraient. Ils passeront dans PostgreSQL ou Redis.
+- **Fait (SCALE-02, première tranche)** : avec `DATABASE_URL`, les statistiques anonymes d'usage sont dans PostgreSQL, et chaque instance **ajoute** ses totaux à ceux des autres. C'est testé en CI contre un vrai PostgreSQL, instances simultanées comprises.
+- **Reste (SCALE-02, tranches suivantes)** : les recherches sans résultat, le journal des erreurs et les fichiers de données (articles, abonnements, notifications, comptes). Écrits par plusieurs instances à la fois, ils s'écraseraient. Ils passeront à leur tour dans PostgreSQL.
 
 On démarre donc avec **une instance** : derrière le CDN, elle suffit, car elle tient environ 630 requêtes par seconde sur une machine de développement. La seconde (+~14,74 €/mois) viendra après SCALE-02.
 

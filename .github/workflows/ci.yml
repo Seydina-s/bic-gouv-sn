@@ -22,7 +22,8 @@ jobs:
     name: Format, lint, types, tests
     runs-on: ubuntu-26.04
     timeout-minutes: 20
-    # A real Redis: the shared state tests also run against it (SCALE-01).
+    # A real Redis and a real PostgreSQL: the shared state tests also run against
+    # them (SCALE-01, SCALE-02). Throwaway database, no password.
     services:
       redis:
         image: redis:7.4-alpine
@@ -30,8 +31,17 @@ jobs:
           - 6379:6379
         options: >-
           --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 3s --health-retries 10
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 3s --health-retries 10
     env:
       REDIS_URL: redis://127.0.0.1:6379
+      DATABASE_URL: postgres://postgres@127.0.0.1:5432/postgres
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup

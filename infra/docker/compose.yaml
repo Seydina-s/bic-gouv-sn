@@ -1,8 +1,9 @@
 # The three services together, as they will run once hosted (S1-02), sharing one
 # data volume. From the repository root:
 #   docker compose -f infra/docker/compose.yaml up --build
-# ADMIN_SECRET_KEY is given by the environment of the command (in production, by
-# the hosting secret manager): never written in this file or in an image.
+# ADMIN_SECRET_KEY and POSTGRES_PASSWORD are given by the environment of the command
+# (in production, by the hosting secret manager): never written in this file or in
+# an image.
 name: bic-gouv-sn
 
 services:
@@ -15,12 +16,32 @@ services:
       LOG_LEVEL: info
       # Sessions, sign-in steps, idempotency keys and the rate limit, shared (SCALE-01).
       REDIS_URL: redis://redis:6379
+      # Anonymous usage counters, added to by every instance (SCALE-02).
+      DATABASE_URL: postgres://bgs:${POSTGRES_PASSWORD:?the database needs its password from the environment}@postgres:5432/bgs
     ports:
       - "3000:3000"
     volumes:
       - data:/app/.data
     depends_on:
-      - redis
+      redis:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: bgs
+      POSTGRES_DB: bgs
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?the database needs its password from the environment}
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "bgs"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    volumes:
+      - database:/var/lib/postgresql
     restart: unless-stopped
 
   redis:
@@ -51,3 +72,4 @@ services:
 
 volumes:
   data:
+  database:
