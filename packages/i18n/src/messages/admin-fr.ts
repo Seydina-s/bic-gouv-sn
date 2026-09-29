@@ -262,6 +262,7 @@ export const adminFr = {
       accountEnabled: "Compte réactivé",
       accountSecondFactorReset: "Second code réinitialisé",
       accountActivationRenewed: "Nouveau lien d'activation",
+      accountPasswordReset: "Mot de passe réinitialisé",
       secretKeyRotated: "Clé des seconds codes remplacée",
       secretsResealed: "Seconds codes rechiffrés avec la nouvelle clé",
     },
@@ -304,6 +305,7 @@ export const adminFr = {
     you: "Vous",
     states: {
       invited: "En attente d'activation",
+      "password-reset": "Mot de passe à choisir",
       "no-second-factor": "Second code à activer",
       active: "Actif",
       disabled: "Désactivé",
@@ -324,6 +326,10 @@ export const adminFr = {
     resetDone:
       "Second code réinitialisé : la personne l'activera de nouveau à sa prochaine connexion.",
     renew: "Nouveau lien d'activation",
+    resetPassword: "Réinitialiser le mot de passe",
+    resetPasswordConfirm: "J'ai vérifié que la demande vient bien de cette personne.",
+    passwordReset:
+      "Mot de passe réinitialisé : l'ancien ne fonctionne plus. Transmettez ce lien à la personne par un moyen sûr : il ne sera plus affiché. Son second code ne change pas.",
     refusals: {
       self: "Vous ne pouvez pas modifier votre propre compte : demandez-le à un autre administrateur.",
       emailTaken: "Un compte existe déjà avec cette adresse.",
@@ -346,7 +352,7 @@ export const adminFr = {
       "Ce lien est incomplet. Ouvrez le lien complet que votre administrateur vous a transmis.",
     invalid:
       "Ce lien ne fonctionne plus (déjà utilisé ou expiré). Demandez-en un nouveau à votre administrateur.",
-    done: "Mot de passe enregistré. Connectez-vous : votre second code s'active à la première connexion.",
+    done: "Mot de passe enregistré. Vous pouvez maintenant vous connecter.",
     signIn: "Aller à la connexion",
     unavailable: "L'activation est momentanément indisponible. Réessayez dans un instant.",
   },

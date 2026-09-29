@@ -125,13 +125,15 @@ export async function changeAccess(
 }
 
 /** A new link for an account not activated yet; the previous one stops working. */
-export async function renewActivation(
-  _previous: AccountFormState,
+/** Asks the API for a new activation link, shown once with its message. */
+async function requestLink(
   form: FormData,
+  action: "activation" | "password-reset",
+  message: string,
 ): Promise<AccountFormState> {
   const { token } = await requireAccount();
   const result = await adminRequest({
-    path: `/accounts/${encodeURIComponent(formText(form, "id"))}/activation`,
+    path: `/accounts/${encodeURIComponent(formText(form, "id"))}/${action}`,
     method: "POST",
     idempotencyKey: formIdempotencyKey(form),
     token,
@@ -142,7 +144,25 @@ export async function renewActivation(
   }
   revalidatePath("/comptes");
   return {
-    message: t("accounts.renewed"),
+    message,
     activation: { code: result.data.code, expiresAt: result.data.expiresAt },
   };
+}
+
+export async function renewActivation(
+  _previous: AccountFormState,
+  form: FormData,
+): Promise<AccountFormState> {
+  return requestLink(form, "activation", t("accounts.renewed"));
+}
+
+/** A forgotten password (ADM-11), only once the person's identity has been checked. */
+export async function resetPassword(
+  _previous: AccountFormState,
+  form: FormData,
+): Promise<AccountFormState> {
+  if (formText(form, "confirm") !== "yes") {
+    return { error: t("accounts.resetPasswordConfirm") };
+  }
+  return requestLink(form, "password-reset", t("accounts.passwordReset"));
 }

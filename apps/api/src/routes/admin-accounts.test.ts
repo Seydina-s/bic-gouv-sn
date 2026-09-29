@@ -178,6 +178,29 @@ describe("the team's accounts", () => {
     expect(codeOf(again)).toBe("ACCOUNT_ALREADY_ACTIVE");
   });
 
+  it("resets a forgotten password: the old one stops, a new link, the second factor kept", async () => {
+    const me = await admin.signedIn("admin");
+    const token = me.token;
+    const other = await admin.signedIn("editor");
+    const reset = await call(token, "POST", `/accounts/${other.id}/password-reset`);
+    const link = activationSchema.parse(reset.json());
+    expect(link.account.state).toBe("password-reset");
+    // Sessions closed, old password refused.
+    expect((await call(other.token, "GET", "/auth/me")).statusCode).toBe(401);
+    const email = (await admin.accounts.get(other.id))?.email ?? "";
+    const old = await call(null, "POST", "/auth/password", { email, password: admin.password });
+    expect(codeOf(old)).toBe("ADMIN_SIGN_IN_FAILED");
+    // The person chooses a new one; the sign-in then asks for the existing code.
+    expect((await activate(link.code)).statusCode).toBe(204);
+    const next = await call(null, "POST", "/auth/password", { email, password: NEW_PASSWORD });
+    expect(next.json()).toMatchObject({ step: "code" });
+    const actions = (await admin.journal.entries()).map((entry) => entry.action);
+    expect(actions).toContain("account.password-reset");
+    // Nobody resets their own password this way.
+    const self = await call(token, "POST", `/accounts/${me.id}/password-reset`);
+    expect(codeOf(self)).toBe("ACCOUNT_SELF");
+  });
+
   it("answers an unknown account plainly", async () => {
     const { token } = await admin.signedIn("admin");
     const response = await call(token, "POST", `/accounts/${crypto.randomUUID()}/disable`);
