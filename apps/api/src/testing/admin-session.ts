@@ -6,18 +6,22 @@ import { FileAdminAccountStore } from "../admin/account-store";
 import { FileAuditJournal } from "../admin/audit-journal";
 import { SecretBox } from "../admin/secret-box";
 import { AdminSignIn } from "../admin/sign-in-service";
+import { MemoryKeyValueStore, type KeyValueStore } from "../shared-state/key-value-store";
 
 const PASSWORD = "une phrase de passe de test";
 
 /** Admin services on temporary files, and a way to sign an account in (tests only). */
-export async function adminForTests() {
+export async function adminForTests(state: KeyValueStore = new MemoryKeyValueStore()) {
   const dir = join(tmpdir(), "bgs-admin-tests", randomUUID());
   const accounts = new FileAdminAccountStore(join(dir, "accounts.json"));
   const journal = new FileAuditJournal(join(dir, "audit.jsonl"));
-  const signIn = new AdminSignIn({
-    accounts,
+  const box = new SecretBox(randomBytes(32).toString("base64"));
+  const signIn = new AdminSignIn({ accounts, journal, box, state });
+  /** Another API instance on the same files and shared state (SCALE-01). */
+  const otherInstance = (otherState: KeyValueStore = state) => ({
+    signIn: new AdminSignIn({ accounts, journal, box, state: otherState }),
     journal,
-    box: new SecretBox(randomBytes(32).toString("base64")),
+    accounts,
   });
   const passwordHash = await hashPassword(PASSWORD);
 
@@ -55,6 +59,7 @@ export async function adminForTests() {
   }
 
   return {
+    otherInstance,
     admin: { signIn, journal, accounts },
     journal,
     accounts,

@@ -47,12 +47,11 @@ Le trafic massif (après un Conseil des ministres) porte sur des réponses publi
 | CDN + WAF | Cloudflare Pro (règles WAF plus complètes que l'offre gratuite) | 20 $ (à l'année) |
 | **Total** | | **~46,76 € + 20 $ par mois**, soit **environ 65 € par mois** (conversion approximative) |
 
-**Limite à lever avant une seconde instance de l'API (audit du 29/09, SCALE-01).** Aujourd'hui, chaque instance garde en mémoire :
-- les sessions et les étapes de connexion de la console ;
-- les clés anti-doublons ;
-- les compteurs (statistiques, recherches sans résultat, journal des erreurs), qu'elle écrit ensuite dans un fichier partagé.
+**Plusieurs instances de l'API (audit du 29/09).**
+- **Fait (SCALE-01)** : avec `REDIS_URL`, les instances partagent dans Redis les sessions et étapes de connexion de la console, les clés anti-doublons et la limite de débit. Une personne connectée sur l'une l'est sur toutes (testé en CI contre un vrai Redis). Redis tourne dans un petit conteneur de plus ; il ne garde que des états de courte durée, rien à sauvegarder.
+- **Reste (SCALE-02)** : les compteurs (statistiques, recherches sans résultat, journal des erreurs) et les fichiers de données partagés (abonnements, notifications, comptes). Écrits par plusieurs instances à la fois, ils s'écraseraient. Ils passeront dans PostgreSQL ou Redis.
 
-Avec deux instances, une personne connectée sur l'une serait refusée par l'autre, et les compteurs s'écraseraient. On démarre donc avec **une instance** : derrière le CDN, elle suffit au départ, car elle tient environ 630 requêtes par seconde sur une machine de développement. Ces états passeront dans PostgreSQL ou Redis, tous deux prévus au stack, avant d'en ajouter une seconde (+~14,74 €/mois).
+On démarre donc avec **une instance** : derrière le CDN, elle suffit, car elle tient environ 630 requêtes par seconde sur une machine de développement. La seconde (+~14,74 €/mois) viendra après SCALE-02.
 
 À ajouter, non chiffré ici : nom de domaine, sauvegardes hors machine sur un second fournisseur (quelques euros par mois pour quelques Go), Sentry (offre gratuite en place).
 

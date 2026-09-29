@@ -8,6 +8,7 @@ Trois conteneurs, prêts pour n'importe quel hébergeur. Le choix de l'hébergeu
 | `infra/docker/console.Dockerfile` | Centre d'administration (Next.js) | 3001 |
 | `infra/docker/ingestion.Dockerfile` | Collecte en temps réel de presidence.sn : **une seule instance** | — |
 
+- **Redis** (image officielle `redis:7.4-alpine`) : les sessions de la console, les clés anti-doublons et la limite de débit, partagées entre les instances de l'API (`REDIS_URL`). États de courte durée, rien à sauvegarder. Sans `REDIS_URL`, l'API les garde en mémoire, ce qui ne convient qu'à une seule instance.
 - **Données** : un volume monté sur `/app/.data`, commun à l'API et à la collecte, sauvegardé chaque jour (voir `docs/runbooks/restaurer-les-donnees.md`).
 - **Secrets** : jamais dans une image. Ils sont fournis au démarrage par le coffre de secrets de l'hébergeur (`docs/securite-des-secrets.md`). Les images sont construites sans aucun fichier `.env` ni donnée (`.dockerignore`), ce que la CI vérifie.
 - **Sécurité** : les processus tournent sans droits d'administrateur. Chaque image a un contrôle de santé.

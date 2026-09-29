@@ -124,7 +124,7 @@ export class AccountAdmin {
       disabled,
     }));
     if (disabled) {
-      this.deps.signIn.endSessionsOf(id);
+      await this.deps.signIn.endSessionsOf(id);
     }
     await this.audit(actorId, disabled ? "account.disabled" : "account.enabled", id);
     return accountView(updated, this.now());
@@ -136,7 +136,7 @@ export class AccountAdmin {
       ...account,
       totp: NO_SECOND_FACTOR,
     }));
-    this.deps.signIn.endSessionsOf(id);
+    await this.deps.signIn.endSessionsOf(id);
     await this.audit(actorId, "account.second-factor-reset", id);
     return accountView(updated, this.now());
   }
@@ -169,7 +169,7 @@ export class AccountAdmin {
       activation,
       attempts: NO_ATTEMPTS,
     }));
-    this.deps.signIn.endSessionsOf(id);
+    await this.deps.signIn.endSessionsOf(id);
     await this.audit(actorId, "account.password-reset", id);
     return { account: accountView(updated, now), code, expiresAt: activation.expiresAt };
   }

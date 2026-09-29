@@ -67,6 +67,12 @@ const envSchema = z.object({
     .default(".data/search-misses.json")
     .transform((path) => resolveDataPath(path)),
   /**
+   * Redis shared by the API instances (SCALE-01): console sessions, sign-in steps,
+   * idempotency keys and the rate limit. Absent: kept in this process (one
+   * instance). May carry a password: from the secret manager only.
+   */
+  REDIS_URL: z.url({ protocol: /^rediss?$/ }).optional(),
+  /**
    * Push service for approved notifications: "none" records them without sending;
    * "expo" sends through Expo's free service (once the app can receive them).
    */
