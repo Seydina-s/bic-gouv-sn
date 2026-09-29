@@ -39,7 +39,7 @@ Voir `.claude/session/A-FAIRE-UTILISATEUR.md`. Toujours ouverts : compte Apple (
 ## Prochaine tâche
 - Dès la version de test : écran des notifications dans l'app (PUSH-01, FEED-04), QA-02, QA-03, QA-04, QA-09 (carte native), E2E-02 (Maestro), LIC-02.
 - Avant le lancement à grande échelle : SCALE-01 (sessions, clés anti-doublons, compteurs et abonnements dans PostgreSQL ou Redis).
-- À surveiller : QA-11 (test de l'API instable une fois sous charge).
+- QA-11 réglé (test instable : préparation trop lente sous charge).
 
 ## Services locaux (au 29/09, 20 h 15)
 - API sur 3100 relancée sur `main` (statistiques, notifications, nouvelle clé : la console demande une nouvelle connexion) ; console en développement sur 3001 ; Expo sur 8081 ; export web de l'app servi sur 8084 (relais vers l'API) ; une seule collecte temps réel (verrou actif, contrôle des retraits chaque nuit ; elle nettoiera les fichiers temporaires orphelins à son prochain démarrage).
