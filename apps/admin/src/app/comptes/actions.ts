@@ -4,7 +4,7 @@ import { accountViewSchema, activationSchema, adminRoleSchema } from "@bgs/share
 import { revalidatePath } from "next/cache";
 import type { FormState } from "../../components/FormOutcome";
 import { adminRequest, type AdminResult } from "../../lib/admin-api";
-import { formText } from "../../lib/form";
+import { formIdempotencyKey, formText } from "../../lib/form";
 import { t } from "../../lib/i18n";
 import { requireAccount } from "../../lib/session";
 
@@ -50,6 +50,7 @@ export async function createAccount(
   const result = await adminRequest({
     path: "/accounts",
     method: "POST",
+    idempotencyKey: formIdempotencyKey(form),
     token,
     body: { name: formText(form, "name"), email, role: role.data },
     schema: activationSchema,
@@ -132,6 +133,7 @@ export async function renewActivation(
   const result = await adminRequest({
     path: `/accounts/${encodeURIComponent(formText(form, "id"))}/activation`,
     method: "POST",
+    idempotencyKey: formIdempotencyKey(form),
     token,
     schema: activationSchema,
   });

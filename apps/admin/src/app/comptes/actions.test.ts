@@ -51,6 +51,19 @@ describe("adding a person", () => {
     });
   });
 
+  it("sends the form's key, so a form sent twice creates one account", async () => {
+    adminRequest.mockResolvedValue({
+      ok: true,
+      data: { code: "code-a-usage-unique", expiresAt: "2026-10-02T08:00:00.000Z" },
+    });
+    const data = person("personne@bic.test");
+    data.set("idempotencyKey", "cle-de-test-du-formulaire");
+    await createAccount({}, data);
+    expect(adminRequest.mock.calls[0]?.[0]).toMatchObject({
+      idempotencyKey: "cle-de-test-du-formulaire",
+    });
+  });
+
   it("refuses two different addresses before asking the API", async () => {
     const state = await createAccount({}, person("personne@bic.test", "persone@bic.test"));
     expect(state.error).toMatch(/différentes/);

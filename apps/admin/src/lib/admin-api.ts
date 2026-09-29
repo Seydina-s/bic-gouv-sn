@@ -14,6 +14,8 @@ interface AdminRequest<S extends z.ZodType> {
   body?: unknown;
   /** Session token of the signed-in person (never sent to the browser). */
   token?: string | null;
+  /** Makes a creating write safe to send twice: the API does it only once. */
+  idempotencyKey?: string | null;
   schema: S;
 }
 
@@ -27,6 +29,7 @@ export async function adminRequest<S extends z.ZodType>({
   method = "GET",
   body,
   token = null,
+  idempotencyKey = null,
   schema,
 }: AdminRequest<S>): Promise<AdminResult<z.infer<S>>> {
   const apiUrl = readApiUrl(process.env);
@@ -43,6 +46,7 @@ export async function adminRequest<S extends z.ZodType>({
           headers: {
             ...(body === undefined ? {} : { "content-type": "application/json" }),
             ...(token === null ? {} : { authorization: `Bearer ${token}` }),
+            ...(idempotencyKey === null ? {} : { "idempotency-key": idempotencyKey }),
           },
           ...(body === undefined ? {} : { body: JSON.stringify(body) }),
         }),

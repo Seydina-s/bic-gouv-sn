@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { serviceCategorySchema } from "@bgs/shared-types";
 import Link from "next/link";
 import { t } from "../../../lib/i18n";
@@ -25,7 +26,7 @@ export default async function AddServicePage() {
         {t("services.addTitle")}
       </h1>
       <p className="max-w-prose text-ink-soft">{t("services.addIntro")}</p>
-      <AddServiceForm categories={categories} />
+      <AddServiceForm categories={categories} idempotencyKey={randomUUID()} />
     </section>
   );
 }

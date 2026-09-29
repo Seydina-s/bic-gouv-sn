@@ -163,6 +163,13 @@ export const ERROR_CATALOG = {
     severity: "info",
     action: "Rechargez la page : une autre personne a sans doute déjà décidé.",
   },
+  NOTIFICATION_ALREADY_PENDING: {
+    what: "Une notification a été préparée pour un article qui en avait déjà une en attente de vérification.",
+    where: "Centre d'administration, notifications",
+    impact: "Rien n'a été préparé : le même article ne peut pas partir deux fois à tout le pays.",
+    severity: "info",
+    action: "Validez ou annulez la notification déjà en attente pour cet article.",
+  },
   NOTIFICATION_NOT_FOUND: {
     what: "Une notification demandée n'existe pas.",
     where: "Centre d'administration, notifications",
@@ -228,6 +235,30 @@ export const ERROR_CATALOG = {
     impact: "Rien n'a été enregistré ; le lien reste valable.",
     severity: "info",
     action: "Choisissez une phrase de passe d'au moins 12 caractères.",
+  },
+  IDEMPOTENCY_KEY_REUSED: {
+    what: "Une même clé de protection contre les doubles envois a servi pour deux demandes différentes.",
+    where: "API (écritures : console, formulaires)",
+    impact:
+      "La seconde demande a été refusée ; la première reste valable, rien n'a été écrit deux fois.",
+    severity: "warning",
+    action:
+      "Rechargez la page avant de recommencer ; si cela se répète, prévenez l'équipe technique.",
+  },
+  IDEMPOTENCY_IN_PROGRESS: {
+    what: "Une demande a été envoyée une seconde fois alors que la première était encore en cours.",
+    where: "API (écritures : console, formulaires)",
+    impact: "Le second envoi a été ignoré : l'action ne sera faite qu'une fois.",
+    severity: "info",
+    action:
+      "Rien à faire : attendez quelques secondes, puis rechargez la page pour voir le résultat.",
+  },
+  IDEMPOTENCY_KEY_INVALID: {
+    what: "Une demande portait une clé de protection contre les doubles envois mal formée.",
+    where: "API (écritures)",
+    impact: "La demande a été refusée ; rien n'a été écrit.",
+    severity: "warning",
+    action: "Prévenez l'équipe technique : un outil envoie des demandes incorrectes.",
   },
   INGESTION_STOPPED: {
     what: "La surveillance des nouvelles publications de la Présidence est arrêtée.",

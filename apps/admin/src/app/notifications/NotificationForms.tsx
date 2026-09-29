@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { IdempotencyKey } from "../../components/IdempotencyKey";
 import { FormOutcome, type FormState } from "../../components/FormOutcome";
 import { field, primaryButton, secondaryButton } from "../../lib/form-styles";
 import { t } from "../../lib/i18n";
@@ -12,10 +13,17 @@ export interface ArticleChoice {
 }
 
 /** Chooses one of the latest official articles: its title becomes the notification. */
-export function PrepareForm({ articles }: { articles: readonly ArticleChoice[] }) {
+export function PrepareForm({
+  articles,
+  idempotencyKey,
+}: {
+  articles: readonly ArticleChoice[];
+  idempotencyKey: string;
+}) {
   const [state, action, pending] = useActionState<FormState, FormData>(prepareNotification, {});
   return (
     <form action={action} className="max-w-2xl space-y-4">
+      <IdempotencyKey value={idempotencyKey} />
       <div className="space-y-2">
         <label htmlFor="articleId" className="block font-semibold">
           {t("notifications.article")}
