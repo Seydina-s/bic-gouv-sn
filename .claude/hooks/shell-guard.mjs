@@ -35,7 +35,23 @@ export function hasSubstitution(command) {
   return false;
 }
 
+/**
+ * True when JavaScript given on the command line holds a backtick, even escaped:
+ * template strings through the shell's quoting broke files twice (ERREURS.md,
+ * 29/09/2026). Such code belongs in a file written with the editor.
+ */
+export function hasInlineTemplate(command) {
+  const text = withoutQuotedHeredocs(command);
+  return /\bnode(\.exe)?\s+(-e|--eval|-p|--print)\b/.test(text) && text.includes("`");
+}
+
 export function refusal(command) {
+  if (hasInlineTemplate(command)) {
+    return (
+      "Commande refusée : du JavaScript passé à « node -e » contient un accent grave (même échappé). " +
+      "Écrire ce code avec l'outil d'édition de fichiers, directement dans le fichier visé."
+    );
+  }
   if (!hasSubstitution(command)) {
     return null;
   }
