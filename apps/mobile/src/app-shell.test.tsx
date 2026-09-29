@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { act, fireEvent, screen, waitFor, within } from "@testing-library/react-native";
 import * as Location from "expo-location";
+import { router } from "expo-router";
 import { renderRouter } from "expo-router/testing-library";
 import { Dimensions, Linking } from "react-native";
 import RootLayout from "./app/_layout";
@@ -470,6 +471,44 @@ describe("app shell", () => {
     await fireEvent.press(first(await screen.findAllByText("Titre de test A")));
     expect(await screen.findByText("Paragraphe de test.")).toBeOnTheScreen();
     expect(sentSignals()).toContainEqual({ type: "read", articleId: DETAIL.id });
+  });
+
+  it("asks once, like a permission, after a first article; yes turns statistics on at once", async () => {
+    const fetchMock = newsFetch();
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    const statsCalls = () => fetchMock.mock.calls.filter(([url]) => url.includes("/v1/stats"));
+    await renderRouter(routes, { initialUrl: "/" });
+    // Not before any reading: the front page opens without asking anything.
+    expect(await screen.findAllByText("Titre de test A")).not.toHaveLength(0);
+    expect(screen.queryByText("Aider à améliorer l'application ?")).toBeNull();
+    await fireEvent.press(first(screen.getAllByText("Titre de test A")));
+    expect(await screen.findByText("Paragraphe de test.")).toBeOnTheScreen();
+    expect(screen.queryByText("Aider à améliorer l'application ?")).toBeNull();
+    await act(() => {
+      router.back();
+    });
+    expect(await screen.findByText("Aider à améliorer l'application ?")).toBeOnTheScreen();
+    expect(statsCalls()).toHaveLength(0);
+    await fireEvent.press(screen.getByRole("button", { name: "Oui, j'accepte" }));
+    // On at once: today's anonymous signal leaves without visiting the settings.
+    await waitFor(() => {
+      expect(statsCalls()).toHaveLength(1);
+    });
+    expect(await AsyncStorage.getItem("bgs-usage-stats")).toBe("on");
+    expect(screen.queryByText("Aider à améliorer l'application ?")).toBeNull();
+    expect(await AsyncStorage.getItem("bgs-usage-invited")).toBe("yes");
+  });
+
+  it("does not ask again once the person said no", async () => {
+    await AsyncStorage.setItem("bgs-usage-invited", "yes");
+    await renderRouter(routes, { initialUrl: "/" });
+    await fireEvent.press(first(await screen.findAllByText("Titre de test A")));
+    expect(await screen.findByText("Paragraphe de test.")).toBeOnTheScreen();
+    await act(() => {
+      router.back();
+    });
+    expect(await screen.findAllByText("Titre de test A")).not.toHaveLength(0);
+    expect(screen.queryByText("Aider à améliorer l'application ?")).toBeNull();
   });
 
   it("erases what the phone kept for statistics when they are turned off", async () => {

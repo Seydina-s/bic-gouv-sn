@@ -8,6 +8,7 @@ import {
   useEffect,
   useMemo,
   useRef,
+  useState,
   type ReactNode,
 } from "react";
 import { AppState, Platform } from "react-native";
@@ -20,6 +21,9 @@ const CONSENTS: readonly UsageConsent[] = ["off", "on"];
 /** Where the choice and the calendar memory are kept on the phone (not secrets). */
 const CONSENT_SLOT = "bgs-usage-stats";
 const MEMORY_SLOT = "bgs-usage-memory";
+/** Whether the person has answered the invitation (or chosen in the settings). */
+const INVITED_SLOT = "bgs-usage-invited";
+const INVITED: readonly ("no" | "yes")[] = ["no", "yes"];
 // EXPO_PUBLIC_* must be read literally to be inlined at build time.
 const API_BASE = process.env.EXPO_PUBLIC_API_URL ?? "";
 const SEND_TIMEOUT_MS = 10_000;
@@ -62,6 +66,13 @@ export interface UsageStats {
   setConsent: (next: UsageConsent) => void;
   /** Counts an article read or listened to, only with the person's consent. */
   record: (signal: UsageSignal) => void;
+  /**
+   * True once, after a first article read, while the person has never been asked
+   * nor chosen in the settings (like a permission, asked when it makes sense).
+   */
+  invitationDue: boolean;
+  /** Yes turns the statistics on at once; either answer closes the invitation for good. */
+  answerInvitation: (accepted: boolean) => void;
 }
 
 const UsageStatsContext = createContext<UsageStats | null>(null);
@@ -110,18 +121,27 @@ export function UsageStatsProvider({ children }: { children: ReactNode }) {
     };
   }, [consent]);
 
+  const [invited, markInvited] = usePersistentChoice(INVITED_SLOT, INVITED, "no");
+  // Only after a first article read in this session: the app has shown its worth.
+  const [hasRead, setHasRead] = useState(false);
+
   const setConsent = useCallback(
     (next: UsageConsent) => {
       choose(next);
+      // A choice made in the settings answers the invitation too: never asked again.
+      markInvited("yes");
       if (next === "off") {
         AsyncStorage.removeItem(MEMORY_SLOT).catch(() => undefined);
       }
     },
-    [choose],
+    [choose, markInvited],
   );
 
   const record = useCallback(
     (signal: UsageSignal) => {
+      if (signal.type === "read") {
+        setHasRead(true);
+      }
       if (consent === "on") {
         send([signal]);
       }
@@ -129,7 +149,18 @@ export function UsageStatsProvider({ children }: { children: ReactNode }) {
     [consent],
   );
 
-  const value = useMemo(() => ({ consent, setConsent, record }), [consent, setConsent, record]);
+  const value = useMemo(
+    () => ({
+      consent,
+      setConsent,
+      record,
+      invitationDue: invited === "no" && consent === "off" && hasRead,
+      answerInvitation: (accepted: boolean) => {
+        setConsent(accepted ? "on" : "off");
+      },
+    }),
+    [consent, setConsent, record, invited, hasRead],
+  );
   return <UsageStatsContext.Provider value={value}>{children}</UsageStatsContext.Provider>;
 }
 

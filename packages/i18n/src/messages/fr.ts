@@ -290,6 +290,13 @@ export const fr = {
     openHint: "Affiche le copyright et le texte de la licence",
     projectSite: "Site du projet",
   },
+  usageInvite: {
+    title: "Aider à améliorer l'application\u00a0?",
+    body: "Bic Gouv SN peut compter, sans savoir qui vous êtes, combien de personnes l'utilisent et quels articles sont lus. Aucun identifiant, aucune position.",
+    note: "Vous pourrez changer d'avis à tout moment dans les Réglages.",
+    accept: "Oui, j'accepte",
+    decline: "Non merci",
+  },
   favorites: {
     title: "Mes favoris",
     add: "Ajouter aux favoris",
