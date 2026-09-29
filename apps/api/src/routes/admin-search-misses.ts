@@ -39,7 +39,7 @@ export const adminSearchMissesRoutes: FastifyPluginAsyncZod<AdminSearchMissesOpt
         return reply;
       }
       void reply.header("cache-control", "no-store");
-      return { minCount: SEARCH_MISS_MIN_COUNT, entries: searchMisses.shown() };
+      return { minCount: SEARCH_MISS_MIN_COUNT, entries: await searchMisses.shown() };
     },
   );
   return Promise.resolve();
