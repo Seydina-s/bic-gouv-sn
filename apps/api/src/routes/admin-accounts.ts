@@ -169,28 +169,42 @@ export const adminAccountsRoutes: FastifyPluginAsyncZod<AdminAccountsOptions> = 
     );
   }
 
-  app.post(
-    "/accounts/:id/activation",
-    {
-      schema: {
-        tags: ["admin"],
-        summary: "A new activation code for an account not activated yet",
-        params,
-        response: { 200: activationSchema, ...errors },
+  /** Actions answering with a new activation link (shown once in the console). */
+  const linkActions = {
+    activation: {
+      summary: "A new activation code for an account not activated yet",
+      run: (actorId: string, id: string) => accountAdmin.renewActivation(actorId, id),
+    },
+    "password-reset": {
+      summary: "A forgotten password: the old one stops working, a new activation code",
+      run: (actorId: string, id: string) => accountAdmin.resetPassword(actorId, id),
+    },
+  } as const;
+
+  for (const [name, action] of Object.entries(linkActions)) {
+    app.post(
+      `/accounts/:id/${name}`,
+      {
+        schema: {
+          tags: ["admin"],
+          summary: action.summary,
+          params,
+          response: { 200: activationSchema, ...errors },
+        },
       },
-    },
-    async (request, reply) => {
-      const actor = await authorize(request, reply, signIn, "users.manage");
-      if (actor === null) {
-        return reply;
-      }
-      try {
-        return await accountAdmin.renewActivation(actor.id, request.params.id);
-      } catch (error) {
-        return refuse(request, reply, error);
-      }
-    },
-  );
+      async (request, reply) => {
+        const actor = await authorize(request, reply, signIn, "users.manage");
+        if (actor === null) {
+          return reply;
+        }
+        try {
+          return await action.run(actor.id, request.params.id);
+        } catch (error) {
+          return refuse(request, reply, error);
+        }
+      },
+    );
+  }
 
   app.post(
     "/auth/activate",

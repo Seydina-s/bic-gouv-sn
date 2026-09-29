@@ -8,6 +8,7 @@ import {
   AccessForm,
   CreateAccountForm,
   RenewActivationForm,
+  ResetPasswordForm,
   ResetSecondFactorForm,
   RoleForm,
 } from "./AccountForms";
@@ -18,6 +19,7 @@ export const dynamic = "force-dynamic";
 const STATE_STYLE: Record<AccountState, string> = {
   active: "bg-primary-container text-on-primary-container",
   invited: "bg-accent-container text-on-accent-container",
+  "password-reset": "bg-accent-container text-on-accent-container",
   "no-second-factor": "bg-accent-container text-on-accent-container",
   disabled: "bg-surface text-ink-soft",
 };
@@ -39,9 +41,12 @@ function AccountActions({ account }: { account: AccountView }) {
       {account.state !== "disabled" && (
         <RoleForm id={account.id} name={account.name} role={account.role} />
       )}
+      {(account.state === "active" || account.state === "no-second-factor") && (
+        <ResetPasswordForm id={account.id} idempotencyKey={randomUUID()} />
+      )}
       {account.state === "active" && <ResetSecondFactorForm id={account.id} />}
       <div className="flex flex-wrap items-start gap-3">
-        {account.state === "invited" && (
+        {(account.state === "invited" || account.state === "password-reset") && (
           <RenewActivationForm id={account.id} idempotencyKey={randomUUID()} />
         )}
         <AccessForm id={account.id} disabled={account.state === "disabled"} />

@@ -39,7 +39,7 @@ function stateOf(account: AdminAccount): AccountState {
     return "disabled";
   }
   if (account.passwordHash === null) {
-    return "invited";
+    return account.totp.enrolledAt === null ? "invited" : "password-reset";
   }
   return account.totp.enrolledAt === null ? "no-second-factor" : "active";
 }
@@ -152,6 +152,25 @@ export class AccountAdmin {
       return { ...account, activation };
     });
     await this.audit(actorId, "account.activation-renewed", id);
+    return { account: accountView(updated, now), code, expiresAt: activation.expiresAt };
+  }
+
+  /**
+   * A forgotten password (ADM-11): the old one stops working, the sessions close,
+   * and a new activation link lets the person choose another. The second factor
+   * stays: whoever holds the link still needs the person's phone to sign in.
+   */
+  async resetPassword(actorId: string, id: string): Promise<Activation> {
+    const now = this.now();
+    const { code, activation } = this.newActivation(now);
+    const { after: updated } = await this.changeOther(actorId, id, (account) => ({
+      ...account,
+      passwordHash: null,
+      activation,
+      attempts: NO_ATTEMPTS,
+    }));
+    this.deps.signIn.endSessionsOf(id);
+    await this.audit(actorId, "account.password-reset", id);
     return { account: accountView(updated, now), code, expiresAt: activation.expiresAt };
   }
 

@@ -12,6 +12,7 @@ import {
   changeRole,
   createAccount,
   renewActivation,
+  resetPassword,
   type AccountFormState,
 } from "./actions";
 
@@ -179,13 +180,29 @@ export function AccessForm({ id, disabled }: { id: string; disabled: boolean }) 
 }
 
 /** Reset the second factor, only once the person's identity has been checked. */
-export function ResetSecondFactorForm({ id }: { id: string }) {
-  const [state, action, pending] = useActionState<AccountFormState, FormData>(changeAccess, {});
+/** A sensitive action on someone's access: done only once their identity is checked. */
+function IdentityCheckedForm({
+  id,
+  run,
+  confirm,
+  button,
+  idempotencyKey,
+  action: actionName,
+}: {
+  id: string;
+  run: (previous: AccountFormState, form: FormData) => Promise<AccountFormState>;
+  confirm: string;
+  button: string;
+  idempotencyKey?: string;
+  action?: string;
+}) {
+  const [state, action, pending] = useActionState<AccountFormState, FormData>(run, {});
   const confirmId = useId();
   return (
     <form action={action} className="space-y-2">
       <input type="hidden" name="id" value={id} />
-      <input type="hidden" name="action" value="reset-second-factor" />
+      {actionName !== undefined && <input type="hidden" name="action" value={actionName} />}
+      {idempotencyKey !== undefined && <IdempotencyKey value={idempotencyKey} />}
       <label htmlFor={confirmId} className="flex min-h-12 items-start gap-3 text-sm">
         <input
           id={confirmId}
@@ -195,13 +212,39 @@ export function ResetSecondFactorForm({ id }: { id: string }) {
           required
           className="mt-0.5 size-5 accent-primary"
         />
-        <span>{t("accounts.resetConfirm")}</span>
+        <span>{confirm}</span>
       </label>
       <button type="submit" disabled={pending} className={secondaryButton}>
-        {t("accounts.resetSecondFactor")}
+        {button}
       </button>
       <Outcome state={state} />
     </form>
+  );
+}
+
+/** Reset the second factor (a lost phone), once the person's identity is checked. */
+export function ResetSecondFactorForm({ id }: { id: string }) {
+  return (
+    <IdentityCheckedForm
+      id={id}
+      run={changeAccess}
+      action="reset-second-factor"
+      confirm={t("accounts.resetConfirm")}
+      button={t("accounts.resetSecondFactor")}
+    />
+  );
+}
+
+/** A forgotten password (ADM-11): a new link, once the person's identity is checked. */
+export function ResetPasswordForm({ id, idempotencyKey }: { id: string; idempotencyKey: string }) {
+  return (
+    <IdentityCheckedForm
+      id={id}
+      run={resetPassword}
+      idempotencyKey={idempotencyKey}
+      confirm={t("accounts.resetPasswordConfirm")}
+      button={t("accounts.resetPassword")}
+    />
   );
 }
 

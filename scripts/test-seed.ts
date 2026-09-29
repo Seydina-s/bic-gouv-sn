@@ -218,6 +218,10 @@ async function seedAccount(dataDir: string, password: string): Promise<void> {
       passwordHash: account.passwordHash,
       disabled: true,
     }),
+    teammate("Personne au mot de passe oublié (fictive)", "editor", {
+      activation: { codeHash: "1".repeat(64), expiresAt: inAnHour },
+      totp: { sealedSecret: null, enrolledAt: new Date().toISOString(), lastStep: null },
+    }),
   ];
   mkdirSync(join(dataDir, "admin"), { recursive: true });
   writeFileSync(

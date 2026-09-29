@@ -15,6 +15,7 @@ const LABELS = {
   "account.enabled": "accountEnabled",
   "account.second-factor-reset": "accountSecondFactorReset",
   "account.activation-renewed": "accountActivationRenewed",
+  "account.password-reset": "accountPasswordReset",
   "secret-key.rotated": "secretKeyRotated",
   "secrets.resealed": "secretsResealed",
   "procedure.theme.validated": "themeValidated",

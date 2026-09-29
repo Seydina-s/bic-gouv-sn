@@ -7,7 +7,8 @@ vi.mock("../../lib/session", () => ({
 }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 
-const { changeAccess, changeRole, createAccount, renewActivation } = await import("./actions");
+const { changeAccess, changeRole, createAccount, renewActivation, resetPassword } =
+  await import("./actions");
 
 // Placeholder person, not a real team member.
 function person(email: string, emailAgain = email): FormData {
@@ -117,6 +118,22 @@ describe("changing someone's access", () => {
     expect((await renewActivation({}, data)).activation?.code).toBe("nouveau-code");
     adminRequest.mockResolvedValue({ ok: false, status: 409, code: "ACCOUNT_ALREADY_ACTIVE" });
     expect((await renewActivation({}, data)).error).toMatch(/déjà activé/);
+  });
+
+  it("resets a forgotten password only once the identity is checked", async () => {
+    const data = new FormData();
+    data.set("id", "a1");
+    expect((await resetPassword({}, data)).error).toMatch(/vient bien de cette personne/);
+    expect(adminRequest).not.toHaveBeenCalled();
+    data.set("confirm", "yes");
+    adminRequest.mockResolvedValue({
+      ok: true,
+      data: { code: "nouveau-code", expiresAt: "2026-10-02T08:00:00.000Z" },
+    });
+    const state = await resetPassword({}, data);
+    expect(adminRequest.mock.calls[0]?.[0]).toMatchObject({ path: "/accounts/a1/password-reset" });
+    expect(state.message).toMatch(/second code ne change pas/);
+    expect(state.activation?.code).toBe("nouveau-code");
   });
 
   it("says a passing failure plainly", async () => {

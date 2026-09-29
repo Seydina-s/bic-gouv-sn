@@ -15,6 +15,8 @@ export type AdminRole = z.infer<typeof adminRoleSchema>;
 export const accountStateSchema = z.enum([
   /** Created: waits for its person to choose a password through the activation link. */
   "invited",
+  /** Password reset (forgotten): waits for a new one through the link; second factor kept. */
+  "password-reset",
   /** Password chosen; the second factor is set up at the first sign-in. */
   "no-second-factor",
   /** Password and second factor: signs in normally. */
