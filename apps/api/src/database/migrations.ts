@@ -15,4 +15,17 @@ export const MIGRATIONS: readonly { id: string; sql: string }[] = [
       PRIMARY KEY (period, metric, name)
     )`,
   },
+  {
+    // Searches that found nothing, per area, language and normalized wording, with
+    // the last day only ("2026-09-29"), never the time, nothing about who searched.
+    id: "002-search-misses",
+    sql: `CREATE TABLE search_misses (
+      area text NOT NULL,
+      lang text NOT NULL,
+      query text NOT NULL,
+      count bigint NOT NULL CHECK (count > 0),
+      last_on text NOT NULL,
+      PRIMARY KEY (area, lang, query)
+    )`,
+  },
 ];

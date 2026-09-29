@@ -1,8 +1,7 @@
-import { readFile } from "node:fs/promises";
-import { writeFileDurably } from "@bgs/content-store";
 import { usageFileSchema, type UsageFile } from "@bgs/shared-types";
 import { z } from "zod";
 import type { Queryable } from "../database/database";
+import { JsonFileState } from "../journal/json-file-state";
 import {
   addUsage,
   emptyUsage,
@@ -27,34 +26,21 @@ function firstDay(usage: UsageFile): string | null {
 
 /** A JSON file: for a single API instance (no DATABASE_URL). */
 export class FileUsageStore implements UsageStore {
-  /** Additions wait for each other: each one reads what the previous one wrote. */
-  private queue: Promise<unknown> = Promise.resolve();
+  private readonly file: JsonFileState<typeof usageFileSchema>;
 
-  constructor(private readonly path: string) {}
-
-  private async read(): Promise<UsageFile> {
-    try {
-      return usageFileSchema.parse(JSON.parse(await readFile(this.path, "utf8")));
-    } catch {
-      // Nothing saved yet, or damaged: the counts start again.
-      return emptyUsage();
-    }
+  constructor(path: string) {
+    this.file = new JsonFileState(path, usageFileSchema, emptyUsage);
   }
 
   add(delta: UsageFile, oldestDay: string): Promise<void> {
-    const done = this.queue.then(async () => {
-      const usage = await this.read();
+    return this.file.update((usage) => {
       addUsage(usage, delta);
       forgetDaysBefore(usage, oldestDay);
-      await writeFileDurably(this.path, JSON.stringify(usage, null, 2));
     });
-    this.queue = done.catch(() => undefined);
-    return done;
   }
 
   async load(fromDay: string): Promise<{ usage: UsageFile; since: string | null }> {
-    await this.queue;
-    const usage = await this.read();
+    const usage = await this.file.read();
     const since = firstDay(usage);
     forgetDaysBefore(usage, fromDay);
     return { usage, since };

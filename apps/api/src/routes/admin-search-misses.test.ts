@@ -6,6 +6,7 @@ import type { FastifyInstance } from "fastify";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { buildApp } from "../app";
 import { loadConfig } from "../config";
+import { FileSearchMissStore } from "../journal/search-miss-store";
 import { SearchMisses } from "../journal/search-misses";
 import { adminForTests } from "../testing/admin-session";
 import { temporaryStore } from "../testing/store";
@@ -52,7 +53,7 @@ beforeEach(async () => {
     version: "1.0.0",
     articles,
     admin: admin.admin,
-    searchMisses: await SearchMisses.open(join(dir, "search-misses.json")),
+    searchMisses: new SearchMisses(new FileSearchMissStore(join(dir, "search-misses.json"))),
   });
 });
 

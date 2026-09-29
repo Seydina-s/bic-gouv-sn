@@ -11,6 +11,7 @@ import type { FastifyInstance } from "fastify";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { buildApp } from "../app";
 import { loadConfig } from "../config";
+import { FileSearchMissStore } from "../journal/search-miss-store";
 import { SearchMisses } from "../journal/search-misses";
 import { procedure } from "../testing/procedure-fixture";
 import { temporaryStore } from "../testing/store";
@@ -22,7 +23,7 @@ describe("/v1/procedures", () => {
 
   beforeEach(async () => {
     dir = await mkdtemp(join(tmpdir(), "bgs-api-procedures-"));
-    searchMisses = await SearchMisses.open(join(dir, "search-misses.json"));
+    searchMisses = new SearchMisses(new FileSearchMissStore(join(dir, "search-misses.json")));
     const procedures = new FileProcedureRepository(join(dir, "procedures.json"));
     await procedures.save(
       procedure(1, "Extrait de naissance", "<p>Se rendre à la mairie.</p>", {
@@ -48,9 +49,9 @@ describe("/v1/procedures", () => {
       await app.inject({ method: "GET", url: "/v1/procedures?q=bourse" });
       await app.inject({ method: "GET", url: "/v1/procedures?q=passeport" });
     }
-    expect(searchMisses.shown().map(({ area, query, count }) => [area, query, count])).toEqual([
-      ["procedures", "bourse", 3],
-    ]);
+    expect(
+      (await searchMisses.shown()).map(({ area, query, count }) => [area, query, count]),
+    ).toEqual([["procedures", "bourse", 3]]);
   });
 
   afterEach(async () => {

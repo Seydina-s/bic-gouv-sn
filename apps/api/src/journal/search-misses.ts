@@ -1,45 +1,31 @@
-import { readFile } from "node:fs/promises";
 import {
   normalizeSearchQuery,
-  searchMissesFileSchema,
   shownSearchMisses,
   type Lang,
   type SearchArea,
   type SearchMiss,
 } from "@bgs/shared-types";
-import { SavedToFile } from "./periodically-saved";
-
-/** Distinct searches kept: beyond, the least searched gives way (bounded on disk). */
-const MAX_QUERIES = 2000;
+import { PeriodicallySaved } from "./periodically-saved";
+import {
+  addMisses,
+  MAX_QUERIES,
+  missKey,
+  mostSearched,
+  type SearchMissStore,
+} from "./search-miss-store";
 
 /**
  * Searches that found nothing, counted per area, language and wording: nothing
- * about who searched (decision of 28/09/2026). The console sees only those made
- * at least SEARCH_MISS_MIN_COUNT times.
+ * about who searched (decision of 28/09/2026). Counted in memory, then added to
+ * the store now and then: several API instances add up their counts (SCALE-02).
+ * The console sees only those made at least SEARCH_MISS_MIN_COUNT times.
  */
-export class SearchMisses extends SavedToFile {
-  private readonly misses = new Map<string, SearchMiss>();
+export class SearchMisses extends PeriodicallySaved {
+  /** Counted here since the last save. */
+  private pending = new Map<string, SearchMiss>();
 
-  private constructor(path: string) {
-    super(path);
-  }
-
-  /** The count saved at `path`, or an empty one (missing or unreadable file). */
-  static async open(path: string): Promise<SearchMisses> {
-    const log = new SearchMisses(path);
-    try {
-      const saved = searchMissesFileSchema.parse(JSON.parse(await readFile(path, "utf8")));
-      for (const entry of saved.entries) {
-        log.misses.set(SearchMisses.key(entry.area, entry.lang, entry.query), entry);
-      }
-    } catch {
-      // Nothing saved yet, or damaged: the count starts again.
-    }
-    return log;
-  }
-
-  private static key(area: SearchArea, lang: Lang, query: string): string {
-    return `${area}|${lang}|${query}`;
+  constructor(private readonly store: SearchMissStore) {
+    super();
   }
 
   record(area: SearchArea, lang: Lang, rawQuery: string, at = new Date()): void {
@@ -47,39 +33,37 @@ export class SearchMisses extends SavedToFile {
     if (query === "") {
       return;
     }
-    const key = SearchMisses.key(area, lang, query);
-    const seen = this.misses.get(key);
-    if (seen === undefined && this.misses.size >= MAX_QUERIES) {
-      this.dropLeastSearched();
+    addMisses(this.pending, [
+      { area, lang, query, count: 1, lastOn: at.toISOString().slice(0, 10) },
+    ]);
+    if (this.pending.size > MAX_QUERIES) {
+      this.pending = new Map(
+        mostSearched(this.pending.values()).map((miss) => [
+          missKey(miss.area, miss.lang, miss.query),
+          miss,
+        ]),
+      );
     }
-    this.misses.set(key, {
-      area,
-      lang,
-      query,
-      count: (seen?.count ?? 0) + 1,
-      lastOn: at.toISOString().slice(0, 10),
-    });
     this.changed();
   }
 
-  private dropLeastSearched(): void {
-    let least: [string, SearchMiss] | undefined;
-    for (const entry of this.misses) {
-      if (least === undefined || entry[1].count < least[1].count) {
-        least = entry;
-      }
-    }
-    if (least !== undefined) {
-      this.misses.delete(least[0]);
+  /** Adds what was counted here to the store; kept for the next save if it fails. */
+  protected async save(): Promise<void> {
+    const counted = this.pending;
+    this.pending = new Map();
+    try {
+      await this.store.add([...counted.values()]);
+    } catch (error) {
+      addMisses(this.pending, counted.values());
+      throw error;
     }
   }
 
   /** Only what the console may show: frequent enough, most searched first. */
-  shown(): SearchMiss[] {
-    return shownSearchMisses([...this.misses.values()]);
-  }
-
-  protected snapshot() {
-    return { schemaVersion: 1 as const, entries: [...this.misses.values()] };
+  async shown(): Promise<SearchMiss[]> {
+    const all = new Map<string, SearchMiss>();
+    addMisses(all, await this.store.all());
+    addMisses(all, this.pending.values());
+    return shownSearchMisses([...all.values()]);
   }
 }
