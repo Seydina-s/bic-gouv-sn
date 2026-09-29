@@ -1,0 +1,43 @@
+# The three services together, as they will run once hosted (S1-02), sharing one
+# data volume. From the repository root:
+#   docker compose -f infra/docker/compose.yaml up --build
+# ADMIN_SECRET_KEY is given by the environment of the command (in production, by
+# the hosting secret manager): never written in this file or in an image.
+name: bic-gouv-sn
+
+services:
+  api:
+    build:
+      context: ../..
+      dockerfile: infra/docker/api.Dockerfile
+    environment:
+      ADMIN_SECRET_KEY: ${ADMIN_SECRET_KEY:?the API needs its secret key from the environment}
+      LOG_LEVEL: info
+    ports:
+      - "3000:3000"
+    volumes:
+      - data:/app/.data
+    restart: unless-stopped
+
+  console:
+    build:
+      context: ../..
+      dockerfile: infra/docker/console.Dockerfile
+    environment:
+      API_URL: http://api:3000
+    ports:
+      - "3001:3001"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  ingestion:
+    build:
+      context: ../..
+      dockerfile: infra/docker/ingestion.Dockerfile
+    volumes:
+      - data:/app/.data
+    restart: unless-stopped
+
+volumes:
+  data:

@@ -1,0 +1,24 @@
+# Never in an image (docs/securite-des-secrets.md): secrets and data.
+**/.env
+**/.env.*
+!**/.env.example
+.data
+**/.data
+**/*.pem
+**/*.key
+
+# Rebuilt inside the image, or not needed there.
+**/node_modules
+**/dist
+**/build
+**/.next
+**/coverage
+**/.expo
+**/*.tsbuildinfo
+.git
+.github
+.claude
+.vscode
+.idea
+docs
+**/*.log

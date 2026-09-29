@@ -31,6 +31,8 @@ jobs:
         run: pnpm fonts:check
       - run: pnpm typecheck
       - run: pnpm test
+      - name: Shell guard (secrets, inline scripts) behaves as tested
+        run: pnpm test:hooks
 
   build:
     name: Production builds
@@ -53,6 +55,40 @@ jobs:
         run: pnpm a11y
       - name: End-to-end journeys (app web export and console)
         run: pnpm e2e
+
+  containers:
+    name: Container images
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Build the API, console and collection images
+        run: |
+          docker build -f infra/docker/api.Dockerfile -t bgs-api .
+          docker build -f infra/docker/console.Dockerfile -t bgs-console .
+          docker build -f infra/docker/ingestion.Dockerfile -t bgs-ingestion .
+      - name: No secret or data inside the images
+        run: |
+          for image in bgs-api bgs-console bgs-ingestion; do
+            found=$(docker run --rm --entrypoint sh "$image" -c 'find / -xdev \( -name ".env" -o -name ".env.local" -o -name "accounts.json" \) 2>/dev/null || true')
+            if [ -n "$found" ]; then echo "Found in $image: $found"; exit 1; fi
+          done
+      - name: The API and the console start and answer
+        run: |
+          docker network create bgs
+          docker run -d --name api --network bgs -p 3000:3000 bgs-api
+          docker run -d --name console --network bgs -e API_URL=http://api:3000 -p 3001:3001 bgs-console
+          for url in http://127.0.0.1:3000/v1/health http://127.0.0.1:3001/connexion; do
+            for attempt in $(seq 1 30); do
+              if curl -fsS -o /dev/null "$url"; then echo "$url answers"; continue 2; fi
+              sleep 2
+            done
+            docker logs api; docker logs console; exit 1
+          done
+      - name: Processes run without administrator rights
+        run: |
+          test "$(docker exec api id -u)" != "0"
+          test "$(docker exec console id -u)" != "0"
 
   security:
     name: Secrets and dependencies
