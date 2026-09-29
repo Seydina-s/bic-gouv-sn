@@ -1,8 +1,10 @@
 // Real-time watcher: `pnpm --filter @bgs/ingestion watch`. Stops cleanly on Ctrl+C / SIGTERM.
+import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   FileArticleRepository,
   readIngestionStatus,
+  removeStaleTemps,
   snapshotDaily,
   writeIngestionStatus,
 } from "@bgs/content-store";
@@ -24,6 +26,14 @@ if (!lock.acquired) {
     `Another watcher is already running (process ${String(lock.holder)}): not starting a second one.\n`,
   );
   process.exit(1);
+}
+// Sole writer now: temporary files an interrupted write left behind can go.
+const STALE_TEMP_MS = 60 * 60 * 1000;
+const staleTemps = await removeStaleTemps(dirname(storePath), STALE_TEMP_MS);
+if (staleTemps > 0) {
+  process.stdout.write(
+    `Removed ${String(staleTemps)} temporary file(s) left by an interrupted write.\n`,
+  );
 }
 const provider = createPresidenceProvider();
 const repository = new FileArticleRepository(storePath);

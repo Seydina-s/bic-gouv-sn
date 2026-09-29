@@ -10,7 +10,7 @@ Liste unique de ce qui attend une action ou une décision de l'utilisateur. Repo
 | 4 | Identifiant officiel de l'app, à valider avec le BIC | Nécessaire avant toute publication sur les stores (pas pour la version de test) | A-02 |
 | 5 | ⏸ **Reporté à la fin (29/09).** 🔄 **Décidé le 28/09 : pas de rédacteur humain.** Fournir les solutions trouvées (traduction, transcription et voix naturelle en wolof) pour un banc d'essai sur nos contenus, puis choisir la meilleure | Les textes d'interface restent en français (repli signalé) d'ici là | W-01 |
 | 6 | Questions au BIC : autorisation d'utiliser l'API de presidence.sn, flux à chaque publication, reprise du wolof, licence du code, autorisation écrite pour les stores | Conditions de mise en ligne publique | L-01, L-02 |
-| 7 | 🔄 **Chiffrage prêt (29/09) : docs/hebergement.md** — option A (Paris + CDN à Dakar) environ 80 €/mois au départ ; option souveraine (Diamniadio) à demander à Sénégal Numérique. Budget d'hébergement (région proche de l'Afrique de l'Ouest + CDN) | Conditionne la mise en production (API, carte, sauvegardes hors machine) | S1-02, MAP-10, DATA-01 |
+| 7 | 🔄 **Chiffrage prêt (29/09) : docs/hebergement.md** — option A (Paris + CDN à Dakar) environ 65 €/mois au départ ; option souveraine (Diamniadio) à demander à Sénégal Numérique. Budget d'hébergement (région proche de l'Afrique de l'Ouest + CDN) | Conditionne la mise en production (API, carte, sauvegardes hors machine) | S1-02, MAP-10, DATA-01 |
 | 8 | Contenu de la section « Opportunités » — à traiter plus tard, ensemble (28/09) | Section en attente de cadrage | O-01 |
 | 9 | Périmètre de « Participer » (sondages, signalements) — à traiter plus tard, ensemble (28/09) | Onglet « bientôt disponible » en attendant | P1 |
 | 10 | ✅ **Décidé le 28/09 : masquer** l'article retiré (et un onglet de traçabilité dans la console). — Choisir le sort d'un article **retiré** par la Présidence : le masquer dans l'app (proposé, conforme à la règle « si l'information n'existe pas dans la source, l'app ne l'affiche pas ») ou l'afficher avec la mention « retiré par la source » | Aujourd'hui un article retiré resterait affiché. Relevé réel du 28/09 : **aucun retrait** pour l'instant (et 74 anciennes versions absentes de la liste officielle mais toujours en ligne, qui ne seront jamais masquées sans seconde lecture). Rien ne presse, mais le choix est nécessaire avant la mise en ligne publique | ING-03 |
@@ -31,3 +31,8 @@ Mise à jour du 29/09/2026 (nuit autonome) : points 12 (parcours des démarches,
 Mise à jour du 29/09/2026 (fin de la nuit autonome, 10 h) : points 14 (incident de clé locale) et 15 (tableaux de bord d’usage) ajoutés.
 
 Mise à jour du 29/09/2026 (midi) : décisions de l’utilisateur sur les points 13 (validé), 14 (garde-fous exigés), 15 (validé) et 5 (banc d’essai wolof reporté à la fin).
+
+| # | Quoi | Pourquoi / effet si ça attend | Réf. backlog |
+|---|---|---|---|
+| 16 | Autoriser l'ajout du contrôle « Container images » aux contrôles exigés avant toute fusion dans `main` (réglage du dépôt GitHub, que je peux faire sur votre accord) | Aujourd'hui, une image cassée serait signalée mais n'empêcherait pas la fusion | AUD4-04 |
+| 17 | Dire si l'on prépare une invitation, une seule fois et facile à refuser, à activer les statistiques anonymes (texte et écran vous seront soumis avant toute mise en place) | Sans elle, peu de personnes les activeront et les tableaux de bord resteront maigres | AUD4-03 |

@@ -6,7 +6,7 @@ Document de décision pour l'utilisateur. Le budget est **sa** décision (CLAUDE
 
 | Élément | Besoin | Source du besoin |
 |---|---|---|
-| API (publique + console) | 2 petites machines pour la redondance, sans état | `infra/docker/api.Dockerfile`, `docs/capacite.md` |
+| API (publique + console) | 1 petite machine au départ, 2 après SCALE-01 (voir plus bas) | `infra/docker/api.Dockerfile`, `docs/capacite.md` |
 | Console | 1 petite machine (peu d'utilisateurs) | `infra/docker/console.Dockerfile` |
 | Collecte en temps réel | 1 petite machine, **une seule instance** | `infra/docker/ingestion.Dockerfile` |
 | Base PostgreSQL (prévue au stack) | Petite au départ, avec secours | CLAUDE.md §4.1 |
@@ -40,12 +40,19 @@ Le trafic massif (après un Conseil des ministres) porte sur des réponses publi
 
 | Poste | Choix | Prix mensuel relevé |
 |---|---|---|
-| API | 2 × DEV1-M | ~29,48 € |
+| API | 1 × DEV1-M au départ (voir la limite ci-dessous) | ~14,74 € |
 | Console + collecte | 2 × DEV1-S | ~13,10 € |
 | PostgreSQL | DB-DEV-S + haute disponibilité + 20 Go | ~11,45 € + ~5,48 € + ~1,99 € = ~18,92 € |
 | Stockage objet | R2, sous les 10 Go gratuits d'après les volumes mesurés | 0 $ tant que le volume reste sous 10 Go |
 | CDN + WAF | Cloudflare Pro (règles WAF plus complètes que l'offre gratuite) | 20 $ (à l'année) |
-| **Total** | | **~61,50 € + 20 $ par mois**, soit **environ 80 € par mois** (conversion approximative) |
+| **Total** | | **~46,76 € + 20 $ par mois**, soit **environ 65 € par mois** (conversion approximative) |
+
+**Limite à lever avant une seconde instance de l'API (audit du 29/09, SCALE-01).** Aujourd'hui, chaque instance garde en mémoire :
+- les sessions et les étapes de connexion de la console ;
+- les clés anti-doublons ;
+- les compteurs (statistiques, recherches sans résultat, journal des erreurs), qu'elle écrit ensuite dans un fichier partagé.
+
+Avec deux instances, une personne connectée sur l'une serait refusée par l'autre, et les compteurs s'écraseraient. On démarre donc avec **une instance** : derrière le CDN, elle suffit au départ, car elle tient environ 630 requêtes par seconde sur une machine de développement. Ces états passeront dans PostgreSQL ou Redis, tous deux prévus au stack, avant d'en ajouter une seconde (+~14,74 €/mois).
 
 À ajouter, non chiffré ici : nom de domaine, sauvegardes hors machine sur un second fournisseur (quelques euros par mois pour quelques Go), Sentry (offre gratuite en place).
 
@@ -74,7 +81,7 @@ Ces coûts restent faibles parce que le CDN ne facture pas la bande passante et 
 
 ## Recommandation
 
-1. **Démarrer avec l'option A** : environ 80 € par mois, conteneurs déjà prêts, CDN à Dakar, aucun frais de bande passante. Aucun engagement long.
+1. **Démarrer avec l'option A** : environ 65 € par mois, conteneurs déjà prêts, CDN à Dakar, aucun frais de bande passante. Aucun engagement long.
 2. **Demander en parallèle une offre à Sénégal Numérique (option C).** Si elle est acceptable, migrer : les conteneurs rendent ce changement simple.
 3. Avant tout choix, **mesurer la latence réelle** depuis un téléphone à Dakar vers Paris et vers les autres régions candidates (quelques minutes, sans coût).
 
