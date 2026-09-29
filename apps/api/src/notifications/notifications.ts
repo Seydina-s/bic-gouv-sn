@@ -120,7 +120,17 @@ export class NotificationService {
       decidedAt: null,
       delivery: null,
     };
-    await this.store.update((all) => ({ next: [...all, notification], result: null }));
+    await this.store.update((all) => {
+      // Checked in the same write: two people preparing the same article at once
+      // must not end up with two national sendings to approve.
+      const waiting = all.some(
+        (item) => item.articleId === articleId && item.lang === lang && item.status === "pending",
+      );
+      if (waiting) {
+        throw new NotificationRuleError("NOTIFICATION_ALREADY_PENDING");
+      }
+      return { next: [...all, notification], result: null };
+    });
     await this.record(person, "notification.prepared", notification);
     return notification;
   }

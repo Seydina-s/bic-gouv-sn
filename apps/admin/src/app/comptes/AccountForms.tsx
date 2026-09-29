@@ -3,6 +3,7 @@
 import type { AdminRole } from "@bgs/shared-types";
 import { useActionState, useId, useState } from "react";
 import { FormOutcome } from "../../components/FormOutcome";
+import { IdempotencyKey } from "../../components/IdempotencyKey";
 import { field, primaryButton, secondaryButton } from "../../lib/form-styles";
 import { formatClockTime, formatDay } from "../../lib/format";
 import { t } from "../../lib/i18n";
@@ -71,10 +72,11 @@ function Outcome({ state }: { state: AccountFormState }) {
 }
 
 /** Adds a person: name, address typed twice, role explained in a line each. */
-export function CreateAccountForm() {
+export function CreateAccountForm({ idempotencyKey }: { idempotencyKey: string }) {
   const [state, action, pending] = useActionState<AccountFormState, FormData>(createAccount, {});
   return (
     <form action={action} className="max-w-2xl space-y-5">
+      <IdempotencyKey value={idempotencyKey} />
       <div className="space-y-2">
         <label htmlFor="name" className="block font-semibold">
           {t("accounts.name")}
@@ -204,11 +206,18 @@ export function ResetSecondFactorForm({ id }: { id: string }) {
 }
 
 /** A new activation link for an account not activated yet. */
-export function RenewActivationForm({ id }: { id: string }) {
+export function RenewActivationForm({
+  id,
+  idempotencyKey,
+}: {
+  id: string;
+  idempotencyKey: string;
+}) {
   const [state, action, pending] = useActionState<AccountFormState, FormData>(renewActivation, {});
   return (
     <form action={action} className="space-y-2">
       <input type="hidden" name="id" value={id} />
+      <IdempotencyKey value={idempotencyKey} />
       <button type="submit" disabled={pending} className={secondaryButton}>
         {t("accounts.renew")}
       </button>

@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { accountsResponseSchema, type AccountState, type AccountView } from "@bgs/shared-types";
 import { adminRequest } from "../../lib/admin-api";
 import { formatClockTime, formatDay } from "../../lib/format";
@@ -40,7 +41,9 @@ function AccountActions({ account }: { account: AccountView }) {
       )}
       {account.state === "active" && <ResetSecondFactorForm id={account.id} />}
       <div className="flex flex-wrap items-start gap-3">
-        {account.state === "invited" && <RenewActivationForm id={account.id} />}
+        {account.state === "invited" && (
+          <RenewActivationForm id={account.id} idempotencyKey={randomUUID()} />
+        )}
         <AccessForm id={account.id} disabled={account.state === "disabled"} />
       </div>
     </div>
@@ -113,7 +116,7 @@ export default async function AccountsPage() {
         <h2 id="create-title" className="font-display text-2xl font-bold">
           {t("accounts.createTitle")}
         </h2>
-        <CreateAccountForm />
+        <CreateAccountForm idempotencyKey={randomUUID()} />
       </section>
     </section>
   );

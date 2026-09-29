@@ -4,7 +4,7 @@ import { notificationSchema } from "@bgs/shared-types";
 import { revalidatePath } from "next/cache";
 import type { FormState } from "../../components/FormOutcome";
 import { adminRequest, type AdminResult } from "../../lib/admin-api";
-import { formText } from "../../lib/form";
+import { formIdempotencyKey, formText } from "../../lib/form";
 import { t } from "../../lib/i18n";
 import { requireAccount } from "../../lib/session";
 
@@ -13,6 +13,7 @@ const REFUSALS = {
   ADMIN_FORBIDDEN: "notifications.editorsOnly",
   NOTIFICATION_SAME_PERSON: "notifications.samePerson",
   NOTIFICATION_NOT_PENDING: "notifications.alreadyDecided",
+  NOTIFICATION_ALREADY_PENDING: "notifications.alreadyPending",
   NOTIFICATION_NOT_FOUND: "notifications.alreadyDecided",
   NOTIFICATION_ARTICLE_UNKNOWN: "notifications.unknownArticle",
 } as const;
@@ -35,6 +36,7 @@ export async function prepareNotification(
   const result = await adminRequest({
     path: "/notifications",
     method: "POST",
+    idempotencyKey: formIdempotencyKey(form),
     token,
     body: { articleId, lang: "fr" },
     schema: notificationSchema,

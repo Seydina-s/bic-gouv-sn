@@ -380,6 +380,8 @@ export const adminFr = {
       "Seuls les éditeurs et les administrateurs préparent et valident les notifications.",
     samePerson: "Vous l'avez préparée : une autre personne doit la valider.",
     alreadyDecided: "Une autre personne a déjà décidé : la page est à jour.",
+    alreadyPending:
+      "Cet article a déjà une notification qui attend d'être vérifiée : validez ou annulez-la d'abord.",
     unknownArticle: "Cet article n'est plus disponible : choisissez-en un autre.",
     failed: "L'action n'a pas abouti. Réessayez dans un instant.",
     listFailed: "La liste n'a pas pu être chargée. Vérifiez l'état du service.",

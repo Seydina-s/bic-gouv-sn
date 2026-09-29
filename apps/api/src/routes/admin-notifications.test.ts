@@ -132,6 +132,46 @@ describe("notifications, two people", () => {
     );
   });
 
+  it("prepares a notification sent twice with the same key only once", async () => {
+    await start();
+    const token = await admin.tokenFor("editor");
+    const twice = () =>
+      app.inject({
+        method: "POST",
+        url: "/admin/v1/notifications",
+        headers: { authorization: `Bearer ${token}`, "idempotency-key": "cle-du-formulaire-0001" },
+        payload: { articleId: article.id, lang: "fr" },
+      });
+    const first = await twice();
+    const second = await twice();
+    expect(second.statusCode).toBe(201);
+    expect(notificationSchema.parse(second.json()).id).toBe(
+      notificationSchema.parse(first.json()).id,
+    );
+    const list = notificationsResponseSchema.parse(
+      (await call(token, "GET", "/notifications")).json(),
+    );
+    expect(list.notifications).toHaveLength(1);
+  });
+
+  it("refuses a second notification for an article already waiting, even by someone else", async () => {
+    await start();
+    const first = await prepare(await admin.tokenFor("editor"));
+    const other = await call(await admin.tokenFor("editor"), "POST", "/notifications", {
+      articleId: article.id,
+      lang: "fr",
+    });
+    expect(other.statusCode).toBe(409);
+    expect(apiErrorSchema.parse(other.json()).code).toBe("NOTIFICATION_ALREADY_PENDING");
+    // Once decided, the article can be announced again (a reminder is not refused).
+    const author = await admin.tokenFor("editor");
+    await call(author, "POST", `/notifications/${first.id}/cancel`);
+    expect(
+      (await call(author, "POST", "/notifications", { articleId: article.id, lang: "fr" }))
+        .statusCode,
+    ).toBe(201);
+  });
+
   it("records a failed sending instead of leaving an approval without result", async () => {
     await start({ ready: true, send: () => Promise.reject(new Error("push service down")) });
     const prepared = await prepare(await admin.tokenFor("editor"));

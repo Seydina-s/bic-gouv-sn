@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { notificationsResponseSchema, type Notification } from "@bgs/shared-types";
 import { adminRequest } from "../../lib/admin-api";
 import { formatClockTime, formatDay } from "../../lib/format";
@@ -81,6 +82,7 @@ export default async function NotificationsPage() {
             {t("notifications.prepareTitle")}
           </h2>
           <PrepareForm
+            idempotencyKey={randomUUID()}
             articles={articles.map((article) => ({
               id: article.id,
               label:

@@ -22,6 +22,7 @@ import { FileAuditJournal, type AuditJournal } from "./admin/audit-journal";
 import { SecretBox } from "./admin/secret-box";
 import { AdminSignIn } from "./admin/sign-in-service";
 import { AccountAdmin } from "./admin/account-admin";
+import { registerIdempotency } from "./idempotency/idempotency";
 import type { Config } from "./config";
 import { registerErrorHandlers } from "./errors";
 import { registerSecurity } from "./security";
@@ -141,6 +142,8 @@ export async function buildApp({
   if (errorJournal !== null) {
     journalErrors(app, errorJournal);
   }
+  // Before compression: a repeated write gets the first answer as it was sent.
+  registerIdempotency(app);
   // Answers leave compressed (gzip, or brotli when asked): on 3G, the services list
   // goes from 35 to 9 KB and the map style from 60 to 4 KB. Registered after the
   // journal, which reads error bodies before compression. Tiles are already

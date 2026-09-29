@@ -4,7 +4,7 @@ import { type GeoPoint, geoPointSchema, inSenegal } from "@bgs/shared-types";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { adminRequest } from "../../lib/admin-api";
-import { formText, formTexts } from "../../lib/form";
+import { formIdempotencyKey, formText, formTexts } from "../../lib/form";
 import { t } from "../../lib/i18n";
 import { parsePosition, samePosition } from "../../lib/position";
 import { requireAccount } from "../../lib/session";
@@ -103,6 +103,7 @@ export async function addService(
   const result = await adminRequest({
     path: "/services",
     method: "POST",
+    idempotencyKey: formIdempotencyKey(form),
     token,
     body: {
       name,
@@ -117,6 +118,8 @@ export async function addService(
     return { error: result.status === 403 ? t("review.forbidden") : t("review.failed") };
   }
   revalidatePath("/services");
+  // A new key for the next service added from the same page.
+  revalidatePath("/services/nouveau");
   return { message: t("services.added") };
 }
 
