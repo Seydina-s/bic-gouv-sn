@@ -349,6 +349,46 @@ export class TestBrowser {
     return state as { path: string; characters: number; lang: string };
   }
 
+  /**
+   * Text cut by the screen's edges (WCAG 1.4.10, reflow): visible text ending past
+   * the right edge or starting before the left one, outside the rows meant to
+   * scroll sideways (carousels, chips). A few culprits, as short descriptions.
+   */
+  async overflowingText(): Promise<string[]> {
+    const found = await this.evaluate(`(() => {
+      const width = document.documentElement.clientWidth;
+      // Without a viewport tag, a phone lays the page out 980 px wide: nothing to check.
+      if (width > screen.width + 1) {
+        return [\`La page ne déclare pas la largeur de l'écran (balise viewport) : \${width} px\`];
+      }
+      const scrollsSideways = (element) => {
+        for (let parent = element.parentElement; parent !== null; parent = parent.parentElement) {
+          const overflow = getComputedStyle(parent).overflowX;
+          if (overflow === "auto" || overflow === "scroll") return true;
+        }
+        return false;
+      };
+      const seen = (element) => {
+        const style = getComputedStyle(element);
+        return style.visibility !== "hidden" && style.opacity !== "0";
+      };
+      return [...document.querySelectorAll("body *")]
+        .filter((element) => {
+          if (element.children.length > 0 || (element.textContent ?? "").trim() === "") return false;
+          const box = element.getBoundingClientRect();
+          if (box.width <= 1 || box.height <= 1) return false;
+          return (box.right > width + 1 || box.left < -1) && seen(element) && !scrollsSideways(element);
+        })
+        .slice(0, 3)
+        .map((element) => {
+          const box = element.getBoundingClientRect();
+          const text = (element.textContent ?? "").trim().slice(0, 40);
+          return \`« \${text} » (de \${Math.round(box.left)} à \${Math.round(box.right)} px sur \${width})\`;
+        });
+    })()`);
+    return Array.isArray(found) ? (found as string[]) : [];
+  }
+
   /** WCAG A/AA rules axe finds broken on the open page. */
   async audit(): Promise<Violation[]> {
     await this.evaluate(AXE_SOURCE);
