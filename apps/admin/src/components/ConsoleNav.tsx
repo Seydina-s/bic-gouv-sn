@@ -34,15 +34,19 @@ const GROUPS = [
     links: [
       { href: "/controle", label: "nav.remote" },
       { href: "/journal", label: "nav.audit" },
+      { href: "/comptes", label: "nav.accounts", adminOnly: true },
     ],
   },
 ] as const;
 
 export async function ConsoleNav() {
   const token = await readCookie(SESSION_COOKIE);
-  if ((await currentAccount()) === null || token === null) {
+  const account = await currentAccount();
+  if (account === null || token === null) {
     return null;
   }
+  // Only administrators manage accounts: the others would find a refusal there.
+  const shown = (link: object) => !("adminOnly" in link) || account.role === "admin";
   const pending = await pendingNotificationCount(token);
   const badges: Partial<Record<string, NavBadge>> = {
     "/notifications": { count: pending, label: t("nav.pending", { count: pending }) },
@@ -58,7 +62,7 @@ export async function ConsoleNav() {
             {t(group.label)}
           </p>
           <ul aria-labelledby={`nav-${group.id}`} className="mt-2 space-y-1">
-            {group.links.map((link) => (
+            {group.links.filter(shown).map((link) => (
               <li key={link.href}>
                 <NavLink href={link.href} badge={badges[link.href]}>
                   {t(link.label)}

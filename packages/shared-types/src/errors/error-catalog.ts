@@ -185,6 +185,50 @@ export const ERROR_CATALOG = {
     action:
       "Si la personne a besoin de ce droit, un administrateur change son rôle ; sinon, consultez le journal d'audit.",
   },
+  ACCOUNT_NOT_FOUND: {
+    what: "Un compte d'administration demandé n'existe pas.",
+    where: "Centre d'administration, comptes",
+    impact: "L'action a été refusée ; rien n'a été modifié.",
+    severity: "info",
+    action: "Rechargez la page des comptes.",
+  },
+  ACCOUNT_SELF: {
+    what: "Un administrateur a voulu changer son propre compte (rôle, désactivation ou second code).",
+    where: "Centre d'administration, comptes",
+    impact:
+      "L'action a été refusée : on ne peut pas se retirer ses propres droits, ce qui garantit qu'un administrateur reste actif.",
+    severity: "info",
+    action: "Demandez à un autre administrateur de faire ce changement.",
+  },
+  ACCOUNT_EMAIL_TAKEN: {
+    what: "Un compte a été créé avec une adresse e-mail déjà utilisée par un autre compte.",
+    where: "Centre d'administration, comptes",
+    impact: "Rien n'a été créé : une adresse ne sert qu'à un seul compte.",
+    severity: "info",
+    action:
+      "Vérifiez l'adresse ; si la personne a déjà un compte, changez plutôt son rôle ou réactivez-le.",
+  },
+  ACCOUNT_ALREADY_ACTIVE: {
+    what: "Un nouveau lien d'activation a été demandé pour un compte dont le mot de passe est déjà choisi.",
+    where: "Centre d'administration, comptes",
+    impact: "Aucun lien n'a été créé ; le compte reste inchangé.",
+    severity: "info",
+    action: "Rechargez la page : la personne a sans doute déjà activé son compte.",
+  },
+  ACCOUNT_ACTIVATION_INVALID: {
+    what: "Un lien d'activation de compte est inconnu, déjà utilisé ou expiré (72 heures).",
+    where: "Centre d'administration, activation d'un compte",
+    impact: "La personne ne peut pas choisir son mot de passe avec ce lien.",
+    severity: "info",
+    action: "Un administrateur crée un nouveau lien depuis l'écran « Comptes » et le lui transmet.",
+  },
+  ACCOUNT_PASSWORD_REJECTED: {
+    what: "Un mot de passe choisi à l'activation d'un compte est trop court ou trop long.",
+    where: "Centre d'administration, activation d'un compte",
+    impact: "Rien n'a été enregistré ; le lien reste valable.",
+    severity: "info",
+    action: "Choisissez une phrase de passe d'au moins 12 caractères.",
+  },
   INGESTION_STOPPED: {
     what: "La surveillance des nouvelles publications de la Présidence est arrêtée.",
     where: "Collecte automatique (presidence.sn)",

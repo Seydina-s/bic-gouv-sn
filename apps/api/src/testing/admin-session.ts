@@ -21,15 +21,17 @@ export async function adminForTests() {
   });
   const passwordHash = await hashPassword(PASSWORD);
 
-  /** A new account of this role, signed in: returns its session token. */
-  async function tokenFor(role: Role): Promise<string> {
+  /** A new account of this role, signed in: returns its id and session token. */
+  async function signedIn(role: Role): Promise<{ id: string; token: string }> {
+    const id = randomUUID();
     const email = `${role}-${randomUUID()}@bic.test`;
     await accounts.save({
-      id: randomUUID(),
+      id,
       email,
       name: role,
       role,
       passwordHash,
+      activation: null,
       totp: { sealedSecret: null, enrolledAt: null, lastStep: null },
       attempts: { failures: [], lockedUntil: null },
       disabled: false,
@@ -44,8 +46,20 @@ export async function adminForTests() {
     if (done.kind !== "signed-in") {
       throw new Error("test sign-in failed");
     }
-    return done.token;
+    return { id, token: done.token };
   }
 
-  return { admin: { signIn, journal, accounts }, journal, tokenFor };
+  /** A new account of this role, signed in: returns its session token. */
+  async function tokenFor(role: Role): Promise<string> {
+    return (await signedIn(role)).token;
+  }
+
+  return {
+    admin: { signIn, journal, accounts },
+    journal,
+    accounts,
+    tokenFor,
+    signedIn,
+    password: PASSWORD,
+  };
 }

@@ -33,7 +33,7 @@ export interface Viewport {
 
 interface CdpReply {
   id?: number;
-  result?: { result?: { value?: unknown } };
+  result?: { result?: { value?: unknown }; data?: string };
   error?: { message: string };
 }
 
@@ -171,6 +171,15 @@ export class AuditBrowser {
       awaitPromise: true,
     });
     return reply.result?.result?.value;
+  }
+
+  /** The whole page as a PNG, beyond the visible part (for a visual check). */
+  async screenshot(): Promise<Buffer> {
+    const reply = await this.send("Page.captureScreenshot", {
+      format: "png",
+      captureBeyondViewport: true,
+    });
+    return Buffer.from(reply.result?.data ?? "", "base64");
   }
 
   async setViewport({ width, height, mobile }: Viewport): Promise<void> {
