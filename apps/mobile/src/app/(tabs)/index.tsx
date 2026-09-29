@@ -1,4 +1,4 @@
-import { useRouter } from "expo-router";
+import { useIsFocused, useRouter } from "expo-router";
 import { useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -30,6 +30,7 @@ import {
   usePrefetchLikely,
 } from "../../features/news/useNews";
 import { WovenIn } from "../../features/news/WovenIn";
+import { UsageStatsInvitation } from "../../features/usage-stats/UsageStatsInvitation";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 
@@ -87,6 +88,8 @@ export default function HomeScreen() {
           : t("content.updatedDaysAgo", { count: freshness.count });
   const bottomInset = useTabBarInset();
   const router = useRouter();
+  // Asked back on the front page, after a first article: never over another screen.
+  const focused = useIsFocused();
   const feed = useNewsFeed();
   const council = useLatestIn(COUNCIL_CATEGORY);
   const front = useFrontSections();
@@ -230,6 +233,7 @@ export default function HomeScreen() {
             chosen={selectedId !== null}
           />
         )}
+        <UsageStatsInvitation visible={focused} />
       </View>
     );
   }
@@ -237,6 +241,7 @@ export default function HomeScreen() {
   return (
     <View style={[styles.root, { backgroundColor: color.background }]}>
       <View style={[styles.column, { width: columnWidth }]}>{page}</View>
+      <UsageStatsInvitation visible={focused} />
     </View>
   );
 }

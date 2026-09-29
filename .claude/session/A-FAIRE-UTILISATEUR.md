@@ -34,5 +34,5 @@ Mise à jour du 29/09/2026 (midi) : décisions de l’utilisateur sur les points
 
 | # | Quoi | Pourquoi / effet si ça attend | Réf. backlog |
 |---|---|---|---|
-| 16 | Autoriser l'ajout du contrôle « Container images » aux contrôles exigés avant toute fusion dans `main` (réglage du dépôt GitHub, que je peux faire sur votre accord) | Aujourd'hui, une image cassée serait signalée mais n'empêcherait pas la fusion | AUD4-04 |
-| 17 | Dire si l'on prépare une invitation, une seule fois et facile à refuser, à activer les statistiques anonymes (texte et écran vous seront soumis avant toute mise en place) | Sans elle, peu de personnes les activeront et les tableaux de bord resteront maigres | AUD4-03 |
+| 16 | ✅ **Validé et fait le 29/09.** — Autoriser l'ajout du contrôle « Container images » aux contrôles exigés avant toute fusion dans `main` (réglage du dépôt GitHub, que je peux faire sur votre accord) | Aujourd'hui, une image cassée serait signalée mais n'empêcherait pas la fusion | AUD4-04 |
+| 17 | ✅ **Validé et fait le 29/09** (demande comme une permission, activation immédiate). — Dire si l'on prépare une invitation, une seule fois et facile à refuser, à activer les statistiques anonymes (texte et écran vous seront soumis avant toute mise en place) | Sans elle, peu de personnes les activeront et les tableaux de bord resteront maigres | AUD4-03 |
