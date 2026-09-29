@@ -13,6 +13,8 @@ import { useProcedureThemes, useProcedures } from "../../features/procedures/use
 import { FeatureGate } from "../../features/remote-config/FeatureGate";
 import { useTranslation } from "../../i18n/useTranslation";
 import { ScrollTopButton, useScrollTop } from "../../components/ScrollTopButton";
+import { useTwoPane } from "../../components/useTwoPane";
+import { ProcedurePane } from "../../features/procedures/ProcedurePane";
 import { FloatingAppBar } from "../../features/shell/FloatingAppBar";
 import { useTheme } from "../../theme/useTheme";
 
@@ -41,6 +43,19 @@ function Procedures() {
   const showCards = browsing && hasThemes;
   const { color, space, textStyle, radius, touchTarget } = theme;
   const items = procedures.data?.pages.flatMap((page) => page.items) ?? [];
+  const { twoPane, listPaneWidth } = useTwoPane();
+  const [selected, setSelected] = useState<string | null>(null);
+  // Results and the chosen procedure side by side; the theme cards keep the full width.
+  const split = twoPane && !showCards;
+  const shownSlug = selected ?? items[0]?.slug ?? null;
+
+  const open = (slug: string) => {
+    if (split) {
+      setSelected(slug);
+    } else {
+      router.push({ pathname: "/procedure/[slug]", params: { slug } });
+    }
+  };
   const total = procedures.data?.pages[0]?.total;
 
   const header = (
@@ -125,50 +140,63 @@ function Procedures() {
   );
 
   return (
-    <View style={[styles.root, { backgroundColor: color.background }]}>
-      <FlashList
-        ref={list}
-        onScroll={scrollTop.onScroll}
-        scrollEventThrottle={100}
-        data={showCards ? [] : items}
-        keyExtractor={(item) => item.id}
-        keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="on-drag"
-        ListHeaderComponent={header}
-        ListEmptyComponent={showCards ? null : empty}
-        renderItem={({ item }) => (
-          <ProcedureRow
-            item={item}
-            onPress={(slug) => {
-              router.push({ pathname: "/procedure/[slug]", params: { slug } });
-            }}
-          />
-        )}
-        onEndReached={() => {
-          if (!showCards && procedures.hasNextPage && !procedures.isFetchingNextPage) {
-            void procedures.fetchNextPage();
-          }
-        }}
-        onEndReachedThreshold={0.5}
-        ListFooterComponent={
-          procedures.isFetchingNextPage ? (
-            <ActivityIndicator
-              accessibilityLabel={t("feed.loadMore")}
-              color={color.primary}
-              style={{ margin: space.lg }}
-            />
-          ) : null
+    <View style={[styles.split, { backgroundColor: color.background }]}>
+      {/* The same tree in both layouts: typing in the search never loses the keyboard. */}
+      <View
+        style={
+          split
+            ? [styles.listPane, { width: listPaneWidth, borderRightColor: color.border }]
+            : styles.root
         }
-        contentContainerStyle={{ paddingBottom: bottomInset + space.xl }}
-      />
-      <ScrollTopButton
-        visible={scrollTop.visible}
-        bottom={bottomInset + space.sm}
-        onPress={() => {
-          list.current?.scrollToOffset({ offset: 0, animated: true });
-        }}
-      />
-      <FloatingAppBar visible={scrollTop.visible} top={insets.top} />
+      >
+        <FlashList
+          ref={list}
+          onScroll={scrollTop.onScroll}
+          scrollEventThrottle={100}
+          data={showCards ? [] : items}
+          keyExtractor={(item) => item.id}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          ListHeaderComponent={header}
+          ListEmptyComponent={showCards ? null : empty}
+          extraData={split ? shownSlug : null}
+          renderItem={({ item }) => (
+            <ProcedureRow item={item} selected={split && item.slug === shownSlug} onPress={open} />
+          )}
+          onEndReached={() => {
+            if (!showCards && procedures.hasNextPage && !procedures.isFetchingNextPage) {
+              void procedures.fetchNextPage();
+            }
+          }}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={
+            procedures.isFetchingNextPage ? (
+              <ActivityIndicator
+                accessibilityLabel={t("feed.loadMore")}
+                color={color.primary}
+                style={{ margin: space.lg }}
+              />
+            ) : null
+          }
+          contentContainerStyle={{ paddingBottom: bottomInset + space.xl }}
+        />
+        <ScrollTopButton
+          visible={scrollTop.visible}
+          bottom={bottomInset + space.sm}
+          onPress={() => {
+            list.current?.scrollToOffset({ offset: 0, animated: true });
+          }}
+        />
+      </View>
+      {split && shownSlug !== null && (
+        <ProcedurePane
+          slug={shownSlug}
+          bottomInset={bottomInset}
+          withAppBar={false}
+          onOpenRelated={setSelected}
+        />
+      )}
+      {!split && <FloatingAppBar visible={scrollTop.visible} top={insets.top} />}
     </View>
   );
 }
@@ -185,6 +213,8 @@ export default function ProceduresScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  split: { flex: 1, flexDirection: "row" },
+  listPane: { borderRightWidth: StyleSheet.hairlineWidth },
   input: { borderWidth: StyleSheet.hairlineWidth },
   button: { alignSelf: "flex-start", alignItems: "center", justifyContent: "center" },
 });

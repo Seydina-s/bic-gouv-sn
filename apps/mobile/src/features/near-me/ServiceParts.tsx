@@ -12,6 +12,7 @@ import { ShieldStarIcon as ShieldStar } from "phosphor-react-native/src/icons/Sh
 import type { ComponentType } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { Icon } from "../../components/Icon";
+import { selectedEdge } from "../../components/selection";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 import { formatDistance, matchingPlaces } from "./nearby";
@@ -63,10 +64,13 @@ export function ServiceRow({
   service,
   meters,
   onPress,
+  selected = false,
 }: {
   service: PublicService;
   meters: number | null;
   onPress: (id: string) => void;
+  /** Shown in the detail pane beside the list (large screens). */
+  selected?: boolean;
 }) {
   const { theme } = useTheme();
   const { t } = useTranslation();
@@ -79,6 +83,7 @@ export function ServiceRow({
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={[service.name, kind, distance, where].filter(Boolean).join(". ")}
+      accessibilityState={{ selected }}
       onPress={() => {
         onPress(service.id);
       }}
@@ -87,9 +92,9 @@ export function ServiceRow({
         {
           gap: space.md,
           paddingVertical: space.md,
-          paddingHorizontal: space.lg,
+          ...selectedEdge(selected, color.primary, space.lg),
           borderTopColor: color.border,
-          backgroundColor: pressed ? color.surface : color.background,
+          backgroundColor: pressed || selected ? color.surface : color.background,
         },
       ]}
     >

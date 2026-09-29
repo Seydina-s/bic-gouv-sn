@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { act, fireEvent, screen, waitFor } from "@testing-library/react-native";
+import { act, fireEvent, screen, waitFor, within } from "@testing-library/react-native";
 import * as Location from "expo-location";
 import { renderRouter } from "expo-router/testing-library";
 import { Dimensions, Linking } from "react-native";
@@ -584,6 +584,30 @@ describe("app shell", () => {
     openURL.mockRestore();
   });
 
+  it("shows the nearest service beside the list on a wide window, then the one chosen", async () => {
+    const phone = Dimensions.get("window");
+    Dimensions.set({ window: { ...phone, width: 1024, height: 768 } });
+    try {
+      await renderRouter(routes, { initialUrl: "/near-me" });
+      const list = () => within(screen.getByTestId("near-me-list"));
+      await fireEvent.press(await list().findByRole("button", { name: "Choisir une ville" }));
+      await fireEvent.changeText(list().getByLabelText("Rechercher une ville"), "ville de");
+      await fireEvent.press(list().getByRole("button", { name: "Ville de test" }));
+      // The nearest opens beside the list, without navigating.
+      expect(
+        await screen.findByRole("header", { name: "Commissariat de test proche" }),
+      ).toBeOnTheScreen();
+      expect(list().getByRole("button", { name: /^Commissariat de test proche/ })).toBeSelected();
+      await fireEvent.press(list().getByRole("button", { name: /^Tribunal de test/ }));
+      expect(await screen.findByRole("header", { name: "Tribunal de test" })).toBeOnTheScreen();
+      expect(list().getByRole("button", { name: /^Tribunal de test/ })).toBeSelected();
+    } finally {
+      await act(() => {
+        Dimensions.set({ window: phone });
+      });
+    }
+  });
+
   it("asks for the location only when asked, and offers a town after a refusal", async () => {
     jest
       .mocked(Location.requestForegroundPermissionsAsync)
@@ -849,6 +873,55 @@ describe("app shell", () => {
     await fireEvent.press(screen.getByRole("button", { name: "Page 3" }));
     expect(await screen.findByText("Page 3 sur 3")).toBeOnTheScreen();
     expect(fetchMock.mock.calls.some(([url]) => url.includes("theme=a1&page=3"))).toBe(true);
+  });
+
+  it("shows a theme's list and the chosen procedure side by side on a wide window", async () => {
+    const fetchMock = newsFetch();
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    const phone = Dimensions.get("window");
+    Dimensions.set({ window: { ...phone, width: 1024, height: 768 } });
+    try {
+      await renderRouter(routes, { initialUrl: "/procedure-theme/a1" });
+      // The first procedure of the list opens beside it, without navigating.
+      expect(await screen.findByText("Public de test.")).toBeOnTheScreen();
+      const list = () => within(screen.getByTestId("theme-list"));
+      const rowB = await list().findByRole("button", { name: "Démarche de test B" });
+      expect(rowB).not.toBeSelected();
+      await fireEvent.press(rowB);
+      await waitFor(() => {
+        expect(
+          fetchMock.mock.calls.some(([url]) => url.includes("/v1/procedures/demarche-test-b")),
+        ).toBe(true);
+      });
+      expect(list().getByRole("button", { name: "Démarche de test B" })).toBeSelected();
+      // Still the theme's screen: its list stays in place beside the sheet.
+      expect(list().getByText("Démarche de test A")).toBeOnTheScreen();
+    } finally {
+      await act(() => {
+        Dimensions.set({ window: phone });
+      });
+    }
+  });
+
+  it("shows search results beside the first procedure found, theme cards in full width", async () => {
+    const phone = Dimensions.get("window");
+    Dimensions.set({ window: { ...phone, width: 1024, height: 768 } });
+    try {
+      await renderRouter(routes, { initialUrl: "/procedures" });
+      expect(
+        await screen.findByRole("button", { name: "Transports. 3 démarches" }),
+      ).toBeOnTheScreen();
+      expect(screen.queryByText("Public de test.")).toBeNull();
+      const search = screen.getByLabelText("Rechercher une démarche");
+      await fireEvent.changeText(search, "test");
+      expect(await screen.findByText("Public de test.", {}, { timeout: 3000 })).toBeOnTheScreen();
+      // The search field is the same one: what was typed is still there.
+      expect(screen.getByLabelText("Rechercher une démarche")).toHaveDisplayValue("test");
+    } finally {
+      await act(() => {
+        Dimensions.set({ window: phone });
+      });
+    }
   });
 
   it("explains a procedure and leads to its official page", async () => {

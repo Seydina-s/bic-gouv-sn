@@ -43,6 +43,8 @@ export interface ProcedureViewProps {
   isPending: boolean;
   bottomInset: number;
   onOpenRelated: (slug: string) => void;
+  /** False in the detail pane of a two-pane layout: the screen has its own bar. */
+  withAppBar?: boolean;
   /** Kinds of state services with at least one verified entry, and how to show them. */
   services?:
     { kinds: ReadonlySet<ServiceCategory>; onOpen: (kind: LinkedKind) => void } | undefined;
@@ -51,7 +53,7 @@ export interface ProcedureViewProps {
 /**
  * One procedure, in the app's own layout: the answers people look for first ("En
  * bref"), then each question of the official sheet with its icon, the documents
- * to tick off, the steps in order, and the official page one tap away at all times.
+ * to bring, the steps in order, and the official page one tap away at all times.
  * Only what e-senegal.sn publishes, in its own words.
  */
 export function ProcedureView({
@@ -59,6 +61,7 @@ export function ProcedureView({
   isPending,
   bottomInset,
   onOpenRelated,
+  withAppBar = true,
   services,
 }: ProcedureViewProps) {
   const { theme } = useTheme();
@@ -84,6 +87,7 @@ export function ProcedureView({
       detail={detail}
       bottomInset={bottomInset}
       onOpenRelated={onOpenRelated}
+      withAppBar={withAppBar}
       services={services}
     />
   );
@@ -93,11 +97,13 @@ function ProcedureSheetView({
   detail,
   bottomInset,
   onOpenRelated,
+  withAppBar,
   services,
 }: {
   detail: ProcedureDetail;
   bottomInset: number;
   onOpenRelated: ProcedureViewProps["onOpenRelated"];
+  withAppBar: boolean;
   services: ProcedureViewProps["services"];
 }) {
   const { theme } = useTheme();
@@ -115,7 +121,7 @@ function ProcedureSheetView({
   const [barHeight, setBarHeight] = useState(0);
   const { color, space, textStyle, layout, touchTarget } = theme;
   // The floating app bar covers the top of the page once scrolled.
-  const coveredTop = touchTarget.min + layout.flagStripe + space.md;
+  const coveredTop = (withAppBar ? touchTarget.min + layout.flagStripe : 0) + space.md;
 
   const scrollTo = (y: number) => {
     scroller.current?.scrollTo({ y: Math.max(0, y), animated: true });
@@ -244,7 +250,7 @@ function ProcedureSheetView({
           scrollTo(0);
         }}
       />
-      <FloatingAppBar visible={scrollTop.visible} />
+      {withAppBar && <FloatingAppBar visible={scrollTop.visible} />}
       <ProcedureActionBar
         url={detail.sourceUrl}
         bottomInset={bottomInset}

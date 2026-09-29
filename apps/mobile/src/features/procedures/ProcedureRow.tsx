@@ -2,16 +2,22 @@ import type { ProcedureSummary } from "@bgs/shared-types";
 import { CaretRightIcon as CaretRight } from "phosphor-react-native/src/icons/CaretRight";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Icon } from "../../components/Icon";
+import { selectedEdge } from "../../components/selection";
 import { useTheme } from "../../theme/useTheme";
 import { FactChips, useProcedureFacts } from "./ProcedureFacts";
 
-/** One procedure in the list: title, what it is for, the facts known at the source. */
+/**
+ * One procedure in the list: title, what it is for, the facts known at the source.
+ * Beside the detail pane of a large screen, the one shown there is marked selected.
+ */
 export function ProcedureRow({
   item,
   onPress,
+  selected = false,
 }: {
   item: ProcedureSummary;
   onPress: (slug: string) => void;
+  selected?: boolean;
 }) {
   const { theme } = useTheme();
   const facts = useProcedureFacts(item);
@@ -20,6 +26,7 @@ export function ProcedureRow({
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityState={{ selected }}
       accessibilityLabel={[item.title, item.summary, ...facts.map((f) => `${f.label} : ${f.value}`)]
         .filter(Boolean)
         .join(". ")}
@@ -29,9 +36,9 @@ export function ProcedureRow({
       style={({ pressed }) => [
         styles.row,
         {
-          backgroundColor: pressed ? color.surface : color.background,
+          backgroundColor: pressed || selected ? color.surface : color.background,
           borderBottomColor: color.border,
-          paddingHorizontal: space.lg,
+          ...selectedEdge(selected, color.primary, space.lg),
           paddingVertical: space.md,
           gap: space.md,
           minHeight: theme.touchTarget.min,

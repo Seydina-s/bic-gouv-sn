@@ -11,6 +11,8 @@ import { ActivityIndicator, Linking, Pressable, StyleSheet, Text, View } from "r
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTabBarInset } from "../../components/GlassTabBar";
 import { ScrollTopButton, useScrollTop } from "../../components/ScrollTopButton";
+import { useTwoPane } from "../../components/useTwoPane";
+import { ServiceDetail } from "../../features/near-me/ServiceDetail";
 import { LocationPanel } from "../../features/near-me/LocationPanel";
 import { ViewToggle } from "../../features/near-me/MapOverlays";
 import { nativeMapAvailable } from "../../features/near-me/map-support";
@@ -95,8 +97,18 @@ function NearMe() {
   );
   // The map is offered only with something to show on it.
   const canMap = mapExists && mapSwitchedOn && all.length > 0;
+  const { twoPane, listPaneWidth } = useTwoPane();
+  const [selected, setSelected] = useState<string | null>(null);
+  // On a large screen, the nearest service (or the one chosen) beside the list.
+  const shown = twoPane
+    ? (rows.find((row) => row.service.id === selected) ?? rows[0])?.service
+    : undefined;
   const openService = (id: string) => {
-    router.push({ pathname: "/service/[id]", params: { id } });
+    if (twoPane) {
+      setSelected(id);
+    } else {
+      router.push({ pathname: "/service/[id]", params: { id } });
+    }
   };
   const locateMe = () => {
     setChosen(null);
@@ -180,55 +192,75 @@ function NearMe() {
   );
 
   return (
-    <View style={[styles.root, { backgroundColor: color.background }]}>
-      <FlashList
-        ref={list}
-        onScroll={scrollTop.onScroll}
-        scrollEventThrottle={100}
-        data={rows}
-        keyExtractor={(row) => row.service.id}
-        keyboardShouldPersistTaps="handled"
-        ListHeaderComponent={header}
-        ListEmptyComponent={empty}
-        renderItem={({ item }) => (
-          <ServiceRow service={item.service} meters={item.meters} onPress={openService} />
-        )}
-        ListFooterComponent={
-          all.length === 0 ? null : (
-            <Pressable
-              accessibilityRole="link"
-              onPress={() => void Linking.openURL(OSM_COPYRIGHT)}
-              style={{ padding: space.lg, minHeight: touchTarget.min }}
-            >
-              <Text style={[textStyle.bodySmall, { color: color.textTertiary }]}>
-                {t("nearMe.attribution")}
-              </Text>
-            </Pressable>
-          )
+    <View style={[styles.split, { backgroundColor: color.background }]}>
+      {/* The same tree in both layouts: typing a town never loses the keyboard. */}
+      <View
+        style={
+          twoPane
+            ? [styles.listPane, { width: listPaneWidth, borderRightColor: color.border }]
+            : styles.root
         }
-        contentContainerStyle={{
-          // The last rows stay clear of the floating "Carte" pill.
-          paddingBottom: bottomInset + space.xl + (canMap ? touchTarget.min + space.sm : 0),
-        }}
-        testID="near-me-list"
-      />
-      <ScrollTopButton
-        visible={scrollTop.visible}
-        bottom={bottomInset + space.sm}
-        onPress={() => {
-          list.current?.scrollToOffset({ offset: 0, animated: true });
-        }}
-      />
-      {canMap && (
-        <ViewToggle
-          showing="list"
-          onToggle={() => {
-            setShowing("map");
+      >
+        <FlashList
+          ref={list}
+          onScroll={scrollTop.onScroll}
+          scrollEventThrottle={100}
+          data={rows}
+          keyExtractor={(row) => row.service.id}
+          keyboardShouldPersistTaps="handled"
+          ListHeaderComponent={header}
+          ListEmptyComponent={empty}
+          extraData={shown?.id}
+          renderItem={({ item }) => (
+            <ServiceRow
+              service={item.service}
+              meters={item.meters}
+              selected={item.service.id === shown?.id}
+              onPress={openService}
+            />
+          )}
+          ListFooterComponent={
+            all.length === 0 ? null : (
+              <Pressable
+                accessibilityRole="link"
+                onPress={() => void Linking.openURL(OSM_COPYRIGHT)}
+                style={{ padding: space.lg, minHeight: touchTarget.min }}
+              >
+                <Text style={[textStyle.bodySmall, { color: color.textTertiary }]}>
+                  {t("nearMe.attribution")}
+                </Text>
+              </Pressable>
+            )
+          }
+          contentContainerStyle={{
+            // The last rows stay clear of the floating "Carte" pill.
+            paddingBottom: bottomInset + space.xl + (canMap ? touchTarget.min + space.sm : 0),
           }}
-          bottom={bottomInset + space.sm}
+          testID="near-me-list"
         />
+        <ScrollTopButton
+          visible={scrollTop.visible}
+          bottom={bottomInset + space.sm}
+          onPress={() => {
+            list.current?.scrollToOffset({ offset: 0, animated: true });
+          }}
+        />
+        {canMap && (
+          <ViewToggle
+            showing="list"
+            onToggle={() => {
+              setShowing("map");
+            }}
+            bottom={bottomInset + space.sm}
+          />
+        )}
+      </View>
+      {shown !== undefined && (
+        <View style={styles.root}>
+          <ServiceDetail service={shown} bottomInset={bottomInset} />
+        </View>
       )}
-      <FloatingAppBar visible={scrollTop.visible} top={insets.top} />
+      {!twoPane && <FloatingAppBar visible={scrollTop.visible} top={insets.top} />}
     </View>
   );
 }
@@ -245,5 +277,7 @@ export default function NearMeScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  split: { flex: 1, flexDirection: "row" },
+  listPane: { borderRightWidth: StyleSheet.hairlineWidth },
   retry: { alignSelf: "flex-start", alignItems: "center", justifyContent: "center" },
 });
