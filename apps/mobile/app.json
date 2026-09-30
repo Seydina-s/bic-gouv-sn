@@ -42,7 +42,8 @@
           "project": "bic-gouv-sn-mobile"
         }
       ],
-      "@maplibre/maplibre-react-native"
+      "@maplibre/maplibre-react-native",
+      "expo-notifications"
     ],
     "experiments": {
       "typedRoutes": true

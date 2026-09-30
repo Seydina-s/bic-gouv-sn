@@ -42,3 +42,9 @@ Mise à jour du 30/09/2026 (minuit, mode autonome) : point 18 ajouté.
 | # | Quoi | Pourquoi / effet si ça attend | Réf. backlog |
 |---|---|---|---|
 | 18 | ✅ **Validé le 30/09 (1 h).** — Autoriser la suite du passage à PostgreSQL pour les données sensibles, dans cet ordre : (a) abonnements aux notifications (jeton de l'appareil, rubriques, heures calmes) ; (b) notifications préparées et décidées dans la console ; (c) comptes de l'équipe et journal d'audit. Ce qui est enregistré ne change pas, seulement l'endroit où c'est rangé. Le déplacement est testé en CI sur un vrai PostgreSQL et reste réversible. | Rien ne presse tant qu'il n'y a qu'un serveur d'API. Avant d'en ajouter un second, ces données doivent être en base commune, sinon elles s'écraseraient | SCALE-02 |
+
+Mise à jour du 30/09/2026 (3 h, mode autonome) : point 19 ajouté.
+
+| # | Quoi | Pourquoi / effet si ça attend | Réf. backlog |
+|---|---|---|---|
+| 19 | Autoriser le passage à PostgreSQL des **contenus publiés** : articles et démarches (écrits par la collecte), services de la carte, thèmes des démarches et contrôle à distance (écrits dans la console). Même contenu, même historique des versions, autre emplacement ; testé en CI sur un vrai PostgreSQL. | Dernière étape avant de pouvoir ajouter un second serveur d'API. Rien ne presse tant qu'un seul serveur suffit | SCALE-02 |

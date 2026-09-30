@@ -30,7 +30,7 @@ import {
   usePrefetchLikely,
 } from "../../features/news/useNews";
 import { WovenIn } from "../../features/news/WovenIn";
-import { UsageStatsInvitation } from "../../features/usage-stats/UsageStatsInvitation";
+import { Invitations } from "../../features/notifications/Invitations";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 
@@ -233,7 +233,7 @@ export default function HomeScreen() {
             chosen={selectedId !== null}
           />
         )}
-        <UsageStatsInvitation visible={focused} />
+        <Invitations visible={focused} />
       </View>
     );
   }
@@ -241,7 +241,7 @@ export default function HomeScreen() {
   return (
     <View style={[styles.root, { backgroundColor: color.background }]}>
       <View style={[styles.column, { width: columnWidth }]}>{page}</View>
-      <UsageStatsInvitation visible={focused} />
+      <Invitations visible={focused} />
     </View>
   );
 }

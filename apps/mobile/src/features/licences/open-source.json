@@ -378,6 +378,14 @@
       "text": 1
     },
     {
+      "name": "expo-application",
+      "version": "57.0.3",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)"],
+      "url": "https://docs.expo.dev/versions/latest/sdk/application/",
+      "text": 1
+    },
+    {
       "name": "expo-asset",
       "version": "57.0.18",
       "licence": "MIT",
@@ -399,6 +407,14 @@
       "licence": "MIT",
       "copyright": ["Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)"],
       "url": "https://docs.expo.dev/versions/latest/sdk/constants/",
+      "text": 1
+    },
+    {
+      "name": "expo-device",
+      "version": "57.0.2",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)"],
+      "url": "https://docs.expo.dev/versions/latest/sdk/device/",
       "text": 1
     },
     {
@@ -463,6 +479,14 @@
       "licence": "MIT",
       "copyright": ["Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)"],
       "url": "https://docs.expo.dev/versions/latest/sdk/network/",
+      "text": 1
+    },
+    {
+      "name": "expo-notifications",
+      "version": "57.0.21",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)"],
+      "url": "https://docs.expo.dev/versions/latest/sdk/notifications/",
       "text": 1
     },
     {

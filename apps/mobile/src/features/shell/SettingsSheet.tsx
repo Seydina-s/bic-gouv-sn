@@ -2,6 +2,8 @@ import type { ThemePreference } from "@bgs/ui";
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 
+import { BellIcon as Bell } from "phosphor-react-native/src/icons/Bell";
+import { BellSlashIcon as BellSlash } from "phosphor-react-native/src/icons/BellSlash";
 import { ChartBarIcon as ChartBar } from "phosphor-react-native/src/icons/ChartBar";
 import { CellSignalHighIcon as CellSignalHigh } from "phosphor-react-native/src/icons/CellSignalHigh";
 import { DeviceMobileIcon as DeviceMobile } from "phosphor-react-native/src/icons/DeviceMobile";
@@ -30,6 +32,8 @@ import { SegmentedChoice, type Segment } from "../../components/SegmentedChoice"
 import type { LangChoice } from "../../i18n/I18nProvider";
 import { type DataSaverPreference, useDataSaver } from "../data-saver/DataSaverProvider";
 import { type UsageConsent, useUsageStats } from "../usage-stats/UsageStatsProvider";
+import type { NotificationChoice, QuietChoice } from "../notifications/notification-preferences";
+import { useNotifications } from "../notifications/NotificationsProvider";
 import { OPEN_SOURCE } from "../licences/open-source";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useReduceMotion } from "../../theme/useSystemAccessibility";
@@ -57,6 +61,7 @@ export function SettingsSheet({ visible, onClose }: { visible: boolean; onClose:
   const { t, choice, setLang } = useTranslation();
   const dataSaver = useDataSaver();
   const usageStats = useUsageStats();
+  const notifications = useNotifications();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { color, space, textStyle, radius, layout } = theme;
@@ -99,6 +104,24 @@ export function SettingsSheet({ visible, onClose }: { visible: boolean; onClose:
       spokenLabel: t("settings.usageStatsOnSpoken"),
       icon: ChartBar,
     },
+  ];
+  const notificationChoices: Segment<NotificationChoice>[] = [
+    { value: "off", label: t("settings.notificationsOff"), icon: BellSlash },
+    {
+      value: "on",
+      label: t("settings.notificationsOn"),
+      spokenLabel: t("settings.notificationsOnSpoken"),
+      icon: Bell,
+    },
+  ];
+  const quietChoices: Segment<QuietChoice>[] = [
+    {
+      value: "on",
+      label: t("settings.quietOn"),
+      spokenLabel: t("settings.quietOnSpoken"),
+      icon: Moon,
+    },
+    { value: "off", label: t("settings.quietOff"), icon: Bell },
   ];
   const close = onClose;
   const reduceMotion = useReduceMotion();
@@ -199,6 +222,44 @@ export function SettingsSheet({ visible, onClose }: { visible: boolean; onClose:
                 {t("settings.dataSaverHelp")}
               </Text>
             </View>
+            {notifications.supported && (
+              <View style={{ gap: space.sm }}>
+                <SegmentedChoice
+                  title={t("settings.notifications")}
+                  segments={notificationChoices}
+                  selected={notifications.choice}
+                  onSelect={notifications.setChoice}
+                />
+                <Text style={[textStyle.bodySmall, { color: color.textSecondary }]}>
+                  {t("settings.notificationsHelp")}
+                </Text>
+                {notifications.blocked && (
+                  <View>
+                    <Text style={[textStyle.bodySmall, { color: color.textPrimary }]}>
+                      {t("settings.notificationsBlocked")}
+                    </Text>
+                    <LinkRow
+                      label={t("settings.openPhoneSettings")}
+                      role="button"
+                      onPress={() => void Linking.openSettings()}
+                    />
+                  </View>
+                )}
+                {notifications.choice === "on" && (
+                  <>
+                    <SegmentedChoice
+                      title={t("settings.quietHours")}
+                      segments={quietChoices}
+                      selected={notifications.quiet}
+                      onSelect={notifications.setQuiet}
+                    />
+                    <Text style={[textStyle.bodySmall, { color: color.textSecondary }]}>
+                      {t("settings.quietHelp")}
+                    </Text>
+                  </>
+                )}
+              </View>
+            )}
             <View style={{ gap: space.sm }}>
               <SegmentedChoice
                 title={t("settings.usageStats")}
