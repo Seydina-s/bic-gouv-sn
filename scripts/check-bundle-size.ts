@@ -9,7 +9,9 @@ const MB = 1024 * 1024;
  * JavaScript (Hermes bytecode): what delays startup on a 2 GB Android phone,
  * so it keeps its own ceiling.
  */
-const CODE_BUDGET_BYTES = 6 * MB;
+// 7.5 MB since 30/09/2026 (user decision): the fluid sliding panel of "Près de moi"
+// (Reanimated, gesture handler) adds about 1.2 MB. The target stays 4 MB (PERF-03).
+const CODE_BUDGET_BYTES = 7.5 * MB;
 /**
  * Whole app content shipped in the bundle (code + fonts, illustrations, animations):
  * raised to 15 MB by the user for an immersive experience (decisions.md, 26/09/2026).
