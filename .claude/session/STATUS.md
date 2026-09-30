@@ -1,6 +1,6 @@
 # STATUS — Bic Gouv SN
 
-**Dernière mise à jour** : 30/09/2026 (0 h 15) · **Mode** : autonome jusqu'au 30/09 à 2 h (demande de l'utilisateur), puis retour au mode standard. Actions de l'utilisateur reportées : `.claude/session/A-FAIRE-UTILISATEUR.md` (17 points, dont plusieurs réglés).
+**Dernière mise à jour** : 30/09/2026 (13 h) · **Mode** : standard (le mode autonome s'est terminé à 13 h, comme demandé). Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md` (21 points, dont plusieurs réglés).
 
 ## Où on en est
 - Dépôt **public et sécurisé** : https://github.com/Seydina-s/bic-gouv-sn. `main` protégée : tout passe par PR + **4 contrôles verts** (qualité et tests, constructions avec **audit d'accessibilité** sur 82 écrans dont 26 à 320 px et **6 parcours de bout en bout**, secrets et dépendances, **conteneurs**).
@@ -34,6 +34,11 @@
   - **SCALE-01** : sessions et étapes de connexion de la console, clés anti-doublons et limite de débit partagées dans **Redis** (`REDIS_URL`) ;
   - **SCALE-02** (tranches 1 à 3) : **PostgreSQL** entre dans l'API (`DATABASE_URL`, schéma mis à jour au démarrage) ; statistiques d'usage, recherches sans résultat et journal des erreurs **additionnés** en base par chaque serveur ; sans base, les fichiers restent utilisés ;
   - tout est testé en CI contre un vrai Redis et un vrai PostgreSQL 18 (PGlite en local) ; Redis et PostgreSQL ajoutés à `infra/docker/compose.yaml`.
+- Nuit du 29 au 30/09 et matinée (PR #141 à #149) :
+  - **SCALE-02** suite, avec l'accord de l'utilisateur : abonnements aux notifications, notifications de la console, comptes de l'équipe et **journal d'audit refusant en base toute modification** passent dans PostgreSQL ; commandes d'administration branchées sur la même base ;
+  - **notifications automatiques** (décision de l'utilisateur, 1 h 20) : chaque nouvel article annoncé avec photo, premiers mots et source, dans la langue de chacun, hors heures calmes ; pause (éditeur) et reprise (administrateur) dans la console, 10 par heure au plus ; nombre de téléphones prévenus affiché ;
+  - **app** : demande comme une permission, Réglages (notifications, heures calmes 22 h – 7 h par défaut, rubriques), ouverture de l'article au toucher ; actif dès que le projet EAS existe ;
+  - envoi Expo à sa cadence officielle (600 par seconde) ; garde-fous des futures clés Apple et Firebase ; guide de la version de test complété (notifications) ; audit croisé AUD5.
 - Contrôle complet : plus de 1 100 tests verts.
 - Incident du 29/09 : clé de l'API **locale** apparue dans la conversation ; remplacée le jour même (ERREURS.md).
 
@@ -41,11 +46,11 @@
 Voir `.claude/session/A-FAIRE-UTILISATEUR.md`. Toujours ouverts : compte Apple (en cours), vérification des services de Dakar, logo, identifiant de l'app, questions au BIC (et offre de Sénégal Numérique pour Diamniadio), budget d'hébergement (chiffrage prêt), jeton Sentry, Opportunités et Participer (plus tard), wolof (à la fin).
 
 ## Prochaine tâche
-- Dès la version de test : écran des notifications dans l'app (PUSH-01, FEED-04), QA-02, QA-03, QA-04, QA-09 (carte native), E2E-02 (Maestro), LIC-02.
-- Avant une seconde instance de l'API : fin de SCALE-02 (articles et démarches écrits par la collecte, abonnements push, notifications, comptes et journal d'audit, dans PostgreSQL). Tranches suivantes : abonnements push, puis notifications, puis comptes (données de l'équipe : à faire avec soin, journal d'audit chaîné).
+- **Maintenant (13 h)** : compte Apple Developer activé → version de test sur iPhone avec l'utilisateur (guide `docs/guides/installer-la-version-de-test-iphone.md`, notifications comprises), puis QA-02, QA-03, QA-04, QA-09, AUD5-04, E2E-02, LIC-02, module iPhone pour la photo (AUD5-07).
+- Décisions attendues : points 19 (contenus publiés dans PostgreSQL), 20 (Firebase), 21 (envoi à l'échelle nationale), et confirmation de l'ordre des invitations et des heures calmes par défaut (AUD5-05).
 - QA-11 réglé (test instable : préparation trop lente sous charge).
 
-## Services locaux (au 30/09, 0 h 15)
+## Services locaux (au 30/09, 13 h)
 - API sur 3100 lancée avant SCALE-01 (code de 20 h 15, toujours sur fichiers : pas de `REDIS_URL` ni de `DATABASE_URL` en local, pas de Redis ni de PostgreSQL installés sur la machine) ; console en développement sur 3001 ; Expo sur 8081 ; export web de l'app servi sur 8084 (relais vers l'API) ; une seule collecte temps réel (verrou actif, contrôle des retraits chaque nuit ; elle nettoiera les fichiers temporaires orphelins à son prochain démarrage).
 - Changer la clé locale des seconds codes : arrêter l'API, `pnpm --filter @bgs/api admin:rotate-key`, relancer (aucune clé n'est jamais affichée).
 - Secrets : gitleaks toujours avec `--redact` et sur le commit (`gitleaks git`), jamais `gitleaks dir` sur le dépôt (ERREURS.md, 29/09).
