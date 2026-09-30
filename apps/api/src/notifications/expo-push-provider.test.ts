@@ -2,25 +2,19 @@ import { randomUUID } from "node:crypto";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { writeFileDurably } from "@bgs/content-store";
-import type { Notification, PushSubscription } from "@bgs/shared-types";
+import type { PushSubscription } from "@bgs/shared-types";
 import { describe, expect, it } from "vitest";
 import { ExpoPushProvider } from "./expo-push-provider";
+import type { PushMessage } from "./push-message";
 import { FilePushSubscriptionStore } from "./push-subscriptions";
 
 // Placeholder tokens and article, shaped like the real ones.
 const token = (n: number) => `ExponentPushToken[test${String(n).padStart(10, "0")}]`;
-const NOTIFICATION: Notification = {
-  id: randomUUID(),
+const NOTIFICATION: PushMessage = {
   articleId: "00000000-0000-5000-8000-000000000001",
-  lang: "fr",
-  title: "Titre officiel de test",
   category: "conseil-des-ministres",
-  status: "approved",
-  preparedBy: { id: "a", name: "A" },
-  preparedAt: "2026-09-29T08:00:00.000Z",
-  decidedBy: { id: "b", name: "B" },
-  decidedAt: "2026-09-29T08:05:00.000Z",
-  delivery: null,
+  imageUrl: null,
+  versions: { fr: { title: "Titre officiel de test", excerpt: "" } },
 };
 const NOON = Date.parse("2026-09-29T12:00:00Z");
 const NIGHT = Date.parse("2026-09-29T23:00:00Z");
@@ -85,6 +79,43 @@ describe("sending a notification through Expo", () => {
     const left = (await store.list()).map((item) => item.token);
     expect(left).toHaveLength(149);
     expect(left).not.toContain(token(7));
+  });
+
+  it("announces the article in each person's language, with its first words and cover", async () => {
+    const { store, requests, fetchImpl } = await setUp([
+      subscription(1, { lang: "wo", topics: null }),
+      subscription(2, { lang: "fr" }),
+    ]);
+    const message: PushMessage = {
+      ...NOTIFICATION,
+      imageUrl: "https://media.test/images/ab/960.jpeg",
+      versions: {
+        // Placeholders: no Wolof is ever written by hand (W-01).
+        fr: { title: "Titre", excerpt: "Premiers mots…" },
+        wo: { title: "[wo] titre de test", excerpt: "[wo] premiers mots de test" },
+      },
+    };
+    await new ExpoPushProvider({ subscriptions: store, fetchImpl, now: () => NOON }).send(message);
+    const sent = new Map(requests.flat().map((item) => [item.to, item]));
+    expect(sent.get(token(1))).toMatchObject({
+      title: "[wo] titre de test",
+      richContent: { image: "https://media.test/images/ab/960.jpeg" },
+      mutableContent: true,
+    });
+    // A no-break space before the colon (French typography): "\s" matches it.
+    expect(sent.get(token(1))?.body).toMatch(
+      /^\[wo\] premiers mots de test\nSource\s:\spresidence\.sn$/,
+    );
+    expect(sent.get(token(2))).toMatchObject({ title: "Titre" });
+  });
+
+  it("falls back to French for a language the article is not published in", async () => {
+    const { store, requests, fetchImpl } = await setUp([subscription(1, { lang: "wo" })]);
+    await new ExpoPushProvider({ subscriptions: store, fetchImpl, now: () => NOON }).send(
+      NOTIFICATION,
+    );
+    expect(requests.flat()[0]).toMatchObject({ title: "Titre officiel de test" });
+    expect(requests.flat()[0]).not.toHaveProperty("richContent");
   });
 
   it("fails when the service cannot be reached, so the console records it", async () => {

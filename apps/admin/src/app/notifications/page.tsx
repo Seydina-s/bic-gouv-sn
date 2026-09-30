@@ -1,11 +1,15 @@
 import { randomUUID } from "node:crypto";
-import { notificationsResponseSchema, type Notification } from "@bgs/shared-types";
+import {
+  notificationsResponseSchema,
+  type AutomaticNotifications,
+  type Notification,
+} from "@bgs/shared-types";
 import { adminRequest } from "../../lib/admin-api";
 import { formatClockTime, formatDay } from "../../lib/format";
 import { t } from "../../lib/i18n";
 import { latestNews } from "../../lib/latest-news";
 import { requireAccount } from "../../lib/session";
-import { DecisionForm, PrepareForm } from "./NotificationForms";
+import { AutomaticForm, DecisionForm, PrepareForm } from "./NotificationForms";
 
 export const dynamic = "force-dynamic";
 
@@ -37,6 +41,31 @@ function decisionLine(notification: Notification): string | null {
   });
 }
 
+/** Where the automatic notifications stand, in one sentence. */
+function automaticLine(automatic: AutomaticNotifications): string {
+  if (!automatic.paused) {
+    return t("notifications.automaticOn", { perHour: automatic.perHour });
+  }
+  return t("notifications.automaticPaused", {
+    name: automatic.changedBy?.name ?? "—",
+    ...(automatic.changedAt === null ? { day: "—", time: "—" } : when(automatic.changedAt)),
+  });
+}
+
+/** Who and when, for a notification of the history. */
+function historyLines(notification: Notification): (string | null)[] {
+  if (notification.origin === "automatic") {
+    return [t("notifications.automaticSentAt", when(notification.preparedAt))];
+  }
+  return [
+    t("notifications.preparedBy", {
+      name: notification.preparedBy.name,
+      ...when(notification.preparedAt),
+    }),
+    decisionLine(notification),
+  ];
+}
+
 /**
  * Notifications, two people (CLAUDE.md §1): prepare one from an official article,
  * have another person check and send it, and keep the history.
@@ -54,7 +83,7 @@ export default async function NotificationsPage() {
       </p>
     );
   }
-  const { notifications, canSend } = result.data;
+  const { notifications, canSend, automatic } = result.data;
   const pending = notifications.filter((item) => item.status === "pending");
   const decided = notifications.filter((item) => item.status !== "pending");
   const canPrepare = account.role !== "reviewer";
@@ -75,6 +104,18 @@ export default async function NotificationsPage() {
           </p>
         )}
       </div>
+
+      <section aria-labelledby="automatic-title" className="space-y-4">
+        <h2 id="automatic-title" className="font-display text-2xl font-bold">
+          {t("notifications.automaticTitle")}
+        </h2>
+        <p className="max-w-prose">{automaticLine(automatic)}</p>
+        {automatic.paused && account.role !== "admin" ? (
+          <p className="max-w-prose text-sm text-ink-soft">{t("notifications.resumeAdminsOnly")}</p>
+        ) : (
+          canPrepare && <AutomaticForm paused={automatic.paused} />
+        )}
+      </section>
 
       {canPrepare && (
         <section aria-labelledby="prepare-title" className="space-y-4">
@@ -135,13 +176,14 @@ export default async function NotificationsPage() {
             {decided.map((notification) => (
               <li key={notification.id} className="space-y-1 p-5">
                 <p className="font-semibold leading-snug">{notification.title}</p>
-                <p className="text-sm text-ink-soft">
-                  {t("notifications.preparedBy", {
-                    name: notification.preparedBy.name,
-                    ...when(notification.preparedAt),
-                  })}
-                </p>
-                <p className="text-sm text-ink-soft">{decisionLine(notification)}</p>
+                {historyLines(notification).map(
+                  (line) =>
+                    line !== null && (
+                      <p key={line} className="text-sm text-ink-soft">
+                        {line}
+                      </p>
+                    ),
+                )}
                 {notification.delivery !== null && (
                   <p className="text-sm font-semibold">
                     {t(DELIVERY_WORDING[notification.delivery.outcome])}

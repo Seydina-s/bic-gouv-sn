@@ -1,6 +1,6 @@
 "use server";
 
-import { notificationSchema } from "@bgs/shared-types";
+import { automaticNotificationsSchema, notificationSchema } from "@bgs/shared-types";
 import { revalidatePath } from "next/cache";
 import type { FormState } from "../../components/FormOutcome";
 import { adminRequest, type AdminResult } from "../../lib/admin-api";
@@ -66,4 +66,25 @@ export async function decideNotification(_previous: FormState, form: FormData): 
   return {
     message: t(decision === "approve" ? "notifications.approved" : "notifications.cancelled"),
   };
+}
+
+/** Pauses (any editor) or resumes (an administrator) the automatic notifications. */
+export async function setAutomaticNotifications(
+  _previous: FormState,
+  form: FormData,
+): Promise<FormState> {
+  const { token } = await requireAccount();
+  const paused = formText(form, "paused") === "true";
+  const result = await adminRequest({
+    path: "/notifications/automatic",
+    method: "PUT",
+    token,
+    body: { paused },
+    schema: automaticNotificationsSchema,
+  });
+  if (!result.ok) {
+    return refusal(result);
+  }
+  revalidatePath("/notifications");
+  return { message: t(paused ? "notifications.pausedDone" : "notifications.resumedDone") };
 }

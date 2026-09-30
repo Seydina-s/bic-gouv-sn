@@ -5,7 +5,7 @@ import { IdempotencyKey } from "../../components/IdempotencyKey";
 import { FormOutcome, type FormState } from "../../components/FormOutcome";
 import { field, primaryButton, secondaryButton } from "../../lib/form-styles";
 import { t } from "../../lib/i18n";
-import { decideNotification, prepareNotification } from "./actions";
+import { decideNotification, prepareNotification, setAutomaticNotifications } from "./actions";
 
 export interface ArticleChoice {
   id: string;
@@ -75,6 +75,23 @@ export function DecisionForm({ id, canApprove }: { id: string; canApprove: boole
           {t("notifications.cancel")}
         </button>
       </div>
+      <FormOutcome state={state} />
+    </form>
+  );
+}
+
+/** One button: pause the automatic notifications, or resume them. */
+export function AutomaticForm({ paused }: { paused: boolean }) {
+  const [state, action, pending] = useActionState<FormState, FormData>(
+    setAutomaticNotifications,
+    {},
+  );
+  return (
+    <form action={action} className="space-y-3">
+      <input type="hidden" name="paused" value={paused ? "false" : "true"} />
+      <button type="submit" disabled={pending} className={paused ? primaryButton : secondaryButton}>
+        {t(paused ? "notifications.resume" : "notifications.pause")}
+      </button>
       <FormOutcome state={state} />
     </form>
   );

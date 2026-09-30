@@ -8,6 +8,7 @@ import {
 } from "@bgs/shared-types";
 import type { AuditJournal } from "../admin/audit-journal";
 import type { NotificationStore } from "./notification-store";
+import { type PushMessage, pushMessageFor } from "./push-message";
 
 /**
  * Hands an approved notification to a push service (CLAUDE.md §4.2: a provider
@@ -16,7 +17,7 @@ import type { NotificationStore } from "./notification-store";
  */
 export interface PushProvider {
   readonly ready: boolean;
-  send(notification: Notification): Promise<"sent" | "not-sent">;
+  send(message: PushMessage): Promise<"sent" | "not-sent">;
 }
 
 export const noPushProvider: PushProvider = {
@@ -42,17 +43,52 @@ export interface Person {
  * another approves (then it is handed to the push service) or either cancels. Every
  * step goes to the audit journal.
  */
+export interface NotificationServices {
+  store: NotificationStore;
+  articles: ArticleRepository;
+  push: PushProvider;
+  journal: AuditJournal;
+  /** Public address of the media (CDN): the cover shown in the notification. */
+  mediaBaseUrl: string | undefined;
+  now?: () => Date;
+}
+
+/**
+ * Hands the notification of an article to the push service: its title and first
+ * words in each language, and its cover. "failed" when the article is gone or the
+ * service fails: never an approval without a result.
+ */
+export async function deliver(
+  {
+    articles,
+    push,
+    mediaBaseUrl,
+  }: Pick<NotificationServices, "articles" | "push" | "mediaBaseUrl">,
+  articleId: string,
+): Promise<"sent" | "not-sent" | "failed"> {
+  const article = await articles.get(articleId);
+  const message = article === null ? null : pushMessageFor(article, mediaBaseUrl);
+  if (message === null) {
+    return "failed";
+  }
+  return push.send(message).catch(() => "failed" as const);
+}
+
 export class NotificationService {
-  constructor(
-    private readonly store: NotificationStore,
-    private readonly articles: ArticleRepository,
-    private readonly push: PushProvider,
-    private readonly journal: AuditJournal,
-    private readonly now: () => Date = () => new Date(),
-  ) {}
+  private readonly store: NotificationStore;
+  private readonly articles: ArticleRepository;
+  private readonly journal: AuditJournal;
+  private readonly now: () => Date;
+
+  constructor(private readonly services: NotificationServices) {
+    this.store = services.store;
+    this.articles = services.articles;
+    this.journal = services.journal;
+    this.now = services.now ?? (() => new Date());
+  }
 
   get canSend(): boolean {
-    return this.push.ready;
+    return this.services.push.ready;
   }
 
   /** Latest first. */
@@ -68,6 +104,7 @@ export class NotificationService {
     }
     const notification: Notification = {
       id: randomUUID(),
+      origin: "console",
       articleId,
       lang,
       title: translation.title,
@@ -96,8 +133,7 @@ export class NotificationService {
 
   async approve(person: Person, id: string): Promise<Notification> {
     const approved = await this.decide(person, id, "approved");
-    // A push service that fails leaves a trace, never an approval without a result.
-    const outcome = await this.push.send(approved).catch(() => "failed" as const);
+    const outcome = await deliver(this.services, approved.articleId);
     const delivered = await this.store.update((all) => {
       const next = all.map((item) =>
         item.id === id ? { ...item, delivery: { outcome, at: this.now().toISOString() } } : item,
