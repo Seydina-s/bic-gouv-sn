@@ -280,6 +280,9 @@ export const fr = {
     quietOff: "Non",
     quietHelp:
       "Pendant les heures calmes, rien ne sonne\u00a0: l'article vous attend dans l'application.",
+    notificationTopics: "Rubriques",
+    notificationTopicsHelp:
+      "Toutes par défaut. Touchez une rubrique pour ne garder qu'elle, puis ajoutez-en d'autres si vous le souhaitez.",
     notificationsBlocked:
       "Les notifications sont bloquées pour Bic Gouv SN dans les réglages du téléphone.",
     openPhoneSettings: "Ouvrir les réglages du téléphone",

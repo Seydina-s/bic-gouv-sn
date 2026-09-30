@@ -34,6 +34,9 @@ import { type DataSaverPreference, useDataSaver } from "../data-saver/DataSaverP
 import { type UsageConsent, useUsageStats } from "../usage-stats/UsageStatsProvider";
 import type { NotificationChoice, QuietChoice } from "../notifications/notification-preferences";
 import { useNotifications } from "../notifications/NotificationsProvider";
+import { toggleTopic } from "../notifications/notification-preferences";
+import { categoryLabelKey, SECTION_FILTERS } from "../news/category";
+import { SectionChip } from "../news/SectionChip";
 import { OPEN_SOURCE } from "../licences/open-source";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useReduceMotion } from "../../theme/useSystemAccessibility";
@@ -256,6 +259,38 @@ export function SettingsSheet({ visible, onClose }: { visible: boolean; onClose:
                     <Text style={[textStyle.bodySmall, { color: color.textSecondary }]}>
                       {t("settings.quietHelp")}
                     </Text>
+                    <Text
+                      accessibilityRole="header"
+                      style={[textStyle.label, { color: color.textSecondary }]}
+                    >
+                      {t("settings.notificationTopics")}
+                    </Text>
+                    <View style={[styles.chips, { gap: space.sm }]}>
+                      <SectionChip
+                        category={null}
+                        label={t("feed.allSections")}
+                        active={notifications.topics === null}
+                        role="checkbox"
+                        onPress={() => {
+                          notifications.setTopics(toggleTopic(notifications.topics, null));
+                        }}
+                      />
+                      {SECTION_FILTERS.map((category) => (
+                        <SectionChip
+                          key={category}
+                          category={category}
+                          label={t(categoryLabelKey(category))}
+                          active={notifications.topics?.includes(category) ?? false}
+                          role="checkbox"
+                          onPress={() => {
+                            notifications.setTopics(toggleTopic(notifications.topics, category));
+                          }}
+                        />
+                      ))}
+                    </View>
+                    <Text style={[textStyle.bodySmall, { color: color.textSecondary }]}>
+                      {t("settings.notificationTopicsHelp")}
+                    </Text>
                   </>
                 )}
               </View>
@@ -334,5 +369,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: -4 },
   },
   header: { flexDirection: "row", alignItems: "center" },
+  chips: { flexDirection: "row", flexWrap: "wrap" },
   flex: { flex: 1 },
 });

@@ -1,10 +1,9 @@
-import { tracking } from "@bgs/ui";
 import { useRef } from "react";
-import { Pressable, ScrollView, StyleSheet, Text } from "react-native";
+import { ScrollView } from "react-native";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 import { categoryLabelKey, SECTION_FILTERS } from "./category";
-import { CategoryIcon } from "./CategoryIcon";
+import { SectionChip } from "./SectionChip";
 
 export interface SectionFilterProps {
   /** Selected section slug, or null for every section. */
@@ -12,27 +11,21 @@ export interface SectionFilterProps {
   onSelect: (category: string | null) => void;
 }
 
-/**
- * Row of section chips under the masthead. Each chip carries the icon and tone of
- * its section, so the chips and the stories speak the same visual language.
- */
+/** Row of section chips under the masthead: one section at a time, or all. */
 export function SectionFilter({ selected, onSelect }: SectionFilterProps) {
   const { theme } = useTheme();
   const { t } = useTranslation();
-  const { color, space, textStyle, radius, touchTarget } = theme;
+  const { space } = theme;
   const row = useRef<ScrollView>(null);
 
   const chip = (category: string | null, label: string) => {
     const active = selected === category;
-    const tone = category === null ? null : theme.categoryTones[category];
-    const ink = tone?.ink ?? (active ? color.onPrimaryContainer : color.textSecondary);
-    const fill = tone?.container ?? color.primaryContainer;
     return (
-      <Pressable
+      <SectionChip
         key={category ?? "all"}
-        accessibilityRole="button"
-        accessibilityState={{ selected: active }}
-        accessibilityLabel={label}
+        category={category}
+        label={label}
+        active={active}
         onPress={() => {
           onSelect(category);
         }}
@@ -42,22 +35,7 @@ export function SectionFilter({ selected, onSelect }: SectionFilterProps) {
             row.current?.scrollTo({ x: Math.max(0, event.nativeEvent.layout.x - space.lg) });
           }
         }}
-        style={({ pressed }) => [
-          styles.chip,
-          {
-            minHeight: touchTarget.min,
-            gap: space.sm,
-            paddingHorizontal: space.md,
-            borderRadius: radius.full,
-            borderColor: active ? (tone?.solid ?? fill) : color.border,
-            backgroundColor: active ? fill : color.background,
-            opacity: pressed ? theme.opacity.cardPressed : 1,
-          },
-        ]}
-      >
-        {category !== null && <CategoryIcon category={category} color={ink} />}
-        <Text style={[textStyle.caption, styles.caps, { color: ink }]}>{label}</Text>
-      </Pressable>
+      />
     );
   };
 
@@ -77,12 +55,3 @@ export function SectionFilter({ selected, onSelect }: SectionFilterProps) {
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  chip: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: StyleSheet.hairlineWidth,
-  },
-  caps: { textTransform: "uppercase", letterSpacing: tracking.caps },
-});
