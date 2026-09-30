@@ -12,6 +12,10 @@ const refused = [
   "cat .data/admin/accounts.json",
   "Get-Content .data\\admin\\accounts.json",
   "openssl x509 -in server.pem",
+  // Push credentials (30/09/2026): Apple's key, Firebase's service account.
+  "cat AuthKey_ABC123.p8",
+  "Get-Content bic-gouv-sn-firebase-adminsdk-x1y2z.json",
+  "cat google-service-account.json",
   // The environment printed.
   "printenv",
   "cd apps/api && env",
@@ -34,6 +38,8 @@ const allowed = [
   "pnpm --filter @bgs/api start",
   "pnpm --filter @bgs/api admin:rotate-key",
   "cat apps/api/.env.example",
+  // Public identifiers only (Firebase's own guidance).
+  "cat apps/mobile/google-services.json",
   'grep -rn "process.env.EXPO_PUBLIC_API_URL" apps/mobile/src',
   'gitleaks git --redact --log-opts="-1"',
   "Get-NetTCPConnection -LocalPort 3100 -State Listen",

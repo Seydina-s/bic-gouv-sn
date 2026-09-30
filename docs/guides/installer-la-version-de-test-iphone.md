@@ -70,3 +70,24 @@ Mêmes étapes 1, 2 et 4, sans enregistrement de l'appareil ni compte Apple :
 npx eas-cli build --profile development --platform android
 ```
 À la fin, ouvrez le lien sur le téléphone Android et installez le fichier proposé (autorisez l'installation depuis le navigateur si Android le demande).
+
+## Notifications des nouveaux articles
+
+L'app sait recevoir une notification pour chaque nouvel article (décision du 30/09/2026). Pour qu'elles arrivent sur un téléphone de test, il faut, une seule fois :
+
+**Sur iPhone** : lors de la première compilation (étape 4), l'outil propose de préparer les notifications. Répondez **oui** aux deux questions (« Setup Push Notifications for your project » puis « Generating a new Apple Push Notifications service key »). Expo crée et garde lui-même la clé d'Apple : elle ne passe jamais par l'ordinateur.
+
+**Sur Android** : Google demande un projet **Firebase** (gratuit).
+1. Sur https://console.firebase.google.com, créez un projet (par exemple « Bic Gouv SN »), puis ajoutez-y une app **Android** avec l'identifiant de test de l'app.
+2. Téléchargez le fichier **`google-services.json`** et donnez-le-moi : il ne contient que des identifiants publics. Je le range dans le projet.
+3. Dans Firebase : Paramètres du projet → Comptes de service → **Générer une nouvelle clé privée**. Ce fichier est **secret** : gardez-le hors du dossier du projet (par exemple dans Téléchargements), ne me l'envoyez pas.
+4. Envoyez-le vous-même à Expo :
+   ```
+   npx eas-cli credentials
+   ```
+   Choisissez Android → le profil de compilation → Google Service Account → « Set up a Google Service Account Key for Push Notifications (FCM V1) » → « Upload a new service account key », puis indiquez le fichier.
+5. Supprimez ensuite le fichier de l'ordinateur : Expo le garde.
+
+Le dépôt refuse ces clés : elles sont exclues de git, et ni les outils ni l'IA ne peuvent les lire.
+
+**Pour essayer** : ouvrez un article dans l'app, revenez à l'accueil, puis acceptez la proposition « Être prévenu des nouveaux articles ? » et la question du téléphone. L'API doit tourner avec `PUSH_PROVIDER=expo` (je la lance ainsi pour l'essai). Au prochain article publié par la Présidence, la notification arrive avec le titre et les premiers mots. La **photo** s'affiche sur Android. Sur iPhone, elle demande un petit module supplémentaire, qui sera ajouté après ce premier essai.
