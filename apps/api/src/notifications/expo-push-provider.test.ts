@@ -118,6 +118,31 @@ describe("sending a notification through Expo", () => {
     expect(requests.flat()[0]).not.toHaveProperty("richContent");
   });
 
+  it("slows down and tries again when Expo says it goes too fast, never twice otherwise", async () => {
+    const store = new FilePushSubscriptionStore(join(tmpdir(), "bgs-push", `${randomUUID()}.json`));
+    await store.save(subscription(1));
+    const answers = [429, 200];
+    const seen: number[] = [];
+    const fetchImpl = (() => {
+      const status = answers.shift() ?? 500;
+      seen.push(status);
+      const body = status === 200 ? JSON.stringify({ data: [{ status: "ok" }] }) : "{}";
+      return Promise.resolve(new Response(body, { status }));
+    }) as typeof fetch;
+    const provider = new ExpoPushProvider({
+      subscriptions: store,
+      fetchImpl,
+      now: () => NOON,
+      retryBaseDelayMs: 1,
+    });
+    await expect(provider.send(NOTIFICATION)).resolves.toBe("sent");
+    expect(seen).toEqual([429, 200]);
+    // A server error is not retried: Expo may have sent part of it already.
+    answers.push(500);
+    await expect(provider.send(NOTIFICATION)).rejects.toThrow(/unreachable/);
+    expect(seen).toEqual([429, 200, 500]);
+  });
+
   it("fails when the service cannot be reached, so the console records it", async () => {
     const store = new FilePushSubscriptionStore(join(tmpdir(), "bgs-push", `${randomUUID()}.json`));
     await store.save(subscription(1));
