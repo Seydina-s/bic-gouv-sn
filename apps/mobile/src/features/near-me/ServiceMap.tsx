@@ -128,7 +128,9 @@ export default function ServiceMap({
   return (
     <MapLibreMap
       style={StyleSheet.absoluteFill}
-      mapStyle={mapStyleUrl(API_BASE, theme.scheme)}
+      // Always the light map: easier to read (decision of 30/09/2026); the controls
+      // around it follow the theme.
+      mapStyle={mapStyleUrl(API_BASE, "light")}
       attribution={false}
       logo={false}
       compass={false}

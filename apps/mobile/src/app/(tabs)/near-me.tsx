@@ -14,7 +14,6 @@ import { ScrollTopButton, useScrollTop } from "../../components/ScrollTopButton"
 import { useTwoPane } from "../../components/useTwoPane";
 import { ServiceDetail } from "../../features/near-me/ServiceDetail";
 import { LocationPanel } from "../../features/near-me/LocationPanel";
-import { ViewToggle } from "../../features/near-me/MapOverlays";
 import { nativeMapAvailable } from "../../features/near-me/map-support";
 import { NearMeMap } from "../../features/near-me/NearMeMap";
 import { FeatureGate } from "../../features/remote-config/FeatureGate";
@@ -70,7 +69,8 @@ function NearMe() {
   }
   const [mapExists] = useState(nativeMapAvailable);
   const mapSwitchedOn = useFeature("map");
-  const [showing, setShowing] = useState<"list" | "map">("list");
+  // The map leads (decision of 30/09/2026); the list alone if it cannot be drawn.
+  const [mapFailed, setMapFailed] = useState(false);
   const { color, space, textStyle, touchTarget } = theme;
 
   // The phone's position counts once found; a town chosen by hand replaces it.
@@ -96,7 +96,7 @@ function NearMe() {
     [kept, origin],
   );
   // The map is offered only with something to show on it.
-  const canMap = mapExists && mapSwitchedOn && all.length > 0;
+  const canMap = mapExists && mapSwitchedOn && all.length > 0 && !mapFailed;
   const { twoPane, listPaneWidth } = useTwoPane();
   const [selected, setSelected] = useState<string | null>(null);
   // On a large screen, the nearest service (or the one chosen) beside the list.
@@ -115,22 +115,25 @@ function NearMe() {
     void location.locate();
   };
 
-  if (canMap && showing === "map") {
-    return (
-      <NearMeMap
-        services={kept}
-        origin={origin}
-        locationStatus={location.status}
-        category={category}
-        onCategory={setCategory}
-        onLocate={locateMe}
-        onOpen={openService}
-        onShowList={() => {
-          setShowing("list");
+  // Where to measure from, and the kinds of service: on top of the list or the panel.
+  const choices = (
+    <>
+      <LocationPanel
+        around={around}
+        status={location.status}
+        places={services.data?.places ?? []}
+        onUsePosition={locateMe}
+        onChooseTown={(place) => {
+          setChosen({ kind: "town", place });
+        }}
+        onChange={() => {
+          setChosen(null);
+          location.forget();
         }}
       />
-    );
-  }
+      <ServiceFilters selected={category} onSelect={setCategory} />
+    </>
+  );
 
   const header = (
     <View style={{ paddingTop: insets.top + space.xl, gap: space.md }}>
@@ -142,25 +145,15 @@ function NearMe() {
           {t("nearMe.intro")}
         </Text>
       </View>
-      {/* Nothing verified yet: no reason to ask for the location (asked only when useful). */}
-      {all.length > 0 && (
-        <>
-          <LocationPanel
-            around={around}
-            status={location.status}
-            places={services.data?.places ?? []}
-            onUsePosition={locateMe}
-            onChooseTown={(place) => {
-              setChosen({ kind: "town", place });
-            }}
-            onChange={() => {
-              setChosen(null);
-              location.forget();
-            }}
-          />
-          <ServiceFilters selected={category} onSelect={setCategory} />
-        </>
+      {mapFailed && (
+        <Text
+          style={[textStyle.bodySmall, { color: color.textSecondary, paddingHorizontal: space.lg }]}
+        >
+          {t("nearMe.mapFailed")}
+        </Text>
       )}
+      {/* Nothing verified yet: no reason to ask for the location (asked only when useful). */}
+      {all.length > 0 && choices}
     </View>
   );
 
@@ -191,6 +184,36 @@ function NearMe() {
     </Text>
   );
 
+  const footer =
+    all.length === 0 ? null : (
+      <Pressable
+        accessibilityRole="link"
+        onPress={() => void Linking.openURL(OSM_COPYRIGHT)}
+        style={{ padding: space.lg, minHeight: touchTarget.min }}
+      >
+        <Text style={[textStyle.bodySmall, { color: color.textTertiary }]}>
+          {t("nearMe.attribution")}
+        </Text>
+      </Pressable>
+    );
+
+  if (canMap) {
+    return (
+      <NearMeMap
+        services={kept}
+        rows={rows}
+        origin={origin}
+        locationStatus={location.status}
+        header={choices}
+        empty={empty}
+        onLocate={locateMe}
+        onMapFailed={() => {
+          setMapFailed(true);
+        }}
+      />
+    );
+  }
+
   return (
     <View style={[styles.split, { backgroundColor: color.background }]}>
       {/* The same tree in both layouts: typing a town never loses the keyboard. */}
@@ -219,23 +242,8 @@ function NearMe() {
               onPress={openService}
             />
           )}
-          ListFooterComponent={
-            all.length === 0 ? null : (
-              <Pressable
-                accessibilityRole="link"
-                onPress={() => void Linking.openURL(OSM_COPYRIGHT)}
-                style={{ padding: space.lg, minHeight: touchTarget.min }}
-              >
-                <Text style={[textStyle.bodySmall, { color: color.textTertiary }]}>
-                  {t("nearMe.attribution")}
-                </Text>
-              </Pressable>
-            )
-          }
-          contentContainerStyle={{
-            // The last rows stay clear of the floating "Carte" pill.
-            paddingBottom: bottomInset + space.xl + (canMap ? touchTarget.min + space.sm : 0),
-          }}
+          ListFooterComponent={footer}
+          contentContainerStyle={{ paddingBottom: bottomInset + space.xl }}
           testID="near-me-list"
         />
         <ScrollTopButton
@@ -245,15 +253,6 @@ function NearMe() {
             list.current?.scrollToOffset({ offset: 0, animated: true });
           }}
         />
-        {canMap && (
-          <ViewToggle
-            showing="list"
-            onToggle={() => {
-              setShowing("map");
-            }}
-            bottom={bottomInset + space.sm}
-          />
-        )}
       </View>
       {shown !== undefined && (
         <View style={styles.root}>

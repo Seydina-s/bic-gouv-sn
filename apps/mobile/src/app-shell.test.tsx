@@ -754,16 +754,14 @@ describe("app shell", () => {
     expect(screen.queryByRole("button", { name: "Afficher les services sur la carte" })).toBeNull();
   });
 
-  it("shows the verified services on the map, then the one touched, its page and the way there", async () => {
+  it("opens on the map, then shows the service touched in the panel, and the way there", async () => {
     mockMapAvailable = true;
     const openURL = jest.spyOn(Linking, "openURL").mockResolvedValue(true);
     await renderRouter(routes, { initialUrl: "/near-me" });
     await screen.findByText("Commissariat de test proche");
-    await fireEvent.press(
-      screen.getByRole("button", { name: "Afficher les services sur la carte" }),
-    );
+    // The map leads: no button to press (decision of 30/09/2026).
     const map = await screen.findByTestId("service-map");
-    // The base map comes from our API, in the app's theme.
+    // The base map comes from our API, always the light one.
     expect(map).toHaveProp(
       "mapStyle",
       expect.stringMatching(/\/v1\/map\/style\.json\?theme=light$/),
@@ -789,15 +787,20 @@ describe("app shell", () => {
     );
     await fireEvent.press(screen.getByRole("link", { name: "Itinéraire" }));
     expect(openURL).toHaveBeenCalledWith(expect.stringContaining("14.701,-17.4"));
-    // A touch on the map itself closes the preview; the list is one tap away again.
-    await fireEvent.press(map);
-    expect(screen.queryByTestId("service-preview")).toBeNull();
+    // The panel shows the whole service at once, hours included.
+    expect(await screen.findByText(/^Du lundi au vendredi, de 8.h à 17.h.$/)).toBeOnTheScreen();
+    // Back to the list from the panel, or by touching the map itself.
+    await fireEvent.press(screen.getByRole("button", { name: "Retour à la liste" }));
+    expect(screen.queryByRole("header", { name: "Commissariat de test proche" })).toBeNull();
     await fireEvent.press(
       points,
       touchOnPoints({ id: "osm-n2", name: "Commissariat de test proche" }, [-17.4, 14.701]),
     );
-    await fireEvent.press(await screen.findByRole("button", { name: "Voir la fiche" }));
-    expect(await screen.findByText(/^Du lundi au vendredi, de 8.h à 17.h.$/)).toBeOnTheScreen();
+    expect(
+      await screen.findByRole("header", { name: "Commissariat de test proche" }),
+    ).toBeOnTheScreen();
+    await fireEvent.press(map);
+    expect(screen.queryByRole("button", { name: "Retour à la liste" })).toBeNull();
     openURL.mockRestore();
   });
 
@@ -805,9 +808,6 @@ describe("app shell", () => {
     mockMapAvailable = true;
     await renderRouter(routes, { initialUrl: "/near-me" });
     await screen.findByText("Commissariat de test proche");
-    await fireEvent.press(
-      screen.getByRole("button", { name: "Afficher les services sur la carte" }),
-    );
     await fireEvent.press(
       await screen.findByTestId("service-points"),
       touchOnPoints({ cluster: true, cluster_id: 3, point_count: 2 }, [-17.4, 14.75]),
@@ -818,7 +818,7 @@ describe("app shell", () => {
       );
     });
     expect(mapCalls.source.getClusterExpansionZoom).toHaveBeenCalledWith(3);
-    expect(screen.queryByTestId("service-preview")).toBeNull();
+    expect(screen.queryByRole("button", { name: "Retour à la liste" })).toBeNull();
   });
 
   it("finds the person on the map only when asked, and keeps the position on the phone", async () => {
@@ -834,9 +834,6 @@ describe("app shell", () => {
     globalThis.fetch = fetchMock as unknown as typeof fetch;
     await renderRouter(routes, { initialUrl: "/near-me" });
     await screen.findByText("Commissariat de test proche");
-    await fireEvent.press(
-      screen.getByRole("button", { name: "Afficher les services sur la carte" }),
-    );
     await screen.findByTestId("service-map");
     expect(Location.requestForegroundPermissionsAsync).not.toHaveBeenCalled();
     expect(screen.queryByTestId("user-location")).toBeNull();
@@ -862,9 +859,6 @@ describe("app shell", () => {
       .mockResolvedValue({ coords: { latitude: 14.7, longitude: -17.4 } } as never);
     await renderRouter(routes, { initialUrl: "/near-me" });
     await screen.findByText("Commissariat de test proche");
-    await fireEvent.press(
-      screen.getByRole("button", { name: "Afficher les services sur la carte" }),
-    );
     await fireEvent.press(await screen.findByRole("button", { name: "Me localiser sur la carte" }));
     await fireEvent.press(
       await screen.findByRole("button", { name: /^Garder le quartier hors ligne \(\d+ Mo\)$/ }),
@@ -891,12 +885,9 @@ describe("app shell", () => {
     mockMapAvailable = true;
     await renderRouter(routes, { initialUrl: "/near-me" });
     await screen.findByText("Commissariat de test proche");
-    await fireEvent.press(
-      screen.getByRole("button", { name: "Afficher les services sur la carte" }),
-    );
     await fireEvent(await screen.findByTestId("service-map"), "didFailLoadingMap");
+    // The list alone, with the reason why.
     expect(await screen.findByText(/La carte n'a pas pu s'afficher/)).toBeOnTheScreen();
-    await fireEvent.press(screen.getByRole("button", { name: "Liste" }));
     expect(await screen.findByText("Commissariat de test proche")).toBeOnTheScreen();
     expect(screen.queryByTestId("service-map")).toBeNull();
   });
