@@ -1,15 +1,13 @@
 import { randomUUID } from "node:crypto";
-import { readFile } from "node:fs/promises";
-import { writeFileDurably, type ArticleRepository } from "@bgs/content-store";
+import type { ArticleRepository } from "@bgs/content-store";
 import {
-  notificationSchema,
   publishedTranslation,
   type ErrorCode,
   type Lang,
   type Notification,
 } from "@bgs/shared-types";
-import { z } from "zod";
 import type { AuditJournal } from "../admin/audit-journal";
+import type { NotificationStore } from "./notification-store";
 
 /**
  * Hands an approved notification to a push service (CLAUDE.md §4.2: a provider
@@ -25,45 +23,6 @@ export const noPushProvider: PushProvider = {
   ready: false,
   send: () => Promise.resolve("not-sent"),
 };
-
-const fileSchema = z.object({
-  schemaVersion: z.literal(1),
-  notifications: z.array(notificationSchema),
-});
-
-/** Provisional store of the notifications: one validated JSON file, written durably. */
-export class FileNotificationStore {
-  private queue: Promise<unknown> = Promise.resolve();
-
-  constructor(private readonly path: string) {}
-
-  async all(): Promise<Notification[]> {
-    try {
-      return fileSchema.parse(JSON.parse(await readFile(this.path, "utf8"))).notifications;
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-        return [];
-      }
-      throw error;
-    }
-  }
-
-  /** Changes the list one writer at a time: two decisions never overwrite each other. */
-  update<T>(
-    change: (notifications: Notification[]) => { next: Notification[]; result: T },
-  ): Promise<T> {
-    const run = this.queue.then(async () => {
-      const { next, result } = change(await this.all());
-      await writeFileDurably(
-        this.path,
-        JSON.stringify({ schemaVersion: 1, notifications: next }, null, 2),
-      );
-      return result;
-    });
-    this.queue = run.catch(() => undefined);
-    return run;
-  }
-}
 
 /** A rule of the two-person workflow was not met; the code explains it in the console. */
 export class NotificationRuleError extends Error {
@@ -85,7 +44,7 @@ export interface Person {
  */
 export class NotificationService {
   constructor(
-    private readonly store: FileNotificationStore,
+    private readonly store: NotificationStore,
     private readonly articles: ArticleRepository,
     private readonly push: PushProvider,
     private readonly journal: AuditJournal,

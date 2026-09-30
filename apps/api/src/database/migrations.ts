@@ -62,4 +62,10 @@ export const MIGRATIONS: readonly { id: string; statements: readonly string[] }[
       "CREATE INDEX push_subscriptions_topics ON push_subscriptions USING gin (topics)",
     ],
   },
+  {
+    // Notifications prepared and decided in the console (two-person rule, ADM-07):
+    // each one whole, validated by the API on the way in and out.
+    id: "005-notifications",
+    statements: ["CREATE TABLE notifications (id text PRIMARY KEY, data jsonb NOT NULL)"],
+  },
 ];
