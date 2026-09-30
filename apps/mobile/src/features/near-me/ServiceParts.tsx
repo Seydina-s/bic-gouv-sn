@@ -10,11 +10,12 @@ import { ScalesIcon as Scales } from "phosphor-react-native/src/icons/Scales";
 import { ShieldCheckIcon as ShieldCheck } from "phosphor-react-native/src/icons/ShieldCheck";
 import { ShieldStarIcon as ShieldStar } from "phosphor-react-native/src/icons/ShieldStar";
 import type { ComponentType } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Icon } from "../../components/Icon";
 import { selectedEdge } from "../../components/selection";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
+import { FieldTextInput } from "./FieldTextInput";
 import { formatDistance, matchingPlaces } from "./nearby";
 
 /** One icon per kind of service, shared by the list, the filters and the service page. */
@@ -198,7 +199,7 @@ export function PlaceSearch({
   const matches = matchingPlaces(places, typed);
   return (
     <View style={{ gap: space.sm }}>
-      <TextInput
+      <FieldTextInput
         value={typed}
         onChangeText={onType}
         autoFocus

@@ -5,6 +5,7 @@ import { StatusBar } from "expo-status-bar";
 import * as SystemUI from "expo-system-ui";
 import { useEffect, type ComponentType } from "react";
 import { StyleSheet, View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { QueryProvider } from "../data/QueryProvider";
 import { DataSaverProvider } from "../features/data-saver/DataSaverProvider";
 import { UsageStatsProvider } from "../features/usage-stats/UsageStatsProvider";
@@ -76,25 +77,28 @@ function ThemedStack() {
 
 function RootLayout() {
   return (
-    <QueryProvider>
-      <ThemeProvider>
-        <I18nProvider>
-          <FavoritesProvider>
-            <DataSaverProvider>
-              <UsageStatsProvider>
-                <NotificationsProvider>
-                  <SettingsProvider>
-                    <UpdateGate>
-                      <ThemedStack />
-                    </UpdateGate>
-                  </SettingsProvider>
-                </NotificationsProvider>
-              </UsageStatsProvider>
-            </DataSaverProvider>
-          </FavoritesProvider>
-        </I18nProvider>
-      </ThemeProvider>
-    </QueryProvider>
+    // Native gestures everywhere (the sliding panel of "Près de moi").
+    <GestureHandlerRootView style={styles.fill}>
+      <QueryProvider>
+        <ThemeProvider>
+          <I18nProvider>
+            <FavoritesProvider>
+              <DataSaverProvider>
+                <UsageStatsProvider>
+                  <NotificationsProvider>
+                    <SettingsProvider>
+                      <UpdateGate>
+                        <ThemedStack />
+                      </UpdateGate>
+                    </SettingsProvider>
+                  </NotificationsProvider>
+                </UsageStatsProvider>
+              </DataSaverProvider>
+            </FavoritesProvider>
+          </I18nProvider>
+        </ThemeProvider>
+      </QueryProvider>
+    </GestureHandlerRootView>
   );
 }
 
@@ -104,3 +108,5 @@ const MonitoredRootLayout: ComponentType = monitoringEnabled ? Sentry.wrap(RootL
 export default function Layout() {
   return <MonitoredRootLayout />;
 }
+
+const styles = StyleSheet.create({ fill: { flex: 1 } });

@@ -1,16 +1,10 @@
-import type { PublicService } from "@bgs/shared-types";
-import { ArrowRightIcon as ArrowRight } from "phosphor-react-native/src/icons/ArrowRight";
 import { CheckCircleIcon as CheckCircle } from "phosphor-react-native/src/icons/CheckCircle";
 import { DownloadSimpleIcon as DownloadSimple } from "phosphor-react-native/src/icons/DownloadSimple";
-import { ListBulletsIcon as ListBullets } from "phosphor-react-native/src/icons/ListBullets";
-import { MapTrifoldIcon as MapTrifold } from "phosphor-react-native/src/icons/MapTrifold";
 import { NavigationArrowIcon as NavigationArrow } from "phosphor-react-native/src/icons/NavigationArrow";
-import { XIcon as X } from "phosphor-react-native/src/icons/X";
 import type { ReactNode } from "react";
 import {
   ActivityIndicator,
   Linking,
-  Platform,
   Pressable,
   type StyleProp,
   StyleSheet,
@@ -22,9 +16,6 @@ import { GlassBackdrop } from "../../components/GlassBackdrop";
 import { Icon } from "../../components/Icon";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
-import { directionsUrl } from "./directions";
-import { formatDistance } from "./nearby";
-import { ServiceBadge } from "./ServiceParts";
 import type { OfflineAreaState } from "./useOfflineArea";
 
 const OSM_COPYRIGHT = "https://www.openstreetmap.org/copyright";
@@ -49,47 +40,6 @@ function Glass({
         <GlassBackdrop />
         {children}
       </View>
-    </View>
-  );
-}
-
-/** "Carte" / "Liste": the floating pill that switches the way services are shown. */
-export function ViewToggle({
-  showing,
-  onToggle,
-  bottom,
-}: {
-  showing: "list" | "map";
-  onToggle: () => void;
-  bottom: number;
-}) {
-  const { theme } = useTheme();
-  const { t } = useTranslation();
-  const { color, space, radius, textStyle, touchTarget } = theme;
-  const toMap = showing === "list";
-  return (
-    <View pointerEvents="box-none" style={[styles.centered, { bottom }]}>
-      <Glass radius={radius.full}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={toMap ? t("nearMe.viewMapLabel") : t("nearMe.viewListLabel")}
-          onPress={onToggle}
-          style={({ pressed }) => [
-            styles.row,
-            {
-              minHeight: touchTarget.min,
-              gap: space.sm,
-              paddingHorizontal: space.xl,
-              opacity: pressed ? theme.opacity.cardPressed : 1,
-            },
-          ]}
-        >
-          <Icon icon={toMap ? MapTrifold : ListBullets} weight="duotone" color={color.textBrand} />
-          <Text style={[textStyle.label, { color: color.textPrimary }]}>
-            {toMap ? t("nearMe.viewMap") : t("nearMe.viewList")}
-          </Text>
-        </Pressable>
-      </Glass>
     </View>
   );
 }
@@ -158,104 +108,6 @@ export function MapNotice({
         >
           <Text style={[textStyle.label, { color: color.textBrand }]}>{action}</Text>
         </Pressable>
-      </View>
-    </Glass>
-  );
-}
-
-/** The chosen service over the map: what it is, how far, its page and the way there. */
-export function ServicePreview({
-  service,
-  meters,
-  onOpen,
-  onClose,
-  bottom,
-}: {
-  service: PublicService;
-  meters: number | null;
-  onOpen: (id: string) => void;
-  onClose: () => void;
-  bottom: number;
-}) {
-  const { theme } = useTheme();
-  const { t } = useTranslation();
-  const { color, space, radius, textStyle, touchTarget } = theme;
-  const kind = t(`nearMe.category.${service.category}`);
-  const distance =
-    meters === null ? null : t("nearMe.distance", { distance: formatDistance(meters) });
-  return (
-    <Glass radius={radius.lg} style={[styles.anchor, { bottom, left: space.lg, right: space.lg }]}>
-      <View style={{ padding: space.md, gap: space.md }} testID="service-preview">
-        <View style={[styles.row, { gap: space.md }]}>
-          <ServiceBadge category={service.category} />
-          <View style={styles.flex}>
-            <Text
-              accessibilityRole="header"
-              numberOfLines={2}
-              style={[
-                textStyle.body,
-                { color: color.textPrimary, fontFamily: textStyle.subtitle.fontFamily },
-              ]}
-            >
-              {service.name}
-            </Text>
-            <Text style={[textStyle.bodySmall, { color: color.textSecondary }]}>
-              {[kind, distance].filter(Boolean).join(" · ")}
-            </Text>
-          </View>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t("nearMe.closePreview")}
-            onPress={onClose}
-            style={[styles.square, { width: touchTarget.min, height: touchTarget.min }]}
-          >
-            <Icon icon={X} color={color.textSecondary} />
-          </Pressable>
-        </View>
-        <View style={[styles.row, { gap: space.sm }]}>
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => {
-              onOpen(service.id);
-            }}
-            style={({ pressed }) => [
-              styles.action,
-              {
-                minHeight: touchTarget.min,
-                gap: space.sm,
-                borderRadius: radius.md,
-                backgroundColor: color.primary,
-                opacity: pressed ? theme.opacity.cardPressed : 1,
-              },
-            ]}
-          >
-            <Text style={[textStyle.label, { color: color.onPrimary }]}>
-              {t("nearMe.openService")}
-            </Text>
-            <Icon icon={ArrowRight} size="sm" color={color.onPrimary} />
-          </Pressable>
-          <Pressable
-            accessibilityRole="link"
-            onPress={() =>
-              void Linking.openURL(directionsUrl(service.location, service.name, Platform.OS))
-            }
-            style={({ pressed }) => [
-              styles.action,
-              {
-                minHeight: touchTarget.min,
-                borderRadius: radius.md,
-                borderColor: color.borderStrong,
-                borderWidth: StyleSheet.hairlineWidth,
-                backgroundColor: color.background,
-                opacity: pressed ? theme.opacity.cardPressed : 1,
-              },
-            ]}
-          >
-            <Text style={[textStyle.label, { color: color.textBrand }]}>
-              {t("nearMe.directions")}
-            </Text>
-          </Pressable>
-        </View>
       </View>
     </Glass>
   );
