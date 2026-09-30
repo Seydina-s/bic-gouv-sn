@@ -17,8 +17,9 @@ import {
   type ArticleRepository,
   type ProcedureRepository,
 } from "@bgs/content-store";
-import { FileAdminAccountStore, type AdminAccountStore } from "./admin/account-store";
-import { FileAuditJournal, type AuditJournal } from "./admin/audit-journal";
+import type { AdminAccountStore } from "./admin/account-store";
+import { adminStores } from "./admin/admin-stores";
+import type { AuditJournal } from "./admin/audit-journal";
 import { SecretBox } from "./admin/secret-box";
 import { AdminSignIn } from "./admin/sign-in-service";
 import { AccountAdmin } from "./admin/account-admin";
@@ -129,12 +130,15 @@ function connectRedis(url: string): Redis {
   return new Redis(url, { commandTimeout: 2000, maxRetriesPerRequest: 2, connectTimeout: 5000 });
 }
 
-function defaultAdmin(config: Config, state: KeyValueStore): AdminServices | null {
+function defaultAdmin(
+  config: Config,
+  state: KeyValueStore,
+  database: Database | null,
+): AdminServices | null {
   if (config.ADMIN_SECRET_KEY === undefined) {
     return null;
   }
-  const journal = new FileAuditJournal(config.ADMIN_AUDIT_PATH);
-  const accounts = new FileAdminAccountStore(config.ADMIN_ACCOUNTS_PATH);
+  const { journal, accounts } = adminStores(config, database);
   return {
     journal,
     accounts,
@@ -158,12 +162,12 @@ export async function buildApp({
   remoteConfig = new FileRemoteConfigStore(config.REMOTE_CONFIG_PATH),
   redis = config.REDIS_URL === undefined ? null : connectRedis(config.REDIS_URL),
   sharedState = redis === null ? new MemoryKeyValueStore() : new RedisKeyValueStore(redis),
-  admin = defaultAdmin(config, sharedState),
+  database = null,
+  admin = defaultAdmin(config, sharedState, database),
   logStream,
   errorJournal = null,
   searchMisses = null,
   usageStats = null,
-  database = null,
   pushSubscriptions = database === null
     ? new FilePushSubscriptionStore(config.PUSH_SUBSCRIPTIONS_PATH)
     : new PostgresPushSubscriptionStore(database),

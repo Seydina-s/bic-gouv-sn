@@ -14,6 +14,7 @@ Aucune protection n'est absolue. L'objectif réaliste est double :
 | `ADMIN_SECRET_KEY` | Chiffre les secrets du second code des comptes de la console | Développement : `apps/api/.env.local`. Production : coffre de secrets |
 | `ADMIN_SECRET_KEYS_PREVIOUS` | Anciennes clés, gardées seulement pendant un changement de clé | Même endroit, puis supprimées |
 | `SENTRY_AUTH_TOKEN` | Envoi des cartes de débogage à Sentry | Secrets GitHub et EAS, jamais sur une machine |
+| `DATABASE_URL`, `REDIS_URL` | Accès à la base PostgreSQL (comptes de l'équipe, journal d'audit, notifications…) et à Redis (sessions) : ils contiennent un mot de passe | Coffre de secrets, jamais ailleurs |
 | Mots de passe de la console | Connexion de l'équipe | Nulle part : seule une empreinte (scrypt) est gardée |
 
 ## Les protections en place
@@ -45,7 +46,7 @@ Aucune protection n'est absolue. L'objectif réaliste est double :
 ### Changer la clé en production
 
 1. Créer la nouvelle clé dans le coffre de secrets. Le serveur reçoit la nouvelle clé dans `ADMIN_SECRET_KEY` et l'ancienne dans `ADMIN_SECRET_KEYS_PREVIOUS`.
-2. Redémarrer l'API, puis lancer `pnpm --filter @bgs/api admin:reseal` avec ces mêmes variables.
+2. Redémarrer l'API, puis lancer `pnpm --filter @bgs/api admin:reseal` avec ces mêmes variables et `DATABASE_URL` : la commande rechiffre les comptes là où l'API les garde.
 3. Si la commande ne signale aucun secret illisible, retirer l'ancienne clé du coffre et redémarrer.
 
 ### Si une clé a été exposée

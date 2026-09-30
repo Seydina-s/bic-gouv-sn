@@ -2,7 +2,7 @@ import packageJson from "../package.json" with { type: "json" };
 import { FileArticleRepository } from "@bgs/content-store";
 import { buildApp } from "./app";
 import { loadConfig } from "./config";
-import { connectPostgres, type Database, migrate } from "./database/database";
+import { openDatabase } from "./database/database";
 import { ErrorJournal } from "./journal/error-journal";
 import { FileErrorJournalStore, PostgresErrorJournalStore } from "./journal/error-journal-store";
 import { FileSearchMissStore, PostgresSearchMissStore } from "./journal/search-miss-store";
@@ -13,15 +13,6 @@ import { FileUsageStore, PostgresUsageStore } from "./usage/usage-store";
 const config = loadConfig(process.env);
 /** The error journal is written at most this often, never on a request's path. */
 const JOURNAL_FLUSH_MS = 30_000;
-/** PostgreSQL when configured (SCALE-02), its schema brought up to date first. */
-async function openDatabase(url: string | undefined): Promise<Database | null> {
-  if (url === undefined) {
-    return null;
-  }
-  const database = connectPostgres(url);
-  await migrate(database);
-  return database;
-}
 const database = await openDatabase(config.DATABASE_URL);
 const errorJournal = new ErrorJournal(
   database === null

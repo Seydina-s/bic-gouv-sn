@@ -83,3 +83,18 @@ export async function migrate(database: Database): Promise<string[]> {
     return applied;
   });
 }
+
+/** PostgreSQL when a URL is set (SCALE-02), its schema brought up to date first. */
+export async function openDatabase(url: string | undefined): Promise<Database | null> {
+  if (url === undefined) {
+    return null;
+  }
+  const database = connectPostgres(url);
+  try {
+    await migrate(database);
+  } catch (error) {
+    await database.close();
+    throw error;
+  }
+  return database;
+}
