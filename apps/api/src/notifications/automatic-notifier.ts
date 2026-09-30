@@ -148,7 +148,7 @@ export class AutomaticNotifier {
     await this.options.store.update((all) => ({
       next: all.map((item) =>
         item.id === notification.id
-          ? { ...item, delivery: { outcome, at: this.now().toISOString() } }
+          ? { ...item, delivery: { ...outcome, at: this.now().toISOString() } }
           : item,
       ),
       result: null,
@@ -158,7 +158,12 @@ export class AutomaticNotifier {
       actor: AUTOMATIC_SENDER.id,
       action: "notification.automatic.sent",
       target: notification.id,
-      details: { articleId: article.id, title: notification.title, delivery: outcome },
+      details: {
+        articleId: article.id,
+        title: notification.title,
+        delivery: outcome.outcome,
+        ...(outcome.outcome === "sent" ? { recipients: outcome.recipients } : {}),
+      },
     });
     return true;
   }

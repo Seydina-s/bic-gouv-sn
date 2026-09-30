@@ -21,6 +21,8 @@ export const notificationDeliverySchema = z.object({
    */
   outcome: z.enum(["sent", "not-sent", "failed"]),
   at: isoDateTimeSchema,
+  /** Phones it was handed over for (sent only; absent before 30/09/2026). */
+  recipients: z.int().nonnegative().optional(),
 });
 
 /** "console": two people; "automatic": a new article, sent on its own. */

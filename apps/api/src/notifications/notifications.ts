@@ -15,15 +15,21 @@ import { type PushMessage, pushMessageFor } from "./push-message";
  * behind an interface). None is set up while the app cannot receive notifications
  * yet (it needs a test build): approving then records, and says nothing was sent.
  */
+/** What became of a notification handed to the push service. */
+export type PushResult = { outcome: "sent"; recipients: number } | { outcome: "not-sent" };
+
 export interface PushProvider {
   readonly ready: boolean;
-  send(message: PushMessage): Promise<"sent" | "not-sent">;
+  send(message: PushMessage): Promise<PushResult>;
 }
 
 export const noPushProvider: PushProvider = {
   ready: false,
-  send: () => Promise.resolve("not-sent"),
+  send: () => Promise.resolve({ outcome: "not-sent" }),
 };
+
+/** Where a delivery stands, as kept with the notification. */
+export type Delivery = { outcome: "failed" } | PushResult;
 
 /** A rule of the two-person workflow was not met; the code explains it in the console. */
 export class NotificationRuleError extends Error {
@@ -65,13 +71,13 @@ export async function deliver(
     mediaBaseUrl,
   }: Pick<NotificationServices, "articles" | "push" | "mediaBaseUrl">,
   articleId: string,
-): Promise<"sent" | "not-sent" | "failed"> {
+): Promise<Delivery> {
   const article = await articles.get(articleId);
   const message = article === null ? null : pushMessageFor(article, mediaBaseUrl);
   if (message === null) {
-    return "failed";
+    return { outcome: "failed" };
   }
-  return push.send(message).catch(() => "failed" as const);
+  return push.send(message).catch((): Delivery => ({ outcome: "failed" }));
 }
 
 export class NotificationService {
@@ -136,11 +142,14 @@ export class NotificationService {
     const outcome = await deliver(this.services, approved.articleId);
     const delivered = await this.store.update((all) => {
       const next = all.map((item) =>
-        item.id === id ? { ...item, delivery: { outcome, at: this.now().toISOString() } } : item,
+        item.id === id ? { ...item, delivery: { ...outcome, at: this.now().toISOString() } } : item,
       );
       return { next, result: next.find((item) => item.id === id) ?? approved };
     });
-    await this.record(person, "notification.approved", delivered, { delivery: outcome });
+    await this.record(person, "notification.approved", delivered, {
+      delivery: outcome.outcome,
+      ...(outcome.outcome === "sent" ? { recipients: outcome.recipients } : {}),
+    });
     return delivered;
   }
 
@@ -181,7 +190,7 @@ export class NotificationService {
     person: Person,
     action: string,
     notification: Notification,
-    extra: Record<string, string> = {},
+    extra: Record<string, string | number> = {},
   ) {
     await this.journal.append({
       at: this.now().toISOString(),
