@@ -3,3 +3,9 @@ declare module "*.ttf" {
   const asset: number;
   export default asset;
 }
+
+// Images bundled by Metro (map markers, with their @2x and @3x): an asset id too.
+declare module "*.png" {
+  const asset: number;
+  export default asset;
+}

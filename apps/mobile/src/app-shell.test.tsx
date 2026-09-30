@@ -772,8 +772,16 @@ describe("app shell", () => {
       screen.getByRole("link", { name: "Données © les contributeurs d'OpenStreetMap" }),
     ).toBeOnTheScreen();
     const points = screen.getByTestId("service-points");
-    const drawn = points.props as { data: { features: unknown[] } };
+    const drawn = points.props as {
+      data: { features: { properties: { category: string } }[] };
+    };
     expect(drawn.data.features).toHaveLength(3);
+    // Each point carries its kind, drawn with that kind's marker (tone and icon).
+    const images = String(screen.getByTestId("map-images").props["accessibilityHint"]);
+    for (const feature of drawn.data.features) {
+      expect(images.split(",")).toContain(feature.properties.category);
+    }
+    expect(images).toBe("administration,gendarmerie,mairie,ministere,police,prefecture,tribunal");
 
     await fireEvent.press(
       points,

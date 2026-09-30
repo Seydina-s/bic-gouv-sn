@@ -18,7 +18,7 @@ export function servicePoints(services: readonly PublicService[]): ServicePoints
     features: services.map((service) => ({
       type: "Feature",
       geometry: { type: "Point", coordinates: [service.location.lng, service.location.lat] },
-      properties: { id: service.id, name: service.name },
+      properties: { id: service.id, name: service.name, category: service.category },
     })),
   };
 }
