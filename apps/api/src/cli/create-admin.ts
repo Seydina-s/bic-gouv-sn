@@ -6,11 +6,16 @@
 import { randomUUID } from "node:crypto";
 import { createInterface } from "node:readline/promises";
 import { parseArgs } from "node:util";
-import { hashPassword, isRole, passwordProblem, PASSWORD_MIN_LENGTH } from "@bgs/admin-auth";
+import {
+  hashPassword,
+  isRole,
+  passwordProblem,
+  PASSWORD_MIN_LENGTH,
+  type Role,
+} from "@bgs/admin-auth";
 import { z } from "zod";
 import { loadConfig } from "../config";
-import { FileAdminAccountStore } from "../admin/account-store";
-import { FileAuditJournal } from "../admin/audit-journal";
+import { type AdminStores, adminStoresForCommand } from "../admin/admin-stores";
 
 /** Reads one line without echoing it (the terminal shows nothing while typing). */
 function readHidden(prompt: string): Promise<string> {
@@ -80,20 +85,32 @@ function parseCommandLine() {
 
 async function main(): Promise<void> {
   const { values } = parseCommandLine();
-  const email = z.email().safeParse(values.email?.trim().toLowerCase());
-  if (!email.success || values.name === undefined || !isRole(values.role)) {
+  const address = z.email().safeParse(values.email?.trim().toLowerCase());
+  if (!address.success || values.name === undefined || !isRole(values.role)) {
     throw new Error(USAGE);
   }
-  const config = loadConfig(process.env);
-  const accounts = new FileAdminAccountStore(config.ADMIN_ACCOUNTS_PATH);
-  if ((await accounts.findByEmail(email.data)) !== null) {
-    throw new Error(`Un compte existe déjà pour ${email.data}.`);
+  const stores = await adminStoresForCommand(loadConfig(process.env));
+  try {
+    await createAccount(stores, address.data, values.name, values.role);
+  } finally {
+    await stores.close();
+  }
+}
+
+async function createAccount(
+  { accounts, journal }: AdminStores,
+  email: string,
+  name: string,
+  role: Role,
+): Promise<void> {
+  if ((await accounts.findByEmail(email)) !== null) {
+    throw new Error(`Un compte existe déjà pour ${email}.`);
   }
   // A typo in the address makes the account unreachable (ERREURS.md, 26/09/2026):
   // the address is shown and typed a second time before anything is saved.
-  process.stdout.write(`Adresse du compte : ${email.data}\n`);
+  process.stdout.write(`Adresse du compte : ${email}\n`);
   const again = (await readVisible("Retapez cette adresse pour confirmer : ")).trim().toLowerCase();
-  if (again !== email.data) {
+  if (again !== email) {
     throw new Error(
       "Les deux adresses sont différentes : rien n'a été créé. Relancez la commande.",
     );
@@ -113,9 +130,9 @@ async function main(): Promise<void> {
   const id = randomUUID();
   await accounts.save({
     id,
-    email: email.data,
-    name: values.name,
-    role: values.role,
+    email: email,
+    name,
+    role,
     passwordHash: await hashPassword(password),
     activation: null,
     totp: { sealedSecret: null, enrolledAt: null, lastStep: null },
@@ -123,15 +140,15 @@ async function main(): Promise<void> {
     disabled: false,
     createdAt: new Date().toISOString(),
   });
-  await new FileAuditJournal(config.ADMIN_AUDIT_PATH).append({
+  await journal.append({
     at: new Date().toISOString(),
     actor: "system:command-line",
     action: "account.created",
     target: id,
-    details: { role: values.role },
+    details: { role },
   });
   process.stdout.write(
-    `Compte créé pour ${email.data} (${values.role}). Le second code s'active à la première connexion.\n`,
+    `Compte créé pour ${email} (${role}). Le second code s'active à la première connexion.\n`,
   );
 }
 

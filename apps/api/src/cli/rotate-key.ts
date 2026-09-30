@@ -9,8 +9,7 @@ import { chmod, readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { writeFileDurably } from "@bgs/content-store";
 import { loadConfig } from "../config";
-import { FileAdminAccountStore } from "../admin/account-store";
-import { FileAuditJournal } from "../admin/audit-journal";
+import { type AdminStores, adminStoresForCommand } from "../admin/admin-stores";
 import { newSecretKey, resealAll, withEnvValue, type ResealReport } from "../admin/key-rotation";
 import { SecretBox } from "../admin/secret-box";
 
@@ -23,8 +22,8 @@ async function writeEnv(text: string): Promise<void> {
   await chmod(ENV_FILE, 0o600).catch(() => undefined);
 }
 
-async function journal(path: string, action: string, box: SecretBox, report: ResealReport) {
-  await new FileAuditJournal(path).append({
+async function journal(stores: AdminStores, action: string, box: SecretBox, report: ResealReport) {
+  await stores.journal.append({
     at: new Date().toISOString(),
     actor: "system:command-line",
     action,
@@ -72,13 +71,18 @@ async function rotateLocal(): Promise<void> {
   text = withEnvValue(text, "ADMIN_SECRET_KEYS_PREVIOUS", previous.join(","));
   await writeEnv(text);
   const box = new SecretBox(key, previous);
-  const report = await resealAll(new FileAdminAccountStore(config.ADMIN_ACCOUNTS_PATH), box);
-  if (report.unreadable === 0) {
-    await writeEnv(withEnvValue(text, "ADMIN_SECRET_KEYS_PREVIOUS", null));
-    say("Ancienne clé retirée : elle ne sert plus à rien.");
+  const stores = await adminStoresForCommand(config);
+  try {
+    const report = await resealAll(stores.accounts, box);
+    if (report.unreadable === 0) {
+      await writeEnv(withEnvValue(text, "ADMIN_SECRET_KEYS_PREVIOUS", null));
+      say("Ancienne clé retirée : elle ne sert plus à rien.");
+    }
+    await journal(stores, "secret-key.rotated", box, report);
+    explain(box, report);
+  } finally {
+    await stores.close();
   }
-  await journal(config.ADMIN_AUDIT_PATH, "secret-key.rotated", box, report);
-  explain(box, report);
   say("Redémarrez l'API pour qu'elle utilise la nouvelle clé.");
 }
 
@@ -88,11 +92,16 @@ async function resealWithGivenKeys(): Promise<void> {
     throw new Error("Aucune clé ADMIN_SECRET_KEY : rien à rechiffrer.");
   }
   const box = new SecretBox(config.ADMIN_SECRET_KEY, config.ADMIN_SECRET_KEYS_PREVIOUS);
-  const report = await resealAll(new FileAdminAccountStore(config.ADMIN_ACCOUNTS_PATH), box);
-  await journal(config.ADMIN_AUDIT_PATH, "secrets.resealed", box, report);
-  explain(box, report);
-  if (report.unreadable === 0) {
-    say("Vous pouvez retirer l'ancienne clé (ADMIN_SECRET_KEYS_PREVIOUS) du coffre de secrets.");
+  const stores = await adminStoresForCommand(config);
+  try {
+    const report = await resealAll(stores.accounts, box);
+    await journal(stores, "secrets.resealed", box, report);
+    explain(box, report);
+    if (report.unreadable === 0) {
+      say("Vous pouvez retirer l'ancienne clé (ADMIN_SECRET_KEYS_PREVIOUS) du coffre de secrets.");
+    }
+  } finally {
+    await stores.close();
   }
 }
 

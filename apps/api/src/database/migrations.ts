@@ -68,4 +68,32 @@ export const MIGRATIONS: readonly { id: string; statements: readonly string[] }[
     id: "005-notifications",
     statements: ["CREATE TABLE notifications (id text PRIMARY KEY, data jsonb NOT NULL)"],
   },
+  {
+    // The team's accounts (validated whole by the API: sealed second-factor
+    // secrets, password fingerprints), and the append-only, chained audit journal.
+    id: "006-admin",
+    statements: [
+      `CREATE TABLE admin_accounts (
+        position bigserial,
+        id text PRIMARY KEY,
+        email text NOT NULL UNIQUE,
+        data jsonb NOT NULL
+      )`,
+      `CREATE TABLE audit_journal (
+        position bigserial PRIMARY KEY,
+        entry jsonb NOT NULL
+      )`,
+      // "Journal d'audit immuable" (CLAUDE.md §1): the database refuses any change
+      // or deletion, whoever asks, the API included.
+      `CREATE FUNCTION audit_journal_is_append_only() RETURNS trigger
+        LANGUAGE plpgsql AS $body$
+        BEGIN
+          RAISE EXCEPTION 'the audit journal is append-only';
+        END
+        $body$`,
+      `CREATE TRIGGER audit_journal_append_only
+        BEFORE UPDATE OR DELETE OR TRUNCATE ON audit_journal
+        FOR EACH STATEMENT EXECUTE FUNCTION audit_journal_is_append_only()`,
+    ],
+  },
 ];

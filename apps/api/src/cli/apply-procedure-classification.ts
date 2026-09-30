@@ -5,7 +5,7 @@
 import { readFile } from "node:fs/promises";
 import { FileProcedureThemeStore } from "@bgs/content-store";
 import { z } from "zod";
-import { FileAuditJournal } from "../admin/audit-journal";
+import { adminStoresForCommand } from "../admin/admin-stores";
 import { loadConfig } from "../config";
 
 /** Who the classification is attributed to, in the store and the audit journal. */
@@ -31,7 +31,6 @@ async function main(): Promise<void> {
   );
   const classification = classificationSchema.parse(raw);
   const store = new FileProcedureThemeStore(config.PROCEDURE_THEMES_PATH);
-  const journal = new FileAuditJournal(config.ADMIN_AUDIT_PATH);
   const now = new Date().toISOString();
 
   await store.savePlatformThemes(
@@ -48,14 +47,19 @@ async function main(): Promise<void> {
     const themeId = classification.assignments[slug] ?? "";
     perTheme.set(themeId, [...(perTheme.get(themeId) ?? []), slug]);
   }
-  for (const [themeId, slugs] of perTheme) {
-    await journal.append({
-      at: now,
-      actor: DELEGATED_REVIEWER,
-      action: "procedure.theme.validated",
-      target: themeId,
-      details: { count: slugs.length, source: "data/procedure-classification.json" },
-    });
+  const stores = await adminStoresForCommand(config);
+  try {
+    for (const [themeId, slugs] of perTheme) {
+      await stores.journal.append({
+        at: now,
+        actor: DELEGATED_REVIEWER,
+        action: "procedure.theme.validated",
+        target: themeId,
+        details: { count: slugs.length, source: "data/procedure-classification.json" },
+      });
+    }
+  } finally {
+    await stores.close();
   }
   process.stdout.write(
     `${String(applied.length)} démarches classées, ${String(keptPersonal.length)} classements faits par une personne conservés.\n`,
