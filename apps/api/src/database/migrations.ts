@@ -96,4 +96,15 @@ export const MIGRATIONS: readonly { id: string; statements: readonly string[] }[
         FOR EACH STATEMENT EXECUTE FUNCTION audit_journal_is_append_only()`,
     ],
   },
+  {
+    // Every section by default (decision of 30/09/2026): no list of sections.
+    id: "007-push-every-section",
+    statements: ["ALTER TABLE push_subscriptions ALTER COLUMN topics DROP NOT NULL"],
+  },
+  {
+    // Settings the console changes for every instance (the pause of the automatic
+    // notifications), validated by the API when read.
+    id: "008-settings",
+    statements: ["CREATE TABLE settings (key text PRIMARY KEY, value jsonb NOT NULL)"],
+  },
 ];

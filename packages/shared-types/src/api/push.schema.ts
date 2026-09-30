@@ -22,14 +22,27 @@ export type QuietHours = z.infer<typeof quietHoursSchema>;
 
 export const pushSubscriptionSchema = z.strictObject({
   token: expoPushTokenSchema,
-  /** Sections followed; empty: nothing is sent (the subscription is then removed). */
-  topics: z.array(slugSchema).max(30),
+  /**
+   * Sections followed. Null: every section (the default, decision of 30/09/2026);
+   * empty: nothing is sent (the subscription is then removed).
+   */
+  topics: z.array(slugSchema).max(30).nullable(),
   quietHours: quietHoursSchema.nullable(),
   lang: langSchema,
 });
 export type PushSubscription = z.infer<typeof pushSubscriptionSchema>;
 
 export const pushUnsubscribeSchema = z.strictObject({ token: expoPushTokenSchema });
+
+/** True when the subscription follows this section (null: every section). */
+export function followsSection(subscription: PushSubscription, category: string): boolean {
+  return subscription.topics === null || subscription.topics.includes(category);
+}
+
+/** True when the subscription follows no section any more: it is then removed. */
+export function followsNothing(subscription: PushSubscription): boolean {
+  return subscription.topics !== null && subscription.topics.length === 0;
+}
 
 /** True when `hour` (0–23, Dakar time) falls in the quiet hours. */
 export function isQuietHour(quiet: QuietHours | null, hour: number): boolean {

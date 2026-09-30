@@ -53,6 +53,8 @@ import {
   FileNotificationStore,
   PostgresNotificationStore,
 } from "./notifications/notification-store";
+import { AutomaticNotifier } from "./notifications/automatic-notifier";
+import { FileSettingStore, PostgresSettingStore } from "./admin/setting-store";
 import { adminServicesRoutes } from "./routes/admin-services";
 import { adminRemoteConfigRoutes, remoteConfigRoutes } from "./routes/remote-config";
 import { type ErrorJournal, journalErrors } from "./journal/error-journal";
@@ -109,6 +111,8 @@ export interface AppOptions {
   database?: Database | null;
   /** Sections each phone follows (FEED-04); defaults from database. */
   pushSubscriptions?: PushSubscriptionStore;
+  /** New articles looked for this often (PUSH-03); null: not at all (tests). */
+  automaticNotificationsEveryMs?: number | null;
 }
 
 export interface AdminServices {
@@ -172,6 +176,7 @@ export async function buildApp({
     ? new FilePushSubscriptionStore(config.PUSH_SUBSCRIPTIONS_PATH)
     : new PostgresPushSubscriptionStore(database),
   pushProvider = defaultPushProvider(config, pushSubscriptions),
+  automaticNotificationsEveryMs = null,
 }: AppOptions): Promise<FastifyInstance> {
   const app = Fastify({
     logger: {
@@ -281,6 +286,34 @@ export async function buildApp({
     await registerMedia(app, config.MEDIA_ROOT);
   }
   if (admin !== null) {
+    const notificationServices = {
+      // One store for both: the file store serializes its writers itself.
+      store:
+        database === null
+          ? new FileNotificationStore(config.NOTIFICATIONS_PATH)
+          : new PostgresNotificationStore(database),
+      articles,
+      push: pushProvider,
+      journal: admin.journal,
+      mediaBaseUrl: config.MEDIA_BASE_URL,
+    };
+    const automatic = new AutomaticNotifier({
+      ...notificationServices,
+      settings:
+        database === null
+          ? new FileSettingStore(config.SETTINGS_PATH)
+          : new PostgresSettingStore(database),
+      perHour: config.AUTO_NOTIFICATIONS_PER_HOUR,
+    });
+    if (automaticNotificationsEveryMs !== null) {
+      app.addHook("onReady", () => {
+        automatic.start(automaticNotificationsEveryMs, (error) => {
+          app.log.error({ err: error }, "Automatic notifications failed");
+        });
+        return Promise.resolve();
+      });
+      app.addHook("onClose", () => automatic.close());
+    }
     await app.register(adminAuthRoutes, { prefix: "/admin/v1", signIn: admin.signIn });
     await app.register(adminProcedureThemesRoutes, {
       prefix: "/admin/v1",
@@ -313,14 +346,8 @@ export async function buildApp({
     await app.register(adminNotificationsRoutes, {
       prefix: "/admin/v1",
       signIn: admin.signIn,
-      notifications: new NotificationService(
-        database === null
-          ? new FileNotificationStore(config.NOTIFICATIONS_PATH)
-          : new PostgresNotificationStore(database),
-        articles,
-        pushProvider,
-        admin.journal,
-      ),
+      notifications: new NotificationService(notificationServices),
+      automatic,
     });
     if (usageStats !== null) {
       await app.register(adminUsageRoutes, {

@@ -1,6 +1,11 @@
 import { readFile } from "node:fs/promises";
 import { writeFileDurably } from "@bgs/content-store";
-import { pushSubscriptionSchema, type PushSubscription } from "@bgs/shared-types";
+import {
+  followsNothing,
+  followsSection,
+  pushSubscriptionSchema,
+  type PushSubscription,
+} from "@bgs/shared-types";
 import { z } from "zod";
 import type { Queryable } from "../database/database";
 
@@ -42,13 +47,13 @@ export class FilePushSubscriptionStore implements PushSubscriptionStore {
   }
 
   async following(topic: string): Promise<PushSubscription[]> {
-    return (await this.list()).filter((subscription) => subscription.topics.includes(topic));
+    return (await this.list()).filter((subscription) => followsSection(subscription, topic));
   }
 
   save(subscription: PushSubscription): Promise<void> {
     return this.change((all) => {
       const others = all.filter((item) => item.token !== subscription.token);
-      return subscription.topics.length === 0 ? others : [...others, subscription];
+      return followsNothing(subscription) ? others : [...others, subscription];
     });
   }
 
@@ -69,7 +74,7 @@ export class FilePushSubscriptionStore implements PushSubscriptionStore {
 
 const rowSchema = z.object({
   token: z.string(),
-  topics: z.array(z.string()),
+  topics: z.array(z.string()).nullable(),
   quiet_hours: z.unknown(),
   lang: z.string(),
 });
@@ -94,16 +99,16 @@ export class PostgresPushSubscriptionStore implements PushSubscriptionStore {
   }
 
   async following(topic: string): Promise<PushSubscription[]> {
-    // "@>" (contains) is what the index on the sections answers.
+    // Null: every section. "@>" (contains) is what the index on the sections answers.
     const { rows } = await this.database.query(
-      `${SELECT} WHERE topics @> ARRAY[$1]::text[] ORDER BY token`,
+      `${SELECT} WHERE topics IS NULL OR topics @> ARRAY[$1]::text[] ORDER BY token`,
       [topic],
     );
     return PostgresPushSubscriptionStore.parse(rows);
   }
 
   async save(subscription: PushSubscription): Promise<void> {
-    if (subscription.topics.length === 0) {
+    if (followsNothing(subscription)) {
       await this.remove([subscription.token]);
       return;
     }

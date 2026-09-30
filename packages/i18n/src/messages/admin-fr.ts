@@ -418,7 +418,18 @@ export const adminFr = {
   notifications: {
     title: "Notifications",
     intro:
-      "Une notification annonce un article officiel, avec son propre titre : rien n'est rédigé à la main. Une personne la prépare, une autre la vérifie et l'envoie : un envoi national demande toujours deux personnes.",
+      "Une notification annonce un article officiel, avec son titre et ses premiers mots : rien n'est rédigé à la main. Chaque nouvel article est annoncé tout seul aux personnes qui ont accepté les notifications. Pour un envoi exceptionnel, une personne prépare la notification et une autre la vérifie : un envoi préparé à la main demande toujours deux personnes.",
+    automaticTitle: "Envoi automatique",
+    automaticOn:
+      "Actif : chaque nouvel article est annoncé dès sa publication, {perHour} au plus par heure, jamais pendant les heures calmes que chacun a choisies.",
+    automaticPaused:
+      "En pause depuis le {day} à {time} ({name}). Les articles publiés pendant la pause ne seront pas annoncés plus tard.",
+    pause: "Mettre en pause",
+    resume: "Reprendre l'envoi automatique",
+    resumeAdminsOnly: "Seul un administrateur peut reprendre l'envoi automatique.",
+    pausedDone: "Envoi automatique mis en pause.",
+    resumedDone: "Envoi automatique repris.",
+    automaticSentAt: "Envoi automatique le {day} à {time}",
     notYet:
       "Aucun envoi réel pour l'instant : l'app ne peut pas encore recevoir de notifications (il faut d'abord la version de test). Les notifications validées sont enregistrées et le seront toujours dans l'historique.",
     prepareTitle: "Préparer une notification",

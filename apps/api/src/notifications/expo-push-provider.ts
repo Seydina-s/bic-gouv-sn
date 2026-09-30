@@ -1,7 +1,8 @@
 import { createTranslator, fr } from "@bgs/i18n";
 import { withTimeout } from "@bgs/resilience";
-import { isQuietHour, type Notification, type PushSubscription } from "@bgs/shared-types";
+import { followsSection, isQuietHour, type PushSubscription } from "@bgs/shared-types";
 import type { PushProvider } from "./notifications";
+import { type PushMessage, versionFor } from "./push-message";
 import type { PushSubscriptionStore } from "./push-subscriptions";
 
 /** Expo's push service (free): it relays to Apple and Google. */
@@ -33,8 +34,28 @@ export function recipients(
 ): PushSubscription[] {
   return subscriptions.filter(
     (subscription) =>
-      subscription.topics.includes(category) && !isQuietHour(subscription.quietHours, hour),
+      followsSection(subscription, category) && !isQuietHour(subscription.quietHours, hour),
   );
+}
+
+/** One phone's message: the title, the first words, the source, and the cover. */
+function expoMessage(
+  token: string,
+  message: PushMessage,
+  version: { title: string; excerpt: string },
+) {
+  const source = t("content.sourceAttribution", { source: "presidence.sn" });
+  return {
+    to: token,
+    title: version.title,
+    body: version.excerpt === "" ? source : `${version.excerpt}\n${source}`,
+    data: { articleId: message.articleId },
+    sound: "default",
+    // Android shows the image as is; iOS needs the app's notification extension.
+    ...(message.imageUrl === null
+      ? {}
+      : { richContent: { image: message.imageUrl }, mutableContent: true }),
+  };
 }
 
 /**
@@ -53,20 +74,17 @@ export class ExpoPushProvider implements PushProvider {
     this.now = options.now ?? Date.now;
   }
 
-  async send(notification: Notification): Promise<"sent"> {
+  async send(message: PushMessage): Promise<"sent"> {
     const hour = new Date(this.now()).getUTCHours(); // Dakar is on UTC all year.
     const targets = recipients(
-      await this.options.subscriptions.following(notification.category),
-      notification.category,
+      await this.options.subscriptions.following(message.category),
+      message.category,
       hour,
     );
-    const messages = targets.map((subscription) => ({
-      to: subscription.token,
-      title: notification.title,
-      body: t("content.sourceAttribution", { source: "presidence.sn" }),
-      data: { articleId: notification.articleId },
-      sound: "default",
-    }));
+    const messages = targets.flatMap((subscription) => {
+      const version = versionFor(message, subscription.lang);
+      return version === undefined ? [] : [expoMessage(subscription.token, message, version)];
+    });
     let delivered = 0;
     const gone: string[] = [];
     for (let start = 0; start < messages.length; start += CHUNK) {

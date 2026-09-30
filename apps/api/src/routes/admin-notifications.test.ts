@@ -6,13 +6,13 @@ import {
   notificationSchema,
   notificationsResponseSchema,
   type NewsArticle,
-  type Notification,
 } from "@bgs/shared-types";
 import type { FastifyInstance } from "fastify";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { buildApp } from "../app";
 import { loadConfig } from "../config";
 import type { PushProvider } from "../notifications/notifications";
+import type { PushMessage } from "../notifications/push-message";
 import { adminForTests } from "../testing/admin-session";
 import { temporaryStore } from "../testing/store";
 
@@ -47,7 +47,7 @@ const article: NewsArticle = {
 let dir: string;
 let app: FastifyInstance;
 let admin: Awaited<ReturnType<typeof adminForTests>>;
-let sent: Notification[];
+let sent: PushMessage[];
 
 async function start(pushProvider?: PushProvider) {
   const articles = temporaryStore();
@@ -56,6 +56,7 @@ async function start(pushProvider?: PushProvider) {
     config: loadConfig({
       LOG_LEVEL: "silent",
       NOTIFICATIONS_PATH: join(dir, "notifications.json"),
+      SETTINGS_PATH: join(dir, "settings.json"),
     }),
     version: "1.0.0",
     articles,
@@ -75,7 +76,7 @@ afterEach(async () => {
   await rm(dir, { recursive: true, force: true });
 });
 
-const call = (token: string, method: "GET" | "POST", url: string, payload?: object) =>
+const call = (token: string, method: "GET" | "POST" | "PUT", url: string, payload?: object) =>
   app.inject({
     method,
     url: `/admin/v1${url}`,
@@ -112,8 +113,8 @@ describe("notifications, two people", () => {
   it("is sent once a second person approves, and journaled at each step", async () => {
     await start({
       ready: true,
-      send: (notification) => {
-        sent.push(notification);
+      send: (message) => {
+        sent.push(message);
         return Promise.resolve("sent");
       },
     });
@@ -123,7 +124,7 @@ describe("notifications, two people", () => {
       (await call(second, "POST", `/notifications/${prepared.id}/approve`)).json(),
     );
     expect(approved).toMatchObject({ status: "approved", delivery: { outcome: "sent" } });
-    expect(sent.map((item) => item.id)).toEqual([prepared.id]);
+    expect(sent.map((item) => item.articleId)).toEqual([prepared.articleId]);
     const again = await call(second, "POST", `/notifications/${prepared.id}/cancel`);
     expect(apiErrorSchema.parse(again.json()).code).toBe("NOTIFICATION_NOT_PENDING");
     const actions = (await admin.journal.entries()).map((entry) => entry.action);
@@ -224,5 +225,27 @@ describe("notifications, two people", () => {
     const prepared = await prepare(author);
     const cancelled = await call(author, "POST", `/notifications/${prepared.id}/cancel`);
     expect(notificationSchema.parse(cancelled.json()).status).toBe("cancelled");
+  });
+
+  it("lets any editor pause the automatic notifications, only an administrator resume", async () => {
+    await start();
+    const editor = await admin.tokenFor("editor");
+    const listed = notificationsResponseSchema.parse(
+      (await call(editor, "GET", "/notifications")).json(),
+    );
+    expect(listed.automatic).toMatchObject({ paused: false, perHour: 10, changedBy: null });
+    const paused = await call(editor, "PUT", "/notifications/automatic", { paused: true });
+    expect(paused.statusCode).toBe(200);
+    expect(paused.json()).toMatchObject({ paused: true, changedBy: { name: "editor" } });
+    const resumedByEditor = await call(editor, "PUT", "/notifications/automatic", {
+      paused: false,
+    });
+    expect(resumedByEditor.statusCode).toBe(403);
+    const boss = await admin.tokenFor("admin");
+    const resumed = await call(boss, "PUT", "/notifications/automatic", { paused: false });
+    expect(resumed.json()).toMatchObject({ paused: false, changedBy: { name: "admin" } });
+    const reviewer = await admin.tokenFor("reviewer");
+    const refused = await call(reviewer, "PUT", "/notifications/automatic", { paused: true });
+    expect(refused.statusCode).toBe(403);
   });
 });

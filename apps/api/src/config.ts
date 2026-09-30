@@ -151,6 +151,14 @@ const envSchema = z.object({
     .min(1)
     .default(".data/admin/accounts.json")
     .transform((path) => resolveDataPath(path)),
+  /** Settings changed in the console (the pause of the automatic notifications). */
+  SETTINGS_PATH: z
+    .string()
+    .min(1)
+    .default(".data/admin/settings.json")
+    .transform((path) => resolveDataPath(path)),
+  /** Automatic notifications of new articles per hour at most: beyond, not announced. */
+  AUTO_NOTIFICATIONS_PER_HOUR: z.coerce.number().int().positive().default(10),
   /** Notifications prepared and decided in the console (two-person rule). */
   NOTIFICATIONS_PATH: z
     .string()
