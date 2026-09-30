@@ -12,7 +12,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.seydinas.bicgouvsn",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "LSApplicationQueriesSchemes": ["comgooglemaps"]
       }
     },
     "android": {

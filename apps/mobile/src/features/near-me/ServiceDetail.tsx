@@ -11,7 +11,7 @@ import { Icon } from "../../components/Icon";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 import { formatPublishedOn } from "../news/format";
-import { directionsUrl } from "./directions";
+import { openDirections } from "./directions";
 import { describeHours, type HoursWords } from "./opening-hours";
 import { ServiceBadge } from "./ServiceParts";
 
@@ -138,7 +138,11 @@ export function ServiceCard({ service }: { service: PublicService }) {
 
       <Pressable
         accessibilityRole="link"
-        onPress={open(directionsUrl(service.location, service.name, Platform.OS))}
+        onPress={() => {
+          openDirections(service.location, service.name, Platform.OS, Linking).catch(
+            () => undefined,
+          );
+        }}
         style={({ pressed }) => [
           styles.button,
           {

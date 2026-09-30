@@ -1,5 +1,5 @@
 import { STATE_SERVICES } from "../../testing/service-fixtures";
-import { directionsUrl } from "./directions";
+import { type LinkOpener, openDirections } from "./directions";
 import { formatDistance, matchingPlaces, nearestServices } from "./nearby";
 
 const TOWN = { lat: 14.7, lng: -17.4 };
@@ -43,15 +43,22 @@ describe("services near a point", () => {
     expect(matchingPlaces(places, "  ")).toEqual([]);
   });
 
-  it("opens the phone's own navigation app towards the service", () => {
-    expect(directionsUrl(TOWN, "Mairie de test", "android")).toBe(
-      "geo:14.7,-17.4?q=14.7,-17.4(Mairie%20de%20test)",
-    );
-    expect(directionsUrl(TOWN, "Mairie", "ios")).toBe(
-      "https://maps.apple.com/?daddr=14.7,-17.4&q=Mairie",
-    );
-    expect(directionsUrl(TOWN, "Mairie", "web")).toBe(
-      "https://www.openstreetmap.org/directions?to=14.7,-17.4",
-    );
+  it("draws the route in Google Maps when it is on the phone, Apple Plans otherwise", async () => {
+    const opened: string[] = [];
+    const phone = (installed: boolean): LinkOpener => ({
+      canOpenURL: (url) => Promise.resolve(installed && url === "comgooglemaps://"),
+      openURL: (url) => {
+        opened.push(url);
+        return Promise.resolve(true);
+      },
+    });
+    await openDirections(TOWN, "Mairie de test", "android", phone(true));
+    await openDirections(TOWN, "Mairie de test", "ios", phone(true));
+    await openDirections(TOWN, "Mairie de test", "ios", phone(false));
+    expect(opened).toEqual([
+      "https://www.google.com/maps/dir/?api=1&destination=14.7,-17.4",
+      "comgooglemaps://?daddr=14.7,-17.4",
+      "https://maps.apple.com/?daddr=14.7,-17.4&q=Mairie%20de%20test",
+    ]);
   });
 });
