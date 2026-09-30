@@ -73,6 +73,8 @@ export interface UsageStats {
   invitationDue: boolean;
   /** Yes turns the statistics on at once; either answer closes the invitation for good. */
   answerInvitation: (accepted: boolean) => void;
+  /** An article was read in this session (other invitations wait for it too). */
+  hasRead: boolean;
 }
 
 const UsageStatsContext = createContext<UsageStats | null>(null);
@@ -158,6 +160,7 @@ export function UsageStatsProvider({ children }: { children: ReactNode }) {
       answerInvitation: (accepted: boolean) => {
         setConsent(accepted ? "on" : "off");
       },
+      hasRead,
     }),
     [consent, setConsent, record, invited, hasRead],
   );

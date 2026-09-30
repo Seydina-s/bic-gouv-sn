@@ -8,6 +8,8 @@ import { StyleSheet, View } from "react-native";
 import { QueryProvider } from "../data/QueryProvider";
 import { DataSaverProvider } from "../features/data-saver/DataSaverProvider";
 import { UsageStatsProvider } from "../features/usage-stats/UsageStatsProvider";
+import { NotificationsProvider } from "../features/notifications/NotificationsProvider";
+import { useNotificationTaps } from "../features/notifications/useNotificationTaps";
 import { UpdateGate } from "../features/remote-config/FeatureGate";
 import { SettingsProvider } from "../features/shell/SettingsProvider";
 import { FavoritesProvider } from "../features/favorites/FavoritesProvider";
@@ -36,6 +38,7 @@ function ThemedStack() {
   const onboarding = useOnboardingDone();
   const ready = fontsReady && onboarding.done !== null;
   useDocumentLanguage();
+  useNotificationTaps();
 
   // Root background behind every screen: no white flash in dark mode.
   useEffect(() => {
@@ -79,11 +82,13 @@ function RootLayout() {
           <FavoritesProvider>
             <DataSaverProvider>
               <UsageStatsProvider>
-                <SettingsProvider>
-                  <UpdateGate>
-                    <ThemedStack />
-                  </UpdateGate>
-                </SettingsProvider>
+                <NotificationsProvider>
+                  <SettingsProvider>
+                    <UpdateGate>
+                      <ThemedStack />
+                    </UpdateGate>
+                  </SettingsProvider>
+                </NotificationsProvider>
               </UsageStatsProvider>
             </DataSaverProvider>
           </FavoritesProvider>

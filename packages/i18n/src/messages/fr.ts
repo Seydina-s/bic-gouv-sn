@@ -268,6 +268,21 @@ export const fr = {
     usageStatsOnSpoken: "Oui, envoyer des statistiques anonymes",
     usageStatsHelp:
       "Aidez-nous à améliorer l'application\u00a0: elle compte combien de personnes l'utilisent et quels articles sont lus, sans jamais savoir qui vous êtes. Aucun identifiant, aucune position.",
+    notifications: "Notifications",
+    notificationsOff: "Non",
+    notificationsOn: "Nouveaux articles",
+    notificationsOnSpoken: "Recevoir une notification pour chaque nouvel article",
+    notificationsHelp:
+      "Une notification pour chaque article officiel publié, avec sa photo et ses premiers mots.",
+    quietHours: "Heures calmes, de 22\u00a0h à 7\u00a0h",
+    quietOn: "Oui",
+    quietOnSpoken: "Oui, aucune notification entre 22\u00a0h et 7\u00a0h",
+    quietOff: "Non",
+    quietHelp:
+      "Pendant les heures calmes, rien ne sonne\u00a0: l'article vous attend dans l'application.",
+    notificationsBlocked:
+      "Les notifications sont bloquées pour Bic Gouv SN dans les réglages du téléphone.",
+    openPhoneSettings: "Ouvrir les réglages du téléphone",
     about: "À propos",
     aboutNews:
       "Bic Gouv SN réunit en un seul endroit l'actualité officielle du Gouvernement du Sénégal. Comptes rendus du Conseil des ministres, communiqués, discours, audiences et visites officielles arrivent dans l'application dès leur publication sur presidence.sn, en français et en wolof.",
@@ -289,6 +304,17 @@ export const fr = {
     intro: "Ces {count} logiciels libres font fonctionner l'application. Merci à leurs auteurs.",
     openHint: "Affiche le copyright et le texte de la licence",
     projectSite: "Site du projet",
+  },
+  notificationsInvite: {
+    title: "Être prévenu des nouveaux articles\u00a0?",
+    body: "Dès qu'un article officiel paraît, une notification vous l'annonce, avec sa photo et ses premiers mots.",
+    note: "Rien la nuit, entre 22\u00a0h et 7\u00a0h. Vous pourrez tout changer dans les Réglages.",
+    accept: "Oui, me prévenir",
+    decline: "Non merci",
+  },
+  notifications: {
+    /** Name of the Android channel, shown in the phone's settings. */
+    channel: "Nouveaux articles",
   },
   usageInvite: {
     title: "Aider à améliorer l'application\u00a0?",

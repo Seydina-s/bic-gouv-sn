@@ -61,7 +61,7 @@ describe("sending a notification through Expo", () => {
     expect(requests[1]?.map((message) => message.to).sort()).toEqual([token(1), token(3)]);
     expect(requests[1]?.[0]).toMatchObject({
       title: "Titre officiel de test",
-      body: "Source : presidence.sn",
+      body: "Source\u00a0: presidence.sn",
     });
   });
 
