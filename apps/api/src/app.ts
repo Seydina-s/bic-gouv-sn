@@ -25,6 +25,7 @@ import { AccountAdmin } from "./admin/account-admin";
 import { ExpoPushProvider } from "./notifications/expo-push-provider";
 import {
   FilePushSubscriptionStore,
+  PostgresPushSubscriptionStore,
   type PushSubscriptionStore,
 } from "./notifications/push-subscriptions";
 import { pushSubscriptionRoutes } from "./routes/push-subscriptions";
@@ -46,6 +47,11 @@ import { adminNewsRoutes } from "./routes/admin-news";
 import { adminNotificationsRoutes } from "./routes/admin-notifications";
 import { adminAccountsRoutes } from "./routes/admin-accounts";
 import { adminSearchMissesRoutes } from "./routes/admin-search-misses";
+import type { Database } from "./database/database";
+import {
+  FileNotificationStore,
+  PostgresNotificationStore,
+} from "./notifications/notification-store";
 import { adminServicesRoutes } from "./routes/admin-services";
 import { adminRemoteConfigRoutes, remoteConfigRoutes } from "./routes/remote-config";
 import { type ErrorJournal, journalErrors } from "./journal/error-journal";
@@ -53,7 +59,6 @@ import type { SearchMisses } from "./journal/search-misses";
 import { adminUsageRoutes, usageSignalsRoutes } from "./routes/usage";
 import type { UsageStats } from "./usage/usage-stats";
 import {
-  FileNotificationStore,
   NotificationService,
   noPushProvider,
   type PushProvider,
@@ -99,7 +104,9 @@ export interface AppOptions {
   redis?: Redis | null;
   /** Sessions, sign-in steps, idempotency keys (SCALE-01); defaults from redis. */
   sharedState?: KeyValueStore;
-  /** Sections each phone follows (FEED-04); defaults to the file store. */
+  /** PostgreSQL shared by the instances (DATABASE_URL, SCALE-02); none: files. */
+  database?: Database | null;
+  /** Sections each phone follows (FEED-04); defaults from database. */
   pushSubscriptions?: PushSubscriptionStore;
 }
 
@@ -156,7 +163,10 @@ export async function buildApp({
   errorJournal = null,
   searchMisses = null,
   usageStats = null,
-  pushSubscriptions = new FilePushSubscriptionStore(config.PUSH_SUBSCRIPTIONS_PATH),
+  database = null,
+  pushSubscriptions = database === null
+    ? new FilePushSubscriptionStore(config.PUSH_SUBSCRIPTIONS_PATH)
+    : new PostgresPushSubscriptionStore(database),
   pushProvider = defaultPushProvider(config, pushSubscriptions),
 }: AppOptions): Promise<FastifyInstance> {
   const app = Fastify({
@@ -300,7 +310,9 @@ export async function buildApp({
       prefix: "/admin/v1",
       signIn: admin.signIn,
       notifications: new NotificationService(
-        new FileNotificationStore(config.NOTIFICATIONS_PATH),
+        database === null
+          ? new FileNotificationStore(config.NOTIFICATIONS_PATH)
+          : new PostgresNotificationStore(database),
         articles,
         pushProvider,
         admin.journal,
