@@ -56,7 +56,7 @@ export class ExpoPushProvider implements PushProvider {
   async send(notification: Notification): Promise<"sent"> {
     const hour = new Date(this.now()).getUTCHours(); // Dakar is on UTC all year.
     const targets = recipients(
-      await this.options.subscriptions.list(),
+      await this.options.subscriptions.following(notification.category),
       notification.category,
       hour,
     );

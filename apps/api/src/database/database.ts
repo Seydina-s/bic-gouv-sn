@@ -74,7 +74,9 @@ export async function migrate(database: Database): Promise<string[]> {
     const done = new Set(rows.map((row) => (row as { id: string }).id));
     const applied: string[] = [];
     for (const migration of MIGRATIONS.filter(({ id }) => !done.has(id))) {
-      await tx.query(migration.sql);
+      for (const statement of migration.statements) {
+        await tx.query(statement);
+      }
       await tx.query("INSERT INTO schema_migrations (id) VALUES ($1)", [migration.id]);
       applied.push(migration.id);
     }

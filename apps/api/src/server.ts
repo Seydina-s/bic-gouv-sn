@@ -7,6 +7,7 @@ import { ErrorJournal } from "./journal/error-journal";
 import { FileErrorJournalStore, PostgresErrorJournalStore } from "./journal/error-journal-store";
 import { FileSearchMissStore, PostgresSearchMissStore } from "./journal/search-miss-store";
 import { SearchMisses } from "./journal/search-misses";
+import { PostgresPushSubscriptionStore } from "./notifications/push-subscriptions";
 import { UsageStats } from "./usage/usage-stats";
 import { FileUsageStore, PostgresUsageStore } from "./usage/usage-store";
 
@@ -45,6 +46,7 @@ const app = await buildApp({
   errorJournal,
   searchMisses,
   usageStats,
+  ...(database === null ? {} : { pushSubscriptions: new PostgresPushSubscriptionStore(database) }),
 });
 database?.onConnectionError((error) => {
   app.log.warn({ err: error }, "A database connection was lost");
