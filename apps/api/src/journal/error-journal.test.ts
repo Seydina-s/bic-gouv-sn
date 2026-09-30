@@ -8,6 +8,7 @@ import { loadConfig } from "../config";
 import { adminForTests } from "../testing/admin-session";
 import { temporaryStore } from "../testing/store";
 import { ErrorJournal, errorCodeOf, UNKNOWN_ROUTE } from "./error-journal";
+import { FileErrorJournalStore } from "./error-journal-store";
 
 let dir: string;
 let app: FastifyInstance | null = null;
@@ -25,11 +26,11 @@ afterEach(async () => {
 describe("error journal", () => {
   it("groups identical errors by code and place, latest first, and keeps them", async () => {
     const path = join(dir, "error-journal.json");
-    const journal = await ErrorJournal.open(path);
+    const journal = new ErrorJournal(new FileErrorJournalStore(path));
     journal.record("NEWS_NOT_FOUND", "GET /v1/news/:id", "r1", new Date("2026-09-28T01:00:00Z"));
     journal.record("INTERNAL_ERROR", "GET /v1/services", "r2", new Date("2026-09-28T01:05:00Z"));
     journal.record("NEWS_NOT_FOUND", "GET /v1/news/:id", "r3", new Date("2026-09-28T01:10:00Z"));
-    expect(journal.entries()).toEqual([
+    expect(await journal.entries()).toEqual([
       {
         code: "NEWS_NOT_FOUND",
         where: "GET /v1/news/:id",
@@ -41,14 +42,14 @@ describe("error journal", () => {
       expect.objectContaining({ code: "INTERNAL_ERROR", count: 1 }),
     ]);
     await journal.close();
-    const reopened = await ErrorJournal.open(path);
-    expect(reopened.entries()).toEqual(journal.entries());
+    const reopened = new ErrorJournal(new FileErrorJournalStore(path));
+    expect(await reopened.entries()).toEqual(await journal.entries());
     expect(JSON.parse(await readFile(path, "utf8"))).toMatchObject({ schemaVersion: 1 });
   });
 
   it("starts empty from a damaged file, and reads only our JSON error bodies", async () => {
-    const journal = await ErrorJournal.open(join(dir, "absent.json"));
-    expect(journal.entries()).toEqual([]);
+    const journal = new ErrorJournal(new FileErrorJournalStore(join(dir, "absent.json")));
+    expect(await journal.entries()).toEqual([]);
     expect(errorCodeOf('{"code":"RATE_LIMITED","message":"x"}')).toBe("RATE_LIMITED");
     expect(errorCodeOf("<html>")).toBeNull();
     expect(errorCodeOf('{"code":12}')).toBeNull();
@@ -57,7 +58,7 @@ describe("error journal", () => {
 
   it("records what the API answers, for the console only, without addresses", async () => {
     const admin = await adminForTests();
-    const journal = await ErrorJournal.open(join(dir, "error-journal.json"));
+    const journal = new ErrorJournal(new FileErrorJournalStore(join(dir, "error-journal.json")));
     app = await buildApp({
       config: loadConfig({ LOG_LEVEL: "silent" }),
       version: "1.0.0",
