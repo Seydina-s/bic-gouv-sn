@@ -12,14 +12,18 @@ import { AppState } from "react-native";
 import { createPushClient } from "../../api/push-client";
 import { usePersistentChoice } from "../../data/usePersistentChoice";
 import { useTranslation } from "../../i18n/useTranslation";
+import { SECTION_FILTERS } from "../news/category";
 import { useUsageStats } from "../usage-stats/UsageStatsProvider";
 import {
   isInvitationDue,
   NOTIFICATION_CHOICES,
   QUIET_CHOICES,
   subscriptionFor,
+  topicsFromText,
+  topicsToText,
   type NotificationChoice,
   type QuietChoice,
+  type Topics,
 } from "./notification-preferences";
 import { askPermission, permission, pushSupported, pushToken } from "./push-registration";
 
@@ -30,6 +34,8 @@ const INVITED_SLOT = "bgs-notifications-invited";
 const INVITED: readonly ("no" | "yes")[] = ["no", "yes"];
 /** The token last given to the API, to stop notifications when turned off. */
 const TOKEN_SLOT = "bgs-push-token";
+/** The sections followed: "all" or a list. */
+const TOPICS_SLOT = "bgs-notifications-topics";
 
 const client = createPushClient({ baseUrl: process.env.EXPO_PUBLIC_API_URL ?? "" });
 
@@ -41,6 +47,9 @@ export interface NotificationsState {
   setChoice: (next: NotificationChoice) => void;
   quiet: QuietChoice;
   setQuiet: (next: QuietChoice) => void;
+  /** Null: every section. */
+  topics: Topics;
+  setTopics: (next: Topics) => void;
   /** Turned on in the app, but refused in the phone's settings. */
   blocked: boolean;
   invitationDue: boolean;
@@ -52,7 +61,12 @@ export interface NotificationsState {
 const NotificationsContext = createContext<NotificationsState | null>(null);
 
 /** Tells the API what this phone wants; a failure is tried again at the next opening. */
-async function synchronize(choice: NotificationChoice, quiet: QuietChoice, lang: "fr" | "wo") {
+async function synchronize(
+  choice: NotificationChoice,
+  quiet: QuietChoice,
+  lang: "fr" | "wo",
+  topics: Topics,
+) {
   if (choice === "off") {
     const saved = await AsyncStorage.getItem(TOKEN_SLOT);
     if (saved !== null) {
@@ -66,7 +80,7 @@ async function synchronize(choice: NotificationChoice, quiet: QuietChoice, lang:
   }
   const token = await pushToken();
   if (token !== null) {
-    await client.subscribe(subscriptionFor(token, quiet, lang));
+    await client.subscribe(subscriptionFor(token, quiet, lang, topics));
     await AsyncStorage.setItem(TOKEN_SLOT, token);
   }
 }
@@ -84,6 +98,19 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   const [quiet, setQuiet] = usePersistentChoice(QUIET_SLOT, QUIET_CHOICES, "on");
   const [invited, markInvited] = usePersistentChoice(INVITED_SLOT, INVITED, "no");
   const [blocked, setBlocked] = useState(false);
+  const [topics, chooseTopics] = useState<Topics>(null);
+  useEffect(() => {
+    AsyncStorage.getItem(TOPICS_SLOT).then(
+      (saved) => {
+        chooseTopics(topicsFromText(saved, SECTION_FILTERS));
+      },
+      () => undefined,
+    );
+  }, []);
+  const setTopics = useCallback((next: Topics) => {
+    chooseTopics(next);
+    AsyncStorage.setItem(TOPICS_SLOT, topicsToText(next)).catch(() => undefined);
+  }, []);
   const [answeredThisSession, setAnsweredThisSession] = useState(false);
   const supported = pushSupported();
 
@@ -99,7 +126,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
           setBlocked(choice === "on" && state === "denied");
         })
         .catch(() => undefined);
-      synchronize(choice, quiet, lang).catch(() => undefined);
+      synchronize(choice, quiet, lang, topics).catch(() => undefined);
     };
     refresh();
     const subscription = AppState.addEventListener("change", (state) => {
@@ -110,7 +137,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     return () => {
       subscription.remove();
     };
-  }, [supported, choice, quiet, lang]);
+  }, [supported, choice, quiet, lang, topics]);
 
   const setChoice = useCallback(
     (next: NotificationChoice) => {
@@ -136,6 +163,8 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
       setChoice,
       quiet,
       setQuiet,
+      topics,
+      setTopics,
       blocked,
       invitationDue: isInvitationDue({ supported, invited: invited === "yes", choice, hasRead }),
       answerInvitation: (accepted: boolean) => {
@@ -144,7 +173,19 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
       },
       answeredThisSession,
     }),
-    [supported, choice, setChoice, quiet, setQuiet, blocked, invited, hasRead, answeredThisSession],
+    [
+      supported,
+      choice,
+      setChoice,
+      quiet,
+      setQuiet,
+      topics,
+      setTopics,
+      blocked,
+      invited,
+      hasRead,
+      answeredThisSession,
+    ],
   );
   return <NotificationsContext.Provider value={value}>{children}</NotificationsContext.Provider>;
 }

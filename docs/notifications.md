@@ -33,7 +33,7 @@ Pour annoncer de nouveau un article, une personne prépare la notification dans 
 ## Dans l'application
 
 - **Demande** : après la lecture d'un premier article, une carte propose « Être prévenu des nouveaux articles ? », avec deux réponses de même poids. « Oui » déclenche la question du téléphone, puis l'activation. Une seule invitation par session : celle des statistiques anonymes vient une autre fois.
-- **Réglages** : Notifications (Non / Nouveaux articles) et Heures calmes (activées par défaut, de 22 h à 7 h). Si les notifications sont bloquées dans les réglages du téléphone, un lien y mène.
+- **Réglages** : Notifications (Non / Nouveaux articles), Heures calmes (activées par défaut, de 22 h à 7 h) et Rubriques (toutes par défaut ; toucher une rubrique ne garde qu'elle, on peut en ajouter ; retirer la dernière ramène à toutes). Si les notifications sont bloquées dans les réglages du téléphone, un lien y mène.
 - **Toucher** une notification ouvre l'article. Reçue pendant que l'app est ouverte, elle s'affiche en bannière, sans son.
 - Seul le jeton de notification du téléphone est envoyé, avec la langue et les heures calmes : rien sur la personne.
 
