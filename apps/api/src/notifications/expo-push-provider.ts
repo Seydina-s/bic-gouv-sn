@@ -1,7 +1,7 @@
 import { createTranslator, fr } from "@bgs/i18n";
 import { retry, sleep, withTimeout } from "@bgs/resilience";
 import { followsSection, isQuietHour, type PushSubscription } from "@bgs/shared-types";
-import type { PushProvider } from "./notifications";
+import type { PushProvider, PushResult } from "./notifications";
 import { type PushMessage, versionFor } from "./push-message";
 import type { PushSubscriptionStore } from "./push-subscriptions";
 
@@ -85,7 +85,7 @@ export class ExpoPushProvider implements PushProvider {
     this.now = options.now ?? Date.now;
   }
 
-  async send(message: PushMessage): Promise<"sent"> {
+  async send(message: PushMessage): Promise<PushResult> {
     const hour = new Date(this.now()).getUTCHours(); // Dakar is on UTC all year.
     const targets = recipients(
       await this.options.subscriptions.following(message.category),
@@ -122,7 +122,7 @@ export class ExpoPushProvider implements PushProvider {
     if (messages.length > 0 && delivered === 0) {
       throw new Error("Expo push service unreachable");
     }
-    return "sent";
+    return { outcome: "sent", recipients: messages.length };
   }
 
   /** Tries again, later and later, only when Expo said "too fast". */

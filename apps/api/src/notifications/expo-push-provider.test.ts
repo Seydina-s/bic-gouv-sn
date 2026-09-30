@@ -57,7 +57,7 @@ describe("sending a notification through Expo", () => {
     // At 23 h, only the phone without quiet hours; never the one following another section.
     expect(requests.flat().map((message) => message.to)).toEqual([token(3)]);
     const atNoon = new ExpoPushProvider({ subscriptions: store, fetchImpl, now: () => NOON });
-    await atNoon.send(NOTIFICATION);
+    expect(await atNoon.send(NOTIFICATION)).toEqual({ outcome: "sent", recipients: 2 });
     expect(requests[1]?.map((message) => message.to).sort()).toEqual([token(1), token(3)]);
     expect(requests[1]?.[0]).toMatchObject({
       title: "Titre officiel de test",
@@ -135,7 +135,7 @@ describe("sending a notification through Expo", () => {
       now: () => NOON,
       retryBaseDelayMs: 1,
     });
-    await expect(provider.send(NOTIFICATION)).resolves.toBe("sent");
+    await expect(provider.send(NOTIFICATION)).resolves.toEqual({ outcome: "sent", recipients: 1 });
     expect(seen).toEqual([429, 200]);
     // A server error is not retried: Expo may have sent part of it already.
     answers.push(500);

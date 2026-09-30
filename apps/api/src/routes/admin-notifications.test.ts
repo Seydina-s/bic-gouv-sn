@@ -115,7 +115,7 @@ describe("notifications, two people", () => {
       ready: true,
       send: (message) => {
         sent.push(message);
-        return Promise.resolve("sent");
+        return Promise.resolve({ outcome: "sent" as const, recipients: 1 });
       },
     });
     const prepared = await prepare(await admin.tokenFor("editor"));
@@ -123,7 +123,10 @@ describe("notifications, two people", () => {
     const approved = notificationSchema.parse(
       (await call(second, "POST", `/notifications/${prepared.id}/approve`)).json(),
     );
-    expect(approved).toMatchObject({ status: "approved", delivery: { outcome: "sent" } });
+    expect(approved).toMatchObject({
+      status: "approved",
+      delivery: { outcome: "sent", recipients: 1 },
+    });
     expect(sent.map((item) => item.articleId)).toEqual([prepared.articleId]);
     const again = await call(second, "POST", `/notifications/${prepared.id}/cancel`);
     expect(apiErrorSchema.parse(again.json()).code).toBe("NOTIFICATION_NOT_PENDING");

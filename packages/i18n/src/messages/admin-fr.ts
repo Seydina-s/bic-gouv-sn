@@ -446,6 +446,11 @@ export const adminFr = {
     approvedWord: "Validée",
     cancelledWord: "Annulée",
     sent: "Envoyée",
+    sentTo: {
+      one: "Envoyée\u00a0: {count} téléphone prévenu",
+      other: "Envoyée\u00a0: {count} téléphones prévenus",
+    },
+    sentToNobody: "Envoyée, mais aucun téléphone n'est encore abonné aux notifications",
     notSent: "Non envoyée : l'app ne reçoit pas encore de notifications",
     failedSending:
       "Échec de l'envoi : le service de notifications n'a pas répondu. Préparez-la de nouveau si elle reste utile.",

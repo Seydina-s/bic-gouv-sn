@@ -95,7 +95,7 @@ const push: PushProvider = {
   },
   send: (message) => {
     sent.push(message);
-    return Promise.resolve("sent");
+    return Promise.resolve({ outcome: "sent" as const, recipients: 1 });
   },
 };
 
@@ -126,7 +126,7 @@ describe("the automatic notification of new articles (PUSH-03)", () => {
       origin: "automatic",
       status: "approved",
       preparedBy: AUTOMATIC_SENDER,
-      delivery: { outcome: "sent" },
+      delivery: { outcome: "sent", recipients: 1 },
     });
     const actions = (await shared.journal.entries()).map((entry) => entry.action);
     expect(actions).toEqual(["notification.automatic.sent"]);

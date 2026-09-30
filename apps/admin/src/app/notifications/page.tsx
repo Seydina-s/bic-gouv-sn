@@ -20,6 +20,16 @@ const DELIVERY_WORDING = {
   failed: "notifications.failedSending",
 } as const;
 
+/** What became of it, with the number of phones told when known. */
+function deliveryLine(delivery: NonNullable<Notification["delivery"]>): string {
+  if (delivery.outcome === "sent" && delivery.recipients !== undefined) {
+    return delivery.recipients === 0
+      ? t("notifications.sentToNobody")
+      : t("notifications.sentTo", { count: delivery.recipients });
+  }
+  return t(DELIVERY_WORDING[delivery.outcome]);
+}
+
 function when(iso: string) {
   const at = new Date(iso);
   return { day: formatDay(at), time: formatClockTime(at) };
@@ -185,9 +195,7 @@ export default async function NotificationsPage() {
                     ),
                 )}
                 {notification.delivery !== null && (
-                  <p className="text-sm font-semibold">
-                    {t(DELIVERY_WORDING[notification.delivery.outcome])}
-                  </p>
+                  <p className="text-sm font-semibold">{deliveryLine(notification.delivery)}</p>
                 )}
               </li>
             ))}
