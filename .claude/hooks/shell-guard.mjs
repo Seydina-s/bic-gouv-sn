@@ -56,7 +56,9 @@ const SECRET_ACCESS = [
   /(^|[\s"'=/\\])\.env(\.(?!example\b)[\w.-]+)?(?=$|[\s"';|&)])/,
   // Accounts (password hashes, sealed second factors) and key files.
   /\.data[/\\]admin\b/,
-  /\w\.(pem|p12|pfx|key)(?=$|[\s"';|&])/,
+  /\w\.(pem|p12|pfx|key|p8)(?=$|[\s"';|&])/,
+  // Push credentials: the Firebase service account (Android) is a private key.
+  /(service-account|firebase-adminsdk)[\w.-]*\.json/i,
   // The environment printed whole, or a secret variable by name.
   /(^|[;&|]\s*)(printenv|env|set|export\s+-p)\s*($|[;&|])/,
   /\b(Get-ChildItem|gci|dir|ls)\s+env:|\$env:[A-Z_]*(SECRET|TOKEN|KEY|PASSWORD|DSN)/i,

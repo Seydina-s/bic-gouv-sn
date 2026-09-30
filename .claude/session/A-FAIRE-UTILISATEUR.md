@@ -48,3 +48,9 @@ Mise à jour du 30/09/2026 (3 h, mode autonome) : point 19 ajouté.
 | # | Quoi | Pourquoi / effet si ça attend | Réf. backlog |
 |---|---|---|---|
 | 19 | Autoriser le passage à PostgreSQL des **contenus publiés** : articles et démarches (écrits par la collecte), services de la carte, thèmes des démarches et contrôle à distance (écrits dans la console). Même contenu, même historique des versions, autre emplacement ; testé en CI sur un vrai PostgreSQL. | Dernière étape avant de pouvoir ajouter un second serveur d'API. Rien ne presse tant qu'un seul serveur suffit | SCALE-02 |
+
+Mise à jour du 30/09/2026 (4 h, mode autonome) : point 20 ajouté.
+
+| # | Quoi | Pourquoi / effet si ça attend | Réf. backlog |
+|---|---|---|---|
+| 20 | Pour les notifications sur Android : créer un projet **Firebase** (gratuit), me donner le fichier `google-services.json` (public), et envoyer vous-même la clé secrète du compte de service à Expo. Étapes dans `docs/guides/installer-la-version-de-test-iphone.md`, partie « Notifications ». Sur iPhone, rien de plus que le compte Apple : répondre oui aux questions sur les notifications lors de la première compilation. | Sans cela, les notifications ne peuvent pas arriver sur Android | PUSH-04 |

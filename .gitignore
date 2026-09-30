@@ -18,6 +18,9 @@ ios/
 *.jks
 *.keystore
 *.p8
+# Firebase service account (Android push, FCM V1): a private key, never committed.
+*service-account*.json
+*firebase-adminsdk*.json
 *.p12
 *.mobileprovision
 

@@ -15,6 +15,8 @@ Aucune protection n'est absolue. L'objectif réaliste est double :
 | `ADMIN_SECRET_KEYS_PREVIOUS` | Anciennes clés, gardées seulement pendant un changement de clé | Même endroit, puis supprimées |
 | `SENTRY_AUTH_TOKEN` | Envoi des cartes de débogage à Sentry | Secrets GitHub et EAS, jamais sur une machine |
 | `DATABASE_URL`, `REDIS_URL` | Accès à la base PostgreSQL (comptes de l'équipe, journal d'audit, notifications…) et à Redis (sessions) : ils contiennent un mot de passe | Coffre de secrets, jamais ailleurs |
+| Clé de notifications d'Apple (APNs) | Envoi des notifications sur iPhone | Créée et gardée par Expo, jamais sur une machine ni dans le dépôt |
+| Clé du compte de service Firebase | Envoi des notifications sur Android | Envoyée à Expo par l'utilisateur, puis supprimée de son ordinateur ; exclue de git et illisible pour les outils et l'IA |
 | Mots de passe de la console | Connexion de l'équipe | Nulle part : seule une empreinte (scrypt) est gardée |
 
 ## Les protections en place
