@@ -54,3 +54,9 @@ Mise à jour du 30/09/2026 (4 h, mode autonome) : point 20 ajouté.
 | # | Quoi | Pourquoi / effet si ça attend | Réf. backlog |
 |---|---|---|---|
 | 20 | Pour les notifications sur Android : créer un projet **Firebase** (gratuit), me donner le fichier `google-services.json` (public), et envoyer vous-même la clé secrète du compte de service à Expo. Étapes dans `docs/guides/installer-la-version-de-test-iphone.md`, partie « Notifications ». Sur iPhone, rien de plus que le compte Apple : répondre oui aux questions sur les notifications lors de la première compilation. | Sans cela, les notifications ne peuvent pas arriver sur Android | PUSH-04 |
+
+Mise à jour du 30/09/2026 (6 h 15, mode autonome) : point 21 ajouté.
+
+| # | Quoi | Pourquoi / effet si ça attend | Réf. backlog |
+|---|---|---|---|
+| 21 | Choisir comment envoyer les notifications **à l'échelle nationale**. Le service d'Expo, en place, accepte au plus 600 notifications par seconde (limite officielle) : un article met environ 3 minutes à atteindre 100 000 téléphones, mais environ 9 heures pour 20 millions. Recommandation : garder Expo pour le pilote, puis passer aux **sujets Firebase** (un seul envoi par article et par langue, Google se charge de la diffusion, gratuit) avant le lancement national. Le code est prêt à changer de fournisseur (interface commune). | Aucun effet tant que le nombre d'abonnés reste sous quelques centaines de milliers | AUD5-01 |

@@ -37,6 +37,10 @@ Pour annoncer de nouveau un article, une personne prépare la notification dans 
 - **Toucher** une notification ouvre l'article. Reçue pendant que l'app est ouverte, elle s'affiche en bannière, sans son.
 - Seul le jeton de notification du téléphone est envoyé, avec la langue et les heures calmes : rien sur la personne.
 
+## Capacité
+
+Le service d'Expo accepte au plus **600 notifications par seconde** (limite officielle). L'API respecte cette cadence et, si Expo demande de ralentir, réessaie plus tard sans risque de doublon. Un article met donc environ 3 minutes à atteindre 100 000 téléphones, mais environ 9 heures pour 20 millions. Avant le lancement national, l'envoi passera par les **sujets Firebase** (décision attendue, point 21 des actions de l'utilisateur).
+
 ## Photo sur les téléphones
 
 - **Android** affiche la photo directement.
