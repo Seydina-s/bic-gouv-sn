@@ -11,6 +11,8 @@ import { TestBrowser, type Viewport, type Violation } from "./test-browser";
 import { startStack } from "./test-stack";
 
 const SETTLE_MS = Number(process.env["A11Y_SETTLE_MS"] ?? 4000);
+/** Time for a step of the welcome to finish coming in. */
+const STEP_SETTLE_MS = 1500;
 /** A folder to keep a picture of every audited screen (visual check); none by default. */
 const SHOTS_DIR = process.env["A11Y_SHOTS"];
 const PHONE: Viewport = { width: 412, height: 915, mobile: true };
@@ -20,6 +22,13 @@ const NARROW: Viewport = { width: 320, height: 640, mobile: true };
 const SCHEMES = ["light", "dark"] as const;
 /** The interface is French until the Wolof catalog is complete (W-01). */
 const INTERFACE_LANG = "fr";
+/** The title of each step of the welcome, in order (fr catalog). */
+const WELCOME_STEPS = [
+  "Choisissez votre langue",
+  "L'action du gouvernement, chaque jour",
+  "La source, toujours",
+  "Gardez l'essentiel, même sans réseau",
+] as const;
 
 const APP_SCREENS = [
   "/",
@@ -66,24 +75,27 @@ async function reflowScreens(
   const reports: ScreenReport[] = [];
   for (const screen of screens) {
     await browser.open(base + screen, SETTLE_MS);
-    const cut = await browser.overflowingText();
-    reports.push({
-      screen: base + screen,
-      scheme: "narrow",
-      violations:
-        cut.length === 0
-          ? []
-          : [
-              {
-                rule: "reflow-320",
-                impact: "serious",
-                help: "Texte coupé par le bord d'un écran de 320 px (WCAG 1.4.10)",
-                targets: cut,
-              },
-            ],
-    });
+    reports.push(reflowShown(base + screen, await browser.overflowingText()));
   }
   return reports;
+}
+
+function reflowShown(screen: string, cut: readonly string[]): ScreenReport {
+  return {
+    screen,
+    scheme: "narrow",
+    violations:
+      cut.length === 0
+        ? []
+        : [
+            {
+              rule: "reflow-320",
+              impact: "serious",
+              help: "Texte coupé par le bord d'un écran de 320 px (WCAG 1.4.10)",
+              targets: [...cut],
+            },
+          ],
+  };
 }
 
 async function auditScreens(
@@ -96,29 +108,73 @@ async function auditScreens(
   await browser.setScheme(scheme);
   for (const screen of screens) {
     await browser.open(base + screen, SETTLE_MS);
-    // An empty page or a redirect (e.g. to the sign-in) would pass axe unaudited.
-    const { path, characters, lang } = await browser.rendered();
-    if (path !== screen || characters === 0) {
-      throw new Error(
-        `${base}${screen} did not render (at ${path}, ${String(characters)} characters)`,
-      );
-    }
-    const violations = await browser.audit();
-    // axe only checks that a language is declared, not that it is the right one.
-    if (lang !== INTERFACE_LANG) {
-      violations.push({
-        rule: "interface-language",
-        impact: "serious",
-        help: `The page declares "${lang}" but its interface is in "${INTERFACE_LANG}" (WCAG 3.1.1)`,
-        targets: ["html"],
-      });
-    }
-    reports.push({ screen: base + screen, scheme, violations });
-    if (SHOTS_DIR !== undefined) {
-      const name = `${new URL(base).port}${screen.replaceAll("/", "_")}-${scheme}.png`;
-      writeFileSync(join(SHOTS_DIR, name), await browser.screenshot());
-    }
+    reports.push(await auditShown(browser, base, screen, screen, scheme));
   }
+  return reports;
+}
+
+/** Audits what is on screen now, expected at `path`; `name` tells it apart in the report. */
+async function auditShown(
+  browser: TestBrowser,
+  base: string,
+  path: string,
+  name: string,
+  scheme: (typeof SCHEMES)[number],
+): Promise<ScreenReport> {
+  // An empty page or a redirect (e.g. to the sign-in) would pass axe unaudited.
+  const shown = await browser.rendered();
+  if (shown.path !== path || shown.characters === 0) {
+    throw new Error(
+      `${base}${name} did not render (at ${shown.path}, ${String(shown.characters)} characters)`,
+    );
+  }
+  const violations = await browser.audit();
+  // axe only checks that a language is declared, not that it is the right one.
+  if (shown.lang !== INTERFACE_LANG) {
+    violations.push({
+      rule: "interface-language",
+      impact: "serious",
+      help: `The page declares "${shown.lang}" but its interface is in "${INTERFACE_LANG}" (WCAG 3.1.1)`,
+      targets: ["html"],
+    });
+  }
+  if (SHOTS_DIR !== undefined) {
+    const file = `${new URL(base).port}${name.replace(/[^\w-]+/g, "_")}-${scheme}.png`;
+    writeFileSync(join(SHOTS_DIR, file), await browser.screenshot());
+  }
+  return { screen: base + name, scheme, violations };
+}
+
+/**
+ * The welcome, from its first screen (the language) to its last step: each one
+ * audited, then, at 320 px, read for text cut by an edge.
+ */
+async function auditWelcome(
+  browser: TestBrowser,
+  base: string,
+  scheme: (typeof SCHEMES)[number] | "narrow",
+): Promise<ScreenReport[]> {
+  await browser.setScheme(scheme === "narrow" ? "light" : scheme);
+  await browser.open(base, SETTLE_MS);
+  await browser.run('localStorage.removeItem("bgs-onboarding")');
+  await browser.open(base, SETTLE_MS);
+  await browser.waitForText(WELCOME_STEPS[0]);
+  const reports: ScreenReport[] = [];
+  for (const [index, title] of WELCOME_STEPS.entries()) {
+    if (index > 0) {
+      await browser.press("Suivant");
+      await browser.waitForText(title);
+      // Each step comes in with a fade: colours read mid-way would be half-blended.
+      await new Promise((resolve) => setTimeout(resolve, STEP_SETTLE_MS));
+    }
+    const name = `/ (présentation, étape ${String(index + 1)})`;
+    reports.push(
+      scheme === "narrow"
+        ? reflowShown(base + name, await browser.overflowingText())
+        : await auditShown(browser, base, "/", name, scheme),
+    );
+  }
+  await browser.run('localStorage.setItem("bgs-onboarding", "done")');
   return reports;
 }
 
@@ -131,11 +187,8 @@ async function main(): Promise<number> {
     const reports: ScreenReport[] = [];
     await browser.setViewport(PHONE);
     for (const scheme of SCHEMES) {
-      // First visit: the welcome screens; then the app itself.
-      await browser.open(appBase, SETTLE_MS);
-      await browser.run('localStorage.removeItem("bgs-onboarding")');
-      reports.push(...(await auditScreens(browser, appBase, ["/"], scheme)));
-      await browser.run('localStorage.setItem("bgs-onboarding", "done")');
+      // First visit: the welcome, step by step; then the app itself.
+      reports.push(...(await auditWelcome(browser, appBase, scheme)));
       reports.push(...(await auditScreens(browser, appBase, APP_SCREENS, scheme)));
     }
     await browser.setViewport(DESKTOP);
@@ -151,7 +204,7 @@ async function main(): Promise<number> {
     }
     // The narrowest phones: nothing cut by the screen's edges (WCAG 1.4.10).
     await browser.setViewport(NARROW);
-    await browser.setScheme("light");
+    reports.push(...(await auditWelcome(browser, appBase, "narrow")));
     reports.push(...(await reflowScreens(browser, appBase, ["/", ...APP_SCREENS])));
     reports.push(...(await reflowScreens(browser, consoleBase, CONSOLE_SCREENS)));
     return report(reports);
