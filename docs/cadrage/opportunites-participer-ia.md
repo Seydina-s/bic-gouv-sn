@@ -45,8 +45,8 @@ Lecture du fichier `robots.txt`, c'est-à-dire les règles que chaque site fixe 
 | sgee-sn.org, fongip.sn | Aucune restriction ; plan du site public | Collecte possible |
 | fonctionpublique.gouv.sn | Pas de fichier de règles (rien d'interdit) | Collecte possible, structure à étudier |
 | financement.der.sn | Application web (rendu par JavaScript) | Collecte avec le navigateur automatisé, comme e-senegal.sn |
-| marchespublics.sn | Certificat de sécurité émis par une autorité que Windows ne reconnaît pas (chaîne incomplète ou autorité locale) | Bloquant tant que ce n'est pas réglé : à signaler à l'ARMP, ou à résoudre en ajoutant le certificat intermédiaire officiel, sans jamais désactiver la vérification |
-| directiondesbourses.sn | Le certificat ne correspond pas au nom du site | Collecte impossible en sécurité : à signaler au ministère |
+| marchespublics.sn | Le site présente le certificat par défaut de son pare-feu web (FortiWeb), auto-signé : une erreur de configuration chez l'opérateur, qu'un navigateur signale aussi (vérifié le 01/10, 11 h) | Bloquant tant que ce n'est pas corrigé : à signaler à l'ARMP. Jamais de vérification désactivée de notre côté |
+| directiondesbourses.sn | Le site présente le certificat générique de son hébergeur (secureserver.net), pas celui du site (vérifié le 01/10, 11 h) | Collecte impossible en sécurité : à signaler au ministère |
 | emploi-fpublique.sec.gouv.sn | Injoignable depuis ici (délai dépassé) | À revérifier depuis le Sénégal ou l'hébergement |
 | 3fpt.sn | Refuse les accès automatiques (403), même pour lire ses règles | Pas de collecte sans accord du 3FPT : saisie dans la console ou lien |
 
