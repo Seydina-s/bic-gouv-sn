@@ -12,6 +12,8 @@ const PERMISSIONS = {
   "procedures.review": "reviewer",
   /** Validate machine translations. */
   "translations.review": "reviewer",
+  /** Prepare, publish (another person) or withdraw an opportunity. */
+  "opportunities.edit": "editor",
   /** Mark an error of the journal as fixed. */
   "errors.resolve": "editor",
   /** Create and edit the services shown on the map. */

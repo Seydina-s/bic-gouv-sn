@@ -22,6 +22,11 @@ import {
 } from "./procedures.schema";
 import { placeSchema } from "../content/state-service.schema";
 import {
+  opportunitiesResponseSchema,
+  publicOpportunitySchema,
+  type OpportunitiesResponse,
+} from "./opportunities.schema";
+import {
   publicServiceSchema,
   stateServicesResponseSchema,
   type StateServicesResponse,
@@ -161,6 +166,20 @@ export function readStateServices(raw: unknown): StateServicesResponse | null {
     ...raw,
     services: keepValid(raw["services"], publicServiceSchema),
     places: keepValid(raw["places"], placeSchema),
+  });
+  return parsed.success ? parsed.data : null;
+}
+
+/**
+ * Opportunities: one of a kind this version does not know yet, or unreadable, is
+ * left out; the others still show. Null if the answer's shape is broken.
+ */
+export function readOpportunities(raw: unknown): OpportunitiesResponse | null {
+  if (!isRecord(raw) || !Array.isArray(raw["opportunities"])) {
+    return null;
+  }
+  const parsed = opportunitiesResponseSchema.safeParse({
+    opportunities: keepValid(raw["opportunities"], publicOpportunitySchema),
   });
   return parsed.success ? parsed.data : null;
 }

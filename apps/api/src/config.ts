@@ -159,6 +159,12 @@ const envSchema = z.object({
     .transform((path) => resolveDataPath(path)),
   /** Automatic notifications of new articles per hour at most: beyond, not announced. */
   AUTO_NOTIFICATIONS_PER_HOUR: z.coerce.number().int().positive().default(10),
+  /** Opportunities prepared and published in the console (two-person rule). */
+  OPPORTUNITIES_PATH: z
+    .string()
+    .min(1)
+    .default(".data/opportunities.json")
+    .transform((path) => resolveDataPath(path)),
   /** Notifications prepared and decided in the console (two-person rule). */
   NOTIFICATIONS_PATH: z
     .string()

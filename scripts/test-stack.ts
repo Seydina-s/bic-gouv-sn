@@ -46,6 +46,7 @@ function startApi(dataDir: string): ChildProcess {
       ADMIN_ACCOUNTS_PATH: data("admin/accounts.json"),
       ADMIN_AUDIT_PATH: data("admin/audit.jsonl"),
       NOTIFICATIONS_PATH: data("admin/notifications.json"),
+      OPPORTUNITIES_PATH: data("opportunities.json"),
     },
   });
 }

@@ -4,6 +4,7 @@ import {
   type NewsDetail,
   type NewsListResponse,
   type NewsSectionsResponse,
+  type OpportunitiesResponse,
 } from "@bgs/shared-types";
 import { PROCEDURE_DETAIL, PROCEDURE_LIST, PROCEDURE_THEMES } from "./procedure-fixtures";
 import { STATE_SERVICES } from "./service-fixtures";
@@ -82,6 +83,39 @@ export const DETAIL: NewsDetail = {
   version: 1,
 };
 
+/** Placeholder opportunities, never real ones: one closing in 3 days, one without a date. */
+function inDays(days: number): string {
+  const day = new Date();
+  day.setDate(day.getDate() + days);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${String(day.getFullYear())}-${pad(day.getMonth() + 1)}-${pad(day.getDate())}`;
+}
+
+export const OPPORTUNITIES: OpportunitiesResponse = {
+  opportunities: [
+    {
+      id: "00000000-0000-4000-8000-0000000000a1",
+      kind: "formation",
+      title: "Formation fictive de test",
+      organization: "Organisme fictif",
+      summary: "Résumé fictif de la page officielle.",
+      deadline: inDays(3),
+      officialUrl: "https://3fpt.sn/appel-a-candidature/",
+      publishedAt: "2026-10-01T10:00:00Z",
+    },
+    {
+      id: "00000000-0000-4000-8000-0000000000a2",
+      kind: "emploi",
+      title: "Recrutement fictif de test",
+      organization: "Ministère fictif",
+      summary: "Autre résumé fictif.",
+      deadline: null,
+      officialUrl: "https://www.fonctionpublique.gouv.sn/concours",
+      publishedAt: "2026-09-30T10:00:00Z",
+    },
+  ],
+};
+
 /** Fake fetch answering the news and procedures endpoints. */
 export function newsFetch(
   overrides: {
@@ -93,9 +127,15 @@ export function newsFetch(
     procedureThemes?: () => Response;
     services?: () => Response;
     remoteConfig?: () => Response;
+    opportunities?: () => Response;
   } = {},
 ) {
   return jest.fn((input: string) => {
+    if (input.includes("/v1/opportunities")) {
+      return Promise.resolve(
+        overrides.opportunities?.() ?? new Response(JSON.stringify(OPPORTUNITIES)),
+      );
+    }
     if (input.includes("/v1/remote-config")) {
       return Promise.resolve(
         overrides.remoteConfig?.() ?? new Response(JSON.stringify(DEFAULT_REMOTE_CONFIG)),

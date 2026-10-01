@@ -8,7 +8,7 @@
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { ARTICLE_ID, PROCEDURE_SLUG, SERVICE_ID } from "./test-seed";
+import { ARTICLE_ID, OPPORTUNITY_TITLE, PROCEDURE_SLUG, SERVICE_ID } from "./test-seed";
 import { TestBrowser, type Viewport } from "./test-browser";
 import { startStack, type TestStack } from "./test-stack";
 
@@ -125,6 +125,20 @@ const JOURNEYS: Journey[] = [
       await browser.type("Le même mot de passe, une seconde fois", "une phrase de passe fictive");
       await browser.press("Enregistrer mon mot de passe");
       await browser.waitForText("Mot de passe enregistré");
+    },
+  },
+  {
+    name: "Opportunités : de l'accueil à la page officielle",
+    run: async (browser, { appBase }) => {
+      await browser.setViewport(PHONE);
+      await browser.open(appBase, 0);
+      await browser.press(
+        `Formation, ${OPPORTUNITY_TITLE}, Organisme fictif, Jusqu'au 31 décembre 2099`,
+      );
+      await browser.waitForText("Résumé fictif, comme recopié d'une page officielle.");
+      await browser.catchOpenedLinks();
+      await browser.press("Voir l'offre officielle");
+      await browser.waitForOpened("3fpt.sn/appel-a-candidature");
     },
   },
   {

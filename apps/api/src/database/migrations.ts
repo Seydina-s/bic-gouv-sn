@@ -126,4 +126,10 @@ export const MIGRATIONS: readonly { id: string; statements: readonly string[] }[
       "ALTER TABLE error_journal ADD COLUMN resolved_by text",
     ],
   },
+  {
+    // Opportunities prepared and published in the console (decision of the user,
+    // 01/10/2026): each one whole, validated by the API on the way in and out.
+    id: "011-opportunities",
+    statements: ["CREATE TABLE opportunities (id text PRIMARY KEY, data jsonb NOT NULL)"],
+  },
 ];
