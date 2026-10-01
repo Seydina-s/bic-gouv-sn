@@ -3,7 +3,11 @@ import compress from "@fastify/compress";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import * as Sentry from "@sentry/node";
-import Fastify, { type FastifyInstance, type FastifyLoggerOptions } from "fastify";
+import Fastify, {
+  type FastifyInstance,
+  type FastifyLoggerOptions,
+  type FastifyRequest,
+} from "fastify";
 import {
   jsonSchemaTransform,
   serializerCompiler,
@@ -182,6 +186,14 @@ export async function buildApp({
     logger: {
       level: config.LOG_LEVEL,
       redact: ["req.headers.authorization", "req.headers.cookie"],
+      // Data minimisation (CLAUDE.md §1): a request is logged by its method and path
+      // only, never the address it came from nor what it asked (search words…).
+      serializers: {
+        req: (request: FastifyRequest) => ({
+          method: request.method,
+          url: request.url.split("?")[0] ?? request.url,
+        }),
+      },
       ...(logStream === undefined ? {} : { stream: logStream }),
     },
     genReqId: () => randomUUID(),

@@ -167,6 +167,7 @@ export function NearMeSidePanel({
   const { color, space } = theme;
   return (
     <View
+      testID="near-me-side-panel"
       style={[
         styles.side,
         {

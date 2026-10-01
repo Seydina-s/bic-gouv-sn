@@ -23,7 +23,8 @@
     "notices": "tsx scripts/licences.ts",
     "a11y": "tsx scripts/a11y-audit.ts",
     "e2e": "tsx scripts/e2e.ts",
-    "map:markers": "tsx scripts/map-markers.ts"
+    "map:markers": "tsx scripts/map-markers.ts",
+    "i18n:wolof": "tsx scripts/wolof-to-translate.ts"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

@@ -101,10 +101,13 @@ describe("base map", () => {
     await start(TINY_ARCHIVE, logs);
     await app.inject({ method: "GET", url: "/v1/map/style.json" });
     await app.inject({ method: "GET", url: "/v1/map/tiles/2/1/1" });
-    await app.inject({ method: "GET", url: "/v1/health" });
+    await app.inject({ method: "GET", url: "/v1/health?q=mot-cherche" });
     // Other requests are logged as usual: the logs are really collected.
     expect(logs.some((line) => line.includes("/v1/health"))).toBe(true);
     expect(logs.filter((line) => line.includes("/v1/map/"))).toEqual([]);
+    // Nothing that points to a person: no address, no port, nothing asked.
+    expect(logs.some((line) => line.includes("remoteAddress"))).toBe(false);
+    expect(logs.some((line) => line.includes("mot-cherche"))).toBe(false);
   });
 
   it("says plainly when the archive is missing", async () => {
