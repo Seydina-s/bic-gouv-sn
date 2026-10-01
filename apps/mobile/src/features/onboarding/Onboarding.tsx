@@ -188,8 +188,10 @@ export function Onboarding({ onFinish }: { onFinish: () => void }) {
           },
         ]}
       >
-        {/* Large text stays reachable: the card scrolls, never more than half the screen. */}
+        {/* Large text stays reachable: the card scrolls, never more than half the screen.
+            Focusable, so a keyboard can scroll it too when a step has no button inside. */}
         <ScrollView
+          focusable
           style={{ maxHeight: height / 2 }}
           contentContainerStyle={[
             styles.content,
