@@ -294,6 +294,12 @@ export const fr = {
     notificationsBlocked:
       "Les notifications sont bloquées pour Bic Gouv SN dans les réglages du téléphone.",
     openPhoneSettings: "Ouvrir les réglages du téléphone",
+    location: "Position",
+    locationOn:
+      "Autorisée\u00a0: «\u00a0Près de moi\u00a0» s'ouvre sur les services les plus proches de vous.",
+    locationDenied: "Refusée. Pour la permettre, ouvrez les réglages du téléphone.",
+    locationAllow: "Autoriser la localisation",
+    locationHelp: "Votre position reste sur votre téléphone, elle n'est jamais envoyée.",
     welcome: "Présentation de l'application",
     restartWelcome: "Redémarrer",
     restartWelcomeHelp: "Revoir la présentation depuis le début, avec le choix de la langue.",

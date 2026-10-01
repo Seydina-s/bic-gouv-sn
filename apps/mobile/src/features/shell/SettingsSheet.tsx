@@ -28,6 +28,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { GlassBackdrop } from "../../components/GlassBackdrop";
 import { IconButton } from "../../components/IconButton";
 import { LinkRow } from "../../components/LinkRow";
+import { useLocation } from "../location/LocationProvider";
 import { SegmentedChoice, type Segment } from "../../components/SegmentedChoice";
 import type { LangChoice } from "../../i18n/I18nProvider";
 import { type DataSaverPreference, useDataSaver } from "../data-saver/DataSaverProvider";
@@ -66,6 +67,7 @@ export function SettingsSheet({ visible, onClose }: { visible: boolean; onClose:
   const dataSaver = useDataSaver();
   const usageStats = useUsageStats();
   const notifications = useNotifications();
+  const location = useLocation();
   const onboarding = useOnboardingDone();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -297,6 +299,41 @@ export function SettingsSheet({ visible, onClose }: { visible: boolean; onClose:
                     </Text>
                   </>
                 )}
+              </View>
+            )}
+            {location.supported && (
+              <View style={{ gap: space.sm }}>
+                <Text
+                  accessibilityRole="header"
+                  style={[textStyle.label, { color: color.textSecondary }]}
+                >
+                  {t("settings.location")}
+                </Text>
+                {location.status === "found" ? (
+                  <Text style={[textStyle.bodySmall, { color: color.textPrimary }]}>
+                    {t("settings.locationOn")}
+                  </Text>
+                ) : location.status === "denied" ? (
+                  <View>
+                    <Text style={[textStyle.bodySmall, { color: color.textPrimary }]}>
+                      {t("settings.locationDenied")}
+                    </Text>
+                    <LinkRow
+                      label={t("settings.openPhoneSettings")}
+                      role="button"
+                      onPress={() => void Linking.openSettings()}
+                    />
+                  </View>
+                ) : (
+                  <LinkRow
+                    label={t("settings.locationAllow")}
+                    role="button"
+                    onPress={() => void location.locate()}
+                  />
+                )}
+                <Text style={[textStyle.bodySmall, { color: color.textSecondary }]}>
+                  {t("settings.locationHelp")}
+                </Text>
               </View>
             )}
             <View style={{ gap: space.sm }}>
