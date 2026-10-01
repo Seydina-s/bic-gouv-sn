@@ -12,8 +12,13 @@ import {
 } from "./push-subscriptions";
 
 let cleanups: (() => Promise<void>)[] = [];
+/** The stores' clock, moved forward by the tests. */
+let today = new Date("2026-10-01T10:00:00Z");
+const clock = () => today;
+const HOUR_MS = 60 * 60 * 1000;
 
 afterEach(async () => {
+  today = new Date("2026-10-01T10:00:00Z");
   for (const cleanup of cleanups) {
     await cleanup();
   }
@@ -29,8 +34,8 @@ const pairs: [string, Pair][] = [
     () => {
       const path = join(tmpdir(), "bgs-push", `${randomUUID()}.json`);
       return Promise.resolve([
-        new FilePushSubscriptionStore(path),
-        new FilePushSubscriptionStore(path),
+        new FilePushSubscriptionStore(path, clock),
+        new FilePushSubscriptionStore(path, clock),
       ]);
     },
   ],
@@ -41,8 +46,8 @@ const pairs: [string, Pair][] = [
       cleanups.push(() => database.close());
       await migrate(database);
       return [
-        new PostgresPushSubscriptionStore(database),
-        new PostgresPushSubscriptionStore(database),
+        new PostgresPushSubscriptionStore(database, clock),
+        new PostgresPushSubscriptionStore(database, clock),
       ];
     },
   ]),
@@ -96,6 +101,8 @@ describe.each(pairs)("the push subscriptions kept %s", (_name, makePair) => {
       quietHours: 0,
       french: 0,
       wolof: 0,
+      newLastDay: 0,
+      newWeekBefore: 0,
     });
     await store.save({ ...phone("a", ["discours"]), quietHours: { from: 22, to: 7 } });
     await store.save({ ...phone("b", []), topics: null, lang: "wo" });
@@ -106,6 +113,23 @@ describe.each(pairs)("the push subscriptions kept %s", (_name, makePair) => {
       quietHours: 1,
       french: 2,
       wolof: 1,
+      newLastDay: 3,
+      newWeekBefore: 0,
     });
+  });
+
+  it("count the phones new in the last 24 hours apart from the week before, for the console", async () => {
+    const [store] = await makePair();
+    await store.save(phone("a", ["discours"]));
+    today = new Date(today.getTime() + 3 * 24 * HOUR_MS);
+    await store.save(phone("b", ["discours"]));
+    // Changing its choices does not make a phone new again.
+    await store.save(phone("a", ["communiques"]));
+    today = new Date(today.getTime() + 2 * HOUR_MS);
+    await store.save(phone("c", ["discours"]));
+    expect(await store.summary()).toMatchObject({ total: 3, newLastDay: 2, newWeekBefore: 1 });
+    // Ten days on, none of them is recent any more.
+    today = new Date(today.getTime() + 10 * 24 * HOUR_MS);
+    expect(await store.summary()).toMatchObject({ total: 3, newLastDay: 0, newWeekBefore: 0 });
   });
 });
