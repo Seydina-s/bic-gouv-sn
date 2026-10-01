@@ -205,6 +205,14 @@ export const ERROR_CATALOG = {
     severity: "info",
     action: "Demandez à une autre personne de l'équipe de vérifier et publier l'opportunité.",
   },
+  PARTICIPATION_CLOSED: {
+    what: "Un message ou un signalement a été envoyé alors que Participer est coupé dans le contrôle à distance.",
+    where: "Application, Participer",
+    impact: "L'envoi a été refusé ; l'app indique que la fonction est momentanément indisponible.",
+    severity: "info",
+    action:
+      "Rien à faire tant que Participer doit rester coupé ; sinon, rallumez-le dans « Contrôle à distance ».",
+  },
   PARTICIPATION_NOT_FOUND: {
     what: "Un message, un signalement ou une photo demandés n'existent pas (ou plus).",
     where: "Centre d'administration, participation",

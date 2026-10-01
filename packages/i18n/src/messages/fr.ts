@@ -368,6 +368,7 @@ export const fr = {
     reportSent: "Merci, votre signalement a bien été transmis à l'équipe.",
     errors: {
       offline: "Pas de connexion\u00a0: rien n'est parti. Réessayez quand le réseau revient.",
+      closed: "Participer est momentanément indisponible. Réessayez plus tard.",
       busy: "Beaucoup d'envois depuis ce réseau\u00a0: réessayez dans une heure.",
       photo: "La photo n'a pas pu être lue. Réessayez avec une autre photo, ou sans photo.",
       failed: "L'envoi n'a pas abouti. Réessayez dans un instant.",

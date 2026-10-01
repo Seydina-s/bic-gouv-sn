@@ -3,7 +3,7 @@ import type { MessageSubmission, ReportSubmission } from "@bgs/shared-types";
 import type { ApiClientOptions } from "./json-getter";
 
 /** Why a sending did not go through, as the screen explains it. */
-export type SendFailure = "offline" | "busy" | "photo" | "failed";
+export type SendFailure = "offline" | "busy" | "closed" | "photo" | "failed";
 
 export class SendError extends Error {
   constructor(readonly failure: SendFailure) {
@@ -15,6 +15,9 @@ export class SendError extends Error {
 function failureOf(status: number): SendFailure {
   if (status === 429) {
     return "busy";
+  }
+  if (status === 503) {
+    return "closed";
   }
   return status === 422 ? "photo" : "failed";
 }

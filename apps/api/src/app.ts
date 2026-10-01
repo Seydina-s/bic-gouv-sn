@@ -296,7 +296,11 @@ export async function buildApp({
     new PhotoFolder(config.PARTICIPATION_PHOTOS_ROOT),
     admin?.journal ?? null,
   );
-  await app.register(participationRoutes, { prefix: "/v1", participation });
+  await app.register(participationRoutes, {
+    prefix: "/v1",
+    participation,
+    isOpen: async () => (await remoteConfig.read()).features.participate,
+  });
   await app.register(pushSubscriptionRoutes, { prefix: "/v1", subscriptions: pushSubscriptions });
   await app.register(mapRoutes, {
     prefix: "/v1",

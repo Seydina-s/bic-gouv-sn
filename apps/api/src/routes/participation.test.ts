@@ -5,6 +5,8 @@ import { participationResponseSchema, submissionReceiptSchema } from "@bgs/share
 import type { FastifyInstance } from "fastify";
 import sharp from "sharp";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { FileRemoteConfigStore } from "@bgs/content-store";
+import { writeFile } from "node:fs/promises";
 import { buildApp } from "../app";
 import { loadConfig } from "../config";
 import {
@@ -129,6 +131,29 @@ describe("Participer", () => {
     expect((await consoleList()).entries[0]).toMatchObject({ status: "handled" });
     const audit = await admin.admin.journal.entries();
     expect(audit.some((line) => line.action === "participation.handled")).toBe(true);
+  });
+});
+
+describe("Participer switched off in the console", () => {
+  it("refuses what is sent, as the apps hide the tab", async () => {
+    const path = join(dir, "remote-config.json");
+    await writeFile(path, JSON.stringify({ minVersion: null, features: { participate: false } }));
+    const closed = await buildApp({
+      config: loadConfig({ LOG_LEVEL: "silent" }),
+      version: "1.0.0",
+      articles: temporaryStore(),
+      admin: admin.admin,
+      remoteConfig: new FileRemoteConfigStore(path),
+      participationStore: new FileParticipationStore(join(dir, "closed.json")),
+    });
+    const sent = await closed.inject({
+      method: "POST",
+      url: "/v1/participation/messages",
+      payload: { topic: "autre", text: "Un message fictif refusé.", lang: "fr" },
+    });
+    expect(sent.statusCode).toBe(503);
+    expect(sent.json<{ code: string }>().code).toBe("PARTICIPATION_CLOSED");
+    await closed.close();
   });
 });
 
