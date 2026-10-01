@@ -6,6 +6,7 @@ import { useMemo, useRef, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Icon } from "../../components/Icon";
 import { ScrollTopButton, useScrollTop } from "../../components/ScrollTopButton";
+import { useProgressive } from "../../components/useProgressive";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 import { Runs } from "../news/BlockRenderer";
@@ -56,6 +57,9 @@ export interface ProcedureViewProps {
  * to bring, the steps in order, and the official page one tap away at all times.
  * Only what e-senegal.sn publishes, in its own words.
  */
+/** Sections drawn with the screen: enough to fill it while it slides in. */
+const FIRST_SECTIONS = 2;
+
 export function ProcedureView({
   detail,
   isPending,
@@ -111,6 +115,8 @@ function ProcedureSheetView({
   const words = usePageWords();
   const labels = useBriefLabels();
   const page = useMemo(() => procedurePage(detail, words), [detail, words]);
+  // The first sections come with the screen, the others on the next frame.
+  const shownSections = useProgressive(page.sections.length, FIRST_SECTIONS);
   // Only offered when it leads somewhere: a verified service of that kind exists.
   const goTo = whereToGo(page);
   const nearest = goTo !== null && services?.kinds.has(goTo) === true ? goTo : null;
@@ -216,7 +222,7 @@ function ProcedureSheetView({
             <SheetItems items={page.intro} kind={null} />
           </View>
         )}
-        {page.sections.map((section, index) => (
+        {page.sections.slice(0, shownSections).map((section, index) => (
           <SheetSectionView
             key={`${section.kind}-${String(index)}`}
             section={section}
