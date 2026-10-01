@@ -29,7 +29,7 @@
   "devDependencies": {
     "@eslint/js": "10.0.1",
     "@types/node": "24.13.6",
-    "@vitest/coverage-v8": "5.0.1",
+    "@vitest/coverage-v8": "5.0.2",
     "axe-core": "4.13.0",
     "eslint": "10.11.0",
     "eslint-config-prettier": "10.1.8",
@@ -37,11 +37,11 @@
     "globals": "17.12.0",
     "harfbuzzjs": "1.6.2",
     "prettier": "3.9.9",
-    "sharp": "0.35.4",
+    "sharp": "0.35.5",
     "subset-font": "2.9.0",
     "tsx": "4.23.15",
     "typescript": "6.0.3",
     "typescript-eslint": "8.70.1",
-    "vitest": "5.0.1"
+    "vitest": "5.0.2"
   }
 }

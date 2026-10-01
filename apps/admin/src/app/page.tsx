@@ -1,4 +1,4 @@
-import { errorJournalEntrySchema, notificationsResponseSchema } from "@bgs/shared-types";
+import { errorJournalEntrySchema } from "@bgs/shared-types";
 import { z } from "zod";
 import { AttentionPanel } from "../components/AttentionPanel";
 import { IngestionPanel } from "../components/IngestionPanel";
@@ -9,6 +9,7 @@ import { attentionItems } from "../lib/attention";
 import { readApiUrl } from "../lib/config";
 import { t } from "../lib/i18n";
 import { getIngestionReport } from "../lib/ingestion-status";
+import { notificationsOverview } from "../lib/pending-notifications";
 import { requireAccount } from "../lib/session";
 
 // Always the live state: never served from a cache.
@@ -24,11 +25,12 @@ export default async function StatusPage() {
     getApiStatus({ apiUrl }),
     getIngestionReport({ apiUrl }),
     adminRequest({ path: "/errors", token, schema: journalSchema }),
-    adminRequest({ path: "/notifications", token, schema: notificationsResponseSchema }),
+    // Shared with the navigation's counter: read once.
+    notificationsOverview(token),
   ]);
   const items = attentionItems({
     errors: errors.ok ? errors.data.entries : null,
-    notifications: notifications.ok ? notifications.data : null,
+    notifications,
     now: status.checkedAt,
   });
   return (
