@@ -128,6 +128,18 @@ const JOURNEYS: Journey[] = [
     },
   },
   {
+    name: "Console : du résumé « À traiter » à la notification qui attend une seconde personne",
+    run: async (browser, { consoleBase, token }) => {
+      await browser.setViewport(DESKTOP);
+      await browser.setCookie("bgs_admin_session", token, consoleBase);
+      await browser.open(consoleBase, SETTLE_MS);
+      // The seed holds one notification waiting for a second person (test-seed.ts).
+      await browser.press("1 notification attend la vérification d'une seconde personne.");
+      await browser.waitForPath("/notifications");
+      await browser.waitForText("Téléphones abonnés");
+    },
+  },
+  {
     name: "Console : marquer une erreur comme réglée, la retrouver parmi les erreurs réglées",
     run: async (browser, { consoleBase, token }) => {
       await browser.setViewport(DESKTOP);
