@@ -17,7 +17,7 @@ import {
   type NearbyRow,
   type NearMeSheetHandle,
 } from "./NearMeSheet";
-import type { LocationStatus } from "./useLocation";
+import type { LocationStatus } from "../location/LocationProvider";
 import { useOfflineArea } from "./useOfflineArea";
 
 const ServiceMap = lazy(loadServiceMap);

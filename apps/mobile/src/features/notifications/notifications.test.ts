@@ -23,9 +23,8 @@ describe("notification preferences", () => {
   });
 
   it("invite once, after a first article read, where notifications can arrive", () => {
-    const facts = { supported: true, invited: false, choice: "off" as const, hasRead: true };
+    const facts = { supported: true, invited: false, choice: "off" as const };
     expect(isInvitationDue(facts)).toBe(true);
-    expect(isInvitationDue({ ...facts, hasRead: false })).toBe(false);
     expect(isInvitationDue({ ...facts, invited: true })).toBe(false);
     expect(isInvitationDue({ ...facts, choice: "on" })).toBe(false);
     expect(isInvitationDue({ ...facts, supported: false })).toBe(false);

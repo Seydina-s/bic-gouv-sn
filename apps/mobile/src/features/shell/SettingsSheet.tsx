@@ -233,7 +233,9 @@ export function SettingsSheet({ visible, onClose }: { visible: boolean; onClose:
                   title={t("settings.notifications")}
                   segments={notificationChoices}
                   selected={notifications.choice}
-                  onSelect={notifications.setChoice}
+                  onSelect={(next) => {
+                    void notifications.setChoice(next);
+                  }}
                 />
                 <Text style={[textStyle.bodySmall, { color: color.textSecondary }]}>
                   {t("settings.notificationsHelp")}

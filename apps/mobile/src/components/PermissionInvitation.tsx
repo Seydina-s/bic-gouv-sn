@@ -18,7 +18,8 @@ export interface PermissionInvitationProps {
 
 /**
  * Asks once, like a phone's permission, before turning something on (decision of
- * 29/09/2026). Both answers weigh the same: same size, same style, no default;
+ * 29/09/2026). The yes is coloured, the other answer stays in plain view, same
+ * size (decision of the user, 01/10/2026: no trap, it is a public service);
  * "back" means no.
  */
 export function PermissionInvitation({
@@ -44,12 +45,20 @@ export function PermissionInvitation({
         {
           minHeight: touchTarget.min,
           borderRadius: radius.md,
-          borderColor: color.borderStrong,
-          backgroundColor: pressed ? color.surface : color.background,
+          borderColor: accepted ? color.primary : color.borderStrong,
+          backgroundColor: accepted
+            ? pressed
+              ? color.primaryPressed
+              : color.primary
+            : pressed
+              ? color.surface
+              : color.background,
         },
       ]}
     >
-      <Text style={[textStyle.label, { color: color.textBrand }]}>{label}</Text>
+      <Text style={[textStyle.label, { color: accepted ? color.onPrimary : color.textBrand }]}>
+        {label}
+      </Text>
     </Pressable>
   );
 

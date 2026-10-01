@@ -11,6 +11,7 @@ import { useTheme } from "../../theme/useTheme";
 import { SectionTag } from "../news/SectionTag";
 import { WovenIn } from "../news/WovenIn";
 import { OnboardingPath } from "./OnboardingPath";
+import { dimWhenPressed } from "../../components/press-feedback";
 
 /** Language picker: the two official languages, named in their own words. */
 function LanguageChoice() {
@@ -169,7 +170,10 @@ export function Onboarding({ onFinish }: { onFinish: () => void }) {
         <Pressable
           accessibilityRole="button"
           onPress={onFinish}
-          style={[styles.skip, { minHeight: touchTarget.min, paddingHorizontal: space.md }]}
+          style={dimWhenPressed(
+            [styles.skip, { minHeight: touchTarget.min, paddingHorizontal: space.md }],
+            theme.opacity.controlPressed,
+          )}
         >
           <Text style={[textStyle.label, { color: color.textBrand }]}>{t("onboarding.skip")}</Text>
         </Pressable>

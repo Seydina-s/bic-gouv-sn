@@ -31,6 +31,7 @@ import {
 } from "../../features/news/useNews";
 import { WovenIn } from "../../features/news/WovenIn";
 import { Invitations } from "../../features/notifications/Invitations";
+import { usePrepareTabs } from "../../features/shell/usePrepareTabs";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 
@@ -52,10 +53,10 @@ function Notice({
         <Pressable
           accessibilityRole="button"
           onPress={onAction}
-          style={[
+          style={({ pressed }) => [
             styles.button,
             {
-              backgroundColor: color.primary,
+              backgroundColor: pressed ? color.primaryPressed : color.primary,
               borderRadius: theme.radius.md,
               minHeight: theme.touchTarget.min,
               paddingHorizontal: space.xl,
@@ -88,8 +89,9 @@ export default function HomeScreen() {
           : t("content.updatedDaysAgo", { count: freshness.count });
   const bottomInset = useTabBarInset();
   const router = useRouter();
-  // Asked back on the front page, after a first article: never over another screen.
+  // The invitations show on the front page only, never over another screen.
   const focused = useIsFocused();
+  usePrepareTabs(focused);
   const feed = useNewsFeed();
   const council = useLatestIn(COUNCIL_CATEGORY);
   const front = useFrontSections();

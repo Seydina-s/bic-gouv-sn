@@ -7,7 +7,7 @@ import { Icon } from "../../components/Icon";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 import { PlaceSearch } from "./ServiceParts";
-import type { LocationStatus } from "./useLocation";
+import type { LocationStatus } from "../location/LocationProvider";
 
 export interface LocationPanelProps {
   /** Where the list is measured from: the phone, a chosen town, or nowhere yet. */
