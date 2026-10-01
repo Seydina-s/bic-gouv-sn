@@ -66,3 +66,10 @@ Mise à jour du 01/10/2026 (5 h, mode autonome) : point 22 ajouté.
 | # | Quoi | Pourquoi / effet si ça attend | Réf. backlog |
 |---|---|---|---|
 | 22 | Faire rédiger la **politique de confidentialité** par un juriste, à partir de l'inventaire factuel des données (`docs/confidentialite/inventaire-des-donnees.md`), et préparer la déclaration à la CDP | Exigée par Google Play et l'App Store avant toute publication, et par la loi n° 2008-12 | L-01, A-02 |
+
+Mise à jour du 01/10/2026 (9 h 30, mode autonome) : points 23 et 24 ajoutés.
+
+| # | Quoi | Pourquoi / effet si ça attend | Réf. backlog |
+|---|---|---|---|
+| 23 | **Confirmer (ou corriger) les choix faits en autonomie cette nuit** : (a) invitations dans l'app, notifications d'abord et statistiques une autre fois, heures calmes 22 h – 7 h activées par défaut ; (b) journaux de l'API sans adresse IP ni mots cherchés ; (c) heure du premier abonnement aux notifications gardée, à l'heure près, pour l'alerte d'afflux (seuils : 500 en 24 h et 5 fois le rythme habituel) ; (d) « Marquer comme réglée » dans le journal des erreurs réservé aux éditeurs et administrateurs. Tout est réversible. | Rien ne casse si ça attend : ces choix sont déjà en place et consignés dans `decisions.md` | AUD5-05, AUD5-03, ADM-04 |
+| 24 | Autoriser la **réparation de la compétence de design ui-ux-pro-max** : ses dossiers de données et de scripts pointent vers un dépôt tiers qui n'est pas installé. Python est déjà présent (3.14). L'installation consiste à télécharger ce dépôt (gratuit). | Sans elle, cette compétence ne donne que ses règles écrites, pas ses recherches de palettes et de typographies | D-03 |
