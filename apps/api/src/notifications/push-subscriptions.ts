@@ -5,6 +5,7 @@ import {
   followsSection,
   pushSubscriptionSchema,
   type PushSubscription,
+  type SubscribersSummary,
 } from "@bgs/shared-types";
 import { z } from "zod";
 import type { Queryable } from "../database/database";
@@ -21,6 +22,8 @@ export interface PushSubscriptionStore {
   following(topic: string): Promise<PushSubscription[]>;
   /** Adds or replaces the subscription of this token; no section: removes it. */
   save(subscription: PushSubscription): Promise<void>;
+  /** Totals for the console: how many phones, which choices (never a token). */
+  summary(): Promise<SubscribersSummary>;
   /** Forgets these tokens (unsubscribed, or no longer valid for Expo). */
   remove(tokens: readonly string[]): Promise<void>;
 }
@@ -48,6 +51,18 @@ export class FilePushSubscriptionStore implements PushSubscriptionStore {
 
   async following(topic: string): Promise<PushSubscription[]> {
     return (await this.list()).filter((subscription) => followsSection(subscription, topic));
+  }
+
+  async summary(): Promise<SubscribersSummary> {
+    const all = await this.list();
+    const count = (keep: (item: PushSubscription) => boolean) => all.filter(keep).length;
+    return {
+      total: all.length,
+      everySection: count((item) => item.topics === null),
+      quietHours: count((item) => item.quietHours !== null),
+      french: count((item) => item.lang === "fr"),
+      wolof: count((item) => item.lang === "wo"),
+    };
   }
 
   save(subscription: PushSubscription): Promise<void> {
@@ -81,6 +96,15 @@ const rowSchema = z.object({
 
 const SELECT = "SELECT token, topics, quiet_hours, lang FROM push_subscriptions";
 
+const count = z.coerce.number().int().nonnegative();
+const summaryRowSchema = z.object({
+  total: count,
+  every_section: count,
+  quiet_hours: count,
+  french: count,
+  wolof: count,
+});
+
 /** PostgreSQL: every API instance reads and writes the same subscriptions (SCALE-02). */
 export class PostgresPushSubscriptionStore implements PushSubscriptionStore {
   constructor(private readonly database: Queryable) {}
@@ -105,6 +129,25 @@ export class PostgresPushSubscriptionStore implements PushSubscriptionStore {
       [topic],
     );
     return PostgresPushSubscriptionStore.parse(rows);
+  }
+
+  async summary(): Promise<SubscribersSummary> {
+    const { rows } = await this.database.query(
+      `SELECT count(*) AS total,
+         count(*) FILTER (WHERE topics IS NULL) AS every_section,
+         count(*) FILTER (WHERE quiet_hours IS NOT NULL) AS quiet_hours,
+         count(*) FILTER (WHERE lang = 'fr') AS french,
+         count(*) FILTER (WHERE lang = 'wo') AS wolof
+       FROM push_subscriptions`,
+    );
+    const totals = summaryRowSchema.parse(rows[0]);
+    return {
+      total: totals.total,
+      everySection: totals.every_section,
+      quietHours: totals.quiet_hours,
+      french: totals.french,
+      wolof: totals.wolof,
+    };
   }
 
   async save(subscription: PushSubscription): Promise<void> {

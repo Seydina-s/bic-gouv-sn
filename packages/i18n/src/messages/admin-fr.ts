@@ -430,6 +430,20 @@ export const adminFr = {
     pausedDone: "Envoi automatique mis en pause.",
     resumedDone: "Envoi automatique repris.",
     automaticSentAt: "Envoi automatique le {day} à {time}",
+    burst: {
+      one: "{count} article annoncé automatiquement en 30 minutes. Vérifiez qu'il vient bien de la Présidence\u00a0; en cas de doute, mettez en pause.",
+      other:
+        "{count} articles annoncés automatiquement en 30 minutes. Vérifiez qu'ils viennent bien de la Présidence\u00a0; en cas de doute, mettez en pause.",
+    },
+    subscribersTitle: "Téléphones abonnés",
+    subscribers: {
+      one: "{count} téléphone abonné aux notifications.",
+      other: "{count} téléphones abonnés aux notifications.",
+    },
+    subscribersDetail:
+      "Toutes les rubriques\u00a0: {everySection} · Heures calmes\u00a0: {quietHours} · Français\u00a0: {french} · Wolof\u00a0: {wolof}",
+    subscribersNote:
+      "Des totaux seulement\u00a0: rien ne permet de savoir à qui appartient un téléphone.",
     notYet:
       "Aucun envoi réel pour l'instant : l'app ne peut pas encore recevoir de notifications (il faut d'abord la version de test). Les notifications validées sont enregistrées et le seront toujours dans l'historique.",
     prepareTitle: "Préparer une notification",

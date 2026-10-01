@@ -87,4 +87,25 @@ describe.each(pairs)("the push subscriptions kept %s", (_name, makePair) => {
     await store.remove([]);
     expect(await store.list()).toEqual([]);
   });
+
+  it("count the phones and their choices, never showing a token", async () => {
+    const [store] = await makePair();
+    expect(await store.summary()).toEqual({
+      total: 0,
+      everySection: 0,
+      quietHours: 0,
+      french: 0,
+      wolof: 0,
+    });
+    await store.save({ ...phone("a", ["discours"]), quietHours: { from: 22, to: 7 } });
+    await store.save({ ...phone("b", []), topics: null, lang: "wo" });
+    await store.save({ ...phone("c", []), topics: null });
+    expect(await store.summary()).toEqual({
+      total: 3,
+      everySection: 2,
+      quietHours: 1,
+      french: 2,
+      wolof: 1,
+    });
+  });
 });

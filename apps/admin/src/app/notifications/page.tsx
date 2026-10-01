@@ -63,6 +63,9 @@ function automaticLine(automatic: AutomaticNotifications): string {
 }
 
 /** Who and when, for a notification of the history. */
+/** Automatic sendings in 30 minutes from which the console asks for a look. */
+const BURST_FROM = 3;
+
 function historyLines(notification: Notification): (string | null)[] {
   if (notification.origin === "automatic") {
     return [t("notifications.automaticSentAt", when(notification.preparedAt))];
@@ -93,7 +96,7 @@ export default async function NotificationsPage() {
       </p>
     );
   }
-  const { notifications, canSend, automatic } = result.data;
+  const { notifications, canSend, automatic, subscribers } = result.data;
   const pending = notifications.filter((item) => item.status === "pending");
   const decided = notifications.filter((item) => item.status !== "pending");
   const canPrepare = account.role !== "reviewer";
@@ -120,11 +123,39 @@ export default async function NotificationsPage() {
           {t("notifications.automaticTitle")}
         </h2>
         <p className="max-w-prose">{automaticLine(automatic)}</p>
+        {automatic.recentSendings >= BURST_FROM && (
+          <p
+            role="alert"
+            className="max-w-prose rounded-md bg-danger-surface px-4 py-3 text-on-danger-surface"
+          >
+            {t("notifications.burst", { count: automatic.recentSendings })}
+          </p>
+        )}
         {automatic.paused && account.role !== "admin" ? (
           <p className="max-w-prose text-sm text-ink-soft">{t("notifications.resumeAdminsOnly")}</p>
         ) : (
           canPrepare && <AutomaticForm paused={automatic.paused} />
         )}
+      </section>
+
+      <section aria-labelledby="subscribers-title" className="space-y-2">
+        <h2 id="subscribers-title" className="font-display text-2xl font-bold">
+          {t("notifications.subscribersTitle")}
+        </h2>
+        <p className="max-w-prose">
+          {t("notifications.subscribers", { count: subscribers.total })}
+        </p>
+        {subscribers.total > 0 && (
+          <p className="max-w-prose text-sm text-ink-soft">
+            {t("notifications.subscribersDetail", {
+              everySection: subscribers.everySection,
+              quietHours: subscribers.quietHours,
+              french: subscribers.french,
+              wolof: subscribers.wolof,
+            })}
+          </p>
+        )}
+        <p className="max-w-prose text-sm text-ink-soft">{t("notifications.subscribersNote")}</p>
       </section>
 
       {canPrepare && (
