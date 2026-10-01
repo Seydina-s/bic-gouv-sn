@@ -514,6 +514,31 @@ export const adminFr = {
     language: { fr: "Français", wo: "Wolof" },
     source: "Ancienne page (lien d'origine)",
   },
+  attention: {
+    title: "À traiter",
+    none: "Rien à traiter pour l'instant.",
+    errorCount: {
+      one: "{count} erreur",
+      other: "{count} erreurs",
+    },
+    errors: "{total} en cours.",
+    errorsBlocking: {
+      one: "{total} en cours, dont {count} bloquante.",
+      other: "{total} en cours, dont {count} bloquantes.",
+    },
+    burst: {
+      one: "{count} article annoncé automatiquement en 30 minutes : vérifiez qu'il vient bien de la Présidence.",
+      other:
+        "{count} articles annoncés automatiquement en 30 minutes : vérifiez qu'ils viennent bien de la Présidence.",
+    },
+    growth: "{count} téléphones abonnés en 24 heures, bien plus que d'habitude.",
+    pending: {
+      one: "{count} notification attend la vérification d'une seconde personne.",
+      other: "{count} notifications attendent la vérification d'une seconde personne.",
+    },
+    paused: "L'envoi automatique des notifications est en pause.",
+    unreadable: "Certaines alertes n'ont pas pu être lues : rechargez la page.",
+  },
   errors: {
     title: "Journal des erreurs",
     intro:

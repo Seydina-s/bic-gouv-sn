@@ -5,6 +5,7 @@ import {
   type Notification,
 } from "@bgs/shared-types";
 import { adminRequest } from "../../lib/admin-api";
+import { BURST_FROM } from "../../lib/attention";
 import { formatClockTime, formatDay } from "../../lib/format";
 import { t } from "../../lib/i18n";
 import { latestNews } from "../../lib/latest-news";
@@ -62,9 +63,6 @@ function automaticLine(automatic: AutomaticNotifications): string {
     ...(automatic.changedAt === null ? { day: "—", time: "—" } : when(automatic.changedAt)),
   });
 }
-
-/** Automatic sendings in 30 minutes from which the console asks for a look. */
-const BURST_FROM = 3;
 
 /** Who and when, for a notification of the history. */
 function historyLines(notification: Notification): (string | null)[] {
