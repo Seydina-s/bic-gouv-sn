@@ -128,9 +128,20 @@ describe("base map", () => {
     expect(
       (await app.inject({ method: "GET", url: "/v1/map/sprites/light.json" })).statusCode,
     ).toBe(200);
+    // A range the fonts do not cover: an empty set, never an error shown on the map.
+    const uncovered = await app.inject({
+      method: "GET",
+      url: "/v1/map/glyphs/Noto%20Sans%20Regular/65024-65279.pbf",
+    });
+    expect(uncovered.statusCode).toBe(200);
+    expect(uncovered.headers["content-type"]).toBe("application/x-protobuf");
+    expect(uncovered.rawPayload.length).toBe(0);
     for (const url of [
       "/v1/map/glyphs/..%2F..%2Fsecret/0-255.pbf",
       "/v1/map/glyphs/Noto%20Sans%20Regular/..%2F..%2Fx.pbf",
+      "/v1/map/glyphs/Noto%20Sans%20Regular/0-300.pbf",
+      "/v1/map/glyphs/Noto%20Sans%20Regular/65536-65791.pbf",
+      "/v1/map/glyphs/Unknown%20Font/0-255.pbf",
       "/v1/map/sprites/..%2Fglyphs",
       "/v1/map/sprites/light.svg",
     ]) {
