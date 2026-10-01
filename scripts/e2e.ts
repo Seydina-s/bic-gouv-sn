@@ -85,6 +85,28 @@ const JOURNEYS: Journey[] = [
     },
   },
   {
+    name: "Revoir la présentation depuis les Réglages, étape par étape, jusqu'à l'app",
+    run: async (browser, { appBase }) => {
+      await browser.setViewport(PHONE);
+      await browser.open(appBase, 0);
+      await browser.press("Réglages");
+      await browser.press("Redémarrer");
+      await browser.waitForText("Choisissez votre langue");
+      for (const title of [
+        "L'action du gouvernement, chaque jour",
+        "La source, toujours",
+        "Gardez l'essentiel, même sans réseau",
+      ]) {
+        await browser.press("Suivant");
+        await browser.waitForText(title);
+      }
+      await browser.press("Commencer");
+      // The presentation fades away over the app, which is there underneath.
+      await browser.waitForControlGone("Commencer");
+      await browser.waitForText(ARTICLE_TITLE);
+    },
+  },
+  {
     name: "Console : ajouter une personne, qui active son compte avec le lien",
     run: async (browser, { consoleBase, token }) => {
       await browser.setViewport(DESKTOP);
