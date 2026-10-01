@@ -76,7 +76,37 @@ export function touchesSecrets(command) {
   return SECRET_ACCESS.some((pattern) => pattern.test(text));
 }
 
+/**
+ * True when a push is not gated by the secret scanner: "git push" must come after
+ * the scanner, joined to it by "&&" only. A ";" ignores its result, and a pipe
+ * ("gitleaks … | tail && git push") gates the push on the last command of the pipe
+ * instead (ERREURS.md, 29/09 and 01/10/2026).
+ */
+export function pushesUngated(command) {
+  // Words in quotes are text (a search pattern, a message), not commands.
+  const text = withoutQuotedHeredocs(command).replace(/'[^']*'|"(?:\\.|[^"\\])*"/g, "''");
+  const push = text.search(/\bgit\s+push\b/);
+  if (push === -1) {
+    return false;
+  }
+  const scanners = [...text.slice(0, push).matchAll(/\bgitleaks(\.exe)?\s/g)];
+  const scanner = scanners.at(-1);
+  if (scanner === undefined) {
+    return true;
+  }
+  const between = text.slice(scanner.index, push);
+  // Once the "&&" are taken out, any ";", newline or "|" (pipe or "||") breaks the gate.
+  return /[;\n|]/.test(between.replaceAll("&&", ""));
+}
+
 export function refusal(command) {
+  if (pushesUngated(command)) {
+    return (
+      "Commande refusée : « git push » doit suivre le scanner de secrets, relié à lui par « && » seulement " +
+      "(ni « ; », ni « | », ni saut de ligne entre les deux), pour ne pousser que si le scanner est vert : " +
+      'gitleaks git --redact --log-opts="-1" && git push …'
+    );
+  }
   if (touchesSecrets(command)) {
     return (
       "Commande refusée : elle pourrait afficher un secret (fichier .env, comptes, clé, variables d'environnement, " +
