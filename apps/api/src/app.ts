@@ -348,6 +348,7 @@ export async function buildApp({
       signIn: admin.signIn,
       notifications: new NotificationService(notificationServices),
       automatic,
+      subscriptions: pushSubscriptions,
     });
     if (usageStats !== null) {
       await app.register(adminUsageRoutes, {

@@ -294,6 +294,9 @@ export const fr = {
     notificationsBlocked:
       "Les notifications sont bloquées pour Bic Gouv SN dans les réglages du téléphone.",
     openPhoneSettings: "Ouvrir les réglages du téléphone",
+    welcome: "Présentation de l'application",
+    restartWelcome: "Redémarrer",
+    restartWelcomeHelp: "Revoir la présentation depuis le début, avec le choix de la langue.",
     about: "À propos",
     aboutNews:
       "Bic Gouv SN réunit en un seul endroit l'actualité officielle du Gouvernement du Sénégal. Comptes rendus du Conseil des ministres, communiqués, discours, audiences et visites officielles arrivent dans l'application dès leur publication sur presidence.sn, en français et en wolof.",

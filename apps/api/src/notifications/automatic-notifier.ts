@@ -24,6 +24,8 @@ const RECENT_DAYS = 1;
 /** Newest articles looked at on each pass. */
 const SCAN = 20;
 const SETTING_KEY = "automatic-notifications";
+/** The window the console watches for a sudden run of automatic sendings. */
+const RECENT_MS = 30 * MINUTE_MS;
 
 /** Who sends them, in the console's list and in the audit journal. */
 export const AUTOMATIC_SENDER: Person = { id: "system:automatic", name: "Envoi automatique" };
@@ -63,9 +65,14 @@ export class AutomaticNotifier {
 
   async state(): Promise<AutomaticNotifications> {
     const saved = settingSchema.safeParse(await this.options.settings.get(SETTING_KEY));
+    const since = new Date(this.now().getTime() - RECENT_MS).toISOString();
+    const recentSendings = (await this.options.store.all()).filter(
+      (item) => item.origin === "automatic" && item.preparedAt >= since,
+    ).length;
     return {
       ...(saved.success ? saved.data : { paused: false, changedBy: null, changedAt: null }),
       perHour: this.options.perHour,
+      recentSendings,
     };
   }
 

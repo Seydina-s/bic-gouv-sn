@@ -55,14 +55,29 @@ export const automaticNotificationsSchema = z.object({
   perHour: z.int().positive(),
   changedBy: personSchema.nullable(),
   changedAt: isoDateTimeSchema.nullable(),
+  /** Automatic sendings of the last 30 minutes: a sudden run deserves a look. */
+  recentSendings: z.int().nonnegative(),
 });
 export type AutomaticNotifications = z.infer<typeof automaticNotificationsSchema>;
+
+/** Phones subscribed to notifications, as totals only (no token ever leaves the base). */
+export const subscribersSummarySchema = z.object({
+  total: z.int().nonnegative(),
+  /** Following every section (the default). */
+  everySection: z.int().nonnegative(),
+  /** With quiet hours. */
+  quietHours: z.int().nonnegative(),
+  french: z.int().nonnegative(),
+  wolof: z.int().nonnegative(),
+});
+export type SubscribersSummary = z.infer<typeof subscribersSummarySchema>;
 
 export const notificationsResponseSchema = z.object({
   notifications: z.array(notificationSchema),
   /** False while no push service is set up: approving records, nothing is sent. */
   canSend: z.boolean(),
   automatic: automaticNotificationsSchema,
+  subscribers: subscribersSummarySchema,
 });
 
 export const setAutomaticNotificationsSchema = z.strictObject({ paused: z.boolean() });

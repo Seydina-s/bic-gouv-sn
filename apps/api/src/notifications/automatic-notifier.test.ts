@@ -130,6 +130,9 @@ describe("the automatic notification of new articles (PUSH-03)", () => {
     });
     const actions = (await shared.journal.entries()).map((entry) => entry.action);
     expect(actions).toEqual(["notification.automatic.sent"]);
+    // The console sees how many went out in the last 30 minutes.
+    expect((await notifier().state()).recentSendings).toBe(1);
+    expect((await notifier(10, NOW + 31 * MINUTE).state()).recentSendings).toBe(0);
   });
 
   it("waits a little for the cover, then announces without it", async () => {

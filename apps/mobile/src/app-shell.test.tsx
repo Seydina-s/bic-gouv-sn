@@ -263,6 +263,15 @@ describe("app shell", () => {
     }
   });
 
+  it("restarts the presentation of the app from the settings", async () => {
+    await renderRouter(routes, { initialUrl: "/" });
+    await fireEvent.press(await screen.findByRole("button", { name: "Réglages" }));
+    await fireEvent.press(await screen.findByRole("button", { name: "Redémarrer" }));
+    expect(await screen.findByText("Choisissez votre langue")).toBeOnTheScreen();
+    expect(screen.getByText("Étape 1 sur 4")).toBeOnTheScreen();
+    expect(await AsyncStorage.getItem("bgs-onboarding")).toBeNull();
+  });
+
   it("opens the settings over the front page, which stays in place when they close", async () => {
     await renderRouter(routes, { initialUrl: "/" });
     await fireEvent.press(await screen.findByRole("button", { name: "Réglages" }));
