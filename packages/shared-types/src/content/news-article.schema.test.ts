@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { audioTrack, frTranslation, newsArticle, woTranslation } from "../testing/fixtures";
-import { newsArticleSchema } from "./news-article.schema";
+import { newsArticleSchema, publishedTranslation } from "./news-article.schema";
 
 function issueMessages(input: unknown): string[] {
   return newsArticleSchema.safeParse(input).error?.issues.map((issue) => issue.message) ?? [];
@@ -64,5 +64,17 @@ describe("newsArticleSchema", () => {
     expect(newsArticleSchema.safeParse(newsArticle({ version: 0 })).success).toBe(false);
     expect(newsArticleSchema.safeParse(newsArticle({ contentHash: "abc" })).success).toBe(false);
     expect(newsArticleSchema.safeParse(newsArticle({ comments: [] })).success).toBe(false);
+  });
+});
+
+describe("publishedTranslation", () => {
+  it("gives the version the source still publishes in that language, never a withdrawn one", () => {
+    const article = newsArticleSchema.parse(
+      newsArticle({
+        translations: [frTranslation({ withdrawnAt: "2026-09-30T10:00:00Z" }), woTranslation()],
+      }),
+    );
+    expect(publishedTranslation(article, "fr")).toBeUndefined();
+    expect(publishedTranslation(article, "wo")?.title).toBe("[wo] Titre de test");
   });
 });
