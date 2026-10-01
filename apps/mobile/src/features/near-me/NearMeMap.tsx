@@ -1,6 +1,7 @@
 import type { GeoPoint, PublicService } from "@bgs/shared-types";
+import { windowClass } from "@bgs/ui";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, useWindowDimensions, View } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTabBarInset } from "../../components/GlassTabBar";
@@ -66,8 +67,12 @@ export function NearMeMap({
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const offline = useOfflineArea(origin);
   const { space, touchTarget } = theme;
-  // Large screens: the panel is fixed on the left, the map takes the rest.
-  const { twoPane, listPaneWidth } = useTwoPane();
+  // Large screens, and phones on their side (a sliding panel would leave a strip):
+  // the panel is fixed on the left, the map takes the rest.
+  const { twoPane: wide, listPaneWidth } = useTwoPane();
+  const window = useWindowDimensions();
+  const sideways = window.width > window.height && windowClass(window.width) !== "compact";
+  const twoPane = wide || sideways;
   const side = twoPane ? listPaneWidth : 0;
 
   // With a side panel, the controls sit above the tab bar instead of on a sheet.

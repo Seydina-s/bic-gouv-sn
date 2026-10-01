@@ -299,7 +299,18 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | AUD5-03 🔵 (01/10 : nombre de téléphones abonnés affiché dans la console, en totaux seulement ; reste : alerte de croissance anormale) | Sécurité | `PUT /v1/push/subscription` est public : n'importe qui peut enregistrer de faux jetons (limite de débit seulement). Expo les signale comme inconnus à l'envoi et ils sont alors oubliés. À surveiller : nombre d'abonnements dans la console, alerte en cas de croissance anormale | Moyenne |
 | AUD5-04 | Design / UI-UX | La section Notifications des Réglages (choix, heures calmes, rubriques, téléphone bloqué) n'a jamais été vue : elle est masquée sur le web, où tournent l'audit et les parcours. À revoir sur téléphone dès la version de test (avec QA-02) | Haute (à la version de test) |
 | AUD5-05 | Marketer + Copywriter | Ordre des invitations changé (notifications d'abord, statistiques une autre fois) et heures calmes activées par défaut : choix autonomes, à confirmer par l'utilisateur | Moyenne |
-| AUD5-06 | Architecte | Stockage des notifications en base : chaque modification relit toute la liste sous verrou. C'est léger aujourd'hui (quelques milliers par an), mais il faudra lire par article et archiver l'historique au-delà d'un an | Basse |
+| AUD5-06 🔵 (01/10 : le surveillant ne lit plus que la pause à chaque passage, PR #160 ; reste : lire par article et archiver au-delà d'un an) | Architecte | Stockage des notifications en base : chaque modification relit toute la liste sous verrou. C'est léger aujourd'hui (quelques milliers par an), mais il faudra lire par article et archiver l'historique au-delà d'un an | Basse |
 | AUD5-07 | QA | Photo dans la notification sur iPhone : il faut un module d'extension (Notification Service Extension), non encore ajouté. Il sera à écrire et à tester sur appareil avec le compte Apple | Moyenne |
 | AUD5-08 | UX writing | Nouveaux textes des notifications (app et console) en français seulement : le wolof viendra avec W-01 et W-02 | Basse |
 | 01/10/2026 | ONB-02 ✅ Réglages › « Présentation de l’application » › « Redémarrer » (libellé choisi par l’utilisateur) : la présentation reprend depuis le choix de la langue | Utilisateur |
+
+### Audit croisé du 01/10/2026 (après la carte d'abord, les repères par type, l'itinéraire Google Maps, le nouvel accueil, la barre de navigation animée)
+
+| # | Agent | Constat | Priorité |
+|---|---|---|---|
+| AUD6-01 | Performance | Code de l'app à environ 7 Mo pour un plafond de 7,5 Mo : peu de marge. Mesurer le démarrage à froid sur un Android d'entrée de gamme (objectif < 2 s) et reprendre l'allègement vers 4 Mo (PERF-03) | Haute (à la version de test Android) |
+| AUD6-02 | QA | Panneau glissant jamais essayé sur un Android modeste : vérifier la fluidité, le défilement horizontal des types dans le panneau et le clavier de la recherche de commune | Haute (à la version de test) |
+| AUD6-03 | Accessibilité | La poignée du panneau est réglable au lecteur d'écran, mais les tests utilisent une simulation : vérifier avec VoiceOver et TalkBack | Moyenne |
+| AUD6-04 ✅ (01/10 : corrigé, volet latéral en paysage, testé) | Design / UI-UX | Téléphone en paysage : le panneau réduit à 25 % ne laissait qu'une bande d'environ 100 points | Haute |
+| AUD6-05 | Données | « Itinéraire » ouvre Google Maps avec la position du service (jamais celle de la personne, que Google obtient ensuite par sa propre app) : à mentionner dans la page de confidentialité | Basse |
+| AUD6-06 | UX writing | 271 textes de l'app sans wolof : fichier prêt pour les traducteurs (`docs/traduction/wolof-a-traduire.csv`, `pnpm i18n:wolof`) | Moyenne (W-01) |

@@ -770,11 +770,13 @@ describe("app shell", () => {
 
   it("opens on the map, then shows the service touched in the panel, and the way there", async () => {
     mockMapAvailable = true;
+    // A phone held upright: the sliding panel, not the side panel.
     const openURL = jest.spyOn(Linking, "openURL").mockResolvedValue(true);
     await renderRouter(routes, { initialUrl: "/near-me" });
     await screen.findByText("Commissariat de test proche");
     // The map leads: no button to press (decision of 30/09/2026).
     const map = await screen.findByTestId("service-map");
+    expect(screen.queryByTestId("near-me-side-panel")).toBeNull();
     // The base map comes from our API, always the light one.
     expect(map).toHaveProp(
       "mapStyle",
@@ -834,6 +836,7 @@ describe("app shell", () => {
       await renderRouter(routes, { initialUrl: "/near-me" });
       await screen.findByTestId("service-map");
       // The same list, beside the map: no sliding panel on a large screen.
+      expect(await screen.findByTestId("near-me-side-panel")).toBeOnTheScreen();
       const list = within(await screen.findByTestId("near-me-sheet-list"));
       await fireEvent.press(list.getByRole("button", { name: /^Commissariat de test proche/ }));
       expect(
@@ -842,6 +845,26 @@ describe("app shell", () => {
       expect(screen.queryByRole("adjustable", { name: "Panneau des services" })).toBeNull();
       await fireEvent.press(screen.getByRole("button", { name: "Retour à la liste" }));
       expect(await screen.findByTestId("near-me-sheet-list")).toBeOnTheScreen();
+    } finally {
+      Dimensions.set({ window: phone });
+    }
+  });
+
+  it("keeps the panel beside the map on a phone turned sideways", async () => {
+    mockMapAvailable = true;
+    const phone = Dimensions.get("window");
+    Dimensions.set({ window: { ...phone, width: 844, height: 390 } });
+    try {
+      await renderRouter(routes, { initialUrl: "/near-me" });
+      await screen.findByTestId("service-map");
+      expect(await screen.findByTestId("near-me-side-panel")).toBeOnTheScreen();
+      const list = within(await screen.findByTestId("near-me-sheet-list"));
+      await fireEvent.press(list.getByRole("button", { name: /^Commissariat de test proche/ }));
+      // A sliding panel would leave a strip a hundred points high: the list sits beside.
+      expect(
+        await screen.findByRole("header", { name: "Commissariat de test proche" }),
+      ).toBeOnTheScreen();
+      expect(screen.getByRole("button", { name: "Retour à la liste" })).toBeOnTheScreen();
     } finally {
       Dimensions.set({ window: phone });
     }
