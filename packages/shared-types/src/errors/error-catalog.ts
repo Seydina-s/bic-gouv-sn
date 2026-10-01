@@ -184,6 +184,27 @@ export const ERROR_CATALOG = {
     severity: "info",
     action: "Rechargez le journal des erreurs.",
   },
+  OPPORTUNITY_NOT_FOUND: {
+    what: "Une opportunité demandée n'existe pas.",
+    where: "Centre d'administration, opportunités",
+    impact: "L'action a été refusée ; rien n'a été modifié.",
+    severity: "info",
+    action: "Rechargez la page des opportunités.",
+  },
+  OPPORTUNITY_NOT_PENDING: {
+    what: "Une opportunité déjà publiée ou retirée a été publiée ou retirée une seconde fois.",
+    where: "Centre d'administration, opportunités",
+    impact: "Rien n'a été modifié ; la première décision reste valable.",
+    severity: "info",
+    action: "Rechargez la page : une autre personne a sans doute déjà décidé.",
+  },
+  OPPORTUNITY_SAME_PERSON: {
+    what: "Une personne a voulu publier une opportunité qu'elle avait elle-même préparée.",
+    where: "Centre d'administration, opportunités",
+    impact: "La publication a été refusée : une seconde personne doit vérifier.",
+    severity: "info",
+    action: "Demandez à une autre personne de l'équipe de vérifier et publier l'opportunité.",
+  },
   NOTIFICATION_ARTICLE_UNKNOWN: {
     what: "Une notification a été préparée pour un article introuvable ou retiré.",
     where: "Centre d'administration, notifications",

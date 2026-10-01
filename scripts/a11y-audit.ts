@@ -6,7 +6,7 @@
 //   pnpm a11y
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { ARTICLE_ID, PROCEDURE_SLUG, SERVICE_ID } from "./test-seed";
+import { ARTICLE_ID, OPPORTUNITY_ID, PROCEDURE_SLUG, SERVICE_ID } from "./test-seed";
 import { TestBrowser, type Viewport, type Violation } from "./test-browser";
 import { startStack } from "./test-stack";
 
@@ -55,6 +55,8 @@ const APP_SCREENS: readonly Screen[] = [
   ["/assistant", { heading: "Assistant IA" }],
   ["/participate", { heading: "Participer" }],
   ["/licences", { heading: "Logiciels libres" }],
+  ["/opportunities", { text: "Opportunité fictive pour les tests" }],
+  [`/opportunity/${OPPORTUNITY_ID}`, { text: "Voir l'offre officielle" }],
 ];
 const SIGN_IN_SCREENS: readonly Screen[] = [
   ["/connexion", { heading: "Connexion" }],
@@ -74,6 +76,7 @@ const CONSOLE_SCREENS: readonly Screen[] = [
   ["/journal", { heading: "Journal d'audit" }],
   ["/notifications", { heading: "Notifications" }],
   ["/comptes", { heading: "Comptes" }],
+  ["/opportunites", { heading: "Opportunités" }],
 ];
 
 /** Opens a screen and waits for its proof of content, then lets it settle. */

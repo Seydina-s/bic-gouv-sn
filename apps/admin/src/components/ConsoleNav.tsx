@@ -27,6 +27,7 @@ const GROUPS = [
       { href: "/services", label: "nav.services" },
       { href: "/masques", label: "nav.withdrawn" },
       { href: "/notifications", label: "nav.notifications" },
+      { href: "/opportunites", label: "nav.opportunities" },
     ],
   },
   {

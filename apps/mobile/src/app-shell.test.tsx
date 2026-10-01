@@ -12,6 +12,8 @@ import NearMeScreen from "./app/(tabs)/near-me";
 import ParticipateScreen from "./app/(tabs)/participate";
 import ProceduresScreen from "./app/(tabs)/procedures";
 import ArticleScreen from "./app/article/[id]";
+import OpportunitiesScreen from "./app/opportunities";
+import OpportunityScreen from "./app/opportunity/[id]";
 import ProcedureScreen from "./app/procedure/[slug]";
 import ProcedureThemeScreen from "./app/procedure-theme/[id]";
 import SectionScreen from "./app/section/[slug]";
@@ -87,6 +89,8 @@ const routes = {
   "procedure-theme/[id]": ProcedureThemeScreen,
   "section/[slug]": SectionScreen,
   "service/[id]": ServiceScreen,
+  opportunities: OpportunitiesScreen,
+  "opportunity/[id]": OpportunityScreen,
   favorites: FavoritesScreen,
   licences: LicencesScreen,
   search: SearchScreen,
@@ -333,6 +337,25 @@ describe("app shell", () => {
     });
     await fireEvent.press(screen.getByRole("tab", { name: /Démarches/ }));
     expect(await screen.findByText("Momentanément indisponible")).toBeOnTheScreen();
+  });
+
+  it("shows the opportunities after the articles, each leading to its official page", async () => {
+    const openURL = jest.spyOn(Linking, "openURL").mockResolvedValue(true);
+    await renderRouter(routes, { initialUrl: "/" });
+    expect(await screen.findByText("Opportunités")).toBeOnTheScreen();
+    expect(screen.getByText("Plus que 3 jours")).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole("button", { name: /Formation fictive de test/ }));
+    expect(await screen.findByText("Résumé fictif de la page officielle.")).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole("link", { name: "Voir l'offre officielle" }));
+    expect(openURL).toHaveBeenCalledWith("https://3fpt.sn/appel-a-candidature/");
+    await act(() => {
+      router.push("/opportunities");
+    });
+    // Every open one, filtered by kind on request.
+    expect(await screen.findByText("Recrutement fictif de test")).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole("button", { name: "Emploi" }));
+    expect(screen.queryByText("Formation fictive de test")).toBeNull();
+    expect(screen.getByText("Sans date limite")).toBeOnTheScreen();
   });
 
   it("opens another tab the instant the finger lands, and only once", async () => {

@@ -33,6 +33,7 @@ import {
 import { WovenIn } from "../../features/news/WovenIn";
 import { Invitations } from "../../features/notifications/Invitations";
 import { usePrepareTabs } from "../../features/shell/usePrepareTabs";
+import { OpportunitiesSection } from "../../features/opportunities/OpportunitiesSection";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 
@@ -211,6 +212,8 @@ export default function HomeScreen() {
         </WovenIn>
       )}
       <Rails rails={rails} width={columnWidth} onOpenStory={open} onOpenSection={openSection} />
+      {/* Right after the articles (decision of the user, 01/10/2026). */}
+      <OpportunitiesSection />
     </View>
   );
 

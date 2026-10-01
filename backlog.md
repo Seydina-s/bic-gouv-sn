@@ -343,3 +343,13 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | AUD8-03 | QA | Les invitations aux notifications et à la localisation n'existent que sur téléphone : couvertes par les tests de l'app, pas par les parcours web ; à vérifier sur l'iPhone (et Android) | Moyenne |
 | AUD8-04 | Marketer + Copywriter | Textes de l'invitation à la localisation écrits en autonomie (« Voir les services près de vous ? », « Oui, me localiser ») : à relire par l'utilisateur | Basse |
 | AUD8-05 | Architecte | Version de test optimisée autonome (sans ordinateur) impossible tant que l'API n'est pas hébergée en HTTPS (S1-02) : l'iPhone refuse les connexions non chiffrées hors mode développement | Moyenne |
+
+### Demandes de l'utilisateur du 01/10/2026, 19 h 45 (mode autonome jusqu'au 02/10, 3 h)
+
+| Date | Tâche | Origine |
+|---|---|---|
+| 01/10/2026 | MAP-12 ✅ Erreur plein écran dans « Près de moi » en mode optimisé (« production URL … location ») : carte chargée sans morceau séparé (PR #196) | Utilisateur |
+| 01/10/2026 | OPP-01 🔵 Opportunités : contrat, API (publique et console, deux personnes, journal d'audit, PostgreSQL), console « Opportunités », section de l'accueil après les articles, liste avec filtre par type, fiche avec la page officielle ; tests, parcours n° 10, audit | Utilisateur |
+| 01/10/2026 | OPP-02 🔴 Collecte automatique des opportunités (DER/FJ et ADEPME d'abord), après accord sur les sources | Cadrage |
+| 01/10/2026 | PART-01 🔴 Participer : boîte de dialogue « Écrire au gouvernement » (messages reçus dans la console) | Utilisateur |
+| 01/10/2026 | PART-02 🔴 Participer : signaler un problème public avec photo et message, reçu dans la console | Utilisateur |

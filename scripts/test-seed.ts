@@ -18,6 +18,8 @@ const repo = fileURLToPath(new URL("..", import.meta.url));
 export const ARTICLE_ID = "00000000-0000-5000-8000-00000000a11e";
 export const PROCEDURE_SLUG = "test-demarche";
 export const SERVICE_ID = "osm-n1";
+export const OPPORTUNITY_ID = "00000000-0000-4000-8000-00000000a1b1";
+export const OPPORTUNITY_TITLE = "Opportunité fictive pour les tests";
 const ACCOUNT_EMAIL = "audit-accessibilite@bic.test";
 const PDF = Buffer.from("%PDF-1.7\n% document fictif\n");
 const PDF_HASH = "b".repeat(64);
@@ -273,6 +275,46 @@ function seedSearchMisses(dataDir: string): void {
   );
 }
 
+/** One opportunity published in the app, one waiting for a second person. */
+function seedOpportunities(dataDir: string): void {
+  const someone = { id: "audit-autre-personne", name: "Autre personne (fictive)" };
+  const base = {
+    kind: "formation",
+    organization: "Organisme fictif",
+    summary: "Résumé fictif, comme recopié d'une page officielle.",
+    deadline: "2099-12-31",
+    officialUrl: "https://3fpt.sn/appel-a-candidature/",
+    preparedBy: someone,
+    preparedAt: "2026-10-01T09:00:00.000Z",
+    withdrawnBy: null,
+    withdrawnAt: null,
+  };
+  writeFileSync(
+    join(dataDir, "opportunities.json"),
+    JSON.stringify({
+      schemaVersion: 1,
+      opportunities: [
+        {
+          ...base,
+          id: OPPORTUNITY_ID,
+          title: OPPORTUNITY_TITLE,
+          status: "published",
+          publishedBy: { id: "audit-troisieme", name: "Troisième personne (fictive)" },
+          publishedAt: "2026-10-01T09:30:00.000Z",
+        },
+        {
+          ...base,
+          id: "00000000-0000-4000-8000-00000000a1b2",
+          title: "Opportunité fictive à vérifier",
+          status: "pending",
+          publishedBy: null,
+          publishedAt: null,
+        },
+      ],
+    }),
+  );
+}
+
 /** One error to deal with, one marked as fixed (the console shows both). */
 function seedErrorJournal(dataDir: string): void {
   const group = (code: string, where: string) => ({
@@ -362,6 +404,7 @@ export async function seed(dataDir: string, password: string): Promise<void> {
   seedNotifications(dataDir);
   seedIngestionStatus(dataDir);
   seedErrorJournal(dataDir);
+  seedOpportunities(dataDir);
   await seedArticle(dataDir);
   await seedProcedure(dataDir);
   await seedServices(dataDir);

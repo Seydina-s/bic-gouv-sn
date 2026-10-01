@@ -60,6 +60,14 @@ import {
 import { AutomaticNotifier } from "./notifications/automatic-notifier";
 import { FileSettingStore, PostgresSettingStore } from "./admin/setting-store";
 import { adminServicesRoutes } from "./routes/admin-services";
+import { adminOpportunitiesRoutes } from "./routes/admin-opportunities";
+import { opportunitiesRoutes } from "./routes/opportunities";
+import {
+  FileOpportunityStore,
+  OpportunityService,
+  type OpportunityStore,
+  PostgresOpportunityStore,
+} from "./opportunities/opportunities";
 import { adminRemoteConfigRoutes, remoteConfigRoutes } from "./routes/remote-config";
 import { type ErrorJournal, journalErrors } from "./journal/error-journal";
 import type { SearchMisses } from "./journal/search-misses";
@@ -117,6 +125,8 @@ export interface AppOptions {
   pushSubscriptions?: PushSubscriptionStore;
   /** New articles looked for this often (PUSH-03); null: not at all (tests). */
   automaticNotificationsEveryMs?: number | null;
+  /** Opportunities of the console; defaults from database. */
+  opportunityStore?: OpportunityStore;
 }
 
 export interface AdminServices {
@@ -181,6 +191,9 @@ export async function buildApp({
     : new PostgresPushSubscriptionStore(database),
   pushProvider = defaultPushProvider(config, pushSubscriptions),
   automaticNotificationsEveryMs = null,
+  opportunityStore = database === null
+    ? new FileOpportunityStore(config.OPPORTUNITIES_PATH)
+    : new PostgresOpportunityStore(database),
 }: AppOptions): Promise<FastifyInstance> {
   const app = Fastify({
     logger: {
@@ -262,6 +275,8 @@ export async function buildApp({
     searchMisses,
   });
   await app.register(servicesRoutes, { prefix: "/v1", services: stateServices });
+  const opportunities = new OpportunityService(opportunityStore, admin?.journal ?? null);
+  await app.register(opportunitiesRoutes, { prefix: "/v1", opportunities });
   await app.register(pushSubscriptionRoutes, { prefix: "/v1", subscriptions: pushSubscriptions });
   await app.register(mapRoutes, {
     prefix: "/v1",
@@ -354,6 +369,11 @@ export async function buildApp({
       prefix: "/admin/v1",
       signIn: admin.signIn,
       accountAdmin: new AccountAdmin(admin),
+    });
+    await app.register(adminOpportunitiesRoutes, {
+      prefix: "/admin/v1",
+      signIn: admin.signIn,
+      opportunities,
     });
     await app.register(adminNotificationsRoutes, {
       prefix: "/admin/v1",
