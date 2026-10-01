@@ -11,7 +11,7 @@ import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
 import type { AdminSignIn, SignedInAccount } from "../admin/sign-in-service";
 import type { AutomaticNotifier } from "../notifications/automatic-notifier";
-import type { PushSubscriptionStore } from "../notifications/push-subscriptions";
+import { cachedSummary, type PushSubscriptionStore } from "../notifications/push-subscriptions";
 import {
   NotificationRuleError,
   type NotificationService,
@@ -66,6 +66,7 @@ export const adminNotificationsRoutes: FastifyPluginAsyncZod<AdminNotificationsO
   app,
   { signIn, notifications, automatic, subscriptions },
 ) => {
+  const subscribersSummary = cachedSummary(subscriptions);
   app.get(
     "/notifications",
     {
@@ -84,7 +85,7 @@ export const adminNotificationsRoutes: FastifyPluginAsyncZod<AdminNotificationsO
         notifications: await notifications.list(),
         canSend: notifications.canSend,
         automatic: await automatic.state(),
-        subscribers: await subscriptions.summary(),
+        subscribers: await subscribersSummary(),
       };
     },
   );
