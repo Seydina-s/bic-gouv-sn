@@ -28,6 +28,7 @@ const GROUPS = [
       { href: "/masques", label: "nav.withdrawn" },
       { href: "/notifications", label: "nav.notifications" },
       { href: "/opportunites", label: "nav.opportunities" },
+      { href: "/participation", label: "nav.participation" },
     ],
   },
   {

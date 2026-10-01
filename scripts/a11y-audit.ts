@@ -77,6 +77,7 @@ const CONSOLE_SCREENS: readonly Screen[] = [
   ["/notifications", { heading: "Notifications" }],
   ["/comptes", { heading: "Comptes" }],
   ["/opportunites", { heading: "Opportunités" }],
+  ["/participation", { heading: "Participation" }],
 ];
 
 /** Opens a screen and waits for its proof of content, then lets it settle. */

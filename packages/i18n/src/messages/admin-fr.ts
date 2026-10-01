@@ -75,6 +75,7 @@ export const adminFr = {
     usage: "Usage de l'application",
     notifications: "Notifications",
     opportunities: "Opportunités",
+    participation: "Participation",
     pending: {
       one: "{count} à vérifier",
       other: "{count} à vérifier",
@@ -222,6 +223,7 @@ export const adminFr = {
       map: "Carte de « Près de moi »",
       readAloud: "Écouter (lecture à voix haute)",
       procedures: "Démarches",
+      participate: "Participer (messages et signalements)",
     },
     minVersion: "Version minimale de l'application",
     minVersionHelp:
@@ -539,6 +541,40 @@ export const adminFr = {
     },
     paused: "L'envoi automatique des notifications est en pause.",
     unreadable: "Certaines alertes n'ont pas pu être lues : rechargez la page.",
+  },
+  participation: {
+    title: "Participation",
+    intro:
+      "Ce que les citoyens écrivent au gouvernement et les problèmes publics qu'ils signalent depuis l'app. Anonyme\u00a0: rien ne permet de savoir qui a écrit. Tout est effacé au bout d'un an, photos comprises.",
+    newTitle: "À lire",
+    handledTitle: "Traités",
+    none: "Rien à lire pour l'instant.",
+    noneHandled: "Aucun message ni signalement traité.",
+    message: "Message",
+    report: "Signalement",
+    topics: {
+      gouvernement: "Pour le gouvernement",
+      application: "Sur l'application",
+      autre: "Autre",
+    },
+    categories: {
+      voirie: "Voirie",
+      eclairage: "Éclairage",
+      salubrite: "Salubrité",
+      eau: "Eau",
+      autre: "Autre",
+    },
+    receivedAt: "Reçu le {day} à {time}",
+    place: "Lieu\u00a0: {place}",
+    photo: "Photo jointe au signalement",
+    handle: "Marquer comme traité",
+    handledDone: "Marqué comme traité.",
+    handledBy: "Traité par {name} le {day} à {time}",
+    editorsOnly:
+      "Seuls les éditeurs et les administrateurs peuvent marquer un message comme traité.",
+    gone: "Ce message n'existe plus\u00a0: rechargez la page.",
+    failed: "L'action n'a pas abouti. Réessayez dans un instant.",
+    listFailed: "Les messages n'ont pas pu être chargés. Vérifiez l'état du service.",
   },
   opportunities: {
     title: "Opportunités",

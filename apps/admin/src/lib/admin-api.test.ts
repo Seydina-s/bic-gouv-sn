@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
-import { adminRequest } from "./admin-api";
+import { adminPicture, adminRequest } from "./admin-api";
 
 vi.mock("server-only", () => ({}));
 
@@ -74,5 +74,25 @@ describe("adminRequest", () => {
     expect(
       await adminRequest({ path: "/auth/sign-out", method: "POST", schema: z.null() }),
     ).toEqual({ ok: true, data: null });
+  });
+});
+
+describe("adminPicture", () => {
+  it("brings back a JPEG with the person's session, and nothing else", async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(new Uint8Array([1, 2]), { headers: { "content-type": "image/jpeg" } }),
+    );
+    const photo = await adminPicture("/participation/photos/x", "tok");
+    expect(photo?.byteLength).toBe(2);
+    expect(fetchMock.mock.calls[0]?.[0]).toBe("https://api.test/admin/v1/participation/photos/x");
+    expect(new Headers(fetchMock.mock.calls[0]?.[1]?.headers).get("authorization")).toBe(
+      "Bearer tok",
+    );
+    fetchMock.mockResolvedValueOnce(json({ code: "PARTICIPATION_NOT_FOUND" }, 404));
+    expect(await adminPicture("/participation/photos/x", "tok")).toBeNull();
+    fetchMock.mockRejectedValueOnce(new Error("API away"));
+    expect(await adminPicture("/participation/photos/x", "tok")).toBeNull();
+    vi.stubEnv("API_URL", "");
+    expect(await adminPicture("/participation/photos/x", "tok")).toBeNull();
   });
 });

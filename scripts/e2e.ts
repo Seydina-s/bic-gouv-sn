@@ -142,6 +142,20 @@ const JOURNEYS: Journey[] = [
     },
   },
   {
+    name: "Participer : écrire au gouvernement, puis le lire et le traiter dans la console",
+    run: async (browser, { appBase, consoleBase, token }) => {
+      await browser.setViewport(PHONE);
+      await browser.open(`${appBase}/participate`, 0);
+      await browser.type("Votre message", "Un message fictif écrit pendant le parcours.");
+      await browser.press("Envoyer");
+      await browser.waitForText("Merci, votre message a bien été transmis à l'équipe.");
+      await browser.setViewport(DESKTOP);
+      await browser.setCookie("bgs_admin_session", token, consoleBase);
+      await browser.open(`${consoleBase}/participation`, SETTLE_MS);
+      await browser.waitForText("Un message fictif écrit pendant le parcours.");
+    },
+  },
+  {
     name: "Console : du résumé « À traiter » à la notification qui attend une seconde personne",
     run: async (browser, { consoleBase, token }) => {
       await browser.setViewport(DESKTOP);

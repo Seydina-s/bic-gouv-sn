@@ -458,6 +458,14 @@
       "text": 1
     },
     {
+      "name": "expo-image-picker",
+      "version": "57.0.20",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)"],
+      "url": "https://docs.expo.dev/versions/latest/sdk/imagepicker/",
+      "text": 1
+    },
+    {
       "name": "expo-linking",
       "version": "57.0.11",
       "licence": "MIT",

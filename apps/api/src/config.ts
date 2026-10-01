@@ -159,6 +159,18 @@ const envSchema = z.object({
     .transform((path) => resolveDataPath(path)),
   /** Automatic notifications of new articles per hour at most: beyond, not announced. */
   AUTO_NOTIFICATIONS_PER_HOUR: z.coerce.number().int().positive().default(10),
+  /** Messages and reports sent from Participer (anonymous). */
+  PARTICIPATION_PATH: z
+    .string()
+    .min(1)
+    .default(".data/participation.json")
+    .transform((path) => resolveDataPath(path)),
+  /** Their photos: a private folder, never served to the public. */
+  PARTICIPATION_PHOTOS_ROOT: z
+    .string()
+    .min(1)
+    .default(".data/participation-photos")
+    .transform((path) => resolveDataPath(path)),
   /** Opportunities prepared and published in the console (two-person rule). */
   OPPORTUNITIES_PATH: z
     .string()

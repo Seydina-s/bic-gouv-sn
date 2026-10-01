@@ -132,4 +132,10 @@ export const MIGRATIONS: readonly { id: string; statements: readonly string[] }[
     id: "011-opportunities",
     statements: ["CREATE TABLE opportunities (id text PRIMARY KEY, data jsonb NOT NULL)"],
   },
+  {
+    // Messages and reports sent from Participer (decision of the user, 01/10/2026):
+    // each one whole, validated by the API; the photos stay in a private folder.
+    id: "012-participation",
+    statements: ["CREATE TABLE participation (id text PRIMARY KEY, data jsonb NOT NULL)"],
+  },
 ];

@@ -205,6 +205,22 @@ export const ERROR_CATALOG = {
     severity: "info",
     action: "Demandez à une autre personne de l'équipe de vérifier et publier l'opportunité.",
   },
+  PARTICIPATION_NOT_FOUND: {
+    what: "Un message, un signalement ou une photo demandés n'existent pas (ou plus).",
+    where: "Centre d'administration, participation",
+    impact: "Rien n'a été modifié ; les messages sont effacés au bout d'un an.",
+    severity: "info",
+    action: "Rechargez la page de la participation.",
+  },
+  PARTICIPATION_PHOTO_INVALID: {
+    what: "Une photo envoyée avec un signalement n'a pas pu être lue.",
+    where: "Application, Participer",
+    impact:
+      "Le signalement n'a pas été enregistré ; la personne voit un message lui proposant de réessayer sans photo.",
+    severity: "info",
+    action:
+      "Rien à faire si c'est ponctuel ; si cela se répète, vérifiez le format des photos envoyées par l'app.",
+  },
   NOTIFICATION_ARTICLE_UNKNOWN: {
     what: "Une notification a été préparée pour un article introuvable ou retiré.",
     where: "Centre d'administration, notifications",

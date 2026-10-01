@@ -29,6 +29,18 @@ describe("FileRemoteConfigStore", () => {
     );
   });
 
+  it("reads a file saved before a feature was added: the new one is on", async () => {
+    const path = join(dir, "remote-config.json");
+    await writeFile(
+      path,
+      JSON.stringify({ minVersion: null, features: { map: false, droppedLongAgo: true } }),
+    );
+    expect(await new FileRemoteConfigStore(path).read()).toEqual({
+      minVersion: null,
+      features: { ...DEFAULT_REMOTE_CONFIG.features, map: false },
+    });
+  });
+
   it("refuses a malformed file instead of guessing", async () => {
     const path = join(dir, "remote-config.json");
     await writeFile(path, JSON.stringify({ minVersion: "v1", features: {} }));

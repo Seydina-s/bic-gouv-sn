@@ -275,6 +275,52 @@ function seedSearchMisses(dataDir: string): void {
   );
 }
 
+/** A message to read and a report with its photo (the console shows both). */
+async function seedParticipation(dataDir: string): Promise<void> {
+  const sharp = createRequire(join(repo, "services", "ingestion", "package.json"))(
+    "sharp",
+  ) as SharpFactory;
+  const photoId = "00000000-0000-4000-8000-00000000c0f1";
+  mkdirSync(join(dataDir, "participation-photos"), { recursive: true });
+  writeFileSync(
+    join(dataDir, "participation-photos", `${photoId}.jpg`),
+    await sharp({ create: { width: 320, height: 240, channels: 3, background: "#7a6a5a" } })
+      .jpeg()
+      .toBuffer(),
+  );
+  const base = {
+    receivedAt: "2026-10-01T09:00:00.000Z",
+    lang: "fr",
+    status: "new",
+    handledBy: null,
+    handledAt: null,
+  };
+  writeFileSync(
+    join(dataDir, "participation.json"),
+    JSON.stringify({
+      schemaVersion: 1,
+      entries: [
+        {
+          ...base,
+          id: "00000000-0000-4000-8000-00000000c0e1",
+          type: "message",
+          topic: "application",
+          text: "Un message fictif pour l'audit d'accessibilité.",
+        },
+        {
+          ...base,
+          id: "00000000-0000-4000-8000-00000000c0e2",
+          type: "report",
+          category: "voirie",
+          text: "Un signalement fictif pour l'audit d'accessibilité.",
+          place: "Quartier fictif",
+          photoId,
+        },
+      ],
+    }),
+  );
+}
+
 /** One opportunity published in the app, one waiting for a second person. */
 function seedOpportunities(dataDir: string): void {
   const someone = { id: "audit-autre-personne", name: "Autre personne (fictive)" };
@@ -405,6 +451,7 @@ export async function seed(dataDir: string, password: string): Promise<void> {
   seedIngestionStatus(dataDir);
   seedErrorJournal(dataDir);
   seedOpportunities(dataDir);
+  await seedParticipation(dataDir);
   await seedArticle(dataDir);
   await seedProcedure(dataDir);
   await seedServices(dataDir);

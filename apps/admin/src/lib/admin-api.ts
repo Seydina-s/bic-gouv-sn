@@ -71,3 +71,30 @@ export async function adminRequest<S extends z.ZodType>({
     return { ok: false, status: null, code: "ADMIN_API_UNREACHABLE" };
   }
 }
+
+/**
+ * A picture from the admin API (a report's photo), for the signed-in person only:
+ * its bytes, or null when it cannot be had (missing, refused, API away).
+ */
+export async function adminPicture(path: string, token: string): Promise<ArrayBuffer | null> {
+  const apiUrl = readApiUrl(process.env);
+  if (apiUrl === null) {
+    return null;
+  }
+  try {
+    const response = await withTimeout(
+      (signal) =>
+        fetch(`${apiUrl}/admin/v1${path}`, {
+          signal,
+          cache: "no-store",
+          headers: { authorization: `Bearer ${token}` },
+        }),
+      { timeoutMs: 8000 },
+    );
+    return response.ok && response.headers.get("content-type") === "image/jpeg"
+      ? await response.arrayBuffer()
+      : null;
+  } catch {
+    return null;
+  }
+}
