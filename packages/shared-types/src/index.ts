@@ -31,3 +31,4 @@ export * from "./api/usage.schema";
 export * from "./common/calendar";
 export * from "./api/push.schema";
 export * from "./api/opportunities.schema";
+export * from "./api/participation.schema";

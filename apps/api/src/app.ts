@@ -62,6 +62,15 @@ import { FileSettingStore, PostgresSettingStore } from "./admin/setting-store";
 import { adminServicesRoutes } from "./routes/admin-services";
 import { adminOpportunitiesRoutes } from "./routes/admin-opportunities";
 import { opportunitiesRoutes } from "./routes/opportunities";
+import { adminParticipationRoutes } from "./routes/admin-participation";
+import { participationRoutes } from "./routes/participation";
+import {
+  FileParticipationStore,
+  ParticipationService,
+  type ParticipationStore,
+  PhotoFolder,
+  PostgresParticipationStore,
+} from "./participation/participation";
 import {
   FileOpportunityStore,
   OpportunityService,
@@ -127,6 +136,8 @@ export interface AppOptions {
   automaticNotificationsEveryMs?: number | null;
   /** Opportunities of the console; defaults from database. */
   opportunityStore?: OpportunityStore;
+  /** Messages and reports of Participer; defaults from database. */
+  participationStore?: ParticipationStore;
 }
 
 export interface AdminServices {
@@ -194,6 +205,9 @@ export async function buildApp({
   opportunityStore = database === null
     ? new FileOpportunityStore(config.OPPORTUNITIES_PATH)
     : new PostgresOpportunityStore(database),
+  participationStore = database === null
+    ? new FileParticipationStore(config.PARTICIPATION_PATH)
+    : new PostgresParticipationStore(database),
 }: AppOptions): Promise<FastifyInstance> {
   const app = Fastify({
     logger: {
@@ -277,6 +291,12 @@ export async function buildApp({
   await app.register(servicesRoutes, { prefix: "/v1", services: stateServices });
   const opportunities = new OpportunityService(opportunityStore, admin?.journal ?? null);
   await app.register(opportunitiesRoutes, { prefix: "/v1", opportunities });
+  const participation = new ParticipationService(
+    participationStore,
+    new PhotoFolder(config.PARTICIPATION_PHOTOS_ROOT),
+    admin?.journal ?? null,
+  );
+  await app.register(participationRoutes, { prefix: "/v1", participation });
   await app.register(pushSubscriptionRoutes, { prefix: "/v1", subscriptions: pushSubscriptions });
   await app.register(mapRoutes, {
     prefix: "/v1",
@@ -369,6 +389,11 @@ export async function buildApp({
       prefix: "/admin/v1",
       signIn: admin.signIn,
       accountAdmin: new AccountAdmin(admin),
+    });
+    await app.register(adminParticipationRoutes, {
+      prefix: "/admin/v1",
+      signIn: admin.signIn,
+      participation,
     });
     await app.register(adminOpportunitiesRoutes, {
       prefix: "/admin/v1",

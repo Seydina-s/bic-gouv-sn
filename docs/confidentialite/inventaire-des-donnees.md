@@ -31,6 +31,7 @@
 | Mots cherchés sans résultat | Recherche sans réponse | Le texte et le jour, seulement s'il a été cherché au moins 3 fois ; rien sur la personne | Les 2 000 recherches les plus fréquentes |
 | Signaux d'usage (statistiques) | Seulement après accord | Des totaux par jour (personnes actives, plateformes, versions, articles lus) ; aucun identifiant | 400 jours |
 | Abonnement aux notifications | Seulement après accord | Le jeton de notification du téléphone, les rubriques, les heures calmes, la langue, et l'heure du premier abonnement (à l'heure près, pour repérer un afflux de faux abonnements) | Jusqu'au désabonnement, ou jusqu'à ce qu'Expo signale le téléphone comme inconnu |
+| Messages au gouvernement et signalements (Participer) | Quand la personne les envoie | Le texte, le sujet ou le type de problème, le lieu s'il est écrit (quartier, commune ; jamais une position), la langue, le jour et l'heure de réception ; la photo d'un signalement, redressée, réduite et **sans ses données cachées** (lieu de prise de vue, appareil), gardée dans un dossier privé, visible seulement dans la console ; **rien sur l'expéditeur** | Un an, puis effacés avec leur photo |
 | Adresse IP | Chaque requête | Seulement en mémoire, pour limiter le débit (fenêtre d'une minute) ; jamais écrite dans les journaux | Une minute |
 
 ## 3. Services tiers
@@ -57,4 +58,5 @@
 1. Durée de conservation des journaux chez l'hébergeur.
 2. Désactivation du stockage des IP chez Sentry (MON-01).
 3. Rédaction de la politique de confidentialité par un juriste, sur la base de ce document.
-4. Déclaration du traitement à la CDP, notamment pour les notifications et, plus tard, Participer et l'IA.
+4. Déclaration du traitement à la CDP, notamment pour les notifications, Participer (textes libres et photos, qui peuvent contenir des données personnelles malgré la consigne d'anonymat) et, plus tard, l'IA.
+5. Durée de conservation de Participer (un an, choix autonome à confirmer).

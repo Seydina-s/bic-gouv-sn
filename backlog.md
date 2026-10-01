@@ -349,7 +349,7 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | Date | Tâche | Origine |
 |---|---|---|
 | 01/10/2026 | MAP-12 ✅ Erreur plein écran dans « Près de moi » en mode optimisé (« production URL … location ») : carte chargée sans morceau séparé (PR #196) | Utilisateur |
-| 01/10/2026 | OPP-01 🔵 Opportunités : contrat, API (publique et console, deux personnes, journal d'audit, PostgreSQL), console « Opportunités », section de l'accueil après les articles, liste avec filtre par type, fiche avec la page officielle ; tests, parcours n° 10, audit | Utilisateur |
+| 01/10/2026 | OPP-01 ✅ (PR #197) Opportunités : contrat, API (publique et console, deux personnes, journal d'audit, PostgreSQL), console « Opportunités », section de l'accueil après les articles, liste avec filtre par type, fiche avec la page officielle ; tests, parcours n° 10, audit | Utilisateur |
 | 01/10/2026 | OPP-02 🔴 Collecte automatique des opportunités (DER/FJ et ADEPME d'abord), après accord sur les sources | Cadrage |
-| 01/10/2026 | PART-01 🔴 Participer : boîte de dialogue « Écrire au gouvernement » (messages reçus dans la console) | Utilisateur |
-| 01/10/2026 | PART-02 🔴 Participer : signaler un problème public avec photo et message, reçu dans la console | Utilisateur |
+| 01/10/2026 | PART-01 ✅ (01/10, 22 h) Participer : boîte de dialogue « Écrire au gouvernement » (sujet, message), reçue dans la console « Participation » | Utilisateur |
+| 01/10/2026 | PART-02 🔵 (01/10, 22 h) Participer : signalement (type, photo prise ou choisie, message, lieu facultatif), reçu dans la console avec la photo ; reste : la photo sur l'iPhone demande une nouvelle compilation (module ajouté), d'ici là l'app propose le signalement sans photo | Utilisateur |

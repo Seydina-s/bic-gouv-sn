@@ -325,6 +325,54 @@ export const fr = {
     openHint: "Affiche le copyright et le texte de la licence",
     projectSite: "Site du projet",
   },
+  participate: {
+    intro:
+      "Votre voix compte. Écrivez au gouvernement ou signalez un problème près de chez vous\u00a0: l'équipe lit chaque message.",
+    messageTitle: "Écrire au gouvernement",
+    messageIntro:
+      "Une idée pour mieux servir les citoyens, un avis sur l'application, une remarque\u00a0? Dites-le simplement.",
+    topic: "Votre message porte sur",
+    topics: {
+      gouvernement: "Le gouvernement",
+      application: "L'application",
+      autre: "Autre chose",
+    },
+    messageLabel: "Votre message",
+    reportTitle: "Signaler un problème",
+    reportIntro:
+      "Une route abîmée, un lampadaire éteint, des déchets, une fuite d'eau\u00a0? Décrivez-le, avec une photo si possible.",
+    category: "Type de problème",
+    categories: {
+      voirie: "Voirie",
+      eclairage: "Éclairage",
+      salubrite: "Salubrité",
+      eau: "Eau",
+      autre: "Autre",
+    },
+    reportLabel: "Ce que vous avez vu",
+    placeLabel: "Lieu (quartier, commune), facultatif",
+    takePhoto: "Prendre une photo",
+    choosePhoto: "Choisir une photo",
+    removePhoto: "Retirer la photo",
+    photoAlt: "Photo jointe au signalement",
+    photoLater: "L'ajout de photo arrivera avec la prochaine version de l'application.",
+    cameraDenied:
+      "L'appareil photo n'est pas autorisé\u00a0: choisissez une photo dans la galerie.",
+    count: "{count} / 2000",
+    tooShort: "Écrivez au moins 10 caractères.",
+    anonymous:
+      "Anonyme\u00a0: n'indiquez ni votre nom ni votre numéro. Pour une urgence, appelez les secours.",
+    send: "Envoyer",
+    sending: "Envoi…",
+    messageSent: "Merci, votre message a bien été transmis à l'équipe.",
+    reportSent: "Merci, votre signalement a bien été transmis à l'équipe.",
+    errors: {
+      offline: "Pas de connexion\u00a0: rien n'est parti. Réessayez quand le réseau revient.",
+      busy: "Beaucoup d'envois depuis ce réseau\u00a0: réessayez dans une heure.",
+      photo: "La photo n'a pas pu être lue. Réessayez avec une autre photo, ou sans photo.",
+      failed: "L'envoi n'a pas abouti. Réessayez dans un instant.",
+    },
+  },
   opportunities: {
     title: "Opportunités",
     intro:

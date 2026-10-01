@@ -44,6 +44,14 @@
         }
       ],
       [
+        "expo-image-picker",
+        {
+          "photosPermission": "Bic Gouv SN ouvre vos photos seulement pour joindre celle que vous choisissez à un signalement.",
+          "cameraPermission": "Bic Gouv SN utilise l’appareil photo seulement pour photographier un problème que vous signalez.",
+          "microphonePermission": false
+        }
+      ],
+      [
         "@sentry/react-native/expo",
         {
           "url": "https://de.sentry.io/",

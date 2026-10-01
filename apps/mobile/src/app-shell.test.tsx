@@ -46,6 +46,23 @@ jest.mock("expo-location", () => ({
 let mockFontState: [boolean, Error | null] = [true, null];
 jest.mock("expo-font", () => ({ useFonts: () => mockFontState }));
 
+// The photo picker exists only in builds made since Participer: a stand-in here.
+let mockPickerAvailable = false;
+const mockPicker = {
+  requestCameraPermissionsAsync: jest.fn(() => Promise.resolve({ granted: true })),
+  launchCameraAsync: jest.fn(),
+  launchImageLibraryAsync: jest.fn(() =>
+    Promise.resolve({
+      canceled: false,
+      assets: [{ uri: "file:///photo-fictive.jpg", base64: "UGhvdG9GaWN0aXZl" }],
+    }),
+  ),
+};
+jest.mock("./features/participate/load-image-picker", () => ({
+  imagePickerAvailable: () => mockPickerAvailable,
+  loadImagePicker: () => mockPicker,
+}));
+
 // The native map exists only in the app's own builds: a stand-in draws it here.
 let mockMapAvailable = false;
 jest.mock("./features/near-me/map-support", () => ({
@@ -102,6 +119,7 @@ beforeEach(async () => {
   await AsyncStorage.setItem("bgs-onboarding", "done");
   mockFontState = [true, null];
   mockMapAvailable = false;
+  mockPickerAvailable = false;
   clearMapCalls();
   // Each journey counts its own questions to the phone.
   jest.mocked(Location.requestForegroundPermissionsAsync).mockClear();
@@ -356,6 +374,75 @@ describe("app shell", () => {
     await fireEvent.press(screen.getByRole("button", { name: "Emploi" }));
     expect(screen.queryByText("Formation fictive de test")).toBeNull();
     expect(screen.getByText("Sans date limite")).toBeOnTheScreen();
+  });
+
+  it("sends a message to the government, anonymous, and says it went", async () => {
+    const fetchMock = newsFetch();
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    await renderRouter(routes, { initialUrl: "/participate" });
+    await fireEvent.press(await screen.findByRole("button", { name: "L'application" }));
+    const box = screen.getByLabelText("Votre message");
+    await fireEvent.changeText(box, "Un message fictif pour les tests.");
+    await fireEvent.press(screen.getAllByRole("button", { name: "Envoyer" })[0] as never);
+    expect(
+      await screen.findByText("Merci, votre message a bien été transmis à l'équipe."),
+    ).toBeOnTheScreen();
+    const sent = fetchMock.mock.calls.find(([url]) => url.includes("/v1/participation/messages"));
+    const init = (sent as unknown as [string, RequestInit] | undefined)?.[1];
+    expect(JSON.parse(init?.body as string)).toEqual({
+      topic: "application",
+      text: "Un message fictif pour les tests.",
+      lang: "fr",
+    });
+    expect(new Headers(init?.headers).get("idempotency-key")).toMatch(/^[a-z0-9-]{16,}$/);
+    expect(screen.getByLabelText("Votre message")).toHaveDisplayValue("");
+  });
+
+  it("reports a public problem with a photo when the build can pick one", async () => {
+    mockPickerAvailable = true;
+    const fetchMock = newsFetch();
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    await renderRouter(routes, { initialUrl: "/participate" });
+    await fireEvent.press(await screen.findByRole("button", { name: "Éclairage" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Choisir une photo" }));
+    expect(await screen.findByLabelText("Photo jointe au signalement")).toBeOnTheScreen();
+    await fireEvent.changeText(
+      screen.getByLabelText("Ce que vous avez vu"),
+      "Un lampadaire fictif éteint.",
+    );
+    await fireEvent.changeText(
+      screen.getByLabelText("Lieu (quartier, commune), facultatif"),
+      "Quartier fictif",
+    );
+    const sends = screen.getAllByRole("button", { name: "Envoyer" });
+    await fireEvent.press(sends[sends.length - 1] as never);
+    expect(
+      await screen.findByText("Merci, votre signalement a bien été transmis à l'équipe."),
+    ).toBeOnTheScreen();
+    const sent = fetchMock.mock.calls.find(([url]) => url.includes("/v1/participation/reports"));
+    const init = (sent as unknown as [string, RequestInit] | undefined)?.[1];
+    expect(JSON.parse(init?.body as string)).toEqual({
+      category: "eclairage",
+      text: "Un lampadaire fictif éteint.",
+      place: "Quartier fictif",
+      photo: "UGhvdG9GaWN0aXZl",
+      lang: "fr",
+    });
+  });
+
+  it("explains a refused sending, and offers no photo where the build cannot take one", async () => {
+    globalThis.fetch = newsFetch({
+      participation: () => new Response("{}", { status: 429 }),
+    }) as unknown as typeof fetch;
+    await renderRouter(routes, { initialUrl: "/participate" });
+    expect(
+      await screen.findByText(
+        "L'ajout de photo arrivera avec la prochaine version de l'application.",
+      ),
+    ).toBeOnTheScreen();
+    await fireEvent.changeText(screen.getByLabelText("Votre message"), "Un message fictif répété.");
+    await fireEvent.press(screen.getAllByRole("button", { name: "Envoyer" })[0] as never);
+    expect(await screen.findByText(/Beaucoup d'envois depuis ce réseau/)).toBeOnTheScreen();
   });
 
   it("opens another tab the instant the finger lands, and only once", async () => {
