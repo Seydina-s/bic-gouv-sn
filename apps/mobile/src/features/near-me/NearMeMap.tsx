@@ -130,11 +130,19 @@ export function NearMeMap({
       {notice !== null ? (
         <MapNotice
           message={notice}
-          action={t("nearMe.chooseTown")}
-          onAction={() => {
-            sheet.current?.resize(EXPANDED);
-          }}
+          // Beside the map, the town search is already in view: nothing to open.
+          action={
+            twoPane
+              ? undefined
+              : {
+                  label: t("nearMe.chooseTown"),
+                  onPress: () => {
+                    sheet.current?.resize(EXPANDED);
+                  },
+                }
+          }
           top={top}
+          left={side}
         />
       ) : (
         origin !== null && (
