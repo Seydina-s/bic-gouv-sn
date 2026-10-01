@@ -26,6 +26,7 @@ import { canListen, ListenButton } from "./ListenButton";
 import { formatPublishedOn } from "./format";
 import { SectionTag } from "./SectionTag";
 import { useNewsArticle } from "./useNews";
+import { dimWhenPressed } from "../../components/press-feedback";
 
 const SOURCE = "presidence.sn";
 
@@ -192,7 +193,10 @@ export function ArticleView({
           <Pressable
             accessibilityRole="link"
             onPress={() => void Linking.openURL(detail.sourceUrl)}
-            style={[styles.sourceLink, { minHeight: theme.touchTarget.min, gap: space.sm }]}
+            style={dimWhenPressed(
+              [styles.sourceLink, { minHeight: theme.touchTarget.min, gap: space.sm }],
+              theme.opacity.controlPressed,
+            )}
           >
             <Icon icon={ArrowSquareOut} size="sm" color={color.textBrand} />
             <Text style={[textStyle.label, { color: color.textBrand }]}>

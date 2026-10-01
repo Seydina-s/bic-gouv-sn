@@ -319,6 +319,13 @@ export const fr = {
     openHint: "Affiche le copyright et le texte de la licence",
     projectSite: "Site du projet",
   },
+  locationInvite: {
+    title: "Voir les services près de vous\u00a0?",
+    body: "Autorisez la localisation\u00a0: les services de l'État les plus proches s'affichent aussitôt, avec leur distance.",
+    note: "Votre position reste sur votre téléphone, elle n'est jamais envoyée. Vous pourrez changer d'avis dans les réglages du téléphone.",
+    accept: "Oui, me localiser",
+    decline: "Non merci",
+  },
   notificationsInvite: {
     title: "Être prévenu des nouveaux articles\u00a0?",
     body: "Dès qu'un article officiel paraît, une notification vous l'annonce, avec sa photo et ses premiers mots.",

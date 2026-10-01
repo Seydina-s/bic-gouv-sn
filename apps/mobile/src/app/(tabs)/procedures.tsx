@@ -120,10 +120,10 @@ function Procedures() {
       <Pressable
         accessibilityRole="button"
         onPress={() => void procedures.refetch()}
-        style={[
+        style={({ pressed }) => [
           styles.button,
           {
-            backgroundColor: color.primary,
+            backgroundColor: pressed ? color.primaryPressed : color.primary,
             borderRadius: radius.md,
             minHeight: touchTarget.min,
             paddingHorizontal: space.xl,

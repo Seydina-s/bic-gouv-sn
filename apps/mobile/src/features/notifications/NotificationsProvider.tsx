@@ -13,7 +13,6 @@ import { createPushClient } from "../../api/push-client";
 import { usePersistentChoice } from "../../data/usePersistentChoice";
 import { useTranslation } from "../../i18n/useTranslation";
 import { SECTION_FILTERS } from "../news/category";
-import { useUsageStats } from "../usage-stats/UsageStatsProvider";
 import {
   isInvitationDue,
   NOTIFICATION_CHOICES,
@@ -44,7 +43,8 @@ export interface NotificationsState {
   supported: boolean;
   choice: NotificationChoice;
   /** On asks the phone's permission first; off stops everything at once. */
-  setChoice: (next: NotificationChoice) => void;
+  /** Settles once the phone's own question, if any, is answered. */
+  setChoice: (next: NotificationChoice) => Promise<void>;
   quiet: QuietChoice;
   setQuiet: (next: QuietChoice) => void;
   /** Null: every section. */
@@ -53,7 +53,7 @@ export interface NotificationsState {
   /** Turned on in the app, but refused in the phone's settings. */
   blocked: boolean;
   invitationDue: boolean;
-  answerInvitation: (accepted: boolean) => void;
+  answerInvitation: (accepted: boolean) => Promise<void>;
   /** The invitation was answered in this session: no other one follows it. */
   answeredThisSession: boolean;
 }
@@ -87,13 +87,12 @@ async function synchronize(
 
 /**
  * Notifications of new articles (PUSH-03): off until the person says yes, asked
- * once like a permission after a first article read. Every section by default,
+ * once like a permission on arriving at the front page. Every section by default,
  * nothing at night unless the person wants it. Nothing about the person is sent:
  * the phone's push token, its language and its quiet hours only.
  */
 export function NotificationsProvider({ children }: { children: ReactNode }) {
   const { t, lang } = useTranslation();
-  const { hasRead } = useUsageStats();
   const [choice, choose] = usePersistentChoice(CHOICE_SLOT, NOTIFICATION_CHOICES, "off");
   const [quiet, setQuiet] = usePersistentChoice(QUIET_SLOT, QUIET_CHOICES, "on");
   const [invited, markInvited] = usePersistentChoice(INVITED_SLOT, INVITED, "no");
@@ -140,18 +139,19 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   }, [supported, choice, quiet, lang, topics]);
 
   const setChoice = useCallback(
-    (next: NotificationChoice) => {
+    async (next: NotificationChoice): Promise<void> => {
       markInvited("yes");
       if (next === "off") {
         choose("off");
         return;
       }
-      askPermission(t("notifications.channel"))
-        .then((state) => {
-          choose(state === "granted" ? "on" : "off");
-          setBlocked(state === "denied");
-        })
-        .catch(() => undefined);
+      try {
+        const state = await askPermission(t("notifications.channel"));
+        choose(state === "granted" ? "on" : "off");
+        setBlocked(state === "denied");
+      } catch {
+        // The phone refused to ask: the choice stays off.
+      }
     },
     [choose, markInvited, t],
   );
@@ -166,10 +166,10 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
       topics,
       setTopics,
       blocked,
-      invitationDue: isInvitationDue({ supported, invited: invited === "yes", choice, hasRead }),
+      invitationDue: isInvitationDue({ supported, invited: invited === "yes", choice }),
       answerInvitation: (accepted: boolean) => {
         setAnsweredThisSession(true);
-        setChoice(accepted ? "on" : "off");
+        return setChoice(accepted ? "on" : "off");
       },
       answeredThisSession,
     }),
@@ -183,7 +183,6 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
       setTopics,
       blocked,
       invited,
-      hasRead,
       answeredThisSession,
     ],
   );

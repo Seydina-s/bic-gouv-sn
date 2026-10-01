@@ -32,6 +32,10 @@ jest.mock("expo-splash-screen", () => ({
 
 jest.mock("expo-location", () => ({
   requestForegroundPermissionsAsync: jest.fn(),
+  // Not allowed yet: nothing is located at opening unless a test says so.
+  getForegroundPermissionsAsync: jest.fn(() => Promise.resolve({ granted: false })),
+  hasServicesEnabledAsync: jest.fn(() => Promise.resolve(true)),
+  enableNetworkProviderAsync: jest.fn(() => Promise.resolve()),
   getLastKnownPositionAsync: jest.fn(),
   getCurrentPositionAsync: jest.fn(),
   Accuracy: { Balanced: 3 },
@@ -95,6 +99,8 @@ beforeEach(async () => {
   mockFontState = [true, null];
   mockMapAvailable = false;
   clearMapCalls();
+  // Each journey counts its own questions to the phone.
+  jest.mocked(Location.requestForegroundPermissionsAsync).mockClear();
   globalThis.fetch = newsFetch() as unknown as typeof fetch;
 });
 
@@ -487,21 +493,22 @@ describe("app shell", () => {
     expect(sentSignals()).toContainEqual({ type: "read", articleId: DETAIL.id });
   });
 
-  it("asks once, like a permission, after a first article; yes turns statistics on at once", async () => {
+  it("asks on arriving at the front page, one after the other; yes turns statistics on at once", async () => {
     const fetchMock = newsFetch();
     globalThis.fetch = fetchMock as unknown as typeof fetch;
     const statsCalls = () => fetchMock.mock.calls.filter(([url]) => url.includes("/v1/stats"));
     await renderRouter(routes, { initialUrl: "/" });
-    // Not before any reading: the front page opens without asking anything.
+    // The front page first, the invitations a moment later, without any reading.
     expect(await screen.findAllByText("Titre de test A")).not.toHaveLength(0);
-    expect(screen.queryByText("Aider à améliorer l'application ?")).toBeNull();
-    await fireEvent.press(first(screen.getAllByText("Titre de test A")));
-    expect(await screen.findByText("Paragraphe de test.")).toBeOnTheScreen();
-    expect(screen.queryByText("Aider à améliorer l'application ?")).toBeNull();
-    await act(() => {
-      router.back();
-    });
-    expect(await screen.findByText("Aider à améliorer l'application ?")).toBeOnTheScreen();
+    expect(screen.queryByText("Voir les services près de vous\u00a0?")).toBeNull();
+    expect(
+      await screen.findByText("Voir les services près de vous\u00a0?", {}, { timeout: 3000 }),
+    ).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole("button", { name: "Non merci" }));
+    expect(Location.requestForegroundPermissionsAsync).not.toHaveBeenCalled();
+    expect(await AsyncStorage.getItem("bgs-location-invited")).toBe("yes");
+    // Right after, in the same card: the anonymous statistics.
+    expect(await screen.findByText("Aider à améliorer l'application\u00a0?")).toBeOnTheScreen();
     expect(statsCalls()).toHaveLength(0);
     await fireEvent.press(screen.getByRole("button", { name: "Oui, j'accepte" }));
     // On at once: today's anonymous signal leaves without visiting the settings.
@@ -509,12 +516,34 @@ describe("app shell", () => {
       expect(statsCalls()).toHaveLength(1);
     });
     expect(await AsyncStorage.getItem("bgs-usage-stats")).toBe("on");
-    expect(screen.queryByText("Aider à améliorer l'application ?")).toBeNull();
+    expect(screen.queryByText("Aider à améliorer l'application\u00a0?")).toBeNull();
     expect(await AsyncStorage.getItem("bgs-usage-invited")).toBe("yes");
   });
 
+  it("finds the position at once when the person allows it, for « Près de moi »", async () => {
+    jest
+      .mocked(Location.requestForegroundPermissionsAsync)
+      .mockResolvedValue({ granted: true } as never);
+    jest
+      .mocked(Location.getLastKnownPositionAsync)
+      .mockResolvedValue({ coords: { latitude: 14.7, longitude: -17.4 } } as never);
+    await renderRouter(routes, { initialUrl: "/" });
+    await fireEvent.press(
+      await screen.findByRole("button", { name: "Oui, me localiser" }, { timeout: 3000 }),
+    );
+    expect(Location.requestForegroundPermissionsAsync).toHaveBeenCalledTimes(1);
+    await act(() => {
+      router.push("/near-me");
+    });
+    // Ranked from the position already found: no tap on « Utiliser ma position ».
+    expect(await screen.findByText("Autour de votre position")).toBeOnTheScreen();
+  });
+
   it("does not ask again once the person said no", async () => {
-    await AsyncStorage.setItem("bgs-usage-invited", "yes");
+    await AsyncStorage.multiSet([
+      ["bgs-usage-invited", "yes"],
+      ["bgs-location-invited", "yes"],
+    ]);
     await renderRouter(routes, { initialUrl: "/" });
     await fireEvent.press(first(await screen.findAllByText("Titre de test A")));
     expect(await screen.findByText("Paragraphe de test.")).toBeOnTheScreen();
@@ -522,7 +551,7 @@ describe("app shell", () => {
       router.back();
     });
     expect(await screen.findAllByText("Titre de test A")).not.toHaveLength(0);
-    expect(screen.queryByText("Aider à améliorer l'application ?")).toBeNull();
+    expect(screen.queryByText("Aider à améliorer l'application\u00a0?")).toBeNull();
   });
 
   it("erases what the phone kept for statistics when they are turned off", async () => {

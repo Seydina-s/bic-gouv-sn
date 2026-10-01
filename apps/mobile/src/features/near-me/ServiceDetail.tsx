@@ -14,6 +14,7 @@ import { formatPublishedOn } from "../news/format";
 import { openDirections } from "./directions";
 import { describeHours, type HoursWords } from "./opening-hours";
 import { ServiceBadge } from "./ServiceParts";
+import { dimWhenPressed } from "../../components/press-feedback";
 
 const OSM_COPYRIGHT = "https://www.openstreetmap.org/copyright";
 
@@ -61,7 +62,11 @@ function Fact({
       {content}
     </View>
   ) : (
-    <Pressable accessibilityRole="link" onPress={onPress} style={style}>
+    <Pressable
+      accessibilityRole="link"
+      onPress={onPress}
+      style={dimWhenPressed(style, theme.opacity.controlPressed)}
+    >
       {content}
     </Pressable>
   );
@@ -190,7 +195,11 @@ export function ServiceCard({ service }: { service: PublicService }) {
           {t("nearMe.verifiedOn", { date: verifiedOn })}
         </Text>
         {service.origin === "osm" && (
-          <Pressable accessibilityRole="link" onPress={open(OSM_COPYRIGHT)}>
+          <Pressable
+            accessibilityRole="link"
+            onPress={open(OSM_COPYRIGHT)}
+            style={dimWhenPressed(null, theme.opacity.controlPressed)}
+          >
             <Text style={[textStyle.bodySmall, { color: color.textTertiary }]}>
               {t("nearMe.attribution")}
             </Text>

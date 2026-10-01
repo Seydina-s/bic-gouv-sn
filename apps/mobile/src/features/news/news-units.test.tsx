@@ -6,7 +6,7 @@ import { createNewsClient, NewsApiError } from "../../api/news-client";
 import { COVER, DETAIL, LIST } from "../../testing/news-fixtures";
 import { TestProviders } from "../../testing/TestProviders";
 import { ArticleView } from "./ArticleView";
-import { BlockRenderer } from "./BlockRenderer";
+import { BlockRenderer, FIRST_BLOCKS } from "./BlockRenderer";
 import { categoryLabelKey } from "./category";
 import { pickCoverSource } from "./CoverImage";
 import { formatDay, formatPublishedOn, freshnessOf, parseCalendarDate } from "./format";
@@ -99,6 +99,22 @@ describe("format", () => {
 });
 
 describe("BlockRenderer", () => {
+  it("draws the first blocks with the screen, then the rest right after", async () => {
+    const blocks: Block[] = Array.from({ length: FIRST_BLOCKS + 4 }, (_, index) => ({
+      type: "paragraph",
+      inlines: [{ text: `Paragraphe fictif ${String(index + 1)}` }],
+    }));
+    await render(
+      <TestProviders>
+        <BlockRenderer blocks={blocks} />
+      </TestProviders>,
+    );
+    expect(screen.getByText(`Paragraphe fictif ${String(FIRST_BLOCKS)}`)).toBeOnTheScreen();
+    expect(
+      await screen.findByText(`Paragraphe fictif ${String(FIRST_BLOCKS + 4)}`),
+    ).toBeOnTheScreen();
+  });
+
   it("renders every block type natively and opens links", async () => {
     const openURL = jest.spyOn(Linking, "openURL").mockResolvedValue(true);
     await render(

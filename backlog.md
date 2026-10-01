@@ -325,3 +325,11 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | AUD7-04 ✅ (01/10 : parcours n° 9) | QA | Le résumé « À traiter » de l'accueil n'est couvert que par l'audit d'accessibilité et les tests unitaires, pas par un parcours de bout en bout | Basse |
 | AUD7-05 | Données | Nouvelle donnée : l'heure du premier abonnement aux notifications (à l'heure près), inscrite dans l'inventaire des données ; à confirmer par l'utilisateur (point 23) | Moyenne |
 | AUD7-06 | Ingestion & Données | Opportunités : certificats invalides sur marchespublics.sn et directiondesbourses.sn, accès automatique refusé par 3fpt.sn ; à signaler aux organismes si la collecte est retenue (séance de 13 h) | Moyenne |
+
+### Demandes de l'utilisateur du 01/10/2026, 14 h 40 (mode autonome jusqu'à 20 h)
+
+| Date | Tâche | Origine |
+|---|---|---|
+| 01/10/2026 | MAP-11 ✅ Erreurs rouges en bas de « Près de moi » sur l'iPhone : plages de lettres de la carte manquantes (404) ; le serveur répond désormais un ensemble vide (PR #185) | Utilisateur |
+| 01/10/2026 | PERM-01 🔵 Invitations dès l'accueil, quelques secondes après l'arrivée (présentation terminée) : notifications, puis localisation, puis statistiques anonymes, bouton positif coloré ; position obtenue tout de suite si accordée, et à chaque ouverture ensuite ; une seule fenêtre dont le contenu change (sur iPhone, une fenêtre ouverte pendant qu'une autre se ferme peut ne jamais s'afficher). Sur l'aperçu web, inchangé (pas de notifications ni de localisation ; statistiques après un article) | Utilisateur |
+| 01/10/2026 | PERF-04 🔵 Fluidité : retour visuel immédiat sur tous les contrôles touchables, corps des articles affiché progressivement (6 premiers blocs avec l'écran, le reste à l'image suivante), « Démarches » et « Près de moi » préparés en arrière-plan 2,5 s après l'arrivée sur l'accueil (pas la carte en économie de données). À mesurer sur l'iPhone avec le code optimisé (la version de développement est 2 à 5 fois plus lente) | Utilisateur |

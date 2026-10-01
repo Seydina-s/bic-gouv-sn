@@ -28,6 +28,7 @@ import { useTheme } from "../../theme/useTheme";
 import { InPanel } from "./FieldTextInput";
 import { ServiceCard } from "./ServiceDetail";
 import { ServiceRow } from "./ServiceParts";
+import { dimWhenPressed } from "../../components/press-feedback";
 
 /** Reduced at first (the map leads), then halfway, then most of the screen. */
 export const SHEET_SNAPS = ["25%", "45%", "70%"] as const;
@@ -138,7 +139,10 @@ function PanelContent({ inSheet, header, rows, empty, selected, onSelect, onBack
       <Pressable
         accessibilityRole="button"
         onPress={onBack}
-        style={[styles.back, { gap: space.sm, minHeight: touchTarget.min }]}
+        style={dimWhenPressed(
+          [styles.back, { gap: space.sm, minHeight: touchTarget.min }],
+          theme.opacity.controlPressed,
+        )}
       >
         <Icon icon={ArrowLeft} size="sm" color={color.textBrand} />
         <Text style={[textStyle.label, { color: color.textBrand }]}>{t("nearMe.backToList")}</Text>

@@ -20,11 +20,12 @@ import { FeatureGate } from "../../features/remote-config/FeatureGate";
 import { useFeature } from "../../features/remote-config/useRemoteConfig";
 import { nearestServices } from "../../features/near-me/nearby";
 import { ServiceFilters, ServiceRow } from "../../features/near-me/ServiceParts";
-import { useLocation } from "../../features/near-me/useLocation";
+import { useLocation } from "../../features/location/LocationProvider";
 import { useStateServices } from "../../features/near-me/useStateServices";
 import { FloatingAppBar } from "../../features/shell/FloatingAppBar";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
+import { dimWhenPressed } from "../../components/press-feedback";
 
 const OSM_COPYRIGHT = "https://www.openstreetmap.org/copyright";
 
@@ -165,12 +166,12 @@ function NearMe() {
       <Pressable
         accessibilityRole="button"
         onPress={() => void services.refetch()}
-        style={[
+        style={({ pressed }) => [
           styles.retry,
           {
             minHeight: touchTarget.min,
             paddingHorizontal: space.xl,
-            backgroundColor: color.primary,
+            backgroundColor: pressed ? color.primaryPressed : color.primary,
             borderRadius: theme.radius.md,
           },
         ]}
@@ -189,7 +190,10 @@ function NearMe() {
       <Pressable
         accessibilityRole="link"
         onPress={() => void Linking.openURL(OSM_COPYRIGHT)}
-        style={{ padding: space.lg, minHeight: touchTarget.min }}
+        style={dimWhenPressed(
+          { padding: space.lg, minHeight: touchTarget.min },
+          theme.opacity.controlPressed,
+        )}
       >
         <Text style={[textStyle.bodySmall, { color: color.textTertiary }]}>
           {t("nearMe.attribution")}

@@ -49,6 +49,8 @@ export const opacity = {
   watermark: 0.06,
   /** Whole tinted card while pressed. */
   cardPressed: 0.85,
+  /** Plain controls (text links, text buttons) while pressed: the tap is felt at once. */
+  controlPressed: 0.55,
 } as const;
 
 /**

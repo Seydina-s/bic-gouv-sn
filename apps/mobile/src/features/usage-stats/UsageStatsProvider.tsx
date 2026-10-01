@@ -72,7 +72,7 @@ export interface UsageStats {
    */
   invitationDue: boolean;
   /** Yes turns the statistics on at once; either answer closes the invitation for good. */
-  answerInvitation: (accepted: boolean) => void;
+  answerInvitation: (accepted: boolean) => Promise<void>;
   /** An article was read in this session (other invitations wait for it too). */
   hasRead: boolean;
 }
@@ -124,7 +124,8 @@ export function UsageStatsProvider({ children }: { children: ReactNode }) {
   }, [consent]);
 
   const [invited, markInvited] = usePersistentChoice(INVITED_SLOT, INVITED, "no");
-  // Only after a first article read in this session: the app has shown its worth.
+  // On a phone, asked on arriving at the front page with the other invitations
+  // (decision of the user, 01/10/2026); on the web preview, after a first article.
   const [hasRead, setHasRead] = useState(false);
 
   const setConsent = useCallback(
@@ -156,9 +157,10 @@ export function UsageStatsProvider({ children }: { children: ReactNode }) {
       consent,
       setConsent,
       record,
-      invitationDue: invited === "no" && consent === "off" && hasRead,
+      invitationDue: invited === "no" && consent === "off" && (Platform.OS !== "web" || hasRead),
       answerInvitation: (accepted: boolean) => {
         setConsent(accepted ? "on" : "off");
+        return Promise.resolve();
       },
       hasRead,
     }),

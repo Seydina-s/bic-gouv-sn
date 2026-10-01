@@ -1,6 +1,6 @@
 import type { Block, Inline } from "@bgs/shared-types";
 import { Image } from "expo-image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PlayCircleIcon as PlayCircle } from "phosphor-react-native/src/icons/PlayCircle";
 import {
   Linking,
@@ -99,13 +99,38 @@ function ArticleImage({ block }: { block: ImageBlock }) {
   );
 }
 
+/** Blocks drawn with the screen: enough to fill it while it slides in. */
+export const FIRST_BLOCKS = 6;
+
+/**
+ * How many blocks to draw: the first ones at once, all of them right after the
+ * first frame. A long text (a Council of Ministers) no longer holds the screen back
+ * from sliding in the instant it is tapped.
+ */
+function useShownBlocks(total: number): number {
+  const [all, setAll] = useState(total <= FIRST_BLOCKS);
+  useEffect(() => {
+    if (all) {
+      return undefined;
+    }
+    const frame = requestAnimationFrame(() => {
+      setAll(true);
+    });
+    return () => {
+      cancelAnimationFrame(frame);
+    };
+  }, [all]);
+  return all ? total : FIRST_BLOCKS;
+}
+
 /** Renders the API's structured blocks with native components: no web view, no HTML. */
 export function BlockRenderer({ blocks }: { blocks: Block[] }) {
   const { theme } = useTheme();
   const { color, space, textStyle } = theme;
   const text = { color: color.textPrimary, marginBottom: space.lg };
+  const shown = useShownBlocks(blocks.length);
 
-  return blocks.map((block, index) => {
+  return blocks.slice(0, shown).map((block, index) => {
     const key = `${block.type}-${String(index)}`;
     switch (block.type) {
       case "paragraph":

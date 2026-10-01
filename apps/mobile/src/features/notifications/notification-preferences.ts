@@ -63,11 +63,12 @@ export interface InvitationFacts {
   supported: boolean;
   invited: boolean;
   choice: NotificationChoice;
-  /** An article was read in this session: the app has shown its worth. */
-  hasRead: boolean;
 }
 
-/** Asked once, like a permission, after a first article read, never if already chosen. */
-export function isInvitationDue({ supported, invited, choice, hasRead }: InvitationFacts): boolean {
-  return supported && !invited && choice === "off" && hasRead;
+/**
+ * Asked once, like a permission, on arriving at the front page (decision of the
+ * user, 01/10/2026), never if already chosen.
+ */
+export function isInvitationDue({ supported, invited, choice }: InvitationFacts): boolean {
+  return supported && !invited && choice === "off";
 }

@@ -14,6 +14,7 @@ import { useNotificationTaps } from "../features/notifications/useNotificationTa
 import { UpdateGate } from "../features/remote-config/FeatureGate";
 import { SettingsProvider } from "../features/shell/SettingsProvider";
 import { FavoritesProvider } from "../features/favorites/FavoritesProvider";
+import { LocationProvider } from "../features/location/LocationProvider";
 import { OnboardingLayer } from "../features/onboarding/OnboardingLayer";
 import { OnboardingProvider, useOnboardingDone } from "../features/onboarding/OnboardingProvider";
 import { I18nProvider } from "../i18n/I18nProvider";
@@ -82,13 +83,15 @@ function RootLayout() {
               <DataSaverProvider>
                 <UsageStatsProvider>
                   <NotificationsProvider>
-                    <OnboardingProvider>
-                      <SettingsProvider>
-                        <UpdateGate>
-                          <ThemedStack />
-                        </UpdateGate>
-                      </SettingsProvider>
-                    </OnboardingProvider>
+                    <LocationProvider>
+                      <OnboardingProvider>
+                        <SettingsProvider>
+                          <UpdateGate>
+                            <ThemedStack />
+                          </UpdateGate>
+                        </SettingsProvider>
+                      </OnboardingProvider>
+                    </LocationProvider>
                   </NotificationsProvider>
                 </UsageStatsProvider>
               </DataSaverProvider>
