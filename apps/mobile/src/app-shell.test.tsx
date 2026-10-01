@@ -865,6 +865,14 @@ describe("app shell", () => {
         await screen.findByRole("header", { name: "Commissariat de test proche" }),
       ).toBeOnTheScreen();
       expect(screen.getByRole("button", { name: "Retour à la liste" })).toBeOnTheScreen();
+      // Location refused: the message stays clear of the panel and offers nothing
+      // to open, the town search being already in view beside it.
+      jest
+        .mocked(Location.requestForegroundPermissionsAsync)
+        .mockResolvedValueOnce({ granted: false } as never);
+      await fireEvent.press(screen.getByRole("button", { name: "Me localiser sur la carte" }));
+      expect(await screen.findByText(/La localisation n'est pas autorisée/)).toBeOnTheScreen();
+      expect(screen.queryByRole("button", { name: "Choisir une ville" })).toBeNull();
     } finally {
       Dimensions.set({ window: phone });
     }
