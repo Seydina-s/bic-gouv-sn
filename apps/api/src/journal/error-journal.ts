@@ -1,4 +1,4 @@
-import type { ErrorJournalEntry } from "@bgs/shared-types";
+import type { ErrorJournalEntry, ErrorResolution, ResolveError } from "@bgs/shared-types";
 import type { FastifyInstance } from "fastify";
 import {
   addGroups,
@@ -89,6 +89,12 @@ export class ErrorJournal extends PeriodicallySaved {
       addGroups(this.pending, journaled.values());
       throw error;
     }
+  }
+
+  /** Marks a group as fixed; what was journaled here is saved first, so it is found. */
+  async resolve(target: ResolveError, resolution: ErrorResolution): Promise<boolean> {
+    await this.flush();
+    return this.store.resolve(target, resolution);
   }
 
   /** Latest first. */

@@ -1,6 +1,7 @@
 import {
   describeError,
   isOngoing,
+  isResolved,
   type ErrorDescription,
   type ErrorJournalEntry,
   type ErrorSeverity,
@@ -17,6 +18,12 @@ export interface JournalRow {
   lastAt: Date;
   ongoing: boolean;
   lastRequestId: string | null;
+  /** The group to mark as fixed; none for the collection, which runs apart. */
+  group: { code: string; where: string } | null;
+  /** Last marked as fixed, if ever. */
+  resolved: { at: Date; by: string } | null;
+  /** Marked as fixed and not seen since: set apart. */
+  fixed: boolean;
 }
 
 /** The collection runs apart from the API: its last failure joins the journal. */
@@ -26,7 +33,8 @@ const SEVERITY_ORDER: Record<ErrorSeverity, number> = { critical: 0, warning: 1,
 
 /**
  * The journal as a person reads it (CLAUDE.md §4.5): what still happens first, then
- * the most serious, then the most recent; each error in the catalog's plain words.
+ * the most serious, then the most recent, and those marked as fixed last; each
+ * error in the catalog's plain words.
  */
 export function journalRows(
   entries: readonly ErrorJournalEntry[],
@@ -41,6 +49,12 @@ export function journalRows(
     lastAt: new Date(entry.lastAt),
     ongoing: isOngoing(entry, now),
     lastRequestId: entry.lastRequestId,
+    group: { code: entry.code, where: entry.where },
+    resolved:
+      entry.resolved === undefined
+        ? null
+        : { at: new Date(entry.resolved.at), by: entry.resolved.by },
+    fixed: isResolved(entry),
   }));
   const failure = collection?.lastFailure ?? null;
   if (collection !== null && failure !== null) {
@@ -52,10 +66,14 @@ export function journalRows(
       lastAt: new Date(failure.at),
       ongoing: collection.consecutiveFailures > 0,
       lastRequestId: null,
+      group: null,
+      resolved: null,
+      fixed: false,
     });
   }
   return rows.sort(
     (a, b) =>
+      Number(a.fixed) - Number(b.fixed) ||
       Number(b.ongoing) - Number(a.ongoing) ||
       SEVERITY_ORDER[a.explanation.severity] - SEVERITY_ORDER[b.explanation.severity] ||
       b.lastAt.getTime() - a.lastAt.getTime(),

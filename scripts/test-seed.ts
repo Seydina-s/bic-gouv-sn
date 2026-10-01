@@ -273,6 +273,31 @@ function seedSearchMisses(dataDir: string): void {
   );
 }
 
+/** One error to deal with, one marked as fixed (the console shows both). */
+function seedErrorJournal(dataDir: string): void {
+  const group = (code: string, where: string) => ({
+    code,
+    where,
+    count: 2,
+    firstAt: "2026-09-28T08:00:00.000Z",
+    lastAt: "2026-09-28T09:00:00.000Z",
+    lastRequestId: null,
+  });
+  writeFileSync(
+    join(dataDir, "error-journal.json"),
+    JSON.stringify({
+      schemaVersion: 1,
+      entries: [
+        group("INTERNAL_ERROR", "GET /v1/news"),
+        {
+          ...group("RATE_LIMITED", "GET /v1/procedures"),
+          resolved: { at: "2026-09-28T10:00:00.000Z", by: "Personne fictive" },
+        },
+      ],
+    }),
+  );
+}
+
 /** A collection report with the source's protection suspended, as after an outage. */
 function seedIngestionStatus(dataDir: string): void {
   const now = new Date().toISOString();
@@ -336,6 +361,7 @@ export async function seed(dataDir: string, password: string): Promise<void> {
   seedUsage(dataDir);
   seedNotifications(dataDir);
   seedIngestionStatus(dataDir);
+  seedErrorJournal(dataDir);
   await seedArticle(dataDir);
   await seedProcedure(dataDir);
   await seedServices(dataDir);

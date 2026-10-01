@@ -177,6 +177,13 @@ export const ERROR_CATALOG = {
     severity: "info",
     action: "Rechargez la page des notifications.",
   },
+  ERROR_GROUP_NOT_FOUND: {
+    what: "Une erreur à marquer comme réglée n'est plus dans le journal.",
+    where: "Centre d'administration, journal des erreurs",
+    impact: "Rien n'a été modifié : seules les 300 erreurs les plus récentes sont gardées.",
+    severity: "info",
+    action: "Rechargez le journal des erreurs.",
+  },
   NOTIFICATION_ARTICLE_UNKNOWN: {
     what: "Une notification a été préparée pour un article introuvable ou retiré.",
     where: "Centre d'administration, notifications",

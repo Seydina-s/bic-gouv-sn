@@ -27,6 +27,32 @@ describe("console error journal", () => {
     expect(rows[1]?.explanation.what).toMatch(/adresse inexistante/);
   });
 
+  it("sets apart the errors marked as fixed, and brings one back when it happens again", () => {
+    const by = "Personne fictive";
+    const rows = journalRows(
+      [
+        {
+          ...entry("INTERNAL_ERROR", "2026-09-28T01:00:00Z"),
+          resolved: { at: "2026-09-28T01:30:00Z", by },
+        },
+        {
+          ...entry("RATE_LIMITED", "2026-09-28T01:40:00Z"),
+          resolved: { at: "2026-09-28T01:30:00Z", by },
+        },
+        entry("ROUTE_NOT_FOUND", "2026-09-27T20:00:00Z"),
+      ],
+      null,
+      NOW,
+    );
+    expect(rows.map((row) => [row.explanation.code, row.fixed])).toEqual([
+      ["RATE_LIMITED", false],
+      ["ROUTE_NOT_FOUND", false],
+      ["INTERNAL_ERROR", true],
+    ]);
+    expect(rows[0]?.resolved?.by).toBe(by);
+    expect(rows[2]?.group).toEqual({ code: "INTERNAL_ERROR", where: "GET /v1/news" });
+  });
+
   it("adds the collection's failure, and flags a code missing from the catalog", () => {
     const collection: IngestionStatus = {
       checkedAt: "2026-09-28T01:59:00Z",
@@ -37,7 +63,13 @@ describe("console error journal", () => {
       lastFailure: { code: "INGESTION_SOURCE_UNREACHABLE", at: "2026-09-28T01:59:00Z" },
     };
     const rows = journalRows([entry("SOMETHING_NEW", "2026-09-28T01:00:00Z")], collection, NOW);
-    expect(rows[0]).toMatchObject({ place: COLLECTION_PLACE, count: 3, ongoing: true });
+    expect(rows[0]).toMatchObject({
+      place: COLLECTION_PLACE,
+      count: 3,
+      ongoing: true,
+      group: null,
+      fixed: false,
+    });
     expect(rows[0]?.explanation.severity).toBe("critical");
     expect(rows[1]?.explanation.catalogued).toBe(false);
   });

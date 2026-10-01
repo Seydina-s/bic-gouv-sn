@@ -542,6 +542,20 @@ export const adminFr = {
     code: "Code",
     place: "Endroit",
     request: "Dernière requête",
+    resolve: "Marquer comme réglée",
+    resolvedDone:
+      "Erreur marquée comme réglée. Elle reviendra en tête de liste si elle se reproduit.",
+    resolveFailed: "L'erreur n'a pas pu être marquée comme réglée. Réessayez dans un instant.",
+    editorsOnly:
+      "Seuls les éditeurs et les administrateurs peuvent marquer une erreur comme réglée.",
+    gone: "Cette erreur n'est plus dans le journal. Rechargez la page.",
+    resolvedBy: "Réglée le {day} à {time} ({name})",
+    cameBack: "Revenue après avoir été marquée réglée le {day} à {time} ({name}).",
+    noneOpen: "Aucune erreur à traiter : celles du journal ont toutes été réglées.",
+    fixedTitle: {
+      one: "{count} erreur réglée",
+      other: "{count} erreurs réglées",
+    },
   },
 } as const;
 

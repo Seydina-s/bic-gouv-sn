@@ -1,6 +1,6 @@
 # STATUS — Bic Gouv SN
 
-**Dernière mise à jour** : 01/10/2026 (5 h) · **Mode** : autonome jusqu'au 01/10 à 13 h, puis séance avec l'utilisateur : Opportunités, Participer, IA. Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md` (22 points, dont plusieurs réglés).
+**Dernière mise à jour** : 01/10/2026 (6 h) · **Mode** : autonome jusqu'au 01/10 à 13 h, puis séance avec l'utilisateur : Opportunités, Participer, IA. Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md` (22 points, dont plusieurs réglés).
 
 ## Où on en est
 - Dépôt **public et sécurisé** : https://github.com/Seydina-s/bic-gouv-sn. `main` protégée : tout passe par PR + **4 contrôles verts** (qualité et tests, constructions avec **audit d'accessibilité** sur 82 écrans dont 26 à 320 px et **6 parcours de bout en bout**, secrets et dépendances, **conteneurs**).
@@ -50,6 +50,13 @@
   - **journaux de l'API sans IP ni recherche** (minimisation) ; **inventaire des données** (`docs/confidentialite/`) ; **fichier des 271 textes à traduire en wolof** (`docs/traduction/`, `pnpm i18n:wolof`) ;
   - **dossier de cadrage** pour la séance de 13 h : `docs/cadrage/opportunites-participer-ia.md` ;
   - audit croisé AUD6 ; mesure du poids de l'app (Sentry ≈ 2 Mo de source, levier principal mais bloqué par PERF-03).
+- Matin du 01/10 (PR #162 à #169), mode autonome :
+  - **parcours de bout en bout n° 7** : « Redémarrer » la présentation depuis les Réglages, étape par étape, jusqu'à l'app ;
+  - **audit d'accessibilité de chaque étape de la présentation** (clair, sombre, 320 px ; 92 écrans) : il a trouvé une carte de texte inatteignable au clavier, corrigée ;
+  - console : **alerte d'afflux d'abonnements** (au moins 500 en 24 h et 5 fois le rythme habituel ; heure d'abonnement gardée à l'heure près, à confirmer) ; journal des erreurs : **« Marquer comme réglée »** (éditeurs, journal d'audit, l'erreur revient si elle se reproduit) ;
+  - « Près de moi » : avertissement de localisation à côté du volet latéral ;
+  - protection du terminal : **toute poussée doit suivre le scanner de secrets** (deuxième entorse à cette règle, ERREURS.md) ;
+  - dossier de cadrage : **ce que permet chaque portail d'Opportunités** (règles des robots, certificats : marchespublics.sn et directiondesbourses.sn bloquent une collecte sûre ; FONGIP confirmé).
 - Contrôle complet : plus de 1 150 tests verts.
 - Incident du 29/09 : clé de l'API **locale** apparue dans la conversation ; remplacée le jour même (ERREURS.md).
 
