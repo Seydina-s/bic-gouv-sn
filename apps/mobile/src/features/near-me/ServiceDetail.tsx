@@ -11,7 +11,7 @@ import { Icon } from "../../components/Icon";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 import { formatPublishedOn } from "../news/format";
-import { directionsUrl } from "./directions";
+import { openDirections } from "./directions";
 import { describeHours, type HoursWords } from "./opening-hours";
 import { ServiceBadge } from "./ServiceParts";
 
@@ -84,7 +84,7 @@ function useHoursWords(): HoursWords {
 /**
  * One state service: what it is, where, when it opens, how to reach it, and the
  * way there through the phone's own navigation app. Only verified facts. Its own
- * screen on a phone, the detail pane beside the list on a large screen.
+ * screen, the detail pane beside the list on a large screen, or the map's panel.
  */
 export function ServiceDetail({
   service,
@@ -94,9 +94,28 @@ export function ServiceDetail({
   bottomInset: number;
 }) {
   const { theme } = useTheme();
+  const { space, layout } = theme;
+  return (
+    <ScrollView
+      contentContainerStyle={{
+        padding: space.lg,
+        paddingBottom: bottomInset + space.xxl,
+        alignSelf: "center",
+        width: "100%",
+        maxWidth: layout.readingMaxWidth,
+      }}
+    >
+      <ServiceCard service={service} />
+    </ScrollView>
+  );
+}
+
+/** The facts of a service, without their own scrolling (a page or a panel scrolls them). */
+export function ServiceCard({ service }: { service: PublicService }) {
+  const { theme } = useTheme();
   const { t, lang } = useTranslation();
   const hoursWords = useHoursWords();
-  const { color, space, textStyle, radius, touchTarget, layout } = theme;
+  const { color, space, textStyle, radius, touchTarget } = theme;
   const open = (url: string) => () => void Linking.openURL(url);
   // In plain French when fully understood; as the source wrote it otherwise.
   const hours =
@@ -106,16 +125,7 @@ export function ServiceDetail({
   const verifiedOn = formatPublishedOn(service.verifiedAt.slice(0, 10), lang);
 
   return (
-    <ScrollView
-      contentContainerStyle={{
-        padding: space.lg,
-        paddingBottom: bottomInset + space.xxl,
-        gap: space.lg,
-        alignSelf: "center",
-        width: "100%",
-        maxWidth: layout.readingMaxWidth,
-      }}
-    >
+    <View style={{ gap: space.lg }}>
       <Text accessibilityRole="header" style={[textStyle.title, { color: color.textPrimary }]}>
         {service.name}
       </Text>
@@ -128,7 +138,11 @@ export function ServiceDetail({
 
       <Pressable
         accessibilityRole="link"
-        onPress={open(directionsUrl(service.location, service.name, Platform.OS))}
+        onPress={() => {
+          openDirections(service.location, service.name, Platform.OS, Linking).catch(
+            () => undefined,
+          );
+        }}
         style={({ pressed }) => [
           styles.button,
           {
@@ -183,7 +197,7 @@ export function ServiceDetail({
           </Pressable>
         )}
       </View>
-    </ScrollView>
+    </View>
   );
 }
 

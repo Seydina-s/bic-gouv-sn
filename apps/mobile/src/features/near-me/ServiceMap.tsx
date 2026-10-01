@@ -5,14 +5,17 @@ import {
   type FilterSpecification,
   GeoJSONSource,
   type GeoJSONSourceRef,
+  Images,
   Layer,
   Map as MapLibreMap,
   NativeUserLocation,
 } from "@maplibre/maplibre-react-native";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { StyleSheet } from "react-native";
+import { themes } from "@bgs/ui";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
+import { MARKER_IMAGES } from "./marker-images";
 import { AROUND_ZOOM, initialView, mapStyleUrl, servicePoints, touchedPoint } from "./service-map";
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL ?? "";
@@ -27,11 +30,11 @@ const LABEL_FONT = ["Noto Sans Medium"];
 const MARKER = {
   groupRadius: 44,
   groupSizes: [16, 10, 20, 50, 26],
-  radius: 8,
   ring: 2,
-  chosenRadius: 12,
-  chosenRing: 4,
-  haloRadius: 22,
+  /** The kind's marker (32 points), and larger when chosen. */
+  iconSize: 1,
+  chosenIconSize: 1.35,
+  haloRadius: 28,
   haloOpacity: 0.24,
   /** Names sit under their point, in lines of at most this many letters widths. */
   labelOffset: 1.2,
@@ -80,7 +83,10 @@ export default function ServiceMap({
 }: ServiceMapProps) {
   const { theme } = useTheme();
   const { t } = useTranslation();
-  const { color, textStyle } = theme;
+  const { textStyle } = theme;
+  // The base map is always light: what is drawn on it takes the light colors too
+  // (a dark theme's light text would vanish on it).
+  const color = themes.light.color;
   const camera = useRef<CameraRef>(null);
   const source = useRef<GeoJSONSourceRef>(null);
   const points = useMemo(() => servicePoints(services), [services]);
@@ -128,7 +134,9 @@ export default function ServiceMap({
   return (
     <MapLibreMap
       style={StyleSheet.absoluteFill}
-      mapStyle={mapStyleUrl(API_BASE, theme.scheme)}
+      // Always the light map: easier to read (decision of 30/09/2026); the controls
+      // around it follow the theme.
+      mapStyle={mapStyleUrl(API_BASE, "light")}
       attribution={false}
       logo={false}
       compass={false}
@@ -149,6 +157,7 @@ export default function ServiceMap({
           firstView === null ? { bounds: COUNTRY, padding } : { ...firstView, padding }
         }
       />
+      <Images images={MARKER_IMAGES} />
       <GeoJSONSource
         ref={source}
         id="services"
@@ -186,18 +195,7 @@ export default function ServiceMap({
           }}
           paint={{ "text-color": color.onPrimary }}
         />
-        <Layer
-          id="service-points"
-          type="circle"
-          filter={SINGLE}
-          paint={{
-            "circle-color": color.primary,
-            "circle-radius": MARKER.radius,
-            "circle-stroke-width": MARKER.ring,
-            "circle-stroke-color": color.onPrimary,
-          }}
-        />
-        {/* The chosen service: larger, ringed with the flag's yellow, on a soft halo. */}
+        {/* The chosen service sits on a soft halo, under its larger marker. */}
         <Layer
           id="service-chosen-halo"
           type="circle"
@@ -208,15 +206,17 @@ export default function ServiceMap({
             "circle-opacity": MARKER.haloOpacity,
           }}
         />
+        {/* Each service: its kind's marker (tone and icon), as in the list. */}
         <Layer
-          id="service-chosen"
-          type="circle"
-          filter={chosen}
-          paint={{
-            "circle-color": color.primary,
-            "circle-radius": MARKER.chosenRadius,
-            "circle-stroke-width": MARKER.chosenRing,
-            "circle-stroke-color": color.accent,
+          id="service-points"
+          type="symbol"
+          filter={SINGLE}
+          layout={{
+            "icon-image": ["get", "category"],
+            "icon-size": ["case", chosen, MARKER.chosenIconSize, MARKER.iconSize],
+            "icon-allow-overlap": true,
+            "icon-ignore-placement": true,
+            "symbol-sort-key": ["case", chosen, 1, 0],
           }}
         />
         <Layer

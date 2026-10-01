@@ -83,6 +83,11 @@ export function Layer() {
   return null;
 }
 
+/** The marker images given to the map, by name. */
+export function Images({ images }: { images: Record<string, unknown> }) {
+  return <View testID="map-images" accessibilityHint={Object.keys(images).sort().join(",")} />;
+}
+
 export function NativeUserLocation() {
   return <View testID="user-location" />;
 }

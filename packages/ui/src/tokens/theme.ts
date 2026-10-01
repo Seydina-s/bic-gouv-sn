@@ -1,3 +1,4 @@
+import { darkServiceTones, lightServiceTones, type ServiceTones } from "./service-tones";
 import { darkCategoryTones, lightCategoryTones, type CategoryTones } from "./category-tones";
 import { darkColors, lightColors, type SemanticColors } from "./colors";
 import {
@@ -33,19 +34,22 @@ export type Theme = {
   scheme: ColorScheme;
   color: SemanticColors;
   categoryTones: CategoryTones;
+  /** One tone per kind of state service: map markers and list badges. */
+  serviceTones: ServiceTones;
 } & typeof scales;
 
 function buildTheme(
   scheme: ColorScheme,
   color: SemanticColors,
   categoryTones: CategoryTones,
+  serviceTones: ServiceTones,
 ): Theme {
-  return { scheme, color, categoryTones, ...scales };
+  return { scheme, color, categoryTones, serviceTones, ...scales };
 }
 
 export const themes: Readonly<Record<ColorScheme, Theme>> = {
-  light: buildTheme("light", lightColors, lightCategoryTones),
-  dark: buildTheme("dark", darkColors, darkCategoryTones),
+  light: buildTheme("light", lightColors, lightCategoryTones, lightServiceTones),
+  dark: buildTheme("dark", darkColors, darkCategoryTones, darkServiceTones),
 };
 
 /**

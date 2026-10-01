@@ -14,3 +14,17 @@ jest.mock("expo-network", () => {
     useNetworkState: () => ({ type: NetworkStateType["WIFI"], isConnected: true }),
   };
 });
+
+// The sliding panel of "Près de moi" (native gestures and animations): its own mock.
+// (Marked as an ES module: its default export is the panel itself.)
+jest.mock("@gorhom/bottom-sheet", () => ({
+  __esModule: true,
+  ...jest.requireActual<object>("@gorhom/bottom-sheet/mock"),
+}));
+// Reanimated 4 runs on worklets: both have their own mocks.
+jest.mock("react-native-worklets", () =>
+  jest.requireActual<object>("react-native-worklets/src/mock"),
+);
+jest.mock("react-native-reanimated", () =>
+  jest.requireActual<object>("react-native-reanimated/mock"),
+);

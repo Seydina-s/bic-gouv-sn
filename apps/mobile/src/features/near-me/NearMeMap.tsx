@@ -1,167 +1,151 @@
-import {
-  distanceMeters,
-  type GeoPoint,
-  type PublicService,
-  type ServiceCategory,
-} from "@bgs/shared-types";
-import { lazy, Suspense, useMemo, useState } from "react";
+import type { GeoPoint, PublicService } from "@bgs/shared-types";
+import { lazy, Suspense, useMemo, useRef, useState, type ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
+import Animated, { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { GlassBackdrop } from "../../components/GlassBackdrop";
 import { useTabBarInset } from "../../components/GlassTabBar";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
-import {
-  LocateButton,
-  MapAttribution,
-  MapNotice,
-  OfflineAreaButton,
-  ServicePreview,
-  ViewToggle,
-} from "./MapOverlays";
+import { LocateButton, MapAttribution, MapNotice, OfflineAreaButton } from "./MapOverlays";
 import { loadServiceMap } from "./load-service-map";
-import { ServiceFilters } from "./ServiceParts";
+import { NearMeSheet, SHEET_SNAPS, type NearbyRow, type NearMeSheetHandle } from "./NearMeSheet";
 import type { LocationStatus } from "./useLocation";
 import { useOfflineArea } from "./useOfflineArea";
 
 const ServiceMap = lazy(loadServiceMap);
 
+/** The share of the screen each resting height of the panel covers. */
+const SHARES = SHEET_SNAPS.map((snap) => Number.parseFloat(snap) / 100);
+const EXPANDED = SHEET_SNAPS.length - 1;
+
 export interface NearMeMapProps {
   /** The verified services of the chosen kind (all of them, not only the nearest). */
   services: readonly PublicService[];
+  rows: readonly NearbyRow[];
   origin: GeoPoint | null;
   locationStatus: LocationStatus;
-  category: ServiceCategory | null;
-  onCategory: (category: ServiceCategory | null) => void;
+  /** The place measured from and the kinds of service, on top of the panel's list. */
+  header: ReactNode;
+  empty: ReactNode;
   onLocate: () => void;
-  onOpen: (id: string) => void;
-  onShowList: () => void;
+  /** The map could not be drawn: the screen falls back to the list alone. */
+  onMapFailed: () => void;
 }
 
 /**
- * "Près de moi" as a map: the kinds of service on top, the services as points, a
- * preview of the one touched, the person's position on request, and the list one
- * tap away. Every control lies on the common glass.
+ * "Près de moi", map first (decision of 30/09/2026, as in Yango or Google Maps):
+ * the services as points on a light map, and a sliding panel with the list, the
+ * place, the kinds of service and the chosen service. The locate button rides on
+ * the panel's edge.
  */
 export function NearMeMap({
   services,
+  rows,
   origin,
   locationStatus,
-  category,
-  onCategory,
+  header,
+  empty,
   onLocate,
-  onOpen,
-  onShowList,
+  onMapFailed,
 }: NearMeMapProps) {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const tabBar = useTabBarInset();
+  const sheet = useRef<NearMeSheetHandle>(null);
+  const position = useSharedValue(0);
+  const [height, setHeight] = useState(0);
+  const [rest, setRest] = useState(0);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [failed, setFailed] = useState(false);
   const offline = useOfflineArea(origin);
-  const [topBar, setTopBar] = useState(insets.top + theme.touchTarget.min);
-  const { color, space, textStyle, touchTarget } = theme;
+  const { space, touchTarget } = theme;
 
-  // From the bottom: tab bar, the credit line, then the controls.
-  const creditBottom = tabBar + space.xs;
-  const controlsBottom = creditBottom + textStyle.caption.lineHeight + space.xs * 2 + space.sm;
+  const top = insets.top + space.sm;
+  // The map keeps its points clear of the panel at its resting height.
   const padding = useMemo(
     () => ({
-      top: topBar + space.md,
+      top: top + touchTarget.min,
       right: space.lg,
-      // Room for the preview of a service, the tallest thing at the bottom.
-      bottom: controlsBottom + touchTarget.min * 3,
+      bottom: tabBar + height * (SHARES[rest] ?? 0) + space.lg,
       left: space.lg,
     }),
-    [topBar, controlsBottom, space.md, space.lg, touchTarget.min],
+    [top, touchTarget.min, space.lg, tabBar, height, rest],
   );
+  // A layer as tall as the screen whose bottom follows the panel's top edge.
+  const abovePanel = useAnimatedStyle(() => ({
+    transform: [{ translateY: position.value - height }],
+  }));
 
   const selected = services.find((service) => service.id === selectedId) ?? null;
-  const notice = failed
-    ? { message: t("nearMe.mapFailed"), action: t("nearMe.viewList") }
-    : locationStatus === "denied"
-      ? { message: t("nearMe.denied"), action: t("nearMe.chooseTown") }
+  const notice =
+    locationStatus === "denied"
+      ? t("nearMe.denied")
       : locationStatus === "unavailable"
-        ? { message: t("nearMe.unavailable"), action: t("nearMe.chooseTown") }
+        ? t("nearMe.unavailable")
         : null;
 
   return (
-    <View style={[styles.root, { backgroundColor: color.surface }]}>
+    <View
+      style={styles.root}
+      onLayout={(event) => {
+        setHeight(event.nativeEvent.layout.height);
+      }}
+    >
       <Suspense fallback={null}>
         <ServiceMap
           services={services}
           origin={origin}
           showsPosition={locationStatus === "found"}
-          selectedId={selected?.id ?? null}
+          selectedId={selectedId}
           onSelect={setSelectedId}
           onClear={() => {
             setSelectedId(null);
           }}
-          onFail={() => {
-            setFailed(true);
-          }}
+          onFail={onMapFailed}
           padding={padding}
         />
       </Suspense>
-      <View
-        onLayout={(event) => {
-          setTopBar(event.nativeEvent.layout.height);
-        }}
-        style={[styles.topBar, { paddingTop: insets.top, borderBottomColor: color.glassBorder }]}
-      >
-        <GlassBackdrop />
-        <ServiceFilters selected={category} onSelect={onCategory} />
-      </View>
       {notice !== null ? (
         <MapNotice
-          message={notice.message}
-          action={notice.action}
-          onAction={onShowList}
-          top={topBar + space.sm}
+          message={notice}
+          action={t("nearMe.chooseTown")}
+          onAction={() => {
+            sheet.current?.resize(EXPANDED);
+          }}
+          top={top}
         />
       ) : (
         origin !== null && (
-          <OfflineAreaButton
-            state={offline.state}
-            onKeep={() => void offline.keep()}
-            top={topBar + space.sm}
-          />
+          <OfflineAreaButton state={offline.state} onKeep={() => void offline.keep()} top={top} />
         )
       )}
-      <MapAttribution bottom={creditBottom} />
-      {selected === null ? (
-        <>
-          <ViewToggle showing="map" onToggle={onShowList} bottom={controlsBottom} />
-          <LocateButton
-            locating={locationStatus === "locating"}
-            onPress={onLocate}
-            bottom={controlsBottom}
-          />
-        </>
-      ) : (
-        <ServicePreview
-          service={selected}
-          meters={origin === null ? null : distanceMeters(origin, selected.location)}
-          onOpen={onOpen}
-          onClose={() => {
-            setSelectedId(null);
-          }}
-          bottom={controlsBottom}
+      <Animated.View pointerEvents="box-none" style={[styles.abovePanel, { height }, abovePanel]}>
+        <MapAttribution bottom={space.sm} />
+        <LocateButton
+          locating={locationStatus === "locating"}
+          onPress={onLocate}
+          bottom={space.sm}
         />
-      )}
+      </Animated.View>
+      <NearMeSheet
+        ref={sheet}
+        header={header}
+        rows={rows}
+        empty={empty}
+        selected={selected}
+        onSelect={setSelectedId}
+        onBack={() => {
+          setSelectedId(null);
+        }}
+        bottomInset={tabBar}
+        position={position}
+        onRest={setRest}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  topBar: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: 0,
-    overflow: "hidden",
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
+  abovePanel: { position: "absolute", left: 0, right: 0, top: 0 },
 });
