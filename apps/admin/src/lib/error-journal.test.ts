@@ -32,8 +32,8 @@ describe("console error journal", () => {
     const rows = journalRows(
       [
         {
-          ...entry("INTERNAL_ERROR", "2026-09-28T01:00:00Z"),
-          resolved: { at: "2026-09-28T01:30:00Z", by },
+          ...entry("INTERNAL_ERROR", "2026-09-28T01:55:00Z"),
+          resolved: { at: "2026-09-28T01:56:00Z", by },
         },
         {
           ...entry("RATE_LIMITED", "2026-09-28T01:40:00Z"),
@@ -50,6 +50,8 @@ describe("console error journal", () => {
       ["INTERNAL_ERROR", true],
     ]);
     expect(rows[0]?.resolved?.by).toBe(by);
+    // Fixed a few minutes after it last happened: not "en cours" any more.
+    expect(rows[2]?.ongoing).toBe(false);
     expect(rows[2]?.group).toEqual({ code: "INTERNAL_ERROR", where: "GET /v1/news" });
   });
 

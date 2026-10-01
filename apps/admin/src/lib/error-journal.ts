@@ -47,7 +47,8 @@ export function journalRows(
     count: entry.count,
     firstAt: new Date(entry.firstAt),
     lastAt: new Date(entry.lastAt),
-    ongoing: isOngoing(entry, now),
+    // Marked as fixed after its last occurrence: no longer "en cours", even within the window.
+    ongoing: isOngoing(entry, now) && !isResolved(entry),
     lastRequestId: entry.lastRequestId,
     group: { code: entry.code, where: entry.where },
     resolved:
