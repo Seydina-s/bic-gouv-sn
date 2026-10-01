@@ -92,6 +92,7 @@ function ArticleImage({ block }: { block: ImageBlock }) {
       accessibilityLabel={alt ?? t("article.image")}
       contentFit="cover"
       transition={theme.motion.duration.normal}
+      cachePolicy="memory-disk"
       onLoad={(event) => {
         setRatio(event.source.width / Math.max(event.source.height, 1));
       }}
