@@ -1,5 +1,5 @@
 import { useIsFocused, useRouter } from "expo-router";
-import { useRef, useState } from "react";
+import { useRef, useState, type ComponentProps } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -20,6 +20,7 @@ import { HeroCarousel } from "../../features/news/HeroCarousel";
 import { Masthead } from "../../features/news/Masthead";
 import { SectionFilter } from "../../features/news/SectionFilter";
 import { SectionRail } from "../../features/news/SectionRail";
+import { useProgressive } from "../../components/useProgressive";
 import { AppActions } from "../../features/shell/AppActions";
 import { CouncilCard } from "../../features/news/Stories";
 import { useLastOpened } from "../../features/news/useLastOpened";
@@ -76,6 +77,40 @@ function Notice({
  * section, each ending on its section page. No endless list: stories are reached
  * section by section (user request, 26/09/2026).
  */
+/** Rails drawn with the front page; the others follow on the next frame. */
+const FIRST_RAILS = 2;
+
+/**
+ * The sections of the front page, about ten cards each: the first ones come with
+ * the screen, the rest right after. Mounted once the sections are there, so the
+ * reveal starts from their arrival.
+ */
+function Rails({
+  rails,
+  width,
+  onOpenStory,
+  onOpenSection,
+}: {
+  rails: readonly Pick<ComponentProps<typeof SectionRail>, "category" | "items" | "total">[];
+  width: number;
+  onOpenStory: (id: string) => void;
+  onOpenSection: (category: string) => void;
+}) {
+  const shown = useProgressive(rails.length, FIRST_RAILS);
+  return rails.slice(0, shown).map((section, index) => (
+    <WovenIn key={section.category} index={index + 2}>
+      <SectionRail
+        category={section.category}
+        items={section.items}
+        total={section.total}
+        width={width}
+        onOpenStory={onOpenStory}
+        onOpenSection={onOpenSection}
+      />
+    </WovenIn>
+  ));
+}
+
 export default function HomeScreen() {
   const { theme } = useTheme();
   const { t } = useTranslation();
@@ -175,18 +210,7 @@ export default function HomeScreen() {
           </View>
         </WovenIn>
       )}
-      {rails.map((section, index) => (
-        <WovenIn key={section.category} index={index + 2}>
-          <SectionRail
-            category={section.category}
-            items={section.items}
-            total={section.total}
-            width={columnWidth}
-            onOpenStory={open}
-            onOpenSection={openSection}
-          />
-        </WovenIn>
-      ))}
+      <Rails rails={rails} width={columnWidth} onOpenStory={open} onOpenSection={openSection} />
     </View>
   );
 

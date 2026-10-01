@@ -122,6 +122,8 @@ describe("BlockRenderer", () => {
         <BlockRenderer blocks={DETAIL.blocks} />
       </TestProviders>,
     );
+    // The blocks past the first ones come on the next frame: wait for the last one.
+    expect(await screen.findByLabelText("Photo de l'article")).toBeOnTheScreen();
     expect(screen.getByText("Paragraphe de test.")).toBeOnTheScreen();
     expect(screen.getByRole("header")).toHaveTextContent("Intertitre");
     expect(screen.getByText("1.")).toBeOnTheScreen();

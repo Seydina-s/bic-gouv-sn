@@ -110,8 +110,9 @@ function serveApp(): Server {
   return server;
 }
 
+/** Up to a minute: a busy machine starts the API slowly (seen at 30 s, 01/10/2026). */
 async function waitUntilUp(url: string): Promise<void> {
-  for (let attempt = 0; attempt < 150; attempt += 1) {
+  for (let attempt = 0; attempt < 300; attempt += 1) {
     try {
       await fetch(url);
       return;
