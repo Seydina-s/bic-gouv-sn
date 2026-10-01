@@ -296,7 +296,7 @@ export const fr = {
     openPhoneSettings: "Ouvrir les réglages du téléphone",
     location: "Position",
     locationOn:
-      "Autorisée\u00a0: « Près de moi » s'ouvre sur les services les plus proches de vous.",
+      "Autorisée\u00a0: «\u00a0Près de moi\u00a0» s'ouvre sur les services les plus proches de vous.",
     locationDenied: "Refusée. Pour la permettre, ouvrez les réglages du téléphone.",
     locationAllow: "Autoriser la localisation",
     locationHelp: "Votre position reste sur votre téléphone, elle n'est jamais envoyée.",
