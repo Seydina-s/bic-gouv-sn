@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { expoPushTokenSchema, isQuietHour, pushSubscriptionSchema } from "./push.schema";
+import {
+  expoPushTokenSchema,
+  followsNothing,
+  followsSection,
+  isQuietHour,
+  pushSubscriptionSchema,
+} from "./push.schema";
 
 // A placeholder token, shaped like Expo's.
 const TOKEN = "ExponentPushToken[abcdefghij0123456789]";
@@ -36,5 +42,20 @@ describe("push subscriptions", () => {
     ]);
     expect(isQuietHour(null, 3)).toBe(false);
     expect(isQuietHour({ from: 5, to: 5 }, 5)).toBe(false);
+  });
+});
+
+describe("the sections a subscription follows", () => {
+  const phone = { token: TOKEN, quietHours: null, lang: "fr" as const };
+
+  it("are every section when none is chosen (the default)", () => {
+    expect(followsSection({ ...phone, topics: null }, "discours")).toBe(true);
+    expect(followsNothing({ ...phone, topics: null })).toBe(false);
+  });
+
+  it("are the chosen ones, and an empty choice follows nothing", () => {
+    expect(followsSection({ ...phone, topics: ["communiques"] }, "communiques")).toBe(true);
+    expect(followsSection({ ...phone, topics: ["communiques"] }, "discours")).toBe(false);
+    expect(followsNothing({ ...phone, topics: [] })).toBe(true);
   });
 });

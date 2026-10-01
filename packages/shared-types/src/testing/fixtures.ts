@@ -17,7 +17,7 @@ export function frTranslation(overrides: Record<string, unknown> = {}) {
 export function woTranslation(overrides: Record<string, unknown> = {}) {
   return frTranslation({
     lang: "wo",
-    title: "Tiitar bu teste",
+    title: "[wo] Titre de test",
     sourceUrl: "https://www.presidence.sn/wo/test-fixture",
     ...overrides,
   });
