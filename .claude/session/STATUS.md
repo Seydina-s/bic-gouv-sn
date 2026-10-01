@@ -1,6 +1,6 @@
 # STATUS — Bic Gouv SN
 
-**Dernière mise à jour** : 01/10/2026 (11 h) · **Mode** : autonome jusqu'au 01/10 à 13 h, puis séance avec l'utilisateur : Opportunités, Participer, IA. Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md` (24 points, dont plusieurs réglés ; le n° 23 regroupe les choix autonomes à confirmer).
+**Dernière mise à jour** : 01/10/2026 (19 h) · **Mode** : autonome jusqu'au 01/10 à 20 h (accord de l'utilisateur à 14 h 40), puis séance avec l'utilisateur sur les points qui demandent son intervention. Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md` (24 points, dont plusieurs réglés ; le n° 23 regroupe les choix autonomes à confirmer).
 
 ## Où on en est
 - Dépôt **public et sécurisé** : https://github.com/Seydina-s/bic-gouv-sn. `main` protégée : tout passe par PR + **4 contrôles verts** (qualité et tests, constructions avec **audit d'accessibilité** sur 91 écrans dont 29 à 320 px et **9 parcours de bout en bout**, secrets et dépendances, **conteneurs**).
@@ -61,6 +61,12 @@
   - « Près de moi » : avertissement de localisation à côté du volet latéral ;
   - protection du terminal : **toute poussée doit suivre le scanner de secrets** (deuxième entorse à cette règle, ERREURS.md) ;
   - dossier de cadrage : **ce que permet chaque portail d'Opportunités** (règles des robots, certificats : marchespublics.sn et directiondesbourses.sn bloquent une collecte sûre ; FONGIP confirmé).
+- Après-midi du 01/10 (PR #185 à #193), mode autonome, demandes de l'utilisateur :
+  - **erreurs rouges de « Près de moi »** corrigées (lettres de la carte manquantes : réponse vide au lieu d'une erreur) ;
+  - **invitations dès l'accueil** : notifications, puis localisation, puis statistiques, bouton positif coloré, « Non merci » toujours visible ; position obtenue tout de suite si autorisée, et à chaque ouverture ; ligne « Position » dans les Réglages ;
+  - **fluidité** : réaction visuelle immédiate sur tous les contrôles, onglets ouverts dès le contact du doigt, articles, démarches et accueil affichés progressivement, « Démarches » et « Près de moi » préparés en arrière-plan, photos gardées en mémoire, recherches non stockées hors ligne ;
+  - **app servie en mode optimisé** depuis une copie séparée du projet (`C:ic-gouv-sn-demo`, toujours sur main) : la version de développement est 2 à 5 fois plus lente que l'app finale ;
+  - audit croisé AUD8 ; inventaire des données mis à jour (position).
 - Contrôle complet : environ 1 200 tests verts, 9 parcours de bout en bout, 91 écrans audités.
 - Incident du 29/09 : clé de l'API **locale** apparue dans la conversation ; remplacée le jour même (ERREURS.md).
 
@@ -68,12 +74,16 @@
 Voir `.claude/session/A-FAIRE-UTILISATEUR.md`. Toujours ouverts : compte Apple (en cours), vérification des services de Dakar, logo, identifiant de l'app, questions au BIC (et offre de Sénégal Numérique pour Diamniadio), budget d'hébergement (chiffrage prêt), jeton Sentry, Opportunités et Participer (plus tard), wolof (à la fin).
 
 ## Prochaine tâche
-- **13 h, séance avec l'utilisateur** : dettes dans l'ordre Opportunités, Participer, intégration de l'IA, à partir du dossier `docs/cadrage/opportunites-participer-ia.md`.
-- Ensuite, sur la version de test : QA-02, QA-03, QA-04, QA-09, AUD5-04, AUD6-02, AUD6-03, E2E-02, LIC-02, module iPhone pour la photo des notifications (AUD5-07, recompilation).
-- Décisions attendues : points 19 (contenus publiés dans PostgreSQL), 20 (Firebase), 21 (envoi à l'échelle nationale), 22 (politique de confidentialité), confirmation de l'ordre des invitations et des heures calmes par défaut (AUD5-05) et des journaux sans IP (décision autonome du 01/10).
-- QA-11 réglé (test instable : préparation trop lente sous charge).
+- **20 h, séance avec l'utilisateur** sur les points qui demandent son intervention (`.claude/session/A-FAIRE-UTILISATEUR.md`, points 19 à 27), en commençant par Opportunités, Participer et l'IA (`docs/cadrage/opportunites-participer-ia.md`).
 
-## Services locaux (au 01/10, 5 h)
+- Ensuite, sur la version de test : QA-02, QA-03, QA-04, QA-09, AUD5-04, AUD6-02, AUD6-03, AUD8-02, AUD8-03, E2E-02, LIC-02, module iPhone pour la photo des notifications (AUD5-07, recompilation).
+- Décisions attendues : points 19 (contenus publiés dans PostgreSQL), 20 (Firebase), 21 (envoi à l'échelle nationale), 22 (politique de confidentialité), 24 (compétence de design), 26 (textes de l'invitation à la localisation), 27 (hébergement).
+
+## Services locaux (au 01/10, 19 h)
+- **App servie en mode optimisé** depuis la copie `C:ic-gouv-sn-demo` (sur `main`, mise à jour après chaque fusion) : `npx expo start --dev-client --port 8081 --no-dev --minify`, `EXPO_PUBLIC_API_URL=http://192.168.1.14:3100`. Le dépôt principal reste libre pour le développement. Pour revenir au mode développement (rechargement à chaud, erreurs à l'écran) : relancer sans `--no-dev --minify`.
+- API sur 3100 relancée à 15 h avec le correctif de la carte.
+
+## Services locaux (rappel du 01/10, 5 h)
 - API sur 3100 relancée sur `main` avec `PUSH_PROVIDER=expo` (toujours sur fichiers : ni Redis ni PostgreSQL installés sur la machine) ; console en développement sur 3001 ; Expo sur 8081 en mode version de test (`--dev-client`, `EXPO_PUBLIC_API_URL=http://192.168.1.14:3100`) ; export web de l'app servi sur 8084 (relais vers l'API) ; une seule collecte temps réel (verrou actif, contrôle des retraits chaque nuit ; elle nettoiera les fichiers temporaires orphelins à son prochain démarrage).
 - Changer la clé locale des seconds codes : arrêter l'API, `pnpm --filter @bgs/api admin:rotate-key`, relancer (aucune clé n'est jamais affichée).
 - Secrets : gitleaks toujours avec `--redact` et sur le commit (`gitleaks git`), jamais `gitleaks dir` sur le dépôt (ERREURS.md, 29/09).

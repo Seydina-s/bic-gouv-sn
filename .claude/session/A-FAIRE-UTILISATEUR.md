@@ -73,3 +73,11 @@ Mise à jour du 01/10/2026 (9 h 30, mode autonome) : points 23 et 24 ajoutés.
 |---|---|---|---|
 | 23 | **Confirmer (ou corriger) les choix faits en autonomie cette nuit** : (a) invitations dans l'app, notifications d'abord et statistiques une autre fois, heures calmes 22 h – 7 h activées par défaut ; (b) journaux de l'API sans adresse IP ni mots cherchés ; (c) heure du premier abonnement aux notifications gardée, à l'heure près, pour l'alerte d'afflux (seuils : 500 en 24 h et 5 fois le rythme habituel) ; (d) « Marquer comme réglée » dans le journal des erreurs réservé aux éditeurs et administrateurs. Tout est réversible. | Rien ne casse si ça attend : ces choix sont déjà en place et consignés dans `decisions.md` | AUD5-05, AUD5-03, ADM-04 |
 | 24 | Autoriser la **réparation de la compétence de design ui-ux-pro-max** : ses dossiers de données et de scripts pointent vers un dépôt tiers qui n'est pas installé. Python est déjà présent (3.14). L'installation consiste à télécharger ce dépôt (gratuit). | Sans elle, cette compétence ne donne que ses règles écrites, pas ses recherches de palettes et de typographies | D-03 |
+
+Mise à jour du 01/10/2026 (19 h, mode autonome) : point 23 validé (14 h 40) ; points 25 à 27 ajoutés.
+
+| # | Quoi | Pourquoi / effet si ça attend | Réf. backlog |
+|---|---|---|---|
+| 25 | **Essayer l'app sur l'iPhone**, ordinateur allumé et sur le même Wi-Fi : ouvrir l'app de test, qui se recharge en **mode optimisé** (plus rapide que d'habitude). Vérifier : plus d'erreurs rouges dans « Près de moi » ; l'invitation à la localisation sur l'accueil (les invitations déjà répondues ne reviennent pas) ; la réaction au toucher et l'ouverture des onglets ; la ligne « Position » des Réglages | Mesure réelle de la fluidité ; seul un téléphone le montre | PERM-01, PERF-04, AUD8-03 |
+| 26 | Relire les **textes de l'invitation à la localisation** : « Voir les services près de vous ? », « Oui, me localiser », « Non merci » | Écrits en autonomie | AUD8-04 |
+| 27 | Choisir l'**hébergement de l'API** (chiffrage prêt, `docs/hebergement.md`) : sans API en HTTPS, impossible de produire une version de test optimisée qui marche sans l'ordinateur | Bloque aussi la mise en ligne | S1-02, AUD8-05 |
