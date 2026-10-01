@@ -24,7 +24,18 @@ const TILE_CACHE = "public, max-age=86400, stale-while-revalidate=604800";
 const ASSET_CACHE = "public, max-age=604800";
 const UNAVAILABLE: ErrorCode = "MAP_UNAVAILABLE";
 const FONT_STACK = /^[A-Za-z ]+$/;
-const GLYPH_RANGE = /^\d{1,5}-\d{1,5}\.pbf$/;
+const GLYPH_RANGE = /^(\d{1,5})-(\d{1,5})\.pbf$/;
+
+/** A range MapLibre may ask for: 256 code points, starting on a multiple of 256. */
+function isGlyphRange(range: string): boolean {
+  const match = GLYPH_RANGE.exec(range);
+  const start = Number(match?.[1]);
+  const end = Number(match?.[2]);
+  return match !== null && start % 256 === 0 && end === start + 255 && end <= 0xffff;
+}
+
+/** An empty set of glyphs: valid protobuf, nothing to draw. */
+const NO_GLYPHS = Buffer.alloc(0);
 const SPRITE = /^(?:light|dark)(?:@2x)?\.(?:json|png)$/;
 /**
  * The map shows state services only, each one verified (CLAUDE.md §1): the base
@@ -144,17 +155,16 @@ export const mapRoutes: FastifyPluginAsyncZod<MapRoutesOptions> = (
         .map((name) => name.trim())
         .find((name) => FONT_STACK.test(name) && existsSync(join(assetsRoot, "glyphs", name)));
       const { range } = request.params;
-      if (stack === undefined || !GLYPH_RANGE.test(range)) {
+      if (stack === undefined || !isGlyphRange(range)) {
         return reply.code(404).send();
       }
       const file = join(assetsRoot, "glyphs", stack, range);
-      if (!existsSync(file)) {
-        return reply.code(404).send();
-      }
+      // A range our fonts do not cover (e.g. variation selectors hidden in a place's
+      // name): an empty set, which the map accepts, rather than an error on screen.
       return reply
         .header("content-type", "application/x-protobuf")
         .header("cache-control", ASSET_CACHE)
-        .send(await readFile(file));
+        .send(existsSync(file) ? await readFile(file) : NO_GLYPHS);
     },
   );
 
