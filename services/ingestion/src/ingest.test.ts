@@ -41,7 +41,7 @@ describe("mergeArticle", () => {
   });
 
   it("adds the Wolof version to the French article, French staying the original", () => {
-    const merged = mergeArticle(version("fr", "Titre FR"), version("wo", "Tiitar WO"));
+    const merged = mergeArticle(version("fr", "Titre FR"), version("wo", "[wo] Titre"));
     expect(merged.lang).toBe("fr");
     expect(merged.sourceUrl).toBe("https://www.presidence.sn/fr/actualites/test/");
     expect(merged.translations.map((t) => t.lang).sort()).toEqual(["fr", "wo"]);
@@ -49,10 +49,10 @@ describe("mergeArticle", () => {
   });
 
   it("replaces only the language being re-collected", () => {
-    const both = mergeArticle(version("fr", "Titre FR"), version("wo", "Tiitar WO"));
+    const both = mergeArticle(version("fr", "Titre FR"), version("wo", "[wo] Titre"));
     const edited = mergeArticle(both, version("fr", "Titre FR corrigé"));
     expect(edited.translations.find((t) => t.lang === "fr")?.title).toBe("Titre FR corrigé");
-    expect(edited.translations.find((t) => t.lang === "wo")?.title).toBe("Tiitar WO");
+    expect(edited.translations.find((t) => t.lang === "wo")?.title).toBe("[wo] Titre");
   });
 
   it("keeps Wolof as original when no French version exists", () => {

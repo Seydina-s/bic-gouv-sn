@@ -14,7 +14,11 @@ export const dynamic = "force-dynamic";
 const journalSchema = z.object({ entries: z.array(errorJournalEntrySchema) });
 
 /** Every error the platform met, grouped and explained in plain words. */
-export default async function ErrorsPage() {
+export default async function ErrorsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ reglee?: string }>;
+}) {
   const { token, account } = await requireAccount();
   const [journal, collection] = await Promise.all([
     adminRequest({ path: "/errors", token, schema: journalSchema }),
@@ -26,6 +30,14 @@ export default async function ErrorsPage() {
         {t("errors.title")}
       </h1>
       <p className="max-w-prose text-ink-soft">{t("errors.intro")}</p>
+      {(await searchParams).reglee === "1" && (
+        <p
+          role="status"
+          className="max-w-prose rounded-md bg-primary-container px-4 py-3 text-on-primary-container"
+        >
+          {t("errors.resolvedDone")}
+        </p>
+      )}
       {journal.ok ? (
         <ErrorJournalList
           rows={journalRows(journal.data.entries, collection, new Date())}

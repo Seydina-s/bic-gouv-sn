@@ -128,6 +128,21 @@ const JOURNEYS: Journey[] = [
     },
   },
   {
+    name: "Console : marquer une erreur comme réglée, la retrouver parmi les erreurs réglées",
+    run: async (browser, { consoleBase, token }) => {
+      await browser.setViewport(DESKTOP);
+      await browser.setCookie("bgs_admin_session", token, consoleBase);
+      // Settled: a form sent before the page is interactive would not show its result.
+      await browser.open(`${consoleBase}/erreurs`, SETTLE_MS);
+      // The seed holds one error to deal with and one already fixed (test-seed.ts).
+      await browser.waitForText("1 erreur réglée");
+      await browser.press("Marquer comme réglée");
+      await browser.waitForText("Erreur marquée comme réglée");
+      await browser.waitForText("2 erreurs réglées");
+      await browser.waitForText("Aucune erreur à traiter");
+    },
+  },
+  {
     name: "Statistiques anonymes : les accepter dans l'app, lire un article, le voir dans la console",
     run: async (browser, { appBase, consoleBase, token }) => {
       await browser.setViewport(PHONE);
