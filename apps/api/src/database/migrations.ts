@@ -107,4 +107,15 @@ export const MIGRATIONS: readonly { id: string; statements: readonly string[] }[
     id: "008-settings",
     statements: ["CREATE TABLE settings (key text PRIMARY KEY, value jsonb NOT NULL)"],
   },
+  {
+    // When each phone subscribed, for the console to notice a flood of fake
+    // subscriptions (AUD5-03). Phones already there keep no date: they never
+    // count as new.
+    id: "009-push-subscribed-at",
+    statements: [
+      "ALTER TABLE push_subscriptions ADD COLUMN subscribed_at timestamptz",
+      "ALTER TABLE push_subscriptions ALTER COLUMN subscribed_at SET DEFAULT now()",
+      "CREATE INDEX push_subscriptions_subscribed_at ON push_subscriptions (subscribed_at)",
+    ],
+  },
 ];

@@ -10,10 +10,30 @@ import {
 import { z } from "zod";
 import type { Queryable } from "../database/database";
 
+/** A subscription as kept: with when the phone subscribed (none before 01/10/2026). */
+const keptSchema = pushSubscriptionSchema.extend({ subscribedAt: z.iso.datetime().optional() });
+type Kept = z.infer<typeof keptSchema>;
+
 const fileSchema = z.object({
   schemaVersion: z.literal(1),
-  subscriptions: z.array(pushSubscriptionSchema),
+  subscriptions: z.array(keptSchema),
 });
+
+const HOUR_MS = 60 * 60 * 1000;
+const DAY_MS = 24 * HOUR_MS;
+
+/** When a phone subscribed, kept to the hour only: enough for the growth check. */
+function subscribedHour(now: Date): Date {
+  return new Date(Math.floor(now.getTime() / HOUR_MS) * HOUR_MS);
+}
+
+/** The two windows of the console's growth check, ending now. */
+function growthWindows(now: Date): { dayStart: Date; weekStart: Date } {
+  return {
+    dayStart: new Date(now.getTime() - DAY_MS),
+    weekStart: new Date(now.getTime() - 8 * DAY_MS),
+  };
+}
 
 export interface PushSubscriptionStore {
   /** Every subscription. */
@@ -36,9 +56,22 @@ export interface PushSubscriptionStore {
 export class FilePushSubscriptionStore implements PushSubscriptionStore {
   private queue: Promise<unknown> = Promise.resolve();
 
-  constructor(private readonly path: string) {}
+  constructor(
+    private readonly path: string,
+    private readonly now: () => Date = () => new Date(),
+  ) {}
 
   async list(): Promise<PushSubscription[]> {
+    // What sending needs, without the day of subscription.
+    return (await this.kept()).map(({ token, topics, quietHours, lang }) => ({
+      token,
+      topics,
+      quietHours,
+      lang,
+    }));
+  }
+
+  private async kept(): Promise<Kept[]> {
     try {
       return fileSchema.parse(JSON.parse(await readFile(this.path, "utf8"))).subscriptions;
     } catch (error) {
@@ -54,21 +87,42 @@ export class FilePushSubscriptionStore implements PushSubscriptionStore {
   }
 
   async summary(): Promise<SubscribersSummary> {
-    const all = await this.list();
-    const count = (keep: (item: PushSubscription) => boolean) => all.filter(keep).length;
+    const all = await this.kept();
+    const count = (keep: (item: Kept) => boolean) => all.filter(keep).length;
+    const { dayStart, weekStart } = growthWindows(this.now());
+    // Subscribed after `from`, and up to `to` when given; undated phones never count.
+    const subscribedBetween = (from: Date, to?: Date) => (item: Kept) => {
+      if (item.subscribedAt === undefined) {
+        return false;
+      }
+      const at = new Date(item.subscribedAt);
+      return at > from && (to === undefined || at <= to);
+    };
     return {
       total: all.length,
       everySection: count((item) => item.topics === null),
       quietHours: count((item) => item.quietHours !== null),
       french: count((item) => item.lang === "fr"),
       wolof: count((item) => item.lang === "wo"),
+      newLastDay: count(subscribedBetween(dayStart)),
+      newWeekBefore: count(subscribedBetween(weekStart, dayStart)),
     };
   }
 
   save(subscription: PushSubscription): Promise<void> {
     return this.change((all) => {
-      const others = all.filter((item) => item.token !== subscription.token);
-      return followsNothing(subscription) ? others : [...others, subscription];
+      const previous = all.find((item) => item.token === subscription.token);
+      const others = all.filter((item) => item !== previous);
+      if (followsNothing(subscription)) {
+        return others;
+      }
+      // A phone changing its choices keeps the day it first subscribed.
+      const subscribedAt =
+        previous === undefined ? subscribedHour(this.now()).toISOString() : previous.subscribedAt;
+      return [
+        ...others,
+        { ...subscription, ...(subscribedAt === undefined ? {} : { subscribedAt }) },
+      ];
     });
   }
 
@@ -77,9 +131,9 @@ export class FilePushSubscriptionStore implements PushSubscriptionStore {
     return this.change((all) => all.filter((item) => !gone.has(item.token)));
   }
 
-  private change(apply: (all: PushSubscription[]) => PushSubscription[]): Promise<void> {
+  private change(apply: (all: Kept[]) => Kept[]): Promise<void> {
     const run = this.queue.then(async () => {
-      const subscriptions = apply(await this.list());
+      const subscriptions = apply(await this.kept());
       await writeFileDurably(this.path, JSON.stringify({ schemaVersion: 1, subscriptions }));
     });
     this.queue = run.catch(() => undefined);
@@ -103,11 +157,16 @@ const summaryRowSchema = z.object({
   quiet_hours: count,
   french: count,
   wolof: count,
+  new_last_day: count,
+  new_week_before: count,
 });
 
 /** PostgreSQL: every API instance reads and writes the same subscriptions (SCALE-02). */
 export class PostgresPushSubscriptionStore implements PushSubscriptionStore {
-  constructor(private readonly database: Queryable) {}
+  constructor(
+    private readonly database: Queryable,
+    private readonly now: () => Date = () => new Date(),
+  ) {}
 
   private static parse(rows: unknown[]): PushSubscription[] {
     return rows.map((row) => {
@@ -132,13 +191,17 @@ export class PostgresPushSubscriptionStore implements PushSubscriptionStore {
   }
 
   async summary(): Promise<SubscribersSummary> {
+    const { dayStart, weekStart } = growthWindows(this.now());
     const { rows } = await this.database.query(
       `SELECT count(*) AS total,
          count(*) FILTER (WHERE topics IS NULL) AS every_section,
          count(*) FILTER (WHERE quiet_hours IS NOT NULL) AS quiet_hours,
          count(*) FILTER (WHERE lang = 'fr') AS french,
-         count(*) FILTER (WHERE lang = 'wo') AS wolof
+         count(*) FILTER (WHERE lang = 'wo') AS wolof,
+         count(*) FILTER (WHERE subscribed_at > $1) AS new_last_day,
+         count(*) FILTER (WHERE subscribed_at > $2 AND subscribed_at <= $1) AS new_week_before
        FROM push_subscriptions`,
+      [dayStart, weekStart],
     );
     const totals = summaryRowSchema.parse(rows[0]);
     return {
@@ -147,6 +210,8 @@ export class PostgresPushSubscriptionStore implements PushSubscriptionStore {
       quietHours: totals.quiet_hours,
       french: totals.french,
       wolof: totals.wolof,
+      newLastDay: totals.new_last_day,
+      newWeekBefore: totals.new_week_before,
     };
   }
 
@@ -156,8 +221,9 @@ export class PostgresPushSubscriptionStore implements PushSubscriptionStore {
       return;
     }
     await this.database.query(
-      `INSERT INTO push_subscriptions (token, topics, quiet_hours, lang)
-       VALUES ($1, $2::text[], $3::jsonb, $4)
+      // A phone changing its choices keeps the day it first subscribed.
+      `INSERT INTO push_subscriptions (token, topics, quiet_hours, lang, subscribed_at)
+       VALUES ($1, $2::text[], $3::jsonb, $4, $5)
        ON CONFLICT (token) DO UPDATE SET
          topics = EXCLUDED.topics, quiet_hours = EXCLUDED.quiet_hours, lang = EXCLUDED.lang`,
       [
@@ -166,6 +232,7 @@ export class PostgresPushSubscriptionStore implements PushSubscriptionStore {
         // SQL NULL, not the JSON value null.
         subscription.quietHours === null ? null : JSON.stringify(subscription.quietHours),
         subscription.lang,
+        subscribedHour(this.now()),
       ],
     );
   }
