@@ -22,6 +22,17 @@ export interface AttentionItem {
   href: string;
 }
 
+/** A count to look at when there is one: "3 messages à lire". */
+function countItem(
+  count: number | undefined,
+  key: "attention.participation" | "attention.opportunities",
+  href: string,
+): AttentionItem[] {
+  return count === undefined || count === 0
+    ? []
+    : [{ tone: "warning", text: t(key, { count }), href }];
+}
+
 function errorItems(entries: readonly ErrorJournalEntry[], now: Date): AttentionItem[] {
   const open = entries.filter((entry) => isOngoing(entry, now) && !isResolved(entry));
   if (open.length === 0) {
@@ -82,10 +93,16 @@ export function attentionItems(input: {
   errors: readonly ErrorJournalEntry[] | null;
   notifications: NotificationsResponse | null;
   now: Date;
+  /** Messages and reports of Participer not yet handled (none: unknown, said nothing). */
+  participationToRead?: number;
+  /** Opportunities waiting for a second person. */
+  opportunitiesPending?: number;
 }): AttentionItem[] {
   const items = [
     ...(input.errors === null ? [] : errorItems(input.errors, input.now)),
     ...(input.notifications === null ? [] : notificationItems(input.notifications)),
+    ...countItem(input.participationToRead, "attention.participation", "/participation"),
+    ...countItem(input.opportunitiesPending, "attention.opportunities", "/opportunites"),
   ];
   if (input.errors === null || input.notifications === null) {
     items.push({ tone: "warning", text: t("attention.unreadable"), href: "/" });
