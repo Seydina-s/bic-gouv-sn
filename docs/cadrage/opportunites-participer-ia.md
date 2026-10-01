@@ -32,12 +32,30 @@ Trois catégories en tuiles :
 | Formation | [3fpt.sn](https://3fpt.sn/appel-a-candidature/) | Bons de formation, appels à candidatures |
 | Bourses | [directiondesbourses.sn](https://www.directiondesbourses.sn/), plateforme [boursesetrangeres.campusen.sn](https://mesrisenegal.sn/2025/11/11/ouverture-de-la-plateforme-https-boursesetrangeres-campusen-sn-pour-le-depot-des-dossiers-de-demande-de-bourses-a-letranger/) (MESRI), [sgee-sn.org](https://www.sgee-sn.org/) | Campagnes de bourses, dates de dépôt |
 
-À vérifier ensemble : le FONGIP, qui n'est pas confirmé dans les recherches, et la liste exacte des ministères à couvrir. Les agrégateurs privés (par exemple marchesdusenegal.com) sont exclus : ce ne sont pas des sources officielles.
+**FONGIP** (vérifié le 01/10, 5 h) : site officiel [fongip.sn](https://www.fongip.sn/). Il présente des produits de garantie (« Nos Solutions ») et un portail de dépôt de dossiers, mais pas de rubrique d'appels à projets : il relève plutôt de l'annuaire que de la collecte.
+
+À vérifier ensemble : la liste exacte des ministères à couvrir.
+
+### Collecte automatique : ce que permet chaque portail (relevé le 01/10/2026, 5 h)
+Lecture du fichier `robots.txt`, c'est-à-dire les règles que chaque site fixe aux robots, et de la connexion sécurisée. Aucune protection n'a été contournée.
+
+| Portail | Constat | Conséquence pour la collecte |
+|---|---|---|
+| der.sn, adepme.sn | Sites WordPress ; seule l'administration est interdite aux robots ; plan du site public | Collecte possible et simple |
+| sgee-sn.org, fongip.sn | Aucune restriction ; plan du site public | Collecte possible |
+| fonctionpublique.gouv.sn | Pas de fichier de règles (rien d'interdit) | Collecte possible, structure à étudier |
+| financement.der.sn | Application web (rendu par JavaScript) | Collecte avec le navigateur automatisé, comme e-senegal.sn |
+| marchespublics.sn | Certificat de sécurité émis par une autorité que Windows ne reconnaît pas (chaîne incomplète ou autorité locale) | Bloquant tant que ce n'est pas réglé : à signaler à l'ARMP, ou à résoudre en ajoutant le certificat intermédiaire officiel, sans jamais désactiver la vérification |
+| directiondesbourses.sn | Le certificat ne correspond pas au nom du site | Collecte impossible en sécurité : à signaler au ministère |
+| emploi-fpublique.sec.gouv.sn | Injoignable depuis ici (délai dépassé) | À revérifier depuis le Sénégal ou l'hébergement |
+| 3fpt.sn | Refuse les accès automatiques (403), même pour lire ses règles | Pas de collecte sans accord du 3FPT : saisie dans la console ou lien |
+
+Cela renforce l'option C : collecte d'abord là où c'est simple (DER/FJ, ADEPME), saisie ou lien ailleurs, et demande d'accord ou de correction aux organismes concernés. Les agrégateurs privés (par exemple marchesdusenegal.com) sont exclus : ce ne sont pas des sources officielles.
 
 ### Options
 - **A. Collecte automatique** sur 4 à 6 portails officiels, comme pour presidence.sn : fiches normalisées (type, organisme, date limite, lien officiel), rappel avant la clôture. C'est le plus complet. Mais chaque portail a sa propre structure, et il faut l'accord de chaque organisme.
 - **B. Saisie dans la console** : l'équipe ajoute les opportunités majeures depuis les portails officiels, avec une validation à deux personnes et le lien officiel obligatoire. Plus un annuaire de liens vers les portails. Rapide et fiable, mais limité par le temps de l'équipe.
-- **C. Hybride (recommandé)** : on commence par B (annuaire et saisie validée), puis on passe une source à la fois en collecte automatique (A), à mesure que les accords sont obtenus. Les marchés publics d'abord : c'est le plus gros volume.
+- **C. Hybride (recommandé)** : on commence par B (annuaire et saisie validée), puis on passe une source à la fois en collecte automatique (A), à mesure que les accords sont obtenus. Les marchés publics sont le plus gros volume, mais leur certificat bloque pour l'instant (voir le tableau ci-dessus) : DER/FJ et ADEPME d'abord.
 
 ### Questions à trancher
 1. Quelles catégories au lancement : financement, concours, marchés publics, bourses, formation ?

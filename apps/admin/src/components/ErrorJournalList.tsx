@@ -1,5 +1,6 @@
 import { InfoIcon, WarningIcon, WarningOctagonIcon } from "@phosphor-icons/react/dist/ssr";
 import type { ErrorSeverity } from "@bgs/shared-types";
+import type { ReactNode } from "react";
 import type { JournalRow } from "../lib/error-journal";
 import { formatClockTime, formatDay } from "../lib/format";
 import { t } from "../lib/i18n";
@@ -15,7 +16,29 @@ function when(key: "errors.since" | "errors.last", date: Date): string {
   return t(key, { day: formatDay(date), time: formatClockTime(date) });
 }
 
-function ErrorCard({ row }: { row: JournalRow }) {
+/** The control marking a group as fixed, for those allowed to (none: read only). */
+export type ResolveControl = (group: { code: string; where: string }) => ReactNode;
+
+/** Who marked it as fixed and when; said differently once it has come back. */
+function ResolvedLine({ row }: { row: JournalRow }) {
+  if (row.resolved === null) {
+    return null;
+  }
+  const values = {
+    day: formatDay(row.resolved.at),
+    time: formatClockTime(row.resolved.at),
+    name: row.resolved.by,
+  };
+  return row.fixed ? (
+    <p className="mt-3 text-sm font-semibold">{t("errors.resolvedBy", values)}</p>
+  ) : (
+    <p className="mt-3 rounded-md bg-accent-container px-3 py-2 text-sm font-semibold text-on-accent-container">
+      {t("errors.cameBack", values)}
+    </p>
+  );
+}
+
+function ErrorCard({ row, resolve }: { row: JournalRow; resolve?: ResolveControl | undefined }) {
   const { explanation } = row;
   const { box, Icon } = SEVERITY_LOOK[explanation.severity];
   return (
@@ -46,6 +69,7 @@ function ErrorCard({ row }: { row: JournalRow }) {
       <p className="mt-3 text-sm text-ink-soft">
         {when("errors.since", row.firstAt)} · {when("errors.last", row.lastAt)}
       </p>
+      <ResolvedLine row={row} />
       {!explanation.catalogued && (
         <p className="mt-3 text-sm font-semibold">{t("errors.uncatalogued")}</p>
       )}
@@ -66,24 +90,59 @@ function ErrorCard({ row }: { row: JournalRow }) {
           )}
         </dl>
       </details>
+      {!row.fixed && row.group !== null && resolve?.(row.group)}
     </li>
   );
 }
 
-/** The console's error journal, in plain words (CLAUDE.md §4.5). */
-export function ErrorJournalList({ rows }: { rows: JournalRow[] }) {
-  if (rows.length === 0) {
-    return (
-      <p className="rounded-lg bg-primary-container p-6 text-on-primary-container">
-        {t("errors.none")}
-      </p>
-    );
-  }
+function ErrorCards({
+  rows,
+  resolve,
+}: {
+  rows: JournalRow[];
+  resolve?: ResolveControl | undefined;
+}) {
   return (
     <ul className="space-y-4">
       {rows.map((row) => (
-        <ErrorCard key={`${row.explanation.code} ${row.place}`} row={row} />
+        <ErrorCard key={`${row.explanation.code} ${row.place}`} row={row} resolve={resolve} />
       ))}
     </ul>
+  );
+}
+
+/**
+ * The console's error journal, in plain words (CLAUDE.md §4.5): the errors to deal
+ * with, then, folded, those marked as fixed.
+ */
+export function ErrorJournalList({
+  rows,
+  resolve,
+}: {
+  rows: JournalRow[];
+  resolve?: ResolveControl;
+}) {
+  const open = rows.filter((row) => !row.fixed);
+  const fixed = rows.filter((row) => row.fixed);
+  return (
+    <div className="space-y-6">
+      {open.length === 0 ? (
+        <p className="rounded-lg bg-primary-container p-6 text-on-primary-container">
+          {t(rows.length === 0 ? "errors.none" : "errors.noneOpen")}
+        </p>
+      ) : (
+        <ErrorCards rows={open} resolve={resolve} />
+      )}
+      {fixed.length > 0 && (
+        <details>
+          <summary className="cursor-pointer font-semibold text-brand">
+            {t("errors.fixedTitle", { count: fixed.length })}
+          </summary>
+          <div className="mt-4">
+            <ErrorCards rows={fixed} />
+          </div>
+        </details>
+      )}
+    </div>
   );
 }

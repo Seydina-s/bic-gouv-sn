@@ -382,6 +382,7 @@ export async function buildApp({
         prefix: "/admin/v1",
         signIn: admin.signIn,
         errorJournal,
+        journal: admin.journal,
       });
     }
   }

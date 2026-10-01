@@ -118,4 +118,12 @@ export const MIGRATIONS: readonly { id: string; statements: readonly string[] }[
       "CREATE INDEX push_subscriptions_subscribed_at ON push_subscriptions (subscribed_at)",
     ],
   },
+  {
+    // An error group marked as fixed in the console (ADM-04): when, and by whom.
+    id: "010-error-journal-resolved",
+    statements: [
+      "ALTER TABLE error_journal ADD COLUMN resolved_at text",
+      "ALTER TABLE error_journal ADD COLUMN resolved_by text",
+    ],
+  },
 ];
