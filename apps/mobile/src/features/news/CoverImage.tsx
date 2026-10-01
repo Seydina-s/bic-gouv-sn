@@ -75,6 +75,8 @@ export function CoverImage({ cover, slotWidth, style, label, onDemand = false }:
       placeholder={{ blurhash: cover.blurhash }}
       contentFit="cover"
       transition={theme.motion.duration.normal}
+      // Kept in memory too: back on a list, the photos are there at once, no flicker.
+      cachePolicy="memory-disk"
       recyclingKey={source?.url ?? null}
       testID="cover-image"
       accessible={label !== undefined}
