@@ -60,3 +60,9 @@ Mise à jour du 30/09/2026 (6 h 15, mode autonome) : point 21 ajouté.
 | # | Quoi | Pourquoi / effet si ça attend | Réf. backlog |
 |---|---|---|---|
 | 21 | Choisir comment envoyer les notifications **à l'échelle nationale**. Le service d'Expo, en place, accepte au plus 600 notifications par seconde (limite officielle) : un article met environ 3 minutes à atteindre 100 000 téléphones, mais environ 9 heures pour 20 millions. Recommandation : garder Expo pour le pilote, puis passer aux **sujets Firebase** (un seul envoi par article et par langue, Google se charge de la diffusion, gratuit) avant le lancement national. Le code est prêt à changer de fournisseur (interface commune). | Aucun effet tant que le nombre d'abonnés reste sous quelques centaines de milliers | AUD5-01 |
+
+Mise à jour du 01/10/2026 (5 h, mode autonome) : point 22 ajouté.
+
+| # | Quoi | Pourquoi / effet si ça attend | Réf. backlog |
+|---|---|---|---|
+| 22 | Faire rédiger la **politique de confidentialité** par un juriste, à partir de l'inventaire factuel des données (`docs/confidentialite/inventaire-des-donnees.md`), et préparer la déclaration à la CDP | Exigée par Google Play et l'App Store avant toute publication, et par la loi n° 2008-12 | L-01, A-02 |

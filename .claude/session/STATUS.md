@@ -1,6 +1,6 @@
 # STATUS — Bic Gouv SN
 
-**Dernière mise à jour** : 30/09/2026 (13 h) · **Mode** : standard (le mode autonome s'est terminé à 13 h, comme demandé). Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md` (21 points, dont plusieurs réglés).
+**Dernière mise à jour** : 01/10/2026 (5 h) · **Mode** : autonome jusqu'au 01/10 à 13 h, puis séance avec l'utilisateur : Opportunités, Participer, IA. Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md` (22 points, dont plusieurs réglés).
 
 ## Où on en est
 - Dépôt **public et sécurisé** : https://github.com/Seydina-s/bic-gouv-sn. `main` protégée : tout passe par PR + **4 contrôles verts** (qualité et tests, constructions avec **audit d'accessibilité** sur 82 écrans dont 26 à 320 px et **6 parcours de bout en bout**, secrets et dépendances, **conteneurs**).
@@ -39,19 +39,31 @@
   - **notifications automatiques** (décision de l'utilisateur, 1 h 20) : chaque nouvel article annoncé avec photo, premiers mots et source, dans la langue de chacun, hors heures calmes ; pause (éditeur) et reprise (administrateur) dans la console, 10 par heure au plus ; nombre de téléphones prévenus affiché ;
   - **app** : demande comme une permission, Réglages (notifications, heures calmes 22 h – 7 h par défaut, rubriques), ouverture de l'article au toucher ; actif dès que le projet EAS existe ;
   - envoi Expo à sa cadence officielle (600 par seconde) ; garde-fous des futures clés Apple et Firebase ; guide de la version de test complété (notifications) ; audit croisé AUD5.
-- Contrôle complet : plus de 1 100 tests verts.
+- Après-midi et soirée du 30/09 (PR #151 à #156), version de test sur iPhone installée par l'utilisateur :
+  - compilation iOS corrigée (sentry-cli introuvable avec pnpm, ERREURS.md) ;
+  - **« Près de moi » carte d'abord** avec panneau glissant à trois hauteurs (Reanimated, @gorhom/bottom-sheet ; plafond de poids relevé à 7,5 Mo par l'utilisateur), **repères par type** (7 teintes et icônes, contrastes testés), **itinéraire dans Google Maps**, carte toujours claire ;
+  - **barre de navigation** à pastille glissante ; **fondu** en fin de présentation ; **présentation en chemin** (direction A choisie parmi trois maquettes).
+- Nuit du 30/09 au 01/10 (PR #157 à #161), mode autonome :
+  - console : **téléphones abonnés** (totaux seulement) et **alerte rouge** dès 3 annonces automatiques en 30 minutes ;
+  - Réglages › « Présentation de l'application » › **« Redémarrer »** (libellé de l'utilisateur) ;
+  - « Près de moi » en **volet latéral** sur tablette, pliable déplié et téléphone en paysage ;
+  - **journaux de l'API sans IP ni recherche** (minimisation) ; **inventaire des données** (`docs/confidentialite/`) ; **fichier des 271 textes à traduire en wolof** (`docs/traduction/`, `pnpm i18n:wolof`) ;
+  - **dossier de cadrage** pour la séance de 13 h : `docs/cadrage/opportunites-participer-ia.md` ;
+  - audit croisé AUD6 ; mesure du poids de l'app (Sentry ≈ 2 Mo de source, levier principal mais bloqué par PERF-03).
+- Contrôle complet : plus de 1 150 tests verts.
 - Incident du 29/09 : clé de l'API **locale** apparue dans la conversation ; remplacée le jour même (ERREURS.md).
 
 ## En attente de l'utilisateur
 Voir `.claude/session/A-FAIRE-UTILISATEUR.md`. Toujours ouverts : compte Apple (en cours), vérification des services de Dakar, logo, identifiant de l'app, questions au BIC (et offre de Sénégal Numérique pour Diamniadio), budget d'hébergement (chiffrage prêt), jeton Sentry, Opportunités et Participer (plus tard), wolof (à la fin).
 
 ## Prochaine tâche
-- **Maintenant (13 h)** : compte Apple Developer activé → version de test sur iPhone avec l'utilisateur (guide `docs/guides/installer-la-version-de-test-iphone.md`, notifications comprises), puis QA-02, QA-03, QA-04, QA-09, AUD5-04, E2E-02, LIC-02, module iPhone pour la photo (AUD5-07).
-- Décisions attendues : points 19 (contenus publiés dans PostgreSQL), 20 (Firebase), 21 (envoi à l'échelle nationale), et confirmation de l'ordre des invitations et des heures calmes par défaut (AUD5-05).
+- **13 h, séance avec l'utilisateur** : dettes dans l'ordre Opportunités, Participer, intégration de l'IA, à partir du dossier `docs/cadrage/opportunites-participer-ia.md`.
+- Ensuite, sur la version de test : QA-02, QA-03, QA-04, QA-09, AUD5-04, AUD6-02, AUD6-03, E2E-02, LIC-02, module iPhone pour la photo des notifications (AUD5-07, recompilation).
+- Décisions attendues : points 19 (contenus publiés dans PostgreSQL), 20 (Firebase), 21 (envoi à l'échelle nationale), 22 (politique de confidentialité), confirmation de l'ordre des invitations et des heures calmes par défaut (AUD5-05) et des journaux sans IP (décision autonome du 01/10).
 - QA-11 réglé (test instable : préparation trop lente sous charge).
 
-## Services locaux (au 30/09, 13 h)
-- API sur 3100 lancée avant SCALE-01 (code de 20 h 15, toujours sur fichiers : pas de `REDIS_URL` ni de `DATABASE_URL` en local, pas de Redis ni de PostgreSQL installés sur la machine) ; console en développement sur 3001 ; Expo sur 8081 ; export web de l'app servi sur 8084 (relais vers l'API) ; une seule collecte temps réel (verrou actif, contrôle des retraits chaque nuit ; elle nettoiera les fichiers temporaires orphelins à son prochain démarrage).
+## Services locaux (au 01/10, 5 h)
+- API sur 3100 relancée sur `main` avec `PUSH_PROVIDER=expo` (toujours sur fichiers : ni Redis ni PostgreSQL installés sur la machine) ; console en développement sur 3001 ; Expo sur 8081 en mode version de test (`--dev-client`, `EXPO_PUBLIC_API_URL=http://192.168.1.14:3100`) ; export web de l'app servi sur 8084 (relais vers l'API) ; une seule collecte temps réel (verrou actif, contrôle des retraits chaque nuit ; elle nettoiera les fichiers temporaires orphelins à son prochain démarrage).
 - Changer la clé locale des seconds codes : arrêter l'API, `pnpm --filter @bgs/api admin:rotate-key`, relancer (aucune clé n'est jamais affichée).
 - Secrets : gitleaks toujours avec `--redact` et sur le commit (`gitleaks git`), jamais `gitleaks dir` sur le dépôt (ERREURS.md, 29/09).
 - Arrêt de la collecte : chercher le processus dont la ligne de commande contient `cli/watch.ts` (arrêter la tâche pnpm ne suffit pas), puis vérifier qu'il n'en reste aucun avant de relancer.
