@@ -4,7 +4,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import * as SystemUI from "expo-system-ui";
 import { useEffect, type ComponentType } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { QueryProvider } from "../data/QueryProvider";
 import { DataSaverProvider } from "../features/data-saver/DataSaverProvider";
@@ -14,7 +14,7 @@ import { useNotificationTaps } from "../features/notifications/useNotificationTa
 import { UpdateGate } from "../features/remote-config/FeatureGate";
 import { SettingsProvider } from "../features/shell/SettingsProvider";
 import { FavoritesProvider } from "../features/favorites/FavoritesProvider";
-import { Onboarding } from "../features/onboarding/Onboarding";
+import { OnboardingLayer } from "../features/onboarding/OnboardingLayer";
 import { useOnboardingDone } from "../features/onboarding/useOnboardingDone";
 import { I18nProvider } from "../i18n/I18nProvider";
 import { useDocumentLanguage } from "../i18n/language";
@@ -66,11 +66,7 @@ function ThemedStack() {
         }}
       />
       {/* First run: welcome screens above the app (the navigator stays mounted). */}
-      {onboarding.done === false && (
-        <View accessibilityViewIsModal style={StyleSheet.absoluteFill}>
-          <Onboarding onFinish={onboarding.finish} />
-        </View>
-      )}
+      {onboarding.done === false && <OnboardingLayer onFinish={onboarding.finish} />}
     </>
   );
 }

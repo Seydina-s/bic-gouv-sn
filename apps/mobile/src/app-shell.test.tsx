@@ -124,7 +124,10 @@ describe("first run", () => {
       expect(await screen.findByText(title)).toBeOnTheScreen();
     }
     await fireEvent.press(screen.getByRole("button", { name: "Commencer" }));
-    expect(screen.queryByText("Gardez l'essentiel, même sans réseau")).toBeNull();
+    // The welcome screens fade away to reveal the app (no sudden cut).
+    await waitFor(() => {
+      expect(screen.queryByText("Gardez l'essentiel, même sans réseau")).toBeNull();
+    });
     expect(await AsyncStorage.multiGet(["bgs-onboarding", "bgs-language"])).toEqual([
       ["bgs-onboarding", "done"],
       ["bgs-language", "wo"],
@@ -135,7 +138,9 @@ describe("first run", () => {
     await AsyncStorage.removeItem("bgs-onboarding");
     await renderRouter(routes, { initialUrl: "/" });
     await fireEvent.press(await screen.findByRole("button", { name: "Passer" }));
-    expect(screen.queryByText("Choisissez votre langue")).toBeNull();
+    await waitFor(() => {
+      expect(screen.queryByText("Choisissez votre langue")).toBeNull();
+    });
     expect((await screen.findAllByText("Titre de test A"))[0]).toBeOnTheScreen();
   });
 });
