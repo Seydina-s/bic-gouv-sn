@@ -170,3 +170,20 @@ Par exemple, 500 000 questions par mois avec Haiku coûteraient environ 2 250 $ 
 4. « Un agent peut prendre le relais » : y a-t-il des agents, et sur quel canal ?
 5. Wolof : contacte-t-on Andakia (AWA) maintenant, ou après le banc d'essai ?
 6. Quel fournisseur de modèle (et quelle région d'hébergement des données) êtes-vous prêt à valider ?
+
+---
+
+## 4. Ce que chaque option demande à construire
+
+Estimation de Claude, en taille relative : **petite** (quelques heures à une journée), **moyenne** (quelques jours), **grosse** (une semaine ou plus, avec des dépendances extérieures). Chaque option garde les exigences habituelles : tests, accessibilité, parcours de bout en bout, journal d'audit.
+
+| Option | Ce qu'il faut construire | Taille | Dépend de |
+|---|---|---|---|
+| Opportunités B (saisie dans la console) | Fiche « opportunité » (type, organisme, date limite, lien officiel obligatoire) ; saisie et validation à deux personnes dans la console ; écran de l'app avec filtres et tri par date limite ; annuaire des portails | Moyenne | Vos choix de catégories et de sources |
+| Opportunités A (collecte), par portail | Adaptateur de collecte, contrôle et quarantaine, comme pour presidence.sn ; surveillance dans la console | Moyenne pour DER/FJ ou ADEPME ; bloquée pour marchespublics.sn tant que son certificat n'est pas réglé | Accord des organismes, règles des sites |
+| Rappel avant la clôture | Notification, sur accord de la personne, quelques jours avant la date limite | Petite (le système de notifications existe) | Option B ou A |
+| Participer A (sondages) | Sondage préparé et validé à deux dans la console, avec charte ; vote anonyme d'un toucher (une voix par installation, limite de débit) ; résultats agrégés | Moyenne | Charte éditoriale, qui rédige |
+| Signalements | Photo (avec floutage des visages et des plaques), position, catégorie ; modération ; transmission à l'organisme et suivi | Grosse | Organisme partenaire, déclaration CDP, durée de conservation |
+| Assistant A (texte, français) | Indexation de la base ; recherche des passages ; adaptateur du fournisseur de modèle ; réponses avec citations ; jeu de test « zéro invention » ; garde-fous (périmètre, neutralité) ; suivi du coût dans la console | Grosse | Fournisseur et budget validés |
+| « Est-ce vrai ? » seul (C) | Même socle que l'assistant, avec un format de réponse plus simple | Moyenne à grosse | Idem |
+| Voix et wolof | Banc d'essai W-02, puis intégration du fournisseur retenu | Grosse | Locuteurs natifs pour le test d'écoute, partenaire éventuel |
