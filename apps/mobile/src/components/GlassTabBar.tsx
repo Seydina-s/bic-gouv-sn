@@ -94,6 +94,8 @@ export function GlassTabBar({ state, descriptors, navigation }: TabBarProps) {
   // Where the indicator lies: each tab's width, and the icon's height in the bar.
   const [geometry, setGeometry] = useState({ slot: 0, top: 0 });
   const indicator = useSlidingIndicator(state.index, geometry.slot);
+  // The tab opened when the finger landed: its release must not open it twice.
+  const openedOnTouch = useRef<string | null>(null);
 
   return (
     <View
@@ -137,7 +139,7 @@ export function GlassTabBar({ state, descriptors, navigation }: TabBarProps) {
           const options = descriptors[route.key]?.options;
           const label = typeof options?.title === "string" ? options.title : route.name;
           const tint = focused ? color.onPrimaryContainer : color.textSecondary;
-          const onPress = () => {
+          const open = () => {
             const event = navigation.emit({
               type: "tabPress",
               target: route.key,
@@ -147,12 +149,28 @@ export function GlassTabBar({ state, descriptors, navigation }: TabBarProps) {
               navigation.navigate(route.name, route.params);
             }
           };
+          // Like the phone's own tab bars: another tab opens the instant the finger
+          // lands. The release still opens it for screen readers, which only "press".
+          const onPressIn = () => {
+            if (!focused) {
+              openedOnTouch.current = route.key;
+              open();
+            }
+          };
+          const onPress = () => {
+            if (openedOnTouch.current === route.key) {
+              openedOnTouch.current = null;
+              return;
+            }
+            open();
+          };
           return (
             <Pressable
               key={route.key}
               accessibilityRole="tab"
               accessibilityState={{ selected: focused }}
               accessibilityLabel={label}
+              onPressIn={onPressIn}
               onPress={onPress}
               onLongPress={() => navigation.emit({ type: "tabLongPress", target: route.key })}
               style={({ pressed }) => [
