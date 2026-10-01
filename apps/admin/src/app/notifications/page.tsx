@@ -9,6 +9,7 @@ import { formatClockTime, formatDay } from "../../lib/format";
 import { t } from "../../lib/i18n";
 import { latestNews } from "../../lib/latest-news";
 import { requireAccount } from "../../lib/session";
+import { unusualGrowth } from "../../lib/subscriber-growth";
 import { AutomaticForm, DecisionForm, PrepareForm } from "./NotificationForms";
 
 export const dynamic = "force-dynamic";
@@ -62,10 +63,10 @@ function automaticLine(automatic: AutomaticNotifications): string {
   });
 }
 
-/** Who and when, for a notification of the history. */
 /** Automatic sendings in 30 minutes from which the console asks for a look. */
 const BURST_FROM = 3;
 
+/** Who and when, for a notification of the history. */
 function historyLines(notification: Notification): (string | null)[] {
   if (notification.origin === "automatic") {
     return [t("notifications.automaticSentAt", when(notification.preparedAt))];
@@ -100,6 +101,7 @@ export default async function NotificationsPage() {
   const pending = notifications.filter((item) => item.status === "pending");
   const decided = notifications.filter((item) => item.status !== "pending");
   const canPrepare = account.role !== "reviewer";
+  const growth = unusualGrowth(subscribers);
 
   return (
     <section aria-labelledby="notifications-title" className="space-y-10">
@@ -145,6 +147,14 @@ export default async function NotificationsPage() {
         <p className="max-w-prose">
           {t("notifications.subscribers", { count: subscribers.total })}
         </p>
+        {growth !== null && (
+          <p
+            role="alert"
+            className="max-w-prose rounded-md bg-danger-surface px-4 py-3 text-on-danger-surface"
+          >
+            {t("notifications.subscriberGrowth", growth)}
+          </p>
+        )}
         {subscribers.total > 0 && (
           <p className="max-w-prose text-sm text-ink-soft">
             {t("notifications.subscribersDetail", {

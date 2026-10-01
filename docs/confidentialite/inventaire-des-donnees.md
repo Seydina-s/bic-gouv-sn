@@ -30,7 +30,7 @@
 | Demandes de contenu (articles, démarches, services, carte) | À l'usage | Rien de nominatif. Le journal note la méthode et le chemin, sans IP ni paramètres ; la carte n'y est pas inscrite du tout | Selon l'hébergeur (à fixer) |
 | Mots cherchés sans résultat | Recherche sans réponse | Le texte et le jour, seulement s'il a été cherché au moins 3 fois ; rien sur la personne | Les 2 000 recherches les plus fréquentes |
 | Signaux d'usage (statistiques) | Seulement après accord | Des totaux par jour (personnes actives, plateformes, versions, articles lus) ; aucun identifiant | 400 jours |
-| Abonnement aux notifications | Seulement après accord | Le jeton de notification du téléphone, les rubriques, les heures calmes, la langue | Jusqu'au désabonnement, ou jusqu'à ce qu'Expo signale le téléphone comme inconnu |
+| Abonnement aux notifications | Seulement après accord | Le jeton de notification du téléphone, les rubriques, les heures calmes, la langue, et l'heure du premier abonnement (à l'heure près, pour repérer un afflux de faux abonnements) | Jusqu'au désabonnement, ou jusqu'à ce qu'Expo signale le téléphone comme inconnu |
 | Adresse IP | Chaque requête | Seulement en mémoire, pour limiter le débit (fenêtre d'une minute) ; jamais écrite dans les journaux | Une minute |
 
 ## 3. Services tiers
