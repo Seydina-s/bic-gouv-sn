@@ -31,6 +31,12 @@ const refused = [
   // Backticks the shell would run, and inline JavaScript holding one (29/09/2026).
   "echo `date`",
   'node -e "s.replace(\\`a\\`, \'b\')"',
+  // A push not gated by the scanner (29/09 and 01/10/2026).
+  "git push -u origin feat/x",
+  'gitleaks git --redact --log-opts="-1"; git push',
+  'gitleaks git --redact --log-opts="-1" | tail -2 && git push -q',
+  'gitleaks git --redact --log-opts="-1" || git push',
+  'gitleaks git --redact --log-opts="-1"\ngit push',
 ];
 
 const allowed = [
@@ -42,6 +48,9 @@ const allowed = [
   "cat apps/mobile/google-services.json",
   'grep -rn "process.env.EXPO_PUBLIC_API_URL" apps/mobile/src',
   'gitleaks git --redact --log-opts="-1"',
+  'git commit -q -m "x" && gitleaks git --redact --log-opts="-1" --no-banner && git push -q -u origin feat/x 2>&1 | tail -2',
+  "git commit -q -F - <<'EOF'\ndocs: then git push\nEOF",
+  "tail -n 1 ERREURS.md | grep -o 'tail && git push'",
   "Get-NetTCPConnection -LocalPort 3100 -State Listen",
   "node scripts/e2e.ts",
   "curl -s http://127.0.0.1:3100/v1/health",
