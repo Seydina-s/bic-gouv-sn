@@ -10,7 +10,10 @@ import { ARTICLE_ID, PROCEDURE_SLUG, SERVICE_ID } from "./test-seed";
 import { TestBrowser, type Viewport, type Violation } from "./test-browser";
 import { startStack } from "./test-stack";
 
-const SETTLE_MS = Number(process.env["A11Y_SETTLE_MS"] ?? 4000);
+/** Once a screen shows its content: time for images, fonts and entrances to finish. */
+const SETTLE_MS = Number(process.env["A11Y_SETTLE_MS"] ?? 1000);
+/** Longest wait for a screen to show its content. */
+const CONTENT_TIMEOUT_MS = 20_000;
 /** Time for a step of the welcome to finish coming in. */
 const STEP_SETTLE_MS = 1500;
 /** A folder to keep a picture of every audited screen (visual check); none by default. */
@@ -30,35 +33,62 @@ const WELCOME_STEPS = [
   "Gardez l'essentiel, même sans réseau",
 ] as const;
 
-const APP_SCREENS = [
-  "/",
-  "/section/communiques",
-  `/article/${ARTICLE_ID}`,
-  "/search",
-  "/favorites",
-  "/procedures",
-  `/procedure/${PROCEDURE_SLUG}`,
-  "/near-me",
-  `/service/${SERVICE_ID}`,
-  "/assistant",
-  "/participate",
-  "/licences",
+/**
+ * What proves a screen shows its content, not a skeleton nor an error: a heading
+ * of the page (never the navigation's labels), or a placeholder of the seed.
+ */
+type Proof = { heading: string } | { text: string };
+type Screen = readonly [path: string, proof: Proof];
+
+const ARTICLE = { text: "Article fictif pour l'audit d'accessibilité" };
+const APP_SCREENS: readonly Screen[] = [
+  ["/", ARTICLE],
+  ["/section/communiques", ARTICLE],
+  [`/article/${ARTICLE_ID}`, ARTICLE],
+  ["/search", { heading: "Rechercher" }],
+  ["/favorites", { heading: "Mes favoris" }],
+  ["/procedures", { heading: "Démarches" }],
+  [`/procedure/${PROCEDURE_SLUG}`, { text: "Démarche de test" }],
+  ["/near-me", { heading: "Près de moi" }],
+  [`/service/${SERVICE_ID}`, { text: "Mairie fictive" }],
+  // Not yet available: the screen's heading, then "Bientôt disponible".
+  ["/assistant", { heading: "Assistant IA" }],
+  ["/participate", { heading: "Participer" }],
+  ["/licences", { heading: "Logiciels libres" }],
 ];
-const CONSOLE_SCREENS = [
-  "/",
-  "/erreurs",
-  "/controle",
-  "/demarches",
-  "/services",
-  `/services/${SERVICE_ID}`,
-  "/services/nouveau",
-  "/masques",
-  "/recherches",
-  "/usage",
-  "/journal",
-  "/notifications",
-  "/comptes",
+const SIGN_IN_SCREENS: readonly Screen[] = [
+  ["/connexion", { heading: "Connexion" }],
+  ["/connexion/activer", { heading: "Activer votre compte" }],
 ];
+const CONSOLE_SCREENS: readonly Screen[] = [
+  ["/", { heading: "À traiter" }],
+  ["/erreurs", { heading: "Journal des erreurs" }],
+  ["/controle", { heading: "Contrôle à distance" }],
+  ["/demarches", { heading: "Thèmes des démarches" }],
+  ["/services", { heading: "Services de l'État" }],
+  [`/services/${SERVICE_ID}`, { heading: "Corriger un service" }],
+  ["/services/nouveau", { heading: "Ajouter un service de l'État" }],
+  ["/masques", { heading: "Articles masqués" }],
+  ["/recherches", { heading: "Recherches sans résultat" }],
+  ["/usage", { heading: "Usage de l'application" }],
+  ["/journal", { heading: "Journal d'audit" }],
+  ["/notifications", { heading: "Notifications" }],
+  ["/comptes", { heading: "Comptes" }],
+];
+
+/** Opens a screen and waits for its proof of content, then lets it settle. */
+async function openScreen(browser: TestBrowser, base: string, [path, proof]: Screen) {
+  await browser.open(base + path, 0);
+  const condition =
+    "heading" in proof
+      ? `[...document.querySelectorAll("h1, h2, [role=heading]")].some((node) => node.innerText.includes(${JSON.stringify(proof.heading)}))`
+      : `document.body.innerText.includes(${JSON.stringify(proof.text)})`;
+  if (!(await browser.waitUntil(condition, CONTENT_TIMEOUT_MS))) {
+    const expected = "heading" in proof ? proof.heading : proof.text;
+    throw new Error(`${base}${path} never showed « ${expected} »`);
+  }
+  await new Promise((resolve) => setTimeout(resolve, SETTLE_MS));
+}
 
 interface ScreenReport {
   screen: string;
@@ -70,12 +100,12 @@ interface ScreenReport {
 async function reflowScreens(
   browser: TestBrowser,
   base: string,
-  screens: readonly string[],
+  screens: readonly Screen[],
 ): Promise<ScreenReport[]> {
   const reports: ScreenReport[] = [];
   for (const screen of screens) {
-    await browser.open(base + screen, SETTLE_MS);
-    reports.push(reflowShown(base + screen, await browser.overflowingText()));
+    await openScreen(browser, base, screen);
+    reports.push(reflowShown(base + screen[0], await browser.overflowingText()));
   }
   return reports;
 }
@@ -101,14 +131,14 @@ function reflowShown(screen: string, cut: readonly string[]): ScreenReport {
 async function auditScreens(
   browser: TestBrowser,
   base: string,
-  screens: readonly string[],
+  screens: readonly Screen[],
   scheme: (typeof SCHEMES)[number],
 ): Promise<ScreenReport[]> {
   const reports: ScreenReport[] = [];
   await browser.setScheme(scheme);
   for (const screen of screens) {
-    await browser.open(base + screen, SETTLE_MS);
-    reports.push(await auditShown(browser, base, screen, screen, scheme));
+    await openScreen(browser, base, screen);
+    reports.push(await auditShown(browser, base, screen[0], screen[0], scheme));
   }
   return reports;
 }
@@ -157,16 +187,15 @@ async function auditWelcome(
   await browser.setScheme(scheme === "narrow" ? "light" : scheme);
   await browser.open(base, SETTLE_MS);
   await browser.run('localStorage.removeItem("bgs-onboarding")');
-  await browser.open(base, SETTLE_MS);
-  await browser.waitForText(WELCOME_STEPS[0]);
+  await browser.open(base, 0);
   const reports: ScreenReport[] = [];
   for (const [index, title] of WELCOME_STEPS.entries()) {
     if (index > 0) {
       await browser.press("Suivant");
-      await browser.waitForText(title);
-      // Each step comes in with a fade: colours read mid-way would be half-blended.
-      await new Promise((resolve) => setTimeout(resolve, STEP_SETTLE_MS));
     }
+    await browser.waitForText(title);
+    // Each step comes in with a fade: colours read mid-way would be half-blended.
+    await new Promise((resolve) => setTimeout(resolve, STEP_SETTLE_MS));
     const name = `/ (présentation, étape ${String(index + 1)})`;
     reports.push(
       scheme === "narrow"
@@ -194,9 +223,7 @@ async function main(): Promise<number> {
     await browser.setViewport(DESKTOP);
     // Signed out first: once signed in, the sign-in page leads to the console.
     for (const scheme of SCHEMES) {
-      reports.push(
-        ...(await auditScreens(browser, consoleBase, ["/connexion", "/connexion/activer"], scheme)),
-      );
+      reports.push(...(await auditScreens(browser, consoleBase, SIGN_IN_SCREENS, scheme)));
     }
     await browser.setCookie("bgs_admin_session", token, consoleBase);
     for (const scheme of SCHEMES) {
@@ -205,7 +232,7 @@ async function main(): Promise<number> {
     // The narrowest phones: nothing cut by the screen's edges (WCAG 1.4.10).
     await browser.setViewport(NARROW);
     reports.push(...(await auditWelcome(browser, appBase, "narrow")));
-    reports.push(...(await reflowScreens(browser, appBase, ["/", ...APP_SCREENS])));
+    reports.push(...(await reflowScreens(browser, appBase, APP_SCREENS)));
     reports.push(...(await reflowScreens(browser, consoleBase, CONSOLE_SCREENS)));
     return report(reports);
   } finally {
