@@ -320,6 +320,20 @@ describe("app shell", () => {
     expect(await screen.findByText("Momentanément indisponible")).toBeOnTheScreen();
   });
 
+  it("opens another tab the instant the finger lands, and only once", async () => {
+    await renderRouter(routes, { initialUrl: "/" });
+    await screen.findAllByText("Titre de test A");
+    const procedures = screen.getByRole("tab", { name: /Démarches/ });
+    const intro = "Les démarches administratives officielles, expliquées simplement.";
+    expect(screen.queryByText(intro)).toBeNull();
+    await fireEvent(procedures, "pressIn");
+    expect(await screen.findByText(intro)).toBeOnTheScreen();
+    // The release changes nothing: the tab stays as it opened.
+    await fireEvent(procedures, "press");
+    expect(screen.getByText(intro)).toBeOnTheScreen();
+    expect(procedures).toBeSelected();
+  });
+
   it("asks for an update when this version is older than the oldest allowed", async () => {
     globalThis.fetch = newsFetch({
       remoteConfig: () => new Response(JSON.stringify({ minVersion: "99.0.0", features: {} })),
