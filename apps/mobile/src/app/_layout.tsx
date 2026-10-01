@@ -3,8 +3,8 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import * as SystemUI from "expo-system-ui";
-import { useEffect, type ComponentType } from "react";
-import { StyleSheet } from "react-native";
+import { useCallback, useEffect, useState, type ComponentType } from "react";
+import { Platform, StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { QueryProvider } from "../data/QueryProvider";
 import { DataSaverProvider } from "../features/data-saver/DataSaverProvider";
@@ -14,6 +14,7 @@ import { useNotificationTaps } from "../features/notifications/useNotificationTa
 import { UpdateGate } from "../features/remote-config/FeatureGate";
 import { SettingsProvider } from "../features/shell/SettingsProvider";
 import { FavoritesProvider } from "../features/favorites/FavoritesProvider";
+import { LaunchLayer } from "../features/launch/LaunchLayer";
 import { LocationProvider } from "../features/location/LocationProvider";
 import { OnboardingLayer } from "../features/onboarding/OnboardingLayer";
 import { OnboardingProvider, useOnboardingDone } from "../features/onboarding/OnboardingProvider";
@@ -39,6 +40,11 @@ function ThemedStack() {
   const fontsReady = useAppFonts();
   const onboarding = useOnboardingDone();
   const ready = fontsReady && onboarding.done !== null;
+  // Once per opening, on phones (the web preview serves tests and checks).
+  const [launching, setLaunching] = useState(Platform.OS !== "web");
+  const launched = useCallback(() => {
+    setLaunching(false);
+  }, []);
   useDocumentLanguage();
   useNotificationTaps();
 
@@ -68,6 +74,7 @@ function ThemedStack() {
       />
       {/* First run: welcome screens above the app (the navigator stays mounted). */}
       {onboarding.done === false && <OnboardingLayer onFinish={onboarding.finish} />}
+      {launching && <LaunchLayer onDone={launched} />}
     </>
   );
 }

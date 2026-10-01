@@ -33,7 +33,15 @@
       "expo-router",
       "expo-localization",
       "expo-font",
-      "expo-splash-screen",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#FFFFFF",
+          "dark": {
+            "backgroundColor": "#131714"
+          }
+        }
+      ],
       "expo-image",
       [
         "expo-location",
