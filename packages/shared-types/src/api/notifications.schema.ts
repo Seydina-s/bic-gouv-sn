@@ -69,6 +69,10 @@ export const subscribersSummarySchema = z.object({
   quietHours: z.int().nonnegative(),
   french: z.int().nonnegative(),
   wolof: z.int().nonnegative(),
+  /** Phones that subscribed in the last 24 hours. */
+  newLastDay: z.int().nonnegative(),
+  /** Phones that subscribed in the 7 days before those 24 hours (the usual pace). */
+  newWeekBefore: z.int().nonnegative(),
 });
 export type SubscribersSummary = z.infer<typeof subscribersSummarySchema>;
 

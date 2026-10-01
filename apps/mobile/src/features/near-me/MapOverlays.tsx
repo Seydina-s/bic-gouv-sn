@@ -87,27 +87,34 @@ export function LocateButton({
 export function MapNotice({
   message,
   action,
-  onAction,
   top,
+  left = 0,
 }: {
   message: string;
-  action: string;
-  onAction: () => void;
+  /** The way out, when there is one to offer (none when the list is already beside). */
+  action?: { label: string; onPress: () => void } | undefined;
   top: number;
+  /** Where the map starts (a panel may sit on its left). */
+  left?: number;
 }) {
   const { theme } = useTheme();
   const { color, space, radius, textStyle, touchTarget } = theme;
   return (
-    <Glass radius={radius.lg} style={[styles.anchor, { top, left: space.lg, right: space.lg }]}>
+    <Glass
+      radius={radius.lg}
+      style={[styles.anchor, { top, left: left + space.lg, right: space.lg }]}
+    >
       <View accessibilityLiveRegion="polite" style={{ padding: space.md, gap: space.xs }}>
         <Text style={[textStyle.bodySmall, { color: color.textPrimary }]}>{message}</Text>
-        <Pressable
-          accessibilityRole="button"
-          onPress={onAction}
-          style={[styles.link, { minHeight: touchTarget.min }]}
-        >
-          <Text style={[textStyle.label, { color: color.textBrand }]}>{action}</Text>
-        </Pressable>
+        {action !== undefined && (
+          <Pressable
+            accessibilityRole="button"
+            onPress={action.onPress}
+            style={[styles.link, { minHeight: touchTarget.min }]}
+          >
+            <Text style={[textStyle.label, { color: color.textBrand }]}>{action.label}</Text>
+          </Pressable>
+        )}
       </View>
     </Glass>
   );
