@@ -1,6 +1,6 @@
 # STATUS — Bic Gouv SN
 
-**Dernière mise à jour** : 01/10/2026 (6 h) · **Mode** : autonome jusqu'au 01/10 à 13 h, puis séance avec l'utilisateur : Opportunités, Participer, IA. Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md` (22 points, dont plusieurs réglés).
+**Dernière mise à jour** : 01/10/2026 (9 h 30) · **Mode** : autonome jusqu'au 01/10 à 13 h, puis séance avec l'utilisateur : Opportunités, Participer, IA. Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md` (24 points, dont plusieurs réglés ; le n° 23 regroupe les choix autonomes à confirmer).
 
 ## Où on en est
 - Dépôt **public et sécurisé** : https://github.com/Seydina-s/bic-gouv-sn. `main` protégée : tout passe par PR + **4 contrôles verts** (qualité et tests, constructions avec **audit d'accessibilité** sur 82 écrans dont 26 à 320 px et **6 parcours de bout en bout**, secrets et dépendances, **conteneurs**).
@@ -50,10 +50,13 @@
   - **journaux de l'API sans IP ni recherche** (minimisation) ; **inventaire des données** (`docs/confidentialite/`) ; **fichier des 271 textes à traduire en wolof** (`docs/traduction/`, `pnpm i18n:wolof`) ;
   - **dossier de cadrage** pour la séance de 13 h : `docs/cadrage/opportunites-participer-ia.md` ;
   - audit croisé AUD6 ; mesure du poids de l'app (Sentry ≈ 2 Mo de source, levier principal mais bloqué par PERF-03).
-- Matin du 01/10 (PR #162 à #169), mode autonome :
+- Matin du 01/10 (PR #162 à #173), mode autonome :
   - **parcours de bout en bout n° 7** : « Redémarrer » la présentation depuis les Réglages, étape par étape, jusqu'à l'app ;
   - **audit d'accessibilité de chaque étape de la présentation** (clair, sombre, 320 px ; 92 écrans) : il a trouvé une carte de texte inatteignable au clavier, corrigée ;
   - console : **alerte d'afflux d'abonnements** (au moins 500 en 24 h et 5 fois le rythme habituel ; heure d'abonnement gardée à l'heure près, à confirmer) ; journal des erreurs : **« Marquer comme réglée »** (éditeurs, journal d'audit, l'erreur revient si elle se reproduit) ;
+  - console : **résumé « À traiter »** en tête de l'accueil (erreurs en cours, alertes des notifications, notifications à vérifier, envoi en pause), chacun menant à sa page ; **procédure** pour les deux alertes des notifications (`docs/runbooks/notifications-alertes.md`) ;
+  - **parcours de bout en bout n° 8** (marquer une erreur comme réglée) : il a trouvé une confirmation qui disparaissait aussitôt, corrigée (ERREURS.md) ;
+  - tests de la logique des types partagés (couverture 83 → 88 %) ; **faux wolof retiré des données de test** (« [wo] … » à la place) ; catalogue wolof de l'interface vérifié vide, comme prévu ;
   - « Près de moi » : avertissement de localisation à côté du volet latéral ;
   - protection du terminal : **toute poussée doit suivre le scanner de secrets** (deuxième entorse à cette règle, ERREURS.md) ;
   - dossier de cadrage : **ce que permet chaque portail d'Opportunités** (règles des robots, certificats : marchespublics.sn et directiondesbourses.sn bloquent une collecte sûre ; FONGIP confirmé).
