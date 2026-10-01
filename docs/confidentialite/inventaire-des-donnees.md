@@ -1,13 +1,13 @@
 # Inventaire des données de Bic Gouv SN
 
-État au 01/10/2026, relevé dans le code. Ce document **n'est pas** la politique de confidentialité : c'en est la base factuelle. La politique, texte juridique, doit être rédigée et relue par un juriste. Elle est exigée par les stores (Google Play, App Store) et pour la déclaration à la CDP (loi n° 2008-12). Toute évolution du code qui touche à ces données met ce document à jour.
+État au 01/10/2026 (mis à jour à 18 h), relevé dans le code. Ce document **n'est pas** la politique de confidentialité : c'en est la base factuelle. La politique, texte juridique, doit être rédigée et relue par un juriste. Elle est exigée par les stores (Google Play, App Store) et pour la déclaration à la CDP (loi n° 2008-12). Toute évolution du code qui touche à ces données met ce document à jour.
 
 ## Principes appliqués
 
 - **Pas de compte** pour les citoyens.
 - La **position** reste sur le téléphone : les distances sont calculées sur l'appareil.
 - Statistiques **anonymes**, sur accord explicite, désactivées par défaut.
-- Notifications **sur accord explicite**.
+- Notifications, localisation et statistiques **sur accord explicite**, proposées une fois chacune à l'arrivée sur l'accueil, le « non » toujours visible.
 - Journaux du serveur réduits au **minimum** : ni adresse IP, ni recherche, ni zone de carte consultée.
 
 ## 1. Sur le téléphone (jamais envoyé)
@@ -18,7 +18,7 @@
 | Articles favoris, dernier article ouvert | Fonctions de l'app | Idem |
 | Articles et fiches déjà chargés | Lecture hors ligne | Cache renouvelé à l'usage |
 | Quartiers de carte gardés hors ligne | Carte sans réseau | Jusqu'à leur suppression |
-| Position (seulement si la personne touche « Me localiser » ou « Utiliser ma position ») | Services les plus proches | Le temps de l'affichage |
+| Position, seulement si la personne l'a autorisée : proposée une fois à l'arrivée sur l'accueil (décision de l'utilisateur du 01/10/2026), ou plus tard par « Utiliser ma position » ou les Réglages ; une fois autorisée, obtenue à chaque ouverture de l'app | Services les plus proches | En mémoire pendant l'utilisation ; jamais enregistrée ni envoyée |
 | Choix des statistiques et mémoire des jours déjà signalés | Ne pas compter deux fois | Effacée si la personne refuse |
 | Choix des notifications, heures calmes, rubriques, jeton de notification | Notifications | Jusqu'à leur arrêt |
 | Présentation déjà vue | Ne pas la remontrer | Jusqu'à « Redémarrer » |
