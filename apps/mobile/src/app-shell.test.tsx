@@ -278,6 +278,21 @@ describe("app shell", () => {
     expect(await AsyncStorage.getItem("bgs-onboarding")).toBeNull();
   });
 
+  it("lets the person allow the location from the settings, asked once on the front page", async () => {
+    await AsyncStorage.setItem("bgs-location-invited", "yes");
+    jest
+      .mocked(Location.requestForegroundPermissionsAsync)
+      .mockResolvedValue({ granted: true } as never);
+    jest
+      .mocked(Location.getLastKnownPositionAsync)
+      .mockResolvedValue({ coords: { latitude: 14.7, longitude: -17.4 } } as never);
+    await renderRouter(routes, { initialUrl: "/" });
+    await fireEvent.press(await screen.findByRole("button", { name: "Réglages" }));
+    await fireEvent.press(await screen.findByRole("button", { name: "Autoriser la localisation" }));
+    expect(Location.requestForegroundPermissionsAsync).toHaveBeenCalledTimes(1);
+    expect(await screen.findByText(/^Autorisée/)).toBeOnTheScreen();
+  });
+
   it("opens the settings over the front page, which stays in place when they close", async () => {
     await renderRouter(routes, { initialUrl: "/" });
     await fireEvent.press(await screen.findByRole("button", { name: "Réglages" }));

@@ -20,6 +20,8 @@ const INVITED_SLOT = "bgs-location-invited";
 const INVITED: readonly ("no" | "yes")[] = ["no", "yes"];
 
 export interface LocationState {
+  /** False on the web preview: the phone's position is asked on a phone only. */
+  supported: boolean;
   status: LocationStatus;
   point: GeoPoint | null;
   /** Asks the phone (once allowed, it no longer asks), then finds the position. */
@@ -120,6 +122,7 @@ export function LocationProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo(
     () => ({
+      supported,
       status,
       point,
       locate,
