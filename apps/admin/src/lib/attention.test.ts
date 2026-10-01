@@ -85,6 +85,23 @@ describe("attentionItems", () => {
     expect(items[2]?.text).toMatch(/1 notification attend/);
   });
 
+  it("counts what citizens sent and what opportunities wait, when there is some", () => {
+    const items = attentionItems({
+      errors: [],
+      notifications: quiet,
+      now: NOW,
+      participationToRead: 2,
+      opportunitiesPending: 0,
+    });
+    expect(items).toEqual([
+      {
+        tone: "warning",
+        text: "2 messages ou signalements des citoyens à lire.",
+        href: "/participation",
+      },
+    ]);
+  });
+
   it("says when it could not read a source, rather than passing for calm", () => {
     const items = attentionItems({ errors: null, notifications: quiet, now: NOW });
     expect(items).toEqual([expect.objectContaining({ tone: "warning", href: "/" })]);

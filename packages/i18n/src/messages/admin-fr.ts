@@ -540,6 +540,14 @@ export const adminFr = {
       other: "{count} notifications attendent la vérification d'une seconde personne.",
     },
     paused: "L'envoi automatique des notifications est en pause.",
+    participation: {
+      one: "{count} message ou signalement des citoyens à lire.",
+      other: "{count} messages ou signalements des citoyens à lire.",
+    },
+    opportunities: {
+      one: "{count} opportunité attend la vérification d'une seconde personne.",
+      other: "{count} opportunités attendent la vérification d'une seconde personne.",
+    },
     unreadable: "Certaines alertes n'ont pas pu être lues : rechargez la page.",
   },
   participation: {

@@ -1,4 +1,8 @@
-import { errorJournalEntrySchema } from "@bgs/shared-types";
+import {
+  adminOpportunitiesResponseSchema,
+  errorJournalEntrySchema,
+  participationResponseSchema,
+} from "@bgs/shared-types";
 import { z } from "zod";
 import { AttentionPanel } from "../components/AttentionPanel";
 import { IngestionPanel } from "../components/IngestionPanel";
@@ -21,17 +25,32 @@ export default async function StatusPage() {
   const { token } = await requireAccount();
   const apiUrl = readApiUrl(process.env);
   // All checks at once: the page never waits for one before starting the next.
-  const [status, report, errors, notifications] = await Promise.all([
+  const [status, report, errors, notifications, participation, opportunities] = await Promise.all([
     getApiStatus({ apiUrl }),
     getIngestionReport({ apiUrl }),
     adminRequest({ path: "/errors", token, schema: journalSchema }),
     // Shared with the navigation's counter: read once.
     notificationsOverview(token),
+    adminRequest({ path: "/participation", token, schema: participationResponseSchema }),
+    adminRequest({ path: "/opportunities", token, schema: adminOpportunitiesResponseSchema }),
   ]);
   const items = attentionItems({
     errors: errors.ok ? errors.data.entries : null,
     notifications,
     now: status.checkedAt,
+    ...(participation.ok
+      ? {
+          participationToRead: participation.data.entries.filter((entry) => entry.status === "new")
+            .length,
+        }
+      : {}),
+    ...(opportunities.ok
+      ? {
+          opportunitiesPending: opportunities.data.opportunities.filter(
+            (item) => item.status === "pending",
+          ).length,
+        }
+      : {}),
   });
   return (
     <>
