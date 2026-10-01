@@ -85,6 +85,23 @@ describe.each(pairs)("the error journal kept %s", (_name, makePair) => {
     expect(all.some((entry) => entry.where === "GET /v1/newest")).toBe(true);
   });
 
+  it("keeps a group marked as fixed, for every instance, through later additions", async () => {
+    const [a, b] = await makePair();
+    await a.add([group("GET /v1/news", 2, T1, T2, "r1")]);
+    const resolution = { at: T2, by: "Personne fictive" };
+    expect(await b.resolve({ code: "INTERNAL_ERROR", where: "GET /v1/news" }, resolution)).toBe(
+      true,
+    );
+    expect(await b.resolve({ code: "INTERNAL_ERROR", where: "GET /v1/map" }, resolution)).toBe(
+      false,
+    );
+    // Seen again after: still marked, with the new time (the console shows it back).
+    await b.add([group("GET /v1/news", 1, T3, T3, "r2")]);
+    expect(await a.all()).toEqual([
+      { ...group("GET /v1/news", 3, T1, T3, "r2"), resolved: resolution },
+    ]);
+  });
+
   it("is empty when nothing went wrong", async () => {
     const [store] = await makePair();
     expect(await store.all()).toEqual([]);
@@ -98,6 +115,7 @@ describe("the error journal, between two saves", () => {
     const flaky: ErrorJournalStore = {
       add: (groups) => (failing ? Promise.reject(new Error("store away")) : kept.add(groups)),
       all: () => kept.all(),
+      resolve: (target, resolution) => kept.resolve(target, resolution),
     };
     const journal = new ErrorJournal(flaky);
     journal.record("INTERNAL_ERROR", "GET /v1/news", "r1", new Date(T1));
@@ -107,5 +125,14 @@ describe("the error journal, between two saves", () => {
     failing = false;
     await journal.flush();
     expect(await kept.all()).toEqual([group("GET /v1/news", 2, T1, T2, "r2")]);
+  });
+
+  it("saves what it journaled before marking a group as fixed, so the group is found", async () => {
+    const kept = new FileErrorJournalStore(newPath());
+    const journal = new ErrorJournal(kept);
+    journal.record("INTERNAL_ERROR", "GET /v1/news", "r1", new Date(T1));
+    const target = { code: "INTERNAL_ERROR", where: "GET /v1/news" };
+    expect(await journal.resolve(target, { at: T2, by: "Personne fictive" })).toBe(true);
+    expect((await journal.entries())[0]?.resolved).toEqual({ at: T2, by: "Personne fictive" });
   });
 });

@@ -2,6 +2,8 @@ import {
   errorJournalEntrySchema,
   errorJournalFileSchema,
   type ErrorJournalEntry,
+  type ErrorResolution,
+  type ResolveError,
 } from "@bgs/shared-types";
 import { z } from "zod";
 import type { Queryable } from "../database/database";
@@ -14,9 +16,21 @@ export function groupKey(entry: Pick<ErrorJournalEntry, "code" | "where">): stri
   return `${entry.code} ${entry.where}`;
 }
 
+/** The latest of two markings as fixed, if any. */
+function laterResolution(
+  a: ErrorResolution | undefined,
+  b: ErrorResolution | undefined,
+): ErrorResolution | undefined {
+  if (a === undefined || b === undefined) {
+    return a ?? b;
+  }
+  return b.at >= a.at ? b : a;
+}
+
 /**
  * Adds groups to `into`: counts add up, the first and last times widen, and the
- * request id is the latest one. Groups from several instances merge this way.
+ * request id is the latest one; a marking as fixed is kept. Groups from several
+ * instances merge this way.
  */
 export function addGroups(
   into: Map<string, ErrorJournalEntry>,
@@ -26,12 +40,14 @@ export function addGroups(
     const key = groupKey(group);
     const seen = into.get(key);
     const later = seen === undefined || group.lastAt >= seen.lastAt ? group : seen;
+    const resolved = laterResolution(seen?.resolved, group.resolved);
     into.set(key, {
       ...group,
       count: (seen?.count ?? 0) + group.count,
       firstAt: seen !== undefined && seen.firstAt < group.firstAt ? seen.firstAt : group.firstAt,
       lastAt: later.lastAt,
       lastRequestId: later.lastRequestId,
+      ...(resolved === undefined ? {} : { resolved }),
     });
   }
 }
@@ -49,6 +65,8 @@ export interface ErrorJournalStore {
   /** Adds these groups to the kept ones, then keeps only the most recent. */
   add(groups: readonly ErrorJournalEntry[]): Promise<void>;
   all(): Promise<ErrorJournalEntry[]>;
+  /** Marks this group as fixed; false when no such group is kept. */
+  resolve(target: ResolveError, resolution: ErrorResolution): Promise<boolean>;
 }
 
 /** A JSON file: for a single API instance (no DATABASE_URL). */
@@ -73,6 +91,18 @@ export class FileErrorJournalStore implements ErrorJournalStore {
 
   async all(): Promise<ErrorJournalEntry[]> {
     return (await this.file.read()).entries;
+  }
+
+  async resolve(target: ResolveError, resolution: ErrorResolution): Promise<boolean> {
+    let found = false;
+    await this.file.update((saved) => {
+      const entry = saved.entries.find((item) => groupKey(item) === groupKey(target));
+      if (entry !== undefined) {
+        entry.resolved = resolution;
+        found = true;
+      }
+    });
+    return found;
   }
 }
 
@@ -102,6 +132,8 @@ const rowSchema = z.object({
   first_at: z.string(),
   last_at: z.string(),
   last_request_id: z.string().nullable(),
+  resolved_at: z.string().nullable(),
+  resolved_by: z.string().nullable(),
 });
 
 /** PostgreSQL: every API instance journals into the same groups (SCALE-02). */
@@ -125,7 +157,8 @@ export class PostgresErrorJournalStore implements ErrorJournalStore {
 
   async all(): Promise<ErrorJournalEntry[]> {
     const { rows } = await this.database.query(
-      "SELECT code, place, count, first_at, last_at, last_request_id FROM error_journal",
+      `SELECT code, place, count, first_at, last_at, last_request_id, resolved_at, resolved_by
+       FROM error_journal`,
     );
     return rows.map((row) => {
       const parsed = rowSchema.parse(row);
@@ -136,7 +169,19 @@ export class PostgresErrorJournalStore implements ErrorJournalStore {
         firstAt: parsed.first_at,
         lastAt: parsed.last_at,
         lastRequestId: parsed.last_request_id,
+        ...(parsed.resolved_at === null || parsed.resolved_by === null
+          ? {}
+          : { resolved: { at: parsed.resolved_at, by: parsed.resolved_by } }),
       });
     });
+  }
+
+  async resolve(target: ResolveError, resolution: ErrorResolution): Promise<boolean> {
+    const { rows } = await this.database.query(
+      `UPDATE error_journal SET resolved_at = $3, resolved_by = $4
+       WHERE code = $1 AND place = $2 RETURNING code`,
+      [target.code, target.where, resolution.at, resolution.by],
+    );
+    return rows.length > 0;
   }
 }
