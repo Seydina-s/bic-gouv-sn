@@ -353,3 +353,14 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 01/10/2026 | OPP-02 🔴 Collecte automatique des opportunités (DER/FJ et ADEPME d'abord), après accord sur les sources | Cadrage |
 | 01/10/2026 | PART-01 ✅ (01/10, 22 h) Participer : boîte de dialogue « Écrire au gouvernement » (sujet, message), reçue dans la console « Participation » | Utilisateur |
 | 01/10/2026 | PART-02 🔵 (01/10, 22 h) Participer : signalement (type, photo prise ou choisie, message, lieu facultatif), reçu dans la console avec la photo ; reste : la photo sur l'iPhone demande une nouvelle compilation (module ajouté), d'ici là l'app propose le signalement sans photo | Utilisateur |
+
+### Audit croisé du 01/10/2026, 23 h 45 (Opportunités, Participer, écran de démarrage)
+
+| # | Agent | Constat | Priorité |
+|---|---|---|---|
+| AUD9-01 ✅ (01/10, 23 h 50 : réglage `TRUST_PROXY`, testé) | Sécurité | Derrière un CDN ou un répartiteur, l'API aurait vu une seule adresse : toutes les limites par adresse (connexion, abonnements, statistiques, Participer) auraient compté le pays entier comme une seule personne | Haute |
+| AUD9-02 | Sécurité / Données | Les photos de Participer sont gardées sur le disque du serveur : avec plusieurs serveurs d'API, il faudra un stockage objet privé commun (S1-02) | Moyenne (au déploiement) |
+| AUD9-03 | Données | Textes libres et photos de Participer peuvent contenir des données personnelles malgré la consigne : modération dans la console, conservation un an (à confirmer), déclaration CDP (point 22) | Haute (avant lancement) |
+| AUD9-04 | QA | La photo des signalements et l'écran natif sans image ne fonctionnent qu'après une nouvelle compilation de l'app (module photo, configuration native) | Haute (prochaine compilation) |
+| AUD9-05 | Ingestion & Données | Opportunités saisies à la main pour l'instant : la collecte automatique (DER/FJ, ADEPME) attend l'accord sur les sources (OPP-02) | Moyenne |
+| AUD9-06 | UX writing | Textes écrits en autonomie (Opportunités, Participer, invitations) : à relire par l'utilisateur | Basse |
