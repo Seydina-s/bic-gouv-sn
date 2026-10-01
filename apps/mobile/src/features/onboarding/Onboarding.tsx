@@ -2,14 +2,15 @@ import { ArrowSquareOutIcon as ArrowSquareOut } from "phosphor-react-native/src/
 import { BookmarkSimpleIcon as BookmarkSimple } from "phosphor-react-native/src/icons/BookmarkSimple";
 import { CheckIcon as Check } from "phosphor-react-native/src/icons/Check";
 import { useState, type ReactNode } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import Animated, { Easing, FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Baobab } from "../../components/Baobab";
 import { Icon } from "../../components/Icon";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 import { SectionTag } from "../news/SectionTag";
 import { WovenIn } from "../news/WovenIn";
+import { OnboardingPath } from "./OnboardingPath";
 
 /** Language picker: the two official languages, named in their own words. */
 function LanguageChoice() {
@@ -104,32 +105,48 @@ function OfflineDemo() {
 }
 
 interface Page {
+  station: string;
   title: string;
   body: string;
   demo: ReactNode;
 }
 
 /**
- * First-run welcome (CLAUDE.md §1): the language first, then one idea per screen,
- * each showing a real piece of the app. "Passer" is always visible. Only features
- * that exist today are presented; permissions are asked later, when they serve.
+ * First-run welcome (CLAUDE.md §1) as a road (direction A, chosen by the user on
+ * 01/10/2026): the language first, then one idea per station, each showing a real
+ * piece of the app. Validating a step draws the road to the next station while
+ * its card rises in. "Passer" is always visible. Only features that exist today
+ * are presented; permissions are asked later, when they serve.
  */
 export function Onboarding({ onFinish }: { onFinish: () => void }) {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  const { height } = useWindowDimensions();
   const [index, setIndex] = useState(0);
-  const { color, space, textStyle, radius, touchTarget } = theme;
+  const { color, space, textStyle, radius, touchTarget, motion } = theme;
 
   const pages: Page[] = [
     {
+      station: t("onboarding.stations.language"),
       title: t("onboarding.languageTitle"),
       body: t("onboarding.languageBody"),
       demo: <LanguageChoice />,
     },
-    { title: t("onboarding.newsTitle"), body: t("onboarding.newsBody"), demo: <SectionsDemo /> },
-    { title: t("onboarding.sourceTitle"), body: t("onboarding.sourceBody"), demo: <SourceDemo /> },
     {
+      station: t("onboarding.stations.news"),
+      title: t("onboarding.newsTitle"),
+      body: t("onboarding.newsBody"),
+      demo: <SectionsDemo />,
+    },
+    {
+      station: t("onboarding.stations.source"),
+      title: t("onboarding.sourceTitle"),
+      body: t("onboarding.sourceBody"),
+      demo: <SourceDemo />,
+    },
+    {
+      station: t("onboarding.stations.offline"),
       title: t("onboarding.offlineTitle"),
       body: t("onboarding.offlineBody"),
       demo: <OfflineDemo />,
@@ -142,16 +159,9 @@ export function Onboarding({ onFinish }: { onFinish: () => void }) {
     <View
       style={[
         styles.root,
-        {
-          backgroundColor: color.background,
-          paddingTop: insets.top + space.md,
-          paddingBottom: insets.bottom + space.lg,
-        },
+        { backgroundColor: color.background, paddingTop: insets.top + space.md },
       ]}
     >
-      <View style={[styles.watermark, { top: insets.top + space.xxxl }]}>
-        <Baobab size={240} color={color.textBrand} opacity={theme.opacity.watermark} />
-      </View>
       <View style={[styles.row, styles.top, { paddingHorizontal: space.lg }]}>
         <Text style={[textStyle.caption, { color: color.textSecondary }]}>
           {t("onboarding.step", { current: index + 1, total: pages.length })}
@@ -164,48 +174,71 @@ export function Onboarding({ onFinish }: { onFinish: () => void }) {
           <Text style={[textStyle.label, { color: color.textBrand }]}>{t("onboarding.skip")}</Text>
         </Pressable>
       </View>
-      <ScrollView
-        contentContainerStyle={[
-          styles.content,
-          { padding: space.xl, gap: space.xl, maxWidth: theme.layout.readingMaxWidth },
+      <OnboardingPath index={index} labels={pages.map((item) => item.station)} />
+      <View
+        style={[
+          styles.sheet,
+          {
+            paddingTop: space.xl,
+            paddingBottom: insets.bottom + space.lg,
+            borderTopLeftRadius: radius.lg + space.sm,
+            borderTopRightRadius: radius.lg + space.sm,
+            backgroundColor: color.background,
+            shadowColor: color.scrim,
+          },
         ]}
       >
-        {page !== undefined && (
-          <>
-            <Text
-              accessibilityRole="header"
-              style={[textStyle.headline, { color: color.textPrimary }]}
-            >
-              {page.title}
-            </Text>
-            <Text style={[textStyle.body, { color: color.textSecondary }]}>{page.body}</Text>
-            <View key={index}>{page.demo}</View>
-          </>
-        )}
-      </ScrollView>
-      <View style={{ paddingHorizontal: space.xl }}>
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => {
-            if (last) {
-              onFinish();
-            } else {
-              setIndex(index + 1);
-            }
-          }}
-          style={({ pressed }) => [
-            styles.primary,
-            {
-              minHeight: touchTarget.min,
-              borderRadius: radius.md,
-              backgroundColor: pressed ? color.primaryPressed : color.primary,
-            },
+        {/* Large text stays reachable: the card scrolls, never more than half the screen. */}
+        <ScrollView
+          style={{ maxHeight: height / 2 }}
+          contentContainerStyle={[
+            styles.content,
+            { paddingHorizontal: space.xl, maxWidth: theme.layout.readingMaxWidth },
           ]}
         >
-          <Text style={[textStyle.label, { color: color.onPrimary }]}>
-            {last ? t("onboarding.start") : t("onboarding.next")}
-          </Text>
-        </Pressable>
+          {page !== undefined && (
+            <Animated.View
+              key={index}
+              entering={FadeInDown.duration(motion.duration.slow).easing(
+                Easing.bezier(...motion.easing.emphasized),
+              )}
+              style={{ gap: space.lg }}
+            >
+              <Text
+                accessibilityRole="header"
+                style={[textStyle.headline, { color: color.textPrimary }]}
+              >
+                {page.title}
+              </Text>
+              <Text style={[textStyle.body, { color: color.textSecondary }]}>{page.body}</Text>
+              <View>{page.demo}</View>
+            </Animated.View>
+          )}
+        </ScrollView>
+        <View style={{ paddingHorizontal: space.xl, paddingTop: space.lg }}>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => {
+              if (last) {
+                onFinish();
+              } else {
+                setIndex(index + 1);
+              }
+            }}
+            style={({ pressed }) => [
+              styles.primary,
+              {
+                minHeight: touchTarget.min,
+                borderRadius: radius.md,
+                backgroundColor: pressed ? color.primaryPressed : color.primary,
+              },
+            ]}
+          >
+            <Text style={[textStyle.label, { color: color.onPrimary }]}>
+              {last ? t("onboarding.start") : t("onboarding.next")}
+            </Text>
+          </Pressable>
+        </View>
       </View>
     </View>
   );
@@ -213,11 +246,16 @@ export function Onboarding({ onFinish }: { onFinish: () => void }) {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  watermark: { position: "absolute", right: -40 },
   row: { flexDirection: "row", alignItems: "center" },
   top: { justifyContent: "space-between" },
   skip: { justifyContent: "center" },
-  content: { flexGrow: 1, justifyContent: "center", alignSelf: "center", width: "100%" },
+  content: { alignSelf: "center", width: "100%" },
+  sheet: {
+    elevation: 12,
+    shadowOpacity: 0.12,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: -6 },
+  },
   language: { flexDirection: "row", alignItems: "center", borderWidth: 1 },
   flex: { flex: 1 },
   badge: { alignSelf: "flex-start" },

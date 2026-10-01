@@ -35,6 +35,13 @@ export const fr = {
     next: "Suivant",
     start: "Commencer",
     step: "Étape {current} sur {total}",
+    /** Station names along the welcome road (short). */
+    stations: {
+      language: "Langue",
+      news: "Actualités",
+      source: "Source",
+      offline: "Hors ligne",
+    },
     languageTitle: "Choisissez votre langue",
     languageBody: "Vous pourrez la changer à tout moment dans les réglages.",
     newsTitle: "L'action du gouvernement, chaque jour",
