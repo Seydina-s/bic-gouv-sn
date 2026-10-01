@@ -263,6 +263,15 @@ describe("app shell", () => {
     }
   });
 
+  it("restarts the presentation of the app from the settings", async () => {
+    await renderRouter(routes, { initialUrl: "/" });
+    await fireEvent.press(await screen.findByRole("button", { name: "Réglages" }));
+    await fireEvent.press(await screen.findByRole("button", { name: "Redémarrer" }));
+    expect(await screen.findByText("Choisissez votre langue")).toBeOnTheScreen();
+    expect(screen.getByText("Étape 1 sur 4")).toBeOnTheScreen();
+    expect(await AsyncStorage.getItem("bgs-onboarding")).toBeNull();
+  });
+
   it("opens the settings over the front page, which stays in place when they close", async () => {
     await renderRouter(routes, { initialUrl: "/" });
     await fireEvent.press(await screen.findByRole("button", { name: "Réglages" }));
@@ -815,6 +824,27 @@ describe("app shell", () => {
     await fireEvent.press(map);
     expect(screen.queryByRole("button", { name: "Retour à la liste" })).toBeNull();
     openURL.mockRestore();
+  });
+
+  it("keeps the services in a panel fixed beside the map on a wide window", async () => {
+    mockMapAvailable = true;
+    const phone = Dimensions.get("window");
+    Dimensions.set({ window: { ...phone, width: 1024, height: 768 } });
+    try {
+      await renderRouter(routes, { initialUrl: "/near-me" });
+      await screen.findByTestId("service-map");
+      // The same list, beside the map: no sliding panel on a large screen.
+      const list = within(await screen.findByTestId("near-me-sheet-list"));
+      await fireEvent.press(list.getByRole("button", { name: /^Commissariat de test proche/ }));
+      expect(
+        await screen.findByRole("header", { name: "Commissariat de test proche" }),
+      ).toBeOnTheScreen();
+      expect(screen.queryByRole("adjustable", { name: "Panneau des services" })).toBeNull();
+      await fireEvent.press(screen.getByRole("button", { name: "Retour à la liste" }));
+      expect(await screen.findByTestId("near-me-sheet-list")).toBeOnTheScreen();
+    } finally {
+      Dimensions.set({ window: phone });
+    }
   });
 
   it("opens a group of nearby services by zooming in on it", async () => {

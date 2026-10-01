@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
 import { DataSaverProvider } from "../features/data-saver/DataSaverProvider";
 import { NotificationsProvider } from "../features/notifications/NotificationsProvider";
+import { OnboardingProvider } from "../features/onboarding/OnboardingProvider";
 import { UsageStatsProvider } from "../features/usage-stats/UsageStatsProvider";
 import { I18nProvider } from "../i18n/I18nProvider";
 import { ThemeProvider } from "../theme/ThemeProvider";
@@ -23,7 +24,9 @@ export function TestProviders({ children }: { children: ReactNode }) {
         <I18nProvider>
           <DataSaverProvider>
             <UsageStatsProvider>
-              <NotificationsProvider>{children}</NotificationsProvider>
+              <NotificationsProvider>
+                <OnboardingProvider>{children}</OnboardingProvider>
+              </NotificationsProvider>
             </UsageStatsProvider>
           </DataSaverProvider>
         </I18nProvider>

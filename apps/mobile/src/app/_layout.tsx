@@ -15,7 +15,7 @@ import { UpdateGate } from "../features/remote-config/FeatureGate";
 import { SettingsProvider } from "../features/shell/SettingsProvider";
 import { FavoritesProvider } from "../features/favorites/FavoritesProvider";
 import { OnboardingLayer } from "../features/onboarding/OnboardingLayer";
-import { useOnboardingDone } from "../features/onboarding/useOnboardingDone";
+import { OnboardingProvider, useOnboardingDone } from "../features/onboarding/OnboardingProvider";
 import { I18nProvider } from "../i18n/I18nProvider";
 import { useDocumentLanguage } from "../i18n/language";
 import { initMonitoring } from "../monitoring/monitoring";
@@ -82,11 +82,13 @@ function RootLayout() {
               <DataSaverProvider>
                 <UsageStatsProvider>
                   <NotificationsProvider>
-                    <SettingsProvider>
-                      <UpdateGate>
-                        <ThemedStack />
-                      </UpdateGate>
-                    </SettingsProvider>
+                    <OnboardingProvider>
+                      <SettingsProvider>
+                        <UpdateGate>
+                          <ThemedStack />
+                        </UpdateGate>
+                      </SettingsProvider>
+                    </OnboardingProvider>
                   </NotificationsProvider>
                 </UsageStatsProvider>
               </DataSaverProvider>

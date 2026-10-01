@@ -24,6 +24,8 @@ const RECENT_DAYS = 1;
 /** Newest articles looked at on each pass. */
 const SCAN = 20;
 const SETTING_KEY = "automatic-notifications";
+/** The window the console watches for a sudden run of automatic sendings. */
+const RECENT_MS = 30 * MINUTE_MS;
 
 /** Who sends them, in the console's list and in the audit journal. */
 export const AUTOMATIC_SENDER: Person = { id: "system:automatic", name: "Envoi automatique" };
@@ -61,12 +63,20 @@ export class AutomaticNotifier {
     this.now = options.now ?? (() => new Date());
   }
 
-  async state(): Promise<AutomaticNotifications> {
+  /** The saved pause, or none (never paused before). */
+  private async setting() {
     const saved = settingSchema.safeParse(await this.options.settings.get(SETTING_KEY));
-    return {
-      ...(saved.success ? saved.data : { paused: false, changedBy: null, changedAt: null }),
-      perHour: this.options.perHour,
-    };
+    return saved.success ? saved.data : { paused: false, changedBy: null, changedAt: null };
+  }
+
+  /** What the console shows: the pause, the hourly cap, the sendings of the last 30 min. */
+  async state(): Promise<AutomaticNotifications> {
+    const saved = await this.setting();
+    const since = new Date(this.now().getTime() - RECENT_MS).toISOString();
+    const recentSendings = (await this.options.store.all()).filter(
+      (item) => item.origin === "automatic" && item.preparedAt >= since,
+    ).length;
+    return { ...saved, perHour: this.options.perHour, recentSendings };
   }
 
   async setPaused(person: Person, paused: boolean): Promise<AutomaticNotifications> {
@@ -84,7 +94,8 @@ export class AutomaticNotifier {
 
   /** One pass: the articles announced now (their ids). */
   async tick(): Promise<string[]> {
-    if (!this.options.push.ready || (await this.state()).paused) {
+    // Only the pause is read on each pass: the notifications list stays for the console.
+    if (!this.options.push.ready || (await this.setting()).paused) {
       return [];
     }
     const { items } = await this.options.articles.list({ limit: SCAN });

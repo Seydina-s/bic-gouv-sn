@@ -34,6 +34,7 @@ import { type DataSaverPreference, useDataSaver } from "../data-saver/DataSaverP
 import { type UsageConsent, useUsageStats } from "../usage-stats/UsageStatsProvider";
 import type { NotificationChoice, QuietChoice } from "../notifications/notification-preferences";
 import { useNotifications } from "../notifications/NotificationsProvider";
+import { useOnboardingDone } from "../onboarding/OnboardingProvider";
 import { toggleTopic } from "../notifications/notification-preferences";
 import { categoryLabelKey, SECTION_FILTERS } from "../news/category";
 import { SectionChip } from "../news/SectionChip";
@@ -65,6 +66,7 @@ export function SettingsSheet({ visible, onClose }: { visible: boolean; onClose:
   const dataSaver = useDataSaver();
   const usageStats = useUsageStats();
   const notifications = useNotifications();
+  const onboarding = useOnboardingDone();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { color, space, textStyle, radius, layout } = theme;
@@ -304,6 +306,25 @@ export function SettingsSheet({ visible, onClose }: { visible: boolean; onClose:
               />
               <Text style={[textStyle.bodySmall, { color: color.textSecondary }]}>
                 {t("settings.usageStatsHelp")}
+              </Text>
+            </View>
+            <View style={{ gap: space.sm }}>
+              <Text
+                accessibilityRole="header"
+                style={[textStyle.label, { color: color.textSecondary }]}
+              >
+                {t("settings.welcome")}
+              </Text>
+              <LinkRow
+                label={t("settings.restartWelcome")}
+                role="button"
+                onPress={() => {
+                  close();
+                  onboarding.restart();
+                }}
+              />
+              <Text style={[textStyle.bodySmall, { color: color.textSecondary }]}>
+                {t("settings.restartWelcomeHelp")}
               </Text>
             </View>
             <View style={{ gap: space.sm }}>

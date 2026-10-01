@@ -10,7 +10,17 @@ import {
   type ReactNode,
   type Ref,
 } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  FlatList,
+  type FlatListProps,
+  Pressable,
+  ScrollView,
+  type ScrollViewProps,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { SharedValue } from "react-native-reanimated";
 import { Icon } from "../../components/Icon";
 import { useTranslation } from "../../i18n/useTranslation";
@@ -87,6 +97,93 @@ function Handle({ index, onSize }: { index: number; onSize: (next: number) => vo
   );
 }
 
+type ContentProps = Pick<
+  NearMeSheetProps,
+  "header" | "rows" | "empty" | "selected" | "onSelect" | "onBack"
+> & {
+  /** Inside the sliding panel (its own lists), or in the side panel (plain ones). */
+  inSheet: boolean;
+};
+
+/** The list of services, or the one chosen with a way back: the panel's content. */
+function PanelContent({ inSheet, header, rows, empty, selected, onSelect, onBack }: ContentProps) {
+  const { theme } = useTheme();
+  const { t } = useTranslation();
+  const { color, space, textStyle, touchTarget } = theme;
+  if (selected === null) {
+    const list: FlatListProps<NearbyRow> = {
+      data: rows,
+      keyExtractor: (row) => row.service.id,
+      keyboardShouldPersistTaps: "handled",
+      ListHeaderComponent: <View style={{ gap: space.md }}>{header}</View>,
+      ListEmptyComponent: <>{empty}</>,
+      renderItem: ({ item }) => (
+        <ServiceRow
+          service={item.service}
+          meters={item.meters}
+          selected={false}
+          onPress={onSelect}
+        />
+      ),
+      contentContainerStyle: { paddingBottom: space.xl },
+      testID: "near-me-sheet-list",
+    };
+    return inSheet ? <BottomSheetFlatList {...list} /> : <FlatList {...list} />;
+  }
+  const scroll: ScrollViewProps = {
+    contentContainerStyle: { paddingHorizontal: space.lg, paddingBottom: space.xxl, gap: space.md },
+  };
+  const body = (
+    <>
+      <Pressable
+        accessibilityRole="button"
+        onPress={onBack}
+        style={[styles.back, { gap: space.sm, minHeight: touchTarget.min }]}
+      >
+        <Icon icon={ArrowLeft} size="sm" color={color.textBrand} />
+        <Text style={[textStyle.label, { color: color.textBrand }]}>{t("nearMe.backToList")}</Text>
+      </Pressable>
+      <ServiceCard service={selected} />
+    </>
+  );
+  return inSheet ? (
+    <BottomSheetScrollView {...scroll}>{body}</BottomSheetScrollView>
+  ) : (
+    <ScrollView {...scroll}>{body}</ScrollView>
+  );
+}
+
+/**
+ * On a large screen (tablet, unfolded foldable), the same content in a panel
+ * fixed on the left of the map, as Google Maps does: nothing to slide.
+ */
+export function NearMeSidePanel({
+  width,
+  bottomInset,
+  ...content
+}: Omit<ContentProps, "inSheet"> & { width: number; bottomInset: number }) {
+  const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
+  const { color, space } = theme;
+  return (
+    <View
+      style={[
+        styles.side,
+        {
+          width,
+          paddingTop: insets.top + space.md,
+          paddingBottom: bottomInset,
+          backgroundColor: color.background,
+          borderRightColor: color.border,
+          shadowColor: color.scrim,
+        },
+      ]}
+    >
+      <PanelContent inSheet={false} {...content} />
+    </View>
+  );
+}
+
 /**
  * "Près de moi" over the map: a sliding panel with the services, nearest first,
  * or the one chosen. The map stays visible and usable above it (as in the best
@@ -105,8 +202,7 @@ export function NearMeSheet({
   onRest,
 }: NearMeSheetProps) {
   const { theme } = useTheme();
-  const { t } = useTranslation();
-  const { color, space, textStyle, touchTarget } = theme;
+  const { color } = theme;
   const sheet = useRef<BottomSheet>(null);
   const [rest, setRest] = useState(0);
   const resize = useCallback((next: number) => {
@@ -144,45 +240,15 @@ export function NearMeSheet({
       style={[styles.sheet, { shadowColor: color.scrim }]}
     >
       <InPanel value={true}>
-        {selected === null ? (
-          <BottomSheetFlatList
-            data={rows}
-            keyExtractor={(row: NearbyRow) => row.service.id}
-            keyboardShouldPersistTaps="handled"
-            ListHeaderComponent={<View style={{ gap: space.md }}>{header}</View>}
-            ListEmptyComponent={<>{empty}</>}
-            renderItem={({ item }: { item: NearbyRow }) => (
-              <ServiceRow
-                service={item.service}
-                meters={item.meters}
-                selected={false}
-                onPress={onSelect}
-              />
-            )}
-            contentContainerStyle={{ paddingBottom: space.xl }}
-            testID="near-me-sheet-list"
-          />
-        ) : (
-          <BottomSheetScrollView
-            contentContainerStyle={{
-              paddingHorizontal: space.lg,
-              paddingBottom: space.xxl,
-              gap: space.md,
-            }}
-          >
-            <Pressable
-              accessibilityRole="button"
-              onPress={onBack}
-              style={[styles.back, { gap: space.sm, minHeight: touchTarget.min }]}
-            >
-              <Icon icon={ArrowLeft} size="sm" color={color.textBrand} />
-              <Text style={[textStyle.label, { color: color.textBrand }]}>
-                {t("nearMe.backToList")}
-              </Text>
-            </Pressable>
-            <ServiceCard service={selected} />
-          </BottomSheetScrollView>
-        )}
+        <PanelContent
+          inSheet
+          header={header}
+          rows={rows}
+          empty={empty}
+          selected={selected}
+          onSelect={onSelect}
+          onBack={onBack}
+        />
       </InPanel>
     </BottomSheet>
   );
@@ -197,4 +263,15 @@ const styles = StyleSheet.create({
   },
   handle: { alignItems: "center", justifyContent: "center" },
   back: { flexDirection: "row", alignItems: "center", alignSelf: "flex-start" },
+  side: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    bottom: 0,
+    borderRightWidth: StyleSheet.hairlineWidth,
+    elevation: 8,
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    shadowOffset: { width: 4, height: 0 },
+  },
 });
