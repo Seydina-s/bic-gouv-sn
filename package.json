@@ -22,7 +22,8 @@
     "map:assets": "tsx scripts/map-assets.ts",
     "notices": "tsx scripts/licences.ts",
     "a11y": "tsx scripts/a11y-audit.ts",
-    "e2e": "tsx scripts/e2e.ts"
+    "e2e": "tsx scripts/e2e.ts",
+    "map:markers": "tsx scripts/map-markers.ts"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
@@ -35,6 +36,7 @@
     "globals": "17.12.0",
     "harfbuzzjs": "1.6.2",
     "prettier": "3.9.9",
+    "sharp": "0.35.4",
     "subset-font": "2.9.0",
     "tsx": "4.23.15",
     "typescript": "6.0.3",

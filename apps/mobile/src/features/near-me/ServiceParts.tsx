@@ -39,10 +39,11 @@ export const SERVICE_CATEGORIES: readonly ServiceCategory[] = [
   "administration",
 ];
 
-/** Round badge with the service's icon. */
+/** Round badge with the service's icon, in its kind's tone (the map's legend). */
 export function ServiceBadge({ category }: { category: ServiceCategory }) {
   const { theme } = useTheme();
-  const { color, radius, touchTarget } = theme;
+  const { radius, touchTarget, serviceTones } = theme;
+  const tone = serviceTones[category];
   return (
     <View
       style={[
@@ -51,11 +52,11 @@ export function ServiceBadge({ category }: { category: ServiceCategory }) {
           width: touchTarget.min,
           height: touchTarget.min,
           borderRadius: radius.full,
-          backgroundColor: color.primaryContainer,
+          backgroundColor: tone.container,
         },
       ]}
     >
-      <Icon icon={SERVICE_ICONS[category]} weight="duotone" color={color.onPrimaryContainer} />
+      <Icon icon={SERVICE_ICONS[category]} weight="duotone" color={tone.ink} />
     </View>
   );
 }
@@ -133,10 +134,13 @@ export function ServiceFilters({
 }) {
   const { theme } = useTheme();
   const { t } = useTranslation();
-  const { color, space, textStyle, radius, touchTarget } = theme;
+  const { color, space, textStyle, radius, touchTarget, serviceTones } = theme;
   const chip = (category: ServiceCategory | null) => {
     const active = selected === category;
-    const ink = active ? color.onPrimaryContainer : color.textSecondary;
+    // A kind's chip speaks its marker's tone; "all" keeps the brand green.
+    const tone = category === null ? undefined : serviceTones[category];
+    const fill = tone?.container ?? color.primaryContainer;
+    const ink = tone?.ink ?? (active ? color.onPrimaryContainer : color.textSecondary);
     const label = category === null ? t("nearMe.all") : t(`nearMe.filter.${category}`);
     return (
       <Pressable
@@ -153,8 +157,8 @@ export function ServiceFilters({
             gap: space.sm,
             paddingHorizontal: space.md,
             borderRadius: radius.full,
-            borderColor: active ? color.primaryContainer : color.border,
-            backgroundColor: active ? color.primaryContainer : color.background,
+            borderColor: active ? (tone?.marker ?? fill) : color.border,
+            backgroundColor: active ? fill : color.background,
             opacity: pressed ? theme.opacity.cardPressed : 1,
           },
         ]}

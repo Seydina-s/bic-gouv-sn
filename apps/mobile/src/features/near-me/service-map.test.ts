@@ -9,13 +9,13 @@ function point(properties: Record<string, unknown>, coordinates = [-17.4, 14.7])
 }
 
 describe("service map", () => {
-  it("draws each service as a point, longitude first, carrying its id and name", () => {
+  it("draws each service as a point, longitude first, carrying its id, name and kind", () => {
     const points = servicePoints(services);
     expect(points.features).toHaveLength(services.length);
     expect(points.features[1]).toEqual({
       type: "Feature",
       geometry: { type: "Point", coordinates: [-17.4, 14.701] },
-      properties: { id: "osm-n2", name: "Commissariat de test proche" },
+      properties: { id: "osm-n2", name: "Commissariat de test proche", category: "police" },
     });
   });
 

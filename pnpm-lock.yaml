@@ -196,6 +196,9 @@ importers:
       prettier:
         specifier: 3.9.9
         version: 3.9.9
+      sharp:
+        specifier: 0.35.4
+        version: 0.35.4(@types/node@24.13.6)
       subset-font:
         specifier: 2.9.0
         version: 2.9.0
