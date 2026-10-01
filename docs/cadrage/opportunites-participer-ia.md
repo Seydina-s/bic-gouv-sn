@@ -119,6 +119,19 @@ Cela renforce l'option C : collecte d'abord là où c'est simple (DER/FJ, ADEPME
 3. « Est-ce vrai ? » suit le même principe. Il dit ce que disent les sources officielles, ou qu'il n'en trouve aucune. Il ne tranche jamais sans source.
 4. Il refuse les sujets hors périmètre et reste politiquement neutre. Un jeu de test « zéro invention » est passé avant chaque mise en ligne.
 
+### Taille de la base à indexer (mesurée le 01/10/2026)
+Texte réellement publié, sans la mise en forme :
+- 972 articles en français : environ 3,3 millions de caractères ;
+- 318 articles en wolof : environ 0,7 million (la Présidence ne publie plus en wolof depuis le 01/10/2025, question L-02) ;
+- 718 démarches : environ 2,2 millions.
+
+Soit environ 6 millions de caractères, de l'ordre de 2 millions de jetons. Conséquences :
+- **indexation initiale** (transformer chaque passage en vecteur pour la recherche) : moins d'un dollar aux prix publics courants des modèles d'indexation (à vérifier au moment du choix), ou rien avec un modèle ouvert installé sur notre serveur ; ensuite, seuls les nouveaux articles sont indexés ;
+- **stockage** : quelques milliers de passages, de l'ordre de 20 Mo dans PostgreSQL (pgvector) ;
+- le vrai coût est donc celui des **réponses** (ci-dessous), pas celui de la base.
+
+À noter : les modèles Claude ne font pas l'indexation. Il faut un modèle d'indexation à part, gratuit et ouvert ou payant, à choisir ; son support du wolof sera vérifié par le banc d'essai W-02.
+
 ### Coût estimé (à valider)
 Prix publics relevés en septembre 2026 ([pecollective.com](https://pecollective.com/tools/anthropic-api-pricing/), [benchlm.ai](https://benchlm.ai/anthropic/api-pricing)), par million de jetons :
 
