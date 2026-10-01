@@ -245,3 +245,32 @@ export class PostgresPushSubscriptionStore implements PushSubscriptionStore {
     }
   }
 }
+
+/** How long the console's totals are reused: they need not be to the second. */
+export const SUMMARY_TTL_MS = 60_000;
+
+/**
+ * The console's totals, counted at most once per `ttlMs` and shared by the requests
+ * meanwhile: counting every subscription is slow once there are millions of phones,
+ * and the console's first screen reads them on each visit. A failed count is not kept.
+ */
+export function cachedSummary(
+  store: Pick<PushSubscriptionStore, "summary">,
+  ttlMs = SUMMARY_TTL_MS,
+  now: () => number = () => Date.now(),
+): () => Promise<SubscribersSummary> {
+  let kept: { at: number; value: Promise<SubscribersSummary> } | null = null;
+  return () => {
+    const at = now();
+    if (kept === null || at - kept.at >= ttlMs) {
+      const value = store.summary();
+      kept = { at, value };
+      value.catch(() => {
+        if (kept?.value === value) {
+          kept = null;
+        }
+      });
+    }
+    return kept.value;
+  };
+}

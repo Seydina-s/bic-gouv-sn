@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { migrate } from "../database/database";
 import { testDatabases } from "../testing/database";
 import {
+  cachedSummary,
   FilePushSubscriptionStore,
   PostgresPushSubscriptionStore,
   type PushSubscriptionStore,
@@ -131,5 +132,53 @@ describe.each(pairs)("the push subscriptions kept %s", (_name, makePair) => {
     // Ten days on, none of them is recent any more.
     today = new Date(today.getTime() + 10 * 24 * HOUR_MS);
     expect(await store.summary()).toMatchObject({ total: 3, newLastDay: 0, newWeekBefore: 0 });
+  });
+});
+
+describe("the console's totals", () => {
+  const totals = {
+    total: 1,
+    everySection: 1,
+    quietHours: 0,
+    french: 1,
+    wolof: 0,
+    newLastDay: 1,
+    newWeekBefore: 0,
+  };
+
+  it("are counted once a minute at most, shared by the requests meanwhile", async () => {
+    let counts = 0;
+    let clock = 0;
+    const summary = cachedSummary(
+      {
+        summary: () => {
+          counts += 1;
+          return Promise.resolve(totals);
+        },
+      },
+      60_000,
+      () => clock,
+    );
+    await Promise.all([summary(), summary()]);
+    clock = 59_999;
+    expect(await summary()).toEqual(totals);
+    expect(counts).toBe(1);
+    clock = 60_000;
+    await summary();
+    expect(counts).toBe(2);
+  });
+
+  it("count again at once after a failure", async () => {
+    let fail = true;
+    const summary = cachedSummary(
+      {
+        summary: () => (fail ? Promise.reject(new Error("base away")) : Promise.resolve(totals)),
+      },
+      60_000,
+      () => 0,
+    );
+    await expect(summary()).rejects.toThrow("base away");
+    fail = false;
+    expect(await summary()).toEqual(totals);
   });
 });

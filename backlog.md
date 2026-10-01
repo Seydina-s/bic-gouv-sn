@@ -314,3 +314,14 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | AUD6-04 ✅ (01/10 : corrigé, volet latéral en paysage, testé) | Design / UI-UX | Téléphone en paysage : le panneau réduit à 25 % ne laissait qu'une bande d'environ 100 points | Haute |
 | AUD6-05 ✅ (01/10 : écrit dans l'inventaire des données, base de la politique de confidentialité, point 22) | Données | « Itinéraire » ouvre Google Maps avec la position du service (jamais celle de la personne, que Google obtient ensuite par sa propre app) : à mentionner dans la page de confidentialité | Basse |
 | AUD6-06 | UX writing | 271 textes de l'app sans wolof : fichier prêt pour les traducteurs (`docs/traduction/wolof-a-traduire.csv`, `pnpm i18n:wolof`) | Moyenne (W-01) |
+
+### Audit croisé du 01/10/2026, 10 h (fin de la nuit autonome : alertes et « À traiter » de la console, marquage des erreurs réglées, audit de la présentation)
+
+| # | Agent | Constat | Priorité |
+|---|---|---|---|
+| AUD7-01 ✅ (01/10, 10 h : totaux gardés une minute, partagés entre les requêtes, testé) | Architecte | L'accueil de la console lit désormais les notifications à chaque visite, et avec elles le total des abonnés : un comptage complet, lent à 20 millions de téléphones | Haute |
+| AUD7-02 | Sécurité | « Marquer comme réglée » retire une erreur de la liste principale : une personne pourrait masquer une erreur en cours. Garde-fous en place : l'erreur revient, signalée, dès qu'elle se reproduit, et chaque marquage est au journal d'audit. Rien de plus à faire pour l'instant | Basse |
+| AUD7-03 | Performance / QA | L'audit d'accessibilité en CI prend environ 6 min 30 (92 écrans, 4 s d'attente fixe chacun). Une attente « page stable » le raccourcirait, mais risquerait d'auditer un écran encore en chargement : à reprendre avec une attente du contenu attendu de chaque écran | Basse |
+| AUD7-04 | QA | Le résumé « À traiter » de l'accueil n'est couvert que par l'audit d'accessibilité et les tests unitaires, pas par un parcours de bout en bout | Basse |
+| AUD7-05 | Données | Nouvelle donnée : l'heure du premier abonnement aux notifications (à l'heure près), inscrite dans l'inventaire des données ; à confirmer par l'utilisateur (point 23) | Moyenne |
+| AUD7-06 | Ingestion & Données | Opportunités : certificats invalides sur marchespublics.sn et directiondesbourses.sn, accès automatique refusé par 3fpt.sn ; à signaler aux organismes si la collecte est retenue (séance de 13 h) | Moyenne |
