@@ -1,3 +1,4 @@
+import { foldForMatching } from "@bgs/shared-types";
 import { plainOf, type ProcedurePage } from "./procedure-page";
 
 /*
@@ -19,7 +20,7 @@ const RULES: readonly (readonly [RegExp, LinkedKind])[] = [
 ];
 
 function folded(text: string): string {
-  return text.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().replace(/[’'-]/g, " ");
+  return foldForMatching(text).replace(/[’'-]/g, " ");
 }
 
 /** The kind of service a "where to go" text names, or null when it names none. */
