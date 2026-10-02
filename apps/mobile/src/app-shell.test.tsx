@@ -397,10 +397,15 @@ describe("app shell", () => {
     expect(screen.getByText("Sans date limite")).toBeOnTheScreen();
   });
 
-  it("shows every subject and problem type at once, never cut by a sideways row", async () => {
+  it("asks one question at a time with large tiles, never cut by a sideways row", async () => {
     globalThis.fetch = newsFetch() as unknown as typeof fetch;
     await renderRouter(routes, { initialUrl: "/participate" });
-    await screen.findByRole("button", { name: "Autre" });
+    expect(await screen.findByText("Votre message porte sur…")).toBeOnTheScreen();
+    expect(screen.getByText("Étape 1 sur 2")).toBeOnTheScreen();
+    const next = screen.getByRole("button", { name: "Continuer" });
+    expect(next).toBeDisabled();
+    await fireEvent.press(screen.getByRole("radio", { name: "Autre chose, Tout le reste" }));
+    expect(next).toBeEnabled();
     interface Node {
       props?: { horizontal?: boolean };
       children?: (Node | string)[] | null;
@@ -413,14 +418,20 @@ describe("app shell", () => {
     expect(sideways(screen.toJSON() as Node | null)).toBe(0);
   });
 
-  it("sends a message to the government, anonymous, and says it went", async () => {
+  it("sends a message to the government in two steps, anonymous, and says it went", async () => {
     const fetchMock = newsFetch();
     globalThis.fetch = fetchMock as unknown as typeof fetch;
     await renderRouter(routes, { initialUrl: "/participate" });
-    await fireEvent.press(await screen.findByRole("button", { name: "L'application" }));
-    const box = screen.getByLabelText("Votre message");
-    await fireEvent.changeText(box, "Un message fictif pour les tests.");
-    await fireEvent.press(screen.getAllByRole("button", { name: "Envoyer" })[0] as never);
+    await fireEvent.press(
+      await screen.findByRole("radio", { name: "L'application, Un avis sur l'app" }),
+    );
+    await fireEvent.press(screen.getByRole("button", { name: "Continuer" }));
+    expect(screen.getByText("Étape 2 sur 2")).toBeOnTheScreen();
+    await fireEvent.changeText(
+      screen.getByLabelText("Votre message"),
+      "Un message fictif pour les tests.",
+    );
+    await fireEvent.press(screen.getByRole("button", { name: "Envoyer" }));
     expect(
       await screen.findByText("Merci, votre message a bien été transmis à l'équipe."),
     ).toBeOnTheScreen();
@@ -432,35 +443,48 @@ describe("app shell", () => {
       lang: "fr",
     });
     expect(new Headers(init?.headers).get("idempotency-key")).toMatch(/^[a-z0-9-]{16,}$/);
-    expect(screen.getByLabelText("Votre message")).toHaveDisplayValue("");
+    // Another one starts from the first question.
+    await fireEvent.press(screen.getByRole("button", { name: "Écrire un autre message" }));
+    expect(screen.getByText("Étape 1 sur 2")).toBeOnTheScreen();
   });
 
-  it("reports a public problem with a photo when the build can pick one", async () => {
+  it("reports another kind of problem, said in words, with a photo, a place and what happened", async () => {
     mockPickerAvailable = true;
     const fetchMock = newsFetch();
     globalThis.fetch = fetchMock as unknown as typeof fetch;
     await renderRouter(routes, { initialUrl: "/participate" });
-    await fireEvent.press(await screen.findByRole("button", { name: "Éclairage" }));
+    await fireEvent.press(await screen.findByRole("radio", { name: "Signaler un problème" }));
+    await fireEvent.press(screen.getByRole("radio", { name: "Autre, À préciser" }));
+    const next = screen.getByRole("button", { name: "Continuer" });
+    expect(next).toBeDisabled();
+    await fireEvent.changeText(
+      screen.getByLabelText("Précisez la nature du problème"),
+      "Feu tricolore fictif en panne",
+    );
+    await fireEvent.press(next);
     await fireEvent.press(screen.getByRole("button", { name: "Choisir une photo" }));
     expect(await screen.findByLabelText("Photo jointe au signalement")).toBeOnTheScreen();
-    await fireEvent.changeText(
-      screen.getByLabelText("Ce que vous avez vu"),
-      "Un lampadaire fictif éteint.",
-    );
+    await fireEvent.press(screen.getByRole("button", { name: "Continuer" }));
     await fireEvent.changeText(
       screen.getByLabelText("Lieu (quartier, commune), facultatif"),
       "Quartier fictif",
     );
-    const sends = screen.getAllByRole("button", { name: "Envoyer" });
-    await fireEvent.press(sends[sends.length - 1] as never);
+    await fireEvent.press(screen.getByRole("button", { name: "Continuer" }));
+    expect(screen.getByText("Étape 4 sur 4")).toBeOnTheScreen();
+    await fireEvent.changeText(
+      screen.getByLabelText("Ce que vous avez vu"),
+      "Un feu fictif éteint au carrefour.",
+    );
+    await fireEvent.press(screen.getByRole("button", { name: "Envoyer" }));
     expect(
       await screen.findByText("Merci, votre signalement a bien été transmis à l'équipe."),
     ).toBeOnTheScreen();
     const sent = fetchMock.mock.calls.find(([url]) => url.includes("/v1/participation/reports"));
     const init = (sent as unknown as [string, RequestInit] | undefined)?.[1];
     expect(JSON.parse(init?.body as string)).toEqual({
-      category: "eclairage",
-      text: "Un lampadaire fictif éteint.",
+      category: "autre",
+      detail: "Feu tricolore fictif en panne",
+      text: "Un feu fictif éteint au carrefour.",
       place: "Quartier fictif",
       photo: "UGhvdG9GaWN0aXZl",
       lang: "fr",
@@ -472,14 +496,22 @@ describe("app shell", () => {
       participation: () => new Response("{}", { status: 429 }),
     }) as unknown as typeof fetch;
     await renderRouter(routes, { initialUrl: "/participate" });
-    expect(
-      await screen.findByText(
-        "L'ajout de photo arrivera avec la prochaine version de l'application.",
-      ),
-    ).toBeOnTheScreen();
+    await fireEvent.press(
+      await screen.findByRole("radio", { name: "Le gouvernement, Une idée, une remarque" }),
+    );
+    await fireEvent.press(screen.getByRole("button", { name: "Continuer" }));
     await fireEvent.changeText(screen.getByLabelText("Votre message"), "Un message fictif répété.");
-    await fireEvent.press(screen.getAllByRole("button", { name: "Envoyer" })[0] as never);
+    await fireEvent.press(screen.getByRole("button", { name: "Envoyer" }));
     expect(await screen.findByText(/Beaucoup d'envois depuis ce réseau/)).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole("radio", { name: "Signaler un problème" }));
+    await fireEvent.press(screen.getByRole("radio", { name: "Voirie, Route, trottoir" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Continuer" }));
+    expect(
+      screen.getByText("L'ajout de photo arrivera avec la prochaine version de l'application."),
+    ).toBeOnTheScreen();
+    // Back to the first question, the choice kept.
+    await fireEvent.press(screen.getByRole("button", { name: "Retour" }));
+    expect(screen.getByRole("radio", { name: "Voirie, Route, trottoir" })).toBeChecked();
   });
 
   it("opens another tab the instant the finger lands, and only once", async () => {

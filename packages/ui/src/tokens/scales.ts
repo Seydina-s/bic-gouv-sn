@@ -26,6 +26,9 @@ export const radius = {
 /** Minimum touch target (CLAUDE.md §1, accessibility). */
 export const touchTarget = { min: 48 } as const;
 
+/** Border widths: the chosen one of a set of options stands out by its outline. */
+export const borderWidth = { selected: 2 } as const;
+
 export const iconSize = {
   sm: 16,
   md: 24,

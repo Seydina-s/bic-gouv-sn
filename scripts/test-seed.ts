@@ -312,6 +312,7 @@ async function seedParticipation(dataDir: string): Promise<void> {
           id: "00000000-0000-4000-8000-00000000c0e2",
           type: "report",
           category: "voirie",
+          detail: null,
           text: "Un signalement fictif pour l'audit d'accessibilité.",
           place: "Quartier fictif",
           photoId,

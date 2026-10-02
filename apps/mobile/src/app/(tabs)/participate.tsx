@@ -1,35 +1,34 @@
+import { MegaphoneIcon as Megaphone } from "phosphor-react-native/src/icons/Megaphone";
+import { PencilSimpleLineIcon as PencilSimpleLine } from "phosphor-react-native/src/icons/PencilSimpleLine";
+import { useState } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTabBarInset } from "../../components/GlassTabBar";
-import { MessageBox } from "../../features/participate/MessageBox";
-import { ReportForm } from "../../features/participate/ReportForm";
+import { SegmentedChoice } from "../../components/SegmentedChoice";
+import { MessageFlow } from "../../features/participate/MessageFlow";
+import { ReportFlow } from "../../features/participate/ReportFlow";
 import { FeatureGate } from "../../features/remote-config/FeatureGate";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 
+type Mode = "write" | "report";
+
 /**
- * Participer (decision of the user, 01/10/2026): first a box to write to the
- * government, then a public problem to report with a photo. Anonymous; read by
- * the team in the console.
+ * Participer (decisions of the user, 01/10 and 02/10/2026): "Écrire" or "Signaler",
+ * then one question at a time (direction C). Anonymous; read by the team in the
+ * console.
  */
 function Participate() {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const bottomInset = useTabBarInset();
-  const { color, space, textStyle, radius, layout } = theme;
-  const card = {
-    gap: space.md,
-    padding: space.lg,
-    borderRadius: radius.lg,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: color.border,
-    backgroundColor: color.background,
-  };
+  const [mode, setMode] = useState<Mode>("write");
+  const { color, space, textStyle, layout } = theme;
 
   return (
     <KeyboardAvoidingView
-      style={[styles.root, { backgroundColor: color.surface }]}
+      style={[styles.root, { backgroundColor: color.background }]}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView
@@ -47,7 +46,7 @@ function Participate() {
         <View style={{ gap: space.sm }}>
           <Text
             accessibilityRole="header"
-            style={[textStyle.headline, { color: color.textPrimary }]}
+            style={[textStyle.display, { color: color.textPrimary }]}
           >
             {t("tabs.participate")}
           </Text>
@@ -55,12 +54,26 @@ function Participate() {
             {t("participate.intro")}
           </Text>
         </View>
-        <View style={card}>
-          <MessageBox />
-        </View>
-        <View style={card}>
-          <ReportForm />
-        </View>
+        <SegmentedChoice<Mode>
+          title={t("participate.modeTitle")}
+          selected={mode}
+          onSelect={setMode}
+          segments={[
+            {
+              value: "write",
+              label: t("participate.modes.write"),
+              spokenLabel: t("participate.modes.writeSpoken"),
+              icon: PencilSimpleLine,
+            },
+            {
+              value: "report",
+              label: t("participate.modes.report"),
+              spokenLabel: t("participate.modes.reportSpoken"),
+              icon: Megaphone,
+            },
+          ]}
+        />
+        {mode === "write" ? <MessageFlow /> : <ReportFlow />}
         <Text style={[textStyle.bodySmall, { color: color.textTertiary }]}>
           {t("participate.anonymous")}
         </Text>

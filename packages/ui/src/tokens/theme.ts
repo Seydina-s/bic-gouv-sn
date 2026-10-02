@@ -2,6 +2,7 @@ import { darkServiceTones, lightServiceTones, type ServiceTones } from "./servic
 import { darkCategoryTones, lightCategoryTones, type CategoryTones } from "./category-tones";
 import { darkColors, lightColors, type SemanticColors } from "./colors";
 import {
+  borderWidth,
   iconSize,
   layout,
   motion,
@@ -19,6 +20,7 @@ export type ColorScheme = "light" | "dark";
 export type ThemePreference = ColorScheme | "system";
 
 const scales = {
+  borderWidth,
   space,
   radius,
   textStyle,
