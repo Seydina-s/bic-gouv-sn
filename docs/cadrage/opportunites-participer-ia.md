@@ -143,6 +143,20 @@ Soit environ 6 millions de caractères, de l'ordre de 2 millions de jetons. Cons
 | Reformulées (16), ex. « Je veux divorcer », « Comment devenir soldat ? » | 50 % | 63 % |
 | Toutes (38) | 71 % | 79 % |
 
+**Essai d'un modèle ouvert, sur l'ordinateur de développement (02/10/2026, 2 h 30)** : multilingual-e5-small (licence MIT, bibliothèque Transformers.js sous licence Apache 2.0), sans rien envoyer à l'extérieur. Bonne page parmi les 3 et les 5 premières :
+
+| Recherche | 3 premières | 5 premières | 10 premières |
+|---|---|---|---|
+| Par mots (avec racinisation) | 79 % | 82 % | 84 % |
+| Par le sens (modèle ouvert seul) | 82 % | 89 % | 95 % |
+| **Les deux combinées** (fusion des rangs) | 82 % | **97 %** | 97 % |
+
+Le modèle lit 6 passages par question : le chiffre qui compte est donc celui des 5 premières. Questions reformulées seules : 56 % (mots), 75 % (sens), 94 % (les deux) dans les 5 premières.
+
+Coût de fonctionnement mesuré : 130 Mo pour le modèle, environ 530 Mo de mémoire, **8 ms par question** (14 ms au pire), et 12 minutes pour indexer toute la base une fois (ensuite, seuls les nouveaux articles). Aucun coût à l'usage et aucune question de citoyen envoyée à un tiers.
+
+**Proposition à valider en séance** : recherche combinée avec ce modèle ouvert installé sur notre serveur. Points à vérifier avant : son support du wolof (non mesuré : il manque des questions en wolof) et l'ajout de ses deux bibliothèques au serveur d'API.
+
 La racinisation (« divorcer » trouve « divorce », « coûte » trouve « coût ») a été réglée sur ce même jeu de 38 questions : le gain réel sera un peu plus faible sur des questions nouvelles. Le même jeu mesurera chaque modèle d'indexation candidat : c'est le critère objectif proposé pour le choisir, avec son coût et son support du wolof. Le wolof n'y figure pas encore : il faut des questions écrites par des locuteurs natifs (W-01).
 
 À noter : les modèles Claude ne font pas l'indexation. Il faut un modèle d'indexation à part, gratuit et ouvert ou payant, à choisir ; son support du wolof sera vérifié par le banc d'essai W-02.
