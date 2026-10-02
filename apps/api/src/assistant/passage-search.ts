@@ -1,5 +1,6 @@
 import type { Lang } from "@bgs/shared-types";
 import { searchTerms, searchWords } from "../search/text-search";
+import { frenchStem } from "./french-stem";
 import type { Passage } from "./passages";
 
 /*
@@ -41,44 +42,124 @@ export interface ScoredPassage {
   score: number;
 }
 
-interface LanguageIndex {
-  passages: Passage[];
-  lengths: number[];
-  averageLength: number;
-  /** For each word, the passages containing it and how many times. */
-  postings: Map<string, Map<number, number>>;
+/** French words are cut to their stem; Wolof ones are kept whole until a native speaker
+ * describes their endings (W-01). */
+function stemmerOf(lang: Lang): (word: string) => string {
+  return lang === "fr" ? frenchStem : (word) => word;
 }
 
-function indexOf(passages: Passage[]): LanguageIndex {
-  const postings = new Map<string, Map<number, number>>();
-  const lengths = passages.map((passage, position) => {
+/**
+ * The passages of one language. Passages are added and removed one content at a
+ * time (a new or corrected article), never by rebuilding everything: the search
+ * stays fast while the collection runs.
+ */
+class LanguageIndex {
+  /** Indexed passages by position; a removed one leaves an empty slot. */
+  private readonly passages: (Passage | undefined)[] = [];
+  private readonly words: string[][] = [];
+  /** For each word, the positions of the passages containing it and how many times. */
+  private readonly postings = new Map<string, Map<number, number>>();
+  private readonly positionsByContent = new Map<string, number[]>();
+  private totalLength = 0;
+  private count = 0;
+
+  constructor(private readonly stem: (word: string) => string) {}
+
+  add(passage: Passage): void {
+    const position = this.passages.length;
     const words = [
       ...Array.from({ length: TITLE_WEIGHT }, () => searchWords(passage.title)).flat(),
       ...searchWords(passage.text),
-    ];
+    ].map(this.stem);
     for (const word of words) {
-      const counts = postings.get(word) ?? new Map<number, number>();
+      const counts = this.postings.get(word) ?? new Map<number, number>();
       counts.set(position, (counts.get(position) ?? 0) + 1);
-      postings.set(word, counts);
+      this.postings.set(word, counts);
     }
-    return words.length;
-  });
-  const total = lengths.reduce((sum, length) => sum + length, 0);
-  return { passages, lengths, averageLength: total / Math.max(passages.length, 1), postings };
+    this.passages.push(passage);
+    this.words.push(words);
+    this.positionsByContent.set(passage.contentId, [
+      ...(this.positionsByContent.get(passage.contentId) ?? []),
+      position,
+    ]);
+    this.totalLength += words.length;
+    this.count += 1;
+  }
+
+  removeContent(contentId: string): void {
+    for (const position of this.positionsByContent.get(contentId) ?? []) {
+      const words = this.words[position] ?? [];
+      for (const word of new Set(words)) {
+        const counts = this.postings.get(word);
+        counts?.delete(position);
+        if (counts?.size === 0) {
+          this.postings.delete(word);
+        }
+      }
+      this.passages[position] = undefined;
+      this.words[position] = [];
+      this.totalLength -= words.length;
+      this.count -= 1;
+    }
+    this.positionsByContent.delete(contentId);
+  }
+
+  search(terms: ReadonlySet<string>, limit: number): ScoredPassage[] {
+    const averageLength = this.totalLength / Math.max(this.count, 1);
+    const scores = new Map<number, number>();
+    for (const term of terms) {
+      const counts = this.postings.get(this.stem(term));
+      if (counts === undefined) {
+        continue;
+      }
+      const rarity = Math.log(1 + (this.count - counts.size + 0.5) / (counts.size + 0.5));
+      for (const [position, frequency] of counts) {
+        const length = this.words[position]?.length ?? 0;
+        const norm = K1 * (1 - B + (B * length) / averageLength);
+        const gain = (rarity * frequency * (K1 + 1)) / (frequency + norm);
+        scores.set(position, (scores.get(position) ?? 0) + gain);
+      }
+    }
+    return [...scores]
+      .sort(([a, scoreA], [b, scoreB]) => scoreB - scoreA || a - b)
+      .slice(0, limit)
+      .flatMap(([position, score]) => {
+        const passage = this.passages[position];
+        return passage === undefined ? [] : [{ passage, score }];
+      });
+  }
 }
 
 export class PassageIndex {
   private readonly byLang = new Map<Lang, LanguageIndex>();
 
   constructor(passages: readonly Passage[]) {
-    const grouped = new Map<Lang, Passage[]>();
     for (const passage of passages) {
-      const group = grouped.get(passage.lang) ?? [];
-      group.push(passage);
-      grouped.set(passage.lang, group);
+      this.languageOf(passage.lang).add(passage);
     }
-    for (const [lang, group] of grouped) {
-      this.byLang.set(lang, indexOf(group));
+  }
+
+  private languageOf(lang: Lang): LanguageIndex {
+    const existing = this.byLang.get(lang);
+    if (existing !== undefined) {
+      return existing;
+    }
+    const created = new LanguageIndex(stemmerOf(lang));
+    this.byLang.set(lang, created);
+    return created;
+  }
+
+  /**
+   * The passages of one content, after it was published, corrected or withdrawn:
+   * its previous passages, in every language, are replaced by `passages` (none
+   * when withdrawn).
+   */
+  replaceContent(contentId: string, passages: readonly Passage[]): void {
+    for (const index of this.byLang.values()) {
+      index.removeContent(contentId);
+    }
+    for (const passage of passages) {
+      this.languageOf(passage.lang).add(passage);
     }
   }
 
@@ -88,28 +169,7 @@ export class PassageIndex {
     if (index === undefined) {
       return [];
     }
-    const scores = new Map<number, number>();
-    const count = index.passages.length;
-    const terms = searchTerms(query).filter((term) => lang !== "fr" || !QUESTION_WORDS.has(term));
-    for (const term of terms) {
-      const counts = index.postings.get(term);
-      if (counts === undefined) {
-        continue;
-      }
-      const rarity = Math.log(1 + (count - counts.size + 0.5) / (counts.size + 0.5));
-      for (const [position, frequency] of counts) {
-        const length = index.lengths[position] ?? 0;
-        const norm = K1 * (1 - B + (B * length) / index.averageLength);
-        const gain = (rarity * frequency * (K1 + 1)) / (frequency + norm);
-        scores.set(position, (scores.get(position) ?? 0) + gain);
-      }
-    }
-    return [...scores]
-      .sort(([a, scoreA], [b, scoreB]) => scoreB - scoreA || a - b)
-      .slice(0, limit)
-      .flatMap(([position, score]) => {
-        const passage = index.passages[position];
-        return passage === undefined ? [] : [{ passage, score }];
-      });
+    const asked = searchTerms(query).filter((term) => lang !== "fr" || !QUESTION_WORDS.has(term));
+    return index.search(new Set(asked), limit);
   }
 }

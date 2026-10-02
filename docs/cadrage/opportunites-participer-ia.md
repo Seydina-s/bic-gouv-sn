@@ -135,7 +135,52 @@ Soit environ 6 millions de caractères, de l'ordre de 2 millions de jetons. Cons
 - 5 094 en français, 772 en wolof ;
 - une **recherche par mots** (BM25, gratuite, sans service extérieur) retrouve ces passages en quelques millisecondes. Elle suffit quand la question reprend les mots de la source (« Le président a-t-il visité la Chine ? », « Quelles pièces pour un extrait de naissance ? »), mais pas quand elle les reformule (« Combien coûte… » ne trouve pas « Coût »). La recherche par le sens (vecteurs) complétera la recherche par mots une fois le modèle d'indexation choisi.
 
+**Mesure de référence (02/10/2026, `pnpm --filter @bgs/api assistant:eval`)** : 38 questions en français, chacune reliée à la page officielle qui y répond (`apps/api/data/assistant-retrieval-eval.json`, données de test internes, jamais affichées). Part des questions dont la bonne page arrive dans les 3 premières :
+
+| Questions | Recherche par mots | Avec racinisation légère du français |
+|---|---|---|
+| Reprenant les mots de la source (22) | 86 % | 91 % |
+| Reformulées (16), ex. « Je veux divorcer », « Comment devenir soldat ? » | 50 % | 63 % |
+| Toutes (38) | 71 % | 79 % |
+
+**Essai de deux modèles ouverts, sur l'ordinateur de développement (02/10/2026, de 2 h 30 à 5 h)** : multilingual-e5-small et multilingual-e5-base (licence MIT, bibliothèque Transformers.js sous licence Apache 2.0), sans rien envoyer à l'extérieur. Part des questions dont la bonne page arrive parmi les premières :
+
+| Recherche | 3 premières | 5 premières | 10 premières |
+|---|---|---|---|
+| Par mots (avec racinisation) | 81 % | 83 % | 85 % |
+| Petit modèle seul (e5-small) | 83 % | 88 % | 93 % |
+| Petit modèle + mots, combinés | 81 % | 94 % | 94 % |
+| **Modèle moyen seul (e5-base)** | **94 %** | **97 %** | 99 % |
+| Modèle moyen + mots, combinés | 89 % | 92 % | 96 % |
+
+Questions reformulées seules, dans les 3 premières : 61 % (mots), 68 % (petit modèle), **89 % (modèle moyen)**. Avec le modèle moyen, ajouter la recherche par mots fait baisser le résultat : elle reste utile en secours si le modèle ne répond pas.
+
+| Coût de fonctionnement mesuré | Petit modèle | Modèle moyen |
+|---|---|---|
+| Taille sur disque | 130 Mo | 283 Mo |
+| Mémoire du serveur | ≈ 530 Mo | ≈ 660 Mo |
+| Temps par question (médian / au pire) | 8 / 14 ms | 16 / 28 ms |
+| Indexation de toute la base, une fois | 12 min | 24 min |
+
+Aucun coût à l'usage et aucune question de citoyen envoyée à un tiers. Mesuré sur 72 questions (jeu élargi à 5 h 45 ; la première mesure sur 38 donnait le même classement) ; des questions écrites par l'équipe et en wolof restent à ajouter (AUD10-05).
+
+**Proposition à valider en séance** : le **modèle moyen (e5-base) seul** pour la recherche, la recherche par mots en secours, installés sur notre serveur. Points à vérifier avant : son support du wolof (non mesuré : il manque des questions en wolof) et l'ajout de ses deux bibliothèques au serveur d'API.
+
+La racinisation (« divorcer » trouve « divorce », « coûte » trouve « coût ») a été réglée sur ce même jeu de 38 questions : le gain réel sera un peu plus faible sur des questions nouvelles. Le même jeu mesurera chaque modèle d'indexation candidat : c'est le critère objectif proposé pour le choisir, avec son coût et son support du wolof. Le wolof n'y figure pas encore : il faut des questions écrites par des locuteurs natifs (W-01).
+
 À noter : les modèles Claude ne font pas l'indexation. Il faut un modèle d'indexation à part, gratuit et ouvert ou payant, à choisir ; son support du wolof sera vérifié par le banc d'essai W-02.
+
+Prix publics relevés le 02/10/2026, par million de jetons ([embeddingcost.com](https://embeddingcost.com/openai), [aiapiprices.com](https://aiapiprices.com/embeddings-api-pricing/), [buildmvpfast.com](https://www.buildmvpfast.com/blog/best-embedding-model-comparison-voyage-openai-cohere-2026)) :
+
+| Modèle d'indexation | Prix | Indexer toute la base (≈ 2 M de jetons) | 500 000 questions par mois (≈ 10 M de jetons) |
+|---|---|---|---|
+| OpenAI text-embedding-3-small | 0,02 $ | ≈ 0,04 $ | ≈ 0,20 $ |
+| Voyage 4 lite | 0,02 $ | ≈ 0,04 $ | ≈ 0,20 $ |
+| Mistral Embed | 0,10 $ | ≈ 0,20 $ | ≈ 1 $ |
+| Cohere Embed | 0,12 $ | ≈ 0,24 $ | ≈ 1,20 $ |
+| Modèle ouvert sur notre serveur (ex. multilingual-e5, licence MIT) | 0 $ | temps de calcul seulement | temps de calcul seulement |
+
+L'indexation coûte donc presque rien dans tous les cas. La vraie différence est ailleurs : avec un service extérieur, **chaque question des citoyens part chez ce fournisseur** (données personnelles possibles, CDP) ; avec un modèle ouvert, tout reste sur notre serveur.
 
 ### Coût estimé (à valider)
 Prix publics relevés en septembre 2026 ([pecollective.com](https://pecollective.com/tools/anthropic-api-pricing/), [benchlm.ai](https://benchlm.ai/anthropic/api-pricing)), par million de jetons :
@@ -159,7 +204,7 @@ Par exemple, 500 000 questions par mois avec Haiku coûteraient environ 2 250 $ 
 ### Voix et wolof
 - **Lecture en français** : déjà faite avec la voix du téléphone, gratuite.
 - **Wolof, voix et compréhension** :
-  - **AWA (Andakia)**, startup sénégalaise : API de transcription et de synthèse vocale en wolof ([osiris.sn](https://osiris.sn/awa-l-intelligence-artificielle-qui-parle-le-wolof-du-senegal.html), [TRT Afrika](https://trtafrika.com/insight/awa-senegalese-start-ups-ai-muse-speaks-in-wolof-18244712)). C'est la référence de qualité fixée par CLAUDE.md. Tarif à demander ; un partenariat est possible.
+  - **AWA (Andakia)**, startup sénégalaise : API de transcription et de synthèse vocale en wolof ([osiris.sn](https://osiris.sn/awa-l-intelligence-artificielle-qui-parle-le-wolof-du-senegal.html), [TRT Afrika](https://trtafrika.com/insight/awa-senegalese-start-ups-ai-muse-speaks-in-wolof-18244712)). C'est la référence de qualité fixée par CLAUDE.md. Tarif à demander ; un partenariat est possible. Relevé le 02/10/2026 : Andakia a annoncé l'ouverture de son API AWA au public ([annonce d'Andakia](https://x.com/Andakia_ai/status/1852509729655799929)), avec transcription et synthèse vocale, intégrable dans une app mobile ; son fondateur fait la couverture du classement « 30 Under 30 » 2026 de Forbes Afrique ([note.com](https://note.com/africanist/n/n784f36821a06?hl=en)). Tarifs et conditions de traitement des données non publiés : à demander.
   - **Modèles ouverts** : un modèle Whisper adapté au wolof annonce un taux d'erreur de 17 % sur sa page ([Hugging Face](https://huggingface.co/M9and2M/whisper-small-wolof/commit/b9153193c0678d5da36071c70f6c1ecf1a8801bf)). La synthèse vocale de Meta (MMS) est sous licence **CC-BY-NC** (pas d'usage commercial, [Hugging Face](https://huggingface.co/facebook/mms-tts)) : une vérification juridique s'impose pour un service public.
   - Le banc d'essai wolof (W-02) départagera ces solutions sur nos propres contenus, comme vous l'avez prévu.
 
@@ -175,6 +220,28 @@ Par exemple, 500 000 questions par mois avec Haiku coûteraient environ 2 250 $ 
 4. « Un agent peut prendre le relais » : y a-t-il des agents, et sur quel canal ?
 5. Wolof : contacte-t-on Andakia (AWA) maintenant, ou après le banc d'essai ?
 6. Quel fournisseur de modèle (et quelle région d'hébergement des données) êtes-vous prêt à valider ?
+
+### Références mondiales (relevé du 02/10/2026)
+- **GOV.UK Chat** (Royaume-Uni), dans l'app officielle depuis mai 2026 : répond uniquement à partir des pages publiées de GOV.UK ; justesse passée de 76 % à 90 % au fil de deux pilotes (10 000 participants, 26 000 questions) ; plus de 500 tentatives de détournement toutes bloquées ; mais **10,7 secondes en moyenne par réponse** ([Civil Service World](https://www.civilserviceworld.com/professions/article/govuk-ai-chatbot-achieves-90-accuracy), [UKAuthority](https://www.ukauthority.com/articles/gov-uk-ai-chat-completes-public-pilot), [The Register](https://www.theregister.com/on-prem/2026/03/19/govuk-chatbot-gets-smarter-but-slower-as-llms-improve/5229770)).
+- **Jugalbandi** (Inde, AI4Bharat et Microsoft) : questions écrites ou **dites** dans la langue locale sur WhatsApp, recherche dans les fiches officielles, réponse lue à voix haute dans la même langue ; 10 langues, 171 programmes publics au lancement ([Microsoft](https://news.microsoft.com/source/asia/features/with-help-from-next-generation-ai-indian-villagers-gain-easier-access-to-government-services/)). C'est le parcours visé pour le wolof.
+- **Bürokratt** (Estonie) : un seul assistant pour tous les services publics ; quand il ne sait pas, il **passe la main à un agent** ([RIA](https://www.ria.ee/en/state-information-system/personal-services/burokratt)).
+
+Ce qu'on en retient pour l'écran :
+- **Montrer les sources tout de suite** : notre recherche trouve les passages en quelques millisecondes ; l'écran peut afficher les pages officielles trouvées pendant que la réponse s'écrit, au lieu d'un temps d'attente vide de 5 à 10 secondes.
+- Chaque réponse se termine par ses sources (titre, date, lien), touchables.
+- « Est-ce vrai ? » ne dit jamais « vrai » ou « faux » en vert et rouge : il dit ce que disent les sources officielles, ou qu'il n'en trouve aucune.
+- Sans réponse, proposer une suite utile (« Écrire au gouvernement », la démarche la plus proche) plutôt qu'une impasse.
+- Mesurer la justesse avant et pendant le pilote, comme GOV.UK (jeux d'évaluation déjà prêts).
+
+### Recommandations de Claude pour la séance (02/10/2026, après les mesures)
+Ce qui est déjà construit et testé, sans fournisseur ni coût : passages traçables, recherche combinée, contrat de réponse avec citations vérifiées avant affichage (PR #207, #209, #210, #211). Il ne manque que l'adaptateur du modèle choisi et la route.
+
+1. **Commencer par « Est-ce vrai ? » et l'assistant ensemble**, en français : ils reposent sur le même socle ; seul le format de la réponse change. Les ouvrir d'abord à un pilote (interrupteur à distance), pas à tous.
+2. **Budget** : fixer un plafond mensuel qui coupe l'assistant automatiquement une fois atteint (l'app reste utilisable). Ordre de grandeur pour 500 000 questions par mois avec Claude Haiku 4.5 : environ 2 250 $ sans optimisation, nettement moins avec le cache des règles fixes (prévu : les règles sont identiques pour chaque question).
+3. **Questions posées** : ne garder que des compteurs (nombre de questions, part sans réponse) et, si vous le souhaitez, les questions sans réponse, sans rien sur la personne, 90 jours au plus, pour compléter la base. Jamais la question dans les journaux techniques.
+4. **« Un agent peut prendre le relais »** : à retirer tant qu'aucune équipe ne répond ; à la place, renvoyer vers « Écrire au gouvernement » (Participer).
+5. **Wolof** : faire le banc d'essai W-02 avant de contacter Andakia, pour arriver avec des mesures ; il faut pour cela des locuteurs natifs qui écrivent des questions et notent les voix.
+6. **Fournisseurs** : pour la recherche, le **modèle ouvert moyen (e5-base) sur notre serveur** (gratuit, bonne page dans les 3 premières pour 94 % des questions sur 72, les questions ne sortent pas). Pour la rédaction des réponses, un modèle économique avec un contrat sans réutilisation des données ; la région d'hébergement est à choisir avec l'hébergement de l'API (point 27).
 
 ---
 

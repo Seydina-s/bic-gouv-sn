@@ -59,6 +59,50 @@ describe("PassageIndex", () => {
     expect(found.map((result) => result.passage.contentId)).toEqual(["content-6"]);
   });
 
+  it("finds a French word under another form of it, but keeps Wolof words whole", () => {
+    const forms = new PassageIndex([
+      passage(8, "Procédure de divorce", "Les pièces à fournir."),
+      passage(9, "[wo] Jëf", "[wo] Jëfandikoo", "wo"),
+    ]);
+    const first = (query: string, lang: "fr" | "wo" = "fr") =>
+      forms.search(query, { lang, limit: 1 })[0]?.passage.contentId;
+    expect(first("Je veux divorcer")).toBe("content-8");
+    expect(first("une pièce")).toBe("content-8");
+    expect(first("jëf", "wo")).toBe("content-9");
+    expect(first("jëfandikoo", "wo")).toBe("content-9");
+    expect(forms.search("jëfa", { lang: "wo", limit: 1 })).toEqual([]);
+  });
+
+  it("replaces the passages of one content, in every language, without rebuilding", () => {
+    const live = new PassageIndex([
+      passage(1, "Conseil de test", "Le conseil a examiné le projet de route."),
+      passage(2, "Visite de test", "Le président a visité le port."),
+      passage(2, "[wo] Visite", "[wo] Port bi", "wo"),
+    ]);
+    live.replaceContent("content-2", [passage(2, "Visite corrigée", "Le marché.")]);
+    const fresh = new PassageIndex([
+      passage(1, "Conseil de test", "Le conseil a examiné le projet de route."),
+      passage(2, "Visite corrigée", "Le marché."),
+    ]);
+    expect(live.search("port", { lang: "fr", limit: 5 })).toEqual([]);
+    expect(live.search("port", { lang: "wo", limit: 5 })).toEqual([]);
+    for (const query of ["marché", "conseil route", "le visite"]) {
+      expect(live.search(query, { lang: "fr", limit: 5 })).toEqual(
+        fresh.search(query, { lang: "fr", limit: 5 }),
+      );
+    }
+  });
+
+  it("removes a withdrawn content, and indexes a new language on its first passage", () => {
+    const live = new PassageIndex([passage(1, "Conseil de test", "Le port.")]);
+    live.replaceContent("content-1", []);
+    expect(live.search("port", { lang: "fr", limit: 5 })).toEqual([]);
+    live.replaceContent("content-3", [passage(3, "[wo] Ndaje", "[wo] Port bi", "wo")]);
+    expect(live.search("port", { lang: "wo", limit: 5 }).map((f) => f.passage.contentId)).toEqual([
+      "content-3",
+    ]);
+  });
+
   it("gives words found everywhere almost no weight", () => {
     const [first] = index.search("le port", { lang: "fr", limit: 5 });
     const [alone] = index.search("port", { lang: "fr", limit: 5 });
