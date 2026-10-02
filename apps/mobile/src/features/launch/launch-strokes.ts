@@ -32,3 +32,9 @@ export function staggered(
   const begin = count <= 1 ? start : start + ((span - own) * index) / (count - 1);
   return [begin, begin + own];
 }
+
+/** A shape fills in as its outline closes: the last part of its window, a little beyond. */
+export function filledAfter([start, end]: readonly [number, number]): [number, number] {
+  const span = end - start;
+  return [start + span * 0.6, Math.min(1, end + span * 0.2)];
+}
