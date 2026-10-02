@@ -11,7 +11,7 @@ Document de décision pour l'utilisateur. Le budget est **sa** décision (CLAUDE
 | Collecte en temps réel | 1 petite machine, **une seule instance** | `infra/docker/ingestion.Dockerfile` |
 | Base PostgreSQL (prévue au stack) | Petite au départ, avec secours | CLAUDE.md §4.1 |
 | Fichiers publics (photos, PDF, fond de carte) | Stockage objet + CDN | Volume : voir « Volumes mesurés » |
-| CDN + pare-feu applicatif (WAF) | Au plus près du Sénégal | CLAUDE.md §4.5 |
+| CDN + pare-feu applicatif (WAF) | Au plus près du Sénégal | CLAUDE.md §4.5 ; régler `TRUST_PROXY` sur l'API (nombre de relais devant elle), sans quoi chaque limite par adresse compterait tout le monde comme une seule personne |
 
 Le trafic massif (après un Conseil des ministres) porte sur des réponses publiques et cachables. **Le CDN en sert l'essentiel**, et l'API ne reçoit que les rafraîchissements. Sur une seule machine de développement, l'API tient environ 630 requêtes par seconde sur la liste des articles (`docs/capacite.md`).
 

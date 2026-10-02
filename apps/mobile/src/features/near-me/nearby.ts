@@ -1,5 +1,6 @@
 import {
   byDistance,
+  foldForMatching,
   type GeoPoint,
   type Place,
   type PublicService,
@@ -42,10 +43,7 @@ export function formatDistance(meters: number, locale = "fr-FR"): string {
 
 /** Letters only, lower case, no accents: "Thiès" is found by "thies". */
 function folded(text: string): string {
-  return text
-    .normalize("NFD")
-    .replace(/\p{M}/gu, "")
-    .toLowerCase()
+  return foldForMatching(text)
     .replace(/[^\p{L}\p{N}]+/gu, " ")
     .trim();
 }
