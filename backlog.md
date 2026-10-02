@@ -424,3 +424,12 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | Date | Tâche | Origine |
 |---|---|---|
 | 02/10/2026 | BUG-08 ✅ Plantage au lancement (« two views with the same name MLRNCamera ») : MapLibre chargé en deux versions (import et require) ; chargement différé par un fichier local, règle ESLint et contrôle en CI contre toute bibliothèque en double ; code de l'app −1,33 Mo (Android 5,44 Mo, iOS 5,36 Mo) | Utilisateur |
+
+### Demandes de l'utilisateur du 02/10/2026, 10 h 45
+
+| Date | Tâche | Origine |
+|---|---|---|
+| 02/10/2026 | OPP-05 ✅ La section Opportunités reste sur l'accueil même sans opportunité publiée, avec un état vide qui dit ce qui y apparaîtra (elle était masquée : aucune opportunité n'est encore publiée, point 29) | Utilisateur |
+| 02/10/2026 | UX-02 🔴 Fondu doux lors du passage entre mode clair et mode sombre | Utilisateur |
+| 02/10/2026 | SPLASH-02 🔴 Baobab plus majestueux et feuillu (traits fins), qui se dessine à l'ouverture et se « dé-dessine » avant l'accueil | Utilisateur |
+| 02/10/2026 | PART-03 🔴 Nouvelle présentation de Participer, plus esthétique et plus intuitive | Utilisateur |

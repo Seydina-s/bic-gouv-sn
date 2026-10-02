@@ -357,6 +357,16 @@ describe("app shell", () => {
     expect(await screen.findByText("Momentanément indisponible")).toBeOnTheScreen();
   });
 
+  it("keeps the opportunities on the front page while none is published, saying so", async () => {
+    globalThis.fetch = newsFetch({
+      opportunities: () => new Response(JSON.stringify({ opportunities: [] })),
+    }) as unknown as typeof fetch;
+    await renderRouter(routes, { initialUrl: "/" });
+    expect(await screen.findByText("Aucune opportunité ouverte pour l'instant.")).toBeOnTheScreen();
+    expect(screen.getByText("Opportunités")).toBeOnTheScreen();
+    expect(screen.getByRole("link", { name: "Tout voir" })).toBeOnTheScreen();
+  });
+
   it("shows the opportunities after the articles, each leading to its official page", async () => {
     const openURL = jest.spyOn(Linking, "openURL").mockResolvedValue(true);
     await renderRouter(routes, { initialUrl: "/" });

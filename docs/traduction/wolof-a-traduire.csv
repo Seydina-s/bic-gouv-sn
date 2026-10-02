@@ -307,6 +307,7 @@
 "opportunities.daysLeft (other)";"Plus que {count} jours";"";"Forme « other » du pluriel. À garder tel quel : {count}"
 "opportunities.noDeadline";"Sans date limite";"";""
 "opportunities.empty";"Aucune opportunité ouverte pour l'instant.";"";""
+"opportunities.emptyHint";"Les emplois, concours, formations et bourses publiés par l'État apparaîtront ici, avec leur page officielle.";"";""
 "opportunities.error";"Les opportunités n'ont pas pu être chargées.";"";""
 "opportunities.official";"Voir l'offre officielle";"";""
 "opportunities.officialHint";"Ouvre la page officielle dans le navigateur";"";""
