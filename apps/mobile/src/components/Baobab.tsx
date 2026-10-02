@@ -3,7 +3,7 @@ import Svg, { Path } from "react-native-svg";
 import {
   BAOBAB_CROWN,
   BAOBAB_GROUND,
-  BAOBAB_LIMB_WIDTH,
+  BAOBAB_LIMB_OUTLINE,
   BAOBAB_LIMBS,
   BAOBAB_TRUNK,
 } from "./baobab-drawing";
@@ -29,10 +29,10 @@ export function Baobab({ size, color, opacity }: { size: number; color: string; 
             key={limb.d}
             d={limb.d}
             stroke={color}
-            strokeWidth={BAOBAB_LIMB_WIDTH}
+            strokeWidth={BAOBAB_LIMB_OUTLINE}
             strokeLinecap="round"
             strokeLinejoin="round"
-            fill="none"
+            fill={color}
           />
         ))}
         {BAOBAB_CROWN.map((level) => (

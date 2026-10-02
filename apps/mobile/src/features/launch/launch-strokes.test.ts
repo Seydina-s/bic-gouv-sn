@@ -1,4 +1,4 @@
-import { phase, staggered, TIMELINE } from "./launch-strokes";
+import { filledAfter, phase, staggered, TIMELINE } from "./launch-strokes";
 
 describe("phase", () => {
   it("runs from 0 to 1 within its window, and stays put outside it", () => {
@@ -16,6 +16,15 @@ describe("staggered", () => {
     expect(last[1]).toBeCloseTo(0.7);
     expect(staggered([0.3, 0.7], 2, 5)[0]).toBeGreaterThan(first[0]);
     expect(staggered([0, 1], 0, 1)).toEqual([0, 0.5]);
+  });
+});
+
+describe("filledAfter", () => {
+  it("fills a shape as its outline closes, never past the end of the drawing", () => {
+    const [start, end] = filledAfter([0.4, 0.6]);
+    expect(start).toBeCloseTo(0.52);
+    expect(end).toBeCloseTo(0.64);
+    expect(filledAfter([0.9, 1])[1]).toBe(1);
   });
 });
 

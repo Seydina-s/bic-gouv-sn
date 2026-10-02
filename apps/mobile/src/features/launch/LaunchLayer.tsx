@@ -15,14 +15,14 @@ import { scheduleOnRN } from "react-native-worklets";
 import {
   BAOBAB_CROWN,
   BAOBAB_GROUND,
-  BAOBAB_LIMB_WIDTH,
+  BAOBAB_LIMB_OUTLINE,
   BAOBAB_LIMBS,
   BAOBAB_TRUNK,
   type DrawnPath,
 } from "../../components/baobab-drawing";
 import { useReduceMotion } from "../../theme/useSystemAccessibility";
 import { useTheme } from "../../theme/useTheme";
-import { phase, staggered, TIMELINE } from "./launch-strokes";
+import { filledAfter, phase, staggered, TIMELINE } from "./launch-strokes";
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
@@ -154,16 +154,20 @@ export function LaunchLayer({ onDone }: { onDone: () => void }) {
           window={TIMELINE.trunkOutline}
           color={ink}
         />
-        {BAOBAB_LIMBS.map((limb, index) => (
-          <DrawnStroke
-            key={limb.d}
-            path={limb}
-            width={BAOBAB_LIMB_WIDTH}
-            progress={progress}
-            window={staggered(TIMELINE.limbs, index, BAOBAB_LIMBS.length)}
-            color={ink}
-          />
-        ))}
+        {BAOBAB_LIMBS.map((limb, index) => {
+          const window = staggered(TIMELINE.limbs, index, BAOBAB_LIMBS.length);
+          return (
+            <DrawnStroke
+              key={limb.d}
+              path={limb}
+              width={BAOBAB_LIMB_OUTLINE}
+              fillWindow={filledAfter(window)}
+              progress={progress}
+              window={window}
+              color={ink}
+            />
+          );
+        })}
         {BAOBAB_CROWN.map((level, index) => (
           <CrownLevelPart
             key={level.width}
