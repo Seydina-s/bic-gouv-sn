@@ -1,5 +1,8 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { act, fireEvent, render, screen } from "@testing-library/react-native";
-import { Text, type ColorSchemeName } from "react-native";
+import { themes } from "@bgs/ui";
+import { AccessibilityInfo, Text, type ColorSchemeName } from "react-native";
+import { fadeFrom, ThemeFade } from "./ThemeFade";
 import { ThemeProvider } from "./ThemeProvider";
 import { useTheme } from "./useTheme";
 
@@ -30,8 +33,10 @@ function setPhoneScheme(scheme: ColorSchemeName) {
   });
 }
 
-beforeEach(() => {
+beforeEach(async () => {
   mockSystemScheme = "light";
+  // A scheme forced in Settings by one test must not carry over to the next.
+  await AsyncStorage.clear();
 });
 
 afterEach(() => {
@@ -86,6 +91,31 @@ describe("ThemeProvider", () => {
     const scheme = await renderProbe();
     await fireEvent.press(scheme());
     expect(scheme()).toHaveTextContent("light");
+  });
+
+  it("dissolves from the previous background when the mode changes", () => {
+    expect(fadeFrom(themes.light, themes.dark, false)).toBe(themes.light.color.background);
+    expect(fadeFrom(themes.dark, themes.light, null)).toBe(themes.dark.color.background);
+    expect(fadeFrom(themes.light, themes.light, false)).toBeNull();
+    expect(fadeFrom(themes.light, themes.dark, true)).toBeNull();
+  });
+
+  it("switches at once when the phone asks for less motion", async () => {
+    jest.spyOn(AccessibilityInfo, "isReduceMotionEnabled").mockResolvedValue(true);
+    await render(
+      <ThemeProvider>
+        <SchemeProbe />
+        <ThemeFade />
+      </ThemeProvider>,
+    );
+    await act(async () => {
+      await Promise.resolve();
+    });
+    await act(() => {
+      setPhoneScheme("dark");
+    });
+    expect(screen.getByTestId("scheme")).toHaveTextContent("dark");
+    expect(screen.queryByTestId("theme-fade")).toBeNull();
   });
 
   it("fails loudly when used outside the provider", async () => {
