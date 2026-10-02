@@ -72,3 +72,10 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : le texte avait été écrit par un script dont la chaîne contenait `C:\bic…` ; `\b` y a été lu comme une séquence d'échappement. Même famille que les barres obliques avalées déjà consignées.
 - **Correctif** : chemin réécrit avec une barre oblique avant (`C:/bic-gouv-sn-demo`), lisible partout.
 - **Prévention** : règle déjà en place (écrire tout texte contenant des barres obliques inverses avec les outils d'édition, jamais par un script) ; dans la documentation, écrire les chemins Windows avec des barres obliques avant.
+
+## 02/10/2026 — Récidive : barres obliques inverses avalées dans une expression régulière écrite par script
+
+- **Ce qui s'est passé** : en ajoutant le filtre de chemin de l'étape Babel des icônes (PERF-08), un script Node a transformé `[\/]` en `[\/]` ; le filtre ne reconnaissait plus les chemins Windows et le gain mesuré était nul. Attrapé à la mesure, avant toute validation.
+- **Cause racine** : la règle existante (« tout texte contenant des barres obliques inverses s'écrit avec les outils d'édition ») n'a pas été appliquée, par commodité, pour un remplacement jugé petit.
+- **Correctif** : expression réécrite avec l'outil d'édition ; un test vérifie désormais l'effet réel de l'étape (il échoue si elle ne s'applique pas).
+- **Prévention** : la règle vaut quelle que soit la taille du remplacement ; et pour toute optimisation, mesurer avant et après avec un test qui échoue sans elle (fait ici). Règle générale ajoutée à `~/.claude/ERREURS-GLOBALES.md`.
