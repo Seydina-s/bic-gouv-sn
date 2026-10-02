@@ -245,6 +245,46 @@ Ce qui est déjà construit et testé, sans fournisseur ni coût : passages tra�
 5. **Wolof** : faire le banc d'essai W-02 avant de contacter Andakia, pour arriver avec des mesures ; il faut pour cela des locuteurs natifs qui écrivent des questions et notent les voix.
 6. **Fournisseurs** : pour la recherche, le **modèle ouvert moyen (e5-base) sur notre serveur** (gratuit, bonne page dans les 3 premières pour 94 % des questions sur 72, les questions ne sortent pas). Pour la rédaction des réponses, un modèle économique avec un contrat sans réutilisation des données ; la région d'hébergement est à choisir avec l'hébergement de l'API (point 27).
 
+### Les trois pistes wolof proposées par le porteur du projet (examen du 02/10/2026)
+Relevé sur les pages officielles de chaque modèle (licence, mesures publiées, matériel). Aucune écoute ni mesure sur nos contenus n'a encore été faite : c'est le rôle du banc d'essai W-02.
+
+**1. WaxalNLP (Google, Gates Foundation, universités africaines)** ([page](https://huggingface.co/datasets/google/WaxalNLP))
+- C'est un **jeu de données d'entraînement**, pas un modèle prêt à l'emploi : 2 242 heures de parole dans 19 langues africaines, sous licences CC-BY-4.0 et CC-BY-SA-4.0 (usage commercial permis, avec attribution).
+- Le wolof y est annoncé pour la synthèse vocale (fourni par AIMS Sénégal, CC-BY-SA-4.0), **mais aucune partie wolof n'est téléchargeable à ce jour** : les 40 sous-ensembles publiés couvrent d'autres langues (relevé de la liste officielle des sous-ensembles).
+- Usage possible plus tard : entraîner ou affiner notre propre voix wolof quand la partie wolof sera publiée. À surveiller, pas à adopter seul.
+
+**2. Soynade Research** (startup de Yaya Sy et Dioula Doucoure, dédiée aux langues d'Afrique de l'Ouest) ([page](https://huggingface.co/soynade-research))
+- Le catalogue le plus complet pour le wolof : voix (Oolel-Voices), transcription (Wolof-HuBERT-CTC), modèle de langage (Oolel 8 B et 2 B, bâtis sur Qwen 2.5), recherche par la voix (Oolel-Embed).
+- **Les licences bloquent un usage direct** :
+  - voix et transcription sous **AGPL-3.0** : utilisables sur notre serveur, mais l'AGPL peut obliger à publier le code du service qui les fait tourner : avis juridique nécessaire ;
+  - Oolel-Embed sous **CC-BY-NC-SA** : usage commercial interdit ;
+  - modèle de langage Oolel : **aucune licence déclarée**, donc aucun droit d'usage tant que l'équipe ne l'a pas précisé.
+- Qualité publiée : transcription à **35,6 % de mots erronés** (moins bon que les modèles Whisper adaptés ci-dessous) ; **aucune mesure ni échantillon publiés** pour la voix.
+- Intérêt réel : une équipe sénégalaise, spécialiste du wolof, qui a aussi un modèle capable de répondre en wolof à partir de textes en français. **Bon candidat à un partenariat** (licence adaptée à un service public), au même titre qu'Andakia (AWA).
+
+**3. Faster-Whisper + NLLB + Adia_TTS**
+- **Faster-Whisper** (moteur, licence MIT) : excellent pour le **français**. Correction importante : **le Whisper d'origine ne connaît pas le wolof** (97,4 % de mots erronés sur le test public FLEURS, selon [cette étude](https://arxiv.org/pdf/2601.09716)). Il faut une version adaptée au wolof, et il en existe sous licence libre : [M9and2M/whisper-small-wolof](https://huggingface.co/M9and2M/whisper-small-wolof) (MIT, 17 % de mots erronés annoncés), [dofbi/wolof-asr](https://huggingface.co/dofbi/wolof-asr) (MIT). Elles se convertissent pour Faster-Whisper.
+- **NLLB-200** (Meta) : licence **CC-BY-NC-4.0, usage commercial interdit**. Pour une app gratuite de service public, la qualification « non commerciale » est discutable : avis juridique nécessaire avant tout usage. Rappel : les articles ne sont **pas** à traduire (version wolof officielle de presidence.sn) ; la traduction ne sert qu'aux éléments manquants, en petit volume, avec relecture humaine.
+- **Adia_TTS** (CONCREE, [page](https://huggingface.co/CONCREE/Adia_TTS)) : licence **Apache 2.0, la seule licence entièrement libre des voix wolof examinées**. Une seule voix, 40 heures d'entraînement. Limites annoncées : environ **20 secondes par phrase** sur carte graphique, 200 caractères au plus par passage, chiffres et dates mal lus, aucune mesure de qualité (MOS) publiée.
+
+**Comparaison**
+
+| Besoin | Meilleure option libre à ce jour | Licence | Point faible |
+|---|---|---|---|
+| Comprendre la voix en français | Faster-Whisper (Whisper d'origine) | MIT | Aucun pour cet usage |
+| Comprendre la voix en wolof | Whisper adapté au wolof, via Faster-Whisper | MIT | 17 % d'erreurs annoncées, à vérifier sur nos phrases |
+| Lire à voix haute en wolof | Adia_TTS | Apache 2.0 | Lent, une seule voix, chiffres et dates |
+| Traduire ce qui manque en wolof | Aucune option libre et sûre | NLLB : non commercial ; Oolel : sans licence | Passer par la file de relecture humaine |
+| Données pour entraîner notre voix | WaxalNLP | CC-BY / CC-BY-SA | Partie wolof pas encore publiée |
+
+**Recommandation de Claude**
+- **Adopter la piste 3, corrigée** : Faster-Whisper pour le français, un Whisper adapté au wolof pour la voix wolof, Adia_TTS comme première voix wolof. Tout est sous licence libre (MIT, Apache 2.0) et tourne sur notre serveur : aucun coût à l'usage, aucune donnée qui sort.
+- **Lire les articles une fois, pas à chaque écoute** : la voix wolof est lente, mais chaque article n'est lu qu'une fois sur notre serveur, à sa publication ; le fichier audio est ensuite servi à tout le monde depuis le CDN. Le coût ne dépend plus du nombre d'utilisateurs, ce qui tient à 20 millions.
+- **Ne pas adopter NLLB** tant qu'un juriste n'a pas validé la licence ; garder la file de relecture humaine pour les éléments manquants.
+- **Garder WaxalNLP en réserve** pour affiner notre voix quand la partie wolof sortira.
+- **Contacter Soynade et Andakia après le banc d'essai**, avec nos mesures en main : l'un ou l'autre peut dépasser Adia_TTS, à condition d'une licence adaptée.
+- **Le choix final reste l'écoute à l'aveugle (W-02)** par des locuteurs natifs, avec le seuil de qualité fixé à l'avance, comme le prévoit CLAUDE.md.
+
 ---
 
 ## 4. Ce que chaque option demande à construire
