@@ -364,3 +364,8 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | AUD9-04 | QA | La photo des signalements et l'écran natif sans image ne fonctionnent qu'après une nouvelle compilation de l'app (module photo, configuration native) | Haute (prochaine compilation) |
 | AUD9-05 | Ingestion & Données | Opportunités saisies à la main pour l'instant : la collecte automatique (DER/FJ, ADEPME) attend l'accord sur les sources (OPP-02) | Moyenne |
 | AUD9-06 | UX writing | Textes écrits en autonomie (Opportunités, Participer, invitations) : à relire par l'utilisateur | Basse |
+### Décision de l'utilisateur du 02/10/2026, 6 h 30
+
+| Date | Tâche | Origine |
+|---|---|---|
+| 02/10/2026 | SEC-06 ✅ Exception limitée à l'alerte node-forge dans l'audit (option a du point 32) ; à revoir à chaque mise à jour d'Expo, à retirer dès qu'une version corrigée de node-forge existe | Utilisateur |
