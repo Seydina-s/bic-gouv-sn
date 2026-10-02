@@ -353,3 +353,9 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 01/10/2026 | OPP-02 🔴 Collecte automatique des opportunités (DER/FJ et ADEPME d'abord), après accord sur les sources | Cadrage |
 | 01/10/2026 | PART-01 ✅ (01/10, 22 h) Participer : boîte de dialogue « Écrire au gouvernement » (sujet, message), reçue dans la console « Participation » | Utilisateur |
 | 01/10/2026 | PART-02 🔵 (01/10, 22 h) Participer : signalement (type, photo prise ou choisie, message, lieu facultatif), reçu dans la console avec la photo ; reste : la photo sur l'iPhone demande une nouvelle compilation (module ajouté), d'ici là l'app propose le signalement sans photo | Utilisateur |
+
+### Mode autonome prolongé jusqu'au 02/10/2026, 13 h — icônes
+
+| Date | Tâche | Origine |
+|---|---|---|
+| 02/10/2026 | PERF-08 ✅ Graisses d'icônes jamais dessinées (fine, légère) retirées à la construction par une étape Babel (`apps/mobile/babel/strip-icon-weights.js`) : code Android 7,15 → 7,07 Mo, iOS 7,05 → 6,96 Mo (s'ajoute aux −220 Ko de PERF-07) ; le type du composant `Icon` n'accepte plus que les 4 graisses gardées, et un test vérifie le rendu | AUD10-07 |

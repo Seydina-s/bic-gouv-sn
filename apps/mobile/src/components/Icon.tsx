@@ -5,12 +5,15 @@ import { useTheme } from "../theme/useTheme";
 
 type IconSize = "sm" | "md" | "lg";
 
+/** Weights kept in the build (babel/strip-icon-weights.js): thin and light draw nothing. */
+export type DrawnWeight = Exclude<NonNullable<PhosphorProps["weight"]>, "thin" | "light">;
+
 export interface IconProps {
   /** One icon imported alone from phosphor-react-native/src/icons (keeps the bundle small). */
   icon: ComponentType<PhosphorProps>;
   size?: IconSize;
   color?: string;
-  weight?: PhosphorProps["weight"];
+  weight?: DrawnWeight;
   /** Required unless the icon only decorates a visible label. */
   label?: string;
 }
