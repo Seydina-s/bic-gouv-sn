@@ -29,6 +29,7 @@ export * from "./api/notifications.schema";
 export * from "./api/accounts.schema";
 export * from "./api/usage.schema";
 export * from "./common/calendar";
+export * from "./common/text";
 export * from "./api/push.schema";
 export * from "./api/opportunities.schema";
 export * from "./api/participation.schema";

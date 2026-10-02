@@ -353,3 +353,67 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 01/10/2026 | OPP-02 🔴 Collecte automatique des opportunités (DER/FJ et ADEPME d'abord), après accord sur les sources | Cadrage |
 | 01/10/2026 | PART-01 ✅ (01/10, 22 h) Participer : boîte de dialogue « Écrire au gouvernement » (sujet, message), reçue dans la console « Participation » | Utilisateur |
 | 01/10/2026 | PART-02 🔵 (01/10, 22 h) Participer : signalement (type, photo prise ou choisie, message, lieu facultatif), reçu dans la console avec la photo ; reste : la photo sur l'iPhone demande une nouvelle compilation (module ajouté), d'ici là l'app propose le signalement sans photo | Utilisateur |
+
+### Mode autonome prolongé jusqu'au 02/10/2026, 13 h — préparation de l'IA
+
+| Date | Tâche | Origine |
+|---|---|---|
+| 02/10/2026 | AI-01 ✅ Socle de l'assistant indépendant du fournisseur : base découpée en **passages traçables** (lien officiel, date, version ; ni traduction automatique ni version retirée ; faits des fiches démarches libellés comme dans l'app) et **recherche par mots BM25** (mots interrogatifs français écartés) ; mesure sur la vraie base : 5 866 passages (5 094 FR, 772 WO), index en 1 s (`pnpm --filter @bgs/api assistant:passages`) | Préparation séance IA |
+| 02/10/2026 | AI-02 🔴 Recherche par le sens (vecteurs pgvector) en complément de BM25, après choix du modèle d'indexation (séance IA) | AI-01 |
+| 02/10/2026 | AI-03 🔴 Contrat de réponse avec citations obligatoires et contrôle « aucune citation hors des passages retrouvés », adaptateur du fournisseur, jeu de test « zéro invention » (après les choix de la séance IA) | AI-01 |
+| 02/10/2026 | REF-01 🔴 La mise en forme du texte pour la recherche (minuscules, sans accents) est écrite cinq fois (API, collecte, app) : la regrouper dans un paquet partagé | Constat AI-01 |
+| 02/10/2026 | AI-03 🔵 (02/10, 2 h 30 : contrat de réponse fait, indépendant du fournisseur : interface `LlmProvider`, règles fixes du modèle (uniquement les extraits numérotés, citations obligatoires, « introuvable » et « hors sujet », neutralité, question traitée comme une donnée), contrôle avant affichage (sans citation ou citant un passage non fourni : jamais montré), aucun appel au modèle sans passage trouvé ; reste : adaptateur du fournisseur choisi, route, jeu de test « zéro invention » sur un vrai modèle) | AI-01 |
+| 02/10/2026 | AI-08 🔵 (02/10, 3 h 10 : jeu « zéro invention » prêt : 21 questions, dont 15 à ne pas répondre (réponse absente de la base, vérifié ; opinions ; hors sujet ; tentatives de contourner les règles) et 6 à répondre en citant la bonne page ; notation « réussi / inventé » testée ; reste : le lancer sur chaque modèle candidat dès l'adaptateur écrit, objectif zéro invention) | AI-03 |
+| 02/10/2026 | AI-04 ✅ Jeu d'évaluation de la recherche des passages : 38 questions françaises (22 reprenant les mots de la source, 16 reformulées) reliées à leur page officielle, commande `assistant:eval` ; référence de la recherche par mots : bonne page dans les 3 premières pour 71 % (86 % directes, 50 % reformulées). Servira à comparer les modèles d'indexation | AI-01 |
+| 02/10/2026 | AI-05 🔴 Questions d'évaluation en wolof, écrites par des locuteurs natifs | W-01 |
+| 02/10/2026 | AI-06 ✅ Racinisation légère du français dans la recherche des passages (pluriels, terminaisons des verbes et du féminin ; le wolof reste entier) : bonne page dans les 3 premières 71 → 79 % (directes 86 → 91 %, reformulées 50 → 63 %), réglée sur le même jeu (gain réel un peu plus faible) | AI-04 |
+| 02/10/2026 | AI-07 ✅ Essai local d'un modèle d'indexation ouvert (multilingual-e5-small, MIT), hors du dépôt : bonne page dans les 5 premières 82 % (mots) → 89 % (sens) → **97 % (les deux combinés)** ; 8 ms par question, 130 Mo, ≈ 530 Mo de mémoire, base indexée en 12 min ; proposé pour AI-02, à valider en séance (support du wolof à vérifier) | AI-04 |
+| 02/10/2026 | AUD10-04 🔵 (02/10, 4 h 15 : l'index des passages se met à jour contenu par contenu (publié, corrigé, retiré), sans reconstruction, avec les mêmes scores qu'un index neuf (test) ; reste : le brancher sur la collecte avec la route de l'assistant, et ranger les vecteurs dans pgvector) | AUD10 |
+| 02/10/2026 | AI-02 🔵 (02/10, 2 h 40 : recherche combinée prête sans fournisseur : interface `EmbeddingProvider`, index des vecteurs, fusion des rangs, retour à la recherche par mots si le modèle est injoignable ; reste : adaptateur du modèle choisi en séance, vecteurs stockés dans PostgreSQL avec pgvector) | AI-07 |
+| 02/10/2026 | AI-09 ✅ Second essai local : modèle ouvert moyen multilingual-e5-base seul, bonne page dans les 3 premières pour 97 % des questions (94 % des reformulées), 16 ms par question, 283 Mo, ≈ 660 Mo de mémoire ; la combinaison avec les mots le fait baisser (89 %) : proposé seul, les mots en secours | AI-07 |
+| 02/10/2026 | AUD10-05 🔵 (02/10, 5 h 45 : jeu d'évaluation élargi de 38 à 72 questions françaises (44 directes, 28 reformulées), chaque page attendue vérifiée dans la base ; reste : questions de l'équipe et en wolof) | AUD10 |
+| 02/10/2026 | AUD10-05 🔵 (02/10, 5 h 45 : jeu d'évaluation élargi de 38 à 72 questions françaises (44 directes, 28 reformulées), chaque page attendue vérifiée dans la base ; reste : questions de l'équipe et en wolof) | AUD10 |
+### Mode autonome prolongé jusqu'au 02/10/2026, 13 h — icônes
+
+| Date | Tâche | Origine |
+|---|---|---|
+| 02/10/2026 | PERF-08 ✅ Graisses d'icônes jamais dessinées (fine, légère) retirées à la construction par une étape Babel (`apps/mobile/babel/strip-icon-weights.js`) : code Android 7,15 → 7,07 Mo, iOS 7,05 → 6,96 Mo (s'ajoute aux −220 Ko de PERF-07) ; le type du composant `Icon` n'accepte plus que les 4 graisses gardées, et un test vérifie le rendu | AUD10-07 |
+### Mode autonome prolongé jusqu'au 02/10/2026, 13 h — allègement
+
+| Date | Tâche | Origine |
+|---|---|---|
+| 02/10/2026 | PERF-07 ✅ Relecture vidéo de session de Sentry (web) retirée de tous les paquets par l'option officielle `includeWebReplay: false` : jamais activée (pas de captures d'écran, CDP), seulement réexportée par Sentry ; code Android 7,15 → 6,93 Mo, iOS 7,05 → 6,82 Mo. Reste à étudier : formulaire de retour Sentry (≈ 47 Ko, appelé au chargement : non retirable par simple remplacement) et graisses d'icônes inutilisées (fine, légère : ≈ 90 Ko, demande une configuration Babel) | AUD6-01 |
+| 02/10/2026 | PERF-09 ✅ Formulaire de retour web de Sentry (jamais affiché, le SDK mobile a le sien) remplacé là où Sentry navigateur l'importe : code Android 6,93 → 6,85 Mo, iOS 6,82 → 6,75 Mo ; 11 parcours de bout en bout verts | AUD10-07 |
+### Mode autonome prolongé jusqu'au 02/10/2026, 13 h
+
+| Date | Tâche | Origine |
+|---|---|---|
+| 02/10/2026 | SEC-06 ⏸ Alerte node-forge (GHSA-86w9-cpqp-85rv) dans l'outil Expo : aucune version corrigée, toutes les PR bloquées au contrôle « Secrets et dépendances » ; en attente de la décision de l'utilisateur (exception ciblée et datée, ou attente d'Expo) | CI |
+
+### Audit croisé du 02/10/2026, 2 h 45 (allègement, préparation de l'IA, revue visuelle)
+
+| Réf. | Agent | Constat | Priorité |
+|---|---|---|---|
+| AUD10-01 | Sécurité | Fusions bloquées par l'alerte node-forge (outil Expo, aucune correction) : décision de l'utilisateur attendue (point 32) ; ensuite, revoir les mises à jour de Dependabot (#212 à #216), dont @sentry/cli 2 → 3 (version majeure : vérifier l'envoi des cartes des sources) | Haute |
+| AUD10-02 | Architecte | PR empilées : #209 et #210 reposent sur #207, #211 sur #209 ; fusionner dans l'ordre 207 → 209 → 211, puis 210 | Haute |
+| AUD10-03 | Sécurité / Coût | Avant toute route de l'assistant : limite d'usage par installation, plafond de dépense mensuel coupant l'assistant (interrupteur à distance), aucune question écrite dans les journaux | Haute (avant AI-03) |
+| AUD10-04 | Performance | L'index des passages (≈ 1 s à construire) devra être tenu à jour à chaque nouvel article, sans tout reconstruire, et ses vecteurs rangés dans PostgreSQL (pgvector) | Moyenne |
+| AUD10-05 | QA | Jeu d'évaluation écrit par Claude, en français seulement : y ajouter des questions écrites par l'équipe et par des locuteurs wolof, pour éviter qu'il ne mesure que ce que son auteur attend | Moyenne |
+| AUD10-06 | Données | Questions posées à l'assistant : conservation et anonymisation à décider (cadrage, question 3) et à inscrire dans l'inventaire des données avant la mise en ligne | Moyenne |
+| AUD10-07 | Performance | Reste du poids de l'app : graisses d'icônes inutilisées (≈ 90 Ko), formulaire de retour de Sentry (≈ 47 Ko) | Basse |
+| AUD10-08 | Design / UI-UX | Revue visuelle faite sur le web seulement : la section Opportunités de l'accueil et Participer restent à voir sur l'iPhone | Moyenne (point 25) |
+### Audit croisé du 01/10/2026, 23 h 45 (Opportunités, Participer, écran de démarrage)
+
+| # | Agent | Constat | Priorité |
+|---|---|---|---|
+| AUD9-01 ✅ (01/10, 23 h 50 : réglage `TRUST_PROXY`, testé) | Sécurité | Derrière un CDN ou un répartiteur, l'API aurait vu une seule adresse : toutes les limites par adresse (connexion, abonnements, statistiques, Participer) auraient compté le pays entier comme une seule personne | Haute |
+| AUD9-02 | Sécurité / Données | Les photos de Participer sont gardées sur le disque du serveur : avec plusieurs serveurs d'API, il faudra un stockage objet privé commun (S1-02) | Moyenne (au déploiement) |
+| AUD9-03 | Données | Textes libres et photos de Participer peuvent contenir des données personnelles malgré la consigne : modération dans la console, conservation un an (à confirmer), déclaration CDP (point 22) | Haute (avant lancement) |
+| AUD9-04 | QA | La photo des signalements et l'écran natif sans image ne fonctionnent qu'après une nouvelle compilation de l'app (module photo, configuration native) | Haute (prochaine compilation) |
+| AUD9-05 | Ingestion & Données | Opportunités saisies à la main pour l'instant : la collecte automatique (DER/FJ, ADEPME) attend l'accord sur les sources (OPP-02) | Moyenne |
+| AUD9-06 | UX writing | Textes écrits en autonomie (Opportunités, Participer, invitations) : à relire par l'utilisateur | Basse |
+### Décision de l'utilisateur du 02/10/2026, 6 h 30
+
+| Date | Tâche | Origine |
+|---|---|---|
+| 02/10/2026 | SEC-06 ✅ Exception limitée à l'alerte node-forge dans l'audit (option a du point 32) ; à revoir à chaque mise à jour d'Expo, à retirer dès qu'une version corrigée de node-forge existe | Utilisateur |
