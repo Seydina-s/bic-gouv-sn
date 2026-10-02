@@ -374,6 +374,7 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 02/10/2026 | AI-09 ✅ Second essai local : modèle ouvert moyen multilingual-e5-base seul, bonne page dans les 3 premières pour 97 % des questions (94 % des reformulées), 16 ms par question, 283 Mo, ≈ 660 Mo de mémoire ; la combinaison avec les mots le fait baisser (89 %) : proposé seul, les mots en secours | AI-07 |
 | 02/10/2026 | AUD10-05 🔵 (02/10, 5 h 45 : jeu d'évaluation élargi de 38 à 72 questions françaises (44 directes, 28 reformulées), chaque page attendue vérifiée dans la base ; reste : questions de l'équipe et en wolof) | AUD10 |
 | 02/10/2026 | AUD10-05 🔵 (02/10, 5 h 45 : jeu d'évaluation élargi de 38 à 72 questions françaises (44 directes, 28 reformulées), chaque page attendue vérifiée dans la base ; reste : questions de l'équipe et en wolof) | AUD10 |
+| 02/10/2026 | AI-10 ✅ Examen des trois pistes wolof proposées par l'utilisateur (WaxalNLP, Soynade Research, Faster-Whisper + NLLB + Adia_TTS) : licences, mesures publiées, matériel ; recommandation dans `docs/cadrage/opportunites-participer-ia.md` (piste 3 corrigée, sans NLLB ; choix final par l'écoute W-02) | Demande de l'utilisateur |
 ### Mode autonome prolongé jusqu'au 02/10/2026, 13 h — icônes
 
 | Date | Tâche | Origine |
