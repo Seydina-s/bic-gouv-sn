@@ -5,7 +5,7 @@ import Svg, { Path } from "react-native-svg";
  * Fine-line baobab (brand motif, CLAUDE.md §1): drawn for this project, not an
  * official emblem. Shown once per view as a faint watermark (3–6 % opacity).
  */
-const STROKES = [
+export const BAOBAB_STROKES = [
   "M18 116H102",
   "M44 116C46 99 41 82 45 63",
   "M76 116C74 99 79 82 75 63",
@@ -25,7 +25,7 @@ export function Baobab({ size, color, opacity }: { size: number; color: string; 
   return (
     <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
       <Svg width={size} height={size} viewBox="0 0 120 120" opacity={opacity}>
-        {STROKES.map((d) => (
+        {BAOBAB_STROKES.map((d) => (
           <Path key={d} d={d} stroke={color} strokeWidth={1.2} strokeLinecap="round" fill="none" />
         ))}
       </Svg>
