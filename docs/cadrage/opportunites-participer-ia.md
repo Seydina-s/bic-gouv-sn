@@ -147,6 +147,18 @@ La racinisation (« divorcer » trouve « divorce », « coûte » trouve « co�
 
 À noter : les modèles Claude ne font pas l'indexation. Il faut un modèle d'indexation à part, gratuit et ouvert ou payant, à choisir ; son support du wolof sera vérifié par le banc d'essai W-02.
 
+Prix publics relevés le 02/10/2026, par million de jetons ([embeddingcost.com](https://embeddingcost.com/openai), [aiapiprices.com](https://aiapiprices.com/embeddings-api-pricing/), [buildmvpfast.com](https://www.buildmvpfast.com/blog/best-embedding-model-comparison-voyage-openai-cohere-2026)) :
+
+| Modèle d'indexation | Prix | Indexer toute la base (≈ 2 M de jetons) | 500 000 questions par mois (≈ 10 M de jetons) |
+|---|---|---|---|
+| OpenAI text-embedding-3-small | 0,02 $ | ≈ 0,04 $ | ≈ 0,20 $ |
+| Voyage 4 lite | 0,02 $ | ≈ 0,04 $ | ≈ 0,20 $ |
+| Mistral Embed | 0,10 $ | ≈ 0,20 $ | ≈ 1 $ |
+| Cohere Embed | 0,12 $ | ≈ 0,24 $ | ≈ 1,20 $ |
+| Modèle ouvert sur notre serveur (ex. multilingual-e5, licence MIT) | 0 $ | temps de calcul seulement | temps de calcul seulement |
+
+L'indexation coûte donc presque rien dans tous les cas. La vraie différence est ailleurs : avec un service extérieur, **chaque question des citoyens part chez ce fournisseur** (données personnelles possibles, CDP) ; avec un modèle ouvert, tout reste sur notre serveur.
+
 ### Coût estimé (à valider)
 Prix publics relevés en septembre 2026 ([pecollective.com](https://pecollective.com/tools/anthropic-api-pricing/), [benchlm.ai](https://benchlm.ai/anthropic/api-pricing)), par million de jetons :
 
