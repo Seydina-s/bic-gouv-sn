@@ -79,3 +79,10 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : la règle existante (« tout texte contenant des barres obliques inverses s'écrit avec les outils d'édition ») n'a pas été appliquée, par commodité, pour un remplacement jugé petit.
 - **Correctif** : expression réécrite avec l'outil d'édition ; un test vérifie désormais l'effet réel de l'étape (il échoue si elle ne s'applique pas).
 - **Prévention** : la règle vaut quelle que soit la taille du remplacement ; et pour toute optimisation, mesurer avant et après avec un test qui échoue sans elle (fait ici). Règle générale ajoutée à `~/.claude/ERREURS-GLOBALES.md`.
+
+## 02/10/2026 — Une PR empilée fermée par GitHub à la fusion de sa base
+
+- **Ce qui s'est passé** : la PR #220 reposait sur la branche de la PR #206. En fusionnant la #206 avec suppression de sa branche, GitHub a fermé la #220 au lieu de la rattacher à `main`. Rien n'a été perdu : la branche existait toujours, rouverte en #224.
+- **Cause racine** : une PR dont la branche de base disparaît est fermée ; la file de fusion ne rattachait pas les PR empilées à `main` avant de fusionner leur base.
+- **Correctif** : les autres PR empilées (#209, #210, #211, #222) ont été rattachées à `main` avant la fusion de leur base ; la #220 a été rouverte.
+- **Prévention** : avant toute fusion, rattacher chaque PR empilée à `main` (`gh pr edit <n> --base main`) ; et, après fusion compressée de la base, s'attendre à un conflit sur les fichiers communs, à régler en gardant la version la plus récente. Règle ajoutée à `~/.claude/ERREURS-GLOBALES.md`.
