@@ -8,6 +8,9 @@ updates:
     groups:
       tooling:
         patterns: ["eslint*", "@eslint/*", "typescript-eslint", "prettier", "vitest", "@vitest/*"]
+      # Share one query core: bumped one by one, their types no longer match.
+      tanstack:
+        patterns: ["@tanstack/*"]
     ignore:
       # Versions chosen by the Expo SDK: they move only with an SDK upgrade
       # (`expo install --fix`, task UPG-01), never one by one. React must equal the
@@ -24,6 +27,8 @@ updates:
       - dependency-name: "@react-native-async-storage/*"
       - dependency-name: "@shopify/flash-list"
       - dependency-name: "@sentry/react-native"
+      # Pinned by @sentry/react-native, which brings its own: moves with it only.
+      - dependency-name: "@sentry/cli"
       - dependency-name: "react"
       - dependency-name: "react-dom"
       - dependency-name: "@types/react*"
