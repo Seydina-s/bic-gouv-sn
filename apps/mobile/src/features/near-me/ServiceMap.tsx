@@ -17,8 +17,8 @@ import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 import { MARKER_IMAGES } from "./marker-images";
 import { AROUND_ZOOM, initialView, mapStyleUrl, servicePoints, touchedPoint } from "./service-map";
+import { API_BASE_URL } from "../../api/base-url";
 
-const API_BASE = process.env.EXPO_PUBLIC_API_URL ?? "";
 /** The map never leaves Senegal, the area of our tiles and of the services. */
 const COUNTRY: [number, number, number, number] = [...SENEGAL_BOUNDS];
 /** Labels are drawn with the letters our API serves next to the tiles. */
@@ -136,7 +136,7 @@ export default function ServiceMap({
       style={StyleSheet.absoluteFill}
       // Always the light map: easier to read (decision of 30/09/2026); the controls
       // around it follow the theme.
-      mapStyle={mapStyleUrl(API_BASE, "light")}
+      mapStyle={mapStyleUrl(API_BASE_URL, "light")}
       attribution={false}
       logo={false}
       compass={false}

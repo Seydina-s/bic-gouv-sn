@@ -14,6 +14,7 @@ import {
 import { AppState, Platform } from "react-native";
 import { usePersistentChoice } from "../../data/usePersistentChoice";
 import { activeSignal, readMemory, type Device } from "./usage-signals";
+import { API_BASE_URL } from "../../api/base-url";
 
 export type UsageConsent = "off" | "on";
 
@@ -24,8 +25,6 @@ const MEMORY_SLOT = "bgs-usage-memory";
 /** Whether the person has answered the invitation (or chosen in the settings). */
 const INVITED_SLOT = "bgs-usage-invited";
 const INVITED: readonly ("no" | "yes")[] = ["no", "yes"];
-// EXPO_PUBLIC_* must be read literally to be inlined at build time.
-const API_BASE = process.env.EXPO_PUBLIC_API_URL ?? "";
 const SEND_TIMEOUT_MS = 10_000;
 
 /** Coarse context only: the system's major version, never a model or an identifier. */
@@ -49,7 +48,7 @@ function send(signals: UsageSignal[]): void {
   const timer = setTimeout(() => {
     controller.abort();
   }, SEND_TIMEOUT_MS);
-  fetch(`${API_BASE}/v1/stats`, {
+  fetch(`${API_BASE_URL}/v1/stats`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ signals }),

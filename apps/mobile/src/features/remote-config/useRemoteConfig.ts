@@ -7,9 +7,9 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import Constants from "expo-constants";
 import { createRemoteConfigClient } from "../../api/remote-config-client";
+import { API_BASE_URL } from "../../api/base-url";
 
-// EXPO_PUBLIC_* must be read literally to be inlined at build time.
-const client = createRemoteConfigClient({ baseUrl: process.env.EXPO_PUBLIC_API_URL ?? "" });
+const client = createRemoteConfigClient({ baseUrl: API_BASE_URL });
 
 /** A switched-off feature reaches the phone within about a minute of use. */
 const FRESH_MS = 60_000;

@@ -13,9 +13,9 @@ import { SectionChip } from "../news/SectionChip";
 import { Field, MAX_TEXT, MIN_TEXT, SendRow } from "./FormParts";
 import { usePhotoPicker } from "./usePhotoPicker";
 import { useSending } from "./useSending";
+import { API_BASE_URL } from "../../api/base-url";
 
-// EXPO_PUBLIC_* must be read literally to be inlined at build time.
-const client = createParticipationClient({ baseUrl: process.env.EXPO_PUBLIC_API_URL ?? "" });
+const client = createParticipationClient({ baseUrl: API_BASE_URL });
 
 /** The longest place name the API accepts. */
 const MAX_PLACE = 120;
