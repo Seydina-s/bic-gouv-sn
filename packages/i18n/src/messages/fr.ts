@@ -400,6 +400,7 @@ export const fr = {
     error: "Les opportunités n'ont pas pu être chargées.",
     official: "Voir l'offre officielle",
     officialHint: "Ouvre la page officielle dans le navigateur",
+    share: "Partager cette opportunité",
     source: "Source\u00a0: {host}",
     notFound: "Cette opportunité n'est plus proposée\u00a0: elle est close ou a été retirée.",
   },

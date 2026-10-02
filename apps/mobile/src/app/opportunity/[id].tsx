@@ -12,6 +12,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Icon } from "../../components/Icon";
 import { useClosingLabel } from "../../features/opportunities/OpportunityCard";
+import { ShareOpportunity } from "../../features/opportunities/ShareOpportunity";
 import { useOpportunity } from "../../features/opportunities/useOpportunities";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
@@ -47,6 +48,8 @@ export default function OpportunityScreen() {
         headerTintColor: color.textBrand,
         headerStyle: { backgroundColor: color.background },
         headerShadowVisible: false,
+        headerRight: () =>
+          opportunity === undefined ? null : <ShareOpportunity opportunity={opportunity} />,
       }}
     />
   );
