@@ -64,15 +64,18 @@ export function normalizeForSearch(text: string): string {
     .trim();
 }
 
+/** Every meaningful word of a text, in order, repeats included. */
+export function searchWords(text: string): string[] {
+  return (
+    normalizeForSearch(text)
+      .split(" ")
+      // Numbers always count ("Conseil du 3 septembre"); lone letters do not.
+      .filter((term) => term.length >= 2 || /^\p{N}+$/u.test(term))
+  );
+}
+
 export function searchTerms(query: string): string[] {
-  return [
-    ...new Set(
-      normalizeForSearch(query)
-        .split(" ")
-        // Numbers always count ("Conseil du 3 septembre"); lone letters do not.
-        .filter((term) => term.length >= 2 || /^\p{N}+$/u.test(term)),
-    ),
-  ];
+  return [...new Set(searchWords(query))];
 }
 
 /** A text made ready for searching once, instead of at every search. */

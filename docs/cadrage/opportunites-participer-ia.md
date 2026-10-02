@@ -130,6 +130,11 @@ Soit environ 6 millions de caractères, de l'ordre de 2 millions de jetons. Cons
 - **stockage** : quelques milliers de passages, de l'ordre de 20 Mo dans PostgreSQL (pgvector) ;
 - le vrai coût est donc celui des **réponses** (ci-dessous), pas celui de la base.
 
+**Découpage réel (mesuré le 02/10/2026, `pnpm --filter @bgs/api assistant:passages`)** : la base est désormais découpée en passages traçables (lien officiel, date, version), sans traduction automatique ni article retiré :
+- 5 866 passages, environ 860 caractères chacun : 4 380 issus des articles, 1 486 des démarches (avec leurs pièces, coût, délai, lieux et questions fréquentes, tels que la fiche les montre) ;
+- 5 094 en français, 772 en wolof ;
+- une **recherche par mots** (BM25, gratuite, sans service extérieur) retrouve ces passages en quelques millisecondes. Elle suffit quand la question reprend les mots de la source (« Le président a-t-il visité la Chine ? », « Quelles pièces pour un extrait de naissance ? »), mais pas quand elle les reformule (« Combien coûte… » ne trouve pas « Coût »). La recherche par le sens (vecteurs) complétera la recherche par mots une fois le modèle d'indexation choisi.
+
 À noter : les modèles Claude ne font pas l'indexation. Il faut un modèle d'indexation à part, gratuit et ouvert ou payant, à choisir ; son support du wolof sera vérifié par le banc d'essai W-02.
 
 ### Coût estimé (à valider)
