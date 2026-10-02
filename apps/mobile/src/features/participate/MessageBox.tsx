@@ -1,6 +1,6 @@
 import { MESSAGE_TOPICS, type MessageTopic } from "@bgs/shared-types";
 import { useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { createParticipationClient } from "../../api/participation-client";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
@@ -34,21 +34,19 @@ export function MessageBox() {
         {t("participate.messageIntro")}
       </Text>
       <Text style={[textStyle.label, { color: color.textPrimary }]}>{t("participate.topic")}</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <View style={[styles.chips, { gap: space.sm }]}>
-          {MESSAGE_TOPICS.map((one) => (
-            <SectionChip
-              key={one}
-              category={null}
-              label={t(`participate.topics.${one}`)}
-              active={topic === one}
-              onPress={() => {
-                setTopic(one);
-              }}
-            />
-          ))}
-        </View>
-      </ScrollView>
+      <View style={[styles.chips, { gap: space.sm }]}>
+        {MESSAGE_TOPICS.map((one) => (
+          <SectionChip
+            key={one}
+            category={null}
+            label={t(`participate.topics.${one}`)}
+            active={topic === one}
+            onPress={() => {
+              setTopic(one);
+            }}
+          />
+        ))}
+      </View>
       <Field
         label={t("participate.messageLabel")}
         value={text}
@@ -76,5 +74,5 @@ export function MessageBox() {
 }
 
 const styles = StyleSheet.create({
-  chips: { flexDirection: "row" },
+  chips: { flexDirection: "row", flexWrap: "wrap" },
 });
