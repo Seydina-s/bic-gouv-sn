@@ -8,9 +8,9 @@ import { useCallback, useEffect } from "react";
 import { createNewsClient } from "../../api/news-client";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useDataSaver } from "../data-saver/DataSaverProvider";
+import { API_BASE_URL } from "../../api/base-url";
 
-// EXPO_PUBLIC_* must be read literally to be inlined at build time.
-const client = createNewsClient({ baseUrl: process.env.EXPO_PUBLIC_API_URL ?? "" });
+const client = createNewsClient({ baseUrl: API_BASE_URL });
 
 /**
  * Latest news in the reader's language, page after page (newest first), for all

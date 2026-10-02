@@ -4,8 +4,7 @@ import { useTheme } from "../../theme/useTheme";
 import { loadOfflineManager } from "./load-service-map";
 import { areaAround, estimatedMegabytes, OFFLINE_ZOOMS, placeKey } from "./offline-area";
 import { mapStyleUrl } from "./service-map";
-
-const API_BASE = process.env.EXPO_PUBLIC_API_URL ?? "";
+import { API_BASE_URL } from "../../api/base-url";
 
 export type OfflineAreaState =
   | { kind: "idle"; megabytes: number }
@@ -60,7 +59,7 @@ export function useOfflineArea(place: GeoPoint | null) {
       }
       await manager.createPack(
         {
-          mapStyle: mapStyleUrl(API_BASE, theme.scheme),
+          mapStyle: mapStyleUrl(API_BASE_URL, theme.scheme),
           bounds: areaAround(place),
           minZoom: OFFLINE_ZOOMS.min,
           maxZoom: OFFLINE_ZOOMS.max,
