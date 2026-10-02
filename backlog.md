@@ -353,3 +353,12 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 01/10/2026 | OPP-02 🔴 Collecte automatique des opportunités (DER/FJ et ADEPME d'abord), après accord sur les sources | Cadrage |
 | 01/10/2026 | PART-01 ✅ (01/10, 22 h) Participer : boîte de dialogue « Écrire au gouvernement » (sujet, message), reçue dans la console « Participation » | Utilisateur |
 | 01/10/2026 | PART-02 🔵 (01/10, 22 h) Participer : signalement (type, photo prise ou choisie, message, lieu facultatif), reçu dans la console avec la photo ; reste : la photo sur l'iPhone demande une nouvelle compilation (module ajouté), d'ici là l'app propose le signalement sans photo | Utilisateur |
+
+### Mode autonome prolongé jusqu'au 02/10/2026, 13 h — préparation de l'IA
+
+| Date | Tâche | Origine |
+|---|---|---|
+| 02/10/2026 | AI-01 ✅ Socle de l'assistant indépendant du fournisseur : base découpée en **passages traçables** (lien officiel, date, version ; ni traduction automatique ni version retirée ; faits des fiches démarches libellés comme dans l'app) et **recherche par mots BM25** (mots interrogatifs français écartés) ; mesure sur la vraie base : 5 866 passages (5 094 FR, 772 WO), index en 1 s (`pnpm --filter @bgs/api assistant:passages`) | Préparation séance IA |
+| 02/10/2026 | AI-02 🔴 Recherche par le sens (vecteurs pgvector) en complément de BM25, après choix du modèle d'indexation (séance IA) | AI-01 |
+| 02/10/2026 | AI-03 🔴 Contrat de réponse avec citations obligatoires et contrôle « aucune citation hors des passages retrouvés », adaptateur du fournisseur, jeu de test « zéro invention » (après les choix de la séance IA) | AI-01 |
+| 02/10/2026 | REF-01 🔴 La mise en forme du texte pour la recherche (minuscules, sans accents) est écrite cinq fois (API, collecte, app) : la regrouper dans un paquet partagé | Constat AI-01 |
