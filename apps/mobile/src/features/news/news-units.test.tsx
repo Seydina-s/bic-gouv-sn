@@ -229,8 +229,7 @@ describe("reading an article aloud", () => {
     await fireEvent.press(screen.getByRole("button", { name: "Écouter" }));
     // Called as the app gives it (a plain function), not as a browser utterance method.
     const onBoundary = speak.mock.calls[0]?.[1]?.onBoundary as
-      | ((event: { charIndex: number; charLength: number }) => void)
-      | undefined;
+      ((event: { charIndex: number; charLength: number }) => void) | undefined;
     // The voice reports the word it starts: the 9th character of the title.
     await act(() => {
       onBoundary?.({ charIndex: 8, charLength: 4 });
