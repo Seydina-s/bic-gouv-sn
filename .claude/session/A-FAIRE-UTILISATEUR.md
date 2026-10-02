@@ -2,6 +2,14 @@
 
 Liste unique de ce qui attend une action ou une décision de l'utilisateur. Reportée à sa demande le 27/09/2026 (16 h 30) : Claude continue sans ces éléments et complète cette liste au fil du travail. Rien ici ne bloque le développement.
 
+## Ordre proposé pour la séance du 02/10, 13 h
+
+1. **Point 32 (2 minutes)** : décider pour l'alerte node-forge. C'est ce qui bloque la fusion de tout le travail de la nuit (PR #202, #204 à #211, #217 à #221).
+2. **IA** : les 6 questions de la partie 3 du cadrage (`docs/cadrage/opportunites-participer-ia.md`), chacune avec une recommandation chiffrée ; en particulier, valider ou non le **modèle ouvert gratuit** (e5-base) pour la recherche (bonne page dans les 3 premières pour 94 % des 72 questions d'essai) et choisir le fournisseur qui rédige les réponses.
+3. **Logo et écran de démarrage** : fichiers et 4 questions de la fiche (point 31).
+4. **Nouvelle compilation** de la version de test (point 28), pour la photo des signalements, l'écran natif et le logo.
+5. Ensuite, à votre rythme : points 26 (textes écrits en autonomie, dont « Partager cette opportunité »), 29 et 30 (Opportunités, Participer), 27 (hébergement), puis 19 à 22.
+
 | # | Quoi | Pourquoi / effet si ça attend | Réf. backlog |
 |---|---|---|---|
 | 1 | Compte Apple Developer (99 USD/an), puis suivre `docs/guides/installer-la-version-de-test-iphone.md` | Seul moyen de voir la carte native sur iPhone. Attendre ne crée aucun incident : la liste reste dans Expo Go, et une version Android de test est gratuite | A-03, MAP-06 |
@@ -81,3 +89,13 @@ Mise à jour du 01/10/2026 (19 h, mode autonome) : point 23 validé (14 h 40) ; 
 | 25 | **Essayer l'app sur l'iPhone**, ordinateur allumé et sur le même Wi-Fi : ouvrir l'app de test, qui se recharge en **mode optimisé** (plus rapide que d'habitude). Vérifier : plus d'erreurs rouges dans « Près de moi » ; l'invitation à la localisation sur l'accueil (les invitations déjà répondues ne reviennent pas) ; la réaction au toucher et l'ouverture des onglets ; la ligne « Position » des Réglages | Mesure réelle de la fluidité ; seul un téléphone le montre | PERM-01, PERF-04, AUD8-03 |
 | 26 | Relire les **textes de l'invitation à la localisation** : « Voir les services près de vous ? », « Oui, me localiser », « Non merci » | Écrits en autonomie | AUD8-04 |
 | 27 | Choisir l'**hébergement de l'API** (chiffrage prêt, `docs/hebergement.md`) : sans API en HTTPS, impossible de produire une version de test optimisée qui marche sans l'ordinateur | Bloque aussi la mise en ligne | S1-02, AUD8-05 |
+
+Mise à jour du 02/10/2026 (0 h 30, mode autonome) : points 28 à 31 ajoutés.
+
+| # | Quoi | Pourquoi / effet si ça attend | Réf. backlog |
+|---|---|---|---|
+| 28 | **Nouvelle compilation de la version de test** (EAS, lancée par vous : `docs/guides/installer-la-version-de-test-iphone.md`) | Sans elle : pas de photo dans les signalements (le module photo n'est pas dans l'app installée) et l'écran natif garde l'image du modèle Expo. Elle servira aussi pour le logo et la photo des notifications iPhone | PART-02, AUD9-04 |
+| 29 | **Opportunités** : confirmer les portails officiels comme sources (domaines .gouv.sn, DER/FJ, ADEPME, FONGIP, 3FPT, ARMP, bourses), dire qui saisit et qui vérifie dans la console, et autoriser ou non la collecte automatique (DER/FJ et ADEPME d'abord) | La section de l'accueil reste vide tant que rien n'est publié | OPP-02, AUD9-05 |
+| 30 | **Participer** : confirmer la conservation (un an, puis effacement), les types de problèmes (voirie, éclairage, salubrité, eau, autre) et à qui transmettre les signalements (mairies, ONAS, SENELEC, SEN'EAU… ?) | Aujourd'hui, seule l'équipe les lit dans la console ; la déclaration à la CDP (point 22) doit mentionner ces données | PART-02, AUD9-03 |
+| 31 | **Logo et écran de démarrage** : fournir les fichiers décrits dans `docs/guides/logo-et-ecran-de-demarrage.md` (des SVG de préférence) et répondre aux 4 questions de la fiche | L'app garde les icônes du modèle Expo ; l'écran de démarrage montre le baobab seul | A-01 |
+| 32 | **Urgent : décider pour l'alerte de sécurité node-forge.** Une faille (signature RSA mal vérifiée, gravité haute) est publiée dans une brique de l'**outil de fabrication** d'Expo, pas dans l'app installée sur les téléphones, et **aucune correction n'existe encore** (fiche officielle GHSA-86w9-cpqp-85rv, publiée le 03/09/2026, vérifiée le 02/10 à 4 h). Vérifié dans le code d'Expo : cette brique ne sert qu'à **signer** (manifestes en développement, certificats iPhone lors d'une compilation locale), alors que la faille concerne la **vérification** d'une signature. Le contrôle « Secrets et dépendances » la refuse, donc **plus aucune PR ne peut être fusionnée**. Choix : (a) autoriser une exception limitée à cette seule alerte, notée dans le dépôt et revue à chaque mise à jour d'Expo (recommandé) ; (b) attendre une correction d'Expo, sans date | Bloque toutes les fusions depuis le 02/10 vers 0 h ; le travail continue sur des branches en attente | SEC-06 |

@@ -113,6 +113,16 @@ export class OpportunityService {
     });
   }
 
+  /** Corrected before it is published (a typo, a date): the second person still checks. */
+  correct(person: Person, id: string, draft: OpportunityDraft): Promise<Opportunity> {
+    return this.decide(person, id, "opportunity.corrected", (item) => {
+      if (item.status !== "pending") {
+        throw new OpportunityRuleError("OPPORTUNITY_NOT_PENDING");
+      }
+      return { ...item, ...draft };
+    });
+  }
+
   /** Taken out of the app (closed early, mistaken): kept in the history. */
   withdraw(person: Person, id: string): Promise<Opportunity> {
     return this.decide(person, id, "opportunity.withdrawn", (item, at) => {
