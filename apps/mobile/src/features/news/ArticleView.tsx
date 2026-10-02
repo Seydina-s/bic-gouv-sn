@@ -1,11 +1,12 @@
 import { useEffect, useRef } from "react";
 import type { NewsDetail } from "@bgs/shared-types";
 import { ArrowSquareOutIcon as ArrowSquareOut } from "phosphor-react-native/src/icons/ArrowSquareOut";
+import type { ScrollView } from "react-native";
 import {
   ActivityIndicator,
+  Animated,
   Linking,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -22,7 +23,8 @@ import { BlockRenderer } from "./BlockRenderer";
 import { CoverImage } from "./CoverImage";
 import { DocumentList } from "./DocumentList";
 import { useRecordRead } from "../usage-stats/UsageStatsProvider";
-import { canListen, ListenButton } from "./ListenButton";
+import { FloatingListenButton, useListenScroll } from "./FloatingListenButton";
+import { ListenPill, useArticleListening } from "./ListenButton";
 import { formatPublishedOn } from "./format";
 import { SectionTag } from "./SectionTag";
 import { useNewsArticle } from "./useNews";
@@ -89,10 +91,8 @@ export function ArticleView({
 }: ArticleViewProps) {
   useRecordRead(countsAsRead ? detail?.id : undefined);
   const { theme } = useTheme();
-  const { t, lang } = useTranslation();
-  const scroller = useRef<ScrollView>(null);
-  const scrollTop = useScrollTop();
-  const { color, space, textStyle, layout, radius } = theme;
+  const { t } = useTranslation();
+  const { color, space, textStyle } = theme;
 
   if (detail === undefined) {
     return (
@@ -107,15 +107,46 @@ export function ArticleView({
       </View>
     );
   }
+  return (
+    <ArticleBody
+      key={detail.id}
+      detail={detail}
+      paneWidth={paneWidth}
+      bottomInset={bottomInset}
+      withAppBar={withAppBar}
+    />
+  );
+}
+
+/** The article itself, its reading aloud and its floating buttons. */
+function ArticleBody({
+  detail,
+  paneWidth,
+  bottomInset,
+  withAppBar,
+}: {
+  detail: NewsDetail;
+  paneWidth: number;
+  bottomInset: number;
+  withAppBar: boolean;
+}) {
+  const { theme } = useTheme();
+  const { t, lang } = useTranslation();
+  const scroller = useRef<ScrollView>(null);
+  const scrollTop = useScrollTop();
+  const listenScroll = useListenScroll(scrollTop.onScroll);
+  const listening = useArticleListening(detail);
+  const { color, space, textStyle, layout, radius, touchTarget } = theme;
 
   // Full-bleed photo when the pane is no wider than the reading column, framed otherwise.
   const framed = paneWidth > layout.readingMaxWidth;
   return (
     <View style={styles.scrollRoot}>
-      <ScrollView
+      <Animated.ScrollView
+        testID="article-scroll"
         ref={scroller}
-        onScroll={scrollTop.onScroll}
-        scrollEventThrottle={100}
+        onScroll={listenScroll.onScroll}
+        scrollEventThrottle={16}
         contentContainerStyle={{
           paddingHorizontal: space.lg,
           paddingBottom: bottomInset + space.xxxl,
@@ -140,24 +171,28 @@ export function ArticleView({
                 marginBottom: space.lg,
               }}
             />
-            {canListen(detail) && (
+            {listening.offered && (
               <View
                 style={[
                   styles.onPhoto,
                   { right: framed ? space.md : 0, bottom: space.lg + space.md },
                 ]}
               >
-                <ListenButton detail={detail} />
+                <ListenPill listening={listening} />
               </View>
             )}
           </View>
         )}
         <View style={[styles.tagRow, { marginTop: detail.cover === null ? space.md : 0 }]}>
           <SectionTag category={detail.category} />
-          {detail.cover === null && canListen(detail) && <ListenButton detail={detail} />}
+          {detail.cover === null && <ListenPill listening={listening} />}
         </View>
         <Text
           accessibilityRole="header"
+          // The pill sits just above the title: once the title reaches the top, it is gone.
+          onLayout={(event) => {
+            listenScroll.setAnchor(event.nativeEvent.layout.y);
+          }}
           {...languageProps(detail.lang)}
           style={[textStyle.leadHeadline, { color: color.textPrimary, marginTop: space.md }]}
         >
@@ -204,13 +239,18 @@ export function ArticleView({
             </Text>
           </Pressable>
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
       <ScrollTopButton
         visible={scrollTop.visible}
         bottom={bottomInset + space.lg}
         onPress={() => {
           scroller.current?.scrollTo({ y: 0, animated: true });
         }}
+      />
+      <FloatingListenButton
+        listening={listening}
+        scroll={listenScroll}
+        bottom={bottomInset + space.lg + touchTarget.min + space.md}
       />
       {withAppBar && <FloatingAppBar visible={scrollTop.visible} />}
     </View>

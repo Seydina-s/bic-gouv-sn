@@ -65,12 +65,7 @@ export function MessageFlow() {
     const question = t("participate.questions.topic");
     return (
       <StepBody step={1}>
-        <StepHeader
-          step={1}
-          count={STEPS}
-          question={question}
-          choices={choices.map((choice) => choice.label)}
-        />
+        <StepHeader step={1} count={STEPS} question={question} />
         <ChoiceTiles title={question} choices={choices} selected={topic} onSelect={setTopic} />
         <StepFooter onBack={null}>
           <NextButton

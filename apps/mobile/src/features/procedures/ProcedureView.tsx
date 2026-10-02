@@ -3,14 +3,16 @@ import { CaretRightIcon as CaretRight } from "phosphor-react-native/src/icons/Ca
 import { MapPinIcon as MapPin } from "phosphor-react-native/src/icons/MapPin";
 import * as Speech from "expo-speech";
 import { useMemo, useRef, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import type { ScrollView } from "react-native";
+import { ActivityIndicator, Animated, Pressable, StyleSheet, Text, View } from "react-native";
 import { Icon } from "../../components/Icon";
 import { ScrollTopButton, useScrollTop } from "../../components/ScrollTopButton";
 import { useProgressive } from "../../components/useProgressive";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 import { Runs } from "../news/BlockRenderer";
-import { FRENCH_VOICE, ReadAloudButton } from "../news/ListenButton";
+import { FloatingListenButton, useListenScroll } from "../news/FloatingListenButton";
+import { FRENCH_VOICE, ListenPill, useListening } from "../news/ListenButton";
 import { FloatingAppBar } from "../shell/FloatingAppBar";
 import { ProcedureActionBar } from "./ProcedureActionBar";
 import { ProcedureBrief, useBriefLabels } from "./ProcedureBrief";
@@ -124,6 +126,21 @@ function ProcedureSheetView({
   // Where each section starts in the page, to lead the reader there.
   const offsets = useRef(new Map<number, number>());
   const scrollTop = useScrollTop();
+  const listenScroll = useListenScroll(scrollTop.onScroll);
+  const listening = useListening({
+    voice: FRENCH_VOICE,
+    pieces: () =>
+      spokenProcedure(
+        detail.title,
+        page,
+        {
+          brief: t("procedures.brief"),
+          fact: (fact) => `${labels[fact.kind]} : ${fact.value}`,
+          note: t("procedures.note"),
+        },
+        Speech.maxSpeechInputLength,
+      ),
+  });
   const [barHeight, setBarHeight] = useState(0);
   const { color, space, textStyle, layout, touchTarget } = theme;
   // The floating app bar covers the top of the page once scrolled.
@@ -135,10 +152,10 @@ function ProcedureSheetView({
 
   return (
     <View style={styles.root}>
-      <ScrollView
+      <Animated.ScrollView
         ref={scroller}
-        onScroll={scrollTop.onScroll}
-        scrollEventThrottle={100}
+        onScroll={listenScroll.onScroll}
+        scrollEventThrottle={16}
         contentContainerStyle={{
           paddingHorizontal: space.lg,
           paddingBottom: barHeight + space.xxl,
@@ -163,22 +180,14 @@ function ProcedureSheetView({
             {t("content.machineTranslation")}
           </Text>
         )}
-        <View style={[styles.listen, { marginTop: space.lg }]}>
-          <ReadAloudButton
-            language={FRENCH_VOICE}
-            pieces={() =>
-              spokenProcedure(
-                detail.title,
-                page,
-                {
-                  brief: t("procedures.brief"),
-                  fact: (fact) => `${labels[fact.kind]} : ${fact.value}`,
-                  note: t("procedures.note"),
-                },
-                Speech.maxSpeechInputLength,
-              )
-            }
-          />
+        <View
+          style={[styles.listen, { marginTop: space.lg }]}
+          onLayout={(event) => {
+            const { y, height } = event.nativeEvent.layout;
+            listenScroll.setAnchor(y + height);
+          }}
+        >
+          <ListenPill listening={listening} />
         </View>
         {page.facts.length > 0 && (
           <View style={{ marginTop: space.xl }}>
@@ -248,13 +257,18 @@ function ProcedureSheetView({
         >
           {t("content.sourceAttribution", { source: SOURCE })}
         </Text>
-      </ScrollView>
+      </Animated.ScrollView>
       <ScrollTopButton
         visible={scrollTop.visible}
         bottom={barHeight + space.md}
         onPress={() => {
           scrollTo(0);
         }}
+      />
+      <FloatingListenButton
+        listening={listening}
+        scroll={listenScroll}
+        bottom={barHeight + space.md + touchTarget.min + space.md}
       />
       {withAppBar && <FloatingAppBar visible={scrollTop.visible} />}
       <ProcedureActionBar

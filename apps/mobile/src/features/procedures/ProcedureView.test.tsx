@@ -104,16 +104,17 @@ describe("the page of a procedure", () => {
     openURL.mockRestore();
   });
 
-  it("reads the procedure aloud with the phone's French voice, then stops", async () => {
+  it("reads the procedure aloud with the phone's French voice, pauses, then resumes", async () => {
     await show(SHEET);
     await fireEvent.press(screen.getByRole("button", { name: "Écouter" }));
     expect(Speech.speak).toHaveBeenCalledWith(
       SHEET.title,
       expect.objectContaining({ language: "fr-FR" }),
     );
-    await fireEvent.press(screen.getByRole("button", { name: "Arrêter" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Pause" }));
     expect(Speech.stop).toHaveBeenCalled();
-    expect(screen.getByRole("button", { name: "Écouter" })).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole("button", { name: "Reprendre" }));
+    expect(screen.getByRole("button", { name: "Pause" })).toBeOnTheScreen();
   });
 
   it("leads to the nearest service the sheet names, only when one is verified", async () => {

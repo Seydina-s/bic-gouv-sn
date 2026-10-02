@@ -207,12 +207,7 @@ export function ReportFlow() {
     const question = t("participate.questions.kind");
     return (
       <StepBody step={1}>
-        <StepHeader
-          step={1}
-          count={STEPS}
-          question={question}
-          choices={choices.map((choice) => choice.label)}
-        />
+        <StepHeader step={1} count={STEPS} question={question} />
         <ChoiceTiles
           title={question}
           choices={choices}

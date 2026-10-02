@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react-native";
+import { act, fireEvent, render, screen } from "@testing-library/react-native";
 import type { Block } from "@bgs/shared-types";
 import * as Speech from "expo-speech";
 import { Linking, StyleSheet } from "react-native";
@@ -210,21 +210,86 @@ describe("reading an article aloud", () => {
     expect(pieces.every((piece) => piece.length <= 40)).toBe(true);
   });
 
-  it("offers Écouter on the photo of a French article, then Arrêter", async () => {
+  it("offers Écouter on the photo of a French article, then Pause and Reprendre", async () => {
     await view(DETAIL);
     await fireEvent.press(screen.getByRole("button", { name: "Écouter" }));
     expect(Speech.speak).toHaveBeenCalledWith(
       DETAIL.title,
       expect.objectContaining({ language: "fr-FR" }),
     );
-    await fireEvent.press(screen.getByRole("button", { name: "Arrêter" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Pause" }));
     expect(Speech.stop).toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Reprendre" })).toBeOnTheScreen();
+  });
+
+  it("resumes at the word the voice had reached", async () => {
+    const speak = jest.mocked(Speech.speak);
+    speak.mockClear();
+    await view(DETAIL);
+    await fireEvent.press(screen.getByRole("button", { name: "Écouter" }));
+    // Called as the app gives it (a plain function), not as a browser utterance method.
+    const onBoundary = speak.mock.calls[0]?.[1]?.onBoundary as
+      | ((event: { charIndex: number; charLength: number }) => void)
+      | undefined;
+    // The voice reports the word it starts: the 9th character of the title.
+    await act(() => {
+      onBoundary?.({ charIndex: 8, charLength: 4 });
+    });
+    await fireEvent.press(screen.getByRole("button", { name: "Pause" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Reprendre" }));
+    expect(speak).toHaveBeenLastCalledWith(DETAIL.title.slice(8), expect.anything());
+  });
+
+  it("goes back to Écouter once the whole text has been read", async () => {
+    const speak = jest.mocked(Speech.speak);
+    speak.mockClear();
+    await view(DETAIL);
+    await fireEvent.press(screen.getByRole("button", { name: "Écouter" }));
+    // Each piece hands over to the next until there is none left.
+    for (let call = 0; call < 50 && screen.queryByRole("button", { name: "Pause" }); call += 1) {
+      const options = speak.mock.calls[call]?.[1];
+      await act(() => {
+        options?.onDone?.();
+      });
+    }
     expect(screen.getByRole("button", { name: "Écouter" })).toBeOnTheScreen();
   });
 
-  it("offers no voice for a Wolof article (no phone has one yet)", async () => {
+  it("floats Pause while reading once the pill has scrolled away, and hands back at the top", async () => {
+    await view(DETAIL);
+    const scroll = async (y: number) => {
+      await fireEvent.scroll(screen.getByTestId("article-scroll"), {
+        nativeEvent: {
+          contentOffset: { y },
+          contentSize: { height: 4000 },
+          layoutMeasurement: { height: 800 },
+        },
+      });
+    };
+    await fireEvent(screen.getByRole("header", { name: DETAIL.title }), "layout", {
+      nativeEvent: { layout: { x: 0, y: 300, width: 390, height: 60 } },
+    });
+    const floating = { name: "Mettre la lecture en pause" };
+    await scroll(600);
+    // Not reading: nothing floats.
+    expect(screen.queryByRole("button", floating)).toBeNull();
+    await scroll(0);
+    await fireEvent.press(screen.getByRole("button", { name: "Écouter" }));
+    await scroll(600);
+    await fireEvent.press(screen.getByRole("button", floating));
+    expect(screen.getByRole("button", { name: "Reprendre la lecture" })).toBeOnTheScreen();
+    await scroll(0);
+    expect(screen.queryByRole("button", { name: "Reprendre la lecture" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Reprendre" })).toBeOnTheScreen();
+  });
+
+  it("says the Wolof voice is coming on a Wolof article, never reading it in French", async () => {
+    const speak = jest.mocked(Speech.speak);
+    speak.mockClear();
     await view({ ...DETAIL, lang: "wo" });
-    expect(screen.queryByRole("button", { name: "Écouter" })).toBeNull();
+    await fireEvent.press(screen.getByRole("button", { name: "Écouter" }));
+    expect(screen.getByRole("button", { name: "Voix wolof bientôt disponible" })).toBeOnTheScreen();
+    expect(speak).not.toHaveBeenCalled();
   });
 });
 
