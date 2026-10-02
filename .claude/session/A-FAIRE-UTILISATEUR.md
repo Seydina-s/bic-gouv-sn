@@ -81,3 +81,12 @@ Mise à jour du 01/10/2026 (19 h, mode autonome) : point 23 validé (14 h 40) ; 
 | 25 | **Essayer l'app sur l'iPhone**, ordinateur allumé et sur le même Wi-Fi : ouvrir l'app de test, qui se recharge en **mode optimisé** (plus rapide que d'habitude). Vérifier : plus d'erreurs rouges dans « Près de moi » ; l'invitation à la localisation sur l'accueil (les invitations déjà répondues ne reviennent pas) ; la réaction au toucher et l'ouverture des onglets ; la ligne « Position » des Réglages | Mesure réelle de la fluidité ; seul un téléphone le montre | PERM-01, PERF-04, AUD8-03 |
 | 26 | Relire les **textes de l'invitation à la localisation** : « Voir les services près de vous ? », « Oui, me localiser », « Non merci » | Écrits en autonomie | AUD8-04 |
 | 27 | Choisir l'**hébergement de l'API** (chiffrage prêt, `docs/hebergement.md`) : sans API en HTTPS, impossible de produire une version de test optimisée qui marche sans l'ordinateur | Bloque aussi la mise en ligne | S1-02, AUD8-05 |
+
+Mise à jour du 02/10/2026 (0 h 30, mode autonome) : points 28 à 31 ajoutés.
+
+| # | Quoi | Pourquoi / effet si ça attend | Réf. backlog |
+|---|---|---|---|
+| 28 | **Nouvelle compilation de la version de test** (EAS, lancée par vous : `docs/guides/installer-la-version-de-test-iphone.md`) | Sans elle : pas de photo dans les signalements (le module photo n'est pas dans l'app installée) et l'écran natif garde l'image du modèle Expo. Elle servira aussi pour le logo et la photo des notifications iPhone | PART-02, AUD9-04 |
+| 29 | **Opportunités** : confirmer les portails officiels comme sources (domaines .gouv.sn, DER/FJ, ADEPME, FONGIP, 3FPT, ARMP, bourses), dire qui saisit et qui vérifie dans la console, et autoriser ou non la collecte automatique (DER/FJ et ADEPME d'abord) | La section de l'accueil reste vide tant que rien n'est publié | OPP-02, AUD9-05 |
+| 30 | **Participer** : confirmer la conservation (un an, puis effacement), les types de problèmes (voirie, éclairage, salubrité, eau, autre) et à qui transmettre les signalements (mairies, ONAS, SENELEC, SEN'EAU… ?) | Aujourd'hui, seule l'équipe les lit dans la console ; la déclaration à la CDP (point 22) doit mentionner ces données | PART-02, AUD9-03 |
+| 31 | **Logo et écran de démarrage** : fournir les fichiers décrits dans `docs/guides/logo-et-ecran-de-demarrage.md` (des SVG de préférence) et répondre aux 4 questions de la fiche | L'app garde les icônes du modèle Expo ; l'écran de démarrage montre le baobab seul | A-01 |
