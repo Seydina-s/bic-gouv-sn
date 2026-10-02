@@ -143,19 +143,28 @@ Soit environ 6 millions de caractères, de l'ordre de 2 millions de jetons. Cons
 | Reformulées (16), ex. « Je veux divorcer », « Comment devenir soldat ? » | 50 % | 63 % |
 | Toutes (38) | 71 % | 79 % |
 
-**Essai d'un modèle ouvert, sur l'ordinateur de développement (02/10/2026, 2 h 30)** : multilingual-e5-small (licence MIT, bibliothèque Transformers.js sous licence Apache 2.0), sans rien envoyer à l'extérieur. Bonne page parmi les 3 et les 5 premières :
+**Essai de deux modèles ouverts, sur l'ordinateur de développement (02/10/2026, de 2 h 30 à 5 h)** : multilingual-e5-small et multilingual-e5-base (licence MIT, bibliothèque Transformers.js sous licence Apache 2.0), sans rien envoyer à l'extérieur. Part des questions dont la bonne page arrive parmi les premières :
 
 | Recherche | 3 premières | 5 premières | 10 premières |
 |---|---|---|---|
 | Par mots (avec racinisation) | 79 % | 82 % | 84 % |
-| Par le sens (modèle ouvert seul) | 82 % | 89 % | 95 % |
-| **Les deux combinées** (fusion des rangs) | 82 % | **97 %** | 97 % |
+| Petit modèle seul (e5-small) | 82 % | 89 % | 95 % |
+| Petit modèle + mots, combinés | 82 % | 97 % | 97 % |
+| **Modèle moyen seul (e5-base)** | **97 %** | **97 %** | 97 % |
+| Modèle moyen + mots, combinés | 89 % | 92 % | 95 % |
 
-Le modèle lit 6 passages par question : le chiffre qui compte est donc celui des 5 premières. Questions reformulées seules : 56 % (mots), 75 % (sens), 94 % (les deux) dans les 5 premières.
+Questions reformulées seules, dans les 3 premières : 63 % (mots), 56 % (petit modèle), **94 % (modèle moyen)**. Avec le modèle moyen, ajouter la recherche par mots fait baisser le résultat : elle reste utile en secours si le modèle ne répond pas.
 
-Coût de fonctionnement mesuré : 130 Mo pour le modèle, environ 530 Mo de mémoire, **8 ms par question** (14 ms au pire), et 12 minutes pour indexer toute la base une fois (ensuite, seuls les nouveaux articles). Aucun coût à l'usage et aucune question de citoyen envoyée à un tiers.
+| Coût de fonctionnement mesuré | Petit modèle | Modèle moyen |
+|---|---|---|
+| Taille sur disque | 130 Mo | 283 Mo |
+| Mémoire du serveur | ≈ 530 Mo | ≈ 660 Mo |
+| Temps par question (médian / au pire) | 8 / 14 ms | 16 / 28 ms |
+| Indexation de toute la base, une fois | 12 min | 24 min |
 
-**Proposition à valider en séance** : recherche combinée avec ce modèle ouvert installé sur notre serveur. Points à vérifier avant : son support du wolof (non mesuré : il manque des questions en wolof) et l'ajout de ses deux bibliothèques au serveur d'API.
+Aucun coût à l'usage et aucune question de citoyen envoyée à un tiers. Prudence : 38 questions, c'est un premier jeu ; il sera élargi avant le choix définitif (AUD10-05).
+
+**Proposition à valider en séance** : le **modèle moyen (e5-base) seul** pour la recherche, la recherche par mots en secours, installés sur notre serveur. Points à vérifier avant : son support du wolof (non mesuré : il manque des questions en wolof) et l'ajout de ses deux bibliothèques au serveur d'API.
 
 La racinisation (« divorcer » trouve « divorce », « coûte » trouve « coût ») a été réglée sur ce même jeu de 38 questions : le gain réel sera un peu plus faible sur des questions nouvelles. Le même jeu mesurera chaque modèle d'indexation candidat : c'est le critère objectif proposé pour le choisir, avec son coût et son support du wolof. Le wolof n'y figure pas encore : il faut des questions écrites par des locuteurs natifs (W-01).
 
@@ -232,7 +241,7 @@ Ce qui est déjà construit et testé, sans fournisseur ni coût : passages tra�
 3. **Questions posées** : ne garder que des compteurs (nombre de questions, part sans réponse) et, si vous le souhaitez, les questions sans réponse, sans rien sur la personne, 90 jours au plus, pour compléter la base. Jamais la question dans les journaux techniques.
 4. **« Un agent peut prendre le relais »** : à retirer tant qu'aucune équipe ne répond ; à la place, renvoyer vers « Écrire au gouvernement » (Participer).
 5. **Wolof** : faire le banc d'essai W-02 avant de contacter Andakia, pour arriver avec des mesures ; il faut pour cela des locuteurs natifs qui écrivent des questions et notent les voix.
-6. **Fournisseurs** : pour la recherche, le **modèle ouvert sur notre serveur** (gratuit, 97 % mesurés, les questions ne sortent pas). Pour la rédaction des réponses, un modèle économique avec un contrat sans réutilisation des données ; la région d'hébergement est à choisir avec l'hébergement de l'API (point 27).
+6. **Fournisseurs** : pour la recherche, le **modèle ouvert moyen (e5-base) sur notre serveur** (gratuit, bonne page dans les 3 premières pour 97 % des questions, les questions ne sortent pas). Pour la rédaction des réponses, un modèle économique avec un contrat sans réutilisation des données ; la région d'hébergement est à choisir avec l'hébergement de l'API (point 27).
 
 ---
 
