@@ -61,8 +61,7 @@ const JOURNEYS: Journey[] = [
       await browser.open(`${appBase}/procedures`, 0);
       await browser.catchOpenedLinks();
       await browser.type("Rechercher une démarche", "test");
-      await browser.press(PROCEDURE_TITLE);
-      await browser.waitForPath(`/procedure/${PROCEDURE_SLUG}`);
+      await browser.pressToOpen(PROCEDURE_TITLE, `/procedure/${PROCEDURE_SLUG}`);
       await browser.waitForText("Toute personne (texte fictif).");
       await browser.press("Faire la démarche sur e-senegal.sn");
       await browser.waitForOpened("e-senegal.sn");
