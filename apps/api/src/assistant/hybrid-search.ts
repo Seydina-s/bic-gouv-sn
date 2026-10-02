@@ -5,8 +5,8 @@ import type { Passage } from "./passages";
 /*
  * Search by meaning, with the search by words fused in or kept as a fallback
  * (AI-02). Measured on the test set (docs/cadrage): a small model gains from the
- * fusion (97 % of right pages in the first 5, against 89 % alone), a medium one
- * does better alone (97 % in the first 3, 89 % fused); `fuseWords` follows the
+ * fusion (94 % of right pages in the first 5, against 88 % alone), a medium one
+ * does better alone (94 % in the first 3, 89 % fused); `fuseWords` follows the
  * model chosen. Rankings are fused by rank, not by score: the scores differ in kind.
  */
 

@@ -147,13 +147,13 @@ Soit environ 6 millions de caractères, de l'ordre de 2 millions de jetons. Cons
 
 | Recherche | 3 premières | 5 premières | 10 premières |
 |---|---|---|---|
-| Par mots (avec racinisation) | 79 % | 82 % | 84 % |
-| Petit modèle seul (e5-small) | 82 % | 89 % | 95 % |
-| Petit modèle + mots, combinés | 82 % | 97 % | 97 % |
-| **Modèle moyen seul (e5-base)** | **97 %** | **97 %** | 97 % |
-| Modèle moyen + mots, combinés | 89 % | 92 % | 95 % |
+| Par mots (avec racinisation) | 81 % | 83 % | 85 % |
+| Petit modèle seul (e5-small) | 83 % | 88 % | 93 % |
+| Petit modèle + mots, combinés | 81 % | 94 % | 94 % |
+| **Modèle moyen seul (e5-base)** | **94 %** | **97 %** | 99 % |
+| Modèle moyen + mots, combinés | 89 % | 92 % | 96 % |
 
-Questions reformulées seules, dans les 3 premières : 63 % (mots), 56 % (petit modèle), **94 % (modèle moyen)**. Avec le modèle moyen, ajouter la recherche par mots fait baisser le résultat : elle reste utile en secours si le modèle ne répond pas.
+Questions reformulées seules, dans les 3 premières : 61 % (mots), 68 % (petit modèle), **89 % (modèle moyen)**. Avec le modèle moyen, ajouter la recherche par mots fait baisser le résultat : elle reste utile en secours si le modèle ne répond pas.
 
 | Coût de fonctionnement mesuré | Petit modèle | Modèle moyen |
 |---|---|---|
@@ -162,7 +162,7 @@ Questions reformulées seules, dans les 3 premières : 63 % (mots), 56 % (petit 
 | Temps par question (médian / au pire) | 8 / 14 ms | 16 / 28 ms |
 | Indexation de toute la base, une fois | 12 min | 24 min |
 
-Aucun coût à l'usage et aucune question de citoyen envoyée à un tiers. Prudence : 38 questions, c'est un premier jeu ; il sera élargi avant le choix définitif (AUD10-05).
+Aucun coût à l'usage et aucune question de citoyen envoyée à un tiers. Mesuré sur 72 questions (jeu élargi à 5 h 45 ; la première mesure sur 38 donnait le même classement) ; des questions écrites par l'équipe et en wolof restent à ajouter (AUD10-05).
 
 **Proposition à valider en séance** : le **modèle moyen (e5-base) seul** pour la recherche, la recherche par mots en secours, installés sur notre serveur. Points à vérifier avant : son support du wolof (non mesuré : il manque des questions en wolof) et l'ajout de ses deux bibliothèques au serveur d'API.
 
@@ -241,7 +241,7 @@ Ce qui est déjà construit et testé, sans fournisseur ni coût : passages tra�
 3. **Questions posées** : ne garder que des compteurs (nombre de questions, part sans réponse) et, si vous le souhaitez, les questions sans réponse, sans rien sur la personne, 90 jours au plus, pour compléter la base. Jamais la question dans les journaux techniques.
 4. **« Un agent peut prendre le relais »** : à retirer tant qu'aucune équipe ne répond ; à la place, renvoyer vers « Écrire au gouvernement » (Participer).
 5. **Wolof** : faire le banc d'essai W-02 avant de contacter Andakia, pour arriver avec des mesures ; il faut pour cela des locuteurs natifs qui écrivent des questions et notent les voix.
-6. **Fournisseurs** : pour la recherche, le **modèle ouvert moyen (e5-base) sur notre serveur** (gratuit, bonne page dans les 3 premières pour 97 % des questions, les questions ne sortent pas). Pour la rédaction des réponses, un modèle économique avec un contrat sans réutilisation des données ; la région d'hébergement est à choisir avec l'hébergement de l'API (point 27).
+6. **Fournisseurs** : pour la recherche, le **modèle ouvert moyen (e5-base) sur notre serveur** (gratuit, bonne page dans les 3 premières pour 94 % des questions sur 72, les questions ne sortent pas). Pour la rédaction des réponses, un modèle économique avec un contrat sans réutilisation des données ; la région d'hébergement est à choisir avec l'hébergement de l'API (point 27).
 
 ---
 
