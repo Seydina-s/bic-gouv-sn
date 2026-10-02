@@ -353,3 +353,9 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 01/10/2026 | OPP-02 🔴 Collecte automatique des opportunités (DER/FJ et ADEPME d'abord), après accord sur les sources | Cadrage |
 | 01/10/2026 | PART-01 ✅ (01/10, 22 h) Participer : boîte de dialogue « Écrire au gouvernement » (sujet, message), reçue dans la console « Participation » | Utilisateur |
 | 01/10/2026 | PART-02 🔵 (01/10, 22 h) Participer : signalement (type, photo prise ou choisie, message, lieu facultatif), reçu dans la console avec la photo ; reste : la photo sur l'iPhone demande une nouvelle compilation (module ajouté), d'ici là l'app propose le signalement sans photo | Utilisateur |
+
+### Décision de l'utilisateur du 02/10/2026, 6 h 30
+
+| Date | Tâche | Origine |
+|---|---|---|
+| 02/10/2026 | SEC-06 ✅ Exception limitée à l'alerte node-forge dans l'audit (option a du point 32) ; à revoir à chaque mise à jour d'Expo, à retirer dès qu'une version corrigée de node-forge existe | Utilisateur |
