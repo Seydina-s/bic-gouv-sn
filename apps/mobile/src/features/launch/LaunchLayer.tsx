@@ -6,6 +6,7 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withDelay,
+  withSequence,
   withTiming,
   type SharedValue,
 } from "react-native-reanimated";
@@ -18,9 +19,9 @@ import { STROKE_DASH, strokeProgress } from "./launch-strokes";
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
-/** The baobab's size: a third of the screen's narrow side, within reason. */
-const SHARE = 0.38;
-const MAX_SIZE = 220;
+/** The baobab's size: half the screen's narrow side, within reason (majestic). */
+const SHARE = 0.5;
+const MAX_SIZE = 280;
 
 function Stroke({
   d,
@@ -41,7 +42,7 @@ function Stroke({
     <AnimatedPath
       d={d}
       stroke={color}
-      strokeWidth={1.4}
+      strokeWidth={1.1}
       strokeLinecap="round"
       fill="none"
       strokeDasharray={[STROKE_DASH, STROKE_DASH]}
@@ -52,7 +53,9 @@ function Stroke({
 
 /**
  * The launch (charter, CLAUDE.md §1): the baobab draws itself stroke by stroke in
- * about a second, then fades into the app. Never in the way: the app loads beneath
+ * a second, from the ground to the leaves; then, just before the front page, it is
+ * taken back the same way in reverse, leaves first (user's request, 02/10/2026),
+ * and fades into the app. Never in the way: the app loads beneath
  * and can be touched at once; skipped when the phone asks for less motion.
  */
 export function LaunchLayer({ onDone }: { onDone: () => void }) {
@@ -72,12 +75,16 @@ export function LaunchLayer({ onDone }: { onDone: () => void }) {
       onDone();
       return;
     }
-    progress.value = withTiming(1, {
-      duration: motion.duration.launchDraw,
-      easing: Easing.inOut(Easing.cubic),
-    });
+    const { launchDraw, launchHold, launchUndraw } = motion.duration;
+    progress.value = withSequence(
+      withTiming(1, { duration: launchDraw, easing: Easing.inOut(Easing.cubic) }),
+      withDelay(
+        launchHold,
+        withTiming(0, { duration: launchUndraw, easing: Easing.in(Easing.cubic) }),
+      ),
+    );
     opacity.value = withDelay(
-      motion.duration.launchDraw + motion.duration.launchHold,
+      launchDraw + launchHold + launchUndraw * 0.7,
       withTiming(0, { duration: motion.duration.launchFade }, (finished) => {
         if (finished === true) {
           scheduleOnRN(onDone);

@@ -1,5 +1,5 @@
 /**
- * Long enough to cover every stroke of the baobab (the longest is under 90 units
+ * Long enough to cover every stroke of the baobab (the longest, the ground, is 100 units
  * of its 120-unit drawing): hidden at the start, whole at the end.
  */
 export const STROKE_DASH = 120;
