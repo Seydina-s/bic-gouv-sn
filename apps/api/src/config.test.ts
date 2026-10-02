@@ -29,6 +29,7 @@ describe("loadConfig", () => {
       SEARCH_MISSES_PATH: fromRoot(".data/search-misses.json"),
       SETTINGS_PATH: fromRoot(".data/admin/settings.json"),
       AUTO_NOTIFICATIONS_PER_HOUR: 10,
+      TRUST_PROXY: false,
       PARTICIPATION_PATH: fromRoot(".data/participation.json"),
       PARTICIPATION_PHOTOS_ROOT: fromRoot(".data/participation-photos"),
       OPPORTUNITIES_PATH: fromRoot(".data/opportunities.json"),

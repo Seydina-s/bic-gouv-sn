@@ -3,6 +3,8 @@
  * id). Written without accents, lower case; matched on whole words or word starts.
  * They only PROPOSE a theme: a person validates before anything is shown.
  */
+import { foldForMatching } from "@bgs/shared-types";
+
 export const THEME_KEYWORDS: Record<string, readonly string[]> = {
   // Citoyenneté, justice et sécurité
   "688d064649b595b42707a1f4": [
@@ -226,10 +228,7 @@ export const THEME_KEYWORDS: Record<string, readonly string[]> = {
 
 /** Lower case, no accents, punctuation as spaces: "Crédit d'État" → "credit d etat". */
 export function normalizeForMatch(text: string): string {
-  return ` ${text
-    .normalize("NFD")
-    .replace(/\p{M}/gu, "")
-    .toLowerCase()
+  return ` ${foldForMatching(text)
     .replace(/[^a-z0-9]+/g, " ")
     .trim()} `;
 }

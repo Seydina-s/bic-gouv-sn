@@ -2,14 +2,14 @@ import type { IconProps as PhosphorProps } from "phosphor-react-native";
 import type { ComponentType } from "react";
 import { Pressable, StyleSheet } from "react-native";
 import { useTheme } from "../theme/useTheme";
-import { Icon } from "./Icon";
+import { Icon, type DrawnWeight } from "./Icon";
 
 export interface IconButtonProps {
   icon: ComponentType<PhosphorProps>;
   /** Spoken name of the action: required, the icon has no visible label. */
   label: string;
   onPress: () => void;
-  weight?: PhosphorProps["weight"];
+  weight?: DrawnWeight;
   selected?: boolean;
 }
 

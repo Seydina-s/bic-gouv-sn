@@ -387,6 +387,22 @@ describe("app shell", () => {
     expect(screen.getByText("Sans date limite")).toBeOnTheScreen();
   });
 
+  it("shows every subject and problem type at once, never cut by a sideways row", async () => {
+    globalThis.fetch = newsFetch() as unknown as typeof fetch;
+    await renderRouter(routes, { initialUrl: "/participate" });
+    await screen.findByRole("button", { name: "Autre" });
+    interface Node {
+      props?: { horizontal?: boolean };
+      children?: (Node | string)[] | null;
+    }
+    const sideways = (node: Node | string | null): number =>
+      typeof node === "string" || node === null
+        ? 0
+        : (node.props?.horizontal === true ? 1 : 0) +
+          (node.children ?? []).reduce((sum, child) => sum + sideways(child), 0);
+    expect(sideways(screen.toJSON() as Node | null)).toBe(0);
+  });
+
   it("sends a message to the government, anonymous, and says it went", async () => {
     const fetchMock = newsFetch();
     globalThis.fetch = fetchMock as unknown as typeof fetch;
