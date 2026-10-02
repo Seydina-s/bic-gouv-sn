@@ -43,7 +43,7 @@
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.8",
-    "@maplibre/maplibre-gl-style-spec": "24.10.0",
+    "@maplibre/maplibre-gl-style-spec": "26.4.4",
     "@types/node": "24.19.0",
     "@types/pg": "8.23.1",
     "tsdown": "0.23.0",
