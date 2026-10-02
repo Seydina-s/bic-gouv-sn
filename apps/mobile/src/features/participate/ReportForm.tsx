@@ -3,7 +3,7 @@ import { Image } from "expo-image";
 import { CameraIcon as Camera } from "phosphor-react-native/src/icons/Camera";
 import { ImageIcon } from "phosphor-react-native/src/icons/Image";
 import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { createParticipationClient } from "../../api/participation-client";
 import { Icon } from "../../components/Icon";
 import { dimWhenPressed } from "../../components/press-feedback";
@@ -89,21 +89,19 @@ export function ReportForm() {
       <Text style={[textStyle.label, { color: color.textPrimary }]}>
         {t("participate.category")}
       </Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <View style={[styles.row, { gap: space.sm }]}>
-          {REPORT_CATEGORIES.map((one) => (
-            <SectionChip
-              key={one}
-              category={null}
-              label={t(`participate.categories.${one}`)}
-              active={category === one}
-              onPress={() => {
-                setCategory(one);
-              }}
-            />
-          ))}
-        </View>
-      </ScrollView>
+      <View style={[styles.row, styles.wrap, { gap: space.sm }]}>
+        {REPORT_CATEGORIES.map((one) => (
+          <SectionChip
+            key={one}
+            category={null}
+            label={t(`participate.categories.${one}`)}
+            active={category === one}
+            onPress={() => {
+              setCategory(one);
+            }}
+          />
+        ))}
+      </View>
       {photos.available ? (
         photos.photo === null ? (
           <View style={[styles.row, styles.wrap, { gap: space.sm }]}>

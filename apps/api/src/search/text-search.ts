@@ -5,6 +5,7 @@
  * plain forms; every word typed must appear, exactly or with a typo (Meilisearch's
  * defaults: one from 5 letters, two from 9). Numbers must match exactly.
  */
+import { foldForMatching } from "@bgs/shared-types";
 
 const TITLE_WEIGHT = 3;
 /** A word found with a typo counts less than the word itself. */
@@ -57,26 +58,24 @@ export function withinTypos(a: string, b: string, max: number): boolean {
 
 /** Lowercase, without diacritics, markup or punctuation, single-spaced. */
 export function normalizeForSearch(text: string): string {
-  return text
-    .normalize("NFD")
-    .replace(/\p{M}/gu, "")
-    .replace(/ŋ/g, "n")
-    .replace(/Ŋ/g, "n")
-    .toLowerCase()
+  return foldForMatching(text)
     .replace(/<[^>]+>/g, " ")
     .replace(/[^\p{L}\p{N}]+/gu, " ")
     .trim();
 }
 
+/** Every meaningful word of a text, in order, repeats included. */
+export function searchWords(text: string): string[] {
+  return (
+    normalizeForSearch(text)
+      .split(" ")
+      // Numbers always count ("Conseil du 3 septembre"); lone letters do not.
+      .filter((term) => term.length >= 2 || /^\p{N}+$/u.test(term))
+  );
+}
+
 export function searchTerms(query: string): string[] {
-  return [
-    ...new Set(
-      normalizeForSearch(query)
-        .split(" ")
-        // Numbers always count ("Conseil du 3 septembre"); lone letters do not.
-        .filter((term) => term.length >= 2 || /^\p{N}+$/u.test(term)),
-    ),
-  ];
+  return [...new Set(searchWords(query))];
 }
 
 /** A text made ready for searching once, instead of at every search. */
