@@ -262,6 +262,243 @@
       "expected": [
         "https://www.presidence.sn/fr/actualites/dakar-2026-le-president-bassirou-diomaye-faye-participe-a-la-vegetalisation-des-abords-du-stade-leopold-sedar-senghor/"
       ]
+    },
+    {
+      "question": "Je suis enceinte, comment obtenir un certificat de grossesse ?",
+      "style": "direct",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-un-certificat-de-grossesse"
+      ]
+    },
+    {
+      "question": "Comment devenir gendarme ?",
+      "style": "reformulated",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/sinscrire-au-concours-deleve-gendarme",
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/sinscrire-au-concours-deleve-gendarme-feminin"
+      ]
+    },
+    {
+      "question": "Comment passer le concours d'inspecteur de police ?",
+      "style": "direct",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/sinscrire-au-concours-dinspecteur-de-police"
+      ]
+    },
+    {
+      "question": "Mon père est sénégalais, comment obtenir la nationalité ?",
+      "style": "reformulated",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-la-nationalite-senegalaise-par-filiation-ou-dorigine"
+      ]
+    },
+    {
+      "question": "Comment avoir une copie intégrale de mon acte de naissance ?",
+      "style": "reformulated",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-une-copie-litterale-dacte-de-naissance"
+      ]
+    },
+    {
+      "question": "Comment obtenir la carte grise de ma voiture ?",
+      "style": "direct",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-un-certificat-dimmatriculation-et-daptitude-technique-carte-grise"
+      ]
+    },
+    {
+      "question": "Comment devenir le tuteur légal d'un enfant ?",
+      "style": "reformulated",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-la-tutelle-dun-enfant"
+      ]
+    },
+    {
+      "question": "Comment devenir sapeur-pompier ?",
+      "style": "direct",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-a-sinscrire-pour-le-recrutement-des-sapeurs-pompiers"
+      ]
+    },
+    {
+      "question": "Comment inscrire mon enfant à la case des tout-petits ?",
+      "style": "direct",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-a-beneficier-dune-case-des-tout-petits"
+      ]
+    },
+    {
+      "question": "Comment protéger le design de mon produit ?",
+      "style": "reformulated",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-lenregistrement-dun-dessin-ou-dun-modele-industriel"
+      ]
+    },
+    {
+      "question": "Je veux me plaindre de mon opérateur de téléphone",
+      "style": "reformulated",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/instruire-une-plainte-a-lautorite-de-regulation-des-telecommunications-et-des-postes-dirigee-contre"
+      ]
+    },
+    {
+      "question": "Comment déclarer mes revenus aux impôts ?",
+      "style": "direct",
+      "expected": ["https://e-senegal.sn/#/comprendre-ma-demarche/demarche/declarer-ses-revenus"]
+    },
+    {
+      "question": "Comment avoir une aide de l'État pour payer l'université ?",
+      "style": "reformulated",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-une-bourse-detude-nationale-etudes-superieures"
+      ]
+    },
+    {
+      "question": "Mon enfant n'a pas encore l'âge d'entrer au CI, que faire ?",
+      "style": "reformulated",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-une-dispense-dage-pour-linscription-en-classe-de-cours-dinitiation-ci"
+      ]
+    },
+    {
+      "question": "Mon père salarié est décédé, puis-je avoir une pension d'orphelin ?",
+      "style": "direct",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-une-pension-dorphelin-a-linstitution-de-prevoyance-retraite-du-senegal-ipres"
+      ]
+    },
+    {
+      "question": "Comment ouvrir un laboratoire d'analyses médicales ?",
+      "style": "direct",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-lautorisation-douvrir-un-laboratoire-danalyses-de-biologie-medicale"
+      ]
+    },
+    {
+      "question": "Comment obtenir une attestation de non imposition ?",
+      "style": "direct",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-une-attestation-dimposition-ou-de-non-imposition"
+      ]
+    },
+    {
+      "question": "Comment obtenir le statut d'entreprise franche d'exportation ?",
+      "style": "direct",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-lagrement-au-statut-dentreprise-franche-dexportation-efe"
+      ]
+    },
+    {
+      "question": "Je veux diviser mon terrain en parcelles, quelle autorisation ?",
+      "style": "reformulated",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-une-autorisation-de-lotissement"
+      ]
+    },
+    {
+      "question": "Comment affilier mon club de football à la fédération ?",
+      "style": "direct",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-laffiliation-dun-club-a-la-federation-de-football"
+      ]
+    },
+    {
+      "question": "Comment l'ANPEJ peut-elle m'aider à monter mon projet ?",
+      "style": "direct",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-a-beneficier-dun-montage-et-dun-suivi-de-projet-par-lanpej"
+      ]
+    },
+    {
+      "question": "Comment prouver que je ne suis pas divorcé ?",
+      "style": "reformulated",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-un-certificat-de-non-divorce-et-de-non-separation-de-corps"
+      ]
+    },
+    {
+      "question": "Le président s'est-il entretenu avec Mohammed bin Zayed ?",
+      "style": "direct",
+      "expected": [
+        "https://www.presidence.sn/fr/actualites/abu-dhabi-le-president-bassirou-diomaye-faye-sentretient-avec-le-president-mohammed-bin-zayed-al-nahyan/"
+      ]
+    },
+    {
+      "question": "Qui a remis les prix du Concours général 2026 ?",
+      "style": "direct",
+      "expected": [
+        "https://www.presidence.sn/fr/actualites/le-president-bassirou-diomaye-faye-preside-la-ceremonie-de-remise-des-prix-du-concours-general-2026/"
+      ]
+    },
+    {
+      "question": "Le président a-t-il reçu la dirigeante de la BERD ?",
+      "style": "direct",
+      "expected": [
+        "https://www.presidence.sn/fr/actualites/le-chef-de-letat-recoit-la-presidente-de-la-berd-au-palais-de-la-republique/"
+      ]
+    },
+    {
+      "question": "Qu'est-ce que le plan Jubbanti Koom ?",
+      "style": "direct",
+      "expected": [
+        "https://www.presidence.sn/fr/actualites/presentation-officielle-du-plan-jubbanti-koom-le-senegal-amorce-une-nouvelle-dynamique-economique-sous-limpulsion-du-president-faye/"
+      ]
+    },
+    {
+      "question": "Le président a-t-il participé à une journée sans voitures avec Paul Kagame ?",
+      "style": "reformulated",
+      "expected": [
+        "https://www.presidence.sn/fr/actualites/le-president-bassirou-diomaye-diakhar-faye-prend-part-a-la-car-free-day-aux-cotes-du-president-paul-kagame/"
+      ]
+    },
+    {
+      "question": "Le président a-t-il prié avec Erdogan à Istanbul ?",
+      "style": "direct",
+      "expected": [
+        "https://www.presidence.sn/fr/actualites/istanbul-le-president-bassirou-diomaye-faye-assiste-a-la-priere-du-vendredi-avec-recep-tayyip-erdogan-a-la-mosquee-de-camlica/"
+      ]
+    },
+    {
+      "question": "Le président a-t-il rencontré Aliko Dangote ?",
+      "style": "direct",
+      "expected": [
+        "https://www.presidence.sn/fr/actualites/addis-abeba-le-president-bassirou-diomaye-faye-recoit-aliko-dangote-et-dr-okey-osamah/"
+      ]
+    },
+    {
+      "question": "Qu'a défendu le Sénégal à Séville sur la finance mondiale ?",
+      "style": "direct",
+      "expected": [
+        "https://www.presidence.sn/fr/actualites/ffd4-seville-le-senegal-engage-pour-une-reforme-de-larchitecture-financiere-mondiale/"
+      ]
+    },
+    {
+      "question": "Le président a-t-il écouté les élus locaux de Kédougou ?",
+      "style": "direct",
+      "expected": [
+        "https://www.presidence.sn/fr/actualites/kedougou-le-president-bassirou-diomaye-faye-a-lecoute-des-acteurs-economiques-et-des-elus-locaux/"
+      ]
+    },
+    {
+      "question": "Le chef de l'État a-t-il déjeuné avec Emmanuel Macron ?",
+      "style": "direct",
+      "expected": [
+        "https://www.presidence.sn/fr/actualites/le-president-faye-recu-par-le-president-emmanuel-macron-pour-un-dejeuner-de-travail/"
+      ]
+    },
+    {
+      "question": "Le président a-t-il visité la Zone militaire numéro 5 ?",
+      "style": "direct",
+      "expected": [
+        "https://www.presidence.sn/fr/actualites/le-president-de-la-republique-en-visite-a-la-zone-militaire-n5/"
+      ]
+    },
+    {
+      "question": "Le président a-t-il reçu le chef d'État du Kosovo ?",
+      "style": "reformulated",
+      "expected": [
+        "https://www.presidence.sn/fr/actualites/le-president-bassirou-diomaye-faye-recoit-son-homologue-du-kosovo-en-marge-de-lassemblee-generale-de-lonu/"
+      ]
     }
   ]
 }
