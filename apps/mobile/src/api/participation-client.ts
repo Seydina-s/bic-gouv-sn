@@ -1,5 +1,5 @@
 import { withTimeout } from "@bgs/resilience";
-import type { MessageSubmission, ReportSubmission } from "@bgs/shared-types";
+import { PHOTO_MAX_BYTES, type MessageSubmission, type ReportSubmission } from "@bgs/shared-types";
 import type { ApiClientOptions } from "./json-getter";
 
 /** Why a sending did not go through, as the screen explains it. */
@@ -54,6 +54,12 @@ export function createParticipationClient({
   };
   return {
     sendMessage: (message: MessageSubmission, key: string) => post("messages", message, key),
-    sendReport: (report: ReportSubmission, key: string) => post("reports", report, key),
+    sendReport: (report: ReportSubmission, key: string) => {
+      // Too heavy for the API: said as a photo problem, before a long upload for nothing.
+      if (report.photo !== null && (report.photo.length * 3) / 4 > PHOTO_MAX_BYTES) {
+        return Promise.reject(new SendError("photo"));
+      }
+      return post("reports", report, key);
+    },
   };
 }
