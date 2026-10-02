@@ -3,7 +3,7 @@ import { act, fireEvent, screen, waitFor, within } from "@testing-library/react-
 import * as Location from "expo-location";
 import { router } from "expo-router";
 import { renderRouter } from "expo-router/testing-library";
-import { Dimensions, Linking } from "react-native";
+import { Dimensions, Linking, Share } from "react-native";
 import RootLayout from "./app/_layout";
 import TabsLayout from "./app/(tabs)/_layout";
 import HomeScreen from "./app/(tabs)/index";
@@ -366,6 +366,17 @@ describe("app shell", () => {
     expect(await screen.findByText("Résumé fictif de la page officielle.")).toBeOnTheScreen();
     await fireEvent.press(screen.getByRole("link", { name: "Voir l'offre officielle" }));
     expect(openURL).toHaveBeenCalledWith("https://3fpt.sn/appel-a-candidature/");
+    // Passed on by message with what it is, who offers it, until when, and the page.
+    const share = jest.spyOn(Share, "share").mockResolvedValue({ action: "sharedAction" });
+    await fireEvent.press(screen.getByRole("button", { name: "Partager cette opportunité" }));
+    expect(share).toHaveBeenCalledWith(
+      expect.objectContaining({
+        url: "https://3fpt.sn/appel-a-candidature/",
+        message: expect.stringMatching(
+          /^Formation fictive de test\n.+\nPlus que 3 jours\nhttps:\/\/3fpt\.sn\/appel-a-candidature\/$/,
+        ) as unknown,
+      }),
+    );
     await act(() => {
       router.push("/opportunities");
     });

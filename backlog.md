@@ -353,3 +353,4 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 01/10/2026 | OPP-02 🔴 Collecte automatique des opportunités (DER/FJ et ADEPME d'abord), après accord sur les sources | Cadrage |
 | 01/10/2026 | PART-01 ✅ (01/10, 22 h) Participer : boîte de dialogue « Écrire au gouvernement » (sujet, message), reçue dans la console « Participation » | Utilisateur |
 | 01/10/2026 | PART-02 🔵 (01/10, 22 h) Participer : signalement (type, photo prise ou choisie, message, lieu facultatif), reçu dans la console avec la photo ; reste : la photo sur l'iPhone demande une nouvelle compilation (module ajouté), d'ici là l'app propose le signalement sans photo | Utilisateur |
+| 02/10/2026 | OPP-04 ✅ Bouton « Partager » sur la fiche d'une opportunité : titre, organisme, date limite et lien officiel, comme on se transmet une offre par message ; liste des textes à traduire en wolof mise à jour (340) | Claude (autonome) |
