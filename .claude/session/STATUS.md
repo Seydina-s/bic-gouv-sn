@@ -79,7 +79,9 @@
   - app plus légère de 220 Ko (relecture vidéo de Sentry, jamais utilisée, retirée) ;
   - **préparation de l'IA**, sans fournisseur ni coût : base découpée en 5 866 passages traçables, recherche par mots, jeu de 38 questions d'évaluation, contrat de réponse avec citations obligatoires vérifiées avant affichage, recherche combinée mots + sens ; **essai local d'un modèle ouvert gratuit** : bonne page dans les 5 premières pour 97 % des questions (82 % par mots seuls), 8 ms par question (cadrage, partie 3) ;
   - mise en forme du texte pour la recherche regroupée (la lettre wolof ŋ traitée partout) ;
-  - revue visuelle des écrans de la nuit : choix de Participer coupés au bord, corrigé (PR #217) ; 103 écrans sans défaut d'accessibilité.
+  - revue visuelle des écrans de la nuit : choix de Participer coupés au bord, corrigé (PR #217) ; 103 écrans sans défaut d'accessibilité ;
+  - partage d'une opportunité (PR #221) ; Dependabot regroupe les paquets TanStack (PR #218) ;
+  - **répétition de la fusion** (4 h 30) : les 15 PR en attente fusionnées ensemble en local, sans conflit ; tout est vert (≈ 1 300 tests, 103 écrans audités, 11 parcours) ; code de l'app 6,77 Mo sur Android et 6,67 Mo sur iPhone (7,15 et 7,05 Mo la veille).
 - Contrôle complet : environ 1 240 tests verts, 11 parcours de bout en bout, 103 écrans audités.
 - Incident du 29/09 : clé de l'API **locale** apparue dans la conversation ; remplacée le jour même (ERREURS.md).
 
@@ -87,7 +89,7 @@
 Voir `.claude/session/A-FAIRE-UTILISATEUR.md`. Toujours ouverts : compte Apple (en cours), vérification des services de Dakar, logo, identifiant de l'app, questions au BIC (et offre de Sénégal Numérique pour Diamniadio), budget d'hébergement (chiffrage prêt), jeton Sentry, Opportunités et Participer (plus tard), wolof (à la fin).
 
 ## Prochaine tâche
-- **D'abord** : décision sur l'alerte node-forge (point 32), puis fusion des PR en attente (#202, #204 à #211, #217) dans l'ordre.
+- **D'abord** : décision sur l'alerte node-forge (point 32), puis fusion des PR en attente dans cet ordre (répété en local, sans conflit) : #202, #204, #205, #206, #220, #219, #208, #207, #209, #211, #222, #210, #217, #218, #221.
 - **Prochaine séance** : l'IA (cadrage `docs/cadrage/opportunites-participer-ia.md`, partie 3, avec les mesures du 02/10 et la proposition d'un modèle ouvert gratuit), le logo et l'écran de démarrage (fiche `docs/guides/logo-et-ecran-de-demarrage.md`), puis les points 19 à 31 de `.claude/session/A-FAIRE-UTILISATEUR.md` (dont la nouvelle compilation, point 28).
 
 - Ensuite, sur la version de test : QA-02, QA-03, QA-04, QA-09, AUD5-04, AUD6-02, AUD6-03, AUD8-02, AUD8-03, E2E-02, LIC-02, module iPhone pour la photo des notifications (AUD5-07, recompilation).
