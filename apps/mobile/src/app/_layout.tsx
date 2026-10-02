@@ -21,6 +21,7 @@ import { OnboardingProvider, useOnboardingDone } from "../features/onboarding/On
 import { I18nProvider } from "../i18n/I18nProvider";
 import { useDocumentLanguage } from "../i18n/language";
 import { initMonitoring } from "../monitoring/monitoring";
+import { ThemeFade } from "../theme/ThemeFade";
 import { ThemeProvider } from "../theme/ThemeProvider";
 import { useAppFonts } from "../theme/useAppFonts";
 import { useTheme } from "../theme/useTheme";
@@ -75,6 +76,7 @@ function ThemedStack() {
       {/* First run: welcome screens above the app (the navigator stays mounted). */}
       {onboarding.done === false && <OnboardingLayer onFinish={onboarding.finish} />}
       {launching && <LaunchLayer onDone={launched} />}
+      <ThemeFade />
     </>
   );
 }

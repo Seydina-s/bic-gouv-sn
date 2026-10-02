@@ -118,6 +118,8 @@ export const motion = {
     /** Then it stays a moment, and fades into the app. */
     launchHold: 200,
     launchFade: 300,
+    /** Light and dark modes dissolve into each other instead of switching at once. */
+    themeFade: 450,
   },
   easing: {
     standard: [0.2, 0, 0, 1],
