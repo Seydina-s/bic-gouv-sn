@@ -146,6 +146,8 @@ const JOURNEYS: Journey[] = [
     run: async (browser, { appBase, consoleBase, token }) => {
       await browser.setViewport(PHONE);
       await browser.open(`${appBase}/participate`, 0);
+      await browser.press("L'application, Un avis sur l'app");
+      await browser.press("Continuer");
       await browser.type("Votre message", "Un message fictif écrit pendant le parcours.");
       await browser.press("Envoyer");
       await browser.waitForText("Merci, votre message a bien été transmis à l'équipe.");

@@ -328,20 +328,12 @@ export const fr = {
   participate: {
     intro:
       "Votre voix compte. Écrivez au gouvernement ou signalez un problème près de chez vous\u00a0: l'équipe lit chaque message.",
-    messageTitle: "Écrire au gouvernement",
-    messageIntro:
-      "Une idée pour mieux servir les citoyens, un avis sur l'application, une remarque\u00a0? Dites-le simplement.",
-    topic: "Votre message porte sur",
     topics: {
       gouvernement: "Le gouvernement",
       application: "L'application",
       autre: "Autre chose",
     },
     messageLabel: "Votre message",
-    reportTitle: "Signaler un problème",
-    reportIntro:
-      "Une route abîmée, un lampadaire éteint, des déchets, une fuite d'eau\u00a0? Décrivez-le, avec une photo si possible.",
-    category: "Type de problème",
     categories: {
       voirie: "Voirie",
       eclairage: "Éclairage",
@@ -362,6 +354,43 @@ export const fr = {
     tooShort: "Écrivez au moins 10 caractères.",
     anonymous:
       "Anonyme\u00a0: n'indiquez ni votre nom ni votre numéro. Pour une urgence, appelez les secours.",
+    modeTitle: "Que voulez-vous faire\u00a0?",
+    modes: {
+      write: "Écrire",
+      writeSpoken: "Écrire au gouvernement",
+      report: "Signaler",
+      reportSpoken: "Signaler un problème",
+    },
+    step: "Étape {step} sur {count}",
+    back: "Retour",
+    next: "Continuer",
+    questions: {
+      topic: "Votre message porte sur…",
+      message: "Que voulez-vous dire\u00a0?",
+      kind: "Quel est le problème\u00a0?",
+      photo: "Une photo du problème\u00a0?",
+      place: "Où est-ce\u00a0?",
+      report: "Que s'est-il passé\u00a0?",
+    },
+    topicHints: {
+      gouvernement: "Une idée, une remarque",
+      application: "Un avis sur l'app",
+      autre: "Tout le reste",
+    },
+    categoryHints: {
+      voirie: "Route, trottoir",
+      eclairage: "Lampadaire",
+      salubrite: "Déchets",
+      eau: "Fuite, coupure",
+      autre: "À préciser",
+    },
+    detailLabel: "Précisez la nature du problème",
+    photoHint: "Facultatif\u00a0: elle aide l'équipe à comprendre.",
+    placeHint: "Facultatif\u00a0: le quartier ou la commune.",
+    again: {
+      message: "Écrire un autre message",
+      report: "Faire un autre signalement",
+    },
     send: "Envoyer",
     sending: "Envoi…",
     messageSent: "Merci, votre message a bien été transmis à l'équipe.",

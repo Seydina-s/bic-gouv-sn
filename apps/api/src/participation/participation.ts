@@ -135,6 +135,7 @@ export class ParticipationService {
       ...base(submission.lang, submission.text, this.now().toISOString()),
       type: "report",
       category: submission.category,
+      detail: submission.detail,
       place: submission.place === "" ? null : submission.place,
       photoId,
     };

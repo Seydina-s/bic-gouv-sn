@@ -3,6 +3,7 @@ import { createParticipationClient, SendError } from "./participation-client";
 
 const report = {
   category: "voirie" as const,
+  detail: null,
   text: "Un signalement fictif.",
   place: null,
   lang: "fr" as const,

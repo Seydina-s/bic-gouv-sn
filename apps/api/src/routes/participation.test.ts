@@ -79,9 +79,26 @@ describe("Participer", () => {
     ]);
   });
 
+  it("keeps the kind of problem said for the other ones, and asks for it", async () => {
+    const report = {
+      category: "autre",
+      text: "Un signalement fictif pour les tests.",
+      place: null,
+      photo: null,
+      lang: "fr",
+    };
+    const sent = await send("reports", { ...report, detail: "Feu tricolore en panne" });
+    expect(sent.statusCode).toBe(201);
+    expect((await consoleList()).entries).toMatchObject([
+      { type: "report", category: "autre", detail: "Feu tricolore en panne" },
+    ]);
+    expect((await send("reports", { ...report, detail: null })).statusCode).toBe(400);
+  });
+
   it("keeps a report's photo without its hidden data, for the console only", async () => {
     const sent = await send("reports", {
       category: "voirie",
+      detail: null,
       text: "Un signalement fictif pour les tests.",
       place: "Quartier fictif",
       photo: await photoWithHiddenData(),
@@ -104,7 +121,13 @@ describe("Participer", () => {
   });
 
   it("refuses what is not a picture, and floods from one address", async () => {
-    const report = { category: "eau", text: "Un signalement fictif.", place: null, lang: "fr" };
+    const report = {
+      category: "eau",
+      detail: null,
+      text: "Un signalement fictif.",
+      place: null,
+      lang: "fr",
+    };
     const broken = await send("reports", { ...report, photo: "bm90IGFuIGltYWdl" });
     expect(broken.statusCode).toBe(422);
     expect(broken.json<{ code: string }>().code).toBe("PARTICIPATION_PHOTO_INVALID");
@@ -169,6 +192,7 @@ describe("Participer's keeping time", () => {
     );
     const old = await service.receiveReport({
       category: "salubrite",
+      detail: null,
       text: "Un vieux signalement fictif.",
       place: null,
       photo: await photoWithHiddenData(),

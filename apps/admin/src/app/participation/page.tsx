@@ -12,11 +12,14 @@ function when(iso: string): { day: string; time: string } {
   return { day: formatDay(date), time: formatClockTime(date) };
 }
 
-/** What kind of entry it is, in words: "Message · Pour le gouvernement". */
+/** What kind of entry it is, in words: "Message · Pour le gouvernement", "Signalement · Autre : …". */
 function kindOf(entry: ParticipationEntry): string {
-  return entry.type === "message"
-    ? `${t("participation.message")} · ${t(`participation.topics.${entry.topic}`)}`
-    : `${t("participation.report")} · ${t(`participation.categories.${entry.category}`)}`;
+  if (entry.type === "message") {
+    return `${t("participation.message")} · ${t(`participation.topics.${entry.topic}`)}`;
+  }
+  const category = t(`participation.categories.${entry.category}`);
+  const detail = entry.detail === null ? "" : `\u00a0: ${entry.detail}`;
+  return `${t("participation.report")} · ${category}${detail}`;
 }
 
 function EntryCard({ entry, canHandle }: { entry: ParticipationEntry; canHandle: boolean }) {

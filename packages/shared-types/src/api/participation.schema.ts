@@ -33,14 +33,25 @@ export const messageSubmissionSchema = z.strictObject({
 });
 export type MessageSubmission = z.infer<typeof messageSubmissionSchema>;
 
-export const reportSubmissionSchema = z.strictObject({
-  category: reportCategorySchema,
-  text: textSchema,
-  /** The district or town, as the person writes it; never a position. */
-  place: z.string().trim().max(120).nullable(),
-  photo: photoSchema.nullable(),
-  lang: langSchema,
-});
+/** The kind of problem written by the person when none of the types fits. */
+export const REPORT_DETAIL_MAX = 80;
+const detailSchema = z.string().trim().min(3).max(REPORT_DETAIL_MAX);
+
+export const reportSubmissionSchema = z
+  .strictObject({
+    category: reportCategorySchema,
+    /** Required for "autre" (owner's request, 02/10/2026), absent for the others. */
+    detail: detailSchema.nullable(),
+    text: textSchema,
+    /** The district or town, as the person writes it; never a position. */
+    place: z.string().trim().max(120).nullable(),
+    photo: photoSchema.nullable(),
+    lang: langSchema,
+  })
+  .refine((report) => (report.category === "autre") === (report.detail !== null), {
+    path: ["detail"],
+    message: "The kind of problem is said for, and only for, the other ones",
+  });
 export type ReportSubmission = z.infer<typeof reportSubmissionSchema>;
 
 export const submissionReceiptSchema = z.object({ id: z.uuid() });
@@ -64,6 +75,8 @@ export const participationEntrySchema = z.discriminatedUnion("type", [
     ...entryBase,
     type: z.literal("report"),
     category: reportCategorySchema,
+    /** Entries received before 02/10/2026 have none. */
+    detail: z.string().max(REPORT_DETAIL_MAX).nullable().default(null),
     place: z.string().max(120).nullable(),
     /** The stored photo's name, served to the console only. */
     photoId: z.uuid().nullable(),
