@@ -359,3 +359,36 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | Date | Tâche | Origine |
 |---|---|---|
 | 02/10/2026 | PERF-07 ✅ Relecture vidéo de session de Sentry (web) retirée de tous les paquets par l'option officielle `includeWebReplay: false` : jamais activée (pas de captures d'écran, CDP), seulement réexportée par Sentry ; code Android 7,15 → 6,93 Mo, iOS 7,05 → 6,82 Mo. Reste à étudier : formulaire de retour Sentry (≈ 47 Ko, appelé au chargement : non retirable par simple remplacement) et graisses d'icônes inutilisées (fine, légère : ≈ 90 Ko, demande une configuration Babel) | AUD6-01 |
+### Mode autonome prolongé jusqu'au 02/10/2026, 13 h
+
+| Date | Tâche | Origine |
+|---|---|---|
+| 02/10/2026 | SEC-06 ⏸ Alerte node-forge (GHSA-86w9-cpqp-85rv) dans l'outil Expo : aucune version corrigée, toutes les PR bloquées au contrôle « Secrets et dépendances » ; en attente de la décision de l'utilisateur (exception ciblée et datée, ou attente d'Expo) | CI |
+
+### Audit croisé du 02/10/2026, 2 h 45 (allègement, préparation de l'IA, revue visuelle)
+
+| Réf. | Agent | Constat | Priorité |
+|---|---|---|---|
+| AUD10-01 | Sécurité | Fusions bloquées par l'alerte node-forge (outil Expo, aucune correction) : décision de l'utilisateur attendue (point 32) ; ensuite, revoir les mises à jour de Dependabot (#212 à #216), dont @sentry/cli 2 → 3 (version majeure : vérifier l'envoi des cartes des sources) | Haute |
+| AUD10-02 | Architecte | PR empilées : #209 et #210 reposent sur #207, #211 sur #209 ; fusionner dans l'ordre 207 → 209 → 211, puis 210 | Haute |
+| AUD10-03 | Sécurité / Coût | Avant toute route de l'assistant : limite d'usage par installation, plafond de dépense mensuel coupant l'assistant (interrupteur à distance), aucune question écrite dans les journaux | Haute (avant AI-03) |
+| AUD10-04 | Performance | L'index des passages (≈ 1 s à construire) devra être tenu à jour à chaque nouvel article, sans tout reconstruire, et ses vecteurs rangés dans PostgreSQL (pgvector) | Moyenne |
+| AUD10-05 | QA | Jeu d'évaluation écrit par Claude, en français seulement : y ajouter des questions écrites par l'équipe et par des locuteurs wolof, pour éviter qu'il ne mesure que ce que son auteur attend | Moyenne |
+| AUD10-06 | Données | Questions posées à l'assistant : conservation et anonymisation à décider (cadrage, question 3) et à inscrire dans l'inventaire des données avant la mise en ligne | Moyenne |
+| AUD10-07 | Performance | Reste du poids de l'app : graisses d'icônes inutilisées (≈ 90 Ko), formulaire de retour de Sentry (≈ 47 Ko) | Basse |
+| AUD10-08 | Design / UI-UX | Revue visuelle faite sur le web seulement : la section Opportunités de l'accueil et Participer restent à voir sur l'iPhone | Moyenne (point 25) |
+### Audit croisé du 01/10/2026, 23 h 45 (Opportunités, Participer, écran de démarrage)
+
+| # | Agent | Constat | Priorité |
+|---|---|---|---|
+| AUD9-01 ✅ (01/10, 23 h 50 : réglage `TRUST_PROXY`, testé) | Sécurité | Derrière un CDN ou un répartiteur, l'API aurait vu une seule adresse : toutes les limites par adresse (connexion, abonnements, statistiques, Participer) auraient compté le pays entier comme une seule personne | Haute |
+| AUD9-02 | Sécurité / Données | Les photos de Participer sont gardées sur le disque du serveur : avec plusieurs serveurs d'API, il faudra un stockage objet privé commun (S1-02) | Moyenne (au déploiement) |
+| AUD9-03 | Données | Textes libres et photos de Participer peuvent contenir des données personnelles malgré la consigne : modération dans la console, conservation un an (à confirmer), déclaration CDP (point 22) | Haute (avant lancement) |
+| AUD9-04 | QA | La photo des signalements et l'écran natif sans image ne fonctionnent qu'après une nouvelle compilation de l'app (module photo, configuration native) | Haute (prochaine compilation) |
+| AUD9-05 | Ingestion & Données | Opportunités saisies à la main pour l'instant : la collecte automatique (DER/FJ, ADEPME) attend l'accord sur les sources (OPP-02) | Moyenne |
+| AUD9-06 | UX writing | Textes écrits en autonomie (Opportunités, Participer, invitations) : à relire par l'utilisateur | Basse |
+### Décision de l'utilisateur du 02/10/2026, 6 h 30
+
+| Date | Tâche | Origine |
+|---|---|---|
+| 02/10/2026 | SEC-06 ✅ Exception limitée à l'alerte node-forge dans l'audit (option a du point 32) ; à revoir à chaque mise à jour d'Expo, à retirer dès qu'une version corrigée de node-forge existe | Utilisateur |
