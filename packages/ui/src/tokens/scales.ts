@@ -114,10 +114,11 @@ export const motion = {
     /** Time each story stays in the front page carousel (long headlines, WCAG 2.2.2). */
     carouselDwell: 5000,
     /** The baobab drawn stroke by stroke at launch (charter: under 1.5 s). */
-    launchDraw: 1100,
-    /** Then it stays a moment, and fades into the app. */
-    launchHold: 200,
-    launchFade: 300,
+    launchDraw: 1000,
+    /** It stays a moment, is taken back stroke by stroke, and fades into the app. */
+    launchHold: 250,
+    launchUndraw: 650,
+    launchFade: 250,
     /** Light and dark modes dissolve into each other instead of switching at once. */
     themeFade: 450,
   },
