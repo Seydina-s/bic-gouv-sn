@@ -72,12 +72,25 @@ describe("fuseRankings", () => {
 });
 
 describe("hybridSearch", () => {
+  it("ranks by meaning alone when the words are only a fallback", async () => {
+    const aboutPort: EmbeddingProvider = {
+      model: "modele-de-test",
+      embed: (texts) => Promise.resolve(texts.map(() => Float32Array.from([0, 1]))),
+    };
+    const found = await hybridSearch(
+      "le quai",
+      { lang: "fr", limit: 2 },
+      { words, vectors, embedder: aboutPort, call: direct, fuseWords: false },
+    );
+    expect(ids(found)).toEqual(["content-2", "content-3"]);
+  });
+
   it("finds by meaning what the words miss", async () => {
     expect(ids(words.search("devenir soldat", { lang: "fr", limit: 5 }))).toEqual([]);
     const found = await hybridSearch(
       "devenir soldat",
       { lang: "fr", limit: 1 },
-      { words, vectors, embedder, call: direct },
+      { words, vectors, embedder, call: direct, fuseWords: true },
     );
     expect(ids(found)).toEqual(["content-1"]);
   });
@@ -87,14 +100,14 @@ describe("hybridSearch", () => {
     const found = await hybridSearch(
       "le port",
       { lang: "fr", limit: 5 },
-      { words, vectors, embedder, call: failing },
+      { words, vectors, embedder, call: failing, fuseWords: true },
     );
     expect(ids(found)).toEqual(ids(words.search("le port", { lang: "fr", limit: 5 })));
     const empty: EmbeddingProvider = { model: "vide", embed: () => Promise.resolve([]) };
     const without = await hybridSearch(
       "le port",
       { lang: "fr", limit: 1 },
-      { words, vectors, embedder: empty, call: direct },
+      { words, vectors, embedder: empty, call: direct, fuseWords: true },
     );
     expect(without).toHaveLength(1);
   });

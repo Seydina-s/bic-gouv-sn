@@ -3,11 +3,11 @@ import type { PassageIndex, ScoredPassage } from "./passage-search";
 import type { Passage } from "./passages";
 
 /*
- * Search by words and by meaning, combined (AI-02). Each finds passages the other
- * misses: words catch names and numbers, meaning catches questions asked in other
- * words. Their rankings are fused by rank, not by score, since the two scores are
- * not comparable. Measured on the test set: the right page among the first 5 for
- * 97 % of questions, against 82 % by words alone (docs/cadrage).
+ * Search by meaning, with the search by words fused in or kept as a fallback
+ * (AI-02). Measured on the test set (docs/cadrage): a small model gains from the
+ * fusion (97 % of right pages in the first 5, against 89 % alone), a medium one
+ * does better alone (97 % in the first 3, 89 % fused); `fuseWords` follows the
+ * model chosen. Rankings are fused by rank, not by score: the scores differ in kind.
  */
 
 /** Turns texts into unit vectors, whoever provides the model (interfaces first). */
@@ -76,6 +76,8 @@ export interface HybridDependencies {
   embedder: EmbeddingProvider;
   /** Deadline and circuit breaker of the embedding calls (@bgs/resilience). */
   call: <T>(operation: (signal: AbortSignal) => Promise<T>) => Promise<T>;
+  /** Fuse the words into the meaning's ranking (small model), or keep them as a fallback. */
+  fuseWords: boolean;
 }
 
 /**
@@ -85,7 +87,7 @@ export interface HybridDependencies {
 export async function hybridSearch(
   query: string,
   { lang, limit }: { lang: Lang; limit: number },
-  { words, vectors, embedder, call }: HybridDependencies,
+  { words, vectors, embedder, call, fuseWords }: HybridDependencies,
 ): Promise<ScoredPassage[]> {
   const byWords = words.search(query, { lang, limit: CANDIDATES });
   let vector: Float32Array | undefined;
@@ -96,6 +98,9 @@ export async function hybridSearch(
   }
   if (vector === undefined) {
     return byWords.slice(0, limit);
+  }
+  if (!fuseWords) {
+    return vectors.search(vector, { lang, limit });
   }
   const byMeaning = vectors.search(vector, { lang, limit: CANDIDATES });
   return fuseRankings([byWords, byMeaning], limit);
