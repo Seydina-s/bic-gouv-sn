@@ -135,6 +135,16 @@ Soit environ 6 millions de caractères, de l'ordre de 2 millions de jetons. Cons
 - 5 094 en français, 772 en wolof ;
 - une **recherche par mots** (BM25, gratuite, sans service extérieur) retrouve ces passages en quelques millisecondes. Elle suffit quand la question reprend les mots de la source (« Le président a-t-il visité la Chine ? », « Quelles pièces pour un extrait de naissance ? »), mais pas quand elle les reformule (« Combien coûte… » ne trouve pas « Coût »). La recherche par le sens (vecteurs) complétera la recherche par mots une fois le modèle d'indexation choisi.
 
+**Mesure de référence (02/10/2026, `pnpm --filter @bgs/api assistant:eval`)** : 38 questions en français, chacune reliée à la page officielle qui y répond (`apps/api/data/assistant-retrieval-eval.json`, données de test internes, jamais affichées). Part des questions dont la bonne page arrive dans les 3 premières :
+
+| Questions | Recherche par mots |
+|---|---|
+| Reprenant les mots de la source (22) | 86 % |
+| Reformulées (16), ex. « Je veux divorcer », « Comment devenir soldat ? » | 50 % |
+| Toutes (38) | 71 % |
+
+Le même jeu mesurera chaque modèle d'indexation candidat : c'est le critère objectif proposé pour le choisir, avec son coût et son support du wolof. Le wolof n'y figure pas encore : il faut des questions écrites par des locuteurs natifs (W-01).
+
 À noter : les modèles Claude ne font pas l'indexation. Il faut un modèle d'indexation à part, gratuit et ouvert ou payant, à choisir ; son support du wolof sera vérifié par le banc d'essai W-02.
 
 ### Coût estimé (à valider)

@@ -1,0 +1,267 @@
+{
+  "about": "Internal test set for the assistant's passage search (AI-04), never shown in the app. Each question was written by Claude from a page of the base and links to the official page that answers it. 'direct' questions reuse the words of the source; 'reformulated' ones ask the same thing in other words. French only: Wolof questions await native speakers (W-01).",
+  "cases": [
+    {
+      "question": "Comment demander un NINEA pour mon entreprise ?",
+      "style": "direct",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-un-avis-dimmatriculation-portant-attribution-dun-numero-didentification-national-des-en"
+      ]
+    },
+    {
+      "question": "Je suis né au Sénégal, comment avoir un extrait de mon casier judiciaire ?",
+      "style": "direct",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-un-extrait-du-bulletin-n0-3-du-casier-judiciaire-pour-les-senegalais-nes-au-senegal"
+      ]
+    },
+    {
+      "question": "Que faut-il pour un visa d'entrée au Canada ?",
+      "style": "direct",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-un-visa-dentree-au-canada"
+      ]
+    },
+    {
+      "question": "Comment faire reconnaître un diplôme obtenu à l'étranger ?",
+      "style": "reformulated",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-un-classement-de-diplome-ou-une-equivalence-de-diplome"
+      ]
+    },
+    {
+      "question": "Comment déclarer la naissance de mon enfant ?",
+      "style": "direct",
+      "expected": ["https://e-senegal.sn/#/comprendre-ma-demarche/demarche/declarer-une-naissance"]
+    },
+    {
+      "question": "Je veux divorcer, que dois-je faire ?",
+      "style": "reformulated",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/initier-une-procedure-en-divorce"
+      ]
+    },
+    {
+      "question": "Comment porter plainte devant le procureur de la République ?",
+      "style": "direct",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/porter-plainte-directement-devant-le-procureur-de-la-republique"
+      ]
+    },
+    {
+      "question": "Quelle carte pour les personnes vivant avec un handicap ?",
+      "style": "reformulated",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/beneficier-de-la-carte-degalite-des-chances"
+      ]
+    },
+    {
+      "question": "Comment s'inscrire à l'université Cheikh Anta Diop ?",
+      "style": "direct",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/sinscrire-a-luniversite-cheikh-anta-diop-de-dakar-ucad"
+      ]
+    },
+    {
+      "question": "Comment passer le concours de l'École nationale d'administration ?",
+      "style": "direct",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/sinscrire-au-concours-dentree-a-lecole-nationale-dadministration-ena"
+      ]
+    },
+    {
+      "question": "Mon épouse est décédée, puis-je toucher sa retraite ?",
+      "style": "reformulated",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-une-pension-de-veuve-ou-de-veuf-a-linstitution-de-prevoyance-retraite-du-senegal-ipres"
+      ]
+    },
+    {
+      "question": "Comment remplir la déclaration de TVA ?",
+      "style": "direct",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/remplir-une-declaration-de-taxe-sur-la-valeur-ajoutee-tva"
+      ]
+    },
+    {
+      "question": "Comment faire reconnaître une association ?",
+      "style": "direct",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-la-reconnaissance-dune-association-nationale-ou-locale"
+      ]
+    },
+    {
+      "question": "Je suis kinésithérapeute, quelle autorisation pour ouvrir mon cabinet ?",
+      "style": "reformulated",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-lautorisation-douvrir-un-cabinet-paramedical-prive"
+      ]
+    },
+    {
+      "question": "Je suis fonctionnaire, comment obtenir un logement de fonction ?",
+      "style": "reformulated",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-un-logement-administratif"
+      ]
+    },
+    {
+      "question": "Comment devenir soldat ?",
+      "style": "reformulated",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/comment-faire-une-carriere-militaire"
+      ]
+    },
+    {
+      "question": "Comment obtenir un certificat d'origine pour exporter ?",
+      "style": "direct",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-un-certificat-dorigine-pour-lexportation"
+      ]
+    },
+    {
+      "question": "Ma facture d'eau est trop élevée, je pense que mon compteur est déréglé",
+      "style": "reformulated",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/comment-faire-une-reclamation-suivie-dun-etalonnage-de-compteur-a-la-senegalaise-des-eaux-sde"
+      ]
+    },
+    {
+      "question": "Comment obtenir un jugement d'hérédité ?",
+      "style": "direct",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-un-jugement-dheredite"
+      ]
+    },
+    {
+      "question": "Je ne veux pas de l'héritage de mon père, comment le refuser ?",
+      "style": "reformulated",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-un-proces-verbal-de-renonciation-a-succession"
+      ]
+    },
+    {
+      "question": "Quelles pièces pour un extrait de naissance ?",
+      "style": "direct",
+      "expected": ["https://e-senegal.sn/#/comprendre-ma-demarche/demarche/extrait-de-naissance"]
+    },
+    {
+      "question": "Comment avoir un passeport ?",
+      "style": "direct",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-un-passeport-numerise"
+      ]
+    },
+    {
+      "question": "J'ai perdu ma pièce d'identité, comment la refaire ?",
+      "style": "reformulated",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-une-carte-nationale-didentite"
+      ]
+    },
+    {
+      "question": "Comment passer le permis pour conduire une voiture ?",
+      "style": "reformulated",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/passer-son-permis-de-conduire-pour-vehicule-leger"
+      ]
+    },
+    {
+      "question": "Comment immatriculer mon entreprise au Centre des grandes entreprises ?",
+      "style": "direct",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-une-immatriculation-au-centre-des-grandes-entreprises-cge"
+      ]
+    },
+    {
+      "question": "Je veux faire mon testament chez un notaire",
+      "style": "direct",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-a-beneficier-de-services-ou-conseils-dun-notaire-pour-la-redaction-lenregistrement-et-la"
+      ]
+    },
+    {
+      "question": "Le président s'est-il entretenu avec Sergueï Lavrov ?",
+      "style": "direct",
+      "expected": [
+        "https://www.presidence.sn/fr/actualites/a-new-york-le-president-bassirou-diomaye-faye-sentretient-avec-serguei-lavrov/"
+      ]
+    },
+    {
+      "question": "Qui dirige la CEDEAO en ce moment ?",
+      "style": "reformulated",
+      "expected": [
+        "https://www.presidence.sn/fr/actualites/le-president-bassirou-diomaye-faye-nouveau-president-en-exercice-de-la-cedeao/"
+      ]
+    },
+    {
+      "question": "Le président est-il allé en Allemagne ?",
+      "style": "direct",
+      "expected": [
+        "https://www.presidence.sn/fr/actualites/le-president-bassirou-diomaye-faye-en-visite-officielle-en-allemagne/"
+      ]
+    },
+    {
+      "question": "Où en sont les travaux de l'aéroport de Ziguinchor ?",
+      "style": "direct",
+      "expected": [
+        "https://www.presidence.sn/fr/actualites/aeroport-de-ziguinchor-le-chef-de-letat-salue-la-reprise-des-travaux/"
+      ]
+    },
+    {
+      "question": "Qu'en est-il de l'usine qui rend l'eau de mer potable à la Grande Côte ?",
+      "style": "reformulated",
+      "expected": [
+        "https://www.presidence.sn/fr/actualites/le-senegal-et-acwa-power-signent-un-contrat-renegocie-pour-lusine-de-dessalement-de-la-grande-cote/"
+      ]
+    },
+    {
+      "question": "Le chef de l'État a-t-il réagi à l'attaque d'Ankara ?",
+      "style": "direct",
+      "expected": [
+        "https://www.presidence.sn/fr/actualites/attaque-a-ankara-le-president-bassirou-diomaye-faye-denonce-un-acte-lache-et-barbare/"
+      ]
+    },
+    {
+      "question": "Une école pour former les avocats va-t-elle être construite ?",
+      "style": "reformulated",
+      "expected": [
+        "https://www.presidence.sn/fr/actualites/pose-de-la-premiere-pierre-de-lecole-de-formation-du-barreau-un-pas-decisif-vers-une-justice-renforcee-et-accessible/"
+      ]
+    },
+    {
+      "question": "Le président a-t-il fait une visite officielle au Koweït ?",
+      "style": "direct",
+      "expected": [
+        "https://www.presidence.sn/fr/actualites/le-president-bassirou-diomaye-faye-entame-une-visite-officielle-au-koweit-et-participera-a-la-semaine-de-la-durabilite-dabu-dhabi/"
+      ]
+    },
+    {
+      "question": "Que fait le gouvernement pour préserver les ressources de la mer et les pêcheurs ?",
+      "style": "reformulated",
+      "expected": [
+        "https://www.presidence.sn/fr/actualites/initiatives-du-gouvernement-senegalais-pour-le-developpement-durable-du-secteur-de-la-peche_2932/"
+      ]
+    },
+    {
+      "question": "Le président a-t-il reçu une délégation du FMI et de Huawei ?",
+      "style": "direct",
+      "expected": [
+        "https://www.presidence.sn/fr/actualites/le-president-de-la-republique-bassirou-diomaye-faye-recoit-des-delegations-du-fmi-et-de-huawei/"
+      ]
+    },
+    {
+      "question": "Qui a ouvert le salon international des mines ?",
+      "style": "direct",
+      "expected": [
+        "https://www.presidence.sn/fr/actualites/le-president-diomaye-faye-ouvre-la-8e-edition-du-salon-international-des-mines-du-senegal-et-reaffirme-sa-vision-dun-secteur-minier-au-service-de-la-souverainete-economique/"
+      ]
+    },
+    {
+      "question": "Le président a-t-il planté des arbres autour du stade Léopold Sédar Senghor ?",
+      "style": "reformulated",
+      "expected": [
+        "https://www.presidence.sn/fr/actualites/dakar-2026-le-president-bassirou-diomaye-faye-participe-a-la-vegetalisation-des-abords-du-stade-leopold-sedar-senghor/"
+      ]
+    }
+  ]
+}
