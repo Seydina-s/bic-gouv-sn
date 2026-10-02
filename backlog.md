@@ -359,3 +359,16 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | Date | Tâche | Origine |
 |---|---|---|
 | 02/10/2026 | SEC-06 ⏸ Alerte node-forge (GHSA-86w9-cpqp-85rv) dans l'outil Expo : aucune version corrigée, toutes les PR bloquées au contrôle « Secrets et dépendances » ; en attente de la décision de l'utilisateur (exception ciblée et datée, ou attente d'Expo) | CI |
+
+### Audit croisé du 02/10/2026, 2 h 45 (allègement, préparation de l'IA, revue visuelle)
+
+| Réf. | Agent | Constat | Priorité |
+|---|---|---|---|
+| AUD10-01 | Sécurité | Fusions bloquées par l'alerte node-forge (outil Expo, aucune correction) : décision de l'utilisateur attendue (point 32) ; ensuite, revoir les mises à jour de Dependabot (#212 à #216), dont @sentry/cli 2 → 3 (version majeure : vérifier l'envoi des cartes des sources) | Haute |
+| AUD10-02 | Architecte | PR empilées : #209 et #210 reposent sur #207, #211 sur #209 ; fusionner dans l'ordre 207 → 209 → 211, puis 210 | Haute |
+| AUD10-03 | Sécurité / Coût | Avant toute route de l'assistant : limite d'usage par installation, plafond de dépense mensuel coupant l'assistant (interrupteur à distance), aucune question écrite dans les journaux | Haute (avant AI-03) |
+| AUD10-04 | Performance | L'index des passages (≈ 1 s à construire) devra être tenu à jour à chaque nouvel article, sans tout reconstruire, et ses vecteurs rangés dans PostgreSQL (pgvector) | Moyenne |
+| AUD10-05 | QA | Jeu d'évaluation écrit par Claude, en français seulement : y ajouter des questions écrites par l'équipe et par des locuteurs wolof, pour éviter qu'il ne mesure que ce que son auteur attend | Moyenne |
+| AUD10-06 | Données | Questions posées à l'assistant : conservation et anonymisation à décider (cadrage, question 3) et à inscrire dans l'inventaire des données avant la mise en ligne | Moyenne |
+| AUD10-07 | Performance | Reste du poids de l'app : graisses d'icônes inutilisées (≈ 90 Ko), formulaire de retour de Sentry (≈ 47 Ko) | Basse |
+| AUD10-08 | Design / UI-UX | Revue visuelle faite sur le web seulement : la section Opportunités de l'accueil et Participer restent à voir sur l'iPhone | Moyenne (point 25) |
