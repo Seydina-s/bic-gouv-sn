@@ -23,3 +23,11 @@ minimumReleaseAgeExclude:
   - expo-glass-effect@57.0.4
   - expo-linking@57.0.11
   - expo-router@57.0.23
+
+# Audit exceptions (decision of the owner, 02/10/2026): one advisory each, with no
+# patched version and outside the shipped app. Reviewed at each Expo SDK upgrade.
+auditConfig:
+  ignoreGhsas:
+    # node-forge <=1.4.0, RSA signature verification: only in @expo/cli, which uses
+    # it to sign (dev manifests, local iOS builds), never to verify.
+    - GHSA-86w9-cpqp-85rv

@@ -84,6 +84,25 @@ describe("opportunities", () => {
     );
   });
 
+  it("can be corrected while waiting, never once published", async () => {
+    const editor = await admin.tokenFor("editor");
+    const { id } = opportunitySchema.parse((await post(editor, "", draft)).json());
+    const put = async (token: string, body: object) =>
+      app.inject({
+        method: "PUT",
+        url: `/admin/v1/opportunities/${id}`,
+        headers: { authorization: `Bearer ${token}` },
+        payload: body,
+      });
+    const corrected = await put(editor, { ...draft, title: "Formation fictive corrigée" });
+    expect(corrected.statusCode).toBe(200);
+    expect(opportunitySchema.parse(corrected.json()).title).toBe("Formation fictive corrigée");
+    expect((await post(await admin.tokenFor("editor"), `/${id}/publish`)).statusCode).toBe(200);
+    expect((await put(editor, draft)).statusCode).toBe(409);
+    const audit = await admin.admin.journal.entries();
+    expect(audit.some((line) => line.action === "opportunity.corrected")).toBe(true);
+  });
+
   it("leave the app once withdrawn or closed", async () => {
     const editor = await admin.tokenFor("editor");
     const other = await admin.tokenFor("editor");

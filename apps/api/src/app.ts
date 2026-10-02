@@ -180,6 +180,13 @@ function defaultAdmin(
   };
 }
 
+/** The proxies to believe: a number of hops becomes "the first N hops". */
+function trustedProxies(
+  setting: Config["TRUST_PROXY"],
+): boolean | string[] | ((address: string, hop: number) => boolean) {
+  return typeof setting === "number" ? (_address, hop) => hop < setting : setting;
+}
+
 /** Builds the API without listening, so tests can call it in memory. */
 export async function buildApp({
   config,
@@ -210,6 +217,7 @@ export async function buildApp({
     : new PostgresParticipationStore(database),
 }: AppOptions): Promise<FastifyInstance> {
   const app = Fastify({
+    trustProxy: trustedProxies(config.TRUST_PROXY),
     logger: {
       level: config.LOG_LEVEL,
       redact: ["req.headers.authorization", "req.headers.cookie"],
