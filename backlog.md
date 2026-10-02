@@ -395,8 +395,8 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 
 | Réf. | Agent | Constat | Priorité |
 |---|---|---|---|
-| AUD10-01 | Sécurité | Fusions bloquées par l'alerte node-forge (outil Expo, aucune correction) : décision de l'utilisateur attendue (point 32) ; ensuite, revoir les mises à jour de Dependabot (#212 à #216), dont @sentry/cli 2 → 3 (version majeure : vérifier l'envoi des cartes des sources) | Haute |
-| AUD10-02 | Architecte | PR empilées : #209 et #210 reposent sur #207, #211 sur #209 ; fusionner dans l'ordre 207 → 209 → 211, puis 210 | Haute |
+| AUD10-01 ✅ (02/10, 6 h 30 : exception décidée par l'utilisateur, PR #223 ; Dependabot : #212, #213 et #225 en cours de fusion, #226 et #227 sont des versions majeures à examiner) | Sécurité | Fusions bloquées par l'alerte node-forge (outil Expo, aucune correction) : décision de l'utilisateur attendue (point 32) ; ensuite, revoir les mises à jour de Dependabot (#212 à #216), dont @sentry/cli 2 → 3 (version majeure : vérifier l'envoi des cartes des sources) | Haute |
+| AUD10-02 ✅ (02/10, 8 h 30 : toutes fusionnées ; la #220, fermée par GitHub quand sa branche de base a été supprimée, a été rouverte en #224) | Architecte | PR empilées : #209 et #210 reposent sur #207, #211 sur #209 ; fusionner dans l'ordre 207 → 209 → 211, puis 210 | Haute |
 | AUD10-03 | Sécurité / Coût | Avant toute route de l'assistant : limite d'usage par installation, plafond de dépense mensuel coupant l'assistant (interrupteur à distance), aucune question écrite dans les journaux | Haute (avant AI-03) |
 | AUD10-04 | Performance | L'index des passages (≈ 1 s à construire) devra être tenu à jour à chaque nouvel article, sans tout reconstruire, et ses vecteurs rangés dans PostgreSQL (pgvector) | Moyenne |
 | AUD10-05 | QA | Jeu d'évaluation écrit par Claude, en français seulement : y ajouter des questions écrites par l'équipe et par des locuteurs wolof, pour éviter qu'il ne mesure que ce que son auteur attend | Moyenne |
