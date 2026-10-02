@@ -59,6 +59,20 @@ describe("PassageIndex", () => {
     expect(found.map((result) => result.passage.contentId)).toEqual(["content-6"]);
   });
 
+  it("finds a French word under another form of it, but keeps Wolof words whole", () => {
+    const forms = new PassageIndex([
+      passage(8, "Procédure de divorce", "Les pièces à fournir."),
+      passage(9, "[wo] Jëf", "[wo] Jëfandikoo", "wo"),
+    ]);
+    const first = (query: string, lang: "fr" | "wo" = "fr") =>
+      forms.search(query, { lang, limit: 1 })[0]?.passage.contentId;
+    expect(first("Je veux divorcer")).toBe("content-8");
+    expect(first("une pièce")).toBe("content-8");
+    expect(first("jëf", "wo")).toBe("content-9");
+    expect(first("jëfandikoo", "wo")).toBe("content-9");
+    expect(forms.search("jëfa", { lang: "wo", limit: 1 })).toEqual([]);
+  });
+
   it("gives words found everywhere almost no weight", () => {
     const [first] = index.search("le port", { lang: "fr", limit: 5 });
     const [alone] = index.search("port", { lang: "fr", limit: 5 });

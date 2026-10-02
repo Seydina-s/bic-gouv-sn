@@ -1,5 +1,6 @@
 import type { Lang } from "@bgs/shared-types";
 import { searchTerms, searchWords } from "../search/text-search";
+import { frenchStem } from "./french-stem";
 import type { Passage } from "./passages";
 
 /*
@@ -49,13 +50,19 @@ interface LanguageIndex {
   postings: Map<string, Map<number, number>>;
 }
 
-function indexOf(passages: Passage[]): LanguageIndex {
+/** French words are cut to their stem; Wolof ones are kept whole until a native speaker
+ * describes their endings (W-01). */
+function stemmerOf(lang: Lang): (word: string) => string {
+  return lang === "fr" ? frenchStem : (word) => word;
+}
+
+function indexOf(passages: Passage[], stem: (word: string) => string): LanguageIndex {
   const postings = new Map<string, Map<number, number>>();
   const lengths = passages.map((passage, position) => {
     const words = [
       ...Array.from({ length: TITLE_WEIGHT }, () => searchWords(passage.title)).flat(),
       ...searchWords(passage.text),
-    ];
+    ].map(stem);
     for (const word of words) {
       const counts = postings.get(word) ?? new Map<number, number>();
       counts.set(position, (counts.get(position) ?? 0) + 1);
@@ -78,7 +85,7 @@ export class PassageIndex {
       grouped.set(passage.lang, group);
     }
     for (const [lang, group] of grouped) {
-      this.byLang.set(lang, indexOf(group));
+      this.byLang.set(lang, indexOf(group, stemmerOf(lang)));
     }
   }
 
@@ -90,7 +97,8 @@ export class PassageIndex {
     }
     const scores = new Map<number, number>();
     const count = index.passages.length;
-    const terms = searchTerms(query).filter((term) => lang !== "fr" || !QUESTION_WORDS.has(term));
+    const asked = searchTerms(query).filter((term) => lang !== "fr" || !QUESTION_WORDS.has(term));
+    const terms = new Set(asked.map(stemmerOf(lang)));
     for (const term of terms) {
       const counts = index.postings.get(term);
       if (counts === undefined) {

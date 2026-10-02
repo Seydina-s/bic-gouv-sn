@@ -137,13 +137,13 @@ Soit environ 6 millions de caractères, de l'ordre de 2 millions de jetons. Cons
 
 **Mesure de référence (02/10/2026, `pnpm --filter @bgs/api assistant:eval`)** : 38 questions en français, chacune reliée à la page officielle qui y répond (`apps/api/data/assistant-retrieval-eval.json`, données de test internes, jamais affichées). Part des questions dont la bonne page arrive dans les 3 premières :
 
-| Questions | Recherche par mots |
-|---|---|
-| Reprenant les mots de la source (22) | 86 % |
-| Reformulées (16), ex. « Je veux divorcer », « Comment devenir soldat ? » | 50 % |
-| Toutes (38) | 71 % |
+| Questions | Recherche par mots | Avec racinisation légère du français |
+|---|---|---|
+| Reprenant les mots de la source (22) | 86 % | 91 % |
+| Reformulées (16), ex. « Je veux divorcer », « Comment devenir soldat ? » | 50 % | 63 % |
+| Toutes (38) | 71 % | 79 % |
 
-Le même jeu mesurera chaque modèle d'indexation candidat : c'est le critère objectif proposé pour le choisir, avec son coût et son support du wolof. Le wolof n'y figure pas encore : il faut des questions écrites par des locuteurs natifs (W-01).
+La racinisation (« divorcer » trouve « divorce », « coûte » trouve « coût ») a été réglée sur ce même jeu de 38 questions : le gain réel sera un peu plus faible sur des questions nouvelles. Le même jeu mesurera chaque modèle d'indexation candidat : c'est le critère objectif proposé pour le choisir, avec son coût et son support du wolof. Le wolof n'y figure pas encore : il faut des questions écrites par des locuteurs natifs (W-01).
 
 À noter : les modèles Claude ne font pas l'indexation. Il faut un modèle d'indexation à part, gratuit et ouvert ou payant, à choisir ; son support du wolof sera vérifié par le banc d'essai W-02.
 
