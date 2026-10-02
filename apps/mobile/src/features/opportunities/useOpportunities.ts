@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { createOpportunitiesClient } from "../../api/opportunities-client";
+import { API_BASE_URL } from "../../api/base-url";
 
-// EXPO_PUBLIC_* must be read literally to be inlined at build time.
-const client = createOpportunitiesClient({ baseUrl: process.env.EXPO_PUBLIC_API_URL ?? "" });
+const client = createOpportunitiesClient({ baseUrl: API_BASE_URL });
 
 /** The opportunities still open, kept offline like the news. */
 export function useOpportunities() {

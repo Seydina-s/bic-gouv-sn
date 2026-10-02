@@ -25,6 +25,7 @@ import {
   type Topics,
 } from "./notification-preferences";
 import { askPermission, permission, pushSupported, pushToken } from "./push-registration";
+import { API_BASE_URL } from "../../api/base-url";
 
 const CHOICE_SLOT = "bgs-notifications";
 const QUIET_SLOT = "bgs-notifications-quiet";
@@ -36,7 +37,7 @@ const TOKEN_SLOT = "bgs-push-token";
 /** The sections followed: "all" or a list. */
 const TOPICS_SLOT = "bgs-notifications-topics";
 
-const client = createPushClient({ baseUrl: process.env.EXPO_PUBLIC_API_URL ?? "" });
+const client = createPushClient({ baseUrl: API_BASE_URL });
 
 export interface NotificationsState {
   /** False on the web, an emulator, or before the app's push project exists. */

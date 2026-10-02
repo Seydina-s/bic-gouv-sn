@@ -7,9 +7,9 @@ import { useTheme } from "../../theme/useTheme";
 import { SectionChip } from "../news/SectionChip";
 import { Field, MAX_TEXT, MIN_TEXT, SendRow } from "./FormParts";
 import { useSending } from "./useSending";
+import { API_BASE_URL } from "../../api/base-url";
 
-// EXPO_PUBLIC_* must be read literally to be inlined at build time.
-const client = createParticipationClient({ baseUrl: process.env.EXPO_PUBLIC_API_URL ?? "" });
+const client = createParticipationClient({ baseUrl: API_BASE_URL });
 
 /**
  * "Écrire au gouvernement" (decision of the user, 01/10/2026), first on the page:

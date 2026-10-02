@@ -397,6 +397,8 @@ export const fr = {
     },
     noDeadline: "Sans date limite",
     empty: "Aucune opportunité ouverte pour l'instant.",
+    emptyHint:
+      "Les emplois, concours, formations et bourses publiés par l'État apparaîtront ici, avec leur page officielle.",
     error: "Les opportunités n'ont pas pu être chargées.",
     official: "Voir l'offre officielle",
     officialHint: "Ouvre la page officielle dans le navigateur",

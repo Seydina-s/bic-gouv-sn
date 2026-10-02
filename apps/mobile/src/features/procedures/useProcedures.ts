@@ -1,8 +1,8 @@
 import { keepPreviousData, useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { createProceduresClient } from "../../api/procedures-client";
+import { API_BASE_URL } from "../../api/base-url";
 
-// EXPO_PUBLIC_* must be read literally to be inlined at build time.
-const client = createProceduresClient({ baseUrl: process.env.EXPO_PUBLIC_API_URL ?? "" });
+const client = createProceduresClient({ baseUrl: API_BASE_URL });
 
 /**
  * Procedures, alphabetical or matching the query, page after page (kept offline);
