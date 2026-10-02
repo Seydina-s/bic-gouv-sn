@@ -607,6 +607,9 @@ export const adminFr = {
     officialUrlHelp:
       "Seuls les portails officiels sont acceptés\u00a0: domaines .gouv.sn, DER/FJ, ADEPME, FONGIP, 3FPT, ARMP (marchespublics.sn), bourses et e-senegal.sn.",
     prepare: "Préparer",
+    correct: "Corriger avant publication",
+    saveCorrection: "Enregistrer la correction",
+    corrected: "Correction enregistrée : une autre personne doit encore vérifier et publier.",
     prepared: "Opportunité préparée\u00a0: une autre personne doit la vérifier et la publier.",
     pendingTitle: "À vérifier",
     publishedTitle: "Publiées dans l'app",

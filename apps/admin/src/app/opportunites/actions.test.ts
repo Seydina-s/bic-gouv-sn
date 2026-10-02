@@ -7,7 +7,7 @@ vi.mock("../../lib/session", () => ({
 }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 
-const { decideOpportunity, prepareOpportunity } = await import("./actions");
+const { correctOpportunity, decideOpportunity, prepareOpportunity } = await import("./actions");
 
 // Placeholder opportunity, never a real one.
 function draft(deadline: string): FormData {
@@ -51,6 +51,18 @@ describe("opportunity actions", () => {
     expect((await decideOpportunity({}, decision("publish"))).error).toMatch(/une autre personne/);
     adminRequest.mockResolvedValue({ ok: false, status: null, code: "ADMIN_API_UNREACHABLE" });
     expect((await decideOpportunity({}, decision("withdraw"))).error).toMatch(/Réessayez/);
+  });
+
+  it("correct: the same fields, to the opportunity named by the form", async () => {
+    adminRequest.mockResolvedValue({ ok: true, data: {} });
+    const data = draft("2026-12-31");
+    data.set("id", "00000000-0000-4000-8000-000000000001");
+    expect((await correctOpportunity({}, data)).message).toMatch(/Correction enregistrée/);
+    expect(adminRequest.mock.calls[0]?.[0]).toMatchObject({
+      path: "/opportunities/00000000-0000-4000-8000-000000000001",
+      method: "PUT",
+      body: { deadline: "2026-12-31", officialUrl: "https://3fpt.sn/appel/" },
+    });
   });
 
   it("publish or withdraw the opportunity named by the form", async () => {

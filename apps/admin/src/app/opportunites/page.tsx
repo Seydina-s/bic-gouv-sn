@@ -4,7 +4,11 @@ import { adminRequest } from "../../lib/admin-api";
 import { formatClockTime, formatDay } from "../../lib/format";
 import { t } from "../../lib/i18n";
 import { requireAccount } from "../../lib/session";
-import { OpportunityDecision, PrepareOpportunityForm } from "./OpportunityForms";
+import {
+  CorrectOpportunityForm,
+  OpportunityDecision,
+  PrepareOpportunityForm,
+} from "./OpportunityForms";
 
 export const dynamic = "force-dynamic";
 
@@ -137,10 +141,13 @@ export default async function OpportunitiesPage() {
                 today={today}
                 decision={
                   canEdit && (
-                    <OpportunityDecision
-                      id={item.id}
-                      canPublish={item.preparedBy.id !== account.id}
-                    />
+                    <>
+                      <CorrectOpportunityForm id={item.id} draft={item} />
+                      <OpportunityDecision
+                        id={item.id}
+                        canPublish={item.preparedBy.id !== account.id}
+                      />
+                    </>
                   )
                 }
               />
