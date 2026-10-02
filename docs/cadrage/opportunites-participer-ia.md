@@ -212,6 +212,16 @@ Par exemple, 500 000 questions par mois avec Haiku coûteraient environ 2 250 $ 
 5. Wolof : contacte-t-on Andakia (AWA) maintenant, ou après le banc d'essai ?
 6. Quel fournisseur de modèle (et quelle région d'hébergement des données) êtes-vous prêt à valider ?
 
+### Recommandations de Claude pour la séance (02/10/2026, après les mesures)
+Ce qui est déjà construit et testé, sans fournisseur ni coût : passages traçables, recherche combinée, contrat de réponse avec citations vérifiées avant affichage (PR #207, #209, #210, #211). Il ne manque que l'adaptateur du modèle choisi et la route.
+
+1. **Commencer par « Est-ce vrai ? » et l'assistant ensemble**, en français : ils reposent sur le même socle ; seul le format de la réponse change. Les ouvrir d'abord à un pilote (interrupteur à distance), pas à tous.
+2. **Budget** : fixer un plafond mensuel qui coupe l'assistant automatiquement une fois atteint (l'app reste utilisable). Ordre de grandeur pour 500 000 questions par mois avec Claude Haiku 4.5 : environ 2 250 $ sans optimisation, nettement moins avec le cache des règles fixes (prévu : les règles sont identiques pour chaque question).
+3. **Questions posées** : ne garder que des compteurs (nombre de questions, part sans réponse) et, si vous le souhaitez, les questions sans réponse, sans rien sur la personne, 90 jours au plus, pour compléter la base. Jamais la question dans les journaux techniques.
+4. **« Un agent peut prendre le relais »** : à retirer tant qu'aucune équipe ne répond ; à la place, renvoyer vers « Écrire au gouvernement » (Participer).
+5. **Wolof** : faire le banc d'essai W-02 avant de contacter Andakia, pour arriver avec des mesures ; il faut pour cela des locuteurs natifs qui écrivent des questions et notent les voix.
+6. **Fournisseurs** : pour la recherche, le **modèle ouvert sur notre serveur** (gratuit, 97 % mesurés, les questions ne sortent pas). Pour la rédaction des réponses, un modèle économique avec un contrat sans réutilisation des données ; la région d'hébergement est à choisir avec l'hébergement de l'API (point 27).
+
 ---
 
 ## 4. Ce que chaque option demande à construire
