@@ -1,15 +1,29 @@
-import { strokeProgress } from "./launch-strokes";
+import { phase, staggered, TIMELINE } from "./launch-strokes";
 
-describe("strokeProgress", () => {
-  it("draws the strokes one after the other, all of them by the end", () => {
-    const count = 13;
-    expect(strokeProgress(0, 0, count)).toBe(0);
-    expect(strokeProgress(0.35, 0, count)).toBe(1);
-    expect(strokeProgress(0.35, count - 1, count)).toBe(0);
-    for (let index = 0; index < count; index += 1) {
-      expect(strokeProgress(1, index, count)).toBe(1);
-    }
-    // Later strokes are never ahead of earlier ones.
-    expect(strokeProgress(0.5, 3, count)).toBeGreaterThanOrEqual(strokeProgress(0.5, 4, count));
+describe("phase", () => {
+  it("runs from 0 to 1 within its window, and stays put outside it", () => {
+    expect(phase(0, [0.2, 0.6])).toBe(0);
+    expect(phase(0.4, [0.2, 0.6])).toBeCloseTo(0.5);
+    expect(phase(1, [0.2, 0.6])).toBe(1);
+  });
+});
+
+describe("staggered", () => {
+  it("starts each item a little after the previous one, the last ending with the window", () => {
+    const first = staggered([0.3, 0.7], 0, 5);
+    const last = staggered([0.3, 0.7], 4, 5);
+    expect(first[0]).toBeCloseTo(0.3);
+    expect(last[1]).toBeCloseTo(0.7);
+    expect(staggered([0.3, 0.7], 2, 5)[0]).toBeGreaterThan(first[0]);
+    expect(staggered([0, 1], 0, 1)).toEqual([0, 0.5]);
+  });
+});
+
+describe("TIMELINE", () => {
+  it("grows the tree from the ground to the leaves, ending at 1", () => {
+    expect(TIMELINE.ground[0]).toBe(0);
+    expect(TIMELINE.trunkOutline[0]).toBeLessThan(TIMELINE.limbs[0]);
+    expect(TIMELINE.limbs[0]).toBeLessThan(TIMELINE.crown[0]);
+    expect(TIMELINE.crown[1]).toBe(1);
   });
 });

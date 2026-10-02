@@ -100,3 +100,10 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : l'adresse de l'API était fixée au lancement du serveur de l'app (`EXPO_PUBLIC_API_URL`), et relue à 12 endroits ; un changement d'adresse attribué par la box la rendait fausse sans que rien ne le signale.
 - **Correctif** : un seul module (`apps/mobile/src/api/base-url.ts`) ; sans adresse donnée à la construction, l'app déduit celle de l'API de l'adresse du serveur de développement qu'elle utilise déjà (même ordinateur, port 3100). Les versions de production gardent leur adresse HTTPS fixe.
 - **Prévention** : plus d'adresse en dur pour le développement ; tests de `apiBaseUrl` ; le serveur de l'app est lancé sans `EXPO_PUBLIC_API_URL` (STATUS, services locaux).
+
+## 02/10/2026 — Copies de travail emportées par la fusion d'une PR
+
+- **Ce qui s'est passé** : deux copies de travail annexes (`C:/bic-gouv-sn-audit`, `C:/bic-gouv-sn-work`) ont disparu en cours de route ; la file de fusion a échoué (« not a git repository ») et une branche en cours a dû être recréée.
+- **Cause racine** : `gh pr merge --delete-branch` supprime aussi la branche locale ; quand cette branche est ouverte dans une copie annexe, la copie est retirée avec elle.
+- **Correctif** : travail repris dans la copie principale ; la file de fusion y opère.
+- **Prévention** : les copies annexes restent en mode détaché (`git checkout --detach`), jamais sur une branche qui va être fusionnée ; règle ajoutée à `~/.claude/ERREURS-GLOBALES.md`.
