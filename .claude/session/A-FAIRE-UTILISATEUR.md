@@ -5,7 +5,7 @@ Liste unique de ce qui attend une action ou une décision de l'utilisateur. Repo
 ## Ordre proposé pour la séance du 02/10, 13 h
 
 1. **Point 32 (2 minutes)** : décider pour l'alerte node-forge. C'est ce qui bloque la fusion de tout le travail de la nuit (PR #202, #204 à #211, #217 à #221).
-2. **IA** : les 6 questions de la partie 3 du cadrage (`docs/cadrage/opportunites-participer-ia.md`), chacune avec une recommandation chiffrée ; en particulier, valider ou non le **modèle ouvert gratuit** pour la recherche (97 % mesurés) et choisir le fournisseur qui rédige les réponses.
+2. **IA** : les 6 questions de la partie 3 du cadrage (`docs/cadrage/opportunites-participer-ia.md`), chacune avec une recommandation chiffrée ; en particulier, valider ou non le **modèle ouvert gratuit** (e5-base) pour la recherche (bonne page dans les 3 premières pour 94 % des 72 questions d'essai) et choisir le fournisseur qui rédige les réponses.
 3. **Logo et écran de démarrage** : fichiers et 4 questions de la fiche (point 31).
 4. **Nouvelle compilation** de la version de test (point 28), pour la photo des signalements, l'écran natif et le logo.
 5. Ensuite, à votre rythme : points 26 (textes écrits en autonomie, dont « Partager cette opportunité »), 29 et 30 (Opportunités, Participer), 27 (hébergement), puis 19 à 22.

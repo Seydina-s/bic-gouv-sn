@@ -77,7 +77,7 @@
 - Nuit du 02/10, de 1 h à 13 h (PR #206 à #217), mode autonome :
   - **fusions bloquées** depuis minuit : une faille sans correction dans l'outil de fabrication d'Expo (node-forge) fait échouer le contrôle des dépendances de toutes les PR ; une exception ciblée a été refusée par le garde-fou de sécurité : **décision de l'utilisateur, point 32** ; seule la PR #203 (photo trop lourde) a pu être fusionnée ;
   - app plus légère de 220 Ko (relecture vidéo de Sentry, jamais utilisée, retirée) ;
-  - **préparation de l'IA**, sans fournisseur ni coût : base découpée en 5 866 passages traçables, recherche par mots, jeu de 38 questions d'évaluation, contrat de réponse avec citations obligatoires vérifiées avant affichage, recherche combinée mots + sens ; **essai local d'un modèle ouvert gratuit** : bonne page dans les 5 premières pour 97 % des questions (82 % par mots seuls), 8 ms par question (cadrage, partie 3) ;
+  - **préparation de l'IA**, sans fournisseur ni coût : base découpée en 5 866 passages traçables, recherche par mots, jeu de 72 questions d'évaluation, contrat de réponse avec citations obligatoires vérifiées avant affichage, recherche combinée mots + sens ; **essai local de deux modèles ouverts gratuits** : le moyen (e5-base) trouve la bonne page dans les 3 premières pour 94 % des questions (81 % par mots seuls), en 16 ms par question (cadrage, partie 3) ;
   - mise en forme du texte pour la recherche regroupée (la lettre wolof ŋ traitée partout) ;
   - revue visuelle des écrans de la nuit : choix de Participer coupés au bord, corrigé (PR #217) ; 103 écrans sans défaut d'accessibilité ;
   - partage d'une opportunité (PR #221) ; Dependabot regroupe les paquets TanStack (PR #218) ;
