@@ -14,7 +14,8 @@
     "procedures:classify": "tsx --env-file-if-exists=.env.local src/cli/apply-procedure-classification.ts",
     "admin:rotate-key": "tsx --env-file-if-exists=.env.local src/cli/rotate-key.ts",
     "admin:reseal": "tsx --env-file-if-exists=.env.local src/cli/rotate-key.ts --reseal",
-    "assistant:passages": "tsx src/cli/assistant-passages.ts"
+    "assistant:passages": "tsx src/cli/assistant-passages.ts",
+    "assistant:eval": "tsx src/cli/assistant-eval.ts"
   },
   "dependencies": {
     "@bgs/admin-auth": "workspace:*",

@@ -362,6 +362,11 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 02/10/2026 | AI-02 🔴 Recherche par le sens (vecteurs pgvector) en complément de BM25, après choix du modèle d'indexation (séance IA) | AI-01 |
 | 02/10/2026 | AI-03 🔴 Contrat de réponse avec citations obligatoires et contrôle « aucune citation hors des passages retrouvés », adaptateur du fournisseur, jeu de test « zéro invention » (après les choix de la séance IA) | AI-01 |
 | 02/10/2026 | REF-01 🔴 La mise en forme du texte pour la recherche (minuscules, sans accents) est écrite cinq fois (API, collecte, app) : la regrouper dans un paquet partagé | Constat AI-01 |
+| 02/10/2026 | AI-04 ✅ Jeu d'évaluation de la recherche des passages : 38 questions françaises (22 reprenant les mots de la source, 16 reformulées) reliées à leur page officielle, commande `assistant:eval` ; référence de la recherche par mots : bonne page dans les 3 premières pour 71 % (86 % directes, 50 % reformulées). Servira à comparer les modèles d'indexation | AI-01 |
+| 02/10/2026 | AI-05 🔴 Questions d'évaluation en wolof, écrites par des locuteurs natifs | W-01 |
+| 02/10/2026 | AI-06 ✅ Racinisation légère du français dans la recherche des passages (pluriels, terminaisons des verbes et du féminin ; le wolof reste entier) : bonne page dans les 3 premières 71 → 79 % (directes 86 → 91 %, reformulées 50 → 63 %), réglée sur le même jeu (gain réel un peu plus faible) | AI-04 |
+| 02/10/2026 | AI-07 ✅ Essai local d'un modèle d'indexation ouvert (multilingual-e5-small, MIT), hors du dépôt : bonne page dans les 5 premières 82 % (mots) → 89 % (sens) → **97 % (les deux combinés)** ; 8 ms par question, 130 Mo, ≈ 530 Mo de mémoire, base indexée en 12 min ; proposé pour AI-02, à valider en séance (support du wolof à vérifier) | AI-04 |
+| 02/10/2026 | AUD10-05 🔵 (02/10, 5 h 45 : jeu d'évaluation élargi de 38 à 72 questions françaises (44 directes, 28 reformulées), chaque page attendue vérifiée dans la base ; reste : questions de l'équipe et en wolof) | AUD10 |
 ### Mode autonome prolongé jusqu'au 02/10/2026, 13 h — icônes
 
 | Date | Tâche | Origine |
