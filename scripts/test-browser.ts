@@ -77,6 +77,8 @@ const STILL_ATTEMPTS = 25;
 
 /** How long a gesture waits for its target to appear (a slow CI runner included). */
 const GESTURE_TIMEOUT_MS = 15_000;
+/** How long a tap gets to open its screen before it is tried again. */
+const OPEN_RETRY_MS = 2_000;
 
 /**
  * Page function listing the visible controls with an accessible name: the exact
@@ -88,13 +90,19 @@ const FIND_CONTROLS = `((name) => {
     const box = element.getBoundingClientRect();
     return box.width > 0 && box.height > 0;
   };
+  // A control still disabled (a send button waiting for the text just typed) is not
+  // pressable yet: pressing waits for it rather than tapping it in vain (ERREURS.md).
+  const enabled = (element) =>
+    element.getAttribute("aria-disabled") !== "true" && element.disabled !== true;
   const nameOf = (element) =>
     (element.getAttribute("aria-label") ?? element.innerText ?? "").replace(/\\s+/g, " ").trim();
   const controls = [
     ...document.querySelectorAll(
       'button, a, [role="button"], [role="link"], [role="tab"], [role="checkbox"], [role="radio"]',
     ),
-  ].filter(shown);
+  ]
+    .filter(shown)
+    .filter(enabled);
   for (const matches of [
     (label) => label === name,
     (label) => label.startsWith(name),
@@ -437,6 +445,25 @@ export class TestBrowser {
     }
   }
 
+  /**
+   * Presses `name` to open the screen at `path`, and presses again if it did not
+   * open: a list redrawn under the finger (a search answering) swallows a tap, and
+   * a person would simply tap again (ERREURS.md, 02/10/2026).
+   */
+  async pressToOpen(name: string, path: string, attempts = 3): Promise<void> {
+    for (let attempt = 1; attempt <= attempts; attempt += 1) {
+      await this.press(name);
+      const opened = await this.waitUntil(
+        `location.pathname === ${JSON.stringify(path)}`,
+        attempt === attempts ? GESTURE_TIMEOUT_MS : OPEN_RETRY_MS,
+      );
+      if (opened) {
+        return;
+      }
+    }
+    throw new Error(`L'écran ${path} ne s'est pas ouvert (resté sur ${await this.path()})`);
+  }
+
   async path(): Promise<string> {
     return String(await this.evaluate("location.pathname"));
   }
@@ -510,9 +537,22 @@ export class TestBrowser {
   }
 
   /** Types into the field with this label (or placeholder), key by key. */
-  async type(label: string, text: string): Promise<void> {
-    await this.locate(`${FIND_FIELD}(${JSON.stringify(label)})`, label, true);
-    await this.send("Input.insertText", { text });
+  /**
+   * Types into the field with this label, and types again if the text did not land
+   * (a field still appearing can lose it): a person would see it and retype.
+   */
+  async type(label: string, text: string, attempts = 3): Promise<void> {
+    const field = `${FIND_FIELD}(${JSON.stringify(label)})`;
+    for (let attempt = 1; attempt <= attempts; attempt += 1) {
+      await this.locate(field, label, true);
+      await this.send("Input.insertText", { text });
+      if (
+        await this.waitUntil(`${field}?.value.includes(${JSON.stringify(text)})`, OPEN_RETRY_MS)
+      ) {
+        return;
+      }
+    }
+    throw new Error(`Le texte n'a pas pu être saisi dans « ${label} »`);
   }
 
   /** The centre of an element found by a page function, scrolled into view (and focused). */
