@@ -1,6 +1,6 @@
 # STATUS — Bic Gouv SN
 
-**Dernière mise à jour** : 02/10/2026 (0 h 30) · **Mode** : autonome jusqu'au 02/10 à 3 h (accord de l'utilisateur du 01/10, 19 h 45) ; ensuite, séance sur l'IA, le logo et l'écran de démarrage. Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md` (24 points, dont plusieurs réglés ; le n° 23 regroupe les choix autonomes à confirmer).
+**Dernière mise à jour** : 02/10/2026 (2 h 45) · **Mode** : autonome jusqu'au 02/10 à 13 h (accord de l'utilisateur du 02/10, vers 1 h 10) ; ensuite, séance sur l'IA, le logo et l'écran de démarrage. Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md` (le n° 32, urgent, bloque toutes les fusions).
 
 ## Où on en est
 - Dépôt **public et sécurisé** : https://github.com/Seydina-s/bic-gouv-sn. `main` protégée : tout passe par PR + **4 contrôles verts** (qualité et tests, constructions avec **audit d'accessibilité** sur 91 écrans dont 29 à 320 px et **9 parcours de bout en bout**, secrets et dépendances, **conteneurs**).
@@ -65,7 +65,7 @@
   - **erreurs rouges de « Près de moi »** corrigées (lettres de la carte manquantes : réponse vide au lieu d'une erreur) ;
   - **invitations dès l'accueil** : notifications, puis localisation, puis statistiques, bouton positif coloré, « Non merci » toujours visible ; position obtenue tout de suite si autorisée, et à chaque ouverture ; ligne « Position » dans les Réglages ;
   - **fluidité** : réaction visuelle immédiate sur tous les contrôles, onglets ouverts dès le contact du doigt, articles, démarches et accueil affichés progressivement, « Démarches » et « Près de moi » préparés en arrière-plan, photos gardées en mémoire, recherches non stockées hors ligne ;
-  - **app servie en mode optimisé** depuis une copie séparée du projet (`C:ic-gouv-sn-demo`, toujours sur main) : la version de développement est 2 à 5 fois plus lente que l'app finale ;
+  - **app servie en mode optimisé** depuis une copie séparée du projet (`C:/bic-gouv-sn-demo`, toujours sur main) : la version de développement est 2 à 5 fois plus lente que l'app finale ;
   - audit croisé AUD8 ; inventaire des données mis à jour (position).
 - Soirée du 01/10 et nuit (PR #196 à #204), demandes de l'utilisateur de 19 h 45 :
   - **erreur plein écran de « Près de moi »** en mode optimisé corrigée (carte chargée sans morceau séparé) ;
@@ -74,6 +74,12 @@
   - **écran de démarrage** : le baobab se dessine trait par trait puis s'efface en fondu ; l'écran natif devient un simple fond (à la prochaine compilation) ; **fiche du logo** à fournir (`docs/guides/logo-et-ecran-de-demarrage.md`) ;
   - console : « À traiter » compte aussi les messages des citoyens et les opportunités à vérifier ;
   - sécurité : réglage `TRUST_PROXY` (sans lui, derrière un CDN, toutes les limites par adresse compteraient le pays entier comme une seule personne) ; audit croisé AUD9.
+- Nuit du 02/10, de 1 h à 13 h (PR #206 à #217), mode autonome :
+  - **fusions bloquées** depuis minuit : une faille sans correction dans l'outil de fabrication d'Expo (node-forge) fait échouer le contrôle des dépendances de toutes les PR ; une exception ciblée a été refusée par le garde-fou de sécurité : **décision de l'utilisateur, point 32** ; seule la PR #203 (photo trop lourde) a pu être fusionnée ;
+  - app plus légère de 220 Ko (relecture vidéo de Sentry, jamais utilisée, retirée) ;
+  - **préparation de l'IA**, sans fournisseur ni coût : base découpée en 5 866 passages traçables, recherche par mots, jeu de 38 questions d'évaluation, contrat de réponse avec citations obligatoires vérifiées avant affichage, recherche combinée mots + sens ; **essai local d'un modèle ouvert gratuit** : bonne page dans les 5 premières pour 97 % des questions (82 % par mots seuls), 8 ms par question (cadrage, partie 3) ;
+  - mise en forme du texte pour la recherche regroupée (la lettre wolof ŋ traitée partout) ;
+  - revue visuelle des écrans de la nuit : choix de Participer coupés au bord, corrigé (PR #217) ; 103 écrans sans défaut d'accessibilité.
 - Contrôle complet : environ 1 240 tests verts, 11 parcours de bout en bout, 103 écrans audités.
 - Incident du 29/09 : clé de l'API **locale** apparue dans la conversation ; remplacée le jour même (ERREURS.md).
 
@@ -81,13 +87,14 @@
 Voir `.claude/session/A-FAIRE-UTILISATEUR.md`. Toujours ouverts : compte Apple (en cours), vérification des services de Dakar, logo, identifiant de l'app, questions au BIC (et offre de Sénégal Numérique pour Diamniadio), budget d'hébergement (chiffrage prêt), jeton Sentry, Opportunités et Participer (plus tard), wolof (à la fin).
 
 ## Prochaine tâche
-- **Prochaine séance** : l'IA (cadrage `docs/cadrage/opportunites-participer-ia.md`, partie 3), le logo et l'écran de démarrage (fiche `docs/guides/logo-et-ecran-de-demarrage.md`), puis les points 19 à 31 de `.claude/session/A-FAIRE-UTILISATEUR.md` (dont la nouvelle compilation, point 28).
+- **D'abord** : décision sur l'alerte node-forge (point 32), puis fusion des PR en attente (#202, #204 à #211, #217) dans l'ordre.
+- **Prochaine séance** : l'IA (cadrage `docs/cadrage/opportunites-participer-ia.md`, partie 3, avec les mesures du 02/10 et la proposition d'un modèle ouvert gratuit), le logo et l'écran de démarrage (fiche `docs/guides/logo-et-ecran-de-demarrage.md`), puis les points 19 à 31 de `.claude/session/A-FAIRE-UTILISATEUR.md` (dont la nouvelle compilation, point 28).
 
 - Ensuite, sur la version de test : QA-02, QA-03, QA-04, QA-09, AUD5-04, AUD6-02, AUD6-03, AUD8-02, AUD8-03, E2E-02, LIC-02, module iPhone pour la photo des notifications (AUD5-07, recompilation).
 - Décisions attendues : points 19 (contenus publiés dans PostgreSQL), 20 (Firebase), 21 (envoi à l'échelle nationale), 22 (politique de confidentialité), 24 (compétence de design), 26 (textes de l'invitation à la localisation), 27 (hébergement).
 
 ## Services locaux (au 01/10, 19 h)
-- **App servie en mode optimisé** depuis la copie `C:ic-gouv-sn-demo` (sur `main`, mise à jour après chaque fusion) : `npx expo start --dev-client --port 8081 --no-dev --minify`, `EXPO_PUBLIC_API_URL=http://192.168.1.14:3100`. Le dépôt principal reste libre pour le développement. Pour revenir au mode développement (rechargement à chaud, erreurs à l'écran) : relancer sans `--no-dev --minify`.
+- **App servie en mode optimisé** depuis la copie `C:/bic-gouv-sn-demo` (sur `main`, mise à jour après chaque fusion) : `npx expo start --dev-client --port 8081 --no-dev --minify`, `EXPO_PUBLIC_API_URL=http://192.168.1.14:3100`. Le dépôt principal reste libre pour le développement. Pour revenir au mode développement (rechargement à chaud, erreurs à l'écran) : relancer sans `--no-dev --minify`.
 - API sur 3100 relancée à 15 h avec le correctif de la carte.
 
 ## Services locaux (rappel du 01/10, 5 h)
