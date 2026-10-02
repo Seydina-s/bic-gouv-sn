@@ -107,3 +107,10 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : `gh pr merge --delete-branch` supprime aussi la branche locale ; quand cette branche est ouverte dans une copie annexe, la copie est retirée avec elle.
 - **Correctif** : travail repris dans la copie principale ; la file de fusion y opère.
 - **Prévention** : les copies annexes restent en mode détaché (`git checkout --detach`), jamais sur une branche qui va être fusionnée ; règle ajoutée à `~/.claude/ERREURS-GLOBALES.md`.
+
+## 02/10/2026 — Parcours de bout en bout instable : « Envoyer » pressé avant d'être actif
+
+- **Ce qui s'est passé** : le parcours « Participer » a échoué une fois sur GitHub (la confirmation n'est jamais apparue), puis réussi à la relance, comme en local.
+- **Cause racine** : l'outil de test agissait plus vite que l'écran. Trois cas, reproduits en local (environ un passage sur deux ou trois échouait déjà avant la refonte de Participer) : un appui sur un bouton encore désactivé (« Envoyer » avant la saisie prise en compte) ; un appui perdu pendant que la liste des démarches se redessinait (la base de test n'a qu'une démarche, donc « 1 démarche » s'affiche avant la réponse de la recherche) ; un texte perdu pendant l'apparition en fondu d'une étape.
+- **Correctif** (`scripts/test-browser.ts`) : les contrôles désactivés sont ignorés (l'appui attend qu'ils soient actifs) ; `pressToOpen` appuie de nouveau si l'écran attendu ne s'est pas ouvert ; `type` vérifie que le texte est dans le champ et le ressaisit sinon, comme le ferait une personne. Vérifié : 5 passages sur 5 réussis.
+- **Prévention** : tout échec ponctuel d'un parcours est traité comme un défaut (cause cherchée et corrigée), jamais seulement relancé.
