@@ -10,6 +10,27 @@ const envSchema = z.object({
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).default("info"),
   /** Grace period for in-flight requests on shutdown before forcing exit. */
   SHUTDOWN_TIMEOUT_MS: z.coerce.number().int().positive().default(10_000),
+  /**
+   * The proxies in front of the API (CDN, load balancer), so that each person's own
+   * address is read from X-Forwarded-For: a number of hops ("1"), or a list of
+   * addresses or ranges ("10.0.0.0/8,127.0.0.1"). None by default: behind a proxy,
+   * every limit per address would count the whole country as one person.
+   */
+  TRUST_PROXY: z
+    .string()
+    .regex(/^(\d{1,2}|[0-9a-fA-F.:/,\s]+)$/)
+    .optional()
+    .transform((value): number | string[] | false => {
+      if (value === undefined || value.trim() === "") {
+        return false;
+      }
+      return /^\d+$/.test(value)
+        ? Number(value)
+        : value
+            .split(",")
+            .map((part) => part.trim())
+            .filter((part) => part !== "");
+    }),
   /** Requests allowed per minute and per client address (generous: carrier-grade NAT). */
   RATE_LIMIT_PER_MINUTE: z.coerce.number().int().positive().default(600),
   /** Provisional article store written by the ingestion job (PostgreSQL in Phase 1). */

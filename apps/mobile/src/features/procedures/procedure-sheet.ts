@@ -1,4 +1,4 @@
-import type { Block, Inline } from "@bgs/shared-types";
+import { foldForMatching, type Block, type Inline } from "@bgs/shared-types";
 
 /*
  * e-senegal.sn writes its procedures as plain paragraphs: its sub-headings are
@@ -99,13 +99,7 @@ const KIND_RULES: readonly (readonly [SectionKind, RegExp])[] = [
 
 /** Lower case, no accents, apostrophes as spaces: for matching only, never shown. */
 function normalize(text: string): string {
-  return text
-    .normalize("NFD")
-    .replace(/\p{M}/gu, "")
-    .toLowerCase()
-    .replace(/[’']/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
+  return foldForMatching(text).replace(/[’']/g, " ").replace(/\s+/g, " ").trim();
 }
 
 function plainText(inlines: readonly Inline[]): string {
