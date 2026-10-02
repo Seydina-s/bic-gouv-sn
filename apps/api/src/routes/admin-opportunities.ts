@@ -95,6 +95,30 @@ export const adminOpportunitiesRoutes: FastifyPluginAsyncZod<AdminOpportunitiesO
     },
   );
 
+  app.put(
+    "/opportunities/:id",
+    {
+      schema: {
+        tags: ["admin"],
+        summary: "Correct an opportunity not yet published",
+        params: idParams,
+        body: opportunityDraftSchema,
+        response: { 200: opportunitySchema, ...errors },
+      },
+    },
+    async (request, reply) => {
+      const account = await authorize(request, reply, signIn, "opportunities.edit");
+      if (account === null) {
+        return reply;
+      }
+      try {
+        return await opportunities.correct(personOf(account), request.params.id, request.body);
+      } catch (error) {
+        return refuse(request, reply, error);
+      }
+    },
+  );
+
   for (const decision of ["publish", "withdraw"] as const) {
     app.post(
       `/opportunities/:id/${decision}`,
