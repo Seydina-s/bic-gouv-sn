@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { createServicesClient } from "../../api/services-client";
+import { API_BASE_URL } from "../../api/base-url";
 
-// EXPO_PUBLIC_* must be read literally to be inlined at build time.
-const client = createServicesClient({ baseUrl: process.env.EXPO_PUBLIC_API_URL ?? "" });
+const client = createServicesClient({ baseUrl: API_BASE_URL });
 
 /** Verified state services and towns, kept offline like the news. */
 export function useStateServices() {

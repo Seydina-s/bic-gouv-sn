@@ -424,3 +424,4 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | Date | Tâche | Origine |
 |---|---|---|
 | 02/10/2026 | BUG-08 ✅ Plantage au lancement (« two views with the same name MLRNCamera ») : MapLibre chargé en deux versions (import et require) ; chargement différé par un fichier local, règle ESLint et contrôle en CI contre toute bibliothèque en double ; code de l'app −1,33 Mo (Android 5,44 Mo, iOS 5,36 Mo) | Utilisateur |
+| 02/10/2026 | BUG-09 ✅ L'app ne joignait plus l'API après un changement d'adresse Wi-Fi de l'ordinateur : adresse de l'API lue en un seul endroit, déduite en développement de celle du serveur de l'app | Utilisateur |
