@@ -359,6 +359,7 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | Date | Tâche | Origine |
 |---|---|---|
 | 02/10/2026 | PERF-07 ✅ Relecture vidéo de session de Sentry (web) retirée de tous les paquets par l'option officielle `includeWebReplay: false` : jamais activée (pas de captures d'écran, CDP), seulement réexportée par Sentry ; code Android 7,15 → 6,93 Mo, iOS 7,05 → 6,82 Mo. Reste à étudier : formulaire de retour Sentry (≈ 47 Ko, appelé au chargement : non retirable par simple remplacement) et graisses d'icônes inutilisées (fine, légère : ≈ 90 Ko, demande une configuration Babel) | AUD6-01 |
+| 02/10/2026 | PERF-09 ✅ Formulaire de retour web de Sentry (jamais affiché, le SDK mobile a le sien) remplacé là où Sentry navigateur l'importe : code Android 6,93 → 6,85 Mo, iOS 6,82 → 6,75 Mo ; 11 parcours de bout en bout verts | AUD10-07 |
 ### Mode autonome prolongé jusqu'au 02/10/2026, 13 h
 
 | Date | Tâche | Origine |
