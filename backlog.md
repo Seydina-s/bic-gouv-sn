@@ -372,3 +372,18 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | AUD10-06 | Données | Questions posées à l'assistant : conservation et anonymisation à décider (cadrage, question 3) et à inscrire dans l'inventaire des données avant la mise en ligne | Moyenne |
 | AUD10-07 | Performance | Reste du poids de l'app : graisses d'icônes inutilisées (≈ 90 Ko), formulaire de retour de Sentry (≈ 47 Ko) | Basse |
 | AUD10-08 | Design / UI-UX | Revue visuelle faite sur le web seulement : la section Opportunités de l'accueil et Participer restent à voir sur l'iPhone | Moyenne (point 25) |
+### Audit croisé du 01/10/2026, 23 h 45 (Opportunités, Participer, écran de démarrage)
+
+| # | Agent | Constat | Priorité |
+|---|---|---|---|
+| AUD9-01 ✅ (01/10, 23 h 50 : réglage `TRUST_PROXY`, testé) | Sécurité | Derrière un CDN ou un répartiteur, l'API aurait vu une seule adresse : toutes les limites par adresse (connexion, abonnements, statistiques, Participer) auraient compté le pays entier comme une seule personne | Haute |
+| AUD9-02 | Sécurité / Données | Les photos de Participer sont gardées sur le disque du serveur : avec plusieurs serveurs d'API, il faudra un stockage objet privé commun (S1-02) | Moyenne (au déploiement) |
+| AUD9-03 | Données | Textes libres et photos de Participer peuvent contenir des données personnelles malgré la consigne : modération dans la console, conservation un an (à confirmer), déclaration CDP (point 22) | Haute (avant lancement) |
+| AUD9-04 | QA | La photo des signalements et l'écran natif sans image ne fonctionnent qu'après une nouvelle compilation de l'app (module photo, configuration native) | Haute (prochaine compilation) |
+| AUD9-05 | Ingestion & Données | Opportunités saisies à la main pour l'instant : la collecte automatique (DER/FJ, ADEPME) attend l'accord sur les sources (OPP-02) | Moyenne |
+| AUD9-06 | UX writing | Textes écrits en autonomie (Opportunités, Participer, invitations) : à relire par l'utilisateur | Basse |
+### Décision de l'utilisateur du 02/10/2026, 6 h 30
+
+| Date | Tâche | Origine |
+|---|---|---|
+| 02/10/2026 | SEC-06 ✅ Exception limitée à l'alerte node-forge dans l'audit (option a du point 32) ; à revoir à chaque mise à jour d'Expo, à retirer dès qu'une version corrigée de node-forge existe | Utilisateur |

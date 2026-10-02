@@ -22,23 +22,28 @@ function refusal(result: Extract<AdminResult<unknown>, { ok: false }>): FormStat
   return { error: t(key ?? "opportunities.failed") };
 }
 
+/** The opportunity as the form gives it: no closing date becomes null. */
+function draftOf(form: FormData) {
+  const deadline = formText(form, "deadline").trim();
+  return {
+    kind: formText(form, "kind"),
+    title: formText(form, "title"),
+    organization: formText(form, "organization"),
+    summary: formText(form, "summary"),
+    deadline: deadline === "" ? null : deadline,
+    officialUrl: formText(form, "officialUrl").trim(),
+  };
+}
+
 /** Prepares an opportunity copied from its official page; a second person publishes it. */
 export async function prepareOpportunity(_previous: FormState, form: FormData): Promise<FormState> {
   const { token } = await requireAccount();
-  const deadline = formText(form, "deadline").trim();
   const result = await adminRequest({
     path: "/opportunities",
     method: "POST",
     idempotencyKey: formIdempotencyKey(form),
     token,
-    body: {
-      kind: formText(form, "kind"),
-      title: formText(form, "title"),
-      organization: formText(form, "organization"),
-      summary: formText(form, "summary"),
-      deadline: deadline === "" ? null : deadline,
-      officialUrl: formText(form, "officialUrl").trim(),
-    },
+    body: draftOf(form),
     schema: opportunitySchema,
   });
   if (!result.ok) {
@@ -46,6 +51,23 @@ export async function prepareOpportunity(_previous: FormState, form: FormData): 
   }
   revalidatePath("/opportunites");
   return { message: t("opportunities.prepared") };
+}
+
+/** Corrects an opportunity not yet published. */
+export async function correctOpportunity(_previous: FormState, form: FormData): Promise<FormState> {
+  const { token } = await requireAccount();
+  const result = await adminRequest({
+    path: `/opportunities/${encodeURIComponent(formText(form, "id"))}`,
+    method: "PUT",
+    token,
+    body: draftOf(form),
+    schema: opportunitySchema,
+  });
+  if (!result.ok) {
+    return refusal(result);
+  }
+  revalidatePath("/opportunites");
+  return { message: t("opportunities.corrected") };
 }
 
 /** A second person publishes, or someone withdraws it from the app. */
