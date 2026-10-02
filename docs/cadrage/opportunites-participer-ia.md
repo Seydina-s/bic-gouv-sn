@@ -212,6 +212,18 @@ Par exemple, 500 000 questions par mois avec Haiku coûteraient environ 2 250 $ 
 5. Wolof : contacte-t-on Andakia (AWA) maintenant, ou après le banc d'essai ?
 6. Quel fournisseur de modèle (et quelle région d'hébergement des données) êtes-vous prêt à valider ?
 
+### Références mondiales (relevé du 02/10/2026)
+- **GOV.UK Chat** (Royaume-Uni), dans l'app officielle depuis mai 2026 : répond uniquement à partir des pages publiées de GOV.UK ; justesse passée de 76 % à 90 % au fil de deux pilotes (10 000 participants, 26 000 questions) ; plus de 500 tentatives de détournement toutes bloquées ; mais **10,7 secondes en moyenne par réponse** ([Civil Service World](https://www.civilserviceworld.com/professions/article/govuk-ai-chatbot-achieves-90-accuracy), [UKAuthority](https://www.ukauthority.com/articles/gov-uk-ai-chat-completes-public-pilot), [The Register](https://www.theregister.com/on-prem/2026/03/19/govuk-chatbot-gets-smarter-but-slower-as-llms-improve/5229770)).
+- **Jugalbandi** (Inde, AI4Bharat et Microsoft) : questions écrites ou **dites** dans la langue locale sur WhatsApp, recherche dans les fiches officielles, réponse lue à voix haute dans la même langue ; 10 langues, 171 programmes publics au lancement ([Microsoft](https://news.microsoft.com/source/asia/features/with-help-from-next-generation-ai-indian-villagers-gain-easier-access-to-government-services/)). C'est le parcours visé pour le wolof.
+- **Bürokratt** (Estonie) : un seul assistant pour tous les services publics ; quand il ne sait pas, il **passe la main à un agent** ([RIA](https://www.ria.ee/en/state-information-system/personal-services/burokratt)).
+
+Ce qu'on en retient pour l'écran :
+- **Montrer les sources tout de suite** : notre recherche trouve les passages en quelques millisecondes ; l'écran peut afficher les pages officielles trouvées pendant que la réponse s'écrit, au lieu d'un temps d'attente vide de 5 à 10 secondes.
+- Chaque réponse se termine par ses sources (titre, date, lien), touchables.
+- « Est-ce vrai ? » ne dit jamais « vrai » ou « faux » en vert et rouge : il dit ce que disent les sources officielles, ou qu'il n'en trouve aucune.
+- Sans réponse, proposer une suite utile (« Écrire au gouvernement », la démarche la plus proche) plutôt qu'une impasse.
+- Mesurer la justesse avant et pendant le pilote, comme GOV.UK (jeux d'évaluation déjà prêts).
+
 ### Recommandations de Claude pour la séance (02/10/2026, après les mesures)
 Ce qui est déjà construit et testé, sans fournisseur ni coût : passages traçables, recherche combinée, contrat de réponse avec citations vérifiées avant affichage (PR #207, #209, #210, #211). Il ne manque que l'adaptateur du modèle choisi et la route.
 
