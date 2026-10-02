@@ -418,3 +418,9 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | Date | Tâche | Origine |
 |---|---|---|
 | 02/10/2026 | SEC-06 ✅ Exception limitée à l'alerte node-forge dans l'audit (option a du point 32) ; à revoir à chaque mise à jour d'Expo, à retirer dès qu'une version corrigée de node-forge existe | Utilisateur |
+
+### Erreur signalée par l'utilisateur le 02/10/2026, 9 h 30
+
+| Date | Tâche | Origine |
+|---|---|---|
+| 02/10/2026 | BUG-08 ✅ Plantage au lancement (« two views with the same name MLRNCamera ») : MapLibre chargé en deux versions (import et require) ; chargement différé par un fichier local, règle ESLint et contrôle en CI contre toute bibliothèque en double ; code de l'app −1,33 Mo (Android 5,44 Mo, iOS 5,36 Mo) | Utilisateur |

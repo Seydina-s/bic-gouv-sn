@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
     "test": "jest --coverage",
     "doctor": "expo-doctor",
-    "bundle:check": "expo export --platform android --platform ios --output-dir dist",
+    "bundle:check": "expo export --platform android --platform ios --output-dir dist --source-maps",
     "export:web": "expo export --platform web --output-dir build/web --clear"
   },
   "jest": {

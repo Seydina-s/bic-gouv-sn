@@ -1,4 +1,4 @@
-import type * as MapLibre from "@maplibre/maplibre-react-native";
+import type * as MapOfflineModule from "./map-offline";
 import type * as ServiceMapModule from "./ServiceMap";
 
 /*
@@ -7,6 +7,7 @@ import type * as ServiceMapModule from "./ServiceMap";
  * map is shown, which happens only where the module exists (nativeMapAvailable).
  * A plain require, not import(): no separate chunk to fetch, which a development
  * server in optimised mode cannot serve to a phone (ERREURS.md, 01/10/2026).
+ * Only local files are required, never the package: see map-offline.ts.
  */
 
 /** The map of "Près de moi", for React.lazy. */
@@ -16,8 +17,8 @@ export function loadServiceMap(): Promise<typeof ServiceMapModule> {
 }
 
 /** The map's offline downloads, from the same library: only where the map shows. */
-export function loadOfflineManager(): Promise<typeof MapLibre.OfflineManager> {
+export function loadOfflineManager(): Promise<typeof MapOfflineModule.OfflineManager> {
   // eslint-disable-next-line @typescript-eslint/no-require-imports -- see above
-  const library = require("@maplibre/maplibre-react-native") as typeof MapLibre;
+  const library = require("./map-offline") as typeof MapOfflineModule;
   return Promise.resolve(library.OfflineManager);
 }

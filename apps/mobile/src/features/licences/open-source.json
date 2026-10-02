@@ -129,30 +129,6 @@
       "text": 4
     },
     {
-      "name": "@sentry-internal/feedback",
-      "version": "10.37.0",
-      "licence": "MIT",
-      "copyright": ["Copyright (c) 2023 Functional Software, Inc. dba Sentry"],
-      "url": "https://github.com/getsentry/sentry-javascript/tree/master/packages/feedback",
-      "text": 4
-    },
-    {
-      "name": "@sentry-internal/replay",
-      "version": "10.37.0",
-      "licence": "MIT",
-      "copyright": ["Copyright (c) 2022 Functional Software, Inc. dba Sentry"],
-      "url": "https://docs.sentry.io/platforms/javascript/session-replay/",
-      "text": 4
-    },
-    {
-      "name": "@sentry-internal/replay-canvas",
-      "version": "10.37.0",
-      "licence": "MIT",
-      "copyright": ["Copyright (c) 2024 Functional Software, Inc. dba Sentry"],
-      "url": "https://docs.sentry.io/platforms/javascript/session-replay/",
-      "text": 4
-    },
-    {
       "name": "@sentry/browser",
       "version": "10.37.0",
       "licence": "MIT",
@@ -194,7 +170,7 @@
     },
     {
       "name": "@tanstack/query-async-storage-persister",
-      "version": "5.103.2",
+      "version": "5.104.0",
       "licence": "MIT",
       "copyright": ["Copyright (c) 2021-present Tanner Linsley"],
       "url": "https://tanstack.com/query",
@@ -202,7 +178,7 @@
     },
     {
       "name": "@tanstack/query-core",
-      "version": "5.103.2",
+      "version": "5.104.0",
       "licence": "MIT",
       "copyright": ["Copyright (c) 2021-present Tanner Linsley"],
       "url": "https://tanstack.com/query",
@@ -210,7 +186,7 @@
     },
     {
       "name": "@tanstack/query-persist-client-core",
-      "version": "5.103.2",
+      "version": "5.104.0",
       "licence": "MIT",
       "copyright": ["Copyright (c) 2021-present Tanner Linsley"],
       "url": "https://tanstack.com/query",
@@ -218,7 +194,7 @@
     },
     {
       "name": "@tanstack/react-query",
-      "version": "5.103.2",
+      "version": "5.104.0",
       "licence": "MIT",
       "copyright": ["Copyright (c) 2021-present Tanner Linsley"],
       "url": "https://tanstack.com/query",
@@ -226,7 +202,7 @@
     },
     {
       "name": "@tanstack/react-query-persist-client",
-      "version": "5.103.2",
+      "version": "5.104.0",
       "licence": "MIT",
       "copyright": ["Copyright (c) 2021-present Tanner Linsley"],
       "url": "https://tanstack.com/query",
@@ -608,6 +584,14 @@
       "copyright": ["Copyright (c) 2019 Alexander Reardon"],
       "url": "https://github.com/alexreardon/memoize-one",
       "text": 2
+    },
+    {
+      "name": "metro-runtime",
+      "version": "0.84.5",
+      "licence": "MIT",
+      "copyright": [],
+      "url": "https://github.com/react/metro",
+      "text": 0
     },
     {
       "name": "nanoid",

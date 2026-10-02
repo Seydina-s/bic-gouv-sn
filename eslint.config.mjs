@@ -5,6 +5,19 @@ import reactHooks from "eslint-plugin-react-hooks";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
+// Invisible control characters (e.g. a "\b" turned into a real backspace by a
+// shell) break patterns silently: never allowed in code (ERREURS.md, 26/09/2026).
+const NO_CONTROL_CHARACTERS = [
+  {
+    selector: "Literal[raw=/[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F]/]",
+    message: "Invisible control character in a literal: write it as an escape sequence.",
+  },
+  {
+    selector: "TemplateElement[value.raw=/[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F]/]",
+    message: "Invisible control character in a template: write it as an escape sequence.",
+  },
+];
+
 export default tseslint.config(
   {
     ignores: [
@@ -36,18 +49,24 @@ export default tseslint.config(
       "@typescript-eslint/switch-exhaustiveness-check": "error",
       "no-console": "error",
       eqeqeq: ["error", "always"],
-      // Invisible control characters (e.g. a "\b" turned into a real backspace by a
-      // shell) break patterns silently: never allowed in code (ERREURS.md, 26/09/2026).
       "no-control-regex": "error",
+      "no-restricted-syntax": ["error", ...NO_CONTROL_CHARACTERS],
+    },
+  },
+  {
+    // A package that ships an ES module and a CommonJS build resolves to one with
+    // `import` and to the other with `require`: both run, and a native library then
+    // registers its views twice and crashes the app at launch (MapLibre, ERREURS.md,
+    // 02/10/2026). Packages are imported; a lazy load requires a local file instead.
+    files: ["apps/mobile/src/**/*.{ts,tsx}"],
+    rules: {
       "no-restricted-syntax": [
         "error",
+        ...NO_CONTROL_CHARACTERS,
         {
-          selector: "Literal[raw=/[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F]/]",
-          message: "Invisible control character in a literal: write it as an escape sequence.",
-        },
-        {
-          selector: "TemplateElement[value.raw=/[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F]/]",
-          message: "Invisible control character in a template: write it as an escape sequence.",
+          selector: "CallExpression[callee.name='require'][arguments.0.value=/^[^.]/]",
+          message:
+            "Never require a package in the app: import it in a local file and require that file (see eslint.config.mjs).",
         },
       ],
     },
