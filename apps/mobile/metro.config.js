@@ -6,7 +6,9 @@ const path = require("node:path");
 // eslint-disable-next-line @typescript-eslint/no-require-imports -- Metro loads its config as CommonJS
 const { getSentryExpoConfig } = require("@sentry/react-native/metro");
 
-const config = getSentryExpoConfig(__dirname);
+// Bundle weight (PERF-05): Sentry's web session replay, never enabled here (no
+// screenshots, CDP / law 2008-12), is left out of every bundle (-134 KB).
+const config = getSentryExpoConfig(__dirname, { includeWebReplay: false });
 
 /**
  * Bundle weight (PERF-03): Zod's catalogue of translated error messages is replaced
