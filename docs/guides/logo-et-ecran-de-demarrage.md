@@ -12,7 +12,8 @@ Le plus simple et le plus sûr : **des fichiers vectoriels (SVG)**. À partir d'
 | 2 | `logo-blanc.svg` | Le même logo, **entièrement blanc**, fond transparent | Thème sombre, notifications Android |
 | 3 | `logo-noir.svg` | Le même logo, **entièrement noir** (ou vert foncé), fond transparent | Icône « thème » d'Android 13 et plus, documents |
 | 4 | `symbole.svg` (si votre logo a un texte) | Le **symbole seul**, sans le nom | Une icône d'app est petite : le texte y devient illisible |
-| 5 | `baobab-traits.svg` | Le baobab dessiné **en traits** (contours), pas en surfaces pleines | L'écran de démarrage le dessine trait par trait (charte) |
+
+Le baobab n'est plus à fournir : l'image de l'utilisateur est dans l'app depuis le 02/10/2026 (PR #240). Les fichiers se déposent dans le dossier `logo-bic-gouv-sn` du Bureau.
 
 Pour chaque SVG :
 - les textes doivent être **convertis en tracés** (vectorisés) : sans cela, une police manquante change le dessin ;
@@ -35,11 +36,11 @@ Fond **transparent**, sauf indication contraire, et **aux dimensions exactes** :
 
 ## L'écran de démarrage prévu (charte, CLAUDE.md §1)
 
-- **Ce qui s'affiche.** Le baobab se dessine trait par trait, en moins de 1,5 seconde, puis un fondu mène à l'accueil.
+- **Ce qui s'affiche.** Le baobab pousse depuis le pied de son tronc jusqu'aux feuilles en une seconde, puis se retire dans l'autre sens et un fondu mène à l'accueil (en place depuis le 02/10/2026).
 - **Fluidité.** L'écran ne bloque jamais le chargement : l'app se prépare pendant l'animation.
 - **Thèmes.** Il existe en version claire et en version sombre, et suit le thème du téléphone.
 - **Le premier instant.** Avant toute animation, le système affiche une image fixe, le logo sur sa couleur de fond, dont la taille est imposée par iOS et Android. L'animation lui succède sans saut visible.
-- **Technique.** Je l'anime à partir de `baobab-traits.svg`, sans outil payant. Si un designer préfère livrer une animation **Rive** (`.riv`), elle peut la remplacer : c'est le format prévu au stack.
+- **Technique.** L'animation est faite dans l'app, sans outil payant. Si un designer préfère livrer une animation **Rive** (`.riv`), elle peut la remplacer : c'est le format prévu au stack.
 
 ## À clarifier en même temps
 

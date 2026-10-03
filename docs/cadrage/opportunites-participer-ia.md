@@ -285,6 +285,19 @@ Relevé sur les pages officielles de chaque modèle (licence, mesures publiées,
 - **Contacter Soynade et Andakia après le banc d'essai**, avec nos mesures en main : l'un ou l'autre peut dépasser Adia_TTS, à condition d'une licence adaptée.
 - **Le choix final reste l'écoute à l'aveugle (W-02)** par des locuteurs natifs, avec le seuil de qualité fixé à l'avance, comme le prévoit CLAUDE.md.
 
+**Essai d'écoute (02/10/2026)** : Adia_TTS a lu quatre phrases d'articles wolof officiels. Sur l'ordinateur de développement, sans carte graphique, il a fallu 110 à 162 secondes de calcul pour 9 à 11 secondes de parole. Avis du porteur du projet : voix adoptée (« j'adore »), prononciation à améliorer ensuite (AI-12). Le test à l'aveugle avec plusieurs locuteurs natifs reste à faire avant le lancement.
+
+### Articles sans version wolof officielle (relevé du 02/10/2026)
+- La Présidence a cessé de publier la version wolof le **01/10/2025** : sur les 973 articles de notre base, les **376** publiés depuis n'existent qu'en français (1,34 million de caractères), et il en paraît environ 35 par mois.
+- CLAUDE.md le permet : la traduction sert aux éléments sans version officielle, avec la mention « Traduction automatique » jusqu'à relecture humaine.
+- Plus anciens, **279 autres articles** (avant octobre 2025) n'ont pas non plus de version wolof : à traduire aussi, ou non, selon votre choix.
+- **Mesurer avant de choisir** : nous avons **318 articles** avec leur version wolof officielle. Chaque moteur traduit une trentaine d'entre eux, et on compare son texte au wolof officiel (score automatique), puis des locuteurs natifs départagent les deux meilleurs sur trois articles.
+- **Moteurs à comparer** :
+  - un modèle de langage par API (Claude) avec, comme exemples, des paires officielles français-wolof pour reprendre la graphie et le vocabulaire de la Présidence. Ordre de grandeur, au tarif public de Claude Sonnet 5.5 en traitement différé (1 $ par million de jetons en entrée, 5 $ en sortie) : **moins de 10 $ pour les 376 articles**, moins de 1 $ par mois ensuite ([tarifs](https://claude.com/pricing)) ;
+  - un service de traduction automatique qui couvre le wolof (tarif à vérifier) ;
+  - NLLB-200 sur notre ordinateur, pour la mesure seulement, tant que sa licence non commerciale n'est pas validée par un juriste.
+- Aucun de ces coûts n'est engagé sans votre accord.
+
 ---
 
 ## 4. Ce que chaque option demande à construire
