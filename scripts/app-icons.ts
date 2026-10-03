@@ -1,13 +1,20 @@
 // The app's icons, from the official BIC-GOUV icon (the flag's three bands and its
 // star, apps/mobile/assets/brand/icon-source.svg, supplied by the owner on
 // 03/10/2026): iPhone and store icon, Android adaptive icon (foreground, background,
-// themed monochrome), native launch screen, notification icon, web favicon, and
-// the console's favicon. The mark is used as supplied, never redrawn.
+// themed monochrome), native launch screen (the star alone), notification icon,
+// web favicon, and the console's favicon. The mark is used as supplied, never redrawn.
 //   pnpm app:icons   regenerate them
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
+import {
+  BRAND_MARK,
+  STAR_CENTER,
+  STAR_POINTS,
+  STAR_WIDTH,
+} from "../packages/ui/src/tokens/brand-mark";
+import { NATIVE_STAR_SHARE } from "../apps/mobile/src/features/launch/native-splash";
 
 const repo = fileURLToPath(new URL("..", import.meta.url));
 const assets = join(repo, "apps/mobile/assets");
@@ -62,13 +69,25 @@ const shape = (color: string) =>
  * tall mark keeps its corners inside it at 520 px.
  */
 const IN_CIRCLE = 520;
+
+/**
+ * The phone's own launch screen shows the icon's star alone, centred, at the size
+ * the launch animation starts from (native-splash.ts): the bands then grow out of it.
+ */
+function launchStar(): string {
+  const size = 1024;
+  const scale = (NATIVE_STAR_SHARE * size) / STAR_WIDTH;
+  const at = `translate(${String(size / 2)} ${String(size / 2)}) scale(${String(scale)}) translate(${String(-STAR_CENTER.x)} ${String(-STAR_CENTER.y)})`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${String(size)}" height="${String(size)}"><polygon points="${STAR_POINTS}" fill="${BRAND_MARK.green}" transform="${at}"/></svg>`;
+}
+
 const ICONS: { file: string; svg: string }[] = [
   // iPhone and stores: opaque, square, the phone rounds the corners.
   { file: "icon.png", svg: square(1024, 720, colour, "#FFFFFF") },
   { file: "android-icon-foreground.png", svg: square(1024, IN_CIRCLE, colour) },
   { file: "android-icon-background.png", svg: square(1024, 0, "", "#FFFFFF") },
   { file: "android-icon-monochrome.png", svg: square(1024, IN_CIRCLE, shape("#000000")) },
-  { file: "splash-icon.png", svg: square(1024, IN_CIRCLE, colour) },
+  { file: "splash-icon.png", svg: launchStar() },
   // Android draws it in one colour: white on transparent, the star cut out.
   { file: "notification-icon.png", svg: square(96, 80, shape("#FFFFFF")) },
   { file: "favicon.png", svg: square(48, 44, colour) },

@@ -9,7 +9,7 @@ jest.mock("../../theme/useSystemAccessibility", () => ({
 }));
 
 describe("LaunchLayer", () => {
-  it("grows the baobab, hidden from screen readers and from touch", async () => {
+  it("shows the icon and the app's name, hidden from screen readers and from touch", async () => {
     mockReduceMotion = false;
     const onDone = jest.fn();
     await render(
@@ -19,8 +19,9 @@ describe("LaunchLayer", () => {
     );
     const layer = screen.getByTestId("launch-layer", { includeHiddenElements: true });
     expect(layer).toHaveProp("pointerEvents", "none");
-    // It starts from the official icon of the phone's launch screen.
+    // The official icon, with the app's name below it, as Google's apps show theirs.
     expect(screen.getByTestId("launch-mark", { includeHiddenElements: true })).toBeOnTheScreen();
+    expect(screen.getByText("BIC-GOUV Sn", { includeHiddenElements: true })).toBeOnTheScreen();
   });
 
   it("steps aside at once when the phone asks for less motion", async () => {

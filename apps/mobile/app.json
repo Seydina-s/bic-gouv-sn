@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "BIC-GOUV SN",
+    "name": "BIC-GOUV Sn",
     "slug": "bic-gouv-sn",
     "scheme": "bicgouvsn",
     "version": "0.0.0",
@@ -49,7 +49,7 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "BIC-GOUV SN utilise votre position sur votre téléphone, sans jamais l’envoyer, pour trouver les services de l’État les plus proches.",
+          "locationWhenInUsePermission": "BIC-GOUV Sn utilise votre position sur votre téléphone, sans jamais l’envoyer, pour trouver les services de l’État les plus proches.",
           "isAndroidBackgroundLocationEnabled": false,
           "isIosBackgroundLocationEnabled": false
         }
@@ -57,8 +57,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "BIC-GOUV SN ouvre vos photos seulement pour joindre celle que vous choisissez à un signalement.",
-          "cameraPermission": "BIC-GOUV SN utilise l’appareil photo seulement pour photographier un problème que vous signalez.",
+          "photosPermission": "BIC-GOUV Sn ouvre vos photos seulement pour joindre celle que vous choisissez à un signalement.",
+          "cameraPermission": "BIC-GOUV Sn utilise l’appareil photo seulement pour photographier un problème que vous signalez.",
           "microphonePermission": false
         }
       ],
