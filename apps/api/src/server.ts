@@ -1,5 +1,5 @@
 import packageJson from "../package.json" with { type: "json" };
-import { FileArticleRepository } from "@bgs/content-store";
+import { contentStores } from "@bgs/content-store";
 import { buildApp } from "./app";
 import { loadConfig } from "./config";
 import { openDatabase } from "@bgs/database";
@@ -29,10 +29,20 @@ const usageStats = new UsageStats(
     ? new FileUsageStore(config.USAGE_STATS_PATH)
     : new PostgresUsageStore(database),
 );
+// Contents in PostgreSQL when DATABASE_URL is set, shared with the collection and
+// every other instance (SCALE-02); otherwise the files of .data/.
+const contents = contentStores(database, {
+  news: config.NEWS_STORE_PATH,
+  procedures: config.PROCEDURES_STORE_PATH,
+  procedureThemes: config.PROCEDURE_THEMES_PATH,
+  stateServices: config.STATE_SERVICES_PATH,
+  remoteConfig: config.REMOTE_CONFIG_PATH,
+  ingestionStatus: config.INGESTION_STATUS_PATH,
+});
 const app = await buildApp({
   config,
   version: packageJson.version,
-  articles: new FileArticleRepository(config.NEWS_STORE_PATH),
+  ...contents,
   errorJournal,
   searchMisses,
   usageStats,

@@ -1,6 +1,6 @@
 import type { Database, Queryable } from "@bgs/database";
 import type { z } from "zod";
-import type { SaveOutcome, Versioned } from "./versioned-json-store";
+import type { SaveOutcome, Versioned, VersionedEntry } from "./versioned-json-store";
 
 /** A table of versioned items, its history table, and the columns lists use. */
 export interface VersionedTableSpec<T extends Versioned> {
@@ -63,6 +63,28 @@ export class PostgresVersionedTable<T extends Versioned> {
       }
       await this.write(tx, { ...item, version: (existing?.version ?? 0) + 1 });
       return existing === null ? "created" : "updated";
+    });
+  }
+
+  /**
+   * Copies an item with its whole history as they are, version numbers included
+   * (moving from the files, SCALE-02). An item already in the table is left
+   * untouched: running the copy again changes nothing.
+   */
+  importEntry(entry: VersionedEntry<T>): Promise<"imported" | "present"> {
+    return this.database.transaction(async (tx) => {
+      if ((await this.lockCurrent(tx, entry.current.id)) !== null) {
+        return "present";
+      }
+      for (const previous of entry.history.map((item) => this.spec.schema.parse(item))) {
+        await tx.query(
+          `INSERT INTO ${this.spec.historyTable} (id, version, data) VALUES ($1, $2, $3::jsonb)
+           ON CONFLICT (id, version) DO NOTHING`,
+          [previous.id, previous.version, JSON.stringify(previous)],
+        );
+      }
+      await this.write(tx, entry.current);
+      return "imported";
     });
   }
 

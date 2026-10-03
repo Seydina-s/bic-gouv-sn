@@ -16,10 +16,12 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run --coverage",
     "procedures:themes": "tsx src/cli/procedure-themes.ts",
-    "services:osm": "tsx src/cli/state-services.ts"
+    "services:osm": "tsx src/cli/state-services.ts",
+    "content:import": "tsx src/cli/import-to-database.ts"
   },
   "dependencies": {
     "@bgs/content-store": "workspace:*",
+    "@bgs/database": "workspace:*",
     "@bgs/resilience": "workspace:*",
     "@bgs/shared-types": "workspace:*",
     "blurhash": "2.0.5",

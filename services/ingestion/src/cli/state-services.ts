@@ -2,17 +2,12 @@
 // `pnpm --filter @bgs/ingestion services:osm`. Nothing is shown in the app before a
 // person verifies it; a verified service is never changed silently by a new import.
 // OpenStreetMap data: © OpenStreetMap contributors, ODbL. Messages are in French.
-import { fileURLToPath } from "node:url";
-import { StateServiceStore, fileDocument } from "@bgs/content-store";
+import { openStores } from "../lib/stores";
 import { toImportedService, toPlace } from "../sources/osm/classify";
 import { fetchStateServices } from "../sources/osm/overpass";
 
-const dataDir = new URL("../../../../.data/", import.meta.url);
-const store = new StateServiceStore(
-  fileDocument(
-    process.env["STATE_SERVICES_PATH"] ?? fileURLToPath(new URL("state-services.json", dataDir)),
-  ),
-);
+const { stores, close } = await openStores();
+const store = stores.stateServices;
 
 const fetchedAt = new Date().toISOString();
 const elements = await fetchStateServices();
@@ -35,3 +30,4 @@ process.stdout.write(
     "",
   ].join("\n"),
 );
+await close();
