@@ -15,6 +15,11 @@ function titleOf(procedure: Procedure): string {
 
 const byTitle = new Intl.Collator("fr", { sensitivity: "base" });
 
+/** Alphabetical order of the French titles, shared by every procedure store. */
+export function byFrenchTitle(a: Procedure, b: Procedure): number {
+  return byTitle.compare(titleOf(a), titleOf(b));
+}
+
 /** Provisional procedure store: one JSON file (see VersionedJsonStore). */
 export class FileProcedureRepository implements ProcedureRepository {
   private readonly store: VersionedJsonStore<Procedure>;
@@ -34,7 +39,7 @@ export class FileProcedureRepository implements ProcedureRepository {
   async all(): Promise<Procedure[]> {
     return Object.values(await this.store.entries())
       .map((entry) => entry.current)
-      .sort((a, b) => byTitle.compare(titleOf(a), titleOf(b)));
+      .sort(byFrenchTitle);
   }
 
   save(procedure: Procedure): Promise<SaveOutcome> {

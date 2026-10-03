@@ -8,3 +8,6 @@ export * from "./procedure-repository";
 export * from "./procedure-theme-store";
 export * from "./state-service-store";
 export * from "./remote-config-store";
+export * from "./postgres-versioned-table";
+export * from "./postgres-article-repository";
+export * from "./postgres-procedure-repository";
