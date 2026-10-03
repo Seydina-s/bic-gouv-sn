@@ -116,7 +116,14 @@ export const motion = {
     exitNormal: 160,
     /** Time each story stays in the front page carousel (long headlines, WCAG 2.2.2). */
     carouselDwell: 5000,
-    /** The baobab drawn stroke by stroke at launch (charter: under 1.5 s). */
+    /**
+     * The launch (owner's choice, 03/10/2026): the official icon grows out of its
+     * star and stays with the app's name, then folds into the star, a seed falling
+     * to the ground, from which the baobab grows.
+     */
+    launchIcon: 2500,
+    launchSeed: 750,
+    /** The baobab grows out of the seed. */
     launchDraw: 1000,
     /** It stays a moment, is taken back stroke by stroke, and fades into the app. */
     launchHold: 250,

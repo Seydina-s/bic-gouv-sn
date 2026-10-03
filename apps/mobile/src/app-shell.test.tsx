@@ -209,7 +209,7 @@ describe("app shell", () => {
         name: /^Article 1 sur 2\. Conseil des ministres\. Titre de test A/,
       }),
     ).toBeOnTheScreen();
-    expect(screen.getByRole("header", { name: "BIC-GOUV SN" })).toBeOnTheScreen();
+    expect(screen.getByRole("header", { name: "BIC-GOUV Sn" })).toBeOnTheScreen();
     // Rows in the official order, each with its "Voir plus" leading to the section.
     expect(screen.getByRole("header", { name: "Conseil des ministres" })).toBeOnTheScreen();
     expect(screen.getByRole("header", { name: "Actualité" })).toBeOnTheScreen();
@@ -609,7 +609,7 @@ describe("app shell", () => {
     await renderRouter(routes, { initialUrl: "/section/discours" });
     expect(await screen.findByRole("header", { name: "Discours" })).toBeOnTheScreen();
     await fireEvent.press(screen.getByRole("button", { name: "Tout" }));
-    expect(await screen.findByRole("header", { name: "BIC-GOUV SN" })).toBeOnTheScreen();
+    expect(await screen.findByRole("header", { name: "BIC-GOUV Sn" })).toBeOnTheScreen();
   });
 
   it("keeps an article in the favorites, saved on the phone", async () => {
