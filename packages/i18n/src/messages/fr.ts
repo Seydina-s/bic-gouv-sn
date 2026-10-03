@@ -18,7 +18,11 @@ export const fr = {
     sourceAttribution: "Source\u00a0: {source}",
     machineTranslation: "Traduction automatique",
     listen: "Écouter",
-    stopListening: "Arrêter",
+    pause: "Pause",
+    resume: "Reprendre",
+    pauseReading: "Mettre la lecture en pause",
+    resumeReading: "Reprendre la lecture",
+    wolofVoiceSoon: "Voix wolof bientôt disponible",
     updatedJustNow: "Mis à jour à l'instant.",
     updatedMinutesAgo: "Mis à jour il y a {count} min.",
     updatedHoursAgo: {

@@ -7,26 +7,24 @@ import { Icon } from "../../components/Icon";
 import { dimWhenPressed } from "../../components/press-feedback";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
-import { FRENCH_VOICE, ReadAloudButton } from "../news/ListenButton";
 
 /*
  * Participer, one question at a time (direction C chosen by the owner, 02/10/2026):
- * a progress bar, the question in large type with "Écouter", large tiles to choose,
- * then "Retour" and "Continuer". References: FixMyStreet and SeeClickFix for citizen
- * reports, Duolingo for one question per screen.
+ * a progress bar, the question in large type, large tiles to choose, then "Retour"
+ * and "Continuer". No "Écouter" here: it is kept for the long texts, articles and
+ * procedures (owner's request, 02/10/2026). References: FixMyStreet and
+ * SeeClickFix for citizen reports, Duolingo for one question per screen.
  */
 
-/** Progress, the question, and "Écouter", which reads the question then the choices. */
+/** Progress and the question. */
 export function StepHeader({
   step,
   count,
   question,
-  choices = [],
 }: {
   step: number;
   count: number;
   question: string;
-  choices?: readonly string[];
 }) {
   const { theme } = useTheme();
   const { t } = useTranslation();
@@ -60,9 +58,6 @@ export function StepHeader({
       <Text accessibilityRole="header" style={[textStyle.headline, { color: color.textPrimary }]}>
         {question}
       </Text>
-      <View style={styles.listen}>
-        <ReadAloudButton language={FRENCH_VOICE} pieces={() => [question, ...choices]} />
-      </View>
     </View>
   );
 }
@@ -235,7 +230,6 @@ export function StepBody({ step, children }: { step: number; children: ReactNode
 const styles = StyleSheet.create({
   progress: { flexDirection: "row" },
   progressPart: { flex: 1 },
-  listen: { alignSelf: "flex-start" },
   tiles: { flexDirection: "row", flexWrap: "wrap" },
   tileHalf: { flexBasis: "47%", flexGrow: 1 },
   tileWhole: { flexBasis: "100%" },

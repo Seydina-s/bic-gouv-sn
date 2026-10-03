@@ -1,8 +1,11 @@
 import type { NewsDetail } from "@bgs/shared-types";
 import * as Speech from "expo-speech";
+import { HourglassMediumIcon as HourglassMedium } from "phosphor-react-native/src/icons/HourglassMedium";
+import { PauseIcon as Pause } from "phosphor-react-native/src/icons/Pause";
+import { PlayIcon as Play } from "phosphor-react-native/src/icons/Play";
 import { SpeakerHighIcon as SpeakerHigh } from "phosphor-react-native/src/icons/SpeakerHigh";
-import { StopIcon as Stop } from "phosphor-react-native/src/icons/Stop";
-import { Pressable, StyleSheet, Text } from "react-native";
+import { useCallback, useEffect, useState } from "react";
+import { AccessibilityInfo, Pressable, StyleSheet, Text } from "react-native";
 import { GlassBackdrop } from "../../components/GlassBackdrop";
 import { Icon } from "../../components/Icon";
 import { useTranslation } from "../../i18n/useTranslation";
@@ -10,73 +13,132 @@ import { useTheme } from "../../theme/useTheme";
 import { useFeature } from "../remote-config/useRemoteConfig";
 import { useUsageStats } from "../usage-stats/UsageStatsProvider";
 import { spokenPieces } from "./spoken-text";
-import { useReadAloud } from "./useReadAloud";
+import { useReadAloud, type ReadAloudStatus } from "./useReadAloud";
 
 /** The phone's French voice: every phone has one; none ships a Wolof voice yet. */
 export const FRENCH_VOICE = "fr-FR";
 const VOICES: Partial<Record<NewsDetail["lang"], string>> = { fr: FRENCH_VOICE };
 
-/** True when this article can be read aloud on the phone. */
-export function canListen(detail: NewsDetail): boolean {
-  return VOICES[detail.lang] !== undefined;
+/** How long "Voix wolof bientôt disponible" stays on the button. */
+const NOTICE_MS = 3000;
+
+/**
+ * The phone voice an article is read with, or null when there is none yet for its
+ * language: the button still shows and says the Wolof voice is coming (owner's
+ * choice, 02/10/2026), never a French voice mangling Wolof.
+ */
+export function articleVoice(detail: NewsDetail): string | null {
+  return VOICES[detail.lang] ?? null;
 }
 
-/** The article's "Écouter": its title, then its text. */
-export function ListenButton({ detail }: { detail: NewsDetail }) {
-  const { record } = useUsageStats();
-  return (
-    <ReadAloudButton
-      language={VOICES[detail.lang] ?? FRENCH_VOICE}
-      onStart={() => {
-        record({ type: "listen", articleId: detail.id });
-      }}
-      pieces={() => spokenPieces(detail.title, detail.blocks, Speech.maxSpeechInputLength)}
-    />
-  );
+/** One screen's reading aloud, shared by its "Écouter" pill and its floating button. */
+export interface Listening {
+  /** False when the console switched reading aloud off for the moment. */
+  offered: boolean;
+  status: ReadAloudStatus;
+  /** "Voix wolof bientôt disponible" is showing. */
+  noticeShown: boolean;
+  /** Listen, pause or resume, depending on where the reading is. */
+  toggle: () => void;
 }
 
-/** "Écouter", unless the console switched reading aloud off for the moment. */
-export function ReadAloudButton(props: {
-  language: string;
+/**
+ * Reading aloud for one screen. `voice` null: no voice for this language yet.
+ * `pieces` is only computed when the reading starts.
+ */
+export function useListening({
+  voice,
+  pieces,
+  onStart,
+}: {
+  voice: string | null;
   pieces: () => readonly string[];
   /** Called when reading starts (an article listened to is counted, ADM-12). */
   onStart?: () => void;
-}) {
-  return useFeature("readAloud") ? <ReadAloudPill {...props} /> : null;
+}): Listening {
+  const { t } = useTranslation();
+  const offered = useFeature("readAloud");
+  const { status, start, pause, resume } = useReadAloud(voice ?? FRENCH_VOICE);
+  const [noticeShown, setNoticeShown] = useState(false);
+
+  useEffect(() => {
+    if (!noticeShown) {
+      return;
+    }
+    const timer = setTimeout(() => {
+      setNoticeShown(false);
+    }, NOTICE_MS);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [noticeShown]);
+
+  const toggle = useCallback(() => {
+    if (voice === null) {
+      setNoticeShown(true);
+      AccessibilityInfo.announceForAccessibility(t("content.wolofVoiceSoon"));
+    } else if (status === "playing") {
+      pause();
+    } else if (status === "paused") {
+      resume();
+    } else {
+      start(pieces());
+      onStart?.();
+    }
+  }, [voice, status, pause, resume, start, pieces, onStart, t]);
+
+  return { offered, status, noticeShown, toggle };
+}
+
+/** The article's reading: its title, then its text, in the article's language. */
+export function useArticleListening(detail: NewsDetail): Listening {
+  const { record } = useUsageStats();
+  return useListening({
+    voice: articleVoice(detail),
+    pieces: () => spokenPieces(detail.title, detail.blocks, Speech.maxSpeechInputLength),
+    onStart: () => {
+      record({ type: "listen", articleId: detail.id });
+    },
+  });
+}
+
+/** What the button shows at each point of the reading. */
+export function useListenFace(listening: Listening) {
+  const { t } = useTranslation();
+  if (listening.noticeShown) {
+    return {
+      icon: HourglassMedium,
+      label: t("content.wolofVoiceSoon"),
+      action: t("content.listen"),
+    };
+  }
+  switch (listening.status) {
+    case "playing":
+      return { icon: Pause, label: t("content.pause"), action: t("content.pauseReading") };
+    case "paused":
+      return { icon: Play, label: t("content.resume"), action: t("content.resumeReading") };
+    case "idle":
+      return { icon: SpeakerHigh, label: t("content.listen"), action: t("content.listen") };
+  }
 }
 
 /**
  * "Écouter" pill on glass (it reads over any picture, as on an article photo).
- * Becomes "Arrêter" while reading. `pieces` is only computed when pressed.
+ * Becomes "Pause", then "Reprendre", while reading.
  */
-function ReadAloudPill({
-  language,
-  pieces,
-  onStart,
-}: {
-  language: string;
-  pieces: () => readonly string[];
-  onStart?: (() => void) | undefined;
-}) {
+export function ListenPill({ listening }: { listening: Listening }) {
   const { theme } = useTheme();
-  const { t } = useTranslation();
-  const { speaking, start, stop } = useReadAloud(language);
+  const face = useListenFace(listening);
   const { color, space, textStyle, radius, touchTarget } = theme;
-  const label = speaking ? t("content.stopListening") : t("content.listen");
-
+  if (!listening.offered) {
+    return null;
+  }
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={label}
-      accessibilityState={{ selected: speaking }}
-      onPress={() => {
-        if (speaking) {
-          stop();
-        } else {
-          start(pieces());
-          onStart?.();
-        }
-      }}
+      accessibilityLabel={face.label}
+      accessibilityState={{ selected: listening.status === "playing" }}
+      onPress={listening.toggle}
       style={({ pressed }) => [
         styles.pill,
         {
@@ -90,8 +152,8 @@ function ReadAloudPill({
       ]}
     >
       <GlassBackdrop />
-      <Icon icon={speaking ? Stop : SpeakerHigh} weight="fill" color={color.textBrand} />
-      <Text style={[textStyle.label, { color: color.textPrimary }]}>{label}</Text>
+      <Icon icon={face.icon} weight="fill" color={color.textBrand} />
+      <Text style={[textStyle.label, { color: color.textPrimary }]}>{face.label}</Text>
     </Pressable>
   );
 }
