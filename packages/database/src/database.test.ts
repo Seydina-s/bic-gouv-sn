@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { testDatabases } from "../testing/database";
+import { testDatabases } from "./testing/index";
 import type { Database } from "./database";
 import { migrate } from "./database";
 import { MIGRATIONS } from "./migrations";

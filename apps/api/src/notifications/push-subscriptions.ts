@@ -8,7 +8,7 @@ import {
   type SubscribersSummary,
 } from "@bgs/shared-types";
 import { z } from "zod";
-import type { Queryable } from "../database/database";
+import type { Queryable } from "@bgs/database";
 
 /** A subscription as kept: with when the phone subscribed (none before 01/10/2026). */
 const keptSchema = pushSubscriptionSchema.extend({ subscribedAt: z.iso.datetime().optional() });

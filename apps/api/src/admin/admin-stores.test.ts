@@ -5,8 +5,8 @@ import { join } from "node:path";
 import { firstBrokenEntry } from "@bgs/admin-auth";
 import { afterEach, describe, expect, it } from "vitest";
 import { loadConfig } from "../config";
-import { type Database, migrate } from "../database/database";
-import { testDatabases } from "../testing/database";
+import { type Database, migrate } from "@bgs/database";
+import { testDatabases } from "@bgs/database/testing";
 import type { AdminAccount } from "./account-store";
 import { type AdminStores, adminStores } from "./admin-stores";
 

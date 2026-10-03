@@ -3,8 +3,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { PushSubscription } from "@bgs/shared-types";
 import { afterEach, describe, expect, it } from "vitest";
-import { migrate } from "../database/database";
-import { testDatabases } from "../testing/database";
+import { migrate } from "@bgs/database";
+import { testDatabases } from "@bgs/database/testing";
 import {
   cachedSummary,
   FilePushSubscriptionStore,

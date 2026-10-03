@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { PGlite } from "@electric-sql/pglite";
-import { connectPostgres, type Database } from "../database/database";
+import { connectPostgres, type Database } from "../database";
 
 const freshSchema = () => `test_${randomUUID().replaceAll("-", "")}`;
 
