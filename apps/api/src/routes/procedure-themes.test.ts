@@ -2,7 +2,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { firstBrokenEntry } from "@bgs/admin-auth";
-import { FileProcedureRepository, FileProcedureThemeStore } from "@bgs/content-store";
+import { FileProcedureRepository, ProcedureThemeStore, fileDocument } from "@bgs/content-store";
 import { procedureListResponseSchema, procedureThemesResponseSchema } from "@bgs/shared-types";
 import type { FastifyInstance } from "fastify";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -23,7 +23,7 @@ beforeEach(async () => {
   await procedures.save(procedure(1, "Permis de conduire", "<p>Texte.</p>"));
   await procedures.save(procedure(2, "Carte grise", "<p>Texte.</p>"));
   await procedures.save(procedure(3, "Prêt", "<p>Texte.</p>"));
-  const themes = new FileProcedureThemeStore(join(dir, "procedure-themes.json"));
+  const themes = new ProcedureThemeStore(fileDocument(join(dir, "procedure-themes.json")));
   await themes.saveThemes([
     { id: "a1", title: "Transports", sourceIcon: "fa-bus-alt", fetchedAt: NOW },
     { id: "b2", title: "Finances", sourceIcon: "fa-wallet", fetchedAt: NOW },

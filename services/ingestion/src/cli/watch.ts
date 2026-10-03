@@ -3,6 +3,7 @@ import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   FileArticleRepository,
+  fileDocument,
   readIngestionStatus,
   removeStaleTemps,
   snapshotDaily,
@@ -56,7 +57,8 @@ for (const signal of ["SIGINT", "SIGTERM"] as const) {
 const statusPath =
   process.env["INGESTION_STATUS_PATH"] ??
   fileURLToPath(new URL("../../../../.data/ingestion-status.json", import.meta.url));
-let status = await readIngestionStatus(statusPath);
+const statusDocument = fileDocument(statusPath);
+let status = await readIngestionStatus(statusDocument);
 
 // One safety copy of the data per day, the last 7 kept (DATA-01).
 const backupsDir =
@@ -79,7 +81,7 @@ async function report(outcome: PassOutcome, lastChangeAt: Date | null): Promise<
     nextAttemptAt: new Date(now.getTime() + delay).toISOString(),
     circuits: circuitStatuses(provider.circuits?.() ?? []),
   };
-  await writeIngestionStatus(statusPath, status).catch((error: unknown) => {
+  await writeIngestionStatus(statusDocument, status).catch((error: unknown) => {
     process.stdout.write(`status report not written: ${String(error)}\n`);
   });
   await snapshotDaily({ files: [storePath, statusPath], backupsDir, now: new Date(), keep: 7 })

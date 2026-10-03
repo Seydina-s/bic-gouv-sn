@@ -11,3 +11,4 @@ export * from "./remote-config-store";
 export * from "./postgres-versioned-table";
 export * from "./postgres-article-repository";
 export * from "./postgres-procedure-repository";
+export * from "./json-document";

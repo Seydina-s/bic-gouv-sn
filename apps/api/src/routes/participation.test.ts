@@ -5,7 +5,7 @@ import { participationResponseSchema, submissionReceiptSchema } from "@bgs/share
 import type { FastifyInstance } from "fastify";
 import sharp from "sharp";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { FileRemoteConfigStore } from "@bgs/content-store";
+import { RemoteConfigStore, fileDocument } from "@bgs/content-store";
 import { writeFile } from "node:fs/promises";
 import { buildApp } from "../app";
 import { loadConfig } from "../config";
@@ -166,7 +166,7 @@ describe("Participer switched off in the console", () => {
       version: "1.0.0",
       articles: temporaryStore(),
       admin: admin.admin,
-      remoteConfig: new FileRemoteConfigStore(path),
+      remoteConfig: new RemoteConfigStore(fileDocument(path)),
       participationStore: new FileParticipationStore(join(dir, "closed.json")),
     });
     const sent = await closed.inject({

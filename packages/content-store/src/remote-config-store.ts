@@ -1,4 +1,3 @@
-import { readFile } from "node:fs/promises";
 import {
   APP_FEATURES,
   DEFAULT_REMOTE_CONFIG,
@@ -6,7 +5,7 @@ import {
   type RemoteConfig,
 } from "@bgs/shared-types";
 import { z } from "zod";
-import { writeFileDurably } from "./durable-file";
+import type { JsonDocument } from "./json-document";
 
 /** What was saved: a feature added since (or dropped) does not make it unreadable. */
 const savedSchema = z.object({
@@ -16,23 +15,19 @@ const savedSchema = z.object({
 
 /**
  * The remote control of the installed apps (kill switches, minimum version), set
- * in the console. Missing file: everything on, no minimum.
+ * in the console. Nothing saved: everything on, no minimum. In a file or in
+ * PostgreSQL (SCALE-02).
  */
-export class FileRemoteConfigStore {
-  constructor(private readonly path: string) {}
+export class RemoteConfigStore {
+  constructor(private readonly document: JsonDocument) {}
 
   async read(): Promise<RemoteConfig> {
-    let raw: string;
-    try {
-      raw = await readFile(this.path, "utf8");
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-        return DEFAULT_REMOTE_CONFIG;
-      }
-      throw error;
+    const raw = await this.document.read();
+    if (raw === undefined) {
+      return DEFAULT_REMOTE_CONFIG;
     }
-    // A malformed file is refused; a feature added since it was saved stays on.
-    const saved = savedSchema.parse(JSON.parse(raw));
+    // A malformed value is refused; a feature added since it was saved stays on.
+    const saved = savedSchema.parse(raw);
     const features = Object.fromEntries(
       APP_FEATURES.map((feature) => [
         feature,
@@ -42,9 +37,8 @@ export class FileRemoteConfigStore {
     return remoteConfigSchema.parse({ minVersion: saved.minVersion, features });
   }
 
-  async write(config: RemoteConfig): Promise<RemoteConfig> {
+  write(config: RemoteConfig): Promise<RemoteConfig> {
     const valid = remoteConfigSchema.parse(config);
-    await writeFileDurably(this.path, JSON.stringify(valid, null, 2));
-    return valid;
+    return this.document.update(() => ({ next: valid, result: valid }));
   }
 }

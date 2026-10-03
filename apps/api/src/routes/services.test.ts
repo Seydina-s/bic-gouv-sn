@@ -2,7 +2,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { firstBrokenEntry } from "@bgs/admin-auth";
-import { FileStateServiceStore, type ImportedService } from "@bgs/content-store";
+import { StateServiceStore, type ImportedService, fileDocument } from "@bgs/content-store";
 import { stateServicesResponseSchema } from "@bgs/shared-types";
 import type { FastifyInstance } from "fastify";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -32,11 +32,11 @@ function service(n: number, name: string): ImportedService {
 let dir: string;
 let app: FastifyInstance;
 let admin: Awaited<ReturnType<typeof adminForTests>>;
-let store: FileStateServiceStore;
+let store: StateServiceStore;
 
 beforeEach(async () => {
   dir = await mkdtemp(join(tmpdir(), "bgs-api-services-"));
-  store = new FileStateServiceStore(join(dir, "state-services.json"));
+  store = new StateServiceStore(fileDocument(join(dir, "state-services.json")));
   await store.importServices(
     [service(1, "Mairie de test B"), service(2, "Mairie de test A"), service(3, "Mairie C")],
     [{ id: "osm-n9", name: "Ville de test", kind: "city", location: { lat: 14.7, lng: -17.4 } }],

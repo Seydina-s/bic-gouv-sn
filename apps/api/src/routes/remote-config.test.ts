@@ -1,7 +1,7 @@
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { FileRemoteConfigStore } from "@bgs/content-store";
+import { RemoteConfigStore, fileDocument } from "@bgs/content-store";
 import { DEFAULT_REMOTE_CONFIG } from "@bgs/shared-types";
 import type { FastifyInstance } from "fastify";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -21,7 +21,7 @@ beforeEach(async () => {
     config: loadConfig({ LOG_LEVEL: "silent" }),
     version: "1.0.0",
     articles: temporaryStore(),
-    remoteConfig: new FileRemoteConfigStore(join(dir, "remote-config.json")),
+    remoteConfig: new RemoteConfigStore(fileDocument(join(dir, "remote-config.json"))),
     admin: admin.admin,
   });
 });

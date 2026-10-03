@@ -180,4 +180,10 @@ export const MIGRATIONS: readonly { id: string; statements: readonly string[] }[
       )`,
     ],
   },
+  {
+    // Contents kept as one validated JSON value each (SCALE-02): procedure themes,
+    // state services, remote control of the apps, report of the collection.
+    id: "014-content-documents",
+    statements: ["CREATE TABLE content_documents (name text PRIMARY KEY, data jsonb NOT NULL)"],
+  },
 ];

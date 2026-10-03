@@ -1,4 +1,4 @@
-import type { FileProcedureThemeStore, ProcedureRepository } from "@bgs/content-store";
+import type { ProcedureThemeStore, ProcedureRepository } from "@bgs/content-store";
 import { apiErrorSchema } from "@bgs/shared-types";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
@@ -10,7 +10,7 @@ export interface AdminProcedureThemesOptions {
   signIn: AdminSignIn;
   journal: AuditJournal;
   procedures: ProcedureRepository;
-  themes: FileProcedureThemeStore;
+  themes: ProcedureThemeStore;
 }
 
 /** A batch stays small enough to be read by the person who validates it. */

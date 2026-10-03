@@ -2,16 +2,17 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { FileProcedureThemeStore } from "./procedure-theme-store";
+import { ProcedureThemeStore } from "./procedure-theme-store";
+import { fileDocument } from "./json-document";
 
 let dir: string;
-let store: FileProcedureThemeStore;
+let store: ProcedureThemeStore;
 const NOW = "2026-09-26T12:00:00Z";
 const LATER = "2026-09-27T12:00:00Z";
 
 beforeEach(async () => {
   dir = await mkdtemp(join(tmpdir(), "bgs-themes-"));
-  store = new FileProcedureThemeStore(join(dir, "procedure-themes.json"));
+  store = new ProcedureThemeStore(fileDocument(join(dir, "procedure-themes.json")));
   await store.saveThemes([
     { id: "a1", title: "Transports", sourceIcon: "fa-bus-alt", fetchedAt: NOW },
     { id: "b2", title: "Finances", sourceIcon: "fa-wallet", fetchedAt: NOW },
@@ -22,9 +23,9 @@ afterEach(async () => {
   await rm(dir, { recursive: true, force: true });
 });
 
-describe("FileProcedureThemeStore", () => {
+describe("ProcedureThemeStore", () => {
   it("starts empty", async () => {
-    const empty = new FileProcedureThemeStore(join(dir, "none.json"));
+    const empty = new ProcedureThemeStore(fileDocument(join(dir, "none.json")));
     expect(await empty.read()).toEqual({ schemaVersion: 1, themes: [], assignments: {} });
   });
 

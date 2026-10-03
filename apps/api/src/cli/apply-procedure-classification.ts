@@ -3,7 +3,7 @@
 // person validated in the console is never replaced; every theme batch is journaled.
 // Messages are in French: this command is run by the team.
 import { readFile } from "node:fs/promises";
-import { FileProcedureThemeStore } from "@bgs/content-store";
+import { ProcedureThemeStore, fileDocument } from "@bgs/content-store";
 import { z } from "zod";
 import { adminStoresForCommand } from "../admin/admin-stores";
 import { loadConfig } from "../config";
@@ -30,7 +30,7 @@ async function main(): Promise<void> {
     await readFile(new URL("../../data/procedure-classification.json", import.meta.url), "utf8"),
   );
   const classification = classificationSchema.parse(raw);
-  const store = new FileProcedureThemeStore(config.PROCEDURE_THEMES_PATH);
+  const store = new ProcedureThemeStore(fileDocument(config.PROCEDURE_THEMES_PATH));
   const now = new Date().toISOString();
 
   await store.savePlatformThemes(

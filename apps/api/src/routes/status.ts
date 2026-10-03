@@ -1,11 +1,11 @@
-import { readIngestionStatus } from "@bgs/content-store";
+import { readIngestionStatus, type JsonDocument } from "@bgs/content-store";
 import { ingestionStatusSchema } from "@bgs/shared-types";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
 
 export interface StatusRoutesOptions {
   /** Report written by the collection after each pass. */
-  ingestionStatusPath: string;
+  ingestionStatus: JsonDocument;
 }
 
 /**
@@ -14,7 +14,7 @@ export interface StatusRoutesOptions {
  */
 export const statusRoutes: FastifyPluginAsyncZod<StatusRoutesOptions> = (
   app,
-  { ingestionStatusPath },
+  { ingestionStatus },
 ) => {
   app.get(
     "/status/ingestion",
@@ -27,7 +27,7 @@ export const statusRoutes: FastifyPluginAsyncZod<StatusRoutesOptions> = (
     },
     async (_request, reply) => {
       void reply.header("cache-control", "no-store");
-      return { report: await readIngestionStatus(ingestionStatusPath) };
+      return { report: await readIngestionStatus(ingestionStatus) };
     },
   );
   return Promise.resolve();

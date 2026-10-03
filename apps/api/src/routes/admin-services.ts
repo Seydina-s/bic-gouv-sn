@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { FileStateServiceStore } from "@bgs/content-store";
+import type { StateServiceStore } from "@bgs/content-store";
 import {
   apiErrorSchema,
   byDistance,
@@ -20,7 +20,7 @@ import { authorize } from "./admin-guard";
 export interface AdminServicesOptions {
   signIn: AdminSignIn;
   journal: AuditJournal;
-  services: FileStateServiceStore;
+  services: StateServiceStore;
 }
 
 /** A batch stays small enough to be checked by the person who verifies it. */
