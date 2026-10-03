@@ -2,7 +2,7 @@ import type { Database } from "@bgs/database";
 import { procedureSchema, type Procedure } from "@bgs/shared-types";
 import { byFrenchTitle, type ProcedureRepository } from "./procedure-repository";
 import { PostgresVersionedTable } from "./postgres-versioned-table";
-import type { SaveOutcome } from "./versioned-json-store";
+import type { SaveOutcome, VersionedEntry } from "./versioned-json-store";
 
 /** Procedures in PostgreSQL (SCALE-02), behind the same interface as the file store. */
 export class PostgresProcedureRepository implements ProcedureRepository {
@@ -38,5 +38,10 @@ export class PostgresProcedureRepository implements ProcedureRepository {
 
   save(procedure: Procedure): Promise<SaveOutcome> {
     return this.table.save(procedure);
+  }
+
+  /** Copies a procedure and its history as they are (see PostgresVersionedTable). */
+  importEntry(entry: VersionedEntry<Procedure>): Promise<"imported" | "present"> {
+    return this.table.importEntry(entry);
   }
 }

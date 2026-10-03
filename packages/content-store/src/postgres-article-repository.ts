@@ -9,6 +9,7 @@ import type {
   SectionsQuery,
 } from "./article-repository";
 import { PostgresVersionedTable } from "./postgres-versioned-table";
+import type { VersionedEntry } from "./versioned-json-store";
 
 /** compareNewestFirst, in SQL: newest publication day, then update time, then id. */
 const NEWEST_FIRST = "published_on DESC, updated_at DESC, id";
@@ -47,6 +48,11 @@ export class PostgresArticleRepository implements ArticleRepository {
 
   save(article: NewsArticle): Promise<SaveOutcome> {
     return this.table.save(article);
+  }
+
+  /** Copies an article and its history as they are (see PostgresVersionedTable). */
+  importEntry(entry: VersionedEntry<NewsArticle>): Promise<"imported" | "present"> {
+    return this.table.importEntry(entry);
   }
 
   async list({

@@ -20,6 +20,7 @@ import {
   RemoteConfigStore,
   StateServiceStore,
   type ArticleRepository,
+  type JsonDocument,
   type ProcedureRepository,
 } from "@bgs/content-store";
 import type { AdminAccountStore } from "./admin/account-store";
@@ -113,6 +114,8 @@ export interface AppOptions {
   stateServices?: StateServiceStore;
   /** Defaults to the remote control file at REMOTE_CONFIG_PATH. */
   remoteConfig?: RemoteConfigStore;
+  /** Defaults to the collection's report file at INGESTION_STATUS_PATH. */
+  ingestionStatus?: JsonDocument;
   /** Defaults to the file stores when ADMIN_SECRET_KEY is set; none otherwise. */
   admin?: AdminServices | null;
   /** Where the logs go: standard output by default, tests read them here. */
@@ -197,6 +200,7 @@ export async function buildApp({
   procedureThemes = new ProcedureThemeStore(fileDocument(config.PROCEDURE_THEMES_PATH)),
   stateServices = new StateServiceStore(fileDocument(config.STATE_SERVICES_PATH)),
   remoteConfig = new RemoteConfigStore(fileDocument(config.REMOTE_CONFIG_PATH)),
+  ingestionStatus = fileDocument(config.INGESTION_STATUS_PATH),
   redis = config.REDIS_URL === undefined ? null : connectRedis(config.REDIS_URL),
   sharedState = redis === null ? new MemoryKeyValueStore() : new RedisKeyValueStore(redis),
   database = null,
@@ -322,7 +326,7 @@ export async function buildApp({
   await app.register(remoteConfigRoutes, { prefix: "/v1", store: remoteConfig });
   await app.register(statusRoutes, {
     prefix: "/v1",
-    ingestionStatus: fileDocument(config.INGESTION_STATUS_PATH),
+    ingestionStatus,
   });
   await app.register(newsRoutes, {
     prefix: "/v1",

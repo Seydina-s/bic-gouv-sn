@@ -2,8 +2,6 @@
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
-  FileArticleRepository,
-  fileDocument,
   readIngestionStatus,
   removeStaleTemps,
   snapshotDaily,
@@ -11,15 +9,16 @@ import {
 } from "@bgs/content-store";
 import { errorCodeOf } from "@bgs/shared-types";
 import { acquireLock } from "../lib/single-instance";
+import { openStores } from "../lib/stores";
 import { FileMediaStorage } from "../media/media-storage";
 import { createPresidenceProvider } from "../sources/presidence/presidence-provider";
 import { circuitStatuses, nextIngestionStatus, type PassOutcome } from "../status";
 import { nextPollDelayMs, pollOnce, retryDelayMs, SeenIndex } from "../watch";
 import { isWithdrawalCheckDue, reconcileWithdrawals } from "../withdrawn";
 
-const storePath =
-  process.env["NEWS_STORE_PATH"] ??
-  fileURLToPath(new URL("../../../../.data/news.json", import.meta.url));
+// Into PostgreSQL when DATABASE_URL is set (SCALE-02), shared with the API; else .data/.
+const { stores, inDatabase, paths, close } = await openStores();
+const storePath = paths.news;
 // The store has a single writer: a second watcher refuses to start (ERREURS.md, 28/09).
 const lock = await acquireLock(`${storePath}.watch.lock`);
 if (!lock.acquired) {
@@ -37,7 +36,7 @@ if (staleTemps > 0) {
   );
 }
 const provider = createPresidenceProvider();
-const repository = new FileArticleRepository(storePath);
+const repository = stores.articles;
 const media = new FileMediaStorage(
   process.env["MEDIA_ROOT"] ?? fileURLToPath(new URL("../../../../.data/media", import.meta.url)),
 );
@@ -54,13 +53,12 @@ for (const signal of ["SIGINT", "SIGTERM"] as const) {
 }
 
 // Report read by the administration console (through the API) after each pass.
-const statusPath =
-  process.env["INGESTION_STATUS_PATH"] ??
-  fileURLToPath(new URL("../../../../.data/ingestion-status.json", import.meta.url));
-const statusDocument = fileDocument(statusPath);
+const statusPath = paths.ingestionStatus;
+const statusDocument = stores.ingestionStatus;
 let status = await readIngestionStatus(statusDocument);
 
-// One safety copy of the data per day, the last 7 kept (DATA-01).
+// One safety copy of the data files per day, the last 7 kept (DATA-01); a database
+// keeps its own backups.
 const backupsDir =
   process.env["BACKUPS_DIR"] ??
   fileURLToPath(new URL("../../../../.data/backups", import.meta.url));
@@ -84,6 +82,9 @@ async function report(outcome: PassOutcome, lastChangeAt: Date | null): Promise<
   await writeIngestionStatus(statusDocument, status).catch((error: unknown) => {
     process.stdout.write(`status report not written: ${String(error)}\n`);
   });
+  if (inDatabase) {
+    return delay;
+  }
   await snapshotDaily({ files: [storePath, statusPath], backupsDir, now: new Date(), keep: 7 })
     .then((snapshot) => {
       if (snapshot === "created") {
@@ -158,4 +159,5 @@ while (control.running) {
   });
 }
 await lock.release();
+await close();
 process.stdout.write("Watcher stopped.\n");
