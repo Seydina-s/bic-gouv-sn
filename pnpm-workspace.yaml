@@ -31,3 +31,7 @@ auditConfig:
     # node-forge <=1.4.0, RSA signature verification: only in @expo/cli, which uses
     # it to sign (dev manifests, local iOS builds), never to verify.
     - GHSA-86w9-cpqp-85rv
+    # braces <=3.0.3, stack exhaustion on deeply nested patterns (owner's decision,
+    # 03/10/2026): only in Metro and Jest, through micromatch, fed with the project's
+    # own glob patterns; absent from the app, the API, the console and ingestion.
+    - GHSA-vfj7-8cjw-p6xm
