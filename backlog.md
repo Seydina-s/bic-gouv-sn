@@ -449,3 +449,7 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 03/10/2026 | SPLASH-06 ✅ Ouverture « La graine » (direction C) : étoile de l'écran natif reprise à l'identique, bandes qui naissent de l'étoile, nom « BIC-GOUV Sn » dessous, icône 2,5 s, repli en graine qui tombe au sol, baobab qui en sort ; horloge unique sur le fil d'affichage (`launch-seed.ts`, testé) ; formes et couleurs de l'icône partagées dans `@bgs/ui` et vérifiées contre le fichier officiel ; 286 tests de l'app verts | Choix de l'utilisateur |
 | 03/10/2026 | SPLASH-07 ✅ Ouverture fluide dès le début : l'étoile attend que l'application soit installée (au moins 400 ms, au plus 1 s) avant de s'animer, début plus ample ; cause et prévention dans ERREURS.md ; 288 tests verts | Retour de l'utilisateur |
 | 03/10/2026 | AI-15 🔴 Voix française Piper « upmc » (Jessica ou Pierre, au choix de l'utilisateur) dans le workflow audio des articles (AI-11), mention de la source dans « À propos » | Décision de l'utilisateur |
+| 03/10/2026 | UX-02 ✅ Fondu doux entre mode clair et mode sombre (PR #233) | Utilisateur |
+| 03/10/2026 | SPLASH-01 ✅ Ouverture animée « La graine » à partir de l'icône officielle (PR #244, #246) ; Rive non nécessaire, animation dessinée par le téléphone | Utilisateur |
+| 03/10/2026 | AI-14 ✅ Workflow de l'IA validé par l'utilisateur ; services payants reportés après les tâches sans IA | Utilisateur |
+| 03/10/2026 | AI-15 🔴 Voix française : Jessica (Piper « upmc ») retenue par l'utilisateur | Utilisateur |
