@@ -1,6 +1,14 @@
 # STATUS — Bic Gouv SN
 
-**Dernière mise à jour** : 02/10/2026 (8 h 45) · **Mode** : autonome jusqu'au 02/10 à 13 h (accord de l'utilisateur du 02/10, vers 1 h 10) ; ensuite, séance sur l'IA, le logo et l'écran de démarrage. Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md` (point 32 réglé à 6 h 30).
+**Dernière mise à jour** : 03/10/2026 (20 h 45) · **Mode** : autonome depuis le 03/10 vers 19 h (accord de l'utilisateur), pour les tâches sans IA et sans coût. Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md`.
+
+## 02 et 03/10 en bref
+- **Identité** : baobab de l'utilisateur vectorisé (#240) ; icône officielle BIC-GOUV posée partout (#244) ; nom « BIC-GOUV Sn » ; ouverture « La graine » (étoile → bandes → nom → graine → baobab, 2,5 s d'icône, fluide dès le début, #246). Icône, nom et écran natif visibles après la **nouvelle compilation** (point 28).
+- **App** : « Écouter » réservé aux articles et démarches, bouton flottant Pause / Reprendre, reprise au mot près, message « Voix wolof bientôt disponible » (#241) ; Participer en fil guidé (#236).
+- **IA** (cadrage, rien de payant engagé) : workflow validé (`docs/cadrage/workflow-ia.md`) ; voix wolof Adia_TTS et voix française Jessica (Piper « upmc ») retenues ; essai de traduction wolof par Claude jugé parfait ; services payants (API Claude) reportés après les tâches sans IA.
+- **Sécurité** : exceptions d'audit limitées pour node-forge (#223) et braces (#243), décisions de l'utilisateur.
+- **SCALE-02 terminé** (#248 à #251) : tous les contenus (articles et démarches avec historique, thèmes, services, contrôle à distance, état de la collecte) dans PostgreSQL dès que `DATABASE_URL` est réglée ; commande `content:import` pour recopier les fichiers une fois ; procédure `docs/runbooks/passer-a-postgresql.md`. Plus aucun fichier partagé entre serveurs d'API.
+- **Ce qui attend l'utilisateur** : la nouvelle compilation (20 min ensemble), l'hébergement (point 27), la vérification des services de Dakar (point 2), le logo complet en vectoriel d'origine (point 34), la clé Claude au moment voulu (point 35).
 
 ## Où on en est
 - Dépôt **public et sécurisé** : https://github.com/Seydina-s/bic-gouv-sn. `main` protégée : tout passe par PR + **4 contrôles verts** (qualité et tests, constructions avec **audit d'accessibilité** sur 91 écrans dont 29 à 320 px et **9 parcours de bout en bout**, secrets et dépendances, **conteneurs**).
