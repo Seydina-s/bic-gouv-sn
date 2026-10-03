@@ -3,7 +3,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { correctedFacts, type Place } from "@bgs/shared-types";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { FileStateServiceStore, type ImportedService } from "./state-service-store";
+import { StateServiceStore, type ImportedService } from "./state-service-store";
+import { fileDocument } from "./json-document";
 
 // Placeholder services and towns, not real data.
 const NOW = "2026-09-27T04:00:00Z";
@@ -37,18 +38,18 @@ function fail(): never {
 }
 
 let dir: string;
-let store: FileStateServiceStore;
+let store: StateServiceStore;
 
 beforeEach(async () => {
   dir = await mkdtemp(join(tmpdir(), "bgs-services-"));
-  store = new FileStateServiceStore(join(dir, "state-services.json"));
+  store = new StateServiceStore(fileDocument(join(dir, "state-services.json")));
 });
 
 afterEach(async () => {
   await rm(dir, { recursive: true, force: true });
 });
 
-describe("FileStateServiceStore", () => {
+describe("StateServiceStore", () => {
   it("starts empty", async () => {
     expect(await store.read()).toEqual({ schemaVersion: 1, services: {}, places: [] });
   });

@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import type { FileProcedureThemeStore, ProcedureRepository } from "@bgs/content-store";
+import type { ProcedureThemeStore, ProcedureRepository } from "@bgs/content-store";
 import {
   apiErrorSchema,
   procedureDetailSchema,
@@ -17,7 +17,7 @@ import { PreparedTexts, searchTerms } from "../search/text-search";
 export interface ProceduresRoutesOptions {
   procedures: ProcedureRepository;
   /** Official themes and the theme of each procedure (only validated ones are public). */
-  themes: FileProcedureThemeStore;
+  themes: ProcedureThemeStore;
   /** Counts searches that found nothing, for the console; none in tests by default. */
   searchMisses?: SearchMisses | null;
 }

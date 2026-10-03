@@ -15,9 +15,10 @@ import {
 } from "fastify-type-provider-zod";
 import {
   FileProcedureRepository,
-  FileProcedureThemeStore,
-  FileRemoteConfigStore,
-  FileStateServiceStore,
+  ProcedureThemeStore,
+  fileDocument,
+  RemoteConfigStore,
+  StateServiceStore,
   type ArticleRepository,
   type ProcedureRepository,
 } from "@bgs/content-store";
@@ -107,11 +108,11 @@ export interface AppOptions {
   /** Defaults to the procedure store at PROCEDURES_STORE_PATH. */
   procedures?: ProcedureRepository;
   /** Defaults to the theme store at PROCEDURE_THEMES_PATH. */
-  procedureThemes?: FileProcedureThemeStore;
+  procedureThemes?: ProcedureThemeStore;
   /** Defaults to the state services store at STATE_SERVICES_PATH. */
-  stateServices?: FileStateServiceStore;
+  stateServices?: StateServiceStore;
   /** Defaults to the remote control file at REMOTE_CONFIG_PATH. */
-  remoteConfig?: FileRemoteConfigStore;
+  remoteConfig?: RemoteConfigStore;
   /** Defaults to the file stores when ADMIN_SECRET_KEY is set; none otherwise. */
   admin?: AdminServices | null;
   /** Where the logs go: standard output by default, tests read them here. */
@@ -193,9 +194,9 @@ export async function buildApp({
   version,
   articles,
   procedures = new FileProcedureRepository(config.PROCEDURES_STORE_PATH),
-  procedureThemes = new FileProcedureThemeStore(config.PROCEDURE_THEMES_PATH),
-  stateServices = new FileStateServiceStore(config.STATE_SERVICES_PATH),
-  remoteConfig = new FileRemoteConfigStore(config.REMOTE_CONFIG_PATH),
+  procedureThemes = new ProcedureThemeStore(fileDocument(config.PROCEDURE_THEMES_PATH)),
+  stateServices = new StateServiceStore(fileDocument(config.STATE_SERVICES_PATH)),
+  remoteConfig = new RemoteConfigStore(fileDocument(config.REMOTE_CONFIG_PATH)),
   redis = config.REDIS_URL === undefined ? null : connectRedis(config.REDIS_URL),
   sharedState = redis === null ? new MemoryKeyValueStore() : new RedisKeyValueStore(redis),
   database = null,
@@ -321,7 +322,7 @@ export async function buildApp({
   await app.register(remoteConfigRoutes, { prefix: "/v1", store: remoteConfig });
   await app.register(statusRoutes, {
     prefix: "/v1",
-    ingestionStatusPath: config.INGESTION_STATUS_PATH,
+    ingestionStatus: fileDocument(config.INGESTION_STATUS_PATH),
   });
   await app.register(newsRoutes, {
     prefix: "/v1",

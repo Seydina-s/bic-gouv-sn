@@ -4,6 +4,7 @@ import { join } from "node:path";
 import type { IngestionStatus } from "@bgs/shared-types";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { readIngestionStatus, writeIngestionStatus } from "./ingestion-status-file";
+import { fileDocument } from "./json-document";
 
 const STATUS: IngestionStatus = {
   checkedAt: "2026-09-26T10:00:00.000Z",
@@ -25,12 +26,13 @@ describe("ingestion status file", () => {
 
   it("round-trips, and reads a missing or damaged report as none", async () => {
     const path = join(dir, "nested", "status.json");
-    expect(await readIngestionStatus(path)).toBeNull();
-    await writeIngestionStatus(path, STATUS);
-    expect(await readIngestionStatus(path)).toEqual(STATUS);
+    const document = fileDocument(path);
+    expect(await readIngestionStatus(document)).toBeNull();
+    await writeIngestionStatus(document, STATUS);
+    expect(await readIngestionStatus(document)).toEqual(STATUS);
     await writeFile(path, "{broken");
-    expect(await readIngestionStatus(path)).toBeNull();
+    expect(await readIngestionStatus(document)).toBeNull();
     await writeFile(path, JSON.stringify({ ...STATUS, consecutiveFailures: -1 }));
-    expect(await readIngestionStatus(path)).toBeNull();
+    expect(await readIngestionStatus(document)).toBeNull();
   });
 });

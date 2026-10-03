@@ -9,7 +9,8 @@ import { base32Decode, codeAt, hashPassword, timeStep } from "../packages/admin-
 import {
   FileArticleRepository,
   FileProcedureRepository,
-  FileStateServiceStore,
+  StateServiceStore,
+  fileDocument,
 } from "../packages/content-store/src/index";
 import { procedureSchema } from "../packages/shared-types/src/index";
 import { procedure } from "../packages/shared-types/src/testing/fixtures";
@@ -164,7 +165,7 @@ async function seedProcedure(dataDir: string): Promise<void> {
 
 async function seedServices(dataDir: string): Promise<void> {
   const location = { lat: 14.7, lng: -17.4 };
-  await new FileStateServiceStore(join(dataDir, "state-services.json")).importServices(
+  await new StateServiceStore(fileDocument(join(dataDir, "state-services.json"))).importServices(
     [
       {
         id: SERVICE_ID,

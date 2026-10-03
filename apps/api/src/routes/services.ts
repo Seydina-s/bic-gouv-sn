@@ -1,11 +1,11 @@
 import { createHash } from "node:crypto";
-import type { FileStateServiceStore } from "@bgs/content-store";
+import type { StateServiceStore } from "@bgs/content-store";
 import { correctedFacts, stateServicesResponseSchema, type StateService } from "@bgs/shared-types";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
 
 export interface ServicesRoutesOptions {
-  services: FileStateServiceStore;
+  services: StateServiceStore;
 }
 
 /** Services change rarely (a person verifies them): same freshness as the procedures. */

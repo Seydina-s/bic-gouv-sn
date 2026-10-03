@@ -1,4 +1,4 @@
-import type { FileRemoteConfigStore } from "@bgs/content-store";
+import type { RemoteConfigStore } from "@bgs/content-store";
 import { apiErrorSchema, remoteConfigSchema, type RemoteConfig } from "@bgs/shared-types";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
@@ -13,7 +13,7 @@ const PUBLIC_CACHE = "public, max-age=60";
  * What every installed app reads at start and now and then: which features are on,
  * and the oldest version still allowed. No personal data, the same for everyone.
  */
-export const remoteConfigRoutes: FastifyPluginAsyncZod<{ store: FileRemoteConfigStore }> = (
+export const remoteConfigRoutes: FastifyPluginAsyncZod<{ store: RemoteConfigStore }> = (
   app,
   { store },
 ) => {
@@ -37,7 +37,7 @@ export const remoteConfigRoutes: FastifyPluginAsyncZod<{ store: FileRemoteConfig
 export interface AdminRemoteConfigOptions {
   signIn: AdminSignIn;
   journal: AuditJournal;
-  store: FileRemoteConfigStore;
+  store: RemoteConfigStore;
 }
 
 /** Plain summary of a change, for the audit journal. */

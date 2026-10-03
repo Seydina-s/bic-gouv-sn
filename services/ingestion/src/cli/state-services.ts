@@ -3,13 +3,15 @@
 // person verifies it; a verified service is never changed silently by a new import.
 // OpenStreetMap data: © OpenStreetMap contributors, ODbL. Messages are in French.
 import { fileURLToPath } from "node:url";
-import { FileStateServiceStore } from "@bgs/content-store";
+import { StateServiceStore, fileDocument } from "@bgs/content-store";
 import { toImportedService, toPlace } from "../sources/osm/classify";
 import { fetchStateServices } from "../sources/osm/overpass";
 
 const dataDir = new URL("../../../../.data/", import.meta.url);
-const store = new FileStateServiceStore(
-  process.env["STATE_SERVICES_PATH"] ?? fileURLToPath(new URL("state-services.json", dataDir)),
+const store = new StateServiceStore(
+  fileDocument(
+    process.env["STATE_SERVICES_PATH"] ?? fileURLToPath(new URL("state-services.json", dataDir)),
+  ),
 );
 
 const fetchedAt = new Date().toISOString();

@@ -1,7 +1,7 @@
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { writeIngestionStatus } from "@bgs/content-store";
+import { fileDocument, writeIngestionStatus } from "@bgs/content-store";
 import type { FastifyInstance } from "fastify";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { buildApp } from "../app";
@@ -45,7 +45,7 @@ describe("GET /v1/status/ingestion", () => {
       consecutiveFailures: 0,
       lastFailure: null,
     };
-    await writeIngestionStatus(join(dir, "ingestion-status.json"), report);
+    await writeIngestionStatus(fileDocument(join(dir, "ingestion-status.json")), report);
     const response = await app.inject({ method: "GET", url: "/v1/status/ingestion" });
     expect(response.json()).toEqual({ report });
   });
