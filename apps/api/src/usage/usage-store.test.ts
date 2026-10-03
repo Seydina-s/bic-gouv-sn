@@ -3,8 +3,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { UsageFile } from "@bgs/shared-types";
 import { afterEach, describe, expect, it } from "vitest";
-import { migrate } from "../database/database";
-import { testDatabases } from "../testing/database";
+import { migrate } from "@bgs/database";
+import { testDatabases } from "@bgs/database/testing";
 import { emptyDay, emptyUsage, MAX_ARTICLES_PER_DAY } from "./usage-counts";
 import { FileUsageStore, PostgresUsageStore, type UsageStore } from "./usage-store";
 

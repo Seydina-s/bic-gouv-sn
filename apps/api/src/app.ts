@@ -52,7 +52,7 @@ import { adminNewsRoutes } from "./routes/admin-news";
 import { adminNotificationsRoutes } from "./routes/admin-notifications";
 import { adminAccountsRoutes } from "./routes/admin-accounts";
 import { adminSearchMissesRoutes } from "./routes/admin-search-misses";
-import type { Database } from "./database/database";
+import type { Database } from "@bgs/database";
 import {
   FileNotificationStore,
   PostgresNotificationStore,

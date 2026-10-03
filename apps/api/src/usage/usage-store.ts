@@ -1,6 +1,6 @@
 import { usageFileSchema, type UsageFile } from "@bgs/shared-types";
 import { z } from "zod";
-import type { Queryable } from "../database/database";
+import type { Queryable } from "@bgs/database";
 import { JsonFileState } from "../journal/json-file-state";
 import {
   addUsage,

@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { writeFileDurably } from "@bgs/content-store";
 import { z } from "zod";
-import type { Database } from "./database";
+import type { Database } from "@bgs/database";
 
 /**
  * Documents the console changes (notifications, opportunities…), each one whole

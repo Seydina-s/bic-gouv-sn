@@ -1,5 +1,5 @@
 import type { Config } from "../config";
-import { type Database, openDatabase } from "../database/database";
+import { type Database, openDatabase } from "@bgs/database";
 import { type AdminAccountStore, FileAdminAccountStore } from "./account-store";
 import { type AuditJournal, FileAuditJournal } from "./audit-journal";
 import { PostgresAdminAccountStore, PostgresAuditJournal } from "./postgres-admin-stores";

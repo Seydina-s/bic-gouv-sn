@@ -6,7 +6,7 @@ import {
   type ResolveError,
 } from "@bgs/shared-types";
 import { z } from "zod";
-import type { Queryable } from "../database/database";
+import type { Queryable } from "@bgs/database";
 import { JsonFileState } from "./json-file-state";
 
 /** Groups kept: beyond, the least recent give way (a flood never fills the storage). */

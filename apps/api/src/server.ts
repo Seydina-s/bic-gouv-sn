@@ -2,7 +2,7 @@ import packageJson from "../package.json" with { type: "json" };
 import { FileArticleRepository } from "@bgs/content-store";
 import { buildApp } from "./app";
 import { loadConfig } from "./config";
-import { openDatabase } from "./database/database";
+import { openDatabase } from "@bgs/database";
 import { ErrorJournal } from "./journal/error-journal";
 import { FileErrorJournalStore, PostgresErrorJournalStore } from "./journal/error-journal-store";
 import { FileSearchMissStore, PostgresSearchMissStore } from "./journal/search-miss-store";

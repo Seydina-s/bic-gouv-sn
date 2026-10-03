@@ -6,7 +6,7 @@ import {
   type SearchMiss,
 } from "@bgs/shared-types";
 import { z } from "zod";
-import type { Queryable } from "../database/database";
+import type { Queryable } from "@bgs/database";
 import { JsonFileState } from "./json-file-state";
 
 /** Distinct searches kept: beyond, the least searched give way (bounded storage). */

@@ -1,5 +1,5 @@
 import { notificationSchema, type Notification } from "@bgs/shared-types";
-import type { Database } from "../database/database";
+import type { Database } from "@bgs/database";
 import {
   type DocumentStore,
   FileDocumentStore,

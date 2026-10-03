@@ -453,3 +453,4 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 03/10/2026 | SPLASH-01 ✅ Ouverture animée « La graine » à partir de l'icône officielle (PR #244, #246) ; Rive non nécessaire, animation dessinée par le téléphone | Utilisateur |
 | 03/10/2026 | AI-14 ✅ Workflow de l'IA validé par l'utilisateur ; services payants reportés après les tâches sans IA | Utilisateur |
 | 03/10/2026 | AI-15 🔴 Voix française : Jessica (Piper « upmc ») retenue par l'utilisateur | Utilisateur |
+| 03/10/2026 | SCALE-02 🔵 (03/10, mode autonome) Étape 1/4 : accès à PostgreSQL dans un paquet partagé `@bgs/database` (connexions, transactions, migrations, bases de test), pour que la collecte écrive aussi en base ; connexion testée (validation, annulation, connexion perdue) ; API inchangée (318 tests) | Plan SCALE-02 |

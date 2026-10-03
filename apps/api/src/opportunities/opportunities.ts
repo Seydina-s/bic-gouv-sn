@@ -9,7 +9,7 @@ import {
   type PublicOpportunity,
 } from "@bgs/shared-types";
 import type { AuditJournal } from "../admin/audit-journal";
-import type { Database } from "../database/database";
+import type { Database } from "@bgs/database";
 import {
   type DocumentStore,
   FileDocumentStore,

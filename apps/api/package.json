@@ -20,6 +20,7 @@
   "dependencies": {
     "@bgs/admin-auth": "workspace:*",
     "@bgs/content-store": "workspace:*",
+    "@bgs/database": "workspace:*",
     "@bgs/i18n": "workspace:*",
     "@bgs/resilience": "workspace:*",
     "@bgs/shared-types": "workspace:*",
@@ -42,10 +43,8 @@
     "zod": "4.6.5"
   },
   "devDependencies": {
-    "@electric-sql/pglite": "0.5.8",
     "@maplibre/maplibre-gl-style-spec": "26.4.4",
     "@types/node": "24.19.0",
-    "@types/pg": "8.23.1",
     "tsdown": "0.23.0",
     "tsx": "4.23.15",
     "typescript": "6.0.3"

@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { writeFileDurably } from "@bgs/content-store";
 import { z } from "zod";
-import type { Queryable } from "../database/database";
+import type { Queryable } from "@bgs/database";
 
 /**
  * Settings the console changes for every API instance at once (the pause of the

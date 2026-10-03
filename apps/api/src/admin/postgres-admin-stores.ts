@@ -1,6 +1,6 @@
 import { chainEntry, type AuditEntry, type AuditInput } from "@bgs/admin-auth";
 import { z } from "zod";
-import type { Database, Queryable } from "../database/database";
+import type { Database, Queryable } from "@bgs/database";
 import { adminAccountSchema, type AdminAccount, type AdminAccountStore } from "./account-store";
 import type { AuditJournal } from "./audit-journal";
 

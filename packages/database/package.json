@@ -1,0 +1,24 @@
+{
+  "name": "@bgs/database",
+  "version": "0.0.0",
+  "private": true,
+  "description": "PostgreSQL access shared by the API and the collection: connection pool, transactions, schema migrations, and test databases",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./testing": "./src/testing/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --coverage"
+  },
+  "dependencies": {
+    "pg": "8.23.0"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.8",
+    "@types/node": "24.19.0",
+    "@types/pg": "8.23.1",
+    "typescript": "6.0.3"
+  }
+}
