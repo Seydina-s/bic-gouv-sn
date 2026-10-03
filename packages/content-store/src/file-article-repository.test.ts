@@ -3,19 +3,15 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { NewsArticle } from "@bgs/shared-types";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import type { ArticleRepository } from "./article-repository";
 import { FileArticleRepository } from "./file-article-repository";
+import { PostgresArticleRepository } from "./postgres-article-repository";
+import { storages, type OpenedStore } from "./testing/stores";
 
-let dir: string;
-let repo: FileArticleRepository;
-
-beforeEach(async () => {
-  dir = await mkdtemp(join(tmpdir(), "bgs-store-"));
-  repo = new FileArticleRepository(join(dir, "nested", "news.json"));
-});
-
-afterEach(async () => {
-  await rm(dir, { recursive: true, force: true });
-});
+const STORAGES = storages<ArticleRepository>(
+  (path) => new FileArticleRepository(path),
+  (database) => new PostgresArticleRepository(database),
+);
 
 // Placeholder texts, not real content.
 function article(n: number, overrides: Partial<NewsArticle> = {}): NewsArticle {
@@ -48,8 +44,18 @@ function article(n: number, overrides: Partial<NewsArticle> = {}): NewsArticle {
   };
 }
 
-describe("FileArticleRepository", () => {
-  it("starts empty when the file does not exist", async () => {
+describe.each(STORAGES)("articles stored %s", (_name, open) => {
+  let opened: OpenedStore<ArticleRepository>;
+  let repo: ArticleRepository;
+  beforeEach(async () => {
+    opened = await open();
+    repo = opened.store;
+  });
+  afterEach(async () => {
+    await opened.close();
+  });
+
+  it("starts empty", async () => {
     expect(await repo.get("missing")).toBeNull();
     expect(await repo.list({ limit: 10 })).toEqual({ items: [], nextCursor: null, total: 0 });
     expect(await repo.sections({ perSection: 10 })).toEqual([]);
@@ -183,6 +189,36 @@ describe("FileArticleRepository", () => {
     await repo.save(article(1));
     expect((await repo.list({ lang: "wo", limit: 5 })).items).toEqual([]);
     expect((await repo.list({ lang: "fr", limit: 5 })).items).toHaveLength(1);
+  });
+
+  it("starts from the top when the cursor is unknown", async () => {
+    await repo.save(article(1));
+    await repo.save(article(2));
+    const page = await repo.list({ limit: 1, cursor: "unknown" });
+    expect(page.items.map((item) => item.id)).toEqual([article(2).id]);
+    expect(page.nextCursor).toBe(article(2).id);
+  });
+
+  it("orders same-day, same-time articles by id, across pages", async () => {
+    const sameMoment = { sourcePublishedOn: "2026-09-20", sourceUpdatedAt: "2026-09-20T08:00:00Z" };
+    for (const n of [3, 1, 2]) {
+      await repo.save(article(n, sameMoment));
+    }
+    const first = await repo.list({ limit: 2 });
+    const second = await repo.list({ limit: 2, cursor: first.nextCursor ?? undefined });
+    expect([...first.items, ...second.items].map((item) => item.id)).toEqual(
+      [1, 2, 3].map((n) => article(n).id),
+    );
+  });
+});
+
+describe("articles in a file", () => {
+  let dir: string;
+  beforeEach(async () => {
+    dir = await mkdtemp(join(tmpdir(), "bgs-store-"));
+  });
+  afterEach(async () => {
+    await rm(dir, { recursive: true, force: true });
   });
 
   it("survives a main file zeroed by a power cut, thanks to its backup (25/09/2026)", async () => {

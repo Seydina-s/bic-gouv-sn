@@ -138,4 +138,46 @@ export const MIGRATIONS: readonly { id: string; statements: readonly string[] }[
     id: "012-participation",
     statements: ["CREATE TABLE participation (id text PRIMARY KEY, data jsonb NOT NULL)"],
   },
+  {
+    // Collected articles and procedures (SCALE-02): the current version of each,
+    // validated whole by the code, with the columns the app's lists sort and filter
+    // on; every previous version kept, never overwritten silently. Sort columns in
+    // byte order ("C"), as the file store compares them.
+    id: "013-contents",
+    statements: [
+      `CREATE TABLE articles (
+        id text COLLATE "C" PRIMARY KEY,
+        version integer NOT NULL CHECK (version > 0),
+        content_hash text NOT NULL,
+        category text NOT NULL,
+        published_on text COLLATE "C" NOT NULL,
+        updated_at text COLLATE "C" NOT NULL,
+        shown_langs text[] NOT NULL,
+        all_langs text[] NOT NULL,
+        data jsonb NOT NULL
+      )`,
+      "CREATE INDEX articles_newest ON articles (published_on DESC, updated_at DESC, id)",
+      "CREATE INDEX articles_shown_langs ON articles USING gin (shown_langs)",
+      `CREATE TABLE article_history (
+        id text NOT NULL,
+        version integer NOT NULL,
+        data jsonb NOT NULL,
+        PRIMARY KEY (id, version)
+      )`,
+      `CREATE TABLE procedures (
+        id text PRIMARY KEY,
+        version integer NOT NULL CHECK (version > 0),
+        content_hash text NOT NULL,
+        slug text NOT NULL,
+        data jsonb NOT NULL
+      )`,
+      "CREATE INDEX procedures_slug ON procedures (slug)",
+      `CREATE TABLE procedure_history (
+        id text NOT NULL,
+        version integer NOT NULL,
+        data jsonb NOT NULL,
+        PRIMARY KEY (id, version)
+      )`,
+    ],
+  },
 ];

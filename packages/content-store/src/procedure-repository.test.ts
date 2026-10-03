@@ -1,9 +1,8 @@
-import { mkdtemp, rm } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
 import type { Procedure } from "@bgs/shared-types";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { FileProcedureRepository } from "./procedure-repository";
+import { PostgresProcedureRepository } from "./postgres-procedure-repository";
+import { FileProcedureRepository, type ProcedureRepository } from "./procedure-repository";
+import { storages, type OpenedStore } from "./testing/stores";
 
 // Placeholder texts, not real content.
 function procedure(n: number, title: string, overrides: Partial<Procedure> = {}): Procedure {
@@ -40,15 +39,20 @@ function procedure(n: number, title: string, overrides: Partial<Procedure> = {})
   };
 }
 
-describe("FileProcedureRepository", () => {
-  let dir: string;
-  let repo: FileProcedureRepository;
+const STORAGES = storages<ProcedureRepository>(
+  (path) => new FileProcedureRepository(path),
+  (database) => new PostgresProcedureRepository(database),
+);
+
+describe.each(STORAGES)("procedures stored %s", (_name, open) => {
+  let opened: OpenedStore<ProcedureRepository>;
+  let repo: ProcedureRepository;
   beforeEach(async () => {
-    dir = await mkdtemp(join(tmpdir(), "bgs-procedures-"));
-    repo = new FileProcedureRepository(join(dir, "procedures.json"));
+    opened = await open();
+    repo = opened.store;
   });
   afterEach(async () => {
-    await rm(dir, { recursive: true, force: true });
+    await opened.close();
   });
 
   it("lists procedures alphabetically, accents ignored, and finds one by slug", async () => {
@@ -70,5 +74,6 @@ describe("FileProcedureRepository", () => {
     const changed = procedure(1, "Passeport", { contentHash: "f".repeat(64), costFcfa: 20_000 });
     expect(await repo.save(changed)).toBe("updated");
     expect((await repo.get(changed.id))?.version).toBe(2);
+    expect(await repo.get("absent")).toBeNull();
   });
 });

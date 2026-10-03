@@ -538,6 +538,9 @@ importers:
 
   packages/content-store:
     dependencies:
+      '@bgs/database':
+        specifier: workspace:*
+        version: link:../database
       '@bgs/shared-types':
         specifier: workspace:*
         version: link:../shared-types
