@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><svg x="18.48131464196908" y="2" width="27.037370716061837" height="60" viewBox="0 0 375.13 832.47">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #faef31;
+      }
+
+      .cls-2 {
+        fill: #e92925;
+      }
+
+      .cls-3 {
+        fill: #0c853f;
+      }
+    </style>
+  </defs>
+  <g>
+    <g>
+      <rect class="cls-1" x="157.99" width="59.16" height="832.47"/>
+      <rect class="cls-2" x="320.56" width="54.57" height="605.06"/>
+      <rect class="cls-3" width="53.2" height="605.07"/>
+    </g>
+    <polygon class="cls-3" points="199.92 436.24 187.57 429.4 175.21 436.24 177.57 421.76 167.58 411.51 181.39 409.4 187.57 396.23 193.74 409.4 207.56 411.51 197.56 421.76 199.92 436.24"/>
+  </g>
+</svg></svg>

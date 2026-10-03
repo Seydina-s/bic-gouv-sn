@@ -13,15 +13,20 @@ import Animated, {
 import Svg, { Circle, Path } from "react-native-svg";
 import { scheduleOnRN } from "react-native-worklets";
 import { BAOBAB_FOOT, BAOBAB_OUTLINE, BAOBAB_SIZE } from "../../components/baobab-drawing";
+import { BrandMark } from "../../components/BrandMark";
 import { useReduceMotion } from "../../theme/useSystemAccessibility";
 import { useTheme } from "../../theme/useTheme";
 import { VEIL_OPACITIES, VEIL_STROKE, veilRadius } from "./launch-growth";
+import { NATIVE_SPLASH_MARK_HEIGHT } from "./native-splash";
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 /** The baobab's size: half the screen's narrow side, within reason (majestic). */
 const SHARE = 0.5;
 const MAX_SIZE = 280;
+
+/** The icon of the phone's launch screen fades during the first part of the growth. */
+const MARK_SHARE_OF_DRAW = 0.35;
 
 /** A ring the colour of the screen over the part of the tree not grown yet. */
 function Veil({
@@ -62,6 +67,7 @@ export function LaunchLayer({ onDone }: { onDone: () => void }) {
   const { width, height } = useWindowDimensions();
   const progress = useSharedValue(0);
   const opacity = useSharedValue(1);
+  const markOpacity = useSharedValue(1);
   const { color, motion } = theme;
   const size = Math.min(Math.min(width, height) * SHARE, MAX_SIZE);
 
@@ -74,6 +80,8 @@ export function LaunchLayer({ onDone }: { onDone: () => void }) {
       return;
     }
     const { launchDraw, launchHold, launchUndraw } = motion.duration;
+    // The phone's own launch screen showed the icon here: it gives way to the tree.
+    markOpacity.value = withTiming(0, { duration: launchDraw * MARK_SHARE_OF_DRAW });
     progress.value = withSequence(
       withTiming(1, { duration: launchDraw, easing: Easing.out(Easing.cubic) }),
       withDelay(
@@ -89,9 +97,10 @@ export function LaunchLayer({ onDone }: { onDone: () => void }) {
         }
       }),
     );
-  }, [reduceMotion, onDone, progress, opacity, motion]);
+  }, [reduceMotion, onDone, progress, opacity, markOpacity, motion]);
 
   const fade = useAnimatedStyle(() => ({ opacity: opacity.value }));
+  const markFade = useAnimatedStyle(() => ({ opacity: markOpacity.value }));
   return (
     <Animated.View
       testID="launch-layer"
@@ -112,6 +121,12 @@ export function LaunchLayer({ onDone }: { onDone: () => void }) {
           />
         ))}
       </Svg>
+      <Animated.View
+        testID="launch-mark"
+        style={[StyleSheet.absoluteFill, styles.center, markFade]}
+      >
+        <BrandMark height={NATIVE_SPLASH_MARK_HEIGHT} />
+      </Animated.View>
     </Animated.View>
   );
 }

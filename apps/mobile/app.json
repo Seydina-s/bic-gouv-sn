@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Bic Gouv SN",
+    "name": "BIC-GOUV SN",
     "slug": "bic-gouv-sn",
     "scheme": "bicgouvsn",
     "version": "0.0.0",
@@ -36,8 +36,11 @@
       [
         "expo-splash-screen",
         {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
           "backgroundColor": "#FFFFFF",
           "dark": {
+            "image": "./assets/splash-icon.png",
             "backgroundColor": "#131714"
           }
         }
@@ -46,7 +49,7 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Bic Gouv SN utilise votre position sur votre téléphone, sans jamais l’envoyer, pour trouver les services de l’État les plus proches.",
+          "locationWhenInUsePermission": "BIC-GOUV SN utilise votre position sur votre téléphone, sans jamais l’envoyer, pour trouver les services de l’État les plus proches.",
           "isAndroidBackgroundLocationEnabled": false,
           "isIosBackgroundLocationEnabled": false
         }
@@ -54,8 +57,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Bic Gouv SN ouvre vos photos seulement pour joindre celle que vous choisissez à un signalement.",
-          "cameraPermission": "Bic Gouv SN utilise l’appareil photo seulement pour photographier un problème que vous signalez.",
+          "photosPermission": "BIC-GOUV SN ouvre vos photos seulement pour joindre celle que vous choisissez à un signalement.",
+          "cameraPermission": "BIC-GOUV SN utilise l’appareil photo seulement pour photographier un problème que vous signalez.",
           "microphonePermission": false
         }
       ],
@@ -68,7 +71,13 @@
         }
       ],
       "@maplibre/maplibre-react-native",
-      "expo-notifications"
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#00853F"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

@@ -19,6 +19,8 @@ describe("LaunchLayer", () => {
     );
     const layer = screen.getByTestId("launch-layer", { includeHiddenElements: true });
     expect(layer).toHaveProp("pointerEvents", "none");
+    // It starts from the official icon of the phone's launch screen.
+    expect(screen.getByTestId("launch-mark", { includeHiddenElements: true })).toBeOnTheScreen();
   });
 
   it("steps aside at once when the phone asks for less motion", async () => {
