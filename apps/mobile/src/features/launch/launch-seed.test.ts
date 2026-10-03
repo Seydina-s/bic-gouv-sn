@@ -20,15 +20,15 @@ const { launchIcon } = motion.duration;
 describe("the seed launch", () => {
   it("starts from the star the phone's launch screen showed, and ends where it began", () => {
     expect(starScale(0)).toBeCloseTo(STAR_START_SCALE);
-    expect(starScale(1000)).toBeCloseTo(1);
+    expect(starScale(1100)).toBeCloseTo(1);
     // A turn of one point: the star looks the same before and after.
     expect(starTurn(0)).toBe(0);
-    expect(starTurn(1000) % 72).toBeCloseTo(0);
+    expect(starTurn(1100) % 72).toBeCloseTo(0);
   });
 
   it("grows the three bands out of the star, one after the other", () => {
     expect(bandGrowth(0, 0)).toBeCloseTo(0);
-    expect(bandGrowth(500, 0)).toBeGreaterThan(bandGrowth(500, 2));
+    expect(bandGrowth(800, 0)).toBeGreaterThan(bandGrowth(800, 2));
     for (const band of [0, 1, 2]) {
       expect(bandGrowth(launchIcon, band)).toBeCloseTo(1);
     }

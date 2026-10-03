@@ -41,6 +41,7 @@ import {
   treeGrowth,
 } from "./launch-seed";
 import { LAUNCH_MARK_HEIGHT } from "./native-splash";
+import { afterSettling } from "./settle";
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 const AnimatedPath = Animated.createAnimatedComponent(Path);
@@ -138,15 +139,17 @@ export function LaunchLayer({ onDone }: { onDone: () => void }) {
       onDone();
       return;
     }
-    clock.value = withTiming(
-      schedule.end,
-      { duration: schedule.end, easing: Easing.linear },
-      (finished) => {
-        if (finished === true) {
-          scheduleOnRN(onDone);
-        }
-      },
-    );
+    return afterSettling(() => {
+      clock.value = withTiming(
+        schedule.end,
+        { duration: schedule.end, easing: Easing.linear },
+        (finished) => {
+          if (finished === true) {
+            scheduleOnRN(onDone);
+          }
+        },
+      );
+    });
   }, [reduceMotion, onDone, clock, schedule]);
 
   const growth = useDerivedValue(() => treeGrowth(clock.value, schedule));

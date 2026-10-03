@@ -34,15 +34,18 @@ export interface LaunchSchedule {
   end: number;
 }
 
-/** The star lights up and settles; the ring of light around it. */
-const STAR_PULSE = 250;
-const STAR_SETTLE: Window = [250, 900];
-const RING: Window = [150, 750];
+/**
+ * The star lights up and settles; the ring of light around it. Unhurried, so the
+ * opening is seen clearly (owner's feedback, 03/10/2026).
+ */
+const STAR_PULSE = 450;
+const STAR_SETTLE: Window = [450, 1100];
+const RING: Window = [200, 1000];
 /** Each band grows out of the star, a little after the previous one. */
-const BAND_START = 350;
-const BAND_STAGGER = 120;
-const BAND_GROWTH = 600;
-const NAME_IN: Window = [800, 1300];
+const BAND_START = 550;
+const BAND_STAGGER = 130;
+const BAND_GROWTH = 650;
+const NAME_IN: Window = [1100, 1600];
 /** The star's highest scale while it lights up. */
 const STAR_PEAK = 1.9;
 /** The star turns by one point (72°): it ends as it began. */
@@ -103,7 +106,7 @@ export function backOut(p: number): number {
 export function starScale(t: number): number {
   "worklet";
   if (t < STAR_PULSE) {
-    return mix(STAR_START_SCALE, STAR_PEAK, easeOut(t / STAR_PULSE));
+    return mix(STAR_START_SCALE, STAR_PEAK, easeInOut(t / STAR_PULSE));
   }
   return mix(STAR_PEAK, 1, easeInOut(phase(t, STAR_SETTLE)));
 }

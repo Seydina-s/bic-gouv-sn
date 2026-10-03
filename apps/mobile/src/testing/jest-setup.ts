@@ -1,4 +1,14 @@
 // Shared Jest mocks for native modules that have no JavaScript implementation.
+
+// React Native gives phones an idle callback (requestIdleCallback); the test
+// environment has none: an idle moment is the next turn of the timers here.
+globalThis.requestIdleCallback = (callback: IdleRequestCallback) =>
+  setTimeout(() => {
+    callback({ didTimeout: false, timeRemaining: () => 0 });
+  }, 0);
+globalThis.cancelIdleCallback = (handle: number) => {
+  clearTimeout(handle);
+};
 jest.mock("@react-native-async-storage/async-storage", () =>
   jest.requireActual<object>("@react-native-async-storage/async-storage/jest/async-storage-mock"),
 );
