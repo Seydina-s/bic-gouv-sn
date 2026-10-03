@@ -9,7 +9,7 @@ jest.mock("../../theme/useSystemAccessibility", () => ({
 }));
 
 describe("LaunchLayer", () => {
-  it("draws the baobab's strokes, hidden from screen readers and from touch", async () => {
+  it("grows the baobab, hidden from screen readers and from touch", async () => {
     mockReduceMotion = false;
     const onDone = jest.fn();
     await render(
