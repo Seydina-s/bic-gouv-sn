@@ -13,9 +13,7 @@
       "bundleIdentifier": "com.seydinas.bicgouvsn",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "LSApplicationQueriesSchemes": [
-          "comgooglemaps"
-        ]
+        "LSApplicationQueriesSchemes": ["comgooglemaps"]
       }
     },
     "android": {
