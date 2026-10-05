@@ -66,9 +66,9 @@ const shape = (color: string) =>
 /**
  * Sizes, in pixels of a 1024 square unless said otherwise. Android masks its
  * adaptive icon and its launch icon to a circle of about 61 % of the square: the
- * tall mark keeps its corners inside it at 520 px.
+ * tall mark keeps its corners inside it up to about 570 px; 560 leaves a margin.
  */
-const IN_CIRCLE = 520;
+const IN_CIRCLE = 560;
 
 /**
  * The phone's own launch screen shows the icon's star alone, centred, at the size
@@ -82,8 +82,9 @@ function launchStar(): string {
 }
 
 const ICONS: { file: string; svg: string }[] = [
-  // iPhone and stores: opaque, square, the phone rounds the corners.
-  { file: "icon.png", svg: square(1024, 720, colour, "#FFFFFF") },
+  // iPhone and stores: opaque, square, the phone rounds the corners. The mark as tall
+  // as the margins allow (owner, 05/10/2026): wider in proportion, never stretched.
+  { file: "icon.png", svg: square(1024, 900, colour, "#FFFFFF") },
   { file: "android-icon-foreground.png", svg: square(1024, IN_CIRCLE, colour) },
   { file: "android-icon-background.png", svg: square(1024, 0, "", "#FFFFFF") },
   { file: "android-icon-monochrome.png", svg: square(1024, IN_CIRCLE, shape("#000000")) },

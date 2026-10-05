@@ -4,7 +4,7 @@
  */
 export const adminFr = {
   shell: {
-    productName: "BIC-GOUV Sn",
+    productName: "Bic Gouv Sn",
     area: "Administration",
     skipToContent: "Aller au contenu",
   },
@@ -88,7 +88,7 @@ export const adminFr = {
   },
   signIn: {
     title: "Connexion",
-    intro: "Réservé à l'équipe d'administration de BIC-GOUV Sn.",
+    intro: "Réservé à l'équipe d'administration de Bic Gouv Sn.",
     email: "Adresse e-mail",
     password: "Mot de passe",
     continue: "Continuer",

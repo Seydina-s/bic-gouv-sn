@@ -4,7 +4,7 @@
  */
 export const fr = {
   app: {
-    name: "BIC-GOUV Sn",
+    name: "Bic Gouv Sn",
   },
   tabs: {
     navigation: "Navigation principale",
@@ -296,7 +296,7 @@ export const fr = {
     notificationTopicsHelp:
       "Toutes par défaut. Touchez une rubrique pour ne garder qu'elle, puis ajoutez-en d'autres si vous le souhaitez.",
     notificationsBlocked:
-      "Les notifications sont bloquées pour BIC-GOUV Sn dans les réglages du téléphone.",
+      "Les notifications sont bloquées pour Bic Gouv Sn dans les réglages du téléphone.",
     openPhoneSettings: "Ouvrir les réglages du téléphone",
     location: "Position",
     locationOn:
@@ -309,7 +309,7 @@ export const fr = {
     restartWelcomeHelp: "Revoir la présentation depuis le début, avec le choix de la langue.",
     about: "À propos",
     aboutNews:
-      "BIC-GOUV Sn réunit en un seul endroit l'actualité officielle du Gouvernement du Sénégal. Comptes rendus du Conseil des ministres, communiqués, discours, audiences et visites officielles arrivent dans l'application dès leur publication sur presidence.sn, en français et en wolof.",
+      "Bic Gouv Sn réunit en un seul endroit l'actualité officielle du Gouvernement du Sénégal. Comptes rendus du Conseil des ministres, communiqués, discours, audiences et visites officielles arrivent dans l'application dès leur publication sur presidence.sn, en français et en wolof.",
     aboutProcedures:
       "Pour vos démarches administratives, l'application explique chaque procédure publiée sur e-senegal.sn avec les pièces à fournir, le coût, le délai et le lien pour la faire en ligne.",
     aboutSources:
@@ -459,7 +459,7 @@ export const fr = {
   },
   usageInvite: {
     title: "Aider à améliorer l'application\u00a0?",
-    body: "BIC-GOUV Sn peut compter, sans savoir qui vous êtes, combien de personnes l'utilisent et quels articles sont lus. Aucun identifiant, aucune position.",
+    body: "Bic Gouv Sn peut compter, sans savoir qui vous êtes, combien de personnes l'utilisent et quels articles sont lus. Aucun identifiant, aucune position.",
     note: "Vous pourrez changer d'avis à tout moment dans les Réglages.",
     accept: "Oui, j'accepte",
     decline: "Non merci",
@@ -477,7 +477,7 @@ export const fr = {
       "Cette partie de l'application est suspendue pour le moment. Le reste fonctionne normalement.",
     updateTitle: "Une nouvelle version est nécessaire",
     updateBody:
-      "Cette version de BIC-GOUV Sn n'est plus prise en charge. Mettez l'application à jour depuis votre magasin d'applications pour continuer.",
+      "Cette version de Bic Gouv Sn n'est plus prise en charge. Mettez l'application à jour depuis votre magasin d'applications pour continuer.",
   },
   comingSoon: {
     title: "Bientôt disponible",

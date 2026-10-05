@@ -21,7 +21,7 @@ describe("LaunchLayer", () => {
     expect(layer).toHaveProp("pointerEvents", "none");
     // The official icon, with the app's name below it, as Google's apps show theirs.
     expect(screen.getByTestId("launch-mark", { includeHiddenElements: true })).toBeOnTheScreen();
-    expect(screen.getByText("BIC-GOUV Sn", { includeHiddenElements: true })).toBeOnTheScreen();
+    expect(screen.getByText("Bic Gouv Sn", { includeHiddenElements: true })).toBeOnTheScreen();
   });
 
   it("steps aside at once when the phone asks for less motion", async () => {
