@@ -17,6 +17,7 @@
       }
     },
     "android": {
+      "package": "com.seydinas.bicgouvsn",
       "adaptiveIcon": {
         "backgroundColor": "#FFFFFF",
         "foregroundImage": "./assets/android-icon-foreground.png",
