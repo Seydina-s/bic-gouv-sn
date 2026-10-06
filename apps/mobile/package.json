@@ -78,6 +78,7 @@
     "zod": "4.6.5"
   },
   "devDependencies": {
+    "@bacons/apple-targets": "5.0.0",
     "@expo-google-fonts/noto-sans": "^0.4.2",
     "@expo-google-fonts/noto-serif": "^0.4.2",
     "@sentry/cli": "2.58.4",

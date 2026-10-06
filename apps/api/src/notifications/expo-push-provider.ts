@@ -60,7 +60,12 @@ function expoMessage(
     to: token,
     title: version.title,
     body: version.excerpt === "" ? source : `${version.excerpt}\n${source}`,
-    data: { articleId: message.articleId },
+    // The photo's address travels in the data too: the iPhone's notification
+    // extension (apps/mobile/targets/notification-service) reads it there.
+    data: {
+      articleId: message.articleId,
+      ...(message.imageUrl === null ? {} : { imageUrl: message.imageUrl }),
+    },
     sound: "default",
     // Android shows the image as is; iOS needs the app's notification extension.
     ...(message.imageUrl === null

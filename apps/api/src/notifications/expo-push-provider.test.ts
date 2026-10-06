@@ -101,6 +101,8 @@ describe("sending a notification through Expo", () => {
       title: "[wo] titre de test",
       richContent: { image: "https://media.test/images/ab/960.jpeg" },
       mutableContent: true,
+      // Also where the iPhone's notification extension reads it (AUD5-07).
+      data: { imageUrl: "https://media.test/images/ab/960.jpeg" },
     });
     // A no-break space before the colon (French typography): "\s" matches it.
     expect(sent.get(token(1))?.body).toMatch(
@@ -116,6 +118,7 @@ describe("sending a notification through Expo", () => {
     );
     expect(requests.flat()[0]).toMatchObject({ title: "Titre officiel de test" });
     expect(requests.flat()[0]).not.toHaveProperty("richContent");
+    expect(requests.flat()[0]?.data).not.toHaveProperty("imageUrl");
   });
 
   it("slows down and tries again when Expo says it goes too fast, never twice otherwise", async () => {
