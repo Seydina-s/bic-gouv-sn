@@ -35,3 +35,13 @@ auditConfig:
     # 03/10/2026): only in Metro and Jest, through micromatch, fed with the project's
     # own glob patterns; absent from the app, the API, the console and ingestion.
     - GHSA-vfj7-8cjw-p6xm
+
+# Patched versions forced for vulnerable transitive dependencies (fixed versions
+# exist, so no audit exception): build tooling only, never in the shipped app.
+overrides:
+  # GHSA-pqg4-j6r4-53mv (critical): via react-native > react-devtools-core.
+  "shell-quote@<1.11.0": "1.11.0"
+  # GHSA-68fv-2mgg-jv7q (high): via the bundlers.
+  "source-map-js@<1.2.2": "1.2.2"
+  # Thirteen high advisories up to 0.8.14: via @bacons/apple-targets > @expo/plist.
+  "@xmldom/xmldom@<0.8.15": "0.8.15"

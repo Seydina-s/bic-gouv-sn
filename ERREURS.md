@@ -121,3 +121,10 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : l'animation démarrait à l'instant même où l'application se construisait en dessous (premier écran, navigation) et où l'écran natif du téléphone s'effaçait. Les premières images de l'animation partageaient le fil d'affichage avec ces travaux et étaient perdues ; le début était aussi trop bref (250 ms).
 - **Correctif** (`apps/mobile/src/features/launch/settle.ts`, `launch-seed.ts`) : l'étoile reste immobile, telle que l'écran natif l'a laissée, au moins 400 ms et jusqu'à ce que l'application soit au repos (au plus 1 s), puis l'animation démarre sur une image neuve ; le début est plus ample (450 ms). Tests : `settle.test.ts`.
 - **Prévention** : toute animation d'entrée démarre après l'installation de l'écran (attente du repos), jamais dans le même instant que le montage de l'application.
+
+## 06/10/2026 — Contrôle de types échoué sur un test de l'API
+
+- **Ce qui s'est passé** : la demande #255 a échoué en CI sur une erreur de types dans un test de l'API (`data` lu sur un type qui ne l'avait pas).
+- **Cause racine** : avant d'envoyer, seuls les types de l'app mobile avaient été vérifiés, pas ceux de l'API, pourtant modifiée aussi ; Vitest exécute le test sans vérifier les types.
+- **Correctif** : assertion par chemin (`toHaveProperty(["data", "imageUrl"])`) ; `pnpm -r typecheck` vert.
+- **Prévention** : avant chaque envoi, lancer la vérification des types de **tout** le dépôt (`pnpm -r --if-present typecheck`), pas seulement du paquet le plus touché.

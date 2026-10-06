@@ -118,7 +118,7 @@ describe("sending a notification through Expo", () => {
     );
     expect(requests.flat()[0]).toMatchObject({ title: "Titre officiel de test" });
     expect(requests.flat()[0]).not.toHaveProperty("richContent");
-    expect(requests.flat()[0]?.data).not.toHaveProperty("imageUrl");
+    expect(requests.flat()[0]).not.toHaveProperty(["data", "imageUrl"]);
   });
 
   it("slows down and tries again when Expo says it goes too fast, never twice otherwise", async () => {
