@@ -14,7 +14,8 @@
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "LSApplicationQueriesSchemes": ["comgooglemaps"]
-      }
+      },
+      "appleTeamId": "M28D8VY9XG"
     },
     "android": {
       "package": "com.seydinas.bicgouvsn",
@@ -78,7 +79,8 @@
           "icon": "./assets/notification-icon.png",
           "color": "#00853F"
         }
-      ]
+      ],
+      "@bacons/apple-targets"
     ],
     "experiments": {
       "typedRoutes": true
