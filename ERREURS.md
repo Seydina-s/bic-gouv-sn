@@ -128,3 +128,10 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : avant d'envoyer, seuls les types de l'app mobile avaient été vérifiés, pas ceux de l'API, pourtant modifiée aussi ; Vitest exécute le test sans vérifier les types.
 - **Correctif** : assertion par chemin (`toHaveProperty(["data", "imageUrl"])`) ; `pnpm -r typecheck` vert.
 - **Prévention** : avant chaque envoi, lancer la vérification des types de **tout** le dépôt (`pnpm -r --if-present typecheck`), pas seulement du paquet le plus touché.
+
+## 06/10/2026 — Version Android de test coupée du serveur
+
+- **Ce qui s'est passé** : la version Android envoyée au testeur ne recevait plus rien le lendemain : le tunnel rapide de Cloudflare répondait « Tunnel not found ».
+- **Cause racine** : un tunnel rapide (`trycloudflare.com`) est éphémère ; Cloudflare le supprime après une coupure ou une mise en veille, et son adresse, inscrite dans l'app compilée, ne revient jamais.
+- **Correctif** : adresse fixe et gratuite chez ngrok (`coat-footprint-triceps.ngrok-free.dev`), choisie par l'utilisateur ; nouvelle version Android pointée dessus ; procédure de relance dans `docs/runbooks/tests-a-distance.md`.
+- **Prévention** : ne jamais inscrire dans une app distribuée une adresse qui peut disparaître ; une adresse de test doit survivre à un redémarrage.
