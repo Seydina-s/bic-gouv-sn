@@ -17,7 +17,7 @@
     "@bgs/shared-types": "workspace:*",
     "@bgs/ui": "workspace:*",
     "@phosphor-icons/react": "2.1.10",
-    "next": "16.3.7",
+    "next": "16.3.8",
     "qrcode": "1.5.4",
     "react": "19.2.3",
     "react-dom": "19.2.3",
