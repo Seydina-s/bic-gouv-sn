@@ -135,3 +135,10 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : un tunnel rapide (`trycloudflare.com`) est éphémère ; Cloudflare le supprime après une coupure ou une mise en veille, et son adresse, inscrite dans l'app compilée, ne revient jamais.
 - **Correctif** : adresse fixe et gratuite chez ngrok (`coat-footprint-triceps.ngrok-free.dev`), choisie par l'utilisateur ; nouvelle version Android pointée dessus ; procédure de relance dans `docs/runbooks/tests-a-distance.md`.
 - **Prévention** : ne jamais inscrire dans une app distribuée une adresse qui peut disparaître ; une adresse de test doit survivre à un redémarrage.
+
+## 07/10/2026 — Contrôle des dépendances en échec : faille Next.js publiée (GHSA-cjq9-62q9-8jv4)
+
+- **Ce qui s'est passé** : la demande de fusion n° 258 (assistant) a été bloquée par le contrôle « Secrets and dependencies ». Une faille « élevée » venait d'être publiée pour Next.js 16.0 à 16.3.7 (falsification de requêtes côté serveur dans l'optimisation des images), utilisée par la console.
+- **Cause racine** : faille publiée après la dernière mise à jour ; rien dans le code ne l'avait introduite. Le contrôle a bien fait son travail.
+- **Correctif** : Next.js passé en 16.3.8 (version corrigée, même branche), sans exception à l'audit ; types, 119 tests et construction de production de la console vérifiés.
+- **Prévention** : l'audit bloquant en CI reste la règle ; une faille publiée en cours de route est corrigée dans une demande à part, avant les autres, plutôt que par une exception.
