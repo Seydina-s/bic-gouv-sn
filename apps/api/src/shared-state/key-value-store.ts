@@ -14,6 +14,12 @@ export interface KeyValueStore {
   /** Adds a member to a set that expires (e.g. the sessions of one account). */
   addToSet(key: string, member: string, ttlMs: number): Promise<void>;
   membersOf(key: string): Promise<string[]>;
+  /**
+   * Adds `by` (one by default) to a counter, atomically across instances, and
+   * returns its new value.
+   * The expiry is set when the counter starts, never pushed back afterwards.
+   */
+  increment(key: string, ttlMs: number, by?: number): Promise<number>;
   close(): Promise<void>;
 }
 
@@ -94,6 +100,15 @@ export class MemoryKeyValueStore implements KeyValueStore {
     return Promise.resolve(value instanceof Set ? [...value] : []);
   }
 
+  increment(key: string, ttlMs: number, by = 1): Promise<number> {
+    const entry = this.live(key);
+    const count = (typeof entry?.value === "string" ? Number(entry.value) || 0 : 0) + by;
+    const expiresAt = entry?.expiresAt ?? this.now() + ttlMs;
+    this.entries.set(key, { value: String(count), expiresAt });
+    this.written();
+    return Promise.resolve(count);
+  }
+
   close(): Promise<void> {
     this.entries.clear();
     return Promise.resolve();
@@ -144,6 +159,19 @@ export class RedisKeyValueStore implements KeyValueStore {
 
   membersOf(key: string): Promise<string[]> {
     return this.redis.smembers(this.key(key));
+  }
+
+  async increment(key: string, ttlMs: number, by = 1): Promise<number> {
+    const [[, count], [, remaining]] = (await this.redis
+      .multi()
+      .incrby(this.key(key), by)
+      .pttl(this.key(key))
+      .exec()) as [[unknown, number], [unknown, number]];
+    // -1: the counter has just started (no expiry yet).
+    if (remaining === -1) {
+      await this.redis.pexpire(this.key(key), Math.max(1, Math.round(ttlMs)));
+    }
+    return count;
   }
 
   async close(): Promise<void> {

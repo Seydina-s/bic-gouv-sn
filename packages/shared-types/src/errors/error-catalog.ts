@@ -213,6 +213,42 @@ export const ERROR_CATALOG = {
     action:
       "Rien à faire tant que Participer doit rester coupé ; sinon, rallumez-le dans « Contrôle à distance ».",
   },
+  ASSISTANT_OFF: {
+    what: "Une question a été posée à l'assistant alors qu'il est coupé dans le contrôle à distance.",
+    where: "Application, Assistant",
+    impact:
+      "La question a été refusée ; l'app indique que l'assistant est momentanément indisponible.",
+    severity: "info",
+    action:
+      "Rien à faire tant que l'assistant doit rester coupé ; sinon, rallumez-le dans « Contrôle à distance ».",
+  },
+  ASSISTANT_MODEL_FAILED: {
+    what: "L'assistant n'a pas pu obtenir de réponse du service d'intelligence artificielle.",
+    where: "Application, Assistant (service Claude d'Anthropic)",
+    impact:
+      "La personne voit que l'assistant est momentanément indisponible ; le reste de l'app fonctionne normalement.",
+    severity: "warning",
+    action:
+      "Si cela se répète, vérifiez la clé d'accès et le crédit du compte Anthropic, puis l'état du service dans la supervision.",
+  },
+  ASSISTANT_ANSWER_REJECTED: {
+    what: "Une réponse de l'assistant a été écartée car elle ne citait pas correctement les sources officielles.",
+    where: "Application, Assistant",
+    impact:
+      "La personne a lu que la base officielle ne contient pas la réponse : rien de non sourcé n'a été affiché.",
+    severity: "info",
+    action:
+      "Rien à faire si c'est ponctuel ; si le nombre augmente, signalez-le à l'équipe technique.",
+  },
+  ASSISTANT_LIMIT_REACHED: {
+    what: "Le nombre de questions prévu pour le mois est atteint : l'assistant est en pause.",
+    where: "Application, Assistant",
+    impact:
+      "Les personnes lisent que l'assistant reprendra le 1er du mois prochain ; le reste de l'app fonctionne.",
+    severity: "warning",
+    action:
+      "Pour reprendre avant, augmentez la limite mensuelle dans la page « Assistant » (cela augmente le coût).",
+  },
   PARTICIPATION_NOT_FOUND: {
     what: "Un message, un signalement ou une photo demandés n'existent pas (ou plus).",
     where: "Centre d'administration, participation",

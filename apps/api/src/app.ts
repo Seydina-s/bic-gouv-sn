@@ -96,6 +96,13 @@ import { proceduresRoutes } from "./routes/procedures";
 import { servicesRoutes } from "./routes/services";
 import { mapRoutes } from "./routes/map";
 import { statusRoutes } from "./routes/status";
+import { CircuitBreaker, createResilientCall } from "@bgs/resilience";
+import { AssistantService } from "./assistant/assistant-service";
+import { ClaudeProvider, isClaudeOutage } from "./assistant/claude-provider";
+import { buildKnowledge, RefreshedKnowledge } from "./assistant/knowledge";
+import type { LlmProvider } from "./assistant/llm-provider";
+import { adminAssistantRoutes, assistantRoutes } from "./routes/assistant";
+import type { SettingStore } from "./admin/setting-store";
 
 /** Longest path parameter accepted (a procedure slug, an article id). */
 const MAX_PARAM_LENGTH = 200;
@@ -142,6 +149,10 @@ export interface AppOptions {
   opportunityStore?: OpportunityStore;
   /** Messages and reports of Participer; defaults from database. */
   participationStore?: ParticipationStore;
+  /** Settings changed in the console; defaults from database. */
+  settings?: SettingStore;
+  /** The assistant's model; defaults to Claude when ANTHROPIC_API_KEY is set, else none. */
+  llm?: LlmProvider | null;
 }
 
 export interface AdminServices {
@@ -157,6 +168,16 @@ function defaultPushProvider(config: Config, subscriptions: PushSubscriptionStor
     ? new ExpoPushProvider({ subscriptions, accessToken: config.EXPO_ACCESS_TOKEN })
     : noPushProvider;
 }
+
+/** The model behind the assistant: none until the owner has entered the key. */
+function defaultLlm(config: Config): LlmProvider | null {
+  return config.ANTHROPIC_API_KEY === undefined
+    ? null
+    : new ClaudeProvider({ apiKey: config.ANTHROPIC_API_KEY, model: config.ASSISTANT_MODEL });
+}
+
+/** Most answers take 2 to 5 seconds; past this, the person is told to retry later. */
+const ASSISTANT_TIMEOUT_MS = 20_000;
 
 /** A Redis client that fails fast: every command has a time limit (CLAUDE.md §4.5). */
 function connectRedis(url: string): Redis {
@@ -220,6 +241,10 @@ export async function buildApp({
   participationStore = database === null
     ? new FileParticipationStore(config.PARTICIPATION_PATH)
     : new PostgresParticipationStore(database),
+  settings = database === null
+    ? new FileSettingStore(config.SETTINGS_PATH)
+    : new PostgresSettingStore(database),
+  llm = defaultLlm(config),
 }: AppOptions): Promise<FastifyInstance> {
   const app = Fastify({
     trustProxy: trustedProxies(config.TRUST_PROXY),
@@ -314,6 +339,34 @@ export async function buildApp({
     participation,
     isOpen: async () => (await remoteConfig.read()).features.participate,
   });
+  const assistant = new AssistantService({
+    llm,
+    knowledge: new RefreshedKnowledge({
+      build: () => buildKnowledge(articles, procedures),
+      onRefreshError: (error) => {
+        app.log.warn({ err: error }, "Assistant knowledge not refreshed");
+      },
+    }),
+    state: sharedState,
+    settings,
+    journal: admin?.journal ?? null,
+    // Never retried: each call is paid for, and the person can ask again.
+    call: createResilientCall({
+      breaker: new CircuitBreaker({
+        dependency: "claude",
+        failureThreshold: 5,
+        resetTimeoutMs: 60_000,
+        isFailure: isClaudeOutage,
+      }),
+      timeoutMs: ASSISTANT_TIMEOUT_MS,
+    }),
+  });
+  await app.register(assistantRoutes, {
+    prefix: "/v1",
+    assistant,
+    isOpen: async () => (await remoteConfig.read()).features.assistant,
+    errorJournal,
+  });
   await app.register(pushSubscriptionRoutes, { prefix: "/v1", subscriptions: pushSubscriptions });
   await app.register(mapRoutes, {
     prefix: "/v1",
@@ -363,10 +416,7 @@ export async function buildApp({
     };
     const automatic = new AutomaticNotifier({
       ...notificationServices,
-      settings:
-        database === null
-          ? new FileSettingStore(config.SETTINGS_PATH)
-          : new PostgresSettingStore(database),
+      settings,
       perHour: config.AUTO_NOTIFICATIONS_PER_HOUR,
     });
     if (automaticNotificationsEveryMs !== null) {
@@ -396,6 +446,11 @@ export async function buildApp({
       store: remoteConfig,
     });
     await app.register(adminNewsRoutes, { prefix: "/admin/v1", signIn: admin.signIn, articles });
+    await app.register(adminAssistantRoutes, {
+      prefix: "/admin/v1",
+      signIn: admin.signIn,
+      assistant,
+    });
     await app.register(adminAuditRoutes, {
       prefix: "/admin/v1",
       signIn: admin.signIn,

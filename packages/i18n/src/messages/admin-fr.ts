@@ -224,6 +224,7 @@ export const adminFr = {
       readAloud: "Écouter (lecture à voix haute)",
       procedures: "Démarches",
       participate: "Participer (messages et signalements)",
+      assistant: "Assistant (questions et « Est-ce vrai ? »)",
     },
     minVersion: "Version minimale de l'application",
     minVersionHelp:
@@ -263,6 +264,7 @@ export const adminFr = {
       serviceCorrected: "Service corrigé",
       serviceAdded: "Service ajouté",
       remoteChanged: "Contrôle à distance modifié",
+      assistantLimitChanged: "Limite mensuelle de l'assistant modifiée",
       notificationPrepared: "Notification préparée",
       notificationApproved: "Notification validée",
       notificationCancelled: "Notification annulée",
