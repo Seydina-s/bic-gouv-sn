@@ -21,6 +21,7 @@ L'API en marche garde la version avec laquelle elle a démarré. Après une fusi
 2. Mettez le dépôt à jour : `git fetch origin && git checkout --detach origin/main`.
 3. Reconstruisez : `pnpm --filter @bgs/api build`.
 4. Relancez les étapes 1 et 2 ci-dessus. Le filtre se lance toujours depuis `scripts/` du dépôt, jamais depuis une copie : la liste des adresses qu'il laisse passer change avec l'app.
+5. Un nouveau type de fichier servi à l'app (photo, PDF, MP3…) doit être ajouté à la liste des types du filtre, dans la même demande de fusion.
 
 Une clé saisie ou changée dans le fichier de configuration local de l'API n'est lue qu'au démarrage : relancez aussi l'API dans ce cas.
 
