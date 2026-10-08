@@ -1,6 +1,16 @@
 # STATUS — Bic Gouv SN
 
-**Dernière mise à jour** : 08/10/2026 (1 h 15) · **Mode** : autonome depuis le 07/10 (accord de l'utilisateur) : intégration du workflow de l'IA, en commençant par l'assistant. Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md`.
+**Dernière mise à jour** : 08/10/2026 (22 h) · **Mode** : autonome (accord de l'utilisateur du 08/10 au soir). Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md`.
+
+## 08/10 (après-midi et soir) en bref : l'assistant répond, les voix parlent
+- **Assistant en discussion** façon Claude (#272, #274) : logo et phrase d'accueil courte, bulles, sources en étiquettes, dictée en français par le téléphone, clavier rangé à l'envoi, logo BIC-GOUV en profil, « Réessayer ».
+- **Réponses justes sur l'actualité** (#274) : date du jour, articles récents favorisés, dernier article d'une rubrique citée. Vérifié : « Où est allé le président cette semaine ? » et « le dernier Conseil des ministres » répondent avec leurs sources.
+- **Recherche par le sens** (#275) : modèle ouvert sur le serveur, sans coût ; sur 72 questions, bonne page dans les 5 premières 89 % (83 % par les mots seuls).
+- **Voix** (#267, #269, #270) : 100 articles enregistrés en français (Jessica), 3 en wolof (Adia, lente sur l'ordinateur : un serveur avec carte graphique est nécessaire pour tout l'historique) ; lecture dans l'app avec pause et reprise.
+- **Traduction wolof** (#271, #273) : 29 articles sur 30 du premier lot enregistrés, à relire par l'utilisateur dans la console ; coût réel ≈ 3,50 $ pour ce lot (dont une erreur de ma part, consignée).
+- **Incidents réglés et consignés** : console sans adresse de l'API, erreur de la console après la mise à jour de Next.js, collecte arrêtée 5 h (Windows et ancienne version), filtre sans MP3, numéro de demande de fusion supposé.
+- **Ce qui attend l'utilisateur** : relire les traductions ; compilation iPhone (après `pnpm install`) ; décider du serveur avec carte graphique pour les voix wolof et du reste de la traduction (≈ 13 $ pour les 349 articles restants depuis octobre 2025).
+
 
 ## 07 et 08/10 en bref : l'assistant et la traduction wolof sont prêts, ils attendent la clé
 - **Serveur** (#258) : adresse `POST /v1/assistant/answers` (question ou « Est-ce vrai ? »), réponses tirées des seules publications officielles avec leurs sources ; Claude Haiku 4.5 ; **plafond de 10 000 questions par mois** tenu même avec plusieurs serveurs ; au-delà, pause aimable jusqu'au 1er du mois suivant ; interrupteur « Assistant » dans le contrôle à distance ; 20 questions par heure et par adresse ; aucune question conservée ni écrite dans les journaux.
