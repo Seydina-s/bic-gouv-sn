@@ -479,9 +479,57 @@ export const fr = {
     updateBody:
       "Cette version de Bic Gouv Sn n'est plus prise en charge. Mettez l'application à jour depuis votre magasin d'applications pour continuer.",
   },
-  comingSoon: {
-    title: "Bientôt disponible",
-    body: "Cette partie de l'application est en préparation.",
+  assistant: {
+    intro:
+      "Posez votre question : la réponse vient uniquement des publications officielles, avec ses sources.",
+    modeTitle: "Que souhaitez-vous faire ?",
+    modes: {
+      ask: "Poser une question",
+      verify: "Est-ce vrai ?",
+      verifySpoken: "Vérifier une information : est-ce vrai ?",
+    },
+    labels: {
+      ask: "Votre question",
+      verify: "L'information à vérifier",
+    },
+    hints: {
+      ask: "Une démarche, une décision du Conseil des ministres, une annonce officielle…",
+      verify:
+        "Écrivez ce que vous avez lu ou entendu : l'assistant le compare aux publications officielles.",
+    },
+    personal: "N'écrivez pas d'informations personnelles (nom, numéro, adresse).",
+    submit: {
+      ask: "Demander",
+      verify: "Vérifier",
+    },
+    asking: "Recherche dans les publications officielles…",
+    sources: "Sources officielles",
+    sourceKinds: {
+      "news-article": "Article",
+      procedure: "Démarche",
+    },
+    sourceSpoken: "{kind} : {title}, {date}",
+    generated:
+      "Réponse rédigée automatiquement à partir de ces sources. En cas de doute, ouvrez-les.",
+    notFound: "Les publications officielles ne contiennent pas encore de réponse à cette question.",
+    notFoundVerify:
+      "Les publications officielles ne disent rien de cette information : elle n'est ni confirmée ni démentie.",
+    outOfScope:
+      "L'assistant répond seulement sur l'action du gouvernement, l'actualité officielle et les démarches administratives.",
+    pausedTitle: "L'assistant fait une pause",
+    pausedBody:
+      "Le nombre de questions prévu pour ce mois est atteint. L'assistant sera de nouveau disponible le {date}. Merci de votre patience.",
+    unavailable: "L'assistant n'est pas disponible pour le moment. Réessayez un peu plus tard.",
+    errors: {
+      offline: "Pas de connexion : votre question n'est pas partie. Réessayez une fois connecté.",
+      busy: "Vous avez posé beaucoup de questions en peu de temps. Réessayez dans un moment.",
+      closed: "L'assistant est momentanément coupé. Réessayez plus tard.",
+      failed: "La réponse n'a pas pu être lue. Réessayez.",
+    },
+    elsewhere: {
+      write: "Écrire au gouvernement",
+      search: "Chercher dans les actualités",
+    },
   },
 } as const;
 
