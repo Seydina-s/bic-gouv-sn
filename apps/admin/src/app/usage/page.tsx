@@ -1,4 +1,5 @@
 import { usageReportSchema, type UsageReport } from "@bgs/shared-types";
+import { FigureTile } from "../../components/FigureTile";
 import { adminRequest } from "../../lib/admin-api";
 import { formatDay } from "../../lib/format";
 import { t } from "../../lib/i18n";
@@ -9,18 +10,9 @@ export const dynamic = "force-dynamic";
 const number = new Intl.NumberFormat("fr-FR");
 const percent = new Intl.NumberFormat("fr-FR", { style: "percent", maximumFractionDigits: 0 });
 
-/** A figure under its label; a sentence instead of a figure stays in body size. */
+/** A figure under its label; without one, says there is not enough data yet. */
 function Tile({ label, value }: { label: string; value: string | null }) {
-  return (
-    <div className="rounded-lg border border-line p-5">
-      <dt className="text-sm text-ink-soft">{label}</dt>
-      {value === null ? (
-        <dd className="mt-2 text-ink-soft">{t("usage.notEnough")}</dd>
-      ) : (
-        <dd className="mt-1 font-display text-3xl font-extrabold tabular-nums">{value}</dd>
-      )}
-    </div>
-  );
+  return <FigureTile label={label} value={value} empty={t("usage.notEnough")} />;
 }
 
 function Section({

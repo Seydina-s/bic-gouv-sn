@@ -1,4 +1,5 @@
 import {
+  type AssistantUsage,
   describeError,
   isOngoing,
   isResolved,
@@ -7,6 +8,7 @@ import {
 } from "@bgs/shared-types";
 import type { z } from "zod";
 import { t } from "./i18n";
+import { NEAR_LIMIT_SHARE, usedShare } from "./assistant-usage";
 import { unusualGrowth } from "./subscriber-growth";
 
 /** Automatic sendings in 30 minutes from which the console asks for a look. */
@@ -84,6 +86,28 @@ function notificationItems(response: NotificationsResponse): AttentionItem[] {
   return items;
 }
 
+const percent = new Intl.NumberFormat("fr-FR", { style: "percent", maximumFractionDigits: 0 });
+
+/** The assistant paused for the rest of the month, or close to it. */
+function assistantItems(usage: AssistantUsage): AttentionItem[] {
+  if (!usage.configured) {
+    return [];
+  }
+  const share = usedShare(usage);
+  if (share >= 1) {
+    return [{ tone: "danger", text: t("attention.assistantPaused"), href: "/assistant" }];
+  }
+  return share >= NEAR_LIMIT_SHARE
+    ? [
+        {
+          tone: "warning",
+          text: t("attention.assistantNearLimit", { percent: percent.format(share) }),
+          href: "/assistant",
+        },
+      ]
+    : [];
+}
+
 /**
  * What needs a person now, most urgent first, for the console's first screen: the
  * errors still happening, the notification alerts, what waits for a second person.
@@ -97,12 +121,15 @@ export function attentionItems(input: {
   participationToRead?: number;
   /** Opportunities waiting for a second person. */
   opportunitiesPending?: number;
+  /** This month's questions to the assistant (none: unknown, said nothing). */
+  assistant?: AssistantUsage;
 }): AttentionItem[] {
   const items = [
     ...(input.errors === null ? [] : errorItems(input.errors, input.now)),
     ...(input.notifications === null ? [] : notificationItems(input.notifications)),
     ...countItem(input.participationToRead, "attention.participation", "/participation"),
     ...countItem(input.opportunitiesPending, "attention.opportunities", "/opportunites"),
+    ...(input.assistant === undefined ? [] : assistantItems(input.assistant)),
   ];
   if (input.errors === null || input.notifications === null) {
     items.push({ tone: "warning", text: t("attention.unreadable"), href: "/" });
