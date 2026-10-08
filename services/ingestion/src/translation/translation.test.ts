@@ -91,6 +91,15 @@ describe("checkTranslation", () => {
     });
   });
 
+  it("lets emphasis move with the words, and an empty paragraph go", () => {
+    const withEmphasis = {
+      title: "Titre fictif",
+      bodyHtml: `<p><strong>Un texte</strong> français fictif pour les essais.</p><p><strong><br /></strong></p><p><img src="${IMAGE}" /></p>`,
+    };
+    const moved = `<p>Mbind mu fictif ngir <strong>seetlu yi</strong>, lu gudd.</p><p><img src="${IMAGE}" /></p>`;
+    expect(checkTranslation(withEmphasis, reply(moved))).toMatchObject({ ok: true });
+  });
+
   it("cleans what it keeps like any scraped article", () => {
     const body = `<p><img src="${IMAGE}" /></p><p onclick="x()">Mbind mu fictif ngir seetlu yi, lu gudd.</p><script>x()</script>`;
     const checked = checkTranslation(french, reply(body));

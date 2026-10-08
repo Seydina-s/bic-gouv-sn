@@ -181,3 +181,10 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
   - options `--inspect` (voir une réponse brute) et `--recollect` (relire un lot sans repayer) ;
   - lot de 30 renvoyé, pour environ 1,67 $.
 - **Prévention** : toute limite ou estimation liée au nombre de jetons d'une langue est mesurée sur un vrai échantillon (une requête) avant un envoi par lot ; un lot commence toujours petit (ici 30).
+
+## 08/10/2026 — 21 traductions wolof écartées à tort (« structure modifiée »)
+
+- **Ce qui s'est passé** : sur le lot de 30, 21 traductions correctes ont été écartées, alors que paragraphes et images étaient intacts.
+- **Cause racine** : le contrôle comparait toutes les balises une à une, mises en gras comprises. Une mise en valeur suit les mots, et le wolof ne les range pas dans l'ordre du français. Un paragraphe vide du français (une simple ligne blanche en gras) comptait aussi comme un bloc.
+- **Correctif** : le contrôle compare désormais les blocs que lit la personne (paragraphes, titres, éléments de liste, citations, images, vidéos), dans l'ordre, sans les paragraphes vides. Les images restent vérifiées une à une. Le lot a été relu gratuitement (`--recollect`) : 29 traductions sur 30 enregistrées. Test : `services/ingestion/src/translation/translation.test.ts`.
+- **Prévention** : un contrôle automatique d'une traduction ne porte que sur ce qui doit rester identique d'une langue à l'autre (blocs, médias, faits), jamais sur l'ordre des mots ni sur la mise en forme qui les suit.
