@@ -1,12 +1,13 @@
 import type { Database } from "@bgs/database";
 import { isPublished, newsArticleSchema, type Lang, type NewsArticle } from "@bgs/shared-types";
-import type {
-  ArticlePage,
-  ArticleRepository,
-  ListQuery,
-  SaveOutcome,
-  SectionPage,
-  SectionsQuery,
+import {
+  withTrack,
+  type ArticlePage,
+  type ArticleRepository,
+  type ListQuery,
+  type SaveOutcome,
+  type SectionPage,
+  type SectionsQuery,
 } from "./article-repository";
 import { PostgresVersionedTable } from "./postgres-versioned-table";
 import type { VersionedEntry } from "./versioned-json-store";
@@ -152,6 +153,13 @@ export class PostgresArticleRepository implements ArticleRepository {
 
   setAttachments(id: string, attachments: NewsArticle["attachments"]): Promise<boolean> {
     return this.table.replaceCurrent(id, (current) => ({ ...current, attachments }));
+  }
+
+  setAudioTrack(id: string, track: NewsArticle["audio"][number]): Promise<boolean> {
+    return this.table.replaceCurrent(id, (current) => ({
+      ...current,
+      audio: withTrack(current.audio, track),
+    }));
   }
 
   /** A mark on the current version: its words stay as they are, no new version. */

@@ -1,0 +1,30 @@
+[project]
+name = "bgs-voices"
+version = "0.0.0"
+description = "Reads the official contents aloud once, in French (Piper, Jessica) and Wolof (Adia_TTS), for the app to play"
+requires-python = "==3.11.*"
+dependencies = [
+  "numpy==2.4.6",
+  "piper-tts==1.8.0",
+  "soundfile==0.14.0",
+  "torch==2.14.1",
+  "transformers==4.46.1",
+  "sentencepiece==0.2.2",
+  "protobuf==4.25.9",
+  "parler-tts @ git+https://github.com/huggingface/parler-tts.git@d108732cd57788ec86bc857d99a6cabd66663d68",
+]
+
+[dependency-groups]
+dev = ["pytest==8.4.2"]
+
+# The processor build of torch (no graphics card on the voice server for now).
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv]
+package = false

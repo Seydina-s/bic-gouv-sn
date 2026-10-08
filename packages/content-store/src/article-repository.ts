@@ -64,10 +64,23 @@ export interface ArticleRepository {
   /** Attaches the stored copies of official PDFs, like images: no new version. */
   setAttachments(id: string, attachments: NewsArticle["attachments"]): Promise<boolean>;
   /**
+   * Attaches a recording of one language version, replacing the previous one of that
+   * language. Derived like images: no new version. Returns false if unknown.
+   */
+  setAudioTrack(id: string, track: NewsArticle["audio"][number]): Promise<boolean>;
+  /**
    * Marks the version in `lang` as withdrawn by the source at `withdrawnAt`, or as
    * published again with null. The words are kept untouched. False if unknown.
    */
   setWithdrawn(id: string, lang: Lang, withdrawnAt: string | null): Promise<boolean>;
+}
+
+/** The recordings with `track` in place of the previous one of its language. */
+export function withTrack(
+  audio: NewsArticle["audio"],
+  track: NewsArticle["audio"][number],
+): NewsArticle["audio"] {
+  return [...audio.filter((existing) => existing.lang !== track.lang), track];
 }
 
 /** Sort key shared by every implementation: newest publication first, stable by id. */

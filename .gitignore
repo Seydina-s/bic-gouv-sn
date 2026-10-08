@@ -56,3 +56,8 @@ next-env.d.ts
 
 # Local data (provisional file store, collected content)
 .data/
+
+# Python environment of the voices (services/voices), rebuilt by `uv sync`.
+services/voices/.venv/
+__pycache__/
+.pytest_cache/

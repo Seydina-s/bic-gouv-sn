@@ -27,8 +27,9 @@ export function audioTrack(overrides: Record<string, unknown> = {}) {
   return {
     lang: "fr",
     origin: "tts",
-    url: "https://cdn.example.test/audio/test.opus",
-    format: "opus",
+    key: "audio/test/fr.mp3",
+    format: "mp3",
+    textHash: "a".repeat(64),
     durationMs: 42_000,
     bytes: 120_000,
     createdAt: NOW,
