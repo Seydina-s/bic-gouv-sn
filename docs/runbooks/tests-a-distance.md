@@ -13,6 +13,17 @@
 
 L'adresse ne change pas : l'app installée chez la personne continue de fonctionner, sans nouvelle compilation.
 
+## Relancer après chaque fusion qui touche l'API
+
+L'API en marche garde la version avec laquelle elle a démarré. Après une fusion, il faut la relancer, sinon la console signale « Une adresse inexistante de l'API a été demandée » pour toute nouvelle page (erreur du 08/10).
+
+1. Arrêtez l'API et le filtre.
+2. Mettez le dépôt à jour : `git fetch origin && git checkout --detach origin/main`.
+3. Reconstruisez : `pnpm --filter @bgs/api build`.
+4. Relancez les étapes 1 et 2 ci-dessus. Le filtre se lance toujours depuis `scripts/` du dépôt, jamais depuis une copie : la liste des adresses qu'il laisse passer change avec l'app.
+
+Une clé saisie ou changée dans le fichier de configuration local de l'API n'est lue qu'au démarrage : relancez aussi l'API dans ce cas.
+
 ## Nouvelle version Android pour les testeurs
 
 `npx eas-cli build --profile preview --platform android` (dans `apps/mobile`). L'adresse de l'API vient de la variable `EXPO_PUBLIC_API_URL` de l'environnement « preview » chez Expo (`eas env:list preview`).

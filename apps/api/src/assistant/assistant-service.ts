@@ -39,6 +39,8 @@ export type AssistantProblem = "model_failed" | "answer_rejected" | "quota_reach
 export interface AssistantOutcome {
   reply: AssistantReply;
   problem: AssistantProblem;
+  /** What went wrong with the model call (deadline, refusal…), for the logs; never the question. */
+  failure?: unknown;
 }
 
 /** The month's questions are used up: the model was not called. */
@@ -133,7 +135,7 @@ export class AssistantService {
       if (error instanceof QuotaReached) {
         return paused;
       }
-      return { reply: reply("unavailable"), problem: "model_failed" };
+      return { reply: reply("unavailable"), problem: "model_failed", failure: error };
     }
     if (answer.usage !== null) {
       await Promise.all([

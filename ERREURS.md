@@ -142,3 +142,10 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : faille publiée après la dernière mise à jour ; rien dans le code ne l'avait introduite. Le contrôle a bien fait son travail.
 - **Correctif** : Next.js passé en 16.3.8 (version corrigée, même branche), sans exception à l'audit ; types, 119 tests et construction de production de la console vérifiés.
 - **Prévention** : l'audit bloquant en CI reste la règle ; une faille publiée en cours de route est corrigée dans une demande à part, avant les autres, plutôt que par une exception.
+
+## 08/10/2026 — Console : « Une adresse inexistante de l'API a été demandée »
+
+- **Ce qui s'est passé** : la nouvelle page « Assistant » de la console appelait `GET /admin/v1/assistant`, qui répondait 404 (trois fois, journal des erreurs). Ensuite, la première question test à l'assistant a répondu « indisponible » au bout de 26 s.
+- **Cause racine** : l'API de démonstration tournait depuis le 06/10. Elle avait été lancée avant la fusion de l'assistant (#258) et n'avait jamais été relancée : la console, elle, était à jour. Le filtre des tests à distance tournait aussi depuis une copie ancienne, sans la nouvelle adresse de l'assistant. La lenteur de la première question venait d'un ralentissement ponctuel du réseau vers Anthropic (18 s mesurées, puis moins d'une seconde), coupé par la limite de 20 s ; cet échec n'apparaissait nulle part dans les journaux de l'API.
+- **Correctif** : API reconstruite et relancée sur la dernière version (avec la clé), filtre relancé depuis `scripts/` du dépôt ; question test : réponse sourcée en 2,2 s. L'API écrit désormais dans son journal pourquoi le modèle n'a pas répondu (délai, refus, crédit), jamais la question (test dans `apps/api/src/routes/assistant.test.ts`).
+- **Prévention** : `docs/runbooks/tests-a-distance.md` décrit la relance après chaque fusion qui touche l'API, et rappelle de lancer le filtre depuis le dépôt.

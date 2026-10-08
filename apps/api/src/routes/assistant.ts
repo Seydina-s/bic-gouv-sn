@@ -57,9 +57,13 @@ export const assistantRoutes: FastifyPluginAsyncZod<AssistantRoutesOptions> = (
           requestId: request.id,
         });
       }
-      const { reply: answer, problem } = await assistant.answer(request.body);
+      const { reply: answer, problem, failure } = await assistant.answer(request.body);
       if (problem !== null) {
         errorJournal?.record(PROBLEM_CODES[problem], ROUTE, request.id);
+      }
+      if (failure !== undefined) {
+        // Why the model did not answer (deadline, key refused, credit…): never the question.
+        request.log.warn({ err: failure }, "Assistant model call failed");
       }
       void reply.header("cache-control", "no-store");
       return answer;

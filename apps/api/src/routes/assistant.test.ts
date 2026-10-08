@@ -43,7 +43,12 @@ function emptyJournalStore(): ErrorJournalStore {
 }
 
 async function start(
-  options: { llm?: LlmProvider | null; features?: object; errorJournal?: ErrorJournal } = {},
+  options: {
+    llm?: LlmProvider | null;
+    features?: object;
+    errorJournal?: ErrorJournal;
+    logs?: string[];
+  } = {},
 ) {
   const procedures = new FileProcedureRepository(join(dir, "procedures.json"));
   await procedures.save(
@@ -55,7 +60,7 @@ async function start(
     JSON.stringify({ minVersion: null, features: options.features ?? {} }),
   );
   const app = await buildApp({
-    config: loadConfig({ LOG_LEVEL: "silent" }),
+    config: loadConfig({ LOG_LEVEL: options.logs === undefined ? "silent" : "warn" }),
     version: "1.0.0",
     articles: temporaryStore(),
     procedures,
@@ -64,6 +69,9 @@ async function start(
     settings: new FileSettingStore(join(dir, "settings.json")),
     llm: options.llm === undefined ? model() : options.llm,
     errorJournal: options.errorJournal ?? null,
+    ...(options.logs === undefined
+      ? {}
+      : { logStream: { write: (line: string) => void options.logs?.push(line) } }),
   });
   apps.push(app);
   return app;
@@ -150,6 +158,21 @@ describe("POST /v1/assistant/answers", () => {
     });
     const audit = await admin.admin.journal.entries();
     expect(audit.some((line) => line.action === "assistant.limit-changed")).toBe(true);
+  });
+
+  it("logs why the model failed, never the question", async () => {
+    const logs: string[] = [];
+    const failing: LlmProvider = {
+      name: "test",
+      complete: () => Promise.reject(new Error("Anthropic answered 529")),
+    };
+    const reply = assistantReplySchema.parse(
+      (await ask(await start({ llm: failing, logs }))).json(),
+    );
+    expect(reply.status).toBe("unavailable");
+    const warning = logs.find((line) => line.includes("Assistant model call failed"));
+    expect(warning).toContain("Anthropic answered 529");
+    expect(logs.join("")).not.toContain("passeport fictif");
   });
 
   it("lets only admins change the limit", async () => {
