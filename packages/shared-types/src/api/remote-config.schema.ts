@@ -6,7 +6,14 @@ import { z } from "zod";
  */
 
 /** What can be switched off in every installed app. */
-export const APP_FEATURES = ["nearMe", "map", "readAloud", "procedures", "participate"] as const;
+export const APP_FEATURES = [
+  "nearMe",
+  "map",
+  "readAloud",
+  "procedures",
+  "participate",
+  "assistant",
+] as const;
 export const appFeatureSchema = z.enum(APP_FEATURES);
 export type AppFeature = z.infer<typeof appFeatureSchema>;
 
@@ -22,7 +29,14 @@ export type RemoteConfig = z.infer<typeof remoteConfigSchema>;
 /** Everything on, no minimum: what an app uses until it knows better. */
 export const DEFAULT_REMOTE_CONFIG: RemoteConfig = {
   minVersion: null,
-  features: { nearMe: true, map: true, readAloud: true, procedures: true, participate: true },
+  features: {
+    nearMe: true,
+    map: true,
+    readAloud: true,
+    procedures: true,
+    participate: true,
+    assistant: true,
+  },
 };
 
 /**

@@ -1,5 +1,6 @@
 import type { ErrorCode } from "@bgs/shared-types";
 import { z } from "zod";
+import { DEFAULT_ASSISTANT_MODEL } from "./assistant/claude-provider";
 import { resolveDataPath } from "./data-path";
 
 /** Every setting comes from environment variables; secrets are never hard-coded. */
@@ -210,6 +211,14 @@ const envSchema = z.object({
     .min(1)
     .default(".data/admin/audit.jsonl")
     .transform((path) => resolveDataPath(path)),
+  /**
+   * Key of the Anthropic account behind the assistant, with a spending limit set in
+   * that account; from the secret manager only. Absent: the assistant says it is
+   * not available yet, and the rest of the app works as usual.
+   */
+  ANTHROPIC_API_KEY: z.string().min(1).optional(),
+  /** The Claude model answering (the cheapest that answers well enough). */
+  ASSISTANT_MODEL: z.string().min(1).default(DEFAULT_ASSISTANT_MODEL),
   /** Sentry project key; crash reporting stays off while it is absent. */
   SENTRY_DSN: z.url({ protocol: /^https$/ }).optional(),
   /** Share of requests traced for performance (0 to 1); errors are always reported. */

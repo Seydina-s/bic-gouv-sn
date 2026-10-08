@@ -12,7 +12,14 @@ describe("remote config", () => {
       readRemoteConfig({ minVersion: "1.2.0", features: { map: false, futureThing: false } }),
     ).toEqual({
       minVersion: "1.2.0",
-      features: { nearMe: true, map: false, readAloud: true, procedures: true, participate: true },
+      features: {
+        nearMe: true,
+        map: false,
+        readAloud: true,
+        procedures: true,
+        participate: true,
+        assistant: true,
+      },
     });
     expect(readRemoteConfig({ minVersion: "latest", features: "none" })).toEqual(
       DEFAULT_REMOTE_CONFIG,

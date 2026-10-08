@@ -44,6 +44,13 @@ describe("userMessage", () => {
   it("asks for Wolof when the question is in Wolof", () => {
     expect(userMessage("[wo] Laaj", "wo", given)).toContain("Language of the answer: Wolof");
   });
+
+  it("asks to check the claim in « Est-ce vrai ? », and only then", () => {
+    expect(userMessage("Le port ferme", "fr", given, "verify")).toContain(
+      "Task: check the claim in the question against the extracts",
+    );
+    expect(userMessage("Le port ferme", "fr", given)).not.toContain("Task:");
+  });
 });
 
 describe("checkAnswer", () => {

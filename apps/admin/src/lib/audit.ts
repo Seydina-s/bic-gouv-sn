@@ -24,6 +24,7 @@ const LABELS = {
   "service.corrected": "serviceCorrected",
   "service.added": "serviceAdded",
   "remote-config.changed": "remoteChanged",
+  "assistant.limit-changed": "assistantLimitChanged",
   "notification.prepared": "notificationPrepared",
   "notification.approved": "notificationApproved",
   "notification.cancelled": "notificationCancelled",

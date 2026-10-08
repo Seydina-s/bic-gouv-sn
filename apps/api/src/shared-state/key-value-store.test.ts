@@ -66,4 +66,18 @@ describe.each(subjects)("the shared key-value store %s", (_name, make) => {
     expect(await store.membersOf("sessions")).toEqual([]);
     await store.close();
   });
+
+  it("counts atomically, and the count expires from its start", async () => {
+    const { store, pass } = make();
+    expect(await store.increment("questions", 300)).toBe(1);
+    await pass(150);
+    expect(await store.increment("questions", 300)).toBe(2);
+    expect(await store.get("questions")).toBe("2");
+    await pass(200);
+    expect(await store.get("questions")).toBeNull();
+    expect(await store.increment("questions", 300)).toBe(1);
+    expect(await store.increment("tokens", 300, 950)).toBe(950);
+    expect(await store.increment("tokens", 300, 50)).toBe(1000);
+    await store.close();
+  });
 });
