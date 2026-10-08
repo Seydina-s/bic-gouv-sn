@@ -514,6 +514,14 @@
       "text": 1
     },
     {
+      "name": "expo-speech-recognition",
+      "version": "57.1.0",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2024 jamsch"],
+      "url": "https://github.com/jamsch/expo-speech-recognition#readme",
+      "text": 2
+    },
+    {
       "name": "expo-splash-screen",
       "version": "57.0.9",
       "licence": "MIT",

@@ -484,55 +484,47 @@ export const fr = {
       "Cette version de Bic Gouv Sn n'est plus prise en charge. Mettez l'application à jour depuis votre magasin d'applications pour continuer.",
   },
   assistant: {
-    intro:
-      "Posez votre question : la réponse vient uniquement des publications officielles, avec ses sources.",
-    modeTitle: "Que souhaitez-vous faire ?",
-    modes: {
-      ask: "Poser une question",
-      verify: "Est-ce vrai ?",
-      verifySpoken: "Vérifier une information : est-ce vrai ?",
-    },
-    labels: {
-      ask: "Votre question",
-      verify: "L'information à vérifier",
-    },
-    hints: {
-      ask: "Une démarche, une décision du Conseil des ministres, une annonce officielle…",
-      verify:
-        "Écrivez ce que vous avez lu ou entendu : l'assistant le compare aux publications officielles.",
-    },
+    welcome:
+      "Posez vos questions sur l'action du Gouvernement et vos démarches administratives, ou soumettez une information pour en vérifier l'exactitude. Les réponses s'appuient exclusivement sur les sources officielles.",
+    placeholder: "Posez une question ou vérifiez une information",
     personal: "N'écrivez pas d'informations personnelles (nom, numéro, adresse).",
-    submit: {
-      ask: "Demander",
-      verify: "Vérifier",
-    },
-    asking: "Recherche dans les publications officielles…",
-    sources: "Sources officielles",
+    listening: "Je vous écoute…",
+    send: "Envoyer",
+    speak: "Dicter votre message",
+    stopListening: "Arrêter la dictée",
+    newChat: "Nouvelle discussion",
+    you: "Vous",
+    thinking: "Recherche dans les sources officielles…",
+    retry: "Réessayer",
     sourceKinds: {
       "news-article": "Article",
       procedure: "Démarche",
     },
     sourceSpoken: "{kind} : {title}, {date}",
-    generated:
-      "Réponse rédigée automatiquement à partir de ces sources. En cas de doute, ouvrez-les.",
-    notFound: "Les publications officielles ne contiennent pas encore de réponse à cette question.",
-    notFoundVerify:
-      "Les publications officielles ne disent rien de cette information : elle n'est ni confirmée ni démentie.",
+    generated: "Réponse rédigée automatiquement à partir de ces sources officielles.",
+    notFound:
+      "Les sources officielles ne contiennent pas d'information sur ce sujet : je ne peux ni répondre, ni confirmer, ni démentir.",
     outOfScope:
-      "L'assistant répond seulement sur l'action du gouvernement, l'actualité officielle et les démarches administratives.",
+      "Je réponds uniquement sur l'action du Gouvernement, l'actualité officielle et les démarches administratives.",
     pausedTitle: "L'assistant fait une pause",
     pausedBody:
       "Le nombre de questions prévu pour ce mois est atteint. L'assistant sera de nouveau disponible le {date}. Merci de votre patience.",
     unavailable: "L'assistant n'est pas disponible pour le moment. Réessayez un peu plus tard.",
     errors: {
-      offline: "Pas de connexion : votre question n'est pas partie. Réessayez une fois connecté.",
-      busy: "Vous avez posé beaucoup de questions en peu de temps. Réessayez dans un moment.",
+      offline: "Pas de connexion : votre message n'est pas parti. Réessayez une fois connecté.",
+      busy: "Vous avez envoyé beaucoup de messages en peu de temps. Réessayez dans un moment.",
       closed: "L'assistant est momentanément coupé. Réessayez plus tard.",
       failed: "La réponse n'a pas pu être lue. Réessayez.",
     },
     elsewhere: {
       write: "Écrire au gouvernement",
       search: "Chercher dans les actualités",
+    },
+    voice: {
+      denied: "Autorisez le micro dans les réglages du téléphone pour dicter vos messages.",
+      unavailable: "La dictée arrive avec la prochaine version de l'application.",
+      wolof: "La dictée en wolof arrive bientôt : écrivez votre message.",
+      failed: "La dictée n'a pas fonctionné. Réessayez ou écrivez votre message.",
     },
   },
 } as const;
