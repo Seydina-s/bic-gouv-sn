@@ -903,11 +903,77 @@ describe("app shell", () => {
     expect(await screen.findByRole("radio", { name: "Sombre" })).toBeOnTheScreen();
   });
 
-  it("shows an honest coming-soon screen for sections not built yet", async () => {
+  it("answers a question with its official sources, and opens the procedure cited", async () => {
+    const fetchMock = newsFetch();
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
     await renderRouter(routes, { initialUrl: "/assistant" });
-    await waitFor(() => {
-      expect(screen.getByText("Bientôt disponible")).toBeOnTheScreen();
+    const ask = await screen.findByRole("button", { name: "Demander" });
+    expect(ask).toBeDisabled();
+    await fireEvent.changeText(screen.getByLabelText("Votre question"), "Une question fictive ?");
+    await fireEvent.press(ask);
+    expect(
+      await screen.findByText("Une réponse fictive tirée de la démarche de test."),
+    ).toBeOnTheScreen();
+    const sent = fetchMock.mock.calls.find(([url]) => url.includes("/v1/assistant/answers"));
+    const init = (sent as unknown as [string, RequestInit] | undefined)?.[1];
+    expect(JSON.parse(init?.body as string)).toEqual({
+      question: "Une question fictive ?",
+      mode: "ask",
+      lang: "fr",
     });
+    await fireEvent.press(
+      screen.getByRole("button", { name: /^Démarche : Démarche fictive citée/ }),
+    );
+    expect(await screen.findByRole("header", { name: "Démarche de test A" })).toBeOnTheScreen();
+  });
+
+  it("checks a claim, and says kindly when the month's questions are used up", async () => {
+    const paused = { status: "paused", text: null, sources: [], resumesOn: "2026-11-01" };
+    const fetchMock = newsFetch({ assistant: () => new Response(JSON.stringify(paused)) });
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    await renderRouter(routes, { initialUrl: "/assistant" });
+    await fireEvent.press(
+      await screen.findByRole("radio", { name: "Vérifier une information : est-ce vrai ?" }),
+    );
+    await fireEvent.changeText(
+      screen.getByLabelText("L'information à vérifier"),
+      "Une information fictive.",
+    );
+    await fireEvent.press(screen.getByRole("button", { name: "Vérifier" }));
+    expect(await screen.findByText("L'assistant fait une pause")).toBeOnTheScreen();
+    expect(screen.getByText(/disponible le 1 novembre 2026/)).toBeOnTheScreen();
+    const sent = fetchMock.mock.calls.find(([url]) => url.includes("/v1/assistant/answers"));
+    const init = (sent as unknown as [string, RequestInit] | undefined)?.[1];
+    expect(JSON.parse(init?.body as string)).toMatchObject({ mode: "verify" });
+  });
+
+  it("offers other ways when the official base has no answer, or no connection", async () => {
+    const notFound = { status: "not_found", text: null, sources: [], resumesOn: null };
+    let offline = false;
+    const fetchMock = newsFetch({
+      assistant: () => {
+        if (offline) {
+          throw new TypeError("Network request failed");
+        }
+        return new Response(JSON.stringify(notFound));
+      },
+    });
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    await renderRouter(routes, { initialUrl: "/assistant" });
+    await fireEvent.changeText(
+      await screen.findByLabelText("Votre question"),
+      "Une question sans réponse ?",
+    );
+    await fireEvent.press(screen.getByRole("button", { name: "Demander" }));
+    expect(
+      await screen.findByText(
+        "Les publications officielles ne contiennent pas encore de réponse à cette question.",
+      ),
+    ).toBeOnTheScreen();
+    expect(screen.getByRole("button", { name: "Écrire au gouvernement" })).toBeOnTheScreen();
+    offline = true;
+    await fireEvent.press(screen.getByRole("button", { name: "Demander" }));
+    expect(await screen.findByText(/^Pas de connexion/)).toBeOnTheScreen();
   });
 
   it("lists the verified services, then the nearest from a chosen town, with directions", async () => {

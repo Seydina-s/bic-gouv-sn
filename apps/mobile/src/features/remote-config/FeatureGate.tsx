@@ -1,6 +1,6 @@
 import type { AppFeature } from "@bgs/shared-types";
 import type { ReactNode } from "react";
-import { NoticeScreen } from "../../components/ComingSoon";
+import { NoticeScreen } from "../../components/NoticeScreen";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useFeature, useUpdateRequired } from "./useRemoteConfig";
 
