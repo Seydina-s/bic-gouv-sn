@@ -2,18 +2,24 @@
 // (data/assistant-retrieval-eval.json): `pnpm --filter @bgs/api assistant:eval`.
 // Read-only. Messages are in French: this command is run by the team.
 import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { FileArticleRepository, FileProcedureRepository } from "@bgs/content-store";
 import type { NewsArticle } from "@bgs/shared-types";
 import { PassageIndex } from "../assistant/passage-search";
 import { articlePassages, procedurePassages } from "../assistant/passages";
 import {
+  byWordsOnly,
   RANKS,
   rankOf,
   retrievalSetSchema,
   summarize,
   unknownPages,
   type CaseResult,
+  type Search,
 } from "../assistant/retrieval-eval";
+import { retrievePassages } from "../assistant/retrieval";
+import { SemanticLayer } from "../assistant/semantic-layer";
+import { TransformersEmbedder } from "../assistant/transformers-embedder";
 import { loadConfig } from "../config";
 
 const PAGE_SIZE = 200;
@@ -56,8 +62,60 @@ async function main(): Promise<void> {
   }
 
   const index = new PassageIndex(passages);
-  const results = cases.map((testCase) => rankOf(index, testCase));
-  process.stdout.write(`${report("Toutes", results)}\n`);
+  const today = new Date().toISOString().slice(0, 10);
+  const searches: [string, Search][] = [
+    ["Mots seuls", byWordsOnly(index)],
+    [
+      "Mots, date et rubrique",
+      (question, depth) => retrievePassages(index, question, "fr", today, null, { limit: depth }),
+    ],
+  ];
+  // --meaning: the search by meaning too, fused with several weights.
+  if (process.argv.includes("--meaning")) {
+    const semantic = new SemanticLayer({
+      embedder: new TransformersEmbedder(join(config.ASSISTANT_VECTORS_ROOT, "models")),
+      path: join(config.ASSISTANT_VECTORS_ROOT, "vectors.json"),
+    });
+    await semantic.update(passages);
+    const vectors = semantic.current();
+    const questions = await semantic.embedder.embed(
+      cases.map((testCase) => testCase.question),
+      "query",
+      new AbortController().signal,
+    );
+    const meaningOf = new Map(
+      cases.map((testCase, position) => {
+        const vector = questions[position];
+        return [
+          testCase.question,
+          vectors === null || vector === undefined
+            ? []
+            : vectors.search(vector, { lang: "fr", limit: 60 }),
+        ];
+      }),
+    );
+    searches.push([
+      "Sens seul",
+      (question, depth) => (meaningOf.get(question) ?? []).slice(0, depth).map((f) => f.passage),
+    ]);
+    for (const weight of [1, 2, 3]) {
+      searches.push([
+        `Mots + sens (poids ${String(weight)}), date et rubrique`,
+        (question, depth) =>
+          retrievePassages(index, question, "fr", today, meaningOf.get(question) ?? null, {
+            limit: depth,
+            meaningWeight: weight,
+          }),
+      ]);
+    }
+  }
+  for (const [label, search] of searches) {
+    const measured = cases.map((testCase) => rankOf(search, testCase));
+    process.stdout.write(`${report(label, measured)}\n`);
+  }
+  const last = searches.at(-1)?.[1] ?? byWordsOnly(index);
+  const results = cases.map((testCase) => rankOf(last, testCase));
+  process.stdout.write(`\nDernière recherche mesurée :\n${report("Toutes", results)}\n`);
   for (const style of ["direct", "reformulated"] as const) {
     const label = style === "direct" ? "Mots de la source" : "Reformulées";
     process.stdout.write(

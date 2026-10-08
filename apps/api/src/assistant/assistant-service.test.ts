@@ -25,11 +25,14 @@ function passage(n: number, kind: Passage["kind"], title: string, text: string):
   };
 }
 
+const PASSAGES = [
+  passage(1, "procedure", "Démarche du port", "Le port de test ouvre le lundi."),
+  passage(2, "news-article", "Nouvelles du port", "Le port de test accueille un navire."),
+];
+
 const knowledge: Knowledge = {
-  index: new PassageIndex([
-    passage(1, "procedure", "Démarche du port", "Le port de test ouvre le lundi."),
-    passage(2, "news-article", "Nouvelles du port", "Le port de test accueille un navire."),
-  ]),
+  index: new PassageIndex(PASSAGES),
+  passages: PASSAGES,
   procedureSlugs: new Map([["content-1", "demarche-du-port"]]),
 };
 

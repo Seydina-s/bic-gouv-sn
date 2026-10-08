@@ -2,11 +2,14 @@
 // lexical search finds for questions given on the command line:
 // `pnpm --filter @bgs/api assistant:passages "question 1" "question 2"`.
 // Read-only. Messages are in French: this command is run by the team.
+import { join } from "node:path";
 import { FileArticleRepository, FileProcedureRepository } from "@bgs/content-store";
 import type { NewsArticle } from "@bgs/shared-types";
 import { PassageIndex } from "../assistant/passage-search";
 import { articlePassages, procedurePassages, type Passage } from "../assistant/passages";
 import { retrievePassages } from "../assistant/retrieval";
+import { SemanticLayer } from "../assistant/semantic-layer";
+import { TransformersEmbedder } from "../assistant/transformers-embedder";
 import { loadConfig } from "../config";
 
 const PAGE_SIZE = 200;
@@ -54,9 +57,34 @@ async function main(): Promise<void> {
     `Index construit en ${String(Math.round(performance.now() - started))} ms\n`,
   );
 
-  for (const question of process.argv.slice(2)) {
-    // What the model would read today: words, freshness, the section named.
-    const found = retrievePassages(index, question, "fr", today);
+  // --meaning: the search by meaning too (computes the vectors the API then reuses).
+  const meaning = process.argv.includes("--meaning")
+    ? new SemanticLayer({
+        embedder: new TransformersEmbedder(join(config.ASSISTANT_VECTORS_ROOT, "models")),
+        path: join(config.ASSISTANT_VECTORS_ROOT, "vectors.json"),
+      })
+    : null;
+  if (meaning !== null) {
+    const began = performance.now();
+    await meaning.update(passages);
+    process.stdout.write(
+      `Vecteurs prêts en ${String(Math.round((performance.now() - began) / 1000))} s
+`,
+    );
+  }
+
+  for (const question of process.argv.slice(2).filter((arg) => !arg.startsWith("--"))) {
+    const vectors = meaning?.current() ?? null;
+    const [vector] =
+      meaning === null || vectors === null
+        ? []
+        : await meaning.embedder.embed([question], "query", new AbortController().signal);
+    const byMeaning =
+      vectors === null || vector === undefined
+        ? null
+        : vectors.search(vector, { lang: "fr", limit: 40 });
+    // What the model would read today: words, meaning, freshness, the section named.
+    const found = retrievePassages(index, question, "fr", today, byMeaning);
     process.stdout.write(`\n« ${question} »\n`);
     for (const passage of found) {
       process.stdout.write(

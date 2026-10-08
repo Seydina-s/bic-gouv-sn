@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { PassageIndex } from "./passage-search";
 import type { Passage } from "./passages";
 import {
+  byWordsOnly,
   rankOf,
   retrievalSetSchema,
   summarize,
@@ -37,12 +38,20 @@ const url = (page: string) => `https://e-senegal.sn/#/demarche/${page}`;
 
 describe("rankOf", () => {
   it("ranks pages, not passages: two passages of one page count once", () => {
-    const result = rankOf(index, { question: "le port", style: "direct", expected: [url("b")] });
+    const result = rankOf(byWordsOnly(index), {
+      question: "le port",
+      style: "direct",
+      expected: [url("b")],
+    });
     expect(result.rank).toBe(2);
   });
 
   it("gives no rank when the expected page is not found", () => {
-    const result = rankOf(index, { question: "le port", style: "direct", expected: [url("c")] });
+    const result = rankOf(byWordsOnly(index), {
+      question: "le port",
+      style: "direct",
+      expected: [url("c")],
+    });
     expect(result.rank).toBeNull();
   });
 });

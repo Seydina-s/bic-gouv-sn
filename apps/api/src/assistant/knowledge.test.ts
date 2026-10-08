@@ -3,7 +3,7 @@ import { PassageIndex } from "./passage-search";
 import { RefreshedKnowledge, type Knowledge } from "./knowledge";
 
 function knowledge(): Knowledge {
-  return { index: new PassageIndex([]), procedureSlugs: new Map() };
+  return { index: new PassageIndex([]), passages: [], procedureSlugs: new Map() };
 }
 
 describe("the refreshed knowledge", () => {
