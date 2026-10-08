@@ -168,6 +168,7 @@ describe("the assistant service", () => {
     expect(await assistant.answer(question)).toEqual({
       reply: { status: "unavailable", text: null, sources: [], resumesOn: null },
       problem: "model_failed",
+      failure: new Error("délai dépassé"),
     });
   });
 
