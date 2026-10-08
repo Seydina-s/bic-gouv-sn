@@ -1,5 +1,12 @@
 import { fileURLToPath } from "node:url";
-import { contentStores, type ContentPaths, type ContentStores } from "@bgs/content-store";
+import {
+  contentStores,
+  fileDocument,
+  postgresDocument,
+  type ContentPaths,
+  type ContentStores,
+  type JsonDocument,
+} from "@bgs/content-store";
 import { openDatabase } from "@bgs/database";
 
 const dataDir = new URL("../../../../.data/", import.meta.url);
@@ -22,6 +29,8 @@ export interface CollectionStores {
   /** True when writing to PostgreSQL (the files of .data/ are then not used). */
   inDatabase: boolean;
   paths: ContentPaths;
+  /** A document of the collection's own, never served (e.g. the translation runs). */
+  document: (name: string) => JsonDocument;
   close: () => Promise<void>;
 }
 
@@ -36,6 +45,8 @@ export async function openStores(env: NodeJS.ProcessEnv = process.env): Promise<
     stores: contentStores(database, paths),
     inDatabase: database !== null,
     paths,
+    document: (name) =>
+      database === null ? fileDocument(inData(`${name}.json`)) : postgresDocument(database, name),
     close: () => database?.close() ?? Promise.resolve(),
   };
 }
