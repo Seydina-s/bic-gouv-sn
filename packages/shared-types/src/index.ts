@@ -34,3 +34,4 @@ export * from "./api/push.schema";
 export * from "./api/opportunities.schema";
 export * from "./api/participation.schema";
 export * from "./api/assistant.schema";
+export * from "./api/translation-review.schema";

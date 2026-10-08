@@ -249,6 +249,20 @@ export const ERROR_CATALOG = {
     action:
       "Pour reprendre avant, augmentez la limite mensuelle dans la page « Assistant » (cela augmente le coût).",
   },
+  TRANSLATION_NOT_FOUND: {
+    what: "La traduction demandée n'existe pas : l'article a peut-être été retiré.",
+    where: "Centre d'administration, traductions à relire",
+    impact: "Rien n'a été modifié.",
+    severity: "info",
+    action: "Rechargez la liste des traductions à relire.",
+  },
+  TRANSLATION_NOT_PENDING: {
+    what: "Cette traduction n'est plus à relire : déjà traitée, ou version officielle en wolof parue entre-temps.",
+    where: "Centre d'administration, traductions à relire",
+    impact: "Rien n'a été modifié ; la décision déjà prise est conservée.",
+    severity: "info",
+    action: "Rechargez la liste et passez à la traduction suivante.",
+  },
   PARTICIPATION_NOT_FOUND: {
     what: "Un message, un signalement ou une photo demandés n'existent pas (ou plus).",
     where: "Centre d'administration, participation",
