@@ -3,6 +3,7 @@ import {
   blockSchema,
   coverSchema,
   newsDetailSchema,
+  newsAudioSchema,
   newsDocumentSchema,
   newsListResponseSchema,
   newsSectionsResponseSchema,
@@ -68,6 +69,10 @@ function withReadableParts(raw: unknown): unknown {
   }
   if ("documents" in raw) {
     readable["documents"] = keepValid(raw["documents"], newsDocumentSchema);
+  }
+  if ("audio" in raw && !newsAudioSchema.nullable().safeParse(raw["audio"]).success) {
+    // A recording this version cannot play: the phone's voice reads the article.
+    readable["audio"] = null;
   }
   return readable;
 }

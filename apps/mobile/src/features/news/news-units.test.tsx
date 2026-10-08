@@ -55,7 +55,8 @@ describe("createNewsClient", () => {
       blocks: [{ type: "podcast", url: "https://cdn.test/p.mp3" }, ...DETAIL.blocks],
     };
     const client = createNewsClient({ baseUrl: "", fetchImpl: respond(newer) });
-    await expect(client.getNews(DETAIL.id, "fr")).resolves.toEqual(DETAIL);
+    // A recording in a shape this version cannot play is dropped, the article kept.
+    await expect(client.getNews(DETAIL.id, "fr")).resolves.toEqual({ ...DETAIL, audio: null });
     const list = createNewsClient({
       baseUrl: "",
       fetchImpl: respond({ ...LIST, pageCount: 2 }),
