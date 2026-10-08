@@ -71,6 +71,7 @@ export const adminFr = {
     services: "Services de l'État",
     errors: "Erreurs",
     withdrawn: "Articles masqués",
+    translations: "Traductions à relire",
     searches: "Recherches sans résultat",
     usage: "Usage de l'application",
     assistant: "Assistant",
@@ -265,6 +266,8 @@ export const adminFr = {
       serviceCorrected: "Service corrigé",
       serviceAdded: "Service ajouté",
       remoteChanged: "Contrôle à distance modifié",
+      translationValidated: "Traduction en wolof validée",
+      translationSetAside: "Traduction en wolof écartée",
       assistantLimitChanged: "Limite mensuelle de l'assistant modifiée",
       notificationPrepared: "Notification préparée",
       notificationApproved: "Notification validée",
@@ -555,6 +558,30 @@ export const adminFr = {
     assistantPaused:
       "L'assistant est en pause : toutes les questions prévues ce mois-ci ont été posées.",
     assistantNearLimit: "L'assistant a déjà utilisé {percent} des questions prévues ce mois-ci.",
+  },
+  translations: {
+    title: "Traductions à relire",
+    intro:
+      "Les articles que la Présidence n'a pas publiés en wolof sont traduits automatiquement. Dans l'application, ils portent la mention « Traduction automatique » jusqu'à leur relecture. Une personne qui parle wolof compare les deux versions, puis valide la traduction ou l'écarte.",
+    count: {
+      one: "{count} traduction à relire",
+      other: "{count} traductions à relire",
+    },
+    none: "Aucune traduction à relire pour l'instant.",
+    failed: "Les traductions n'ont pas pu être lues. Rechargez la page.",
+    publishedOn: "Publié le {day}",
+    back: "Toutes les traductions à relire",
+    french: "Français (version officielle)",
+    wolof: "Wolof (traduction automatique)",
+    source: "Voir l'article officiel",
+    decide: "Votre décision",
+    validate: "Valider la traduction",
+    validateHelp: "La mention « Traduction automatique » disparaît de l'application.",
+    setAside: "Écarter la traduction",
+    setAsideHelp:
+      "L'article est de nouveau montré en français seulement ; il pourra être traduit à nouveau.",
+    notPending:
+      "Cette traduction n'est plus à relire : elle a déjà été traitée, ou la version officielle en wolof est parue.",
   },
   assistant: {
     title: "Assistant",

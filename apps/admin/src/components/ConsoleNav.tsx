@@ -26,6 +26,7 @@ const GROUPS = [
     links: [
       { href: "/demarches", label: "nav.procedures" },
       { href: "/services", label: "nav.services" },
+      { href: "/traductions", label: "nav.translations" },
       { href: "/masques", label: "nav.withdrawn" },
       { href: "/notifications", label: "nav.notifications" },
       { href: "/opportunites", label: "nav.opportunities" },

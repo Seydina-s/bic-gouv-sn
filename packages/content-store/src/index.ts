@@ -13,3 +13,4 @@ export * from "./postgres-article-repository";
 export * from "./postgres-procedure-repository";
 export * from "./json-document";
 export * from "./content-stores";
+export * from "./article-content-hash";
