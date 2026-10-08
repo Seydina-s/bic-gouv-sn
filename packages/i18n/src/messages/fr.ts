@@ -328,6 +328,10 @@ export const fr = {
     intro: "Ces {count} logiciels libres font fonctionner l'application. Merci à leurs auteurs.",
     openHint: "Affiche le copyright et le texte de la licence",
     projectSite: "Site du projet",
+    voicesTitle: "Les voix",
+    voiceFrench:
+      "Voix française : Jessica, modèle Piper fr_FR-upmc-medium, entraîné sur les enregistrements UPMC (licence CC BY-SA 4.0).",
+    voiceWolof: "Voix wolof : Adia_TTS, par CONCREE (licence Apache 2.0).",
   },
   participate: {
     intro:

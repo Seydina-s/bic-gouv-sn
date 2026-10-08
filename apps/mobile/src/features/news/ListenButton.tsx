@@ -12,8 +12,10 @@ import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 import { useFeature } from "../remote-config/useRemoteConfig";
 import { useUsageStats } from "../usage-stats/UsageStatsProvider";
+import { recordingsPlayable } from "./load-audio-player";
 import { spokenPieces } from "./spoken-text";
 import { useReadAloud, type ReadAloudStatus } from "./useReadAloud";
+import { useRecordingPlayback } from "./useRecordingPlayback";
 
 /** The phone's French voice: every phone has one; none ships a Wolof voice yet. */
 export const FRENCH_VOICE = "fr-FR";
@@ -43,22 +45,30 @@ export interface Listening {
 }
 
 /**
- * Reading aloud for one screen. `voice` null: no voice for this language yet.
- * `pieces` is only computed when the reading starts.
+ * Reading aloud for one screen: the recording made by our voices when there is one
+ * (and this build can play it), otherwise the phone's voice. `voice` null: no phone
+ * voice for this language. `pieces` is only computed when the phone's voice starts.
  */
 export function useListening({
   voice,
   pieces,
+  recording = null,
   onStart,
 }: {
   voice: string | null;
   pieces: () => readonly string[];
+  /** Address of the recording of this text in its language, if one was made. */
+  recording?: string | null;
   /** Called when reading starts (an article listened to is counted, ADM-12). */
   onStart?: () => void;
 }): Listening {
   const { t } = useTranslation();
   const offered = useFeature("readAloud");
-  const { status, start, pause, resume } = useReadAloud(voice ?? FRENCH_VOICE);
+  const [playable] = useState(recordingsPlayable);
+  const recordingUrl = playable ? recording : null;
+  const phone = useReadAloud(voice ?? FRENCH_VOICE);
+  const recorded = useRecordingPlayback(recordingUrl);
+  const { status, pause, resume } = recordingUrl === null ? phone : recorded;
   const [noticeShown, setNoticeShown] = useState(false);
 
   useEffect(() => {
@@ -74,7 +84,7 @@ export function useListening({
   }, [noticeShown]);
 
   const toggle = useCallback(() => {
-    if (voice === null) {
+    if (recordingUrl === null && voice === null) {
       setNoticeShown(true);
       AccessibilityInfo.announceForAccessibility(t("content.wolofVoiceSoon"));
     } else if (status === "playing") {
@@ -82,10 +92,14 @@ export function useListening({
     } else if (status === "paused") {
       resume();
     } else {
-      start(pieces());
+      if (recordingUrl === null) {
+        phone.start(pieces());
+      } else {
+        void recorded.start();
+      }
       onStart?.();
     }
-  }, [voice, status, pause, resume, start, pieces, onStart, t]);
+  }, [recordingUrl, voice, status, pause, resume, phone, recorded, pieces, onStart, t]);
 
   return { offered, status, noticeShown, toggle };
 }
@@ -96,6 +110,7 @@ export function useArticleListening(detail: NewsDetail): Listening {
   return useListening({
     voice: articleVoice(detail),
     pieces: () => spokenPieces(detail.title, detail.blocks, Speech.maxSpeechInputLength),
+    recording: detail.audio?.url ?? null,
     onStart: () => {
       record({ type: "listen", articleId: detail.id });
     },

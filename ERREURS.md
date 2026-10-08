@@ -149,3 +149,10 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : l'API de démonstration tournait depuis le 06/10. Elle avait été lancée avant la fusion de l'assistant (#258) et n'avait jamais été relancée : la console, elle, était à jour. Le filtre des tests à distance tournait aussi depuis une copie ancienne, sans la nouvelle adresse de l'assistant. La lenteur de la première question venait d'un ralentissement ponctuel du réseau vers Anthropic (18 s mesurées, puis moins d'une seconde), coupé par la limite de 20 s ; cet échec n'apparaissait nulle part dans les journaux de l'API.
 - **Correctif** : API reconstruite et relancée sur la dernière version (avec la clé), filtre relancé depuis `scripts/` du dépôt ; question test : réponse sourcée en 2,2 s. L'API écrit désormais dans son journal pourquoi le modèle n'a pas répondu (délai, refus, crédit), jamais la question (test dans `apps/api/src/routes/assistant.test.ts`).
 - **Prévention** : `docs/runbooks/tests-a-distance.md` décrit la relance après chaque fusion qui touche l'API, et rappelle de lancer le filtre depuis le dépôt.
+
+## 08/10/2026 — Enregistrement des voix interrompu : « EPERM, rename … news.json »
+
+- **Ce qui s'est passé** : la commande `voices:record` s'est arrêtée après 40 articles sur 60, en écrivant le fichier des articles.
+- **Cause racine** : l'écriture durable crée un fichier temporaire puis le renomme par-dessus l'original. Sous Windows, ce renommage est refusé un instant quand un autre programme a le fichier ouvert (ici l'API, qui le relisait). Linux, utilisé en production, n'a pas ce comportement.
+- **Correctif** : `writeFileDurably` réessaie le renommage jusqu'à 8 fois, un peu plus tard à chaque fois, seulement pour ces refus passagers (EPERM, EACCES, EBUSY). Toute autre erreur remonte aussitôt. Test : `packages/content-store/src/durable-file.test.ts`.
+- **Prévention** : toute écriture par renommage d'un fichier partagé entre plusieurs programmes passe par `writeFileDurably`, qui gère ce cas.
