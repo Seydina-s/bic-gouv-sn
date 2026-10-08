@@ -109,6 +109,27 @@ describe.each(STORAGES)("articles stored %s", (_name, open) => {
     expect((await repo.get(article(1).id))?.version).toBe(1);
   });
 
+  it("attaches one recording per language, the newest replacing the older, no new version", async () => {
+    await repo.save(article(1));
+    const id = article(1).id;
+    const track = {
+      lang: "fr" as const,
+      origin: "tts" as const,
+      key: "audio/test/fr-1.mp3",
+      format: "mp3" as const,
+      durationMs: 42_000,
+      bytes: 120_000,
+      textHash: "a".repeat(64),
+      createdAt: "2026-10-08T10:00:00Z",
+    };
+    expect(await repo.setAudioTrack(id, track)).toBe(true);
+    expect(await repo.setAudioTrack(id, { ...track, key: "audio/test/fr-2.mp3" })).toBe(true);
+    const stored = await repo.get(id);
+    expect(stored?.audio.map((t) => t.key)).toEqual(["audio/test/fr-2.mp3"]);
+    expect(stored?.version).toBe(1);
+    expect(await repo.setAudioTrack(article(9).id, track)).toBe(false);
+  });
+
   it("hides a version the source withdrew, keeps its words, and shows it again", async () => {
     await repo.save(article(1));
     await repo.save(article(2));

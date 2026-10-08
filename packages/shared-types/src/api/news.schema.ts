@@ -96,6 +96,13 @@ export const newsDocumentSchema = z.object({
 });
 export type NewsDocument = z.infer<typeof newsDocumentSchema>;
 
+/** A recording of the article: title, then text, as the "Écouter" button reads it. */
+export const newsAudioSchema = z.object({
+  url: z.url(),
+  durationMs: z.int().positive(),
+});
+export type NewsAudio = z.infer<typeof newsAudioSchema>;
+
 /** One article in a feed, in the requested language. */
 export const newsSummarySchema = z.object({
   id: z.uuid(),
@@ -145,5 +152,11 @@ export const newsDetailSchema = newsSummarySchema.omit({ excerpt: true }).extend
   version: z.int().positive(),
   /** Official PDFs linked from the article. Absent from APIs older than this field. */
   documents: z.array(newsDocumentSchema).optional(),
+  /**
+   * The article read aloud in its language (recorded once by our voices), or null
+   * when not recorded yet: the app then uses the phone's own voice, in French only.
+   * Absent from APIs older than this field.
+   */
+  audio: newsAudioSchema.nullable().optional(),
 });
 export type NewsDetail = z.infer<typeof newsDetailSchema>;

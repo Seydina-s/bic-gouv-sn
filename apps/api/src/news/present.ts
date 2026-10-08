@@ -10,6 +10,7 @@ import {
   type NewsDocument,
   type NewsSummary,
 } from "@bgs/shared-types";
+import { currentRecording } from "../voices/spoken-text";
 import { excerptOf, htmlToBlocks } from "./html-to-blocks";
 
 /** The version the app may show in `lang`: withdrawn versions are hidden. */
@@ -135,7 +136,21 @@ export function toDetail(
     fetchedAt: article.fetchedAt,
     version: article.version,
     documents: documentsOf(article, mediaBaseUrl),
+    audio: audioOf(article, lang, translation, mediaBaseUrl),
   };
+}
+
+/** The recording of this version's current words, under `mediaBaseUrl`, or null. */
+function audioOf(
+  article: NewsArticle,
+  lang: Lang,
+  translation: { title: string; bodyHtml: string },
+  mediaBaseUrl: string,
+): NewsDetail["audio"] {
+  const track = currentRecording(article, lang, translation);
+  return track === null
+    ? null
+    : { url: `${mediaBaseUrl}/${track.key}`, durationMs: track.durationMs };
 }
 
 /**
@@ -147,6 +162,7 @@ export function freshnessKey(article: NewsArticle): string {
     article.contentHash,
     ...article.images.map((image) => image.originalKey),
     ...article.attachments.map((attachment) => attachment.key),
+    ...article.audio.map((track) => track.key),
     // A withdrawn version leaves the "available languages" of the other one.
     ...article.translations.map(({ lang, withdrawnAt }) => `${lang}=${withdrawnAt ?? ""}`),
   ].join(":");

@@ -1,6 +1,7 @@
 import { isPublished, newsArticleSchema, type Lang, type NewsArticle } from "@bgs/shared-types";
 import {
   compareNewestFirst,
+  withTrack,
   type ArticlePage,
   type ArticleRepository,
   type ListQuery,
@@ -114,6 +115,12 @@ export class FileArticleRepository implements ArticleRepository {
   setAttachments(id: string, attachments: NewsArticle["attachments"]): Promise<boolean> {
     return this.store.replaceCurrent(id, (current) =>
       newsArticleSchema.parse({ ...current, attachments }),
+    );
+  }
+
+  setAudioTrack(id: string, track: NewsArticle["audio"][number]): Promise<boolean> {
+    return this.store.replaceCurrent(id, (current) =>
+      newsArticleSchema.parse({ ...current, audio: withTrack(current.audio, track) }),
     );
   }
 
