@@ -12,6 +12,16 @@ import { examplePairs } from "../translation/wolof-candidates";
 import { WolofTranslation } from "../translation/wolof-translation";
 
 const DEFAULT_MODEL = "claude-opus-5-5";
+
+/** Why a reply cannot be read as JSON, if it cannot (for --inspect). */
+function readingProblem(text: string): string | null {
+  try {
+    JSON.parse(text.slice(text.indexOf("{"), text.lastIndexOf("}") + 1));
+    return null;
+  } catch (error) {
+    return error instanceof Error ? error.message : "illisible";
+  }
+}
 const STATE = "translation-runs";
 
 function option(name: string): string | null {
@@ -67,8 +77,24 @@ try {
         ? "Rien à envoyer."
         : `${String(sent)} articles envoyés (lot ${batchId ?? ""}). Relancez --collect dans quelques heures.`,
     );
-  } else if (process.argv.includes("--collect")) {
-    const report = await translation.collect(client());
+  } else if (process.argv.includes("--inspect")) {
+    // The first reply of the latest run as the model wrote it (public content only).
+    const replies = await translation.latestReplies(client());
+    const first = replies.find((reply) => reply.ok);
+    if (first?.ok !== true) {
+      say("Aucune réponse à montrer.");
+    } else {
+      say(`Jetons écrits : ${String(first.outputTokens)}`);
+      say(`Début :
+${first.text.slice(0, 300)}`);
+      say(`Fin :
+${first.text.slice(-300)}`);
+      say(`Lecture : ${readingProblem(first.text) ?? "lisible"}`);
+    }
+  } else if (process.argv.includes("--collect") || process.argv.includes("--recollect")) {
+    const report = process.argv.includes("--recollect")
+      ? await translation.recollectLatest(client())
+      : await translation.collect(client());
     const price = BATCH_PRICES[model];
     const cost =
       price === undefined
@@ -83,7 +109,7 @@ try {
       `Lots encore en cours : ${String(report.stillRunning)} · coût de cette collecte : ${dollars(cost)}`,
     );
   } else {
-    say("Précisez --estimate, --submit ou --collect.");
+    say("Précisez --estimate, --submit, --collect, --inspect ou --recollect.");
   }
 } finally {
   await close();

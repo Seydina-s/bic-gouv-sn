@@ -10,12 +10,12 @@ Prérequis : la clé Anthropic saisie par le porteur du projet (`docs/guides/bra
 pnpm --filter @bgs/ingestion translate:wolof --estimate --since 2025-10-01
 ```
 
-Mesuré le 08/10/2026 sur la base réelle :
+Mesuré le 08/10/2026 sur la base réelle (estimation corrigée après le premier lot : le wolof compte 1,3 caractère par jeton) :
 
 | Périmètre | Articles | Claude Opus 5.5 (lots) | Claude Haiku 4.5 (lots) |
 |---|---|---|---|
-| Depuis le 1er octobre 2025 | 379 | ≈ 8,70 $ | ≈ 2,20 $ |
-| Tout l'historique sans wolof | 658 | ≈ 14,75 $ | ≈ 3,70 $ |
+| Depuis le 1er octobre 2025 | 379 | ≈ 16 $ | ≈ 4 $ |
+| Tout l'historique sans wolof | 658 | ≈ 27 $ | ≈ 7 $ |
 
 L'estimation compte la consigne et les exemples au prix plein pour chaque article. En réalité, ils sont mis en cache et coûtent moins cher, donc le coût réel est plus bas.
 
@@ -50,4 +50,4 @@ La commande affiche :
 - HTML nettoyé comme tout article collecté.
 - Rien n'est enregistré si l'article a changé depuis l'envoi.
 
-Les nouveaux articles (≈ 35 par mois, moins de 1 $) se traitent de la même façon. L'automatisation après chaque collecte viendra une fois la qualité confirmée par la relecture.
+Les nouveaux articles (≈ 35 par mois, environ 1,50 $) se traitent de la même façon. L'automatisation après chaque collecte viendra une fois la qualité confirmée par la relecture.
