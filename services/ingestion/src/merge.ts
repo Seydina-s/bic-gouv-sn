@@ -1,19 +1,8 @@
+import { articleContentHash } from "@bgs/content-store";
 import type { NewsArticle } from "@bgs/shared-types";
-import { contentHash } from "./lib/identity";
 
-type Translations = NewsArticle["translations"];
-
-/** Hash of what the reader sees: every translation, the day and the section. */
-export function articleContentHash(
-  translations: Translations,
-  publishedOn: string | null,
-  category: string,
-): string {
-  const ordered = [...translations]
-    .sort((a, b) => a.lang.localeCompare(b.lang))
-    .map(({ lang, status, title, bodyHtml }) => ({ lang, status, title, bodyHtml }));
-  return contentHash({ translations: ordered, publishedOn, category });
-}
+// The hash moved to @bgs/content-store (shared with the console's reviews).
+export { articleContentHash };
 
 /**
  * Merges a freshly collected language version into the stored article (same source
