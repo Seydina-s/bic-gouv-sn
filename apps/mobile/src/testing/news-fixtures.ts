@@ -1,4 +1,5 @@
 import {
+  type AssistantReply,
   DEFAULT_REMOTE_CONFIG,
   type Cover,
   type NewsDetail,
@@ -116,6 +117,23 @@ export const OPPORTUNITIES: OpportunitiesResponse = {
   ],
 };
 
+/** An answer citing the procedure of the fixtures (placeholder text). */
+export const ASSISTANT_ANSWER: AssistantReply = {
+  status: "answered",
+  text: "Une réponse fictive tirée de la démarche de test.",
+  sources: [
+    {
+      kind: "procedure",
+      contentId: PROCEDURE_DETAIL.id,
+      slug: PROCEDURE_DETAIL.slug,
+      title: "Démarche fictive citée",
+      url: "https://e-senegal.sn/#/demarche/test",
+      publishedOn: null,
+    },
+  ],
+  resumesOn: null,
+};
+
 /** Fake fetch answering the news and procedures endpoints. */
 export function newsFetch(
   overrides: {
@@ -129,9 +147,15 @@ export function newsFetch(
     remoteConfig?: () => Response;
     opportunities?: () => Response;
     participation?: () => Response;
+    assistant?: () => Response;
   } = {},
 ) {
   return jest.fn((input: string) => {
+    if (input.includes("/v1/assistant/")) {
+      return Promise.resolve(
+        overrides.assistant?.() ?? new Response(JSON.stringify(ASSISTANT_ANSWER)),
+      );
+    }
     if (input.includes("/v1/participation/")) {
       return Promise.resolve(
         overrides.participation?.() ??

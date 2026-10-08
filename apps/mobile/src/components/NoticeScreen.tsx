@@ -1,11 +1,10 @@
 import { StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useTranslation } from "../i18n/useTranslation";
 import { useTheme } from "../theme/useTheme";
 import { Baobab } from "./Baobab";
 
 /**
- * A screen that honestly says why there is nothing here (not built yet, switched
+ * A screen that honestly says why there is nothing here (switched
  * off for the moment, update needed): the baobab and two short lines, no filler.
  */
 export function NoticeScreen({
@@ -54,24 +53,8 @@ export function NoticeScreen({
   );
 }
 
-/** Honest empty state for sections not built yet: no placeholder content. */
-export function ComingSoon({ title }: { title: string }) {
-  const { t } = useTranslation();
-  return <NoticeScreen title={title} heading={t("comingSoon.title")} body={t("comingSoon.body")} />;
-}
-
 const styles = StyleSheet.create({
   root: { flex: 1 },
   center: { flex: 1, alignItems: "center", justifyContent: "center", paddingBottom: 80 },
   centerText: { textAlign: "center" },
 });
-
-type TabKey = "tabs.nearMe" | "tabs.assistant" | "tabs.procedures" | "tabs.participate";
-
-/** Route component for a section that is not built yet. */
-export function comingSoonScreen(titleKey: TabKey) {
-  return function ComingSoonScreen() {
-    const { t } = useTranslation();
-    return <ComingSoon title={t(titleKey)} />;
-  };
-}
