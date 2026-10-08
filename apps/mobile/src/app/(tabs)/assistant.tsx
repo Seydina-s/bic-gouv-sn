@@ -1,13 +1,7 @@
-import {
-  ASSISTANT_QUESTION_MAX,
-  ASSISTANT_QUESTION_MIN,
-  type AssistantMode,
-  type AssistantSource,
-} from "@bgs/shared-types";
+import type { AssistantSource } from "@bgs/shared-types";
 import { useRouter } from "expo-router";
-import { ChatTeardropTextIcon as ChatTeardropText } from "phosphor-react-native/src/icons/ChatTeardropText";
-import { SealCheckIcon as SealCheck } from "phosphor-react-native/src/icons/SealCheck";
-import { useState } from "react";
+import { NotePencilIcon as NotePencil } from "phosphor-react-native/src/icons/NotePencil";
+import { useCallback, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
   Linking,
@@ -16,22 +10,29 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
+import Animated, { FadeIn } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { BrandMark } from "../../components/BrandMark";
 import { useTabBarInset } from "../../components/GlassTabBar";
-import { SegmentedChoice } from "../../components/SegmentedChoice";
-import { AnswerView, type AnswerActions } from "../../features/assistant/AnswerView";
-import { useAsking } from "../../features/assistant/useAsking";
+import { Icon } from "../../components/Icon";
+import { AssistantTurn, UserBubble, type ChatActions } from "../../features/assistant/ChatMessage";
+import { Composer } from "../../features/assistant/Composer";
+import { useConversation, type ChatTurn } from "../../features/assistant/useConversation";
+import { useVoiceInput } from "../../features/assistant/useVoiceInput";
 import { FeatureGate } from "../../features/remote-config/FeatureGate";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 
+/** The official mark over the welcome words, before the first message. */
+const WELCOME_MARK_HEIGHT = 96;
+
 /**
- * The assistant (owner's decision of 07/10/2026): one question, or one claim to
- * check (« Est-ce vrai ? »), answered from the official publications only, with
- * the sources to open. One question at a time, like a search, not a chat.
+ * The assistant as a conversation (owner's decision of 08/10/2026): the welcome
+ * words under the official mark, then the messages, and one field at the bottom to
+ * write or dictate a question or a claim to check. Answers come from the official
+ * sources only, with them to open.
  */
 function Assistant() {
   const { theme } = useTheme();
@@ -39,15 +40,22 @@ function Assistant() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const bottomInset = useTabBarInset();
-  const [mode, setMode] = useState<AssistantMode>("ask");
-  const [question, setQuestion] = useState("");
-  const { state, submit } = useAsking();
-  const { color, space, textStyle, radius, touchTarget, layout } = theme;
-  const asking = state.phase === "asking";
-  const ready = question.trim().length >= ASSISTANT_QUESTION_MIN && !asking;
-  const label = t(`assistant.labels.${mode}`);
+  const scroll = useRef<ScrollView>(null);
+  const [draft, setDraft] = useState("");
+  const { turns, busy, send, reset } = useConversation();
+  const voice = useVoiceInput(lang, setDraft);
+  const { color, space, textStyle, layout, touchTarget } = theme;
 
-  const actions: AnswerActions = {
+  const submit = useCallback(() => {
+    const question = draft.trim();
+    if (question === "" || busy) {
+      return;
+    }
+    setDraft("");
+    void send(question, lang);
+  }, [draft, busy, send, lang]);
+
+  const actions: ChatActions = {
     openSource: (source: AssistantSource) => {
       if (source.kind === "news-article") {
         router.push({ pathname: "/article/[id]", params: { id: source.contentId } });
@@ -57,12 +65,21 @@ function Assistant() {
         void Linking.openURL(source.url);
       }
     },
-    writeToGovernment: () => {
-      router.navigate("/participate");
-    },
     searchNews: () => {
       router.push("/search");
     },
+    writeToGovernment: () => {
+      router.navigate("/participate");
+    },
+    retry: (turn: ChatTurn) => {
+      void send(turn.question, lang);
+    },
+  };
+
+  const column = {
+    width: "100%" as const,
+    maxWidth: layout.readingMaxWidth,
+    alignSelf: "center" as const,
   };
 
   return (
@@ -70,94 +87,85 @@ function Assistant() {
       style={[styles.root, { backgroundColor: color.background }]}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <ScrollView
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{
-          paddingTop: insets.top + space.lg,
-          paddingHorizontal: space.lg,
-          paddingBottom: bottomInset + space.xxl,
-          gap: space.xl,
-          width: "100%",
-          maxWidth: layout.readingMaxWidth,
-          alignSelf: "center",
-        }}
+      <View
+        style={[
+          styles.header,
+          column,
+          {
+            paddingTop: insets.top + space.sm,
+            paddingHorizontal: space.lg,
+            minHeight: touchTarget.min,
+          },
+        ]}
       >
-        <View style={{ gap: space.sm }}>
-          <Text
-            accessibilityRole="header"
-            style={[textStyle.display, { color: color.textPrimary }]}
-          >
-            {t("tabs.assistant")}
-          </Text>
-          <Text style={[textStyle.body, { color: color.textSecondary }]}>
-            {t("assistant.intro")}
-          </Text>
-        </View>
-        <SegmentedChoice<AssistantMode>
-          title={t("assistant.modeTitle")}
-          selected={mode}
-          onSelect={setMode}
-          segments={[
-            { value: "ask", label: t("assistant.modes.ask"), icon: ChatTeardropText },
-            {
-              value: "verify",
-              label: t("assistant.modes.verify"),
-              spokenLabel: t("assistant.modes.verifySpoken"),
-              icon: SealCheck,
-            },
-          ]}
-        />
-        <View style={{ gap: space.sm }}>
-          <Text style={[textStyle.label, { color: color.textPrimary }]}>{label}</Text>
-          <TextInput
-            accessibilityLabel={label}
-            accessibilityHint={t(`assistant.hints.${mode}`)}
-            value={question}
-            onChangeText={setQuestion}
-            multiline
-            maxLength={ASSISTANT_QUESTION_MAX}
-            textAlignVertical="top"
-            placeholder={t(`assistant.hints.${mode}`)}
-            placeholderTextColor={color.textTertiary}
-            style={[
-              textStyle.body,
-              {
-                color: color.textPrimary,
-                minHeight: touchTarget.min * 2,
-                paddingHorizontal: space.md,
-                paddingVertical: space.sm,
-                borderRadius: radius.md,
-                borderWidth: StyleSheet.hairlineWidth,
-                borderColor: color.borderStrong,
-                backgroundColor: color.background,
-              },
-            ]}
-          />
-          <Text style={[textStyle.bodySmall, { color: color.textTertiary }]}>
-            {t("assistant.personal")}
-          </Text>
+        <Text accessibilityRole="header" style={[textStyle.title, { color: color.textPrimary }]}>
+          {t("tabs.assistant")}
+        </Text>
+        {turns.length > 0 && (
           <Pressable
             accessibilityRole="button"
-            accessibilityState={{ disabled: !ready, busy: asking }}
-            disabled={!ready}
-            onPress={() => void submit(question, mode, lang)}
+            accessibilityLabel={t("assistant.newChat")}
+            onPress={reset}
             style={({ pressed }) => [
-              styles.submit,
-              {
-                minHeight: touchTarget.min,
-                borderRadius: radius.md,
-                backgroundColor: pressed ? color.primaryPressed : color.primary,
-                opacity: ready ? 1 : theme.opacity.disabled,
-              },
+              styles.headerAction,
+              { width: touchTarget.min, height: touchTarget.min, opacity: pressed ? 0.6 : 1 },
             ]}
           >
-            <Text style={[textStyle.label, { color: color.onPrimary }]}>
-              {t(`assistant.submit.${mode}`)}
-            </Text>
+            <Icon icon={NotePencil} size="md" color={color.textBrand} />
           </Pressable>
-        </View>
-        <AnswerView state={state} actions={actions} />
+        )}
+      </View>
+      <ScrollView
+        ref={scroll}
+        keyboardShouldPersistTaps="handled"
+        onContentSizeChange={() => {
+          scroll.current?.scrollToEnd({ animated: true });
+        }}
+        contentContainerStyle={[
+          column,
+          { flexGrow: 1, paddingHorizontal: space.lg, paddingVertical: space.lg, gap: space.xl },
+        ]}
+      >
+        {turns.length === 0 ? (
+          <Animated.View
+            entering={FadeIn.duration(theme.motion.duration.slow)}
+            style={[styles.welcome, { gap: space.lg, paddingHorizontal: space.lg }]}
+          >
+            <BrandMark height={WELCOME_MARK_HEIGHT} />
+            <Text style={[textStyle.body, styles.center, { color: color.textTertiary }]}>
+              {t("assistant.welcome")}
+            </Text>
+          </Animated.View>
+        ) : (
+          turns.map((turn) => (
+            <View key={turn.id} style={{ gap: space.lg }}>
+              <UserBubble turn={turn} />
+              <AssistantTurn turn={turn} actions={actions} />
+            </View>
+          ))
+        )}
       </ScrollView>
+      <View
+        style={[
+          column,
+          {
+            paddingHorizontal: space.md,
+            paddingTop: space.xs,
+            paddingBottom: bottomInset + space.sm,
+          },
+        ]}
+      >
+        <Composer
+          value={draft}
+          onChange={setDraft}
+          onSend={submit}
+          busy={busy}
+          listening={voice.listening}
+          onListen={() => void voice.start()}
+          onStopListening={voice.stop}
+          voiceProblem={voice.problem}
+        />
+      </View>
     </KeyboardAvoidingView>
   );
 }
@@ -174,5 +182,8 @@ export default function AssistantScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  submit: { alignItems: "center", justifyContent: "center" },
+  header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  headerAction: { alignItems: "center", justifyContent: "center" },
+  welcome: { flex: 1, alignItems: "center", justifyContent: "center" },
+  center: { textAlign: "center" },
 });
