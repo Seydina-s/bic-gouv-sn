@@ -17,6 +17,7 @@ const GROUPS = [
       { href: "/erreurs", label: "nav.errors" },
       { href: "/recherches", label: "nav.searches" },
       { href: "/usage", label: "nav.usage" },
+      { href: "/assistant", label: "nav.assistant" },
     ],
   },
   {

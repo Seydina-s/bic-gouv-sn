@@ -1,5 +1,6 @@
 import {
   adminOpportunitiesResponseSchema,
+  assistantUsageSchema,
   errorJournalEntrySchema,
   participationResponseSchema,
 } from "@bgs/shared-types";
@@ -25,15 +26,17 @@ export default async function StatusPage() {
   const { token } = await requireAccount();
   const apiUrl = readApiUrl(process.env);
   // All checks at once: the page never waits for one before starting the next.
-  const [status, report, errors, notifications, participation, opportunities] = await Promise.all([
-    getApiStatus({ apiUrl }),
-    getIngestionReport({ apiUrl }),
-    adminRequest({ path: "/errors", token, schema: journalSchema }),
-    // Shared with the navigation's counter: read once.
-    notificationsOverview(token),
-    adminRequest({ path: "/participation", token, schema: participationResponseSchema }),
-    adminRequest({ path: "/opportunities", token, schema: adminOpportunitiesResponseSchema }),
-  ]);
+  const [status, report, errors, notifications, participation, opportunities, assistant] =
+    await Promise.all([
+      getApiStatus({ apiUrl }),
+      getIngestionReport({ apiUrl }),
+      adminRequest({ path: "/errors", token, schema: journalSchema }),
+      // Shared with the navigation's counter: read once.
+      notificationsOverview(token),
+      adminRequest({ path: "/participation", token, schema: participationResponseSchema }),
+      adminRequest({ path: "/opportunities", token, schema: adminOpportunitiesResponseSchema }),
+      adminRequest({ path: "/assistant", token, schema: assistantUsageSchema }),
+    ]);
   const items = attentionItems({
     errors: errors.ok ? errors.data.entries : null,
     notifications,
@@ -51,6 +54,7 @@ export default async function StatusPage() {
           ).length,
         }
       : {}),
+    ...(assistant.ok ? { assistant: assistant.data } : {}),
   });
   return (
     <>
