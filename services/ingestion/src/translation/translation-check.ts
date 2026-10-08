@@ -22,9 +22,23 @@ const replySchema = z.object({
   bodyHtml: z.string().trim().min(1),
 });
 
-/** The tags, in order: the shape a translation must keep. */
-function tagSequence(html: string): string[] {
-  return [...html.matchAll(/<([a-z0-9]+)\b/g)].map((match) => match[1] ?? "");
+/**
+ * The blocks a reader sees, in order (paragraphs, headings, list items, quotes and
+ * media): the shape a translation must keep. Emphasis and links inside a block may
+ * move with the words, Wolof not ordering them as French does (08/10/2026); empty
+ * paragraphs are not blocks a reader sees.
+ */
+function blockShape(html: string): string[] {
+  const blocks = /<(p|h2|h3|h4|li|blockquote)\b[^>]*>([\s\S]*?)<\/\1>|<(img|iframe)\b/g;
+  return [...sanitizeArticleHtml(html).matchAll(blocks)].flatMap((match) => {
+    const media = match[3];
+    if (media !== undefined) {
+      return [media];
+    }
+    const inner = match[2] ?? "";
+    const seen = textLength(inner) > 0 || /<(img|iframe)\b/.test(inner);
+    return seen ? [match[1] ?? ""] : [];
+  });
 }
 
 /** Image and frame addresses, in order: never changed by a translation. */
@@ -67,7 +81,7 @@ export function checkTranslation(
   if (wolofText === 0 && frenchText > 0) {
     return refused("empty");
   }
-  if (tagSequence(bodyHtml).join(" ") !== tagSequence(french.bodyHtml).join(" ")) {
+  if (blockShape(bodyHtml).join(" ") !== blockShape(french.bodyHtml).join(" ")) {
     return refused("structure_changed");
   }
   if (mediaSources(bodyHtml).join(" ") !== mediaSources(french.bodyHtml).join(" ")) {

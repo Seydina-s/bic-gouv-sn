@@ -106,7 +106,7 @@ ${first.text.slice(-300)}`);
       `Échecs du service : ${String(report.failed)} · articles changés entre-temps : ${String(report.outdated)}`,
     );
     say(
-      `Lots encore en cours : ${String(report.stillRunning)} · coût de cette collecte : ${dollars(cost)}`,
+      `Lots encore en cours : ${String(report.stillRunning)} · prix des réponses lues : ${dollars(cost)}${process.argv.includes("--recollect") ? " (déjà payé, rien de plus)" : ""}`,
     );
   } else {
     say("Précisez --estimate, --submit, --collect, --inspect ou --recollect.");
