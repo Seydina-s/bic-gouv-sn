@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { PassageIndex } from "./passage-search";
+import type { Passage } from "./passages";
 
 /*
  * Measures the passage search on a set of questions, each linked to the official
@@ -39,9 +40,18 @@ export interface RetrievalSummary {
   meanReciprocalRank: number;
 }
 
-export function rankOf(index: PassageIndex, testCase: RetrievalCase): CaseResult {
-  const found = index.search(testCase.question, { lang: "fr", limit: DEPTH });
-  const pages = [...new Set(found.map(({ passage }) => passage.sourceUrl))];
+/** The passages a search finds for a question, best first. */
+export type Search = (question: string, depth: number) => readonly Passage[];
+
+/** The search by words alone, the baseline. */
+export function byWordsOnly(index: PassageIndex): Search {
+  return (question, depth) =>
+    index.search(question, { lang: "fr", limit: depth }).map(({ passage }) => passage);
+}
+
+export function rankOf(search: Search, testCase: RetrievalCase): CaseResult {
+  const found = search(testCase.question, DEPTH);
+  const pages = [...new Set(found.map((passage) => passage.sourceUrl))];
   const position = pages.findIndex((url) => testCase.expected.includes(url));
   return { testCase, rank: position < 0 ? null : position + 1 };
 }

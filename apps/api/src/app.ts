@@ -1,3 +1,4 @@
+import { join } from "node:path";
 import { randomUUID } from "node:crypto";
 import compress from "@fastify/compress";
 import swagger from "@fastify/swagger";
@@ -100,6 +101,8 @@ import { CircuitBreaker, createResilientCall } from "@bgs/resilience";
 import { AssistantService } from "./assistant/assistant-service";
 import { ClaudeProvider, isClaudeOutage } from "./assistant/claude-provider";
 import { buildKnowledge, RefreshedKnowledge } from "./assistant/knowledge";
+import { SemanticLayer } from "./assistant/semantic-layer";
+import { TransformersEmbedder } from "./assistant/transformers-embedder";
 import type { LlmProvider } from "./assistant/llm-provider";
 import { adminAssistantRoutes, assistantRoutes } from "./routes/assistant";
 import { TranslationReview } from "./news/translation-review";
@@ -341,10 +344,26 @@ export async function buildApp({
     participation,
     isOpen: async () => (await remoteConfig.read()).features.participate,
   });
+  const semantic =
+    config.ASSISTANT_SEMANTIC_SEARCH === "on"
+      ? new SemanticLayer({
+          embedder: new TransformersEmbedder(join(config.ASSISTANT_VECTORS_ROOT, "models")),
+          path: join(config.ASSISTANT_VECTORS_ROOT, "vectors.json"),
+          onError: (error) => {
+            app.log.warn({ err: error }, "Assistant search by meaning not updated");
+          },
+        })
+      : null;
   const assistant = new AssistantService({
     llm,
+    semantic,
     knowledge: new RefreshedKnowledge({
-      build: () => buildKnowledge(articles, procedures),
+      build: async () => {
+        const knowledge = await buildKnowledge(articles, procedures);
+        // The vectors follow in the background; the words answer meanwhile.
+        void semantic?.update(knowledge.passages);
+        return knowledge;
+      },
       onRefreshError: (error) => {
         app.log.warn({ err: error }, "Assistant knowledge not refreshed");
       },

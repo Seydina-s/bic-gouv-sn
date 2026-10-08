@@ -987,6 +987,35 @@ describe("app shell", () => {
     ).toHaveLength(2);
   });
 
+  it("offers to try again when the assistant is unavailable for a moment", async () => {
+    const unavailable = { status: "unavailable", text: null, sources: [], resumesOn: null };
+    let busy = true;
+    globalThis.fetch = newsFetch({
+      assistant: () => {
+        if (busy) {
+          busy = false;
+          return new Response(JSON.stringify(unavailable));
+        }
+        return new Response(
+          JSON.stringify({
+            status: "answered",
+            text: "Réponse fictive.",
+            sources: [],
+            resumesOn: null,
+          }),
+        );
+      },
+    }) as unknown as typeof fetch;
+    await renderRouter(routes, { initialUrl: "/assistant" });
+    await fireEvent.changeText(
+      await screen.findByLabelText("Posez une question ou vérifiez une information"),
+      "Une question fictive ?",
+    );
+    await fireEvent.press(screen.getByRole("button", { name: "Envoyer" }));
+    await fireEvent.press(await screen.findByRole("button", { name: "Réessayer" }));
+    expect(await screen.findByText("Réponse fictive.")).toBeOnTheScreen();
+  });
+
   it("says dictation comes with the next version where this build cannot listen", async () => {
     globalThis.fetch = newsFetch() as unknown as typeof fetch;
     await renderRouter(routes, { initialUrl: "/assistant" });

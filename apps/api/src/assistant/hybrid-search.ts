@@ -58,11 +58,13 @@ function dot(a: Float32Array, b: Float32Array): number {
 export function fuseRankings(
   rankings: readonly (readonly ScoredPassage[])[],
   limit: number,
+  weights: readonly number[] = [],
 ): ScoredPassage[] {
   const fused = new Map<string, ScoredPassage>();
-  for (const ranking of rankings) {
+  for (const [index, ranking] of rankings.entries()) {
+    const weight = weights[index] ?? 1;
     ranking.forEach(({ passage }, position) => {
-      const gain = 1 / (FUSION_K + position + 1);
+      const gain = weight / (FUSION_K + position + 1);
       const current = fused.get(passage.id);
       fused.set(passage.id, { passage, score: (current?.score ?? 0) + gain });
     });

@@ -10,6 +10,7 @@ import type { SettingStore } from "../admin/setting-store";
 import type { KeyValueStore } from "../shared-state/key-value-store";
 import { answerQuestion, type AnswerDependencies, type GroundedAnswer } from "./grounded-answer";
 import type { KnowledgeSource } from "./knowledge";
+import type { SemanticLayer } from "./semantic-layer";
 import type { LlmProvider } from "./llm-provider";
 import type { Passage } from "./passages";
 
@@ -65,6 +66,8 @@ export interface AssistantServiceOptions {
   /** None while no model is configured: the assistant says it is unavailable. */
   llm: LlmProvider | null;
   knowledge: KnowledgeSource;
+  /** The search by meaning, when switched on (ASSISTANT_SEMANTIC_SEARCH). */
+  semantic?: SemanticLayer | null;
   state: KeyValueStore;
   settings: SettingStore;
   journal: AuditJournal | null;
@@ -78,6 +81,13 @@ export class AssistantService {
 
   constructor(private readonly options: AssistantServiceOptions) {
     this.now = options.now ?? Date.now;
+  }
+
+  /** The vectors ready now, or none: the words then answer alone. */
+  private meaning() {
+    const vectors = this.options.semantic?.current() ?? null;
+    const embedder = this.options.semantic?.embedder;
+    return vectors === null || embedder === undefined ? null : { vectors, embedder };
   }
 
   get configured(): boolean {
@@ -123,6 +133,7 @@ export class AssistantService {
         { ...question, today: new Date(time).toISOString().slice(0, 10) },
         {
           index: knowledge.index,
+          meaning: this.meaning(),
           llm,
           // Counted just before the model is called: atomic across instances, so
           // the limit holds even when many people ask at the same moment.

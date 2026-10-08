@@ -3,7 +3,36 @@ import { z } from "zod";
 import type { LlmProvider, LlmResponse } from "./llm-provider";
 import type { PassageIndex } from "./passage-search";
 import type { Passage } from "./passages";
+import type { EmbeddingProvider, VectorIndex } from "./hybrid-search";
+import type { ScoredPassage } from "./passage-search";
 import { retrievePassages } from "./retrieval";
+
+/** A question is encoded in milliseconds: past this, the words answer alone. */
+const MEANING_TIMEOUT_MS = 3000;
+const MEANING_CANDIDATES = 40;
+
+async function closestInMeaning(
+  question: string,
+  lang: Lang,
+  meaning: AnswerDependencies["meaning"],
+): Promise<ScoredPassage[] | null> {
+  if (meaning === null || meaning === undefined) {
+    return null;
+  }
+  try {
+    const [vector] = await meaning.embedder.embed(
+      [question],
+      "query",
+      AbortSignal.timeout(MEANING_TIMEOUT_MS),
+    );
+    return vector === undefined
+      ? null
+      : meaning.vectors.search(vector, { lang, limit: MEANING_CANDIDATES });
+  } catch {
+    // Graceful degradation: the search by words answers alone.
+    return null;
+  }
+}
 
 /*
  * An answer grounded in the official base only (CLAUDE.md §1, P2). The model reads
@@ -135,6 +164,8 @@ export function checkAnswer(response: LlmResponse, given: readonly Passage[]): G
 
 export interface AnswerDependencies {
   index: PassageIndex;
+  /** The search by meaning, when its vectors are ready; words alone otherwise. */
+  meaning?: { vectors: VectorIndex; embedder: EmbeddingProvider } | null;
   llm: LlmProvider;
   /** Deadline, circuit breaker and retries of the model calls (@bgs/resilience). */
   call: <T>(operation: (signal: AbortSignal) => Promise<T>) => Promise<T>;
@@ -148,9 +179,15 @@ export async function answerQuestion(
     mode = "ask",
     today = new Date().toISOString().slice(0, 10),
   }: { question: string; lang: Lang; mode?: AssistantMode; today?: string },
-  { index, llm, call }: AnswerDependencies,
+  { index, meaning = null, llm, call }: AnswerDependencies,
 ): Promise<GroundedAnswer> {
-  const given = retrievePassages(index, question, lang, today);
+  const given = retrievePassages(
+    index,
+    question,
+    lang,
+    today,
+    await closestInMeaning(question, lang, meaning),
+  );
   if (given.length === 0) {
     return refused("not_found", null, null);
   }

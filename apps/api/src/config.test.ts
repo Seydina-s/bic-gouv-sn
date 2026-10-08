@@ -40,6 +40,8 @@ describe("loadConfig", () => {
       ADMIN_ACCOUNTS_PATH: fromRoot(".data/admin/accounts.json"),
       ADMIN_AUDIT_PATH: fromRoot(".data/admin/audit.jsonl"),
       ASSISTANT_MODEL: "claude-haiku-4-5-20251001",
+      ASSISTANT_SEMANTIC_SEARCH: "off",
+      ASSISTANT_VECTORS_ROOT: fromRoot(".data/assistant"),
       SENTRY_TRACES_SAMPLE_RATE: 0.02,
     });
   });

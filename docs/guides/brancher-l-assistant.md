@@ -35,7 +35,7 @@ La clé est un secret, comme un mot de passe. **Vous seul** la créez et la sais
 - Modèle : Claude Haiku 4.5, le moins cher qui réponde assez bien.
 - Une question coûte environ **0,003 $** : la question, les règles et six extraits officiels sont lus, puis une réponse courte est écrite. C'est une estimation : la page **Assistant** de la console affiche le coût réel du mois.
 - Avec la limite actuelle de **10 000 questions par mois**, le maximum est d'environ **30 $ par mois**. Au-delà, l'assistant se met en pause jusqu'au 1er du mois suivant, avec un message aimable.
-- Une question dont aucun mot ne se retrouve dans les publications officielles ne coûte rien : le modèle n'est pas appelé.
+- Avec la recherche par le sens (réglage `ASSISTANT_SEMANTIC_SEARCH=on`), presque chaque question trouve des extraits à lire : elle est donc comptée et payée (environ 0,003 $). Sans cette recherche, une question dont aucun mot ne se retrouve dans les publications officielles ne coûte rien.
 
 ## En cas de problème
 

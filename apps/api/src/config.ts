@@ -219,6 +219,17 @@ const envSchema = z.object({
   ANTHROPIC_API_KEY: z.string().min(1).optional(),
   /** The Claude model answering (the cheapest that answers well enough). */
   ASSISTANT_MODEL: z.string().min(1).default(DEFAULT_ASSISTANT_MODEL),
+  /**
+   * The assistant also searches by meaning (an open model run on this server, free):
+   * about 400 MB of memory more, and a few minutes of computing the first time.
+   */
+  ASSISTANT_SEMANTIC_SEARCH: z.enum(["on", "off"]).default("off"),
+  /** The search by meaning's model and the passages' vectors, kept between runs. */
+  ASSISTANT_VECTORS_ROOT: z
+    .string()
+    .min(1)
+    .default(".data/assistant")
+    .transform((path) => resolveDataPath(path)),
   /** Sentry project key; crash reporting stays off while it is absent. */
   SENTRY_DSN: z.url({ protocol: /^https$/ }).optional(),
   /** Share of requests traced for performance (0 to 1); errors are always reported. */

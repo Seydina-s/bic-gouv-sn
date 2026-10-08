@@ -9,6 +9,10 @@ engineStrict: true
 allowBuilds:
   "@sentry/cli": true # official Sentry uploader (source maps), downloads its binary
   esbuild: true
+  # CPU binaries ship in the package; the script only fetches GPU extras: kept off.
+  onnxruntime-node: false
+  # Its script only rebuilds its own sources: not needed.
+  protobufjs: false
 
 # Official Expo SDK 57 packages, exempted by `expo install` from the minimum
 # release age protection. Review at each SDK upgrade.

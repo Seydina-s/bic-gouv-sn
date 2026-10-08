@@ -256,7 +256,19 @@ function TurnBody({ turn, actions }: { turn: ChatTurn; actions: ChatActions }) {
         </>
       );
     case "unavailable":
-      return <Said muted>{t("assistant.unavailable")}</Said>;
+      // Often a passing slowness of the network: trying again usually answers.
+      return (
+        <>
+          <Said muted>{t("assistant.unavailable")}</Said>
+          <TurnAction
+            icon={ArrowClockwise}
+            label={t("assistant.retry")}
+            onPress={() => {
+              actions.retry(turn);
+            }}
+          />
+        </>
+      );
   }
 }
 

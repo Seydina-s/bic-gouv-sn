@@ -1,7 +1,7 @@
 import type { ArticleRepository, ProcedureRepository } from "@bgs/content-store";
 import type { NewsArticle } from "@bgs/shared-types";
 import { PassageIndex } from "./passage-search";
-import { articlePassages, procedurePassages } from "./passages";
+import { articlePassages, procedurePassages, type Passage } from "./passages";
 
 /*
  * The official base as the assistant searches it: every article and procedure cut
@@ -16,6 +16,8 @@ export const KNOWLEDGE_REFRESH_MS = 5 * 60_000;
 
 export interface Knowledge {
   index: PassageIndex;
+  /** Every passage, for the search by meaning to encode. */
+  passages: readonly Passage[];
   /** Slug of each procedure by id, for the app to open its sheet. */
   procedureSlugs: ReadonlyMap<string, string>;
 }
@@ -40,11 +42,13 @@ export async function buildKnowledge(
   procedures: ProcedureRepository,
 ): Promise<Knowledge> {
   const [allNews, allProcedures] = await Promise.all([allArticles(articles), procedures.all()]);
+  const passages = [
+    ...allNews.flatMap(articlePassages),
+    ...allProcedures.flatMap(procedurePassages),
+  ];
   return {
-    index: new PassageIndex([
-      ...allNews.flatMap(articlePassages),
-      ...allProcedures.flatMap(procedurePassages),
-    ]),
+    index: new PassageIndex(passages),
+    passages,
     procedureSlugs: new Map(allProcedures.map((procedure) => [procedure.id, procedure.slug])),
   };
 }
