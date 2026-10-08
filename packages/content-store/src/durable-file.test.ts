@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { mkdir, readdir, readFile, utimes, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, rename, utimes, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -34,6 +34,22 @@ describe("durable writes", () => {
     await writeFile(join(dir, "notes.tmp"), "autre chose");
     expect(await removeStaleTemps(dir, HOUR_MS, now)).toBe(1);
     expect((await readdir(dir)).sort()).toEqual(["news.json", "news.json.20000.tmp", "notes.tmp"]);
+  });
+
+  it("try again while another process holds the file, and give up on a real error", async () => {
+    const path = join(await folder(), "busy.json");
+    let refusals = 2;
+    const busyThenFree = async (from: string, to: string) => {
+      if (refusals > 0) {
+        refusals -= 1;
+        throw Object.assign(new Error("busy"), { code: "EPERM" });
+      }
+      await rename(from, to);
+    };
+    await writeFileDurably(path, "{}", busyThenFree);
+    expect(await readFile(path, "utf8")).toBe("{}");
+    const broken = () => Promise.reject(Object.assign(new Error("gone"), { code: "ENOENT" }));
+    await expect(writeFileDurably(path, "{}", broken)).rejects.toThrow("gone");
   });
 
   it("find nothing to clean in a folder that does not exist", async () => {
