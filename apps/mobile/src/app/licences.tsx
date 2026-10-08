@@ -106,9 +106,23 @@ export default function LicencesScreen() {
         keyExtractor={(item) => item.name}
         renderItem={({ item }) => <PackageRow item={item} />}
         ListHeaderComponent={
-          <Text style={[textStyle.body, { color: color.textSecondary, padding: space.lg }]}>
-            {t("licences.intro", { count: OPEN_SOURCE.packages.length })}
-          </Text>
+          <View style={{ padding: space.lg, gap: space.md }}>
+            <Text
+              accessibilityRole="header"
+              style={[textStyle.subtitle, { color: color.textPrimary }]}
+            >
+              {t("licences.voicesTitle")}
+            </Text>
+            <Text style={[textStyle.body, { color: color.textSecondary }]}>
+              {t("licences.voiceFrench")}
+            </Text>
+            <Text style={[textStyle.body, { color: color.textSecondary }]}>
+              {t("licences.voiceWolof")}
+            </Text>
+            <Text style={[textStyle.body, { color: color.textSecondary }]}>
+              {t("licences.intro", { count: OPEN_SOURCE.packages.length })}
+            </Text>
+          </View>
         }
         contentContainerStyle={{ paddingBottom: insets.bottom + space.xxxl }}
         testID="licences-list"

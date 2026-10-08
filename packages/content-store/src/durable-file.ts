@@ -1,6 +1,34 @@
 import { mkdir, open, readdir, rename, stat, unlink } from "node:fs/promises";
 import { dirname, join } from "node:path";
 
+/**
+ * Windows refuses to replace a file another process has open for an instant (the
+ * API reading the store while a command writes it): the rename is tried again a few
+ * times, a little later each time (ERREURS.md, 08/10/2026). Elsewhere it never waits.
+ */
+const BUSY = new Set(["EPERM", "EACCES", "EBUSY"]);
+const RENAME_ATTEMPTS = 8;
+const RENAME_DELAY_MS = 25;
+
+async function renamePatiently(
+  from: string,
+  to: string,
+  move: (from: string, to: string) => Promise<void> = rename,
+): Promise<void> {
+  for (let attempt = 1; ; attempt += 1) {
+    try {
+      await move(from, to);
+      return;
+    } catch (error) {
+      const code = (error as NodeJS.ErrnoException).code ?? "";
+      if (!BUSY.has(code) || attempt >= RENAME_ATTEMPTS) {
+        throw error;
+      }
+      await new Promise((resolve) => setTimeout(resolve, RENAME_DELAY_MS * attempt));
+    }
+  }
+}
+
 /** A temporary file of writeFileDurably: "<name>.<process id>.tmp". */
 const TEMP_FILE = /\.\d+\.tmp$/;
 
@@ -35,7 +63,11 @@ export async function removeStaleTemps(
  * the fsync, a power cut can leave a renamed file full of zeros (ERREURS.md,
  * 25/09/2026). Creates the folder when needed.
  */
-export async function writeFileDurably(path: string, data: string | Uint8Array): Promise<void> {
+export async function writeFileDurably(
+  path: string,
+  data: string | Uint8Array,
+  move?: (from: string, to: string) => Promise<void>,
+): Promise<void> {
   await mkdir(dirname(path), { recursive: true });
   const temp = `${path}.${String(process.pid)}.tmp`;
   const handle = await open(temp, "w");
@@ -45,5 +77,5 @@ export async function writeFileDurably(path: string, data: string | Uint8Array):
   } finally {
     await handle.close();
   }
-  await rename(temp, path);
+  await renamePatiently(temp, path, move);
 }

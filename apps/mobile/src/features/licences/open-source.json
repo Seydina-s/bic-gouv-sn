@@ -386,6 +386,14 @@
       "text": 1
     },
     {
+      "name": "expo-audio",
+      "version": "57.0.5",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)"],
+      "url": "https://docs.expo.dev/versions/latest/sdk/audio/",
+      "text": 1
+    },
+    {
       "name": "expo-blur",
       "version": "57.0.3",
       "licence": "MIT",

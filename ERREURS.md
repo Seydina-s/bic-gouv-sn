@@ -163,3 +163,9 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : le filtre ne servait que les types prévus pour les photos et les PDF. Il ne gérait pas non plus la lecture partielle (« Range »), dont les lecteurs audio, ceux de l'iPhone en tête, ont besoin.
 - **Correctif** : type MP3 ajouté, réponses partielles (206) et refus des plages impossibles (416) dans `scripts/public-gate.mjs` ; vérifié en local et à travers le tunnel.
 - **Prévention** : tout nouveau type de média servi à l'app est ajouté au filtre dans la même demande de fusion (rappel dans `docs/runbooks/tests-a-distance.md`).
+## 08/10/2026 — Enregistrement des voix interrompu : « EPERM, rename … news.json »
+
+- **Ce qui s'est passé** : la commande `voices:record` s'est arrêtée après 40 articles sur 60, en écrivant le fichier des articles.
+- **Cause racine** : l'écriture durable crée un fichier temporaire puis le renomme par-dessus l'original. Sous Windows, ce renommage est refusé un instant quand un autre programme a le fichier ouvert (ici l'API, qui le relisait). Linux, utilisé en production, n'a pas ce comportement.
+- **Correctif** : `writeFileDurably` réessaie le renommage jusqu'à 8 fois, un peu plus tard à chaque fois, seulement pour ces refus passagers (EPERM, EACCES, EBUSY). Toute autre erreur remonte aussitôt. Test : `packages/content-store/src/durable-file.test.ts`.
+- **Prévention** : toute écriture par renommage d'un fichier partagé entre plusieurs programmes passe par `writeFileDurably`, qui gère ce cas.
