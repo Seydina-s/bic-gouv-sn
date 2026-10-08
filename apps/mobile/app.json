@@ -61,7 +61,7 @@
         {
           "photosPermission": "Bic Gouv Sn ouvre vos photos seulement pour joindre celle que vous choisissez à un signalement.",
           "cameraPermission": "Bic Gouv Sn utilise l’appareil photo seulement pour photographier un problème que vous signalez.",
-          "microphonePermission": false
+          "microphonePermission": "Le micro sert à dicter vos questions à l'assistant. L'application ne conserve pas votre voix."
         }
       ],
       [
@@ -86,6 +86,13 @@
         {
           "recordAudioAndroid": false,
           "enableBackgroundPlayback": true
+        }
+      ],
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "Le micro sert à dicter vos questions à l'assistant. L'application ne conserve pas votre voix.",
+          "speechRecognitionPermission": "La reconnaissance vocale transforme votre voix en texte pour poser vos questions à l'assistant."
         }
       ]
     ],
