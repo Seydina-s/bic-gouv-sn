@@ -169,3 +169,15 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : l'écriture durable crée un fichier temporaire puis le renomme par-dessus l'original. Sous Windows, ce renommage est refusé un instant quand un autre programme a le fichier ouvert (ici l'API, qui le relisait). Linux, utilisé en production, n'a pas ce comportement.
 - **Correctif** : `writeFileDurably` réessaie le renommage jusqu'à 8 fois, un peu plus tard à chaque fois, seulement pour ces refus passagers (EPERM, EACCES, EBUSY). Toute autre erreur remonte aussitôt. Test : `packages/content-store/src/durable-file.test.ts`.
 - **Prévention** : toute écriture par renommage d'un fichier partagé entre plusieurs programmes passe par `writeFileDurably`, qui gère ce cas.
+
+## 08/10/2026 — Premier lot de traduction wolof perdu : réponses coupées
+
+- **Ce qui s'est passé** : les 30 traductions du premier lot ont toutes été écartées comme « illisibles » (coût : 1,47 $, rien d'enregistré).
+- **Cause racine** : la longueur maximale des réponses était calculée sur une hypothèse non mesurée (2,8 caractères wolof par jeton). Mesuré sur une vraie réponse : **1,3 caractère par jeton**. Le wolof, langue rare pour le modèle, est découpé en beaucoup plus de jetons. Les réponses s'arrêtaient donc à leur limite, avant la fin du texte, et le contrôle ne distinguait pas une réponse coupée d'une réponse illisible. L'estimation de coût reposait sur la même hypothèse : elle était sous-évaluée de moitié.
+- **Correctif** :
+  - place laissée au wolof portée à 1,2 jeton par caractère français plus une marge (seuls les jetons écrits sont payés) ;
+  - réponse coupée signalée comme telle (« truncated ») ;
+  - estimation corrigée : environ 16 $ pour les 379 articles depuis octobre 2025, environ 27 $ pour les 658 ;
+  - options `--inspect` (voir une réponse brute) et `--recollect` (relire un lot sans repayer) ;
+  - lot de 30 renvoyé, pour environ 1,67 $.
+- **Prévention** : toute limite ou estimation liée au nombre de jetons d'une langue est mesurée sur un vrai échantillon (une requête) avant un envoi par lot ; un lot commence toujours petit (ici 30).

@@ -12,7 +12,7 @@ import { sanitizeArticleHtml, textLength } from "../lib/sanitize";
 const LENGTH_RATIO = { min: 0.6, max: 2.2 } as const;
 
 export type TranslationRefusal =
-  "unreadable" | "empty" | "structure_changed" | "media_changed" | "length_off";
+  "truncated" | "unreadable" | "empty" | "structure_changed" | "media_changed" | "length_off";
 
 export type CheckedTranslation =
   { ok: true; title: string; bodyHtml: string } | { ok: false; refusal: TranslationRefusal };

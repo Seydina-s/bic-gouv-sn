@@ -14,9 +14,9 @@ export const BATCH_PRICES: Record<string, { input: number; output: number }> = {
   "claude-haiku-4-5-20251001": { input: 0.5, output: 2.5 },
 };
 
-/** Characters per token: French reads densely, Wolof (rarer) takes more tokens. */
+/** Characters per token: French reads densely; Wolof, rarer, measured at 1.3 (08/10/2026). */
 const FRENCH_CHARACTERS_PER_TOKEN = 3.5;
-const WOLOF_CHARACTERS_PER_TOKEN = 2.8;
+const WOLOF_CHARACTERS_PER_TOKEN = 1.3;
 /** Wolof runs a little longer than the French it translates. */
 const WOLOF_LENGTH = 1.15;
 

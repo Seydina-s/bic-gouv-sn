@@ -22,7 +22,15 @@ export interface BatchRequest {
 export type BatchStatus = "in_progress" | "canceling" | "ended";
 
 export type BatchResult =
-  | { customId: string; ok: true; text: string; inputTokens: number; outputTokens: number }
+  | {
+      customId: string;
+      ok: true;
+      text: string;
+      inputTokens: number;
+      outputTokens: number;
+      /** The reply stopped at its length limit: incomplete, never saved. */
+      truncated: boolean;
+    }
   | { customId: string; ok: false; reason: string };
 
 const batchSchema = z.object({
@@ -38,6 +46,7 @@ const resultLineSchema = z.object({
       type: z.literal("succeeded"),
       message: z.object({
         content: z.array(z.object({ type: z.string(), text: z.string().optional() })),
+        stop_reason: z.string().nullish(),
         usage: z.object({
           input_tokens: z.int().nonnegative(),
           output_tokens: z.int().nonnegative(),
@@ -140,6 +149,7 @@ export class ClaudeBatches {
             (usage.cache_read_input_tokens ?? 0) +
             (usage.cache_creation_input_tokens ?? 0),
           outputTokens: usage.output_tokens,
+          truncated: result.message.stop_reason === "max_tokens",
         };
       });
   }

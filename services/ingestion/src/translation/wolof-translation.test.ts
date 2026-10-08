@@ -76,6 +76,7 @@ const translated = (request: BatchRequest): BatchResult => ({
   text: JSON.stringify({ title: "Tur bu fictif", bodyHtml: WOLOF }),
   inputTokens: 1000,
   outputTokens: 200,
+  truncated: false,
 });
 
 let dir: string;
@@ -151,11 +152,16 @@ describe("the Wolof translation runs", () => {
       if (request.customId === idOf(1)) {
         return { ...translated(request), text: "pas du JSON" };
       }
+      if (request.customId === idOf(4)) {
+        // Stopped at its length limit: a complete-looking start, never saved.
+        return { ...translated(request), truncated: true };
+      }
       return request.customId === idOf(2)
         ? { customId: request.customId, ok: false, reason: "errored" }
         : translated(request);
     });
-    await translation.submit(service.client, "claude-opus-5-5", { since: null, limit: 3 });
+    await articles.save(article(4, "2025-08-01"));
+    await translation.submit(service.client, "claude-opus-5-5", { since: null, limit: 4 });
     // Article 3 is corrected at the source while its translation is being written.
     const original = article(3, "2025-09-01");
     const translations = original.translations.map((t) => ({ ...t, title: "Titre corrigé" }));
@@ -166,15 +172,20 @@ describe("the Wolof translation runs", () => {
     });
     service.end();
     const report = await translation.collect(service.client);
-    expect(report).toMatchObject({ saved: 0, refused: { unreadable: 1 }, failed: 1, outdated: 1 });
-    for (const n of [1, 2, 3]) {
+    expect(report).toMatchObject({
+      saved: 0,
+      refused: { unreadable: 1, truncated: 1 },
+      failed: 1,
+      outdated: 1,
+    });
+    for (const n of [1, 2, 3, 4]) {
       expect((await articles.get(idOf(n)))?.translations).toHaveLength(1);
     }
   });
 
   it("gives the Wolof room to be longer than the French, within bounds", () => {
-    expect(outputTokensFor(100)).toBe(1024);
-    expect(outputTokensFor(10_000)).toBe(6500);
+    expect(outputTokensFor(100)).toBe(2048);
+    expect(outputTokensFor(10_000)).toBe(13_000);
     expect(outputTokensFor(1_000_000)).toBe(32_000);
   });
 
@@ -244,7 +255,7 @@ describe("Anthropic's batches", () => {
       resultsUrl: "https://api.anthropic.com/r",
     });
     expect(await batches.results("https://api.anthropic.com/r")).toEqual([
-      { customId: "a", ok: true, text: "{}", inputTokens: 100, outputTokens: 5 },
+      { customId: "a", ok: true, text: "{}", inputTokens: 100, outputTokens: 5, truncated: false },
       { customId: "b", ok: false, reason: "expired" },
     ]);
   });

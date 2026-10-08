@@ -16,9 +16,13 @@ import { translationRequest, translationSystem } from "./wolof-prompt";
 
 const PAGE_SIZE = 200;
 
-/** Room for the Wolof (a little longer than French), never cut short. */
+/**
+ * Room for the Wolof, never cut short: measured on the first run (08/10/2026), Wolof
+ * takes about 0.9 token per French character (1.3 characters per token). Only the
+ * tokens written are paid: the margin costs nothing.
+ */
 export function outputTokensFor(frenchCharacters: number): number {
-  return Math.min(32_000, Math.max(1024, Math.ceil(frenchCharacters * 0.6) + 500));
+  return Math.min(32_000, Math.max(2048, Math.ceil(frenchCharacters * 1.2) + 1000));
 }
 
 const runSchema = z.object({
@@ -158,6 +162,32 @@ export class WolofTranslation {
     return report;
   }
 
+  /** The latest run's raw replies, to understand a refusal; nothing is saved. */
+  async latestReplies(client: BatchClient): Promise<BatchResult[]> {
+    const latest = (await this.state.read()).runs.at(-1);
+    if (latest === undefined) {
+      return [];
+    }
+    const { resultsUrl } = await client.status(latest.batchId);
+    return resultsUrl === null ? [] : client.results(resultsUrl);
+  }
+
+  /**
+   * Collects the latest run again, after a fix of the checks: the provider keeps the
+   * replies 29 days, so nothing is paid twice. Articles saved since are left alone.
+   */
+  async recollectLatest(client: BatchClient): Promise<CollectReport> {
+    await this.state.change((current) => ({
+      next: {
+        runs: current.runs.map((run, index) =>
+          index === current.runs.length - 1 ? { ...run, collectedAt: null } : run,
+        ),
+      },
+      result: undefined,
+    }));
+    return this.collect(client);
+  }
+
   private async apply(run: Run, result: BatchResult, report: CollectReport): Promise<void> {
     if (!result.ok) {
       report.failed += 1;
@@ -165,6 +195,10 @@ export class WolofTranslation {
     }
     report.inputTokens += result.inputTokens;
     report.outputTokens += result.outputTokens;
+    if (result.truncated) {
+      report.refused.truncated = (report.refused.truncated ?? 0) + 1;
+      return;
+    }
     const sent = run.articles.find((article) => article.id === result.customId);
     const article = await this.options.articles.get(result.customId);
     const french = article === null ? null : frenchToTranslate(article);
