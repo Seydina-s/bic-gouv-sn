@@ -73,6 +73,7 @@ export const adminFr = {
     withdrawn: "Articles masqués",
     searches: "Recherches sans résultat",
     usage: "Usage de l'application",
+    assistant: "Assistant",
     notifications: "Notifications",
     opportunities: "Opportunités",
     participation: "Participation",
@@ -551,6 +552,35 @@ export const adminFr = {
       other: "{count} opportunités attendent la vérification d'une seconde personne.",
     },
     unreadable: "Certaines alertes n'ont pas pu être lues : rechargez la page.",
+    assistantPaused:
+      "L'assistant est en pause : toutes les questions prévues ce mois-ci ont été posées.",
+    assistantNearLimit: "L'assistant a déjà utilisé {percent} des questions prévues ce mois-ci.",
+  },
+  assistant: {
+    title: "Assistant",
+    intro:
+      "Les questions posées ce mois-ci à l'assistant de l'application, ce qu'elles coûtent, et la limite mensuelle. Une fois la limite atteinte, l'assistant se met en pause jusqu'au 1er du mois suivant ; le reste de l'application fonctionne normalement.",
+    notConfigured:
+      "L'assistant n'est pas encore branché : la clé d'accès du compte Anthropic n'a pas été saisie sur le serveur. Dans l'application, il indique qu'il n'est pas encore disponible.",
+    month: "Mois en cours : {month}",
+    questions: "Questions posées",
+    ofLimit: "sur {limit} prévues",
+    progress: "{used} questions posées sur {limit} ({percent})",
+    remaining: "Questions restantes",
+    cost: "Coût estimé",
+    costHelp:
+      "Estimation au tarif de Claude Haiku 4.5 : 1 $ par million de jetons lus, 5 $ par million de jetons écrits (un jeton est un morceau de mot). Le montant exact figure sur la facture d'Anthropic.",
+    average: "Coût moyen d'une question",
+    noQuestion: "Aucune question ce mois-ci.",
+    limit: "Limite mensuelle de questions",
+    limitHelp:
+      "Au-delà, l'assistant se met en pause jusqu'au 1er du mois suivant. Augmenter la limite augmente le coût maximal du mois. Seul un administrateur peut la changer ; le changement est inscrit au journal d'audit.",
+    maxCost: "Coût maximal du mois à ce rythme : environ {cost}",
+    save: "Enregistrer la limite",
+    saved: "Limite enregistrée.",
+    invalid: "Écrivez un nombre entier de questions, entre 1 et 1 000 000.",
+    adminOnly: "Seul un administrateur peut changer la limite.",
+    failed: "Les chiffres de l'assistant n'ont pas pu être lus. Rechargez la page.",
   },
   participation: {
     title: "Participation",

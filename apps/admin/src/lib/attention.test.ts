@@ -102,6 +102,36 @@ describe("attentionItems", () => {
     ]);
   });
 
+  it("warns as the assistant nears its monthly limit, and alerts once it is paused", () => {
+    const usage = {
+      month: "2026-10",
+      questions: 500,
+      monthlyLimit: 10_000,
+      inputTokens: 0,
+      outputTokens: 0,
+      configured: true,
+    };
+    const items = (questions: number, configured = true) =>
+      attentionItems({
+        errors: [],
+        notifications: quiet,
+        now: NOW,
+        assistant: { ...usage, questions, configured },
+      });
+    expect(items(500)).toEqual([]);
+    expect(items(8500)).toEqual([
+      {
+        tone: "warning",
+        text: "L'assistant a déjà utilisé 85 % des questions prévues ce mois-ci.",
+        href: "/assistant",
+      },
+    ]);
+    expect(items(10_000)).toEqual([
+      expect.objectContaining({ tone: "danger", href: "/assistant" }),
+    ]);
+    expect(items(10_000, false)).toEqual([]);
+  });
+
   it("says when it could not read a source, rather than passing for calm", () => {
     const items = attentionItems({ errors: null, notifications: quiet, now: NOW });
     expect(items).toEqual([expect.objectContaining({ tone: "warning", href: "/" })]);
