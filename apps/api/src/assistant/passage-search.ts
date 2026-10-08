@@ -128,6 +128,29 @@ class LanguageIndex {
         return passage === undefined ? [] : [{ passage, score }];
       });
   }
+
+  /** The opening passages of the newest contents, of one section when given. */
+  latest({
+    section,
+    contents,
+    perContent,
+  }: {
+    section: string | null;
+    contents: number;
+    perContent: number;
+  }): Passage[] {
+    const firsts = [...this.positionsByContent.values()]
+      .map((positions) => positions.flatMap((position) => this.passages[position] ?? []))
+      .filter((passages) => passages.length > 0)
+      .filter((passages) => section === null || passages[0]?.section === section)
+      .sort(([a], [b]) => (a === undefined || b === undefined ? 0 : byNewest(a, b)));
+    return firsts.slice(0, contents).flatMap((passages) => passages.slice(0, perContent));
+  }
+}
+
+/** Newest first; undated last. */
+function byNewest(a: Passage, b: Passage): number {
+  return (b.publishedOn ?? "").localeCompare(a.publishedOn ?? "");
 }
 
 export class PassageIndex {
@@ -161,6 +184,16 @@ export class PassageIndex {
     for (const passage of passages) {
       this.languageOf(passage.lang).add(passage);
     }
+  }
+
+  /** The opening passages of the newest contents in `lang`, of one section when given. */
+  latest(options: {
+    lang: Lang;
+    section: string | null;
+    contents: number;
+    perContent: number;
+  }): Passage[] {
+    return this.byLang.get(options.lang)?.latest(options) ?? [];
   }
 
   /** Passages of `lang` matching `query`, best first; none when no word matches. */

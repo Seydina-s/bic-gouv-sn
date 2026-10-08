@@ -1,14 +1,9 @@
 import { describe, expect, it } from "vitest";
-import {
-  answerQuestion,
-  checkAnswer,
-  PASSAGES_GIVEN,
-  SYSTEM_RULES,
-  userMessage,
-} from "./grounded-answer";
+import { answerQuestion, checkAnswer, SYSTEM_RULES, userMessage } from "./grounded-answer";
 import type { LlmProvider, LlmRequest } from "./llm-provider";
 import { PassageIndex } from "./passage-search";
 import type { Passage } from "./passages";
+import { PASSAGES_GIVEN } from "./retrieval";
 
 // Placeholder texts, not real content.
 function passage(n: number, title: string, text: string): Passage {

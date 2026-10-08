@@ -22,6 +22,8 @@ export interface Passage {
   publishedOn: string | null;
   /** Version of the content the passage was cut from: cut again when it changes. */
   contentHash: string;
+  /** The article's section ("conseil-des-ministres"…); none for a procedure. */
+  section?: string;
   text: string;
 }
 
@@ -125,7 +127,8 @@ function cut(content: Content, translation: Translation, sections: string[]): Pa
 export function articlePassages(article: NewsArticle): Passage[] {
   return article.translations
     .filter(isQuotable)
-    .flatMap((translation) => cut(article, translation, paragraphsOf(translation.bodyHtml)));
+    .flatMap((translation) => cut(article, translation, paragraphsOf(translation.bodyHtml)))
+    .map((passage) => ({ ...passage, section: article.category }));
 }
 
 function listed(label: string, items: string[]): string[] {

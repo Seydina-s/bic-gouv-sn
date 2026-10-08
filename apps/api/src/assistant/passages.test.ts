@@ -52,7 +52,7 @@ describe("paragraphsOf", () => {
 });
 
 describe("articlePassages", () => {
-  it("keeps the source, the date and the version on every passage", () => {
+  it("keeps the source, the date, the version and the section on every passage", () => {
     const [passage] = articlePassages(article([fr("<p>Corps de test.</p>")]));
     expect(passage).toEqual({
       id: "00000000-0000-5000-8000-000000000001:fr:0",
@@ -64,6 +64,7 @@ describe("articlePassages", () => {
       sourceUrl: "https://www.presidence.sn/fr/actualites/test-1/",
       publishedOn: "2026-09-21",
       contentHash: "1".repeat(64),
+      section: "communiques",
       text: "Corps de test.",
     });
   });

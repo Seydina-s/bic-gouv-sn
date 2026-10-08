@@ -2,7 +2,6 @@ import type { AssistantSource } from "@bgs/shared-types";
 import { ArrowClockwiseIcon as ArrowClockwise } from "phosphor-react-native/src/icons/ArrowClockwise";
 import { ListChecksIcon as ListChecks } from "phosphor-react-native/src/icons/ListChecks";
 import { NewspaperIcon as Newspaper } from "phosphor-react-native/src/icons/Newspaper";
-import { SparkleIcon as Sparkle } from "phosphor-react-native/src/icons/Sparkle";
 import type { IconProps as PhosphorProps } from "phosphor-react-native";
 import { useEffect, type ComponentType, type ReactNode } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
@@ -15,6 +14,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from "react-native-reanimated";
+import { BrandMark } from "../../components/BrandMark";
 import { Icon } from "../../components/Icon";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useReduceMotion } from "../../theme/useSystemAccessibility";
@@ -266,7 +266,7 @@ export function resumeDay(isoDate: string | null, lang: "fr" | "wo"): string {
   return lang === "fr" ? day.replace(/^1 /, "1er ") : day;
 }
 
-/** The assistant's turn, on the left: its mark, then the words, without a bubble. */
+/** The assistant's turn, on the left: the BIC-GOUV mark as its face, then the words. */
 export function AssistantTurn({ turn, actions }: { turn: ChatTurn; actions: ChatActions }) {
   const { theme } = useTheme();
   const { color, space } = theme;
@@ -275,8 +275,10 @@ export function AssistantTurn({ turn, actions }: { turn: ChatTurn; actions: Chat
       entering={FadeInDown.duration(theme.motion.duration.normal)}
       style={[styles.row, styles.top, { gap: space.md }]}
     >
-      <View style={[styles.mark, { backgroundColor: color.primaryContainer }]}>
-        <Icon icon={Sparkle} size="sm" weight="fill" color={color.textBrand} />
+      <View
+        style={[styles.mark, { backgroundColor: color.surfaceRaised, borderColor: color.border }]}
+      >
+        <BrandMark height={MARK * 0.62} />
       </View>
       <View style={[styles.flex, { gap: space.md }]}>
         <TurnBody turn={turn} actions={actions} />
@@ -285,7 +287,7 @@ export function AssistantTurn({ turn, actions }: { turn: ChatTurn; actions: Chat
   );
 }
 
-const MARK = 28;
+const MARK = 32;
 
 const styles = StyleSheet.create({
   row: { flexDirection: "row", alignItems: "center" },
@@ -294,6 +296,7 @@ const styles = StyleSheet.create({
   right: { alignItems: "flex-end" },
   flex: { flex: 1 },
   mark: {
+    borderWidth: StyleSheet.hairlineWidth,
     width: MARK,
     height: MARK,
     borderRadius: MARK / 2,
