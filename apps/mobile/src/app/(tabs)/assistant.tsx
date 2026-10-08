@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import { NotePencilIcon as NotePencil } from "phosphor-react-native/src/icons/NotePencil";
 import { useCallback, useRef, useState } from "react";
 import {
+  Keyboard,
   KeyboardAvoidingView,
   Linking,
   Platform,
@@ -52,6 +53,8 @@ function Assistant() {
       return;
     }
     setDraft("");
+    // The keyboard goes away so the whole discussion can be read.
+    Keyboard.dismiss();
     void send(question, lang);
   }, [draft, busy, send, lang]);
 

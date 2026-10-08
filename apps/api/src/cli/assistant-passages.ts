@@ -6,10 +6,11 @@ import { FileArticleRepository, FileProcedureRepository } from "@bgs/content-sto
 import type { NewsArticle } from "@bgs/shared-types";
 import { PassageIndex } from "../assistant/passage-search";
 import { articlePassages, procedurePassages, type Passage } from "../assistant/passages";
+import { retrievePassages } from "../assistant/retrieval";
 import { loadConfig } from "../config";
 
 const PAGE_SIZE = 200;
-const SHOWN = 3;
+const today = new Date().toISOString().slice(0, 10);
 
 async function allArticles(store: FileArticleRepository): Promise<NewsArticle[]> {
   const all: NewsArticle[] = [];
@@ -54,11 +55,12 @@ async function main(): Promise<void> {
   );
 
   for (const question of process.argv.slice(2)) {
-    const found = index.search(question, { lang: "fr", limit: SHOWN });
+    // What the model would read today: words, freshness, the section named.
+    const found = retrievePassages(index, question, "fr", today);
     process.stdout.write(`\n« ${question} »\n`);
-    for (const { passage, score } of found) {
+    for (const passage of found) {
       process.stdout.write(
-        `  ${score.toFixed(1)}  ${passage.title}\n        ${passage.sourceUrl}\n`,
+        `  ${passage.publishedOn ?? "sans date"}  ${passage.title}\n        ${passage.sourceUrl}\n`,
       );
     }
     if (found.length === 0) {

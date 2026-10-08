@@ -485,7 +485,7 @@ export const fr = {
   },
   assistant: {
     welcome:
-      "Posez vos questions sur l'action du Gouvernement et vos démarches administratives, ou soumettez une information pour en vérifier l'exactitude. Les réponses s'appuient exclusivement sur les sources officielles.",
+      "Posez une question ou vérifiez une information. Réponses fondées sur les sources officielles.",
     placeholder: "Posez une question ou vérifiez une information",
     personal: "N'écrivez pas d'informations personnelles (nom, numéro, adresse).",
     listening: "Je vous écoute…",

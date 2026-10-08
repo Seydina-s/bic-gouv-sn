@@ -3,7 +3,7 @@ import { act, fireEvent, screen, waitFor, within } from "@testing-library/react-
 import * as Location from "expo-location";
 import { router } from "expo-router";
 import { renderRouter } from "expo-router/testing-library";
-import { Dimensions, Linking, Share } from "react-native";
+import { Dimensions, Keyboard, Linking, Share } from "react-native";
 import RootLayout from "./app/_layout";
 import TabsLayout from "./app/(tabs)/_layout";
 import HomeScreen from "./app/(tabs)/index";
@@ -908,17 +908,22 @@ describe("app shell", () => {
     globalThis.fetch = fetchMock as unknown as typeof fetch;
     await renderRouter(routes, { initialUrl: "/assistant" });
     expect(
-      await screen.findByText(/^Posez vos questions sur l'action du Gouvernement/),
+      await screen.findByText(/^Posez une question ou vérifiez une information. Réponses fondées/),
     ).toBeOnTheScreen();
     const field = screen.getByLabelText("Posez une question ou vérifiez une information");
     await fireEvent.changeText(field, "Une question fictive ?");
+    const dismiss = jest.spyOn(Keyboard, "dismiss");
     await fireEvent.press(screen.getByRole("button", { name: "Envoyer" }));
+    // The keyboard goes away so the whole discussion can be read.
+    expect(dismiss).toHaveBeenCalled();
     expect(screen.getByText("Une question fictive ?")).toBeOnTheScreen();
     expect(
       await screen.findByText("Une réponse fictive tirée de la démarche de test."),
     ).toBeOnTheScreen();
     // The welcome words leave once the conversation has begun.
-    expect(screen.queryByText(/^Posez vos questions sur l'action du Gouvernement/)).toBeNull();
+    expect(
+      screen.queryByText(/^Posez une question ou vérifiez une information. Réponses fondées/),
+    ).toBeNull();
     const sent = fetchMock.mock.calls.find(([url]) => url.includes("/v1/assistant/answers"));
     const init = (sent as unknown as [string, RequestInit] | undefined)?.[1];
     expect(JSON.parse(init?.body as string)).toEqual({
@@ -947,7 +952,9 @@ describe("app shell", () => {
     expect(screen.getByText(/disponible le 1er novembre 2026/)).toBeOnTheScreen();
     await fireEvent.press(screen.getByRole("button", { name: "Nouvelle discussion" }));
     expect(screen.queryByText("L'assistant fait une pause")).toBeNull();
-    expect(screen.getByText(/^Posez vos questions sur l'action du Gouvernement/)).toBeOnTheScreen();
+    expect(
+      screen.getByText(/^Posez une question ou vérifiez une information. Réponses fondées/),
+    ).toBeOnTheScreen();
   });
 
   it("offers other ways when the sources say nothing, and a retry when offline", async () => {

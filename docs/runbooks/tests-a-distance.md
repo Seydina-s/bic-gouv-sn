@@ -17,7 +17,7 @@ L'adresse ne change pas : l'app installée chez la personne continue de fonction
 
 L'API en marche garde la version avec laquelle elle a démarré. Après une fusion, il faut la relancer, sinon la console signale « Une adresse inexistante de l'API a été demandée » pour toute nouvelle page (erreur du 08/10).
 
-1. Arrêtez l'API et le filtre.
+1. Arrêtez l'API, le filtre et la collecte (`pnpm --filter @bgs/ingestion watch`).
 2. Mettez le dépôt à jour : `git fetch origin && git checkout --detach origin/main`.
 3. Reconstruisez : `pnpm --filter @bgs/api build`.
 4. Relancez les étapes 1 et 2 ci-dessus. Le filtre se lance toujours depuis `scripts/` du dépôt, jamais depuis une copie : la liste des adresses qu'il laisse passer change avec l'app.
