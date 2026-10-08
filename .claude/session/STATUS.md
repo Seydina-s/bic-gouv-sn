@@ -1,6 +1,15 @@
 # STATUS — Bic Gouv SN
 
-**Dernière mise à jour** : 03/10/2026 (20 h 45) · **Mode** : autonome depuis le 03/10 vers 19 h (accord de l'utilisateur), pour les tâches sans IA et sans coût. Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md`.
+**Dernière mise à jour** : 08/10/2026 (0 h 45) · **Mode** : autonome depuis le 07/10 (accord de l'utilisateur) : intégration du workflow de l'IA, en commençant par l'assistant. Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md`.
+
+## 07 et 08/10 en bref : l'assistant est prêt, il attend sa clé
+- **Serveur** (#258) : adresse `POST /v1/assistant/answers` (question ou « Est-ce vrai ? »), réponses tirées des seules publications officielles avec leurs sources ; Claude Haiku 4.5 ; **plafond de 10 000 questions par mois** tenu même avec plusieurs serveurs ; au-delà, pause aimable jusqu'au 1er du mois suivant ; interrupteur « Assistant » dans le contrôle à distance ; 20 questions par heure et par adresse ; aucune question conservée ni écrite dans les journaux.
+- **App** (#260) : l'onglet Assistant remplace « Bientôt disponible » : question ou information à vérifier, réponse et sources à ouvrir, messages simples (introuvable, hors sujet, pause du mois, indisponible, sans connexion). Visible après une mise à jour de l'app installée.
+- **Console** (#261) : page « Assistant » (questions du mois, coût estimé, limite modifiable par un administrateur) et alerte à 80 % des questions.
+- **Sécurité** (#259) : Next.js 16.3.8 (faille publiée le 07/10), sans exception à l'audit.
+- **Ce qui attend l'utilisateur** : créer la clé Anthropic avec une limite de dépense et la saisir soi-même (point 36, `docs/guides/brancher-l-assistant.md`) ; ensuite, traduction wolof des articles (point 35) avec la même clé.
+- **Suite prévue** : chaîne de traduction des articles sans version wolof (lots Claude, étiquette « Traduction automatique », file de relecture), puis audio (voix Jessica et Adia) sur notre serveur.
+
 
 ## 02 et 03/10 en bref
 - **Identité** : baobab de l'utilisateur vectorisé (#240) ; icône officielle BIC-GOUV posée partout (#244) ; nom « BIC-GOUV Sn » ; ouverture « La graine » (étoile → bandes → nom → graine → baobab, 2,5 s d'icône, fluide dès le début, #246). Icône, nom et écran natif visibles après la **nouvelle compilation** (point 28).
