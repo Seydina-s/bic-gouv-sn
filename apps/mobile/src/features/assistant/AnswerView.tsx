@@ -1,4 +1,4 @@
-import type { AssistantReply, AssistantSource } from "@bgs/shared-types";
+import type { AssistantReply, AssistantSource, Lang } from "@bgs/shared-types";
 import type { IconProps as PhosphorProps } from "phosphor-react-native";
 import { ChatTeardropTextIcon as ChatTeardropText } from "phosphor-react-native/src/icons/ChatTeardropText";
 import { HourglassMediumIcon as HourglassMedium } from "phosphor-react-native/src/icons/HourglassMedium";
@@ -20,6 +20,12 @@ export interface AnswerActions {
   openSource: (source: AssistantSource) => void;
   writeToGovernment: () => void;
   searchNews: () => void;
+}
+
+/** The day the assistant answers again; French writes the first of the month « 1er ». */
+export function resumeDay(isoDate: string | null, lang: Lang): string {
+  const day = formatPublishedOn(isoDate, lang);
+  return lang === "fr" ? day.replace(/^1 /, "1er ") : day;
 }
 
 /** The answer's place under the question: it rises in as each new state comes. */
@@ -135,7 +141,7 @@ function ReplyBody({
         <Notice
           icon={HourglassMedium}
           title={t("assistant.pausedTitle")}
-          body={t("assistant.pausedBody", { date: formatPublishedOn(reply.resumesOn, lang) })}
+          body={t("assistant.pausedBody", { date: resumeDay(reply.resumesOn, lang) })}
         />
       );
     case "unavailable":

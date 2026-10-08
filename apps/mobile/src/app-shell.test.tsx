@@ -941,7 +941,7 @@ describe("app shell", () => {
     );
     await fireEvent.press(screen.getByRole("button", { name: "Vérifier" }));
     expect(await screen.findByText("L'assistant fait une pause")).toBeOnTheScreen();
-    expect(screen.getByText(/disponible le 1 novembre 2026/)).toBeOnTheScreen();
+    expect(screen.getByText(/disponible le 1er novembre 2026/)).toBeOnTheScreen();
     const sent = fetchMock.mock.calls.find(([url]) => url.includes("/v1/assistant/answers"));
     const init = (sent as unknown as [string, RequestInit] | undefined)?.[1];
     expect(JSON.parse(init?.body as string)).toMatchObject({ mode: "verify" });
