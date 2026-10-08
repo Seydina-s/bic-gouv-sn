@@ -20,9 +20,21 @@ const TYPES = {
   ".avif": "image/avif",
   ".png": "image/png",
   ".pdf": "application/pdf",
+  ".mp3": "audio/mpeg",
 };
 
-function serveMedia(path, response) {
+/** The bytes asked by a "Range" header (players read audio in parts), or null for all. */
+function rangeOf(header, size) {
+  const match = /^bytes=(\d*)-(\d*)$/.exec(header ?? "");
+  if (match === null || (match[1] === "" && match[2] === "")) {
+    return null;
+  }
+  const start = match[1] === "" ? Math.max(0, size - Number(match[2])) : Number(match[1]);
+  const end = match[1] === "" || match[2] === "" ? size - 1 : Math.min(Number(match[2]), size - 1);
+  return start <= end && start < size ? { start, end } : "unsatisfiable";
+}
+
+function serveMedia(path, request, response) {
   const root = normalize(mediaRoot);
   const file = normalize(join(root, decodeURIComponent(path.slice("/media/".length))));
   const type = TYPES[extname(file).toLowerCase()];
@@ -30,12 +42,30 @@ function serveMedia(path, response) {
     if (!file.startsWith(root + sep) || type === undefined || !statSync(file).isFile()) {
       throw new Error("not served");
     }
-    response.writeHead(200, {
+    const size = statSync(file).size;
+    const headers = {
       "content-type": type,
       "cache-control": "public, max-age=86400",
       "x-content-type-options": "nosniff",
+      "accept-ranges": "bytes",
+    };
+    const range = rangeOf(request.headers.range, size);
+    if (range === "unsatisfiable") {
+      response.writeHead(416, { "content-range": `bytes */${String(size)}` });
+      response.end();
+      return;
+    }
+    if (range === null) {
+      response.writeHead(200, { ...headers, "content-length": String(size) });
+      createReadStream(file).pipe(response);
+      return;
+    }
+    response.writeHead(206, {
+      ...headers,
+      "content-length": String(range.end - range.start + 1),
+      "content-range": `bytes ${String(range.start)}-${String(range.end)}/${String(size)}`,
     });
-    createReadStream(file).pipe(response);
+    createReadStream(file, range).pipe(response);
   } catch {
     response.writeHead(404, { "content-type": "application/json" });
     response.end('{"error":"NOT_FOUND"}');
@@ -79,7 +109,7 @@ http
     }
     const path = (request.url ?? "").split("?")[0] ?? "";
     if (path.startsWith("/media/")) {
-      serveMedia(path, response);
+      serveMedia(path, request, response);
       return;
     }
     const upstream = http.request(

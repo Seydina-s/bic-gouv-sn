@@ -150,6 +150,19 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Correctif** : API reconstruite et relancée sur la dernière version (avec la clé), filtre relancé depuis `scripts/` du dépôt ; question test : réponse sourcée en 2,2 s. L'API écrit désormais dans son journal pourquoi le modèle n'a pas répondu (délai, refus, crédit), jamais la question (test dans `apps/api/src/routes/assistant.test.ts`).
 - **Prévention** : `docs/runbooks/tests-a-distance.md` décrit la relance après chaque fusion qui touche l'API, et rappelle de lancer le filtre depuis le dépôt.
 
+## 08/10/2026 — File de fusion lancée sur le mauvais numéro
+
+- **Ce qui s'est passé** : la file de fusion automatique a été lancée sur le n° 268 au lieu du n° 269. J'avais supposé le numéro de la demande que je venais de créer au lieu de le lire. Le n° 268 était une mise à jour Dependabot (pytest). Arrêtée en quelques secondes, elle n'a rien fusionné : la branche du n° 268 a seulement été mise à jour.
+- **Cause racine** : numéro déduit de la demande précédente plutôt que lu dans la réponse de `gh pr create`. Dependabot avait ouvert une demande entre-temps.
+- **Correctif** : file arrêtée, n° 268 vérifié (toujours ouvert), file relancée sur le n° 269.
+- **Prévention** : le numéro passé à la file de fusion est toujours celui que renvoie `gh pr create`, lu dans sa réponse, jamais supposé.
+
+## 08/10/2026 — Fichiers audio refusés par le filtre des tests à distance
+
+- **Ce qui s'est passé** : les enregistrements MP3 répondaient 404 à travers le tunnel.
+- **Cause racine** : le filtre ne servait que les types prévus pour les photos et les PDF. Il ne gérait pas non plus la lecture partielle (« Range »), dont les lecteurs audio, ceux de l'iPhone en tête, ont besoin.
+- **Correctif** : type MP3 ajouté, réponses partielles (206) et refus des plages impossibles (416) dans `scripts/public-gate.mjs` ; vérifié en local et à travers le tunnel.
+- **Prévention** : tout nouveau type de média servi à l'app est ajouté au filtre dans la même demande de fusion (rappel dans `docs/runbooks/tests-a-distance.md`).
 ## 08/10/2026 — Enregistrement des voix interrompu : « EPERM, rename … news.json »
 
 - **Ce qui s'est passé** : la commande `voices:record` s'est arrêtée après 40 articles sur 60, en écrivant le fichier des articles.
