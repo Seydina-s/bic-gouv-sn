@@ -14,8 +14,12 @@ import type { Passage } from "./passages";
 /** Usual BM25 settings: how fast repeats stop counting, how much length matters. */
 const K1 = 1.2;
 const B = 0.75;
-/** A title word counts as this many words of the text. */
-const TITLE_WEIGHT = 2;
+/**
+ * A title word counts as this many words of the text: a procedure is named by its
+ * title, while its list of documents repeats common words (measured 08/10/2026 on
+ * 72 questions: within the first 3 pages 86 % with 4, against 83 % with 2).
+ */
+const TITLE_WEIGHT = 4;
 /**
  * French question words say how a question is asked, not what it is about; many
  * procedure titles start with "Comment…", which would outrank the subject itself.
