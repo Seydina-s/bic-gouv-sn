@@ -9,7 +9,7 @@ import { z } from "zod";
 import { QuarantineError } from "../../lib/errors";
 import { stableUuid } from "../../lib/identity";
 import { createPoliteHttp } from "../../lib/polite-http";
-import { isEmptied, plainLetters, sanitizeArticleHtml, unpublishable } from "../../lib/sanitize";
+import { isEmptied, plainLetters, sanitizeNested, unpublishable } from "../../lib/sanitize";
 import { articleContentHash } from "../../merge";
 import type { SourceArticleRef, SourceProvider } from "../source-provider";
 import { articleContent, splitBlankLines, type CleanupRules } from "./clean";
@@ -98,12 +98,7 @@ export function normalizeWordpressPost(
   const title = plainTitle(post.title.rendered);
   const clean = (repeatedCover: string | null) =>
     splitBlankLines(
-      // Twice: page builders nest blocks, which the second reading lays flat.
-      sanitizeArticleHtml(
-        sanitizeArticleHtml(
-          articleContent(post.content.rendered, title, repeatedCover, site.cleanup),
-        ),
-      ),
+      sanitizeNested(articleContent(post.content.rendered, title, repeatedCover, site.cleanup)),
     );
   // The cover repeated in the text is dropped, unless it is the whole post (a poster).
   const withoutCover = clean(cover);

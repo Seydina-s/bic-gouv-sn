@@ -3,7 +3,8 @@ import { describe, expect, it, vi } from "vitest";
 import { QuarantineError } from "../../lib/errors";
 import { USER_AGENT } from "../../lib/polite-http";
 import { primatureArticleId, primatureArticleUrl } from "./normalize";
-import { listingDate, parseArticlePage, parseListingPage } from "./parse";
+import { frenchDate } from "../../lib/french-date";
+import { parseArticlePage, parseListingPage } from "./parse";
 import { createPrimatureProvider } from "./primature-provider";
 
 // Pages saved from primature.sn on 09/10/2026 (docs/sources.md).
@@ -14,18 +15,21 @@ const OLDEST = fixture("list-page-41.html");
 const COUNCIL = fixture("article-conseil-30-09-2026.html");
 const COUNCIL_SLUG = "conseil-des-ministres-du-30-septembre-2026";
 
-describe("listingDate", () => {
+describe("frenchDate", () => {
   it.each([
     ["30 sep 2026", "2026-09-30"],
     [" 06 juin 2021 ", "2021-06-06"],
     ["05 avr 2022", "2022-04-05"],
     ["1 août 2025", "2025-08-01"],
+    ["8 août 2026", "2026-08-08"],
+    ["1er octobre 2025", "2025-10-01"],
+    ["25 juillet 2026", "2026-07-25"],
   ])("reads %s", (text, day) => {
-    expect(listingDate(text)).toBe(day);
+    expect(frenchDate(text)).toBe(day);
   });
 
   it.each(["31 sep 2026", "30 brumaire 2026", "2026-09-30", ""])("never guesses %s", (text) => {
-    expect(listingDate(text)).toBeNull();
+    expect(frenchDate(text)).toBeNull();
   });
 });
 

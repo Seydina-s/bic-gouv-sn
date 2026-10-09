@@ -70,6 +70,9 @@ export const fr = {
     peches: "Ministère des Pêches et de l'Économie maritime",
     "emploi-formation": "Ministère de l'Emploi et de la Formation professionnelle",
     interieur: "Ministère de l'Intérieur et de la Sécurité publique",
+    sante: "Ministère de la Santé et de l'Hygiène publique",
+    "forces-armees": "Ministère des Forces armées",
+    culture: "Ministère de la Culture, de l'Artisanat et du Tourisme",
   },
   /** Sections of the official sites, keyed by their slug. */
   categories: {

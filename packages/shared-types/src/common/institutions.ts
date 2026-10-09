@@ -18,6 +18,9 @@ export const INSTITUTIONS = [
   "peches",
   "emploi-formation",
   "interieur",
+  "sante",
+  "forces-armees",
+  "culture",
 ] as const;
 
 export const institutionSchema = z.enum(INSTITUTIONS);
@@ -77,6 +80,18 @@ export const INSTITUTION_SITES: Readonly<Record<Institution, InstitutionSite>> =
   interieur: {
     pageHosts: ["www.interieur.gouv.sn", "interieur.gouv.sn"],
     mediaHosts: ["www.interieur.gouv.sn", "interieur.gouv.sn"],
+  },
+  sante: {
+    pageHosts: ["www.sante.gouv.sn", "sante.gouv.sn"],
+    mediaHosts: ["www.sante.gouv.sn", "sante.gouv.sn"],
+  },
+  "forces-armees": {
+    pageHosts: ["www.forcesarmees.gouv.sn", "forcesarmees.gouv.sn"],
+    mediaHosts: ["www.forcesarmees.gouv.sn", "forcesarmees.gouv.sn"],
+  },
+  culture: {
+    pageHosts: ["mcat.gouv.sn", "www.mcat.gouv.sn"],
+    mediaHosts: ["mcat.gouv.sn", "www.mcat.gouv.sn"],
   },
 };
 

@@ -1,6 +1,7 @@
 import type { ChildNode, Element } from "domhandler";
 import render from "dom-serializer";
 import { DomUtils, parseDocument } from "htmlparser2";
+import { frenchDate } from "../../lib/french-date";
 
 /*
  * Reads the pages of primature.sn (Drupal, no feed and no API, docs/sources.md):
@@ -10,44 +11,6 @@ import { DomUtils, parseDocument } from "htmlparser2";
 
 export const PRIMATURE_ORIGIN = "https://primature.sn";
 export const NEWS_PATH = "/publications/actualites";
-
-/** Month abbreviations the site prints ("30 sep 2026", "06 juin 2021", "05 avr 2022"). */
-const MONTHS: Readonly<Record<string, number>> = {
-  jan: 1,
-  janv: 1,
-  fév: 2,
-  févr: 2,
-  fev: 2,
-  mar: 3,
-  mars: 3,
-  avr: 4,
-  mai: 5,
-  juin: 6,
-  jun: 6,
-  juil: 7,
-  jul: 7,
-  aoû: 8,
-  août: 8,
-  aou: 8,
-  sep: 9,
-  sept: 9,
-  oct: 10,
-  nov: 11,
-  déc: 12,
-  dec: 12,
-};
-
-/** "30 sep 2026" → "2026-09-30"; null for anything else, never a guessed date. */
-export function listingDate(text: string): string | null {
-  const match = /^(\d{1,2})\s+(\p{L}+)\.?\s+(\d{4})$/u.exec(text.trim());
-  const month = MONTHS[match?.[2]?.toLowerCase() ?? ""];
-  if (match === null || month === undefined) {
-    return null;
-  }
-  const [day, year] = [Number(match[1]), Number(match[3])];
-  const date = new Date(Date.UTC(year, month - 1, day));
-  return date.getUTCDate() === day ? date.toISOString().slice(0, 10) : null;
-}
 
 function hasClass(element: Element, name: string): boolean {
   return (element.attribs["class"] ?? "").split(/\s+/).includes(name);
@@ -95,7 +58,7 @@ function listingItem(row: Element): ListingItem | null {
   const src = image?.attribs["src"];
   return {
     slug,
-    publishedOn: posted === null ? null : listingDate(DomUtils.textContent(posted)),
+    publishedOn: posted === null ? null : frenchDate(DomUtils.textContent(posted)),
     coverUrl: src === undefined ? null : absolute(src),
   };
 }

@@ -90,7 +90,7 @@ export function damageIn(html: string): string | null {
   const letters = text.match(/\p{L}/gu)?.length ?? 0;
   const accented = text.match(FRENCH_ACCENTS)?.length ?? 0;
   return letters >= 300 && accented / letters < 0.003
-    ? "French text without accents (characters lost at the source)"
+    ? "French text without accents (characters lost at the source, or another language)"
     : null;
 }
 
@@ -148,5 +148,58 @@ export function unpublishable(title: string, bodyHtml: string, lang: string): st
   if (isEmptied(bodyHtml)) {
     return "body is empty after sanitization";
   }
-  return lang === "fr" ? damageIn(`${title} ${bodyHtml}`) : null;
+  if (lang !== "fr") {
+    return null;
+  }
+  const text = `${title} ${bodyHtml}`;
+  return looksEnglish(text)
+    ? "text in English (the app has no English edition yet)"
+    : damageIn(text);
+}
+
+const ENGLISH_WORDS: ReadonlySet<string> = new Set([
+  "the",
+  "and",
+  "of",
+  "to",
+  "in",
+  "is",
+  "for",
+  "with",
+  "on",
+  "was",
+]);
+const FRENCH_WORDS: ReadonlySet<string> = new Set([
+  "le",
+  "la",
+  "les",
+  "des",
+  "et",
+  "du",
+  "en",
+  "un",
+  "une",
+  "est",
+]);
+
+/**
+ * True when a text announced as French is written in English (some ministry sites
+ * publish a few posts in English): its common English words far outnumber French ones.
+ */
+export function looksEnglish(html: string): boolean {
+  const words = html
+    .replace(/<[^>]+>/g, " ")
+    .toLowerCase()
+    .split(/[^\p{L}]+/u);
+  const english = words.filter((word) => ENGLISH_WORDS.has(word)).length;
+  const french = words.filter((word) => FRENCH_WORDS.has(word)).length;
+  return english >= 10 && english > 3 * french;
+}
+
+/**
+ * Sanitized article text laid flat: sites wrap their text in blocks that become
+ * paragraphs inside paragraphs ("<p><p>…</p></p>"); a second reading separates them.
+ */
+export function sanitizeNested(html: string): string {
+  return sanitizeArticleHtml(sanitizeArticleHtml(html));
 }

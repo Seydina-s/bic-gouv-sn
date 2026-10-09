@@ -236,3 +236,12 @@ describe("Employment and Training site", () => {
     expect(body).toContain("🍅");
   });
 });
+
+describe("Culture site", () => {
+  it("drops the list of other posts placed in the text", () => {
+    const body = bodyOf("culture", 2);
+    expect(body).toContain("Plan Diomaye pour la Casamance");
+    expect(body).not.toContain("JMT 2026");
+    expect(body.trimEnd()).toMatch(/au mois de novembre\.<\/p>$/);
+  });
+});

@@ -5,6 +5,7 @@ import {
   damageIn,
   hasOfficialMedia,
   hasVideo,
+  looksEnglish,
   plainLetters,
   sanitizeArticleHtml,
   textLength,
@@ -144,7 +145,7 @@ describe("news text quality", () => {
   it("sees a long French text that lost all its accents", () => {
     const lost = "Le Ministre a preside la reunion sur les activites conomiques. ".repeat(8);
     expect(damageIn(`<p>${lost}</p>`)).toBe(
-      "French text without accents (characters lost at the source)",
+      "French text without accents (characters lost at the source, or another language)",
     );
   });
 
@@ -158,5 +159,30 @@ describe("news text quality", () => {
     expect(unpublishable("Titre", lost, "wo")).toBeNull();
     expect(unpublishable("Titre", lost, "fr")).toMatch(/without accents/);
     expect(unpublishable("Titre", "<p></p>", "wo")).toBe("body is empty after sanitization");
+  });
+});
+
+describe("text announced as French but written in English", () => {
+  it("is set aside as English, not as damaged", () => {
+    const english =
+      "<p>" +
+      "The Minister of Tourism chairs the meeting of the experts and the delegates in Dakar. ".repeat(
+        6,
+      ) +
+      "</p>";
+    expect(looksEnglish(english)).toBe(true);
+    expect(unpublishable("Senegal shines", english, "fr")).toBe(
+      "text in English (the app has no English edition yet)",
+    );
+  });
+
+  it("never takes French for English", () => {
+    const french =
+      "<p>" +
+      "Le Ministre de la Culture a présidé la réunion des experts et des délégués à Dakar. ".repeat(
+        6,
+      ) +
+      "</p>";
+    expect(looksEnglish(french)).toBe(false);
   });
 });
