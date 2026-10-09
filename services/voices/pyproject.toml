@@ -15,7 +15,7 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["pytest==8.4.2"]
+dev = ["pytest==9.0.3"]
 
 # The processor build of torch (no graphics card on the voice server for now).
 [tool.uv.sources]

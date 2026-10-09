@@ -29,6 +29,10 @@ PIPER_SHA256 = {
 }
 JESSICA = 0
 ADIA = "CONCREE/Adia_TTS"
+# Pinned revision, weights in safetensors only: transformers stays at 4.46.1 because
+# parler-tts requires it, and its known flaws are in loading untrusted (pickled)
+# checkpoints. A pinned, verified revision in safetensors never runs such code.
+ADIA_REVISION = "1a4ba9291efc3f40418ecace15ddb8bd8431d376"
 ADIA_DESCRIPTION = "A clear and educational voice, with a flow adapted to learning"
 # Silence between paragraphs, and between sentences read one by one (Wolof).
 PARAGRAPH_PAUSE_S = 0.6
@@ -80,8 +84,10 @@ class Wolof:
 
         torch.manual_seed(7)
         self._torch = torch
-        self._model = ParlerTTSForConditionalGeneration.from_pretrained(ADIA)
-        self._tokenizer = AutoTokenizer.from_pretrained(ADIA)
+        self._model = ParlerTTSForConditionalGeneration.from_pretrained(
+            ADIA, revision=ADIA_REVISION, use_safetensors=True
+        )
+        self._tokenizer = AutoTokenizer.from_pretrained(ADIA, revision=ADIA_REVISION)
         self._description = self._tokenizer(ADIA_DESCRIPTION, return_tensors="pt").input_ids
         self.rate = self._model.config.sampling_rate
 
