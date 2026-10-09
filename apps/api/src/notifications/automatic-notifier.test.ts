@@ -43,6 +43,8 @@ function article(n: number, shape: Shape = {}): NewsArticle {
   return {
     id: `00000000-0000-5000-8000-${String(n).padStart(12, "0")}`,
     kind: "news-article",
+    publisher: "presidence",
+    alsoPublishedBy: [],
     category: "communiques",
     sourceUrl: url,
     sourcePublishedOn: shape.publishedOn === undefined ? "2026-09-30" : shape.publishedOn,

@@ -31,6 +31,8 @@ async function storeWithOneArticle() {
   await articles.save({
     id: ID,
     kind: "news-article",
+    publisher: "presidence",
+    alsoPublishedBy: [],
     category: "communiques",
     sourceUrl: SOURCE,
     sourcePublishedOn: "2026-09-20",

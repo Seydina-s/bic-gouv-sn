@@ -156,6 +156,8 @@ function storedArticle(): NewsArticle {
   return {
     id: ID,
     kind: "news-article",
+    publisher: "presidence",
+    alsoPublishedBy: [],
     category: "communiques",
     sourceUrl,
     sourcePublishedOn: "2026-01-01",

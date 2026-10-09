@@ -55,6 +55,8 @@ export function normalizeDetail(detail: DetailResponse, { lang, fetchedAt }: Nor
   const candidate: NewsArticle = {
     id: presidenceArticleId(version.articleId),
     kind: "news-article",
+    publisher: "presidence",
+    alsoPublishedBy: [],
     category: category.reference,
     sourceUrl,
     sourcePublishedOn: base.date,

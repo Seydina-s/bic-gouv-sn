@@ -26,6 +26,8 @@ function article(n: number, slug: string): NewsArticle {
   return {
     id: idOf(n),
     kind: "news-article",
+    publisher: "presidence",
+    alsoPublishedBy: [],
     category: "communiques",
     sourceUrl: urlOf(slug),
     sourcePublishedOn: "2026-01-01",

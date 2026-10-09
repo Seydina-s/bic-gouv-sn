@@ -19,6 +19,8 @@ function article(n: number, overrides: Partial<NewsArticle> = {}): NewsArticle {
   return {
     id: `00000000-0000-5000-8000-${String(n).padStart(12, "0")}`,
     kind: "news-article",
+    publisher: "presidence",
+    alsoPublishedBy: [],
     category: "communiques",
     sourceUrl,
     sourcePublishedOn: `2026-09-${String(10 + n).padStart(2, "0")}`,
