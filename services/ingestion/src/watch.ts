@@ -1,5 +1,5 @@
 import type { ArticleRepository, SaveOutcome } from "@bgs/content-store";
-import { errorCodeOf, type Lang } from "@bgs/shared-types";
+import { errorCodeOf, type Institution, type Lang } from "@bgs/shared-types";
 import type { CollectionReport } from "./collect";
 import { attachCover } from "./media/attach-cover";
 import { attachDocuments } from "./media/attach-documents";
@@ -117,6 +117,93 @@ export async function pollOnce(
       if (refs.length === 0 || created < refs.length || page >= lastPage) {
         break;
       }
+    }
+  }
+  return result;
+}
+
+/** One official site the watcher follows, at its own pace. */
+export interface WatchedSource {
+  institution: Institution;
+  /** Name in reports, e.g. "primature.sn". */
+  name: string;
+  provider: SourceProvider;
+  langs: readonly Lang[];
+  /** Least time between two passes on this site; 0 for every pass. */
+  everyMs: number;
+  /**
+   * True for the reference source: its failure is the pass's failure (the console
+   * then reports the collection as failing). Another site's failure is only listed.
+   */
+  essential: boolean;
+  seen: SeenIndex;
+  lastPassAt: Date | null;
+}
+
+/**
+ * Sites to follow, from the WATCHED_SOURCES setting ("presidence,primature"): all of
+ * them when it is unset. The reference site is always followed. Lets the team hold a
+ * new institution back until the installed apps can show it, or pause a failing site.
+ */
+export function watchedFrom(
+  sources: readonly WatchedSource[],
+  setting: string | undefined,
+): WatchedSource[] {
+  if (setting === undefined || setting.trim() === "") {
+    return [...sources];
+  }
+  const wanted = new Set(setting.split(",").map((id) => id.trim()));
+  return sources.filter((source) => source.essential || wanted.has(source.institution));
+}
+
+function isDue(source: WatchedSource, now: Date): boolean {
+  return (
+    source.lastPassAt === null || now.getTime() - source.lastPassAt.getTime() >= source.everyMs
+  );
+}
+
+/**
+ * One pass over every site that is due (CLAUDE.md §4.4): a site that fails never
+ * keeps the others from being read, except the reference one, which fails the pass.
+ */
+export async function pollSources(
+  sources: readonly WatchedSource[],
+  repository: ArticleRepository,
+  now: () => Date = () => new Date(),
+  media: MediaStorage | null = null,
+): Promise<PollResult> {
+  const result: PollResult = {
+    outcomes: { created: 0, updated: 0, unchanged: 0 },
+    failures: [],
+    detectionDelays: [],
+  };
+  for (const source of sources.filter((candidate) => isDue(candidate, now()))) {
+    source.lastPassAt = now();
+    try {
+      const pass = await pollOnce(
+        source.provider,
+        repository,
+        source.langs,
+        source.seen,
+        now,
+        media,
+      );
+      for (const outcome of ["created", "updated", "unchanged"] as const) {
+        result.outcomes[outcome] += pass.outcomes[outcome];
+      }
+      result.failures.push(...pass.failures);
+      result.detectionDelays.push(...pass.detectionDelays);
+    } catch (error) {
+      if (source.essential) {
+        throw error;
+      }
+      const code = errorCodeOf(error) ?? "UNKNOWN";
+      result.failures.push({
+        ref: source.name,
+        // The console must not blame presidence.sn for another institution's site.
+        code: code === "INGESTION_SOURCE_UNREACHABLE" ? "INGESTION_OTHER_SOURCE_UNREACHABLE" : code,
+        message: error instanceof Error ? error.message : String(error),
+      });
     }
   }
   return result;

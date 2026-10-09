@@ -209,3 +209,10 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : `reset --soft` garde l'état des fichiers de l'ancienne base ; il n'est sûr que si cette base est exactement le parent de `origin/main`.
 - **Correctif** : fichiers remis dans leur état fusionné (`git checkout origin/main -- <fichiers>`) avant toute validation ; vérifié dans `git status`.
 - **Prévention** : après chaque changement de base, relire `git status` et n'accepter que les fichiers modifiés par la tâche en cours ; préférer `git rebase --onto origin/main <ancienne base>` à `reset --soft`.
+
+## 09/10/2026 — Demande n° 288 refusée : les contrôles d'accessibilité et de parcours cherchaient l'ancien titre d'accueil
+
+- **Ce qui s'est passé** : après la nouvelle phrase d'accueil (« Le Gouvernement, en un seul endroit »), le contrôle d'accessibilité de l'intégration continue a échoué : il attendait l'ancien titre.
+- **Cause racine** : j'ai mis à jour les tests de l'app mais pas les scripts de contrôle (`scripts/a11y-audit.ts`, `scripts/e2e.ts`), qui ne tournent qu'en intégration continue, ni la liste des textes wolof à traduire.
+- **Correctif** : scripts et liste mis à jour, message du catalogue d'erreurs aligné.
+- **Prévention** : avant de changer un texte visible, chercher l'ancien texte dans tout le dépôt (scripts, documentation, tests) et relancer `pnpm i18n:wolof`.

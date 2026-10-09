@@ -109,6 +109,15 @@ export const ERROR_CATALOG = {
     severity: "critical",
     action: "Vérifiez que presidence.sn est accessible ; la collecte reprend seule dès son retour.",
   },
+  INGESTION_OTHER_SOURCE_UNREACHABLE: {
+    what: "Le site officiel d'une autre institution que la Présidence (la Primature, par exemple) ne répond pas à la collecte.",
+    where: "Collecte automatique (sites des institutions)",
+    impact:
+      "Les nouveaux articles de cette institution n'arrivent plus ; ceux de la Présidence continuent d'arriver.",
+    severity: "warning",
+    action:
+      "Le détail indique le site concerné ; la collecte réessaie seule à chaque tour (toutes les 15 minutes).",
+  },
   MAP_UNAVAILABLE: {
     what: "Le fond de carte n'est pas disponible : le fichier des tuiles du Sénégal manque sur le serveur.",
     where: "API publique (/v1/map)",
