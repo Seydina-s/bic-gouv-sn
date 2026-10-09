@@ -53,7 +53,8 @@ export const fr = {
     newsBody:
       "Conseil des ministres, communiqués, discours\u00a0: les publications officielles des institutions, dès leur mise en ligne.",
     sourceTitle: "La source, toujours",
-    sourceBody: "Chaque article vient du site officiel qui l'a publié et renvoie à sa page d'origine.",
+    sourceBody:
+      "Chaque article vient du site officiel qui l'a publié et renvoie à sa page d'origine.",
     offlineTitle: "Gardez l'essentiel, même sans réseau",
     offlineBody: "Touchez le marque-page\u00a0: l'article reste lisible hors ligne.",
   },
