@@ -1,7 +1,15 @@
 import { describe, expect, it, vi } from "vitest";
 import { contentHash, stableUuid } from "./identity";
 import { createRateLimiter } from "./rate-limiter";
-import { hasOfficialMedia, hasVideo, sanitizeArticleHtml, textLength } from "./sanitize";
+import {
+  damageIn,
+  hasOfficialMedia,
+  hasVideo,
+  plainLetters,
+  sanitizeArticleHtml,
+  textLength,
+  unpublishable,
+} from "./sanitize";
 
 describe("sanitizeArticleHtml: embedded videos", () => {
   it("keeps an official YouTube embed, on the privacy-enhanced host, without extra attributes", () => {
@@ -118,5 +126,37 @@ describe("createRateLimiter", () => {
   it("does not wait when the source was idle long enough", async () => {
     const schedule = createRateLimiter(1000);
     await expect(schedule(() => Promise.resolve("ok"))).resolves.toBe("ok");
+  });
+});
+
+describe("news text quality", () => {
+  it("writes decorative letters and split accents as ordinary letters", () => {
+    expect(plainLetters("𝐃𝐞́𝐥𝐞́𝐠𝐚𝐭𝐢𝐨𝐧")).toBe("Délégation");
+    expect(plainLetters("été")).toBe("été");
+  });
+
+  it("sees a French text whose letters were replaced by question marks", () => {
+    expect(damageIn("<p>Le Se?ne?gal a? 10 500 FCFA, de?cision</p>")).toBe(
+      '3 letters replaced by "?"',
+    );
+  });
+
+  it("sees a long French text that lost all its accents", () => {
+    const lost = "Le Ministre a preside la reunion sur les activites conomiques. ".repeat(8);
+    expect(damageIn(`<p>${lost}</p>`)).toBe(
+      "French text without accents (characters lost at the source)",
+    );
+  });
+
+  it("lets an ordinary French text through, and a question mark in a web address", () => {
+    const ordinary = "Le Président de la République a présidé la réunion du Conseil. ".repeat(8);
+    expect(damageIn(`<p>${ordinary} https://exemple.sn/page?id=1&a?b=c&d?e=f</p>`)).toBeNull();
+  });
+
+  it("checks the accents of French only, never Wolof", () => {
+    const lost = "<p>" + "Le Ministre a preside la reunion. ".repeat(20) + "</p>";
+    expect(unpublishable("Titre", lost, "wo")).toBeNull();
+    expect(unpublishable("Titre", lost, "fr")).toMatch(/without accents/);
+    expect(unpublishable("Titre", "<p></p>", "wo")).toBe("body is empty after sanitization");
   });
 });

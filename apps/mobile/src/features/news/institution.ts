@@ -1,4 +1,12 @@
-const KNOWN = ["presidence", "primature"] as const;
+const KNOWN = [
+  "presidence",
+  "primature",
+  "justice",
+  "industrie-commerce",
+  "energie",
+  "hydraulique",
+  "agriculture",
+] as const;
 
 type KnownInstitution = (typeof KNOWN)[number];
 

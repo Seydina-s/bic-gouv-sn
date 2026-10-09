@@ -1,7 +1,7 @@
 import { isoDateSchema, newsArticleSchema, type NewsArticle } from "@bgs/shared-types";
 import { QuarantineError } from "../../lib/errors";
 import { stableUuid } from "../../lib/identity";
-import { isEmptied, sanitizeArticleHtml } from "../../lib/sanitize";
+import { plainLetters, sanitizeArticleHtml, unpublishable } from "../../lib/sanitize";
 import { articleContentHash } from "../../merge";
 import { NEWS_PATH, PRIMATURE_ORIGIN, type ArticlePage } from "./parse";
 
@@ -40,15 +40,17 @@ export function normalizePrimature(
     throw quarantine("no article in the page (source structure changed?)");
   }
   const bodyHtml = sanitizeArticleHtml(page.bodyHtml);
-  if (page.title === "") {
+  const title = plainLetters(page.title);
+  if (title === "") {
     throw quarantine("article has no title");
   }
-  if (isEmptied(bodyHtml)) {
-    throw quarantine("article body is empty after sanitization");
+  const problem = unpublishable(title, bodyHtml, "fr");
+  if (problem !== null) {
+    throw quarantine(`article ${problem}`);
   }
   const day = isoDateSchema.safeParse(publishedOn);
   const translations: NewsArticle["translations"] = [
-    { lang: "fr", status: "official", title: page.title, bodyHtml, sourceUrl },
+    { lang: "fr", status: "official", title, bodyHtml, sourceUrl },
   ];
   const sourcePublishedOn = day.success ? day.data : null;
   const candidate: NewsArticle = {

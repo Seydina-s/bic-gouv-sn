@@ -7,7 +7,15 @@ import { z } from "zod";
  * docs/sources.md. Names shown to people live in the i18n messages, not here.
  */
 
-export const INSTITUTIONS = ["presidence", "primature"] as const;
+export const INSTITUTIONS = [
+  "presidence",
+  "primature",
+  "justice",
+  "industrie-commerce",
+  "energie",
+  "hydraulique",
+  "agriculture",
+] as const;
 
 export const institutionSchema = z.enum(INSTITUTIONS);
 export type Institution = z.infer<typeof institutionSchema>;
@@ -33,6 +41,27 @@ export const INSTITUTION_SITES: Readonly<Record<Institution, InstitutionSite>> =
   primature: {
     pageHosts: ["primature.sn", "www.primature.sn"],
     mediaHosts: ["primature.sn", "www.primature.sn"],
+  },
+  // Ministries whose WordPress site publishes regularly (docs/sources.md, 09/10/2026).
+  justice: {
+    pageHosts: ["justice.sec.gouv.sn"],
+    mediaHosts: ["justice.sec.gouv.sn"],
+  },
+  "industrie-commerce": {
+    pageHosts: ["industriecommerce.gouv.sn", "www.industriecommerce.gouv.sn"],
+    mediaHosts: ["industriecommerce.gouv.sn", "www.industriecommerce.gouv.sn"],
+  },
+  energie: {
+    pageHosts: ["energie-mines.gouv.sn", "www.energie-mines.gouv.sn"],
+    mediaHosts: ["energie-mines.gouv.sn", "www.energie-mines.gouv.sn"],
+  },
+  hydraulique: {
+    pageHosts: ["mha.gouv.sn", "www.mha.gouv.sn"],
+    mediaHosts: ["mha.gouv.sn", "www.mha.gouv.sn"],
+  },
+  agriculture: {
+    pageHosts: ["agriculture.gouv.sn", "www.agriculture.gouv.sn"],
+    mediaHosts: ["agriculture.gouv.sn", "www.agriculture.gouv.sn"],
   },
 };
 

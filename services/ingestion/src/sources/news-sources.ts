@@ -2,16 +2,25 @@ import { institutionSchema, type Institution } from "@bgs/shared-types";
 import { createPresidenceProvider } from "./presidence/presidence-provider";
 import { createPrimatureProvider } from "./primature/primature-provider";
 import type { SourceProvider } from "./source-provider";
+import { WORDPRESS_MINISTRIES } from "./wordpress/ministries";
+import { createWordpressProvider } from "./wordpress/wordpress-provider";
 
 /** The collector of each institution's news (docs/sources.md). */
 export const NEWS_SOURCES: Readonly<Record<Institution, () => SourceProvider>> = {
   presidence: createPresidenceProvider,
   primature: createPrimatureProvider,
+  justice: () => createWordpressProvider(WORDPRESS_MINISTRIES.justice),
+  "industrie-commerce": () => createWordpressProvider(WORDPRESS_MINISTRIES["industrie-commerce"]),
+  energie: () => createWordpressProvider(WORDPRESS_MINISTRIES.energie),
+  hydraulique: () => createWordpressProvider(WORDPRESS_MINISTRIES.hydraulique),
+  agriculture: () => createWordpressProvider(WORDPRESS_MINISTRIES.agriculture),
 };
 
 /** One provider per institution, each with its own pace and circuit breaker. */
 export function createNewsProviders(): Record<Institution, SourceProvider> {
-  return { presidence: NEWS_SOURCES.presidence(), primature: NEWS_SOURCES.primature() };
+  return Object.fromEntries(
+    Object.entries(NEWS_SOURCES).map(([id, create]) => [id, create()]),
+  ) as Record<Institution, SourceProvider>;
 }
 
 /** Command arguments without `--source <id>`, in order. */
