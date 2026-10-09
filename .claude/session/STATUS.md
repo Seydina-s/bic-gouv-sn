@@ -1,12 +1,16 @@
 # STATUS — Bic Gouv SN
 
-**Dernière mise à jour** : 09/10/2026 · **Mode** : autonome (accord de l'utilisateur du 08/10 au soir). Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md`.
+**Dernière mise à jour** : 09/10/2026 (fin d'après-midi) · **Mode** : autonome (accord de l'utilisateur du 08/10 au soir). Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md`.
 
-## 09/10 en bref : réorientation vers tout le Gouvernement
-- **Décision de l'utilisateur** : la plateforme relaie tout le Gouvernement (Présidence, Primature, ministères) ; en cas de doublon, la version de la Présidence est gardée. CLAUDE.md §1 et `decisions.md` mis à jour.
-- **Sources cartographiées** (`docs/sources.md`) : Primature (42 pages d'actualités, sans flux RSS) ; 14 ministères au site actif, 15 à revoir ou sans site ; réseaux sociaux écartés, proposition alternative au point 39.
-- **Suite** : tâches GOV-02 à GOV-12 du backlog (modèle de données, collecte Primature, doublons, ministères, narration de l'app).
-- **Reporté par l'utilisateur** : serveur d'IA (point 38), compilation iPhone, relecture des traductions. Lot de 351 traductions wolof envoyé le 09/10, à collecter.
+## 09/10 en bref : la Primature rejoint la Présidence
+- **Décision de l'utilisateur** : la plateforme relaie tout le Gouvernement (Présidence, Primature, ministères) ; en cas de doublon, la version de la Présidence est gardée. CLAUDE.md §1 et `decisions.md` mis à jour (#283).
+- **Sources cartographiées** (`docs/sources.md`) : Primature ; 14 ministères au site actif, 15 à revoir ou sans site ; réseaux sociaux écartés, proposition alternative au point 39.
+- **Primature en ligne** : chaque article porte son institution (#285) ; collecte de la Primature et règle « un contenu, un article » (#287) : **374 articles importés, 94 doublons masqués** (comptes rendus du Conseil des ministres déjà publiés par la Présidence), 1 257 articles visibles ; suivi des nouveautés toutes les 15 minutes à côté de la Présidence (#289) ; photos et images (#290).
+- **App** (#288) : textes d'accueil et « À propos » pour le Gouvernement, institution sur les cartes, « Source : primature.sn », « Aussi publié par ». Nouvelle version Android en compilation (point 40).
+- **Sécurité** (#286) : modèle de la voix wolof figé et chargé sans code exécutable (alertes `transformers`).
+- **Traduction wolof** : lot de 351 rentré (349 enregistrées) ; coût réel 18,83 $ pour 14,45 $ estimés, estimation corrigée (#284). Primature et reste de l'historique à valider (point 41).
+- **Ministères (en cours)** : interfaces WordPress ouvertes pour Justice, Industrie et Commerce, Énergie, Hydraulique, Agriculture (≈ 900 articles), mais texte à nettoyer site par site avant toute publication.
+- **Reporté par l'utilisateur** : serveur d'IA (point 38), compilation iPhone, relecture des traductions.
 
 ## 08/10 (après-midi et soir) en bref : l'assistant répond, les voix parlent
 - **Assistant en discussion** façon Claude (#272, #274) : logo et phrase d'accueil courte, bulles, sources en étiquettes, dictée en français par le téléphone, clavier rangé à l'envoi, logo BIC-GOUV en profil, « Réessayer ».
