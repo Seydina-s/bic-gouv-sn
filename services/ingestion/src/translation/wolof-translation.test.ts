@@ -28,6 +28,8 @@ function article(n: number, publishedOn: string): NewsArticle {
   return {
     id: idOf(n),
     kind: "news-article",
+    publisher: "presidence",
+    alsoPublishedBy: [],
     category: "communiques",
     sourceUrl: url,
     sourcePublishedOn: publishedOn,

@@ -10,6 +10,8 @@ function article(n: number, title: string, body: string, lang: "fr" | "wo" = "fr
   return {
     id: `00000000-0000-5000-8000-${String(n).padStart(12, "0")}`,
     kind: "news-article",
+    publisher: "presidence",
+    alsoPublishedBy: [],
     category: "communiques",
     sourceUrl: url,
     sourcePublishedOn: `2026-09-${String(10 + n)}`,

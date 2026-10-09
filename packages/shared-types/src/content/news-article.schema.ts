@@ -1,19 +1,44 @@
 import { z } from "zod";
+import { institutionOfUrl, institutionSchema } from "../common/institutions";
+import { officialSourceUrlSchema } from "../common/official-source.schema";
 import { slugSchema } from "../common/primitives.schema";
 import { imageSchema, pdfAttachmentSchema } from "./media.schema";
 import { checkTraceableContent, traceableContentShape } from "./traceable-content.schema";
 
-/** A news item ingested from presidence.sn, kept identical to the source. */
+/** Another institution's publication of the same content (kept for traceability). */
+export const otherPublicationSchema = z.strictObject({
+  publisher: institutionSchema,
+  sourceUrl: officialSourceUrlSchema,
+});
+export type OtherPublication = z.infer<typeof otherPublicationSchema>;
+
+/** A news item ingested from an institution's official site, kept identical to the source. */
 export const newsArticleSchema = z
   .strictObject({
     ...traceableContentShape,
     kind: z.literal("news-article"),
-    /** Section slug as mapped from presidence.sn in docs/sources.md; never invented. */
+    /**
+     * Institution whose site published the article. Articles stored before the
+     * whole-government scope (09/10/2026) all come from presidence.sn.
+     */
+    publisher: institutionSchema.default("presidence"),
+    /** Same content published by other institutions: shown once, in this version. */
+    alsoPublishedBy: z.array(otherPublicationSchema).default([]),
+    /** Section slug as mapped from the source in docs/sources.md; never invented. */
     category: slugSchema,
     images: z.array(imageSchema),
     attachments: z.array(pdfAttachmentSchema),
   })
-  .superRefine(checkTraceableContent);
+  .superRefine(checkTraceableContent)
+  .superRefine((article, ctx) => {
+    if (institutionOfUrl(article.sourceUrl) !== article.publisher) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["publisher"],
+        message: "The source page must belong to the publishing institution",
+      });
+    }
+  });
 export type NewsArticle = z.infer<typeof newsArticleSchema>;
 
 type NewsTranslation = NewsArticle["translations"][number];

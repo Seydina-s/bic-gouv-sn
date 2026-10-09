@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { officialSourceUrlSchema } from "../common/official-source.schema";
 import {
   httpsUrlSchema,
   isoDateSchema,
@@ -116,6 +115,13 @@ export const newsSummarySchema = z.object({
   /** Languages this article is available in. */
   availableLangs: z.array(langSchema).min(1),
   cover: coverSchema.nullable(),
+  /**
+   * Institution that published the article ("presidence", "primature"…). A plain
+   * string, not the list of institutions: an installed app shows an id it does not
+   * know as a generic official source instead of dropping the article. Absent from
+   * APIs older than this field (all their articles come from presidence.sn).
+   */
+  publisher: z.string().min(1).optional(),
 });
 export type NewsSummary = z.infer<typeof newsSummarySchema>;
 
@@ -145,8 +151,17 @@ export type NewsSectionsResponse = z.infer<typeof newsSectionsResponseSchema>;
 
 export const newsDetailSchema = newsSummarySchema.omit({ excerpt: true }).extend({
   blocks: z.array(blockSchema),
-  /** Official page, shown as "Source : presidence.sn" with a link (traceability). */
-  sourceUrl: officialSourceUrlSchema,
+  /**
+   * Official page, shown as "Source : <institution>" with a link (traceability). The
+   * server only stores pages of official sources (newsArticleSchema); the app checks
+   * the link is https, not the list of hosts, so a ministry added later never makes
+   * its articles unreadable in installed versions.
+   */
+  sourceUrl: httpsUrlSchema,
+  /** Same content published by other institutions. Absent from older APIs. */
+  alsoPublishedBy: z
+    .array(z.object({ publisher: z.string().min(1), sourceUrl: httpsUrlSchema }))
+    .optional(),
   sourceUpdatedAt: isoDateTimeSchema.nullable(),
   fetchedAt: isoDateTimeSchema,
   version: z.int().positive(),

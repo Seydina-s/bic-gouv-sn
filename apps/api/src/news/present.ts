@@ -108,6 +108,7 @@ export function toSummary(
     translationStatus: translation.status,
     availableLangs: availableLangs(article),
     cover: coverOf(article, mediaBaseUrl),
+    publisher: article.publisher,
   };
 }
 
@@ -131,7 +132,9 @@ export function toDetail(
     availableLangs: availableLangs(article),
     cover: coverOf(article, mediaBaseUrl),
     blocks: blocksOf(article, translation.bodyHtml, mediaBaseUrl),
+    publisher: article.publisher,
     sourceUrl: translation.sourceUrl ?? article.sourceUrl,
+    alsoPublishedBy: article.alsoPublishedBy,
     sourceUpdatedAt: article.sourceUpdatedAt,
     fetchedAt: article.fetchedAt,
     version: article.version,
