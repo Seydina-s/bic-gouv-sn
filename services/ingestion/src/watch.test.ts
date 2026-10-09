@@ -6,7 +6,14 @@ import { INGESTION_STOPPED_AFTER_MS, type Lang, type NewsArticle } from "@bgs/sh
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { articleContentHash } from "./merge";
 import type { SourceArticleRef, SourceProvider } from "./sources/source-provider";
-import { nextPollDelayMs, pollOnce, pollSources, retryDelayMs, SeenIndex } from "./watch";
+import {
+  nextPollDelayMs,
+  pollOnce,
+  pollSources,
+  retryDelayMs,
+  SeenIndex,
+  watchedFrom,
+} from "./watch";
 
 const NOW = new Date("2026-09-25T10:00:00Z");
 
@@ -249,6 +256,7 @@ describe("pollSources", () => {
 
   function watched(name: string, provider: SourceProvider, essential: boolean, everyMs = 0) {
     return {
+      institution: essential ? ("presidence" as const) : ("primature" as const),
       name,
       provider,
       langs: ["fr"] as const,
@@ -284,6 +292,15 @@ describe("pollSources", () => {
     await expect(
       pollSources([watched("presidence.sn", down, true)], repo, () => NOW),
     ).rejects.toThrow("site down");
+  });
+
+  it("follows the sites the setting names, always the reference one", () => {
+    const all = [watched("presidence.sn", down, true), watched("primature.sn", down, false)];
+    const names = (setting: string | undefined) =>
+      watchedFrom(all, setting).map((source) => source.name);
+    expect(names(undefined)).toEqual(["presidence.sn", "primature.sn"]);
+    expect(names("presidence")).toEqual(["presidence.sn"]);
+    expect(names(" presidence , primature ")).toEqual(["presidence.sn", "primature.sn"]);
   });
 
   it("reads a slower site only when its turn comes", async () => {

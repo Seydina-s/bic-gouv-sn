@@ -19,6 +19,7 @@ import {
   pollSources,
   retryDelayMs,
   SeenIndex,
+  watchedFrom,
   type WatchedSource,
 } from "../watch";
 import { isWithdrawalCheckDue, reconcileWithdrawals } from "../withdrawn";
@@ -45,26 +46,33 @@ if (staleTemps > 0) {
 const provider = createPresidenceProvider();
 // The Présidence at the ordinary pace (freshness SLO < 2 min); the Primature, whose
 // site has no feed and publishes a few times a week, every 15 minutes (docs/sources.md).
-const sources: WatchedSource[] = [
-  {
-    name: "presidence.sn",
-    provider,
-    langs: ["fr", "wo"],
-    everyMs: 0,
-    essential: true,
-    seen: new SeenIndex(),
-    lastPassAt: null,
-  },
-  {
-    name: "primature.sn",
-    provider: createPrimatureProvider(),
-    langs: ["fr"],
-    everyMs: 15 * 60 * 1000,
-    essential: false,
-    seen: new SeenIndex(),
-    lastPassAt: null,
-  },
-];
+const sources: WatchedSource[] = watchedFrom(
+  [
+    {
+      institution: "presidence",
+      name: "presidence.sn",
+      provider,
+      langs: ["fr", "wo"],
+      everyMs: 0,
+      essential: true,
+      seen: new SeenIndex(),
+      lastPassAt: null,
+    },
+    {
+      institution: "primature",
+      name: "primature.sn",
+      provider: createPrimatureProvider(),
+      langs: ["fr"],
+      everyMs: 15 * 60 * 1000,
+      essential: false,
+      seen: new SeenIndex(),
+      lastPassAt: null,
+    },
+  ],
+  process.env["WATCHED_SOURCES"],
+);
+process.stdout.write(`Watching ${sources.map((source) => source.name).join(", ")}.
+`);
 const repository = stores.articles;
 const media = new FileMediaStorage(
   process.env["MEDIA_ROOT"] ?? fileURLToPath(new URL("../../../../.data/media", import.meta.url)),

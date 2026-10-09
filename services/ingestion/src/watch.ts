@@ -1,5 +1,5 @@
 import type { ArticleRepository, SaveOutcome } from "@bgs/content-store";
-import { errorCodeOf, type Lang } from "@bgs/shared-types";
+import { errorCodeOf, type Institution, type Lang } from "@bgs/shared-types";
 import type { CollectionReport } from "./collect";
 import { attachCover } from "./media/attach-cover";
 import { attachDocuments } from "./media/attach-documents";
@@ -124,6 +124,7 @@ export async function pollOnce(
 
 /** One official site the watcher follows, at its own pace. */
 export interface WatchedSource {
+  institution: Institution;
   /** Name in reports, e.g. "primature.sn". */
   name: string;
   provider: SourceProvider;
@@ -137,6 +138,22 @@ export interface WatchedSource {
   essential: boolean;
   seen: SeenIndex;
   lastPassAt: Date | null;
+}
+
+/**
+ * Sites to follow, from the WATCHED_SOURCES setting ("presidence,primature"): all of
+ * them when it is unset. The reference site is always followed. Lets the team hold a
+ * new institution back until the installed apps can show it, or pause a failing site.
+ */
+export function watchedFrom(
+  sources: readonly WatchedSource[],
+  setting: string | undefined,
+): WatchedSource[] {
+  if (setting === undefined || setting.trim() === "") {
+    return [...sources];
+  }
+  const wanted = new Set(setting.split(",").map((id) => id.trim()));
+  return sources.filter((source) => source.essential || wanted.has(source.institution));
 }
 
 function isDue(source: WatchedSource, now: Date): boolean {
