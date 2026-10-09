@@ -22,7 +22,7 @@ Application mobile native Android + iOS, accompagnée de :
 - à terme, une **brique IA** (voix, traduction, assistant).
 
 ### Vision et objectif
-Bic Gouv SN est le compagnon numérique du citoyen sénégalais. Elle l'informe en temps réel de l'action gouvernementale : Conseil des ministres, communiqués, actualités, visites officielles. Elle lui montre sur une carte les services de l'État les plus proches de lui et lui explique les démarches administratives. Tout cela en **français et en wolof**, à l'écrit comme à l'oral.
+Bic Gouv SN est le compagnon numérique du citoyen sénégalais. Elle réunit en un seul lieu **tout le Gouvernement du Sénégal** (Présidence, Primature, ministères) et informe en temps réel de son action : Conseil des ministres, communiqués, actualités, visites officielles. *(Réorientation décidée par l'utilisateur le 09/10/2026 : la plateforme ne relaie plus seulement la Présidence.)* Elle lui montre sur une carte les services de l'État les plus proches de lui et lui explique les démarches administratives. Tout cela en **français et en wolof**, à l'écrit comme à l'oral.
 
 Le succès se mesure ainsi : une application de référence nationale, puis mondiale, qui reste rapide, fiable et agréable sur n'importe quel téléphone, pour des millions d'utilisateurs.
 
@@ -33,7 +33,7 @@ Le succès se mesure ainsi : une application de référence nationale, puis mond
 
 ### Objectifs mesurables
 - **Échelle** : architecture dimensionnée pour **20 millions d'installations** à terme, et des pics de trafic massifs après un Conseil des ministres.
-- **Fraîcheur** : moins de **2 minutes** entre la publication d'un article sur presidence.sn et sa disponibilité dans l'app. « À la seconde » n'est pas garantissable sans flux push de la source : ce SLO est mesuré dans l'admin.
+- **Fraîcheur** : moins de **2 minutes** entre la publication d'un article sur presidence.sn et sa disponibilité dans l'app (Primature et ministères : moins de 15 minutes, leurs sites étant plus lents et sans interface de données). « À la seconde » n'est pas garantissable sans flux push de la source : ce SLO est mesuré dans l'admin.
 - **Fluidité** :
   - démarrage à froid < 2 s sur un Android d'entrée de gamme (2 Go de RAM) ;
   - réponse visuelle à toute interaction < 100 ms ;
@@ -47,7 +47,13 @@ Le succès se mesure ainsi : une application de référence nationale, puis mond
 - **Voix wolof** : qualité équivalente ou quasi équivalente à l'IA sénégalaise **AWA** (Andakia), mesurée par un test d'écoute en aveugle auprès de locuteurs natifs (score MOS). Seuil fixé avant le test.
 
 ### Sources de vérité (règle absolue)
-1. **Actualités gouvernementales** : **uniquement** https://www.presidence.sn/fr/ et sa version wolof officielle https://www.presidence.sn/wo/. Aucune autre source d'actualité, jamais.
+1. **Actualités gouvernementales** : **uniquement** les sites officiels des institutions du Gouvernement, listés et vérifiés dans `docs/sources.md` :
+   - la Présidence : https://www.presidence.sn/fr/ et sa version wolof officielle https://www.presidence.sn/wo/ ;
+   - la Primature : https://primature.sn/publications/actualites ;
+   - les ministères dont le site officiel publie régulièrement (liste tenue dans `docs/sources.md`).
+
+   Aucune autre source d'actualité, jamais : ni presse, ni agrégateur, ni plateforme indépendante. Une nouvelle source n'est ajoutée qu'après vérification de son caractère officiel et consignation dans `docs/sources.md`.
+   **Doublons** : un même contenu publié par plusieurs institutions (ex. communiqué du Conseil des ministres sur presidence.sn et primature.sn) n'apparaît qu'une fois ; **la version de la Présidence est toujours celle gardée**, les autres publications sont notées comme sources complémentaires.
 2. **Démarches administratives** : https://e-senegal.sn/#/home/demarches
 3. **Services de l'État géolocalisés** : base interne, saisie et vérifiée dans le centre d'administration (import initial possible depuis OpenStreetMap, jamais publié sans validation).
 

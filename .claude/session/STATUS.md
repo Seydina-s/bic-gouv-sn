@@ -1,6 +1,12 @@
 # STATUS — Bic Gouv SN
 
-**Dernière mise à jour** : 08/10/2026 (22 h) · **Mode** : autonome (accord de l'utilisateur du 08/10 au soir). Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md`.
+**Dernière mise à jour** : 09/10/2026 · **Mode** : autonome (accord de l'utilisateur du 08/10 au soir). Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md`.
+
+## 09/10 en bref : réorientation vers tout le Gouvernement
+- **Décision de l'utilisateur** : la plateforme relaie tout le Gouvernement (Présidence, Primature, ministères) ; en cas de doublon, la version de la Présidence est gardée. CLAUDE.md §1 et `decisions.md` mis à jour.
+- **Sources cartographiées** (`docs/sources.md`) : Primature (42 pages d'actualités, sans flux RSS) ; 14 ministères au site actif, 15 à revoir ou sans site ; réseaux sociaux écartés, proposition alternative au point 39.
+- **Suite** : tâches GOV-02 à GOV-12 du backlog (modèle de données, collecte Primature, doublons, ministères, narration de l'app).
+- **Reporté par l'utilisateur** : serveur d'IA (point 38), compilation iPhone, relecture des traductions. Lot de 351 traductions wolof envoyé le 09/10, à collecter.
 
 ## 08/10 (après-midi et soir) en bref : l'assistant répond, les voix parlent
 - **Assistant en discussion** façon Claude (#272, #274) : logo et phrase d'accueil courte, bulles, sources en étiquettes, dictée en français par le téléphone, clavier rangé à l'envoi, logo BIC-GOUV en profil, « Réessayer ».
