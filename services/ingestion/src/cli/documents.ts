@@ -1,29 +1,31 @@
 // Official PDFs of the stored history (linked in the text or attached apart by the
-// source): `pnpm --filter @bgs/ingestion documents [fr|wo] [maxPages]`.
+// source): `pnpm --filter @bgs/ingestion documents [fr|wo] [maxPages] [--source primature]`.
 // Resumable: documents already stored are skipped. ~1 request per second.
 import { fileURLToPath } from "node:url";
 import { langSchema } from "@bgs/shared-types";
 import { openStores } from "../lib/stores";
 import { backfillDocuments } from "../media/backfill-documents";
 import { FileMediaStorage } from "../media/media-storage";
-import { createPresidenceProvider } from "../sources/presidence/presidence-provider";
+import { NEWS_SOURCES, positionalArguments, sourceOption } from "../sources/news-sources";
 
-const lang = langSchema.parse(process.argv[2] ?? "fr");
-const maxPages = process.argv[3] === undefined ? undefined : Number(process.argv[3]);
+const [langArgument, pagesArgument] = positionalArguments(process.argv);
+const lang = langSchema.parse(langArgument ?? "fr");
+const maxPages = pagesArgument === undefined ? undefined : Number(pagesArgument);
+const source = sourceOption(process.argv);
 const mediaRoot =
   process.env["MEDIA_ROOT"] ?? fileURLToPath(new URL("../../../../.data/media", import.meta.url));
 const { stores, close } = await openStores();
 
 try {
   const result = await backfillDocuments(
-    createPresidenceProvider(),
+    NEWS_SOURCES[source](),
     stores.articles,
     new FileMediaStorage(mediaRoot),
     lang,
     {
       ...(maxPages === undefined ? {} : { maxPages }),
       onPage: ({ page, lastPage }) => {
-        process.stdout.write(`[${lang}] page ${String(page)}/${String(lastPage)}\n`);
+        process.stdout.write(`[${source} ${lang}] page ${String(page)}/${String(lastPage)}\n`);
       },
     },
   );

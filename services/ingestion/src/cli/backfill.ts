@@ -5,11 +5,9 @@
 import { langSchema } from "@bgs/shared-types";
 import { backfill } from "../backfill";
 import { openStores } from "../lib/stores";
-import { NEWS_SOURCES, sourceOption } from "../sources/news-sources";
+import { NEWS_SOURCES, positionalArguments, sourceOption } from "../sources/news-sources";
 
-const [langArgument, pagesArgument] = process.argv.slice(2).filter((arg, index, all) => {
-  return !arg.startsWith("--") && all[index - 1] !== "--source";
-});
+const [langArgument, pagesArgument] = positionalArguments(process.argv);
 const lang = langSchema.parse(langArgument ?? "fr");
 const maxPages = pagesArgument === undefined ? undefined : Number(pagesArgument);
 const source = sourceOption(process.argv);

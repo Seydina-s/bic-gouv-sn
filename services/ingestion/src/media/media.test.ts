@@ -366,9 +366,9 @@ describe("images placed in the text", () => {
     await repo.save(withBody(body));
     const download = vi.fn(() => Promise.resolve(photo));
     const storage = new MemoryMediaStorage();
-    const first = await backfillMedia(attachInlineImages, provider(download), repo, storage);
+    const first = await backfillMedia(attachInlineImages, () => provider(download), repo, storage);
     expect(first).toMatchObject({ articles: 1, attached: 2, failures: [] });
-    const again = await backfillMedia(attachInlineImages, provider(download), repo, storage);
+    const again = await backfillMedia(attachInlineImages, () => provider(download), repo, storage);
     expect(again.attached).toBe(0);
     expect(download).toHaveBeenCalledTimes(2);
   });

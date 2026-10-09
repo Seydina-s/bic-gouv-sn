@@ -5,17 +5,18 @@ import { openStores } from "../lib/stores";
 import { attachInlineImages } from "../media/attach-inline";
 import { backfillMedia } from "../media/backfill-media";
 import { FileMediaStorage } from "../media/media-storage";
-import { createPresidenceProvider } from "../sources/presidence/presidence-provider";
+import { createNewsProviders } from "../sources/news-sources";
 
 const mediaRoot =
   process.env["MEDIA_ROOT"] ?? fileURLToPath(new URL("../../../../.data/media", import.meta.url));
 const REPORT_EVERY = 25;
+const providers = createNewsProviders();
 const { stores, close } = await openStores();
 
 try {
   const result = await backfillMedia(
     attachInlineImages,
-    createPresidenceProvider(),
+    (article) => providers[article.publisher],
     stores.articles,
     new FileMediaStorage(mediaRoot),
     (p) => {

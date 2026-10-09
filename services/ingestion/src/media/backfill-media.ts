@@ -1,4 +1,5 @@
 import type { ArticleRepository } from "@bgs/content-store";
+import type { NewsArticle } from "@bgs/shared-types";
 import type { SourceProvider } from "../sources/source-provider";
 import type { AttachMedia } from "./attach-result";
 import type { MediaStorage } from "./media-storage";
@@ -14,11 +15,12 @@ const PAGE_SIZE = 100;
 /**
  * Keeps our copy of one kind of file (images in the text, official documents) for
  * every stored article, reading our own store (no listing request to the source).
- * Resumable: files already stored are skipped.
+ * Resumable: files already stored are skipped. Each article's files are fetched
+ * through its own institution's site provider (pace and circuit breaker).
  */
 export async function backfillMedia(
   attach: AttachMedia,
-  provider: SourceProvider,
+  providerFor: (article: NewsArticle) => SourceProvider,
   repository: ArticleRepository,
   storage: MediaStorage,
   onArticle?: (progress: MediaBackfillProgress) => void,
@@ -28,7 +30,12 @@ export async function backfillMedia(
   do {
     const page = await repository.list({ limit: PAGE_SIZE, cursor });
     for (const article of page.items) {
-      const { attached, failures } = await attach(article, provider, repository, storage);
+      const { attached, failures } = await attach(
+        article,
+        providerFor(article),
+        repository,
+        storage,
+      );
       progress.articles += 1;
       progress.attached += attached;
       progress.failures.push(
