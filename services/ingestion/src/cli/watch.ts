@@ -12,7 +12,11 @@ import { acquireLock } from "../lib/single-instance";
 import { openStores } from "../lib/stores";
 import { FileMediaStorage } from "../media/media-storage";
 import { createPresidenceProvider } from "../sources/presidence/presidence-provider";
+import { NEWS_SOURCES } from "../sources/news-sources";
 import { createPrimatureProvider } from "../sources/primature/primature-provider";
+import { WORDPRESS_MINISTRIES } from "../sources/wordpress/ministries";
+
+const MINISTRY_IDS = Object.keys(WORDPRESS_MINISTRIES) as (keyof typeof WORDPRESS_MINISTRIES)[];
 import { circuitStatuses, nextIngestionStatus, type PassOutcome } from "../status";
 import {
   nextPollDelayMs,
@@ -68,6 +72,17 @@ const sources: WatchedSource[] = watchedFrom(
       seen: new SeenIndex(),
       lastPassAt: null,
     },
+    // Ministry sites: a few posts a week each, read every 30 minutes (docs/sources.md).
+    ...MINISTRY_IDS.map((institution): WatchedSource => ({
+      institution,
+      name: new URL(WORDPRESS_MINISTRIES[institution].origin).hostname,
+      provider: NEWS_SOURCES[institution](),
+      langs: ["fr"],
+      everyMs: 30 * 60 * 1000,
+      essential: false,
+      seen: new SeenIndex(),
+      lastPassAt: null,
+    })),
   ],
   process.env["WATCHED_SOURCES"],
 );

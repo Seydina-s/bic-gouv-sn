@@ -12,7 +12,7 @@ import { isSameContent, reconcileDuplicates, saveCollected } from "./reconcile";
 const words = (from: number, count: number) =>
   Array.from({ length: count }, (_, index) => `mot${String(from + index)}`).join(" ");
 
-const PAGES: Record<Institution, string> = {
+const PAGES: Partial<Record<Institution, string>> = {
   presidence: "https://www.presidence.sn/fr/actualites/",
   primature: "https://primature.sn/publications/actualites/",
 };
@@ -23,7 +23,7 @@ function article(
   text: string,
   day = "2026-09-30",
 ): NewsArticle {
-  const sourceUrl = `${PAGES[publisher]}${slug}`;
+  const sourceUrl = `${PAGES[publisher] ?? ""}${slug}`;
   const translations: NewsArticle["translations"] = [
     { lang: "fr", status: "official", title: slug, bodyHtml: `<p>${text}</p>`, sourceUrl },
   ];

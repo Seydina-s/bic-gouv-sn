@@ -52,6 +52,29 @@ Depuis le 09/10/2026, la plateforme couvre **tout le Gouvernement** : Présidenc
 | Télécommunications et Numérique | mctn.sn | application Angular, sans plan du site : navigateur automatique | à mesurer au rendu |
 | Éducation nationale | education.sn | Next.js, articles dans la page | à mesurer (liste à jour) |
 
+### Ministères collectés par WordPress (GOV-05, 09/10/2026)
+
+Justice, Industrie et Commerce, Énergie et Pétrole, Hydraulique et Assainissement, Agriculture : lus par l'interface publique de leur site (`/wp-json/wp/v2/posts`, 20 articles par page). Elle donne dates exactes, texte complet, photo de couverture et tout l'historique.
+
+- **Commande** : `pnpm --filter @bgs/ingestion backfill fr --source <justice|industrie-commerce|energie|hydraulique|agriculture>`, puis `covers fr --source …` pour les photos.
+- **Suivi des nouveautés** : toutes les 30 minutes, à côté de la Présidence et de la Primature ; une panne d'un site n'arrête pas les autres.
+- **Identifiant** : le numéro WordPress de l'article sur son site. **Rubrique** : `actualites`.
+- **Nettoyage site par site**, tiré de vrais articles (`services/ingestion/src/sources/wordpress/fixtures/`) :
+  - Justice : codes du constructeur Divi retirés ; ses vidéos YouTube (`[et_pb_video]`) gardées ;
+  - Industrie et Commerce : blocs de recherche, de catégories et d'articles liés retirés ;
+  - Énergie : titre et photo répétés, menu « Departments » et lien « Suivez-Nous » retirés ;
+  - pour tous : liens vers des profils Facebook (codes de pistage) retirés, le texte gardé ; affiche seule gardée même si c'est aussi la couverture.
+- **Contrôle de qualité commun à toutes les sources** : lettres décoratives (copiées de Facebook) ramenées en lettres ordinaires, accents recomposés. Un texte français abîmé à la source (lettres remplacées par « ? », ou sans aucun accent sur plus de 300 lettres) part en quarantaine. Mesure du 09/10 : les textes français publiés ont au moins 0,8 % de lettres accentuées, les textes abîmés 0 % ; aucun des 1 352 textes français déjà publiés n'est écarté.
+- **Essai complet du 09/10/2026** (stockage à part) :
+
+| Ministère | Articles gardés | Écartés | Période | Raison des écarts |
+|---|---|---|---|---|
+| Justice | 113 | 2 | 2020 → 2026 | vidéo MP4 hébergée par le site (format pas encore lu par l'app) |
+| Industrie et Commerce | 10 | 27 | 2024 → 2026 | texte abîmé à la source (articles de 2024 et début 2025) |
+| Énergie et Pétrole | 174 | 5 | 2023 → 2026 | pages sans contenu (fiches de directions) |
+| Hydraulique et Assainissement | 303 | 7 | 2021 → 2026 | contenu vide à la source |
+| Agriculture | 250 | 10 | 2016 → 2026 | vidéo MP4, contenu vide, image hors du site |
+
 ### Ministères : sites à revoir (non collectés pour l'instant)
 
 | Ministère | Site | Constat du 09/10/2026 |
@@ -66,7 +89,7 @@ Depuis le 09/10/2026, la plateforme couvre **tout le Gouvernement** : Présidenc
 | Urbanisme, Collectivités territoriales et Aménagement | urbanisme.gouv.sn ; decentralisation.gouv.sn | dernier article 05/2024 ; certificat invalide |
 | Intégration africaine et Affaires étrangères | diplomatie.gouv.sn | dernier article 03/2024 |
 | Jeunesse et Sports | mjsc.gouv.sn | site de l'ancien ministère (Jeunesse, Sports et Culture), dernier article 06/2025 |
-| Culture, Artisanat et Tourisme | culture.gouv.sn | site de l'ancien Secrétariat d'État, dernier article 06/2024 |
+| Culture, Artisanat et Tourisme | culture.gouv.sn | site de l'ancien Secrétariat d'État, dernier article 06/2024 ; **nouveau site actif repéré le 09/10 : tourisme.gouv.sn** (et mcat.gouv.sn), à collecter |
 | Environnement et Transition écologique | environnement.gouv.sn | site fermé par mot de passe (en construction) |
 | Mines et Géologie | — | aucun site trouvé (minesgeologie.sec.gouv.sn n'existe plus) |
 | Communication et Relations avec les Institutions | — | aucun site trouvé |

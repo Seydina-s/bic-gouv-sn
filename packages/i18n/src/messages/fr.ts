@@ -62,6 +62,11 @@ export const fr = {
   institutions: {
     presidence: "Présidence",
     primature: "Primature",
+    justice: "Ministère de la Justice",
+    "industrie-commerce": "Ministère de l'Industrie et du Commerce",
+    energie: "Ministère de l'Énergie et du Pétrole",
+    hydraulique: "Ministère de l'Hydraulique et de l'Assainissement",
+    agriculture: "Ministère de l'Agriculture",
   },
   /** Sections of the official sites, keyed by their slug. */
   categories: {

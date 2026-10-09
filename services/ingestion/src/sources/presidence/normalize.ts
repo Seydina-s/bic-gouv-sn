@@ -2,7 +2,7 @@ import { newsArticleSchema, type Lang, type NewsArticle } from "@bgs/shared-type
 import { QuarantineError } from "../../lib/errors";
 import { stableUuid } from "../../lib/identity";
 import { articleContentHash } from "../../merge";
-import { isEmptied, sanitizeArticleHtml } from "../../lib/sanitize";
+import { plainLetters, sanitizeArticleHtml, unpublishable } from "../../lib/sanitize";
 import type { DetailResponse } from "./api-schemas";
 
 export const SITE_ORIGIN = "https://www.presidence.sn";
@@ -32,7 +32,7 @@ export function normalizeDetail(detail: DetailResponse, { lang, fetchedAt }: Nor
   const base = version.article;
   const sourceUrl = canonicalArticleUrl(lang, version.slug);
   const category = detail.data.categories.find((entry) => entry.id === base.categorieId);
-  const title = version.titre.trim();
+  const title = plainLetters(version.titre.trim());
   const bodyHtml = sanitizeArticleHtml(version.content);
 
   const quarantine = (reason: string) => new QuarantineError(sourceUrl, reason);
@@ -42,8 +42,9 @@ export function normalizeDetail(detail: DetailResponse, { lang, fetchedAt }: Nor
   if (category === undefined) {
     throw quarantine(`unknown category id ${String(base.categorieId)}`);
   }
-  if (isEmptied(bodyHtml)) {
-    throw quarantine("article body is empty after sanitization");
+  const problem = unpublishable(title, bodyHtml, lang);
+  if (problem !== null) {
+    throw quarantine(`article ${problem}`);
   }
 
   const translations: NewsArticle["translations"] = [

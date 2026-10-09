@@ -54,10 +54,44 @@ const OPTIONS: sanitizeHtml.IOptions = {
 };
 
 export function sanitizeArticleHtml(html: string): string {
-  return sanitizeHtml(html, OPTIONS)
+  return plainLetters(sanitizeHtml(html, OPTIONS))
     .replace(/(<br \/>\s*)+<\/p>/g, "</p>")
     .replace(/<p>(\s|<br \/>)*<\/p>/g, "")
     .trim();
+}
+
+/**
+ * Letters as people type them: decorative "mathematical" letters (pasted from social
+ * networks, and read one symbol at a time by screen readers) become ordinary letters,
+ * and accents written apart from their letter are joined to it.
+ */
+export function plainLetters(text: string): string {
+  return text
+    .replace(/[\u{1D400}-\u{1D7FF}]/gu, (letter) => letter.normalize("NFKC"))
+    .normalize("NFC");
+}
+
+const FRENCH_ACCENTS = /[àâäçéèêëîïôöùûüÿœæÀÂÄÇÉÈÊËÎÏÔÖÙÛÜŸŒÆ]/gu;
+
+/**
+ * Why a French text looks damaged at its source (letters lost or replaced by "?"
+ * when the site was migrated), or null. Measured on 09/10/2026: published French
+ * texts have at least 0.8 % accented letters, damaged ones none; no published
+ * article of presidence.sn or primature.sn is caught.
+ */
+export function damageIn(html: string): string | null {
+  const text = plainLetters(html)
+    .replace(/<[^>]+>/g, " ")
+    .replace(/https?:\/\/\S+/g, " ");
+  const replaced = text.match(/\p{L}\?{1,2}\p{L}/gu)?.length ?? 0;
+  if (replaced >= 3) {
+    return `${String(replaced)} letters replaced by "?"`;
+  }
+  const letters = text.match(/\p{L}/gu)?.length ?? 0;
+  const accented = text.match(FRENCH_ACCENTS)?.length ?? 0;
+  return letters >= 300 && accented / letters < 0.003
+    ? "French text without accents (characters lost at the source)"
+    : null;
 }
 
 /** Visible text length, to detect articles emptied by the source or by sanitization. */
@@ -89,4 +123,15 @@ const MIN_NEWS_TEXT_LENGTH = 40;
 /** True when a sanitized news article has neither enough text nor official media. */
 export function isEmptied(bodyHtml: string): boolean {
   return textLength(bodyHtml) < MIN_NEWS_TEXT_LENGTH && !hasOfficialMedia(bodyHtml);
+}
+
+/**
+ * Why a sanitized news text cannot be published (it would mislead or show nothing),
+ * or null. Shared by every news source: emptied, or French damaged at the source.
+ */
+export function unpublishable(title: string, bodyHtml: string, lang: string): string | null {
+  if (isEmptied(bodyHtml)) {
+    return "body is empty after sanitization";
+  }
+  return lang === "fr" ? damageIn(`${title} ${bodyHtml}`) : null;
 }
