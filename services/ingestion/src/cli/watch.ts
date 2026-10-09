@@ -7,16 +7,16 @@ import {
   snapshotDaily,
   writeIngestionStatus,
 } from "@bgs/content-store";
-import { errorCodeOf } from "@bgs/shared-types";
+import { errorCodeOf, INSTITUTION_SITES, INSTITUTIONS } from "@bgs/shared-types";
 import { acquireLock } from "../lib/single-instance";
 import { openStores } from "../lib/stores";
 import { FileMediaStorage } from "../media/media-storage";
 import { createPresidenceProvider } from "../sources/presidence/presidence-provider";
 import { NEWS_SOURCES } from "../sources/news-sources";
 import { createPrimatureProvider } from "../sources/primature/primature-provider";
-import { WORDPRESS_MINISTRIES } from "../sources/wordpress/ministries";
 
-const MINISTRY_IDS = Object.keys(WORDPRESS_MINISTRIES) as (keyof typeof WORDPRESS_MINISTRIES)[];
+/** Every institution but the Présidence and the Primature, read at their own pace below. */
+const MINISTRY_IDS = INSTITUTIONS.filter((id) => id !== "presidence" && id !== "primature");
 import { circuitStatuses, nextIngestionStatus, type PassOutcome } from "../status";
 import {
   nextPollDelayMs,
@@ -75,7 +75,7 @@ const sources: WatchedSource[] = watchedFrom(
     // Ministry sites: a few posts a week each, read every 30 minutes (docs/sources.md).
     ...MINISTRY_IDS.map((institution): WatchedSource => ({
       institution,
-      name: new URL(WORDPRESS_MINISTRIES[institution].origin).hostname,
+      name: INSTITUTION_SITES[institution].pageHosts[0] ?? institution,
       provider: NEWS_SOURCES[institution](),
       langs: ["fr"],
       everyMs: 30 * 60 * 1000,

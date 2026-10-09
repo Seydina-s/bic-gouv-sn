@@ -7,6 +7,8 @@ import { WORDPRESS_MINISTRIES } from "./ministries";
 import {
   createWordpressProvider,
   normalizeWordpressPost,
+  parseRestBody,
+  restUrl,
   plainTitle,
   wordpressArticleId,
 } from "./wordpress-provider";
@@ -195,5 +197,42 @@ describe("page builder media", () => {
       "2026-10-09T12:00:00Z",
     );
     expect(article.translations[0]?.bodyHtml).toContain(poster);
+  });
+});
+
+describe("Fisheries site", () => {
+  it("reads a REST answer printed after the page builder's style blocks", () => {
+    expect(parseRestBody('<style id="x">.a{color:red}</style>\n[{"id":1}]')).toEqual([{ id: 1 }]);
+    expect(parseRestBody("<html>Maintenance</html>")).toBeNull();
+  });
+
+  it("publishes a communiqué that is an official PDF alone", () => {
+    const body = bodyOf("peches");
+    expect(body).toContain("https://mpem.gouv.sn/wp-content/uploads/2026/10/");
+    expect(body).toContain(".pdf");
+  });
+
+  it("keeps the Fisheries posts' words and photos", () => {
+    const body = bodyOf("peches", 1);
+    expect(body).toContain("Joal-Fadiouth");
+    expect(body.match(/<img /g)?.length).toBeGreaterThan(2);
+  });
+});
+
+describe("Employment and Training site", () => {
+  it("reads the REST interface at its query address", () => {
+    const site = WORDPRESS_MINISTRIES["emploi-formation"];
+    expect(restUrl(site, "posts", "per_page=20")).toBe(
+      "https://formation.gouv.sn/?rest_route=/wp/v2/posts&per_page=20",
+    );
+    expect(restUrl(WORDPRESS_MINISTRIES.justice, "posts/1", "_fields=id")).toBe(
+      "https://justice.sec.gouv.sn/wp-json/wp/v2/posts/1?_fields=id",
+    );
+  });
+
+  it("keeps the emoji pasted from Facebook as text, not as Facebook's picture", () => {
+    const body = bodyOf("emploi-formation", 2);
+    expect(body).not.toContain("fbcdn");
+    expect(body).toContain("🍅");
   });
 });

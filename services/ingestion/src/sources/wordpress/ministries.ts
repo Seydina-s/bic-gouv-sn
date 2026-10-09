@@ -44,4 +44,16 @@ export const WORDPRESS_MINISTRIES = {
     origin: "https://agriculture.gouv.sn",
     cleanup: NO_EXTRA,
   },
+  "emploi-formation": {
+    institution: "emploi-formation",
+    origin: "https://formation.gouv.sn",
+    queryRoute: true,
+    cleanup: NO_EXTRA,
+  },
+  peches: {
+    institution: "peches",
+    origin: "https://mpem.gouv.sn",
+    // Its REST answers start with the page builder's style blocks (parseRestBody).
+    cleanup: NO_EXTRA,
+  },
 } as const satisfies Record<string, WordpressSite>;

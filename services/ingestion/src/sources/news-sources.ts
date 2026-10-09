@@ -1,4 +1,5 @@
 import { institutionSchema, type Institution } from "@bgs/shared-types";
+import { createInterieurProvider } from "./interieur/interieur-provider";
 import { createPresidenceProvider } from "./presidence/presidence-provider";
 import { createPrimatureProvider } from "./primature/primature-provider";
 import type { SourceProvider } from "./source-provider";
@@ -14,6 +15,9 @@ export const NEWS_SOURCES: Readonly<Record<Institution, () => SourceProvider>> =
   energie: () => createWordpressProvider(WORDPRESS_MINISTRIES.energie),
   hydraulique: () => createWordpressProvider(WORDPRESS_MINISTRIES.hydraulique),
   agriculture: () => createWordpressProvider(WORDPRESS_MINISTRIES.agriculture),
+  peches: () => createWordpressProvider(WORDPRESS_MINISTRIES.peches),
+  interieur: createInterieurProvider,
+  "emploi-formation": () => createWordpressProvider(WORDPRESS_MINISTRIES["emploi-formation"]),
 };
 
 /** One provider per institution, each with its own pace and circuit breaker. */

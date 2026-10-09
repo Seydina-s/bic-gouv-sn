@@ -122,7 +122,22 @@ const MIN_NEWS_TEXT_LENGTH = 40;
 
 /** True when a sanitized news article has neither enough text nor official media. */
 export function isEmptied(bodyHtml: string): boolean {
-  return textLength(bodyHtml) < MIN_NEWS_TEXT_LENGTH && !hasOfficialMedia(bodyHtml);
+  return (
+    textLength(bodyHtml) < MIN_NEWS_TEXT_LENGTH &&
+    !hasOfficialMedia(bodyHtml) &&
+    !hasOfficialDocument(bodyHtml)
+  );
+}
+
+/**
+ * True when the sanitized text links an official PDF: some communiqués are the
+ * document alone ("Télécharger"), shown in the app under "Documents officiels".
+ */
+export function hasOfficialDocument(html: string): boolean {
+  return [...html.matchAll(/<a\b[^>]*\bhref="([^"]+)"/g)].some((match) => {
+    const url = officialMediaUrl((match[1] ?? "").replaceAll("&amp;", "&"));
+    return url !== null && new URL(url).pathname.toLowerCase().endsWith(".pdf");
+  });
 }
 
 /**

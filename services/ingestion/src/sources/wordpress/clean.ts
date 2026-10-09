@@ -1,4 +1,4 @@
-import type { ChildNode, Element } from "domhandler";
+import { Text, type ChildNode, type Element } from "domhandler";
 import render from "dom-serializer";
 import { DomUtils, parseDocument } from "htmlparser2";
 
@@ -89,10 +89,30 @@ function isSocialLink(element: Element): boolean {
   }
 }
 
+/**
+ * Emoji pasted from Facebook arrive as its pictures ("static.xx.fbcdn.net/…/emoji.php",
+ * alt "🍅"), never shown by the app: the emoji itself is kept, as text.
+ */
+function socialEmoji(element: Element): string | null {
+  const alt = element.attribs["alt"] ?? "";
+  try {
+    return element.name === "img" &&
+      new URL(element.attribs["src"] ?? "").hostname.endsWith("fbcdn.net") &&
+      alt !== "" &&
+      alt.length <= 12
+      ? alt
+      : null;
+  } catch {
+    return null;
+  }
+}
+
 function prune(nodes: ChildNode[], rules: CleanupRules, title: string, cover: string | null) {
   for (const element of DomUtils.findAll(() => true, nodes)) {
     if (element.parent !== null && isDropped(element, rules, title, cover)) {
       DomUtils.removeElement(element);
+    } else if (socialEmoji(element) !== null) {
+      DomUtils.replaceElement(element, new Text(socialEmoji(element) ?? ""));
     } else if (isSocialLink(element)) {
       delete element.attribs["href"];
     }

@@ -1,0 +1,747 @@
+[
+  {
+    "id": 8417,
+    "date": "2025-12-10T17:21:52",
+    "date_gmt": "2025-12-10T16:21:52",
+    "modified_gmt": "2025-12-10T16:22:28",
+    "slug": "candidature-aux-examens-certifications-professionnels-du-mfp-session-2025",
+    "link": "https:\/\/formation.gouv.sn\/?p=8417",
+    "title": {
+      "rendered": "CANDIDATURE AUX EXAMENS PROFESSIONNELS ET CERTIFICATIONS  DU MEFPT &#8211; SESSION 2026"
+    },
+    "content": {
+      "rendered": "\n<ul class=\"wp-block-list\">\n<li><strong><a href=\"https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/Note-dinformation_Inscriptions-aux-examens-et-certifications.pdf\"><em>NOTE D&rsquo;INFORMATION<\/em> (<em>Candidature aux examens professionnels-session 202<\/em>6)<\/a><\/strong><\/li>\n\n\n\n<li><strong><em><a href=\"https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/FICHE-DINSCRIPTION-EXAMEN-ET-CERTIFICATIONS-2026-1.pdf\">FICHE D&rsquo;INSCRIPTION EXAMENS 2026<\/a><\/em><\/strong><\/li>\n<\/ul>\n\n\n\n<p class=\"wp-block-paragraph\"><\/p>\n",
+      "protected": false
+    },
+    "_links": {
+      "self": [
+        {
+          "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=\/wp\/v2\/posts\/8417",
+          "targetHints": { "allow": ["GET"] }
+        }
+      ],
+      "collection": [
+        { "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=\/wp\/v2\/posts" }
+      ],
+      "about": [
+        { "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=\/wp\/v2\/types\/post" }
+      ],
+      "author": [
+        {
+          "embeddable": true,
+          "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=\/wp\/v2\/users\/12"
+        }
+      ],
+      "replies": [
+        {
+          "embeddable": true,
+          "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=%2Fwp%2Fv2%2Fcomments&post=8417"
+        }
+      ],
+      "version-history": [
+        {
+          "count": 10,
+          "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=\/wp\/v2\/posts\/8417\/revisions"
+        }
+      ],
+      "predecessor-version": [
+        {
+          "id": 10410,
+          "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=\/wp\/v2\/posts\/8417\/revisions\/10410"
+        }
+      ],
+      "wp:featuredmedia": [
+        {
+          "embeddable": true,
+          "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=\/wp\/v2\/media\/10381"
+        }
+      ],
+      "wp:attachment": [
+        {
+          "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=%2Fwp%2Fv2%2Fmedia&parent=8417"
+        }
+      ],
+      "wp:term": [
+        {
+          "taxonomy": "category",
+          "embeddable": true,
+          "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=%2Fwp%2Fv2%2Fcategories&post=8417"
+        },
+        {
+          "taxonomy": "post_tag",
+          "embeddable": true,
+          "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=%2Fwp%2Fv2%2Ftags&post=8417"
+        }
+      ],
+      "curies": [{ "name": "wp", "href": "https:\/\/api.w.org\/{rel}", "templated": true }]
+    },
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "id": 10381,
+          "date": "2025-12-08T13:39:00",
+          "slug": "information-doc-decpc-pour-le-site",
+          "type": "attachment",
+          "link": "https:\/\/formation.gouv.sn\/?attachment_id=10381",
+          "title": { "rendered": "Information doc DECPC pour le site" },
+          "author": 12,
+          "featured_media": 0,
+          "jetpack_sharing_enabled": true,
+          "caption": { "rendered": "" },
+          "alt_text": "",
+          "media_type": "image",
+          "mime_type": "image\/jpeg",
+          "media_details": {
+            "width": 755,
+            "height": 319,
+            "file": "2025\/12\/Information-doc-DECPC-pour-le-site.jpg",
+            "filesize": 46532,
+            "sizes": {
+              "medium": {
+                "file": "Information-doc-DECPC-pour-le-site-300x127.jpg",
+                "width": 300,
+                "height": 127,
+                "filesize": 7805,
+                "mime_type": "image\/jpeg",
+                "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/Information-doc-DECPC-pour-le-site-300x127.jpg"
+              },
+              "thumbnail": {
+                "file": "Information-doc-DECPC-pour-le-site-150x150.jpg",
+                "width": 150,
+                "height": 150,
+                "filesize": 5021,
+                "mime_type": "image\/jpeg",
+                "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/Information-doc-DECPC-pour-le-site-150x150.jpg"
+              },
+              "bingo_ruby_crop_110x85": {
+                "file": "Information-doc-DECPC-pour-le-site-110x85.jpg",
+                "width": 110,
+                "height": 85,
+                "filesize": 3380,
+                "mime_type": "image\/jpeg",
+                "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/Information-doc-DECPC-pour-le-site-110x85.jpg"
+              },
+              "bingo_ruby_crop_300x424": {
+                "file": "Information-doc-DECPC-pour-le-site-300x319.jpg",
+                "width": 300,
+                "height": 319,
+                "filesize": 13314,
+                "mime_type": "image\/jpeg",
+                "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/Information-doc-DECPC-pour-le-site-300x319.jpg"
+              },
+              "bingo_ruby_crop_365x330": {
+                "file": "Information-doc-DECPC-pour-le-site-365x319.jpg",
+                "width": 365,
+                "height": 319,
+                "filesize": 15859,
+                "mime_type": "image\/jpeg",
+                "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/Information-doc-DECPC-pour-le-site-365x319.jpg"
+              },
+              "bingo_ruby_crop_540x370": {
+                "file": "Information-doc-DECPC-pour-le-site-540x319.jpg",
+                "width": 540,
+                "height": 319,
+                "filesize": 20998,
+                "mime_type": "image\/jpeg",
+                "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/Information-doc-DECPC-pour-le-site-540x319.jpg"
+              },
+              "bingo_ruby_crop_540x540": {
+                "file": "Information-doc-DECPC-pour-le-site-540x319.jpg",
+                "width": 540,
+                "height": 319,
+                "filesize": 20998,
+                "mime_type": "image\/jpeg",
+                "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/Information-doc-DECPC-pour-le-site-540x319.jpg"
+              },
+              "bingo_ruby_crop_750x450": {
+                "file": "Information-doc-DECPC-pour-le-site-750x319.jpg",
+                "width": 750,
+                "height": 319,
+                "filesize": 25651,
+                "mime_type": "image\/jpeg",
+                "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/Information-doc-DECPC-pour-le-site-750x319.jpg"
+              },
+              "full": {
+                "file": "Information-doc-DECPC-pour-le-site.jpg",
+                "width": 755,
+                "height": 319,
+                "mime_type": "image\/jpeg",
+                "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/Information-doc-DECPC-pour-le-site.jpg"
+              }
+            },
+            "image_meta": {
+              "aperture": "0",
+              "credit": "",
+              "camera": "",
+              "caption": "",
+              "created_timestamp": "0",
+              "copyright": "",
+              "focal_length": "0",
+              "iso": "0",
+              "shutter_speed": "0",
+              "title": "",
+              "orientation": "0",
+              "keywords": []
+            }
+          },
+          "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/Information-doc-DECPC-pour-le-site.jpg",
+          "_links": {
+            "self": [
+              {
+                "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=\/wp\/v2\/media\/10381",
+                "targetHints": { "allow": ["GET"] }
+              }
+            ],
+            "collection": [
+              { "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=\/wp\/v2\/media" }
+            ],
+            "about": [
+              {
+                "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=\/wp\/v2\/types\/attachment"
+              }
+            ],
+            "author": [
+              {
+                "embeddable": true,
+                "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=\/wp\/v2\/users\/12"
+              }
+            ],
+            "replies": [
+              {
+                "embeddable": true,
+                "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=%2Fwp%2Fv2%2Fcomments&post=10381"
+              }
+            ],
+            "wp:attached-to": [
+              {
+                "embeddable": true,
+                "post_type": "post",
+                "id": 8417,
+                "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=\/wp\/v2\/posts\/8417"
+              }
+            ],
+            "curies": [{ "name": "wp", "href": "https:\/\/api.w.org\/{rel}", "templated": true }]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": 10401,
+    "date": "2025-12-10T13:35:57",
+    "date_gmt": "2025-12-10T12:35:57",
+    "modified_gmt": "2025-12-10T12:36:00",
+    "slug": "journee-de-lexcellence-de-la-formation-professionnelle-et-technique-3",
+    "link": "https:\/\/formation.gouv.sn\/?p=10401",
+    "title": {
+      "rendered": "Journ\u00e9e de l\u2019Excellence de la Formation professionnelle et technique"
+    },
+    "content": {
+      "rendered": "\n<figure class=\"wp-block-image size-large\"><img loading=\"lazy\" decoding=\"async\" width=\"1024\" height=\"681\" src=\"https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-4-1024x681.jpg\" alt=\"\" class=\"wp-image-10402\" srcset=\"https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-4-1024x681.jpg 1024w, https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-4-300x200.jpg 300w, https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-4-768x511.jpg 768w, https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-4.jpg 1440w\" sizes=\"auto, (max-width: 1024px) 100vw, 1024px\" \/><\/figure>\n\n\n\n<p class=\"wp-block-paragraph\"><a><\/a>Le Minist\u00e8re de l\u2019Emploi et de la Formation professionnelle et technique (MEFPT) a organis\u00e9 en partenariat avec le Projet de Formation et d&rsquo;Insertion (PFPI) mis en \u0153uvre par EDC-S\u00e9n\u00e9gal en partenariat avec la Fondation Mastercard, la Journ\u00e9e de l\u2019Excellence de la Formation professionnelle et technique.<\/p>\n\n\n\n<p class=\"wp-block-paragraph\">L&rsquo;Excellence a brillamment \u00e9t\u00e9 mise \u00e0 l\u2019honneur ce jeudi 04 d\u00e9cembre \u00e0 Dakar, sous la pr\u00e9sidence de M. Amadou Moustapha Ndieck Sarr\u00e9, Ministre de l\u2019Emploi et de la Formation professionnelle et technique, en pr\u00e9sence du Directeur Pays de la Fondation Mastercard.<\/p>\n\n\n\n<p class=\"wp-block-paragraph\">Plac\u00e9e sous le parrainage de Mme Mame Diarra Diop, cette grande c\u00e9r\u00e9monie a constitu\u00e9 un moment fort d\u00e9di\u00e9 \u00e0 la c\u00e9l\u00e9bration des acteurs les plus m\u00e9ritants de la formation professionnelle et technique.<\/p>\n\n\n\n<p class=\"wp-block-paragraph\">Cette \u00e9dition a permis de distinguer :<\/p>\n\n\n\n<p class=\"wp-block-paragraph\">&#8211; les meilleurs chefs d\u2019\u00e9tablissements;<\/p>\n\n\n\n<p class=\"wp-block-paragraph\">&#8211; les meilleurs formateurs;<\/p>\n\n\n\n<p class=\"wp-block-paragraph\">&#8211; les meilleurs ma\u00eetres d\u2019apprentissage;<\/p>\n\n\n\n<p class=\"wp-block-paragraph\">&#8211; les meilleurs apprenants;<\/p>\n\n\n\n<p class=\"wp-block-paragraph\">&#8211; ainsi que les meilleurs apprentis.<\/p>\n\n\n\n<p class=\"wp-block-paragraph\">Pour la Formation professionnelle et technique, le 1er prix a \u00e9t\u00e9 remport\u00e9 par Le Lyc\u00e9e Technique Andr\u00e9 Peytavin de Saint-Louis,<\/p>\n\n\n\n<p class=\"wp-block-paragraph\">Le 2\u00e9me prix par le CFP Oussouye de Ziguinchor et le 3\u00e9me par le Lyc\u00e9e technique industriel Maurice Delafosse (LTID).<\/p>\n\n\n\n<p class=\"wp-block-paragraph\">Pour \u0301le volet apprentissage, le 1er prix a \u00e9t\u00e9 remport\u00e9 par le GIE Fas Jom de Kaolack, le 2\u00e9me prix par le GIE Keur khaleyi de Kaffrine et enfin le 3\u00e9me par le GIE Bien-\u00catre de Dakar.<\/p>\n\n\n\n<p class=\"wp-block-paragraph\">Un instant solennel et inspirant qui magnifie l\u2019engagement, le savoir-faire et la d\u00e9termination de ceux qui \u0153uvrent chaque jour pour hisser la formation professionnelle s\u00e9n\u00e9galaise vers l\u2019excellence.<\/p>\n\n\n\n<p class=\"wp-block-paragraph\">Mastercard FoundationYMCA Senegal Education Development CenterCaritas S\u00e9n\u00e9galMinist\u00e8re de l&rsquo;Emploi et de la Formation professionnelleCaritas KoldaONG Jeunesse Et D\u00e9veloppement@Ecoles au S\u00e9n\u00e9gal. <a href=\"https:\/\/www.facebook.com\/hashtag\/pfpi?__eep__=6&amp;__cft__[0]=AZWE2wUsrRBN8hEQ3SKYyAdP9DC2Ipdws0RDZ7P4Ovar9pRNEk7_ygczUXTr5oGf63Xuv6JtdfmvsN-NL5_c2h_5vsP9LNraZIQy21i_TF6xlftJVEHUtPd4saHsnrw7ETZlucCtNL-PD4XsO3JI-Fx_jjNgzeVHBTfLkklUTVydt3AmWalJlyTfRubjz1FWgH0&amp;__tn__=*NK-R\">#Pfpi<\/a>#Journ\u00e9eDeLExcellencee<\/p>\n\n\n\n<p class=\"wp-block-paragraph\"><a href=\"https:\/\/www.facebook.com\/hashtag\/fpt?__eep__=6&amp;__cft__[0]=AZWE2wUsrRBN8hEQ3SKYyAdP9DC2Ipdws0RDZ7P4Ovar9pRNEk7_ygczUXTr5oGf63Xuv6JtdfmvsN-NL5_c2h_5vsP9LNraZIQy21i_TF6xlftJVEHUtPd4saHsnrw7ETZlucCtNL-PD4XsO3JI-Fx_jjNgzeVHBTfLkklUTVydt3AmWalJlyTfRubjz1FWgH0&amp;__tn__=*NK-R\">#FPT<\/a><a href=\"https:\/\/www.facebook.com\/hashtag\/dakar?__eep__=6&amp;__cft__[0]=AZWE2wUsrRBN8hEQ3SKYyAdP9DC2Ipdws0RDZ7P4Ovar9pRNEk7_ygczUXTr5oGf63Xuv6JtdfmvsN-NL5_c2h_5vsP9LNraZIQy21i_TF6xlftJVEHUtPd4saHsnrw7ETZlucCtNL-PD4XsO3JI-Fx_jjNgzeVHBTfLkklUTVydt3AmWalJlyTfRubjz1FWgH0&amp;__tn__=*NK-R\">#dakar<\/a><a href=\"https:\/\/www.facebook.com\/hashtag\/transformationagroalimentaire?__eep__=6&amp;__cft__[0]=AZWE2wUsrRBN8hEQ3SKYyAdP9DC2Ipdws0RDZ7P4Ovar9pRNEk7_ygczUXTr5oGf63Xuv6JtdfmvsN-NL5_c2h_5vsP9LNraZIQy21i_TF6xlftJVEHUtPd4saHsnrw7ETZlucCtNL-PD4XsO3JI-Fx_jjNgzeVHBTfLkklUTVydt3AmWalJlyTfRubjz1FWgH0&amp;__tn__=*NK-R\">#TransformationAgroalimentaire<\/a><a href=\"https:\/\/www.facebook.com\/hashtag\/entrepreneuriat?__eep__=6&amp;__cft__[0]=AZWE2wUsrRBN8hEQ3SKYyAdP9DC2Ipdws0RDZ7P4Ovar9pRNEk7_ygczUXTr5oGf63Xuv6JtdfmvsN-NL5_c2h_5vsP9LNraZIQy21i_TF6xlftJVEHUtPd4saHsnrw7ETZlucCtNL-PD4XsO3JI-Fx_jjNgzeVHBTfLkklUTVydt3AmWalJlyTfRubjz1FWgH0&amp;__tn__=*NK-R\">#Entrepreneuriat<\/a>.Jeune <a href=\"https:\/\/www.facebook.com\/hashtag\/innovation?__eep__=6&amp;__cft__[0]=AZWE2wUsrRBN8hEQ3SKYyAdP9DC2Ipdws0RDZ7P4Ovar9pRNEk7_ygczUXTr5oGf63Xuv6JtdfmvsN-NL5_c2h_5vsP9LNraZIQy21i_TF6xlftJVEHUtPd4saHsnrw7ETZlucCtNL-PD4XsO3JI-Fx_jjNgzeVHBTfLkklUTVydt3AmWalJlyTfRubjz1FWgH0&amp;__tn__=*NK-R\">#Innovation<\/a> Durable <a href=\"https:\/\/www.facebook.com\/hashtag\/autonomiealimentaire?__eep__=6&amp;__cft__[0]=AZWE2wUsrRBN8hEQ3SKYyAdP9DC2Ipdws0RDZ7P4Ovar9pRNEk7_ygczUXTr5oGf63Xuv6JtdfmvsN-NL5_c2h_5vsP9LNraZIQy21i_TF6xlftJVEHUtPd4saHsnrw7ETZlucCtNL-PD4XsO3JI-Fx_jjNgzeVHBTfLkklUTVydt3AmWalJlyTfRubjz1FWgH0&amp;__tn__=*NK-R\">#autonomiealimentaire<\/a><a href=\"https:\/\/www.facebook.com\/hashtag\/s%C3%A9n%C3%A9gal?__eep__=6&amp;__cft__[0]=AZWE2wUsrRBN8hEQ3SKYyAdP9DC2Ipdws0RDZ7P4Ovar9pRNEk7_ygczUXTr5oGf63Xuv6JtdfmvsN-NL5_c2h_5vsP9LNraZIQy21i_TF6xlftJVEHUtPd4saHsnrw7ETZlucCtNL-PD4XsO3JI-Fx_jjNgzeVHBTfLkklUTVydt3AmWalJlyTfRubjz1FWgH0&amp;__tn__=*NK-R\">#s\u00e9n\u00e9gal<\/a><\/p>\n",
+      "protected": false
+    },
+    "_links": {
+      "self": [
+        {
+          "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=\/wp\/v2\/posts\/10401",
+          "targetHints": { "allow": ["GET"] }
+        }
+      ],
+      "collection": [
+        { "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=\/wp\/v2\/posts" }
+      ],
+      "about": [
+        { "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=\/wp\/v2\/types\/post" }
+      ],
+      "author": [
+        {
+          "embeddable": true,
+          "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=\/wp\/v2\/users\/13"
+        }
+      ],
+      "replies": [
+        {
+          "embeddable": true,
+          "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=%2Fwp%2Fv2%2Fcomments&post=10401"
+        }
+      ],
+      "version-history": [
+        {
+          "count": 2,
+          "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=\/wp\/v2\/posts\/10401\/revisions"
+        }
+      ],
+      "predecessor-version": [
+        {
+          "id": 10404,
+          "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=\/wp\/v2\/posts\/10401\/revisions\/10404"
+        }
+      ],
+      "wp:featuredmedia": [
+        {
+          "embeddable": true,
+          "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=\/wp\/v2\/media\/10402"
+        }
+      ],
+      "wp:attachment": [
+        {
+          "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=%2Fwp%2Fv2%2Fmedia&parent=10401"
+        }
+      ],
+      "wp:term": [
+        {
+          "taxonomy": "category",
+          "embeddable": true,
+          "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=%2Fwp%2Fv2%2Fcategories&post=10401"
+        },
+        {
+          "taxonomy": "post_tag",
+          "embeddable": true,
+          "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=%2Fwp%2Fv2%2Ftags&post=10401"
+        }
+      ],
+      "curies": [{ "name": "wp", "href": "https:\/\/api.w.org\/{rel}", "templated": true }]
+    },
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "id": 10402,
+          "date": "2025-12-10T13:34:11",
+          "slug": "10-dec-4",
+          "type": "attachment",
+          "link": "https:\/\/formation.gouv.sn\/?attachment_id=10402",
+          "title": { "rendered": "10 DEC 4" },
+          "author": 13,
+          "featured_media": 0,
+          "jetpack_sharing_enabled": true,
+          "caption": { "rendered": "" },
+          "alt_text": "",
+          "media_type": "image",
+          "mime_type": "image\/jpeg",
+          "media_details": {
+            "width": 1440,
+            "height": 958,
+            "file": "2025\/12\/10-DEC-4.jpg",
+            "filesize": 179244,
+            "sizes": {
+              "medium": {
+                "file": "10-DEC-4-300x200.jpg",
+                "width": 300,
+                "height": 200,
+                "filesize": 19200,
+                "mime_type": "image\/jpeg",
+                "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-4-300x200.jpg"
+              },
+              "large": {
+                "file": "10-DEC-4-1024x681.jpg",
+                "width": 1024,
+                "height": 681,
+                "filesize": 133517,
+                "mime_type": "image\/jpeg",
+                "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-4-1024x681.jpg"
+              },
+              "thumbnail": {
+                "file": "10-DEC-4-150x150.jpg",
+                "width": 150,
+                "height": 150,
+                "filesize": 8660,
+                "mime_type": "image\/jpeg",
+                "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-4-150x150.jpg"
+              },
+              "medium_large": {
+                "file": "10-DEC-4-768x511.jpg",
+                "width": 768,
+                "height": 511,
+                "filesize": 85344,
+                "mime_type": "image\/jpeg",
+                "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-4-768x511.jpg"
+              },
+              "bingo_ruby_crop_110x85": {
+                "file": "10-DEC-4-110x85.jpg",
+                "width": 110,
+                "height": 85,
+                "filesize": 4590,
+                "mime_type": "image\/jpeg",
+                "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-4-110x85.jpg"
+              },
+              "bingo_ruby_crop_300x424": {
+                "file": "10-DEC-4-300x424.jpg",
+                "width": 300,
+                "height": 424,
+                "filesize": 31766,
+                "mime_type": "image\/jpeg",
+                "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-4-300x424.jpg"
+              },
+              "bingo_ruby_crop_365x330": {
+                "file": "10-DEC-4-365x330.jpg",
+                "width": 365,
+                "height": 330,
+                "filesize": 33040,
+                "mime_type": "image\/jpeg",
+                "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-4-365x330.jpg"
+              },
+              "bingo_ruby_crop_540x370": {
+                "file": "10-DEC-4-540x370.jpg",
+                "width": 540,
+                "height": 370,
+                "filesize": 51472,
+                "mime_type": "image\/jpeg",
+                "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-4-540x370.jpg"
+              },
+              "bingo_ruby_crop_540x540": {
+                "file": "10-DEC-4-540x540.jpg",
+                "width": 540,
+                "height": 540,
+                "filesize": 65115,
+                "mime_type": "image\/jpeg",
+                "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-4-540x540.jpg"
+              },
+              "bingo_ruby_crop_750x450": {
+                "file": "10-DEC-4-750x450.jpg",
+                "width": 750,
+                "height": 450,
+                "filesize": 74977,
+                "mime_type": "image\/jpeg",
+                "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-4-750x450.jpg"
+              },
+              "bingo_ruby_crop_1000x550": {
+                "file": "10-DEC-4-1000x550.jpg",
+                "width": 1000,
+                "height": 550,
+                "filesize": 104628,
+                "mime_type": "image\/jpeg",
+                "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-4-1000x550.jpg"
+              },
+              "bingo_ruby_crop_1200x750": {
+                "file": "10-DEC-4-1200x750.jpg",
+                "width": 1200,
+                "height": 750,
+                "filesize": 159687,
+                "mime_type": "image\/jpeg",
+                "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-4-1200x750.jpg"
+              },
+              "full": {
+                "file": "10-DEC-4.jpg",
+                "width": 1440,
+                "height": 958,
+                "mime_type": "image\/jpeg",
+                "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-4.jpg"
+              }
+            },
+            "image_meta": {
+              "aperture": "0",
+              "credit": "",
+              "camera": "",
+              "caption": "",
+              "created_timestamp": "0",
+              "copyright": "",
+              "focal_length": "0",
+              "iso": "0",
+              "shutter_speed": "0",
+              "title": "",
+              "orientation": "0",
+              "keywords": []
+            }
+          },
+          "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-4.jpg",
+          "_links": {
+            "self": [
+              {
+                "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=\/wp\/v2\/media\/10402",
+                "targetHints": { "allow": ["GET"] }
+              }
+            ],
+            "collection": [
+              { "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=\/wp\/v2\/media" }
+            ],
+            "about": [
+              {
+                "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=\/wp\/v2\/types\/attachment"
+              }
+            ],
+            "author": [
+              {
+                "embeddable": true,
+                "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=\/wp\/v2\/users\/13"
+              }
+            ],
+            "replies": [
+              {
+                "embeddable": true,
+                "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=%2Fwp%2Fv2%2Fcomments&post=10402"
+              }
+            ],
+            "wp:attached-to": [
+              {
+                "embeddable": true,
+                "post_type": "post",
+                "id": 10401,
+                "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=\/wp\/v2\/posts\/10401"
+              }
+            ],
+            "curies": [{ "name": "wp", "href": "https:\/\/api.w.org\/{rel}", "templated": true }]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": 10397,
+    "date": "2025-12-10T13:32:53",
+    "date_gmt": "2025-12-10T12:32:53",
+    "modified_gmt": "2025-12-10T12:32:55",
+    "slug": "journee-de-lexcellence-de-la-formation-professionnelle-et-technique-2",
+    "link": "https:\/\/formation.gouv.sn\/?p=10397",
+    "title": {
+      "rendered": "Journ\u00e9e de l\u2019Excellence de la Formation professionnelle et technique"
+    },
+    "content": {
+      "rendered": "\n<figure class=\"wp-block-image size-large\"><img loading=\"lazy\" decoding=\"async\" width=\"1024\" height=\"1024\" src=\"https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-3-1024x1024.jpg\" alt=\"\" class=\"wp-image-10398\" srcset=\"https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-3-1024x1024.jpg 1024w, https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-3-300x300.jpg 300w, https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-3-150x150.jpg 150w, https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-3-768x768.jpg 768w, https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-3-540x540.jpg 540w, https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-3.jpg 1440w\" sizes=\"auto, (max-width: 1024px) 100vw, 1024px\" \/><\/figure>\n\n\n\n<p class=\"wp-block-paragraph\"><img loading=\"lazy\" decoding=\"async\" height=\"16\" width=\"16\" src=\"https:\/\/static.xx.fbcdn.net\/images\/emoji.php\/v9\/tc\/1\/16\/1f345.png\" alt=\"\ud83c\udf45\"> Innover pour nourrir durablement !<\/p>\n\n\n\n<p class=\"wp-block-paragraph\">Le groupe d\u2019apprenants du Lyc\u00e9e Technique Industriel Maurice Delafosse, compos\u00e9 de 4 jeunes visionnaires, s\u2019est distingu\u00e9 lors de la Journ\u00e9e de l\u2019Excellence de la Formation professionnelle et technique (FPT) dans la r\u00e9gion de Dakar gr\u00e2ce \u00e0 un projet ambitieux : la production et la transformation de la tomate et du gombo <img loading=\"lazy\" decoding=\"async\" height=\"16\" width=\"16\" alt=\"\ud83c\udf3e\" src=\"https:\/\/static.xx.fbcdn.net\/images\/emoji.php\/v9\/t9d\/1\/16\/1f33e.png\"><img loading=\"lazy\" decoding=\"async\" height=\"16\" width=\"16\" alt=\"\ud83c\udf45\" src=\"https:\/\/static.xx.fbcdn.net\/images\/emoji.php\/v9\/tc\/1\/16\/1f345.png\">.<\/p>\n\n\n\n<p class=\"wp-block-paragraph\">Leur initiative consiste \u00e0 cultiver ces produits sur leur propre champ puis \u00e0 les transformer localement pour r\u00e9duire les pertes post-r\u00e9colte et renforcer l\u2019autonomie alimentaire.<\/p>\n\n\n\n<p class=\"wp-block-paragraph\">Ils pr\u00e9voient de produire de la tomate concentr\u00e9e 100 % naturelle, sans additif, ainsi que du gombo transform\u00e9 et conditionn\u00e9 dans des sachets de conservation, permettant son utilisation tout au long de l\u2019ann\u00e9e, m\u00eame pendant les p\u00e9riodes de raret\u00e9 sur le march\u00e9 <img loading=\"lazy\" decoding=\"async\" height=\"16\" width=\"16\" alt=\"\ud83c\udf31\" src=\"https:\/\/static.xx.fbcdn.net\/images\/emoji.php\/v9\/t69\/1\/16\/1f331.png\">.<\/p>\n\n\n\n<p class=\"wp-block-paragraph\">Ce projet allie innovation, durabilit\u00e9 et engagement social, illustrant la volont\u00e9 de ces jeunes de valoriser les ressources locales et de promouvoir une alimentation saine et accessible au S\u00e9n\u00e9gal <img loading=\"lazy\" decoding=\"async\" height=\"16\" width=\"16\" alt=\"\ud83c\uddf8\ud83c\uddf3\" src=\"https:\/\/static.xx.fbcdn.net\/images\/emoji.php\/v9\/t25\/1\/16\/1f1f8_1f1f3.png\">.<\/p>\n\n\n\n<p class=\"wp-block-paragraph\">Mastercard FoundationYMCA SenegalEducation Development CenterCaritas S\u00e9n\u00e9galMinist\u00e8re de l\u2019Emploi et de la Formation professionnelleCaritas KoldaONG Jeunesse Et D\u00e9veloppement@Ecoles au S\u00e9n\u00e9gal.<\/p>\n\n\n\n<p class=\"wp-block-paragraph\"><a href=\"https:\/\/www.facebook.com\/hashtag\/pfpi?__eep__=6&amp;__cft__[0]=AZWDU6FjzGGGcbmlQG9GXYMeWOGP_vh3sL7L58DZUiufHuxcuLMeXe7cd9LpP6GnPOsgkigrMkltDNVPEf6J3AWY_QK7X971v-uBg9eNBbNnpXn5JCXWRIsVEvj3TpXg_cl_RtNhn2z5zVgWwwnr3LX1&amp;__tn__=*NK-R\">#Pfpi<\/a>#Journ\u00e9eDeLExcellencee <a href=\"https:\/\/www.facebook.com\/hashtag\/fpt?__eep__=6&amp;__cft__[0]=AZWDU6FjzGGGcbmlQG9GXYMeWOGP_vh3sL7L58DZUiufHuxcuLMeXe7cd9LpP6GnPOsgkigrMkltDNVPEf6J3AWY_QK7X971v-uBg9eNBbNnpXn5JCXWRIsVEvj3TpXg_cl_RtNhn2z5zVgWwwnr3LX1&amp;__tn__=*NK-R\">#FPT<\/a><a href=\"https:\/\/www.facebook.com\/hashtag\/dakar?__eep__=6&amp;__cft__[0]=AZWDU6FjzGGGcbmlQG9GXYMeWOGP_vh3sL7L58DZUiufHuxcuLMeXe7cd9LpP6GnPOsgkigrMkltDNVPEf6J3AWY_QK7X971v-uBg9eNBbNnpXn5JCXWRIsVEvj3TpXg_cl_RtNhn2z5zVgWwwnr3LX1&amp;__tn__=*NK-R\">#dakar<\/a><a href=\"https:\/\/www.facebook.com\/hashtag\/transformationagroalimentaire?__eep__=6&amp;__cft__[0]=AZWDU6FjzGGGcbmlQG9GXYMeWOGP_vh3sL7L58DZUiufHuxcuLMeXe7cd9LpP6GnPOsgkigrMkltDNVPEf6J3AWY_QK7X971v-uBg9eNBbNnpXn5JCXWRIsVEvj3TpXg_cl_RtNhn2z5zVgWwwnr3LX1&amp;__tn__=*NK-R\">#TransformationAgroalimentaire<\/a><a href=\"https:\/\/www.facebook.com\/hashtag\/entrepreneuriatjeune?__eep__=6&amp;__cft__[0]=AZWDU6FjzGGGcbmlQG9GXYMeWOGP_vh3sL7L58DZUiufHuxcuLMeXe7cd9LpP6GnPOsgkigrMkltDNVPEf6J3AWY_QK7X971v-uBg9eNBbNnpXn5JCXWRIsVEvj3TpXg_cl_RtNhn2z5zVgWwwnr3LX1&amp;__tn__=*NK-R\">#EntrepreneuriatJeune<\/a><a href=\"https:\/\/www.facebook.com\/hashtag\/innovationdurable?__eep__=6&amp;__cft__[0]=AZWDU6FjzGGGcbmlQG9GXYMeWOGP_vh3sL7L58DZUiufHuxcuLMeXe7cd9LpP6GnPOsgkigrMkltDNVPEf6J3AWY_QK7X971v-uBg9eNBbNnpXn5JCXWRIsVEvj3TpXg_cl_RtNhn2z5zVgWwwnr3LX1&amp;__tn__=*NK-R\">#InnovationDurable<\/a><a href=\"https:\/\/www.facebook.com\/hashtag\/autonomiealimentaire?__eep__=6&amp;__cft__[0]=AZWDU6FjzGGGcbmlQG9GXYMeWOGP_vh3sL7L58DZUiufHuxcuLMeXe7cd9LpP6GnPOsgkigrMkltDNVPEf6J3AWY_QK7X971v-uBg9eNBbNnpXn5JCXWRIsVEvj3TpXg_cl_RtNhn2z5zVgWwwnr3LX1&amp;__tn__=*NK-R\">#autonomiealimentaire<\/a><a href=\"https:\/\/www.facebook.com\/hashtag\/se%CC%81ne%CC%81gal?__eep__=6&amp;__cft__[0]=AZWDU6FjzGGGcbmlQG9GXYMeWOGP_vh3sL7L58DZUiufHuxcuLMeXe7cd9LpP6GnPOsgkigrMkltDNVPEf6J3AWY_QK7X971v-uBg9eNBbNnpXn5JCXWRIsVEvj3TpXg_cl_RtNhn2z5zVgWwwnr3LX1&amp;__tn__=*NK-R\">#s\u00e9n\u00e9gal<\/a><\/p>\n",
+      "protected": false
+    },
+    "_links": {
+      "self": [
+        {
+          "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=\/wp\/v2\/posts\/10397",
+          "targetHints": { "allow": ["GET"] }
+        }
+      ],
+      "collection": [
+        { "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=\/wp\/v2\/posts" }
+      ],
+      "about": [
+        { "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=\/wp\/v2\/types\/post" }
+      ],
+      "author": [
+        {
+          "embeddable": true,
+          "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=\/wp\/v2\/users\/13"
+        }
+      ],
+      "replies": [
+        {
+          "embeddable": true,
+          "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=%2Fwp%2Fv2%2Fcomments&post=10397"
+        }
+      ],
+      "version-history": [
+        {
+          "count": 2,
+          "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=\/wp\/v2\/posts\/10397\/revisions"
+        }
+      ],
+      "predecessor-version": [
+        {
+          "id": 10400,
+          "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=\/wp\/v2\/posts\/10397\/revisions\/10400"
+        }
+      ],
+      "wp:featuredmedia": [
+        {
+          "embeddable": true,
+          "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=\/wp\/v2\/media\/10398"
+        }
+      ],
+      "wp:attachment": [
+        {
+          "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=%2Fwp%2Fv2%2Fmedia&parent=10397"
+        }
+      ],
+      "wp:term": [
+        {
+          "taxonomy": "category",
+          "embeddable": true,
+          "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=%2Fwp%2Fv2%2Fcategories&post=10397"
+        },
+        {
+          "taxonomy": "post_tag",
+          "embeddable": true,
+          "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=%2Fwp%2Fv2%2Ftags&post=10397"
+        }
+      ],
+      "curies": [{ "name": "wp", "href": "https:\/\/api.w.org\/{rel}", "templated": true }]
+    },
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "id": 10398,
+          "date": "2025-12-10T13:31:50",
+          "slug": "10-dec-3",
+          "type": "attachment",
+          "link": "https:\/\/formation.gouv.sn\/?attachment_id=10398",
+          "title": { "rendered": "10 DEC 3" },
+          "author": 13,
+          "featured_media": 0,
+          "jetpack_sharing_enabled": true,
+          "caption": { "rendered": "" },
+          "alt_text": "",
+          "media_type": "image",
+          "mime_type": "image\/jpeg",
+          "media_details": {
+            "width": 1440,
+            "height": 1440,
+            "file": "2025\/12\/10-DEC-3.jpg",
+            "filesize": 166926,
+            "sizes": {
+              "medium": {
+                "file": "10-DEC-3-300x300.jpg",
+                "width": 300,
+                "height": 300,
+                "filesize": 21071,
+                "mime_type": "image\/jpeg",
+                "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-3-300x300.jpg"
+              },
+              "large": {
+                "file": "10-DEC-3-1024x1024.jpg",
+                "width": 1024,
+                "height": 1024,
+                "filesize": 129162,
+                "mime_type": "image\/jpeg",
+                "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-3-1024x1024.jpg"
+              },
+              "thumbnail": {
+                "file": "10-DEC-3-150x150.jpg",
+                "width": 150,
+                "height": 150,
+                "filesize": 7530,
+                "mime_type": "image\/jpeg",
+                "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-3-150x150.jpg"
+              },
+              "medium_large": {
+                "file": "10-DEC-3-768x768.jpg",
+                "width": 768,
+                "height": 768,
+                "filesize": 85069,
+                "mime_type": "image\/jpeg",
+                "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-3-768x768.jpg"
+              },
+              "bingo_ruby_crop_110x85": {
+                "file": "10-DEC-3-110x85.jpg",
+                "width": 110,
+                "height": 85,
+                "filesize": 3962,
+                "mime_type": "image\/jpeg",
+                "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-3-110x85.jpg"
+              },
+              "bingo_ruby_crop_300x424": {
+                "file": "10-DEC-3-300x424.jpg",
+                "width": 300,
+                "height": 424,
+                "filesize": 29093,
+                "mime_type": "image\/jpeg",
+                "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-3-300x424.jpg"
+              },
+              "bingo_ruby_crop_365x330": {
+                "file": "10-DEC-3-365x330.jpg",
+                "width": 365,
+                "height": 330,
+                "filesize": 25688,
+                "mime_type": "image\/jpeg",
+                "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-3-365x330.jpg"
+              },
+              "bingo_ruby_crop_540x370": {
+                "file": "10-DEC-3-540x370.jpg",
+                "width": 540,
+                "height": 370,
+                "filesize": 35342,
+                "mime_type": "image\/jpeg",
+                "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-3-540x370.jpg"
+              },
+              "bingo_ruby_crop_540x540": {
+                "file": "10-DEC-3-540x540.jpg",
+                "width": 540,
+                "height": 540,
+                "filesize": 51087,
+                "mime_type": "image\/jpeg",
+                "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-3-540x540.jpg"
+              },
+              "bingo_ruby_crop_750x450": {
+                "file": "10-DEC-3-750x450.jpg",
+                "width": 750,
+                "height": 450,
+                "filesize": 49674,
+                "mime_type": "image\/jpeg",
+                "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-3-750x450.jpg"
+              },
+              "bingo_ruby_crop_1000x550": {
+                "file": "10-DEC-3-1000x550.jpg",
+                "width": 1000,
+                "height": 550,
+                "filesize": 66942,
+                "mime_type": "image\/jpeg",
+                "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-3-1000x550.jpg"
+              },
+              "bingo_ruby_crop_1200x750": {
+                "file": "10-DEC-3-1200x750.jpg",
+                "width": 1200,
+                "height": 750,
+                "filesize": 102326,
+                "mime_type": "image\/jpeg",
+                "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-3-1200x750.jpg"
+              },
+              "full": {
+                "file": "10-DEC-3.jpg",
+                "width": 1440,
+                "height": 1440,
+                "mime_type": "image\/jpeg",
+                "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-3.jpg"
+              }
+            },
+            "image_meta": {
+              "aperture": "0",
+              "credit": "",
+              "camera": "",
+              "caption": "",
+              "created_timestamp": "0",
+              "copyright": "",
+              "focal_length": "0",
+              "iso": "0",
+              "shutter_speed": "0",
+              "title": "",
+              "orientation": "0",
+              "keywords": []
+            }
+          },
+          "source_url": "https:\/\/formation.gouv.sn\/wp-content\/uploads\/2025\/12\/10-DEC-3.jpg",
+          "_links": {
+            "self": [
+              {
+                "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=\/wp\/v2\/media\/10398",
+                "targetHints": { "allow": ["GET"] }
+              }
+            ],
+            "collection": [
+              { "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=\/wp\/v2\/media" }
+            ],
+            "about": [
+              {
+                "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=\/wp\/v2\/types\/attachment"
+              }
+            ],
+            "author": [
+              {
+                "embeddable": true,
+                "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=\/wp\/v2\/users\/13"
+              }
+            ],
+            "replies": [
+              {
+                "embeddable": true,
+                "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=%2Fwp%2Fv2%2Fcomments&post=10398"
+              }
+            ],
+            "wp:attached-to": [
+              {
+                "embeddable": true,
+                "post_type": "post",
+                "id": 10397,
+                "href": "https:\/\/formation.gouv.sn\/index.php?rest_route=\/wp\/v2\/posts\/10397"
+              }
+            ],
+            "curies": [{ "name": "wp", "href": "https:\/\/api.w.org\/{rel}", "templated": true }]
+          }
+        }
+      ]
+    }
+  }
+]
