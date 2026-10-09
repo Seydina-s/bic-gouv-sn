@@ -67,6 +67,7 @@ describe("articlePassages", () => {
       publishedOn: "2026-09-21",
       contentHash: "1".repeat(64),
       section: "communiques",
+      publisher: "Présidence",
       text: "Corps de test.",
     });
   });

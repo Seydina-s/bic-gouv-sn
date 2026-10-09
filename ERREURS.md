@@ -202,3 +202,10 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : l'estimation reposait sur des ratios (caractères par jeton) mesurés sur le seul premier lot de 30 articles, sans marge, et la collecte ne gardait pas les jetons réellement consommés : impossible de vérifier le modèle d'estimation avant d'engager un lot dix fois plus gros.
 - **Correctif** : toute estimation est multipliée par l'écart mesuré (×1,3, `MEASURED_OVERRUN`) ; la collecte affiche désormais les jetons lus et écrits, pour recaler les ratios à chaque lot. Test : `services/ingestion/src/translation/wolof-translation.test.ts`. Écart signalé à l'utilisateur.
 - **Prévention** : une estimation de coût présentée pour validation s'appuie sur une mesure réelle d'un lot comparable, affiche sa marge, et chaque dépense réelle est comparée à l'estimation validée dès sa lecture ; au-delà de +10 %, l'utilisateur est prévenu.
+
+## 09/10/2026 — Quasi-incident : une branche remise à jour aurait annulé une fusion (rattrapé avant validation)
+
+- **Ce qui s'est passé** : pour repartir de la dernière version, j'ai déplacé une branche de travail sur `origin/main` en gardant ses fichiers (`git reset --soft`). La branche partait d'avant la fusion n° 286 (voix) : ses anciennes versions des fichiers des voix, du backlog et du journal des décisions apparaissaient comme des modifications, qui auraient défait la n° 286 une fois validées.
+- **Cause racine** : `reset --soft` garde l'état des fichiers de l'ancienne base ; il n'est sûr que si cette base est exactement le parent de `origin/main`.
+- **Correctif** : fichiers remis dans leur état fusionné (`git checkout origin/main -- <fichiers>`) avant toute validation ; vérifié dans `git status`.
+- **Prévention** : après chaque changement de base, relire `git status` et n'accepter que les fichiers modifiés par la tâche en cours ; préférer `git rebase --onto origin/main <ancienne base>` à `reset --soft`.

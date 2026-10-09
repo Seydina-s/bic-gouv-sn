@@ -28,7 +28,7 @@ const INTERFACE_LANG = "fr";
 /** The title of each step of the welcome, in order (fr catalog). */
 const WELCOME_STEPS = [
   "Choisissez votre langue",
-  "L'action du gouvernement, chaque jour",
+  "Le Gouvernement, en un seul endroit",
   "La source, toujours",
   "Gardez l'essentiel, même sans réseau",
 ] as const;

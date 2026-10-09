@@ -36,6 +36,13 @@ describe("userMessage", () => {
     expect(message).toContain('<extract number="2" title="Quai" date="not given">');
   });
 
+  it("names the institution that published an article's extract", () => {
+    const news = { ...passage(3, "Audience", "Le texte."), publisher: "Primature" };
+    expect(userMessage("Question ?", "fr", [news])).toContain(
+      '<extract number="1" title="Audience" date="not given" publisher="Primature">',
+    );
+  });
+
   it("asks for Wolof when the question is in Wolof", () => {
     expect(userMessage("[wo] Laaj", "wo", given)).toContain("Language of the answer: Wolof");
   });

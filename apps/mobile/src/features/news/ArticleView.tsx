@@ -26,11 +26,10 @@ import { useRecordRead } from "../usage-stats/UsageStatsProvider";
 import { FloatingListenButton, useListenScroll } from "./FloatingListenButton";
 import { ListenPill, useArticleListening } from "./ListenButton";
 import { formatPublishedOn } from "./format";
+import { institutionLabelKey, siteOf } from "./institution";
 import { SectionTag } from "./SectionTag";
 import { useNewsArticle } from "./useNews";
 import { dimWhenPressed } from "../../components/press-feedback";
-
-const SOURCE = "presidence.sn";
 
 /** HTTP answer of the API for an article the source withdrew (hidden, decision of 28/09). */
 const GONE = 410;
@@ -137,6 +136,10 @@ function ArticleBody({
   const listenScroll = useListenScroll(scrollTop.onScroll);
   const listening = useArticleListening(detail);
   const { color, space, textStyle, layout, radius, touchTarget } = theme;
+  const others = (detail.alsoPublishedBy ?? [])
+    .map((other) => institutionLabelKey(other.publisher))
+    .filter((key) => key !== null)
+    .map((key) => t(key));
 
   // Full-bleed photo when the pane is no wider than the reading column, framed otherwise.
   const framed = paneWidth > layout.readingMaxWidth;
@@ -223,21 +226,17 @@ function ArticleBody({
           ]}
         >
           <Text style={[textStyle.bodySmall, { color: color.textSecondary }]}>
-            {t("content.sourceAttribution", { source: SOURCE })}
+            {t("content.sourceAttribution", { source: siteOf(detail.sourceUrl) })}
           </Text>
-          <Pressable
-            accessibilityRole="link"
-            onPress={() => void Linking.openURL(detail.sourceUrl)}
-            style={dimWhenPressed(
-              [styles.sourceLink, { minHeight: theme.touchTarget.min, gap: space.sm }],
-              theme.opacity.controlPressed,
-            )}
-          >
-            <Icon icon={ArrowSquareOut} size="sm" color={color.textBrand} />
-            <Text style={[textStyle.label, { color: color.textBrand }]}>
-              {t("article.openSource", { source: SOURCE })}
+          <SourceLink url={detail.sourceUrl} />
+          {others.length > 0 && (
+            <Text style={[textStyle.bodySmall, { color: color.textSecondary }]}>
+              {t("content.alsoPublishedBy", { institutions: others.join(", ") })}
             </Text>
-          </Pressable>
+          )}
+          {(detail.alsoPublishedBy ?? []).map((other) => (
+            <SourceLink key={other.sourceUrl} url={other.sourceUrl} />
+          ))}
         </View>
       </Animated.ScrollView>
       <ScrollTopButton
@@ -254,6 +253,28 @@ function ArticleBody({
       />
       {withAppBar && <FloatingAppBar visible={scrollTop.visible} />}
     </View>
+  );
+}
+
+/** "Lire sur primature.sn": opens an official page in the browser. */
+function SourceLink({ url }: { url: string }) {
+  const { theme } = useTheme();
+  const { t } = useTranslation();
+  const { color, space, textStyle } = theme;
+  return (
+    <Pressable
+      accessibilityRole="link"
+      onPress={() => void Linking.openURL(url)}
+      style={dimWhenPressed(
+        [styles.sourceLink, { minHeight: theme.touchTarget.min, gap: space.sm }],
+        theme.opacity.controlPressed,
+      )}
+    >
+      <Icon icon={ArrowSquareOut} size="sm" color={color.textBrand} />
+      <Text style={[textStyle.label, { color: color.textBrand }]}>
+        {t("article.openSource", { source: siteOf(url) })}
+      </Text>
+    </Pressable>
   );
 }
 

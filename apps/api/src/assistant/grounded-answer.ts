@@ -102,7 +102,7 @@ export function userMessage(
 ): string {
   const extracts = given.map(
     (passage, index) =>
-      `<extract number="${String(index + 1)}" title="${quoted(passage.title).replace(/"/g, "'")}" date="${passage.publishedOn ?? "not given"}">\n${quoted(passage.text)}\n</extract>`,
+      `<extract number="${String(index + 1)}" title="${quoted(passage.title).replace(/"/g, "'")}" date="${passage.publishedOn ?? "not given"}"${passage.publisher === undefined ? "" : ` publisher="${passage.publisher}"`}>\n${quoted(passage.text)}\n</extract>`,
   );
   const task = TASKS[mode];
   return [

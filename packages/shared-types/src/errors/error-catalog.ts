@@ -70,7 +70,7 @@ export const ERROR_CATALOG = {
     action: "Rien à faire, sauf si le nombre augmente (lien cassé dans une notification ?).",
   },
   NEWS_WITHDRAWN: {
-    what: "Un article demandé a été retiré du site de la Présidence ; l'app ne le montre plus.",
+    what: "Un article demandé a été retiré de son site d'origine ; l'app ne le montre plus.",
     where: "API publique, actualités",
     impact: "L'utilisateur voit « Cet article a été retiré par la Présidence ».",
     severity: "info",

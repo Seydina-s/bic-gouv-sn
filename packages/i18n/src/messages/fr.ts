@@ -16,6 +16,7 @@ export const fr = {
   },
   content: {
     sourceAttribution: "Source\u00a0: {source}",
+    alsoPublishedBy: "Aussi publi\u00e9 par\u00a0: {institutions}",
     machineTranslation: "Traduction automatique",
     listen: "Écouter",
     pause: "Pause",
@@ -48,15 +49,21 @@ export const fr = {
     },
     languageTitle: "Choisissez votre langue",
     languageBody: "Vous pourrez la changer à tout moment dans les réglages.",
-    newsTitle: "L'action du gouvernement, chaque jour",
+    newsTitle: "Le Gouvernement, en un seul endroit",
     newsBody:
-      "Conseil des ministres, communiqués, discours\u00a0: les publications officielles, dès leur mise en ligne.",
+      "Conseil des ministres, communiqués, discours\u00a0: les publications officielles des institutions, dès leur mise en ligne.",
     sourceTitle: "La source, toujours",
-    sourceBody: "Chaque article vient de presidence.sn et renvoie à sa page d'origine.",
+    sourceBody:
+      "Chaque article vient du site officiel qui l'a publié et renvoie à sa page d'origine.",
     offlineTitle: "Gardez l'essentiel, même sans réseau",
     offlineBody: "Touchez le marque-page\u00a0: l'article reste lisible hors ligne.",
   },
-  /** Sections of presidence.sn, keyed by their slug. */
+  /** Institutions publishing the news, keyed by their id (short names for cards). */
+  institutions: {
+    presidence: "Présidence",
+    primature: "Primature",
+  },
+  /** Sections of the official sites, keyed by their slug. */
   categories: {
     "conseil-des-ministres": "Conseil des ministres",
     communiques: "Communiqués",
@@ -65,6 +72,7 @@ export const fr = {
     focus: "Focus",
     interviews: "Interviews & reportages",
     agenda: "Agenda",
+    actualites: "Actualités",
     general: "Actualité",
   },
   feed: {
@@ -102,7 +110,7 @@ export const fr = {
     back: "Retour",
     openSource: "Lire sur {source}",
     notFound: "Cet article n'est pas disponible.",
-    withdrawn: "Cet article a été retiré du site de la Présidence.",
+    withdrawn: "Cet article a été retiré de son site d'origine.",
     image: "Photo de l'article",
     showPhoto: "Afficher la photo",
     watchVideo: "Regarder la vidéo",
@@ -309,7 +317,7 @@ export const fr = {
     restartWelcomeHelp: "Revoir la présentation depuis le début, avec le choix de la langue.",
     about: "À propos",
     aboutNews:
-      "Bic Gouv Sn réunit en un seul endroit l'actualité officielle du Gouvernement du Sénégal. Comptes rendus du Conseil des ministres, communiqués, discours, audiences et visites officielles arrivent dans l'application dès leur publication sur presidence.sn, en français et en wolof.",
+      "Bic Gouv Sn réunit en un seul endroit l'actualité officielle du Gouvernement du Sénégal. Comptes rendus du Conseil des ministres, communiqués, discours, audiences et visites officielles arrivent dans l'application dès leur publication sur les sites officiels de la Présidence de la République et de la Primature, en français et en wolof.",
     aboutProcedures:
       "Pour vos démarches administratives, l'application explique chaque procédure publiée sur e-senegal.sn avec les pièces à fournir, le coût, le délai et le lien pour la faire en ligne.",
     aboutSources:

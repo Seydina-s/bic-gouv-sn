@@ -144,7 +144,7 @@ describe("first run", () => {
     await fireEvent.press(screen.getByRole("radio", { name: "Wolof" }));
     expect(screen.getByRole("radio", { name: "Wolof", checked: true })).toBeOnTheScreen();
     for (const title of [
-      "L'action du gouvernement, chaque jour",
+      "Le Gouvernement, en un seul endroit",
       "La source, toujours",
       "Gardez l'essentiel, même sans réseau",
     ]) {
@@ -644,7 +644,7 @@ describe("app shell", () => {
     }) as unknown as typeof fetch;
     await renderRouter(routes, { initialUrl: `/article/${DETAIL.id}` });
     expect(
-      await screen.findByText("Cet article a été retiré du site de la Présidence."),
+      await screen.findByText("Cet article a été retiré de son site d'origine."),
     ).toBeOnTheScreen();
     expect(screen.queryByText("Paragraphe de test.")).toBeNull();
     await waitFor(async () => {
