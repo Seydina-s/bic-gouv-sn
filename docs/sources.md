@@ -2,6 +2,82 @@
 
 Relevé du 25/09/2026 (tâche VS-01). Environ 40 requêtes au total, espacées d'au moins 1 seconde, avec un User-Agent qui identifie le projet.
 
+Depuis le 09/10/2026, la plateforme couvre **tout le Gouvernement** : Présidence, Primature et ministères (décision de l'utilisateur, voir `decisions.md`). La section « Gouvernement » ci-dessous recense les sites de la Primature et des ministères.
+
+## Gouvernement : Primature et ministères (relevé du 09/10/2026)
+
+### Méthode
+
+- Liste des ministères : page officielle https://primature.sn/le-gouvernement (Premier ministre, 29 ministres dont 4 « ministres auprès »).
+- Adresses : liens officiels, puis recherche web. L'annuaire de https://www.vie-publique.sn n'a servi que de piste : c'est une **plateforme indépendante** (rubrique « Financement & indépendance »), **pas une source**.
+- Chaque site a été interrogé directement : réponse, outil de publication, flux RSS, date du dernier article, `robots.txt`. Une seule visite par page, User-Agent du projet.
+- **Actif** = un article daté de moins de 3 mois au 09/10/2026.
+
+### Règles communes
+
+- Attribution « Source : <institution> » avec un lien vers la page d'origine, comme pour presidence.sn.
+- Au plus 1 requête par seconde et par site ; `Crawl-delay` respecté quand il est indiqué (10 s pour Forces armées et Santé).
+- Certificat TLS invalide : **le site n'est pas collecté**, jamais de contournement. On le revérifie chaque mois.
+- Doublons : un contenu publié par la Présidence et une autre institution n'est gardé qu'une fois, **dans sa version de la Présidence** ; l'autre publication est notée comme source complémentaire.
+
+### Primature : primature.sn
+
+- Drupal. `robots.txt` autorise `/publications/actualites` (seuls `/admin/`, `/core/`… sont interdits).
+- Liste : `https://primature.sn/publications/actualites?page=0` à `?page=41` (42 pages au 09/10/2026), du plus récent au plus ancien.
+- Autres rubriques : `/publications/conseil-des-ministres`, `/le-gouvernement`, `/programmes-speciaux`.
+- Pas de flux RSS (`/rss.xml` : 404). Collecte par lecture des pages de liste puis des articles.
+- Doublon connu : le communiqué du Conseil des ministres du 30/09/2026 est sur presidence.sn **et** primature.sn → version Présidence gardée.
+- Pas de version wolof.
+
+### Ministères : sites actifs
+
+| Ministère | Site | Accès aux articles | Dernier article vu |
+|---|---|---|---|
+| Justice | justice.sec.gouv.sn | WordPress, flux RSS | 09/10/2026 |
+| Industrie et Commerce | industriecommerce.gouv.sn | WordPress, flux RSS (accueil « en maintenance », flux à jour) | 09/10/2026 |
+| Pêches et Économie maritime | mpem.gouv.sn | WordPress, flux RSS | 08/10/2026 |
+| Intérieur | interieur.gouv.sn | pages HTML, pas de RSS, pas de `robots.txt` | 07/10/2026 |
+| Enseignement supérieur, Recherche et Innovation | mesr.gouv.sn (articles sur mesrisenegal.sn) | flux RSS (30 articles) | 05/10/2026 |
+| Énergie et Pétrole | energie-mines.gouv.sn | WordPress, flux RSS ; titre encore « Énergie, Pétrole et Mines » | 05/10/2026 |
+| Emploi et Formation professionnelle | formation.gouv.sn | WordPress ; flux RSS arrêté en 12/2025, accueil à jour | 29/09/2026 |
+| Hydraulique et Assainissement | mha.gouv.sn | WordPress, flux RSS | 25/09/2026 |
+| Agriculture, Souveraineté alimentaire et Élevage | agriculture.gouv.sn | WordPress, flux RSS ; `robots.txt` : collecte autorisée, `ai-train=no` (nous n'entraînons aucun modèle) | 22/09/2026 |
+| Infrastructures | ministeredesinfrastructures.sn | application JavaScript : plan du site avec dates (16 articles), rendu par navigateur automatique | 01/09/2026 |
+| Santé et Hygiène publique | sante.gouv.sn | Drupal, `Crawl-delay: 10` | 15/08/2026 |
+| Forces armées | forcesarmees.gouv.sn | Drupal, `Crawl-delay: 10` | 08/08/2026 |
+| Télécommunications et Numérique | mctn.sn | application Angular, sans plan du site : navigateur automatique | à mesurer au rendu |
+| Éducation nationale | education.sn | Next.js, articles dans la page | à mesurer (liste à jour) |
+
+### Ministères : sites à revoir (non collectés pour l'instant)
+
+| Ministère | Site | Constat du 09/10/2026 |
+|---|---|---|
+| Économie, Plan et Coopération | economie.gouv.sn | dernier article 20/05/2026 ; Drupal, collectable dès qu'il publie de nouveau |
+| Famille, Action sociale et Solidarités | femme.gouv.sn | dernier article 06/01/2026 |
+| Finances et Budget | finances.gouv.sn | ne répond pas depuis notre réseau (délai dépassé) ; à retenter depuis le serveur |
+| Budget | budget.sec.gouv.sn | certificat TLS incomplet |
+| Fonction publique, Travail et Réforme du service public | fonctionpublique.gouv.sn | refuse nos visites (429, trop de requêtes) ; à retenter |
+| Microfinance et Économie sociale et solidaire | microfinance-ess.gouv.sn | certificat TLS expiré |
+| Transports terrestres et aériens | mittd.gouv.sn | certificat TLS ne correspondant pas au site |
+| Urbanisme, Collectivités territoriales et Aménagement | urbanisme.gouv.sn ; decentralisation.gouv.sn | dernier article 05/2024 ; certificat invalide |
+| Intégration africaine et Affaires étrangères | diplomatie.gouv.sn | dernier article 03/2024 |
+| Jeunesse et Sports | mjsc.gouv.sn | site de l'ancien ministère (Jeunesse, Sports et Culture), dernier article 06/2025 |
+| Culture, Artisanat et Tourisme | culture.gouv.sn | site de l'ancien Secrétariat d'État, dernier article 06/2024 |
+| Environnement et Transition écologique | environnement.gouv.sn | site fermé par mot de passe (en construction) |
+| Mines et Géologie | — | aucun site trouvé (minesgeologie.sec.gouv.sn n'existe plus) |
+| Communication et Relations avec les Institutions | — | aucun site trouvé |
+| Secrétariat général du Gouvernement | — | aucun site trouvé |
+
+### Réseaux sociaux
+
+Plusieurs ministères sans site actif publient sur Facebook ou X. Ces réseaux **ne sont pas collectés** :
+
+- **Conditions d'utilisation** : la lecture automatique des pages Facebook est interdite sans l'accès « Page Public Content Access » de Meta (vérification d'entreprise et revue de l'application, rarement accordées) ; l'interface de lecture de X est payante.
+- **Fiabilité** : ces services changent souvent leurs règles et coupent les accès sans préavis.
+- **Traçabilité** : un message peut être modifié ou supprimé sans trace ; il n'a souvent ni titre ni texte complet.
+
+YouTube fait exception : chaque chaîne officielle publie un flux RSS public et gratuit (`https://www.youtube.com/feeds/videos.xml?channel_id=…`), utilisable pour les vidéos d'une institution après vérification de la chaîne.
+
 ## presidence.sn : actualités
 
 ### Règles d'accès

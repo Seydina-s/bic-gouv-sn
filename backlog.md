@@ -485,3 +485,20 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 08/10/2026 | AI-22 ✅ Réponses sur l'actualité récente : date du jour donnée au modèle, articles récents favorisés pour les questions d'actualité, dernier article d'une rubrique citée (Conseil des ministres, discours, interviews) | Retour de l'utilisateur (08/10) |
 | 08/10/2026 | AI-23 🔴 Recherche : les questions de la forme « j'ai perdu ma pièce d'identité » trouvent encore mal la fiche de la carte nationale d'identité (rang ≈ 14 sur le jeu d'essai), noyée par les fiches dont la liste de pièces répète « pièce d'identité » ; pistes : compter davantage le titre d'une fiche que sa liste de pièces, ou un modèle d'encodage plus grand (mesurer sur `assistant:eval --meaning`) | Mesure du 08/10 |
 | 08/10/2026 | AI-23 ✅ Poids du titre porté de 2 à 4 dans la recherche par mots : la fiche de la carte nationale d'identité passe du 14e rang aux 3 premières ; sur 72 questions, bonne page dans les 3 premières 86 % (83 %), dans les 5 premières 92 % (89 %), dans les 10 premières 97 % (94 %) | Mesure du 08/10 |
+
+### Réorientation du 09/10/2026 — tout le Gouvernement (Présidence, Primature, ministères)
+
+| Date | Tâche | Origine |
+|---|---|---|
+| 09/10/2026 | GOV-01 ✅ Cartographie des sources : liste officielle du Gouvernement (primature.sn), 60 adresses vérifiées une à une ; 14 sites de ministères actifs (dont 7 avec flux RSS), 15 à revoir (certificat invalide, site arrêté, aucun site) ; vie-publique.sn écartée (plateforme indépendante) ; réseaux sociaux non collectés (conditions d'utilisation, fiabilité, traçabilité) ; `docs/sources.md`, CLAUDE.md §1 et `decisions.md` mis à jour | Demande de l'utilisateur (09/10) |
+| 09/10/2026 | GOV-02 🔴 Modèle de données : institution qui publie (`publisher`) sur chaque article et sources complémentaires (`alsoPublishedBy`) ; articles existants rattachés à la Présidence ; schémas partagés, API, cache de l'app | GOV-01 |
+| 09/10/2026 | GOV-03 🔴 Collecte de la Primature : pages de liste (`?page=0..41`) puis articles, tout l'historique, validation, quarantaine, images et PDF ; puis suivi des nouveautés (15 min) | GOV-01 |
+| 09/10/2026 | GOV-04 🔴 Doublons entre institutions : même contenu repéré (titre normalisé, date proche, texte semblable), **version de la Présidence gardée**, l'autre notée en source complémentaire ; jeu d'essai avec le Conseil des ministres du 30/09 | Décision de l'utilisateur (09/10) |
+| 09/10/2026 | GOV-05 🔴 Collecte par flux RSS (sites WordPress) : Justice, Industrie et Commerce, Pêches, Enseignement supérieur, Énergie, Hydraulique, Agriculture ; historique par l'interface WordPress quand elle est ouverte | GOV-01 |
+| 09/10/2026 | GOV-06 🔴 Collecte par pages HTML : Intérieur, Santé, Forces armées (10 s entre deux visites), Emploi et Formation, Éducation nationale | GOV-01 |
+| 09/10/2026 | GOV-07 🔴 Sites en application JavaScript (Infrastructures, Numérique) : navigateur automatique (Playwright) derrière le même fournisseur | GOV-01 |
+| 09/10/2026 | GOV-08 🔴 Revérification mensuelle automatique des sites à revoir (certificat, réponse, dernier article), alerte simple dans la console quand un site redevient collectable | GOV-01 |
+| 09/10/2026 | GOV-09 🔴 Narration de l'app pour tout le Gouvernement : onboarding, accueil, attribution « Source : <institution> », filtre par institution, textes de l'assistant ; console (supervision par source) ; FR + WO | Demande de l'utilisateur (09/10) |
+| 09/10/2026 | GOV-10 🔴 Traduction wolof des articles de la Primature et des ministères (aucune version wolof officielle) : coût à estimer puis à faire valider | GOV-03, GOV-05 |
+| 09/10/2026 | GOV-11 🔴 Proposition à valider (point 39) : espace de publication dans la console pour les cellules de communication des ministères sans site actif, et vidéos des chaînes YouTube officielles par leur flux RSS public | Demande de l'utilisateur (09/10) |
+| 09/10/2026 | GOV-12 🔴 Assistant : réponses sur tout le Gouvernement (citations avec l'institution), jeu d'essai élargi | GOV-03 |
