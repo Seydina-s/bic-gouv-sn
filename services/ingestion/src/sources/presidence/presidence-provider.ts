@@ -1,8 +1,7 @@
 import { officialMediaUrl, type Lang, type NewsArticle } from "@bgs/shared-types";
-import { CircuitBreaker, createResilientCall } from "@bgs/resilience";
 import type { z } from "zod";
-import { QuarantineError, SourceUnreachableError } from "../../lib/errors";
-import { createRateLimiter } from "../../lib/rate-limiter";
+import { QuarantineError } from "../../lib/errors";
+import { createPoliteHttp } from "../../lib/polite-http";
 import type { SourceArticleRef, SourceProvider } from "../source-provider";
 import { detailResponseSchema, listResponseSchema } from "./api-schemas";
 import { normalizeDetail, presidenceArticleId } from "./normalize";
@@ -15,9 +14,6 @@ const PRESIDENCE_FILES = "https://bo-admin.presidence.sn";
 function documentUrl(path: string | null): string | null {
   return path === null ? null : officialMediaUrl(new URL(path, PRESIDENCE_FILES).href);
 }
-
-/** Identifies the project to the source, as a polite crawler should. */
-export const USER_AGENT = "BicGouvSN-ingestion/0.1 (+https://github.com/Seydina-s/bic-gouv-sn)";
 
 export interface PresidenceProviderOptions {
   fetchImpl?: typeof fetch;
@@ -32,48 +28,15 @@ export function createPresidenceProvider({
   now = () => new Date(),
   intervalMs = 1000,
 }: PresidenceProviderOptions = {}): SourceProvider {
-  const schedule = createRateLimiter(intervalMs);
-  const breaker = new CircuitBreaker({
-    dependency: "presidence.sn",
-    failureThreshold: 5,
-    resetTimeoutMs: 60_000,
-    isFailure: (error) => !(error instanceof QuarantineError),
-  });
-  const call = createResilientCall({
-    breaker,
-    timeoutMs: 15_000,
-    retry: {
-      idempotent: true,
-      maxAttempts: 3,
-      baseDelayMs: 1000,
-      maxDelayMs: 8000,
-      // A 4xx (e.g. an article removed at the source) is not transient: no retry.
-      shouldRetry: (error) =>
-        !(error instanceof SourceUnreachableError && error.status !== null && error.status < 500),
-    },
-  });
+  const http = createPoliteHttp({ dependency: "presidence.sn", fetchImpl, intervalMs });
+  const breaker = http.breaker;
 
   async function getJson<S extends z.ZodType>(path: string, lang: Lang, schema: S) {
     const url = `${PRESIDENCE_API}${path}`;
-    const body = await call((signal) =>
-      schedule(async () => {
-        const response = await fetchImpl(url, {
-          signal,
-          headers: {
-            Accept: "application/json",
-            "Accept-Language": lang,
-            "User-Agent": USER_AGENT,
-          },
-        }).catch((error: unknown) => {
-          // Network failure (DNS, TLS, connection reset): reported with its catalog code.
-          throw signal.aborted ? error : new SourceUnreachableError(url, null);
-        });
-        if (!response.ok) {
-          throw new SourceUnreachableError(url, response.status);
-        }
-        return (await response.json()) as unknown;
-      }),
-    );
+    const body = await http.read(url, (response) => response.json() as Promise<unknown>, {
+      Accept: "application/json",
+      "Accept-Language": lang,
+    });
     const parsed = schema.safeParse(body);
     if (!parsed.success) {
       throw new QuarantineError(url, "unexpected response shape (source structure changed?)");
@@ -108,21 +71,7 @@ export function createPresidenceProvider({
     articleIdFor: (ref) => presidenceArticleId(ref.sourceId),
 
     async downloadMedia(url) {
-      const data = await call((signal) =>
-        schedule(async () => {
-          const response = await fetchImpl(url, {
-            signal,
-            headers: { "User-Agent": USER_AGENT },
-          }).catch((error: unknown) => {
-            throw signal.aborted ? error : new SourceUnreachableError(url, null);
-          });
-          if (!response.ok) {
-            throw new SourceUnreachableError(url, response.status);
-          }
-          return response.arrayBuffer();
-        }),
-      );
-      return Buffer.from(data);
+      return Buffer.from(await http.read(url, (response) => response.arrayBuffer()));
     },
 
     async fetchArticle(ref: SourceArticleRef): Promise<NewsArticle> {

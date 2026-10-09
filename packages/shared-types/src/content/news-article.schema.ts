@@ -24,6 +24,12 @@ export const newsArticleSchema = z
     publisher: institutionSchema.default("presidence"),
     /** Same content published by other institutions: shown once, in this version. */
     alsoPublishedBy: z.array(otherPublicationSchema).default([]),
+    /**
+     * Set when this article repeats one published by the reference institution
+     * (owner's decision of 09/10/2026): kept for traceability, never shown; the
+     * reference article lists it in `alsoPublishedBy`.
+     */
+    duplicateOf: z.uuid().optional(),
     /** Section slug as mapped from the source in docs/sources.md; never invented. */
     category: slugSchema,
     images: z.array(imageSchema),
@@ -53,7 +59,16 @@ export function publishedTranslation(
   article: NewsArticle,
   lang: NewsTranslation["lang"],
 ): NewsTranslation | undefined {
-  return article.translations.find(
-    (translation) => translation.lang === lang && isPublished(translation),
-  );
+  return article.duplicateOf === undefined
+    ? article.translations.find(
+        (translation) => translation.lang === lang && isPublished(translation),
+      )
+    : undefined;
+}
+
+/** Languages the app may show the article in: none for a duplicate. */
+export function shownLangs(article: NewsArticle): NewsTranslation["lang"][] {
+  return article.duplicateOf === undefined
+    ? article.translations.filter(isPublished).map((translation) => translation.lang)
+    : [];
 }

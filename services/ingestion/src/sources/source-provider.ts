@@ -3,12 +3,20 @@ import type { Lang, NewsArticle } from "@bgs/shared-types";
 
 /** Lightweight entry from a source's "latest" listing, enough to decide what to fetch. */
 export interface SourceArticleRef {
-  /** Identifier of the article in the source system (shared by its FR and WO versions). */
-  sourceId: number;
+  /**
+   * Identifier of the article in the source system (shared by its FR and WO versions):
+   * a number for presidence.sn, the page name for sites without ids (Primature).
+   */
+  sourceId: number | string;
   slug: string;
   lang: Lang;
-  /** Source's last-modification time, used to detect new and edited articles. */
+  /**
+   * Source's last-modification marker, used to detect new and edited articles: a time
+   * for presidence.sn, the listed day for sites that give no time.
+   */
   sourceUpdatedAt: string;
+  /** Publication day shown by the listing, for sources whose article page has none. */
+  publishedOn?: string | null;
   /** Cover photo on the source site, if any. */
   coverSourceUrl: string | null;
   /** Official documents (PDF) the source attaches to the article, outside its text. */

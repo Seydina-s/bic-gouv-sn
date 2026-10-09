@@ -51,7 +51,7 @@ function fakeSource(): SourceProvider & { fetched: number[] } {
   const fetched: number[] = [];
   return {
     fetched,
-    articleIdFor: (ref) => idOf(ref.sourceId),
+    articleIdFor: (ref) => idOf(Number(ref.sourceId)),
     downloadMedia: () => Promise.reject(new Error("no media")),
     listPage: (lang, page) =>
       Promise.resolve({
@@ -65,10 +65,10 @@ function fakeSource(): SourceProvider & { fetched: number[] } {
         })),
       }),
     fetchArticle: (ref) => {
-      fetched.push(ref.sourceId);
+      fetched.push(Number(ref.sourceId));
       return ref.sourceId === 2
         ? Promise.reject(Object.assign(new Error("broken"), { code: "INGESTION_QUARANTINED" }))
-        : Promise.resolve(article(ref.sourceId, ref.lang));
+        : Promise.resolve(article(Number(ref.sourceId), ref.lang));
     },
   };
 }

@@ -3,7 +3,7 @@ import { CircuitBreaker, createResilientCall } from "@bgs/resilience";
 import type { z } from "zod";
 import { QuarantineError, SourceUnreachableError } from "../../lib/errors";
 import { createRateLimiter } from "../../lib/rate-limiter";
-import { USER_AGENT } from "../presidence/presidence-provider";
+import { USER_AGENT } from "../../lib/polite-http";
 import {
   DETAIL_QUERY,
   detailResponseSchema,

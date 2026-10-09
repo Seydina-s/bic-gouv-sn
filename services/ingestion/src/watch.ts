@@ -6,6 +6,7 @@ import { attachDocuments } from "./media/attach-documents";
 import { attachInlineImages } from "./media/attach-inline";
 import type { AttachMedia } from "./media/attach-result";
 import type { MediaStorage } from "./media/media-storage";
+import { saveCollected } from "./duplicates/reconcile";
 import { mergeArticle } from "./merge";
 import type { SourceArticleRef, SourceProvider } from "./sources/source-provider";
 
@@ -63,7 +64,8 @@ export async function pollOnce(
       for (const ref of refs.filter((candidate) => !seen.isUnchanged(candidate))) {
         try {
           const existing = await repository.get(provider.articleIdFor(ref));
-          const outcome = await repository.save(
+          const outcome = await saveCollected(
+            repository,
             mergeArticle(existing, await provider.fetchArticle(ref)),
           );
           result.outcomes[outcome] += 1;
@@ -71,8 +73,9 @@ export async function pollOnce(
             created += 1;
           }
           if (outcome !== "unchanged") {
+            // Only a time measures freshness: a listed day alone would count hours.
             const changedAt = Date.parse(ref.sourceUpdatedAt);
-            if (!Number.isNaN(changedAt)) {
+            if (ref.sourceUpdatedAt.includes("T") && !Number.isNaN(changedAt)) {
               result.detectionDelays.push(Math.max(0, (now().getTime() - changedAt) / 1000));
             }
           }

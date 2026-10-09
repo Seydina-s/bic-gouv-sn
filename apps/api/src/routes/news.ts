@@ -176,7 +176,13 @@ export const newsRoutes: FastifyPluginAsyncZod<NewsRoutesOptions> = (
       },
     },
     async (request, reply) => {
-      const article = await articles.get(request.params.id);
+      const stored = await articles.get(request.params.id);
+      // A repeat of the Présidence's article (shared link, older notification): the
+      // reader gets the version kept, under its own id.
+      const article =
+        stored?.duplicateOf === undefined
+          ? stored
+          : ((await articles.get(stored.duplicateOf)) ?? stored);
       const media = mediaBaseUrlFor(request, mediaBaseUrl);
       const detail = article === null ? null : toDetail(article, request.query.lang, media);
       if (article !== null && isWithdrawnIn(article, request.query.lang)) {

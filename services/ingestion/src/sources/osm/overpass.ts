@@ -1,7 +1,7 @@
 import { CircuitBreaker, createResilientCall } from "@bgs/resilience";
 import { z } from "zod";
 import { QuarantineError, SourceUnreachableError } from "../../lib/errors";
-import { USER_AGENT } from "../presidence/presidence-provider";
+import { USER_AGENT } from "../../lib/polite-http";
 
 /** Public Overpass API (OpenStreetMap data, ODbL): one polite query per import. */
 export const OVERPASS_API = "https://overpass-api.de/api/interpreter";

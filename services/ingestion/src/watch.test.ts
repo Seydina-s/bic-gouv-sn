@@ -50,7 +50,7 @@ function liveSource() {
     cover: null as string | null,
   };
   const provider: SourceProvider = {
-    articleIdFor: (ref) => idOf(ref.sourceId),
+    articleIdFor: (ref) => idOf(Number(ref.sourceId)),
     downloadMedia: () => Promise.reject(new Error("no media")),
     listPage: (lang) =>
       Promise.resolve({
@@ -64,12 +64,12 @@ function liveSource() {
         })),
       }),
     fetchArticle: (ref) => {
-      state.fetched.push(ref.sourceId);
+      state.fetched.push(Number(ref.sourceId));
       if (state.failing) {
         return Promise.reject(new Error("down"));
       }
       const item = state.page.find((entry) => entry.sourceId === ref.sourceId);
-      return Promise.resolve(article(ref.sourceId, ref.lang, item?.title ?? "?"));
+      return Promise.resolve(article(Number(ref.sourceId), ref.lang, item?.title ?? "?"));
     },
   };
   return { state, provider };
@@ -169,7 +169,7 @@ describe("catching up after an outage", () => {
   /** Newest first, two per page: 6 5 | 4 3 | 2 1 | … */
   function pagedSource(read: number[]): SourceProvider {
     return {
-      articleIdFor: (ref) => idOf(ref.sourceId),
+      articleIdFor: (ref) => idOf(Number(ref.sourceId)),
       downloadMedia: () => Promise.reject(new Error("no media")),
       listPage: (lang, page) => {
         read.push(page);
@@ -185,7 +185,8 @@ describe("catching up after an outage", () => {
           })),
         });
       },
-      fetchArticle: (ref) => Promise.resolve(article(ref.sourceId, ref.lang, `Titre ${ref.slug}`)),
+      fetchArticle: (ref) =>
+        Promise.resolve(article(Number(ref.sourceId), ref.lang, `Titre ${ref.slug}`)),
     };
   }
 

@@ -1,6 +1,7 @@
 import { isPublished, newsArticleSchema, type Lang, type NewsArticle } from "@bgs/shared-types";
 import {
   compareNewestFirst,
+  withDuplicateOf,
   withTrack,
   type ArticlePage,
   type ArticleRepository,
@@ -91,6 +92,7 @@ export class FileArticleRepository implements ArticleRepository {
       (includeWithdrawn || isPublished(translation));
     const articles = Object.values(entries)
       .map((entry) => entry.current)
+      .filter((article) => includeWithdrawn || article.duplicateOf === undefined)
       .filter((article) => article.translations.some(shown))
       .sort(compareNewestFirst);
     sorted.set(key, articles);
@@ -121,6 +123,18 @@ export class FileArticleRepository implements ArticleRepository {
   setAudioTrack(id: string, track: NewsArticle["audio"][number]): Promise<boolean> {
     return this.store.replaceCurrent(id, (current) =>
       newsArticleSchema.parse({ ...current, audio: withTrack(current.audio, track) }),
+    );
+  }
+
+  setDuplicateOf(id: string, referenceId: string | null): Promise<boolean> {
+    return this.store.replaceCurrent(id, (current) =>
+      newsArticleSchema.parse(withDuplicateOf(current, referenceId)),
+    );
+  }
+
+  setAlsoPublishedBy(id: string, others: NewsArticle["alsoPublishedBy"]): Promise<boolean> {
+    return this.store.replaceCurrent(id, (current) =>
+      newsArticleSchema.parse({ ...current, alsoPublishedBy: others }),
     );
   }
 

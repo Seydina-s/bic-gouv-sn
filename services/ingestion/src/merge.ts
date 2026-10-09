@@ -27,6 +27,9 @@ export function mergeArticle(existing: NewsArticle | null, incoming: NewsArticle
     audio: existing.audio,
     // Derived media survive an editorial update; the media step refreshes them if needed.
     images: existing.images,
+    // Marks of the one-content-one-article rule are ours, not the source's: kept.
+    alsoPublishedBy: existing.alsoPublishedBy,
+    ...(existing.duplicateOf === undefined ? {} : { duplicateOf: existing.duplicateOf }),
     embedding: existing.embedding,
     version: existing.version,
     contentHash: articleContentHash(translations, incoming.sourcePublishedOn, incoming.category),
