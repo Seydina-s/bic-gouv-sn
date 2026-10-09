@@ -15,6 +15,9 @@ export const INSTITUTIONS = [
   "energie",
   "hydraulique",
   "agriculture",
+  "peches",
+  "emploi-formation",
+  "interieur",
 ] as const;
 
 export const institutionSchema = z.enum(INSTITUTIONS);
@@ -62,6 +65,18 @@ export const INSTITUTION_SITES: Readonly<Record<Institution, InstitutionSite>> =
   agriculture: {
     pageHosts: ["agriculture.gouv.sn", "www.agriculture.gouv.sn"],
     mediaHosts: ["agriculture.gouv.sn", "www.agriculture.gouv.sn"],
+  },
+  peches: {
+    pageHosts: ["mpem.gouv.sn", "www.mpem.gouv.sn"],
+    mediaHosts: ["mpem.gouv.sn", "www.mpem.gouv.sn"],
+  },
+  "emploi-formation": {
+    pageHosts: ["formation.gouv.sn", "www.formation.gouv.sn"],
+    mediaHosts: ["formation.gouv.sn", "www.formation.gouv.sn"],
+  },
+  interieur: {
+    pageHosts: ["www.interieur.gouv.sn", "interieur.gouv.sn"],
+    mediaHosts: ["www.interieur.gouv.sn", "interieur.gouv.sn"],
   },
 };
 

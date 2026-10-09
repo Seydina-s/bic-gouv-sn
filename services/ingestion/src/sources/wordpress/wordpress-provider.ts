@@ -25,6 +25,18 @@ export interface WordpressSite {
   /** Site address without the final slash, e.g. "https://justice.sec.gouv.sn". */
   origin: string;
   cleanup: CleanupRules;
+  /**
+   * True when the site answers its REST interface only at "/?rest_route=" (its
+   * "/wp-json/" address fails, as on formation.gouv.sn, 09/10/2026).
+   */
+  queryRoute?: boolean;
+}
+
+/** Address of a REST route of the site, with its query parameters. */
+export function restUrl(site: WordpressSite, route: string, query: string): string {
+  return site.queryRoute === true
+    ? `${site.origin}/?rest_route=/wp/v2/${route}&${query}`
+    : `${site.origin}/wp-json/wp/v2/${route}?${query}`;
 }
 
 /** Section the ministries' posts are shown in (the sites' own categories vary). */
@@ -54,6 +66,19 @@ export function wordpressArticleId(origin: string, postId: number | string): str
 /** Title as people read it: entities decoded ("l&#8217;eau" → "l’eau"), spaces tidied. */
 export function plainTitle(rendered: string): string {
   return plainLetters(DomUtils.textContent(parseDocument(rendered)).replace(/\s+/g, " ").trim());
+}
+
+/**
+ * JSON of a REST answer. Some sites' page builder prints its style blocks before
+ * the data (seen on mpem.gouv.sn, 09/10/2026): those are skipped. Anything else that
+ * is not JSON is returned as null, which the shape check then quarantines.
+ */
+export function parseRestBody(text: string): unknown {
+  try {
+    return JSON.parse(text.replace(/^\s*(?:<style\b[\s\S]*?<\/style>\s*)+/, "")) as unknown;
+  } catch {
+    return null;
+  }
 }
 
 export interface WordpressProviderOptions {
@@ -129,13 +154,12 @@ export function createWordpressProvider(
     fetchImpl,
     intervalMs,
   });
-  const api = `${site.origin}/wp-json/wp/v2/posts`;
 
   async function getJson(url: string): Promise<{ body: unknown; totalPages: number }> {
     return http.read(
       url,
       async (response) => ({
-        body: (await response.json()) as unknown,
+        body: parseRestBody(await response.text()),
         totalPages: Number(response.headers.get("x-wp-totalpages") ?? "1"),
       }),
       { Accept: "application/json" },
@@ -149,7 +173,11 @@ export function createWordpressProvider(
       if (lang !== "fr") {
         return { refs: [], lastPage: 0 };
       }
-      const url = `${api}?per_page=${String(PER_PAGE)}&page=${String(page)}&orderby=date&order=desc&_fields=id,date,modified_gmt,slug,link,_links,_embedded&_embed=wp:featuredmedia`;
+      const url = restUrl(
+        site,
+        "posts",
+        `per_page=${String(PER_PAGE)}&page=${String(page)}&orderby=date&order=desc&_fields=id,date,modified_gmt,slug,link,_links,_embedded&_embed=wp:featuredmedia`,
+      );
       const { body, totalPages } = await getJson(url);
       const parsed = z.array(listedPostSchema).safeParse(body);
       if (!parsed.success) {
@@ -177,7 +205,11 @@ export function createWordpressProvider(
     },
 
     async fetchArticle(ref) {
-      const url = `${api}/${String(ref.sourceId)}?_fields=id,date,modified_gmt,slug,link,title,content`;
+      const url = restUrl(
+        site,
+        `posts/${String(ref.sourceId)}`,
+        "_fields=id,date,modified_gmt,slug,link,title,content",
+      );
       const parsed = postSchema.safeParse((await getJson(url)).body);
       if (!parsed.success) {
         throw new QuarantineError(url, "unexpected post shape (site structure changed?)");

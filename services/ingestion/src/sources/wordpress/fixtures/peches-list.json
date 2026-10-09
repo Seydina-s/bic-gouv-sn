@@ -1,0 +1,795 @@
+[
+  {
+    "id": 5128,
+    "date": "2026-10-02T14:37:24",
+    "modified_gmt": "2026-10-02T12:37:56",
+    "slug": "communique-intemperies-sur-le-littoral-le-mpem-aux-cotes-des-pecheurs-sinistres",
+    "link": "https://mpem.gouv.sn/communique-intemperies-sur-le-littoral-le-mpem-aux-cotes-des-pecheurs-sinistres/",
+    "title": {
+      "rendered": "Communiqué : Intempéries sur le littoral : le MPEM aux côtés des pêcheurs sinistrés"
+    },
+    "content": {
+      "rendered": "\n<p class=\"wp-block-paragraph\"></p>\n\n\n\n<div data-wp-interactive=\"core/file\" class=\"wp-block-file\"><object data-wp-bind--hidden=\"!state.hasPdfPreview\" hidden class=\"wp-block-file__embed\" data=\"https://mpem.gouv.sn/wp-content/uploads/2026/10/COMMUNIQUÉ-MPEM-25-SEPT-2026.pdf\" type=\"application/pdf\" style=\"width:100%;height:600px\" aria-label=\"Contenu embarqué COMMUNIQUÉ MPEM 25 SEPT 2026.\"></object><a id=\"wp-block-file--media-cbed4853-15b2-43ad-b5d8-f067c85f0e20\" href=\"https://mpem.gouv.sn/wp-content/uploads/2026/10/COMMUNIQUÉ-MPEM-25-SEPT-2026.pdf\">COMMUNIQUÉ MPEM 25 SEPT 2026</a><a href=\"https://mpem.gouv.sn/wp-content/uploads/2026/10/COMMUNIQUÉ-MPEM-25-SEPT-2026.pdf\" class=\"wp-block-file__button wp-element-button\" download aria-describedby=\"wp-block-file--media-cbed4853-15b2-43ad-b5d8-f067c85f0e20\">Télécharger</a></div>\n",
+      "protected": false
+    },
+    "_links": {
+      "self": [
+        {
+          "href": "https://mpem.gouv.sn/wp-json/wp/v2/posts/5128",
+          "targetHints": { "allow": ["GET"] }
+        }
+      ],
+      "collection": [{ "href": "https://mpem.gouv.sn/wp-json/wp/v2/posts" }],
+      "about": [{ "href": "https://mpem.gouv.sn/wp-json/wp/v2/types/post" }],
+      "author": [{ "embeddable": true, "href": "https://mpem.gouv.sn/wp-json/wp/v2/users/1" }],
+      "replies": [
+        { "embeddable": true, "href": "https://mpem.gouv.sn/wp-json/wp/v2/comments?post=5128" }
+      ],
+      "version-history": [
+        { "count": 1, "href": "https://mpem.gouv.sn/wp-json/wp/v2/posts/5128/revisions" }
+      ],
+      "predecessor-version": [
+        { "id": 5132, "href": "https://mpem.gouv.sn/wp-json/wp/v2/posts/5128/revisions/5132" }
+      ],
+      "wp:featuredmedia": [
+        { "embeddable": true, "href": "https://mpem.gouv.sn/wp-json/wp/v2/media/5130" }
+      ],
+      "wp:attachment": [{ "href": "https://mpem.gouv.sn/wp-json/wp/v2/media?parent=5128" }],
+      "wp:term": [
+        {
+          "taxonomy": "category",
+          "embeddable": true,
+          "href": "https://mpem.gouv.sn/wp-json/wp/v2/categories?post=5128"
+        },
+        {
+          "taxonomy": "post_tag",
+          "embeddable": true,
+          "href": "https://mpem.gouv.sn/wp-json/wp/v2/tags?post=5128"
+        }
+      ],
+      "curies": [{ "name": "wp", "href": "https://api.w.org/{rel}", "templated": true }]
+    },
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "id": 5130,
+          "date": "2026-10-02T14:36:36",
+          "slug": "communique-2-2",
+          "type": "attachment",
+          "link": "https://mpem.gouv.sn/communique-intemperies-sur-le-littoral-le-mpem-aux-cotes-des-pecheurs-sinistres/communique-2-2/",
+          "title": { "rendered": "COMMUNIQUÉ-2" },
+          "author": 1,
+          "featured_media": 0,
+          "caption": { "rendered": "" },
+          "alt_text": "",
+          "media_type": "image",
+          "mime_type": "image/png",
+          "media_details": {
+            "width": 1920,
+            "height": 1080,
+            "file": "2026/10/COMMUNIQUÉ-2.png",
+            "filesize": 2398656,
+            "sizes": {
+              "medium": {
+                "file": "COMMUNIQUÉ-2-300x169.png",
+                "width": 300,
+                "height": 169,
+                "filesize": 77016,
+                "mime_type": "image/png",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/10/COMMUNIQUÉ-2-300x169.png"
+              },
+              "large": {
+                "file": "COMMUNIQUÉ-2-1024x576.png",
+                "width": 1024,
+                "height": 576,
+                "filesize": 665114,
+                "mime_type": "image/png",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/10/COMMUNIQUÉ-2-1024x576.png"
+              },
+              "thumbnail": {
+                "file": "COMMUNIQUÉ-2-150x150.png",
+                "width": 150,
+                "height": 150,
+                "filesize": 39425,
+                "mime_type": "image/png",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/10/COMMUNIQUÉ-2-150x150.png"
+              },
+              "medium_large": {
+                "file": "COMMUNIQUÉ-2-768x432.png",
+                "width": 768,
+                "height": 432,
+                "filesize": 402232,
+                "mime_type": "image/png",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/10/COMMUNIQUÉ-2-768x432.png"
+              },
+              "thumblist": {
+                "file": "COMMUNIQUÉ-2-300x300.png",
+                "width": 300,
+                "height": 300,
+                "filesize": 128574,
+                "mime_type": "image/png",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/10/COMMUNIQUÉ-2-300x300.png"
+              },
+              "meccarouselthumb": {
+                "file": "COMMUNIQUÉ-2-474x324.png",
+                "width": 474,
+                "height": 324,
+                "filesize": 204967,
+                "mime_type": "image/png",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/10/COMMUNIQUÉ-2-474x324.png"
+              },
+              "gridsquare": {
+                "file": "COMMUNIQUÉ-2-391x260.png",
+                "width": 391,
+                "height": 260,
+                "filesize": 143070,
+                "mime_type": "image/png",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/10/COMMUNIQUÉ-2-391x260.png"
+              },
+              "tileview": {
+                "file": "COMMUNIQUÉ-2-300x400.png",
+                "width": 300,
+                "height": 400,
+                "filesize": 160851,
+                "mime_type": "image/png",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/10/COMMUNIQUÉ-2-300x400.png"
+              },
+              "1536x1536": {
+                "file": "COMMUNIQUÉ-2-1536x864.png",
+                "width": 1536,
+                "height": 864,
+                "filesize": 1372212,
+                "mime_type": "image/png",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/10/COMMUNIQUÉ-2-1536x864.png"
+              },
+              "post-thumbnail": {
+                "file": "COMMUNIQUÉ-2-370x208.png",
+                "width": 370,
+                "height": 208,
+                "filesize": 111512,
+                "mime_type": "image/png",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/10/COMMUNIQUÉ-2-370x208.png"
+              },
+              "veto-thumb-huge": {
+                "file": "COMMUNIQUÉ-2-1290x725.png",
+                "width": 1290,
+                "height": 725,
+                "filesize": 1000671,
+                "mime_type": "image/png",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/10/COMMUNIQUÉ-2-1290x725.png"
+              },
+              "veto-thumb-big": {
+                "file": "COMMUNIQUÉ-2-924x520.png",
+                "width": 924,
+                "height": 520,
+                "filesize": 554642,
+                "mime_type": "image/png",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/10/COMMUNIQUÉ-2-924x520.png"
+              },
+              "veto-thumb-med": {
+                "file": "COMMUNIQUÉ-2-410x230.png",
+                "width": 410,
+                "height": 230,
+                "filesize": 132609,
+                "mime_type": "image/png",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/10/COMMUNIQUÉ-2-410x230.png"
+              },
+              "veto-thumb-tiny": {
+                "file": "COMMUNIQUÉ-2-90x90.png",
+                "width": 90,
+                "height": 90,
+                "filesize": 16030,
+                "mime_type": "image/png",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/10/COMMUNIQUÉ-2-90x90.png"
+              },
+              "veto-thumb-masonry-big": {
+                "file": "COMMUNIQUÉ-2-924x520.png",
+                "width": 924,
+                "height": 520,
+                "filesize": 554484,
+                "mime_type": "image/png",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/10/COMMUNIQUÉ-2-924x520.png"
+              },
+              "veto-thumb-masonry": {
+                "file": "COMMUNIQUÉ-2-410x231.png",
+                "width": 410,
+                "height": 231,
+                "filesize": 132988,
+                "mime_type": "image/png",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/10/COMMUNIQUÉ-2-410x231.png"
+              },
+              "trx_addons-thumb-avatar": {
+                "file": "COMMUNIQUÉ-2-370x370.png",
+                "width": 370,
+                "height": 370,
+                "filesize": 183233,
+                "mime_type": "image/png",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/10/COMMUNIQUÉ-2-370x370.png"
+              },
+              "full": {
+                "file": "COMMUNIQUÉ-2.png",
+                "width": 1920,
+                "height": 1080,
+                "mime_type": "image/png",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/10/COMMUNIQUÉ-2.png"
+              }
+            },
+            "image_meta": {
+              "aperture": "0",
+              "credit": "",
+              "camera": "",
+              "caption": "",
+              "created_timestamp": "0",
+              "copyright": "",
+              "focal_length": "0",
+              "iso": "0",
+              "shutter_speed": "0",
+              "title": "",
+              "orientation": "0",
+              "keywords": [],
+              "alt": ""
+            }
+          },
+          "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/10/COMMUNIQUÉ-2.png",
+          "_links": {
+            "self": [
+              {
+                "href": "https://mpem.gouv.sn/wp-json/wp/v2/media/5130",
+                "targetHints": { "allow": ["GET"] }
+              }
+            ],
+            "collection": [{ "href": "https://mpem.gouv.sn/wp-json/wp/v2/media" }],
+            "about": [{ "href": "https://mpem.gouv.sn/wp-json/wp/v2/types/attachment" }],
+            "author": [
+              { "embeddable": true, "href": "https://mpem.gouv.sn/wp-json/wp/v2/users/1" }
+            ],
+            "replies": [
+              {
+                "embeddable": true,
+                "href": "https://mpem.gouv.sn/wp-json/wp/v2/comments?post=5130"
+              }
+            ],
+            "wp:attached-to": [
+              {
+                "embeddable": true,
+                "post_type": "post",
+                "id": 5128,
+                "href": "https://mpem.gouv.sn/wp-json/wp/v2/posts/5128"
+              }
+            ],
+            "curies": [{ "name": "wp", "href": "https://api.w.org/{rel}", "templated": true }]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": 5104,
+    "date": "2026-10-01T13:00:40",
+    "modified_gmt": "2026-10-01T12:57:43",
+    "slug": "joal-ceremonie-de-mise-a-leau-des-pots-a-poulpe-en-2025",
+    "link": "https://mpem.gouv.sn/joal-ceremonie-de-mise-a-leau-des-pots-a-poulpe-en-2025/",
+    "title": { "rendered": "Joal : cérémonie de mise à l’eau des pots à poulpe en 2025" },
+    "content": {
+      "rendered": "\t\t<div data-elementor-type=\"wp-post\" data-elementor-id=\"5104\" class=\"elementor elementor-5104\">\n\t\t\t\t<div class=\"elementor-element elementor-element-65f5438 e-flex e-con-boxed sc_layouts_column_icons_position_left e-con e-parent\" data-id=\"65f5438\" data-element_type=\"container\" data-e-type=\"container\">\n\t\t\t\t\t<div class=\"e-con-inner\">\n\t\t\t\t<div class=\"elementor-element elementor-element-75ae338 elementor-drop-cap-yes elementor-drop-cap-view-default sc_fly_static elementor-widget elementor-widget-text-editor\" data-id=\"75ae338\" data-element_type=\"widget\" data-e-type=\"widget\" data-settings=\"{&quot;drop_cap&quot;:&quot;yes&quot;}\" data-widget_type=\"text-editor.default\">\n\t\t\t\t<div class=\"elementor-widget-container\">\n\t\t\t\t\t\t\t\t\t<p class=\"PDq2pG_selectionAnchorContainer\" dir=\"auto\" data-start=\"84\" data-end=\"359\">La traditionnelle cérémonie d’immersion des pots à poulpe s’est tenue jeudi à <strong>Joal-Fadiouth</strong>, marquant une nouvelle étape dans les efforts de préservation et de régénération des ressources halieutiques au Sénégal.</p>\t\t\t\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t<div class=\"elementor-element elementor-element-a9398bc e-con e-atomic-element e-flexbox-base e-default-div e-9fdda2a \" data-id=\"a9398bc\" data-element_type=\"e-flexbox\" data-e-type=\"e-flexbox\" data-interaction-id=\"a9398bc\">\n    <div class=\"elementor-element elementor-element-74dff9e e-con e-atomic-element e-flexbox-base e-default-div e-4fbce9c \" data-id=\"74dff9e\" data-element_type=\"e-flexbox\" data-e-type=\"e-flexbox\" data-interaction-id=\"74dff9e\">\n    \t\t<div class=\"elementor-element elementor-element-2340143 sc_fly_static elementor-widget elementor-widget-image\" data-id=\"2340143\" data-element_type=\"widget\" data-e-type=\"widget\" data-widget_type=\"image.default\">\n\t\t\t\t<div class=\"elementor-widget-container\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<img fetchpriority=\"high\" decoding=\"async\" width=\"1024\" height=\"576\" src=\"https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-5-1024x576.jpeg\" class=\"attachment-large size-large wp-image-5109\" alt=\"\" srcset=\"https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-5-1024x576.jpeg 1024w, https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-5-300x169.jpeg 300w, https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-5-768x432.jpeg 768w, https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-5-370x208.jpeg 370w, https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-5-924x520.jpeg 924w, https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-5-410x231.jpeg 410w, https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-5.jpeg 1060w\" sizes=\"(max-width: 1024px) 100vw, 1024px\" />\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\n</div>\n<div class=\"elementor-element elementor-element-8c3bb0e e-con e-atomic-element e-flexbox-base e-default-div e-21f3843 \" data-id=\"8c3bb0e\" data-element_type=\"e-flexbox\" data-e-type=\"e-flexbox\" data-interaction-id=\"8c3bb0e\">\n    \t\t<div class=\"elementor-element elementor-element-dcbddbd sc_fly_static elementor-widget elementor-widget-image\" data-id=\"dcbddbd\" data-element_type=\"widget\" data-e-type=\"widget\" data-widget_type=\"image.default\">\n\t\t\t\t<div class=\"elementor-widget-container\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<img decoding=\"async\" width=\"1024\" height=\"576\" src=\"https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-1-1024x576.jpeg\" class=\"attachment-large size-large wp-image-5105\" alt=\"\" srcset=\"https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-1-1024x576.jpeg 1024w, https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-1-300x169.jpeg 300w, https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-1-768x432.jpeg 768w, https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-1-370x208.jpeg 370w, https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-1-924x520.jpeg 924w, https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-1-410x231.jpeg 410w, https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-1.jpeg 1060w\" sizes=\"(max-width: 1024px) 100vw, 1024px\" />\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\n</div>\n\n</div>\n<div class=\"elementor-element elementor-element-76447e2 e-flex e-con-boxed sc_layouts_column_icons_position_left e-con e-parent\" data-id=\"76447e2\" data-element_type=\"container\" data-e-type=\"container\">\n\t\t\t\t\t<div class=\"e-con-inner\">\n\t\t\t\t<div class=\"elementor-element elementor-element-cc84b89 sc_fly_static elementor-widget elementor-widget-text-editor\" data-id=\"cc84b89\" data-element_type=\"widget\" data-e-type=\"widget\" data-widget_type=\"text-editor.default\">\n\t\t\t\t<div class=\"elementor-widget-container\">\n\t\t\t\t\t\t\t\t\t<h2>Une initiative en faveur de la gestion durable des ressources</h2><p class=\"isSelectedEnd\">Initiée dans le cadre du <strong>Projet de Gestion des Ressources naturelles au Sénégal (SENRM)</strong> et financée par la <strong>Banque mondiale</strong>, cette initiative vise à contribuer à la reconstitution des stocks de poulpes et à promouvoir des pratiques de pêche plus durables.</p><p class=\"isSelectedEnd\">L’immersion des pots à poulpe constitue une mesure d’aménagement des pêcheries destinée à favoriser la reproduction de cette espèce. Ces dispositifs offrent des abris propices à la ponte et à la protection des œufs, contribuant ainsi au renouvellement de la ressource.</p>\t\t\t\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t<div class=\"elementor-element elementor-element-5784688 e-con e-atomic-element e-flexbox-base e-default-div e-7b1c71b \" data-id=\"5784688\" data-element_type=\"e-flexbox\" data-e-type=\"e-flexbox\" data-interaction-id=\"5784688\">\n    \t\t<div class=\"elementor-element elementor-element-4d9a839 sc_fly_static elementor-widget elementor-widget-image\" data-id=\"4d9a839\" data-element_type=\"widget\" data-e-type=\"widget\" data-widget_type=\"image.default\">\n\t\t\t\t<div class=\"elementor-widget-container\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<img decoding=\"async\" width=\"1024\" height=\"576\" src=\"https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-1024x576.jpeg\" class=\"attachment-large size-large wp-image-5110\" alt=\"\" srcset=\"https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-1024x576.jpeg 1024w, https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-300x169.jpeg 300w, https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-768x432.jpeg 768w, https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-370x208.jpeg 370w, https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-924x520.jpeg 924w, https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-410x231.jpeg 410w, https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37.jpeg 1060w\" sizes=\"(max-width: 1024px) 100vw, 1024px\" />\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\n</div>\n<div class=\"elementor-element elementor-element-9b44b36 e-flex e-con-boxed sc_layouts_column_icons_position_left e-con e-parent\" data-id=\"9b44b36\" data-element_type=\"container\" data-e-type=\"container\">\n\t\t\t\t\t<div class=\"e-con-inner\">\n\t\t\t\t<div class=\"elementor-element elementor-element-6ead5d3 sc_fly_static elementor-widget elementor-widget-text-editor\" data-id=\"6ead5d3\" data-element_type=\"widget\" data-e-type=\"widget\" data-widget_type=\"text-editor.default\">\n\t\t\t\t<div class=\"elementor-widget-container\">\n\t\t\t\t\t\t\t\t\t<h2>Renforcer la gestion communautaire des pêcheries</h2><p class=\"isSelectedEnd\">À travers cette action, le projet SENRM accompagne les efforts de gestion durable des ressources halieutiques et encourage l’implication des acteurs locaux dans la préservation du patrimoine marin.</p><p class=\"isSelectedEnd\">Cette initiative s’inscrit dans une démarche de gestion participative des pêcheries, essentielle pour préserver les ressources, soutenir les activités de pêche artisanale et contribuer à la durabilité des moyens de subsistance des communautés côtières.</p><p class=\"isSelectedEnd\">La cérémonie de Joal-Fadiouth illustre ainsi l’importance des initiatives concrètes en faveur de la régénération des ressources halieutiques et de la promotion d’une pêche durable au Sénégal.</p>\t\t\t\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t<div class=\"elementor-element elementor-element-eba6a1e e-con e-atomic-element e-flexbox-base e-default-div e-eba6a1e-6c6241a \" data-id=\"eba6a1e\" data-element_type=\"e-flexbox\" data-e-type=\"e-flexbox\" data-interaction-id=\"eba6a1e\">\n    <div class=\"elementor-element elementor-element-7985441 e-con e-atomic-element e-flexbox-base e-default-div e-7985441-3dca74c \" data-id=\"7985441\" data-element_type=\"e-flexbox\" data-e-type=\"e-flexbox\" data-interaction-id=\"7985441\">\n    \t\t<div class=\"elementor-element elementor-element-309e6cc sc_fly_static elementor-widget elementor-widget-image\" data-id=\"309e6cc\" data-element_type=\"widget\" data-e-type=\"widget\" data-widget_type=\"image.default\">\n\t\t\t\t<div class=\"elementor-widget-container\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<img loading=\"lazy\" decoding=\"async\" width=\"1024\" height=\"576\" src=\"https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-3-1024x576.jpeg\" class=\"attachment-large size-large wp-image-5107\" alt=\"\" srcset=\"https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-3-1024x576.jpeg 1024w, https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-3-300x169.jpeg 300w, https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-3-768x432.jpeg 768w, https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-3-370x208.jpeg 370w, https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-3-924x520.jpeg 924w, https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-3-410x231.jpeg 410w, https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-3.jpeg 1060w\" sizes=\"(max-width: 1024px) 100vw, 1024px\" />\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\n</div>\n<div class=\"elementor-element elementor-element-95b9234 e-con e-atomic-element e-flexbox-base e-default-div e-95b9234-0325f2a \" data-id=\"95b9234\" data-element_type=\"e-flexbox\" data-e-type=\"e-flexbox\" data-interaction-id=\"95b9234\">\n    \t\t<div class=\"elementor-element elementor-element-645331f sc_fly_static elementor-widget elementor-widget-image\" data-id=\"645331f\" data-element_type=\"widget\" data-e-type=\"widget\" data-widget_type=\"image.default\">\n\t\t\t\t<div class=\"elementor-widget-container\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<img loading=\"lazy\" decoding=\"async\" width=\"1024\" height=\"576\" src=\"https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-4-1024x576.jpeg\" class=\"attachment-large size-large wp-image-5108\" alt=\"\" srcset=\"https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-4-1024x576.jpeg 1024w, https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-4-300x169.jpeg 300w, https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-4-768x432.jpeg 768w, https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-4-370x208.jpeg 370w, https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-4-924x520.jpeg 924w, https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-4-410x231.jpeg 410w, https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-4.jpeg 1060w\" sizes=\"(max-width: 1024px) 100vw, 1024px\" />\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\n</div>\n\n</div>\n\t\t</div>\n\t\t",
+      "protected": false
+    },
+    "_links": {
+      "self": [
+        {
+          "href": "https://mpem.gouv.sn/wp-json/wp/v2/posts/5104",
+          "targetHints": { "allow": ["GET"] }
+        }
+      ],
+      "collection": [{ "href": "https://mpem.gouv.sn/wp-json/wp/v2/posts" }],
+      "about": [{ "href": "https://mpem.gouv.sn/wp-json/wp/v2/types/post" }],
+      "author": [{ "embeddable": true, "href": "https://mpem.gouv.sn/wp-json/wp/v2/users/1" }],
+      "replies": [
+        { "embeddable": true, "href": "https://mpem.gouv.sn/wp-json/wp/v2/comments?post=5104" }
+      ],
+      "version-history": [
+        { "count": 4, "href": "https://mpem.gouv.sn/wp-json/wp/v2/posts/5104/revisions" }
+      ],
+      "predecessor-version": [
+        { "id": 5115, "href": "https://mpem.gouv.sn/wp-json/wp/v2/posts/5104/revisions/5115" }
+      ],
+      "wp:featuredmedia": [
+        { "embeddable": true, "href": "https://mpem.gouv.sn/wp-json/wp/v2/media/5106" }
+      ],
+      "wp:attachment": [{ "href": "https://mpem.gouv.sn/wp-json/wp/v2/media?parent=5104" }],
+      "wp:term": [
+        {
+          "taxonomy": "category",
+          "embeddable": true,
+          "href": "https://mpem.gouv.sn/wp-json/wp/v2/categories?post=5104"
+        },
+        {
+          "taxonomy": "post_tag",
+          "embeddable": true,
+          "href": "https://mpem.gouv.sn/wp-json/wp/v2/tags?post=5104"
+        }
+      ],
+      "curies": [{ "name": "wp", "href": "https://api.w.org/{rel}", "templated": true }]
+    },
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "id": 5106,
+          "date": "2026-10-01T12:59:02",
+          "slug": "whatsapp-image-2026-09-21-at-14-07-37-2",
+          "type": "attachment",
+          "link": "https://mpem.gouv.sn/joal-ceremonie-de-mise-a-leau-des-pots-a-poulpe-en-2025/whatsapp-image-2026-09-21-at-14-07-37-2/",
+          "title": { "rendered": "Cérémonie de mise à eau des pots à poulpe à Joal en 2025" },
+          "author": 1,
+          "featured_media": 0,
+          "caption": { "rendered": "" },
+          "alt_text": "",
+          "media_type": "image",
+          "mime_type": "image/jpeg",
+          "media_details": {
+            "width": 1080,
+            "height": 809,
+            "file": "2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-2.jpeg",
+            "filesize": 88343,
+            "sizes": {
+              "medium": {
+                "file": "WhatsApp-Image-2026-09-21-at-14.07.37-2-300x225.jpeg",
+                "width": 300,
+                "height": 225,
+                "filesize": 16162,
+                "mime_type": "image/jpeg",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-2-300x225.jpeg"
+              },
+              "large": {
+                "file": "WhatsApp-Image-2026-09-21-at-14.07.37-2-1024x767.jpeg",
+                "width": 1024,
+                "height": 767,
+                "filesize": 97627,
+                "mime_type": "image/jpeg",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-2-1024x767.jpeg"
+              },
+              "thumbnail": {
+                "file": "WhatsApp-Image-2026-09-21-at-14.07.37-2-150x150.jpeg",
+                "width": 150,
+                "height": 150,
+                "filesize": 6806,
+                "mime_type": "image/jpeg",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-2-150x150.jpeg"
+              },
+              "medium_large": {
+                "file": "WhatsApp-Image-2026-09-21-at-14.07.37-2-768x575.jpeg",
+                "width": 768,
+                "height": 575,
+                "filesize": 63799,
+                "mime_type": "image/jpeg",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-2-768x575.jpeg"
+              },
+              "thumblist": {
+                "file": "WhatsApp-Image-2026-09-21-at-14.07.37-2-300x300.jpeg",
+                "width": 300,
+                "height": 300,
+                "filesize": 18680,
+                "mime_type": "image/jpeg",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-2-300x300.jpeg"
+              },
+              "meccarouselthumb": {
+                "file": "WhatsApp-Image-2026-09-21-at-14.07.37-2-474x324.jpeg",
+                "width": 474,
+                "height": 324,
+                "filesize": 29704,
+                "mime_type": "image/jpeg",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-2-474x324.jpeg"
+              },
+              "gridsquare": {
+                "file": "WhatsApp-Image-2026-09-21-at-14.07.37-2-391x260.jpeg",
+                "width": 391,
+                "height": 260,
+                "filesize": 21964,
+                "mime_type": "image/jpeg",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-2-391x260.jpeg"
+              },
+              "tileview": {
+                "file": "WhatsApp-Image-2026-09-21-at-14.07.37-2-300x400.jpeg",
+                "width": 300,
+                "height": 400,
+                "filesize": 21313,
+                "mime_type": "image/jpeg",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-2-300x400.jpeg"
+              },
+              "post-thumbnail": {
+                "file": "WhatsApp-Image-2026-09-21-at-14.07.37-2-370x277.jpeg",
+                "width": 370,
+                "height": 277,
+                "filesize": 21828,
+                "mime_type": "image/jpeg",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-2-370x277.jpeg"
+              },
+              "veto-thumb-huge": {
+                "file": "WhatsApp-Image-2026-09-21-at-14.07.37-2-1080x725.jpeg",
+                "width": 1080,
+                "height": 725,
+                "filesize": 102086,
+                "mime_type": "image/jpeg",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-2-1080x725.jpeg"
+              },
+              "veto-thumb-big": {
+                "file": "WhatsApp-Image-2026-09-21-at-14.07.37-2-924x520.jpeg",
+                "width": 924,
+                "height": 520,
+                "filesize": 69565,
+                "mime_type": "image/jpeg",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-2-924x520.jpeg"
+              },
+              "veto-thumb-med": {
+                "file": "WhatsApp-Image-2026-09-21-at-14.07.37-2-410x230.jpeg",
+                "width": 410,
+                "height": 230,
+                "filesize": 21225,
+                "mime_type": "image/jpeg",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-2-410x230.jpeg"
+              },
+              "veto-thumb-tiny": {
+                "file": "WhatsApp-Image-2026-09-21-at-14.07.37-2-90x90.jpeg",
+                "width": 90,
+                "height": 90,
+                "filesize": 3504,
+                "mime_type": "image/jpeg",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-2-90x90.jpeg"
+              },
+              "veto-thumb-masonry-big": {
+                "file": "WhatsApp-Image-2026-09-21-at-14.07.37-2-924x692.jpeg",
+                "width": 924,
+                "height": 692,
+                "filesize": 84808,
+                "mime_type": "image/jpeg",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-2-924x692.jpeg"
+              },
+              "veto-thumb-masonry": {
+                "file": "WhatsApp-Image-2026-09-21-at-14.07.37-2-410x307.jpeg",
+                "width": 410,
+                "height": 307,
+                "filesize": 25420,
+                "mime_type": "image/jpeg",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-2-410x307.jpeg"
+              },
+              "trx_addons-thumb-avatar": {
+                "file": "WhatsApp-Image-2026-09-21-at-14.07.37-2-370x370.jpeg",
+                "width": 370,
+                "height": 370,
+                "filesize": 25684,
+                "mime_type": "image/jpeg",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-2-370x370.jpeg"
+              },
+              "full": {
+                "file": "WhatsApp-Image-2026-09-21-at-14.07.37-2.jpeg",
+                "width": 1080,
+                "height": 809,
+                "mime_type": "image/jpeg",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-2.jpeg"
+              }
+            },
+            "image_meta": {
+              "aperture": "0",
+              "credit": "",
+              "camera": "",
+              "caption": "",
+              "created_timestamp": "0",
+              "copyright": "",
+              "focal_length": "0",
+              "iso": "0",
+              "shutter_speed": "0",
+              "title": "",
+              "orientation": "0",
+              "keywords": [],
+              "alt": ""
+            }
+          },
+          "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/10/WhatsApp-Image-2026-09-21-at-14.07.37-2.jpeg",
+          "_links": {
+            "self": [
+              {
+                "href": "https://mpem.gouv.sn/wp-json/wp/v2/media/5106",
+                "targetHints": { "allow": ["GET"] }
+              }
+            ],
+            "collection": [{ "href": "https://mpem.gouv.sn/wp-json/wp/v2/media" }],
+            "about": [{ "href": "https://mpem.gouv.sn/wp-json/wp/v2/types/attachment" }],
+            "author": [
+              { "embeddable": true, "href": "https://mpem.gouv.sn/wp-json/wp/v2/users/1" }
+            ],
+            "replies": [
+              {
+                "embeddable": true,
+                "href": "https://mpem.gouv.sn/wp-json/wp/v2/comments?post=5106"
+              }
+            ],
+            "wp:attached-to": [
+              {
+                "embeddable": true,
+                "post_type": "post",
+                "id": 5104,
+                "href": "https://mpem.gouv.sn/wp-json/wp/v2/posts/5104"
+              }
+            ],
+            "curies": [{ "name": "wp", "href": "https://api.w.org/{rel}", "templated": true }]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": 5023,
+    "date": "2026-09-30T17:24:46",
+    "modified_gmt": "2026-09-30T15:34:22",
+    "slug": "ouakam-le-senrm-renforce-les-capacites-des-acteurs-de-la-peche-artisanale",
+    "link": "https://mpem.gouv.sn/ouakam-le-senrm-renforce-les-capacites-des-acteurs-de-la-peche-artisanale/",
+    "title": {
+      "rendered": "Ouakam : le SENRM renforce les capacités des acteurs de la pêche artisanale"
+    },
+    "content": {
+      "rendered": "\t\t<div data-elementor-type=\"wp-post\" data-elementor-id=\"5023\" class=\"elementor elementor-5023\">\n\t\t\t\t<div class=\"elementor-element elementor-element-65f5438 e-flex e-con-boxed sc_layouts_column_icons_position_left e-con e-parent\" data-id=\"65f5438\" data-element_type=\"container\" data-e-type=\"container\">\n\t\t\t\t\t<div class=\"e-con-inner\">\n\t\t\t\t<div class=\"elementor-element elementor-element-75ae338 elementor-drop-cap-yes elementor-drop-cap-view-default sc_fly_static elementor-widget elementor-widget-text-editor\" data-id=\"75ae338\" data-element_type=\"widget\" data-e-type=\"widget\" data-settings=\"{&quot;drop_cap&quot;:&quot;yes&quot;}\" data-widget_type=\"text-editor.default\">\n\t\t\t\t<div class=\"elementor-widget-container\">\n\t\t\t\t\t\t\t\t\t<p class=\"PDq2pG_selectionAnchorContainer\" dir=\"auto\" data-start=\"84\" data-end=\"359\">Ce <strong data-start=\"82\" data-end=\"109\">mardi 29 septembre 2026</strong>, Madame <strong data-start=\"118\" data-end=\"136\">Amy Mara Dièye</strong>, Ministre des Pêches et de l’Économie maritime, s’est rendue au <strong data-start=\"201\" data-end=\"228\">quai de pêche de Ouakam</strong>, où elle a présidé une cérémonie officielle consacrée à la réception d’un important lot d’équipements maritimes acquis dans le cadre du <strong data-start=\"365\" data-end=\"431\">Projet de Gestion des Ressources naturelles au Sénégal (SENRM)</strong>.</p>\t\t\t\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t<div class=\"elementor-element elementor-element-a9398bc e-con e-atomic-element e-flexbox-base e-default-div e-9fdda2a \" data-id=\"a9398bc\" data-element_type=\"e-flexbox\" data-e-type=\"e-flexbox\" data-interaction-id=\"a9398bc\">\n    <div class=\"elementor-element elementor-element-74dff9e e-con e-atomic-element e-flexbox-base e-default-div e-4fbce9c \" data-id=\"74dff9e\" data-element_type=\"e-flexbox\" data-e-type=\"e-flexbox\" data-interaction-id=\"74dff9e\">\n    \t\t<div class=\"elementor-element elementor-element-2340143 sc_fly_static elementor-widget elementor-widget-image\" data-id=\"2340143\" data-element_type=\"widget\" data-e-type=\"widget\" data-widget_type=\"image.default\">\n\t\t\t\t<div class=\"elementor-widget-container\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<img loading=\"lazy\" decoding=\"async\" width=\"1024\" height=\"768\" src=\"https://mpem.gouv.sn/wp-content/uploads/2026/09/91909889-1024x768.jpg\" class=\"attachment-large size-large wp-image-5027\" alt=\"\" srcset=\"https://mpem.gouv.sn/wp-content/uploads/2026/09/91909889-1024x768.jpg 1024w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91909889-300x225.jpg 300w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91909889-768x576.jpg 768w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91909889-1536x1152.jpg 1536w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91909889-2048x1536.jpg 2048w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91909889-370x278.jpg 370w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91909889-924x693.jpg 924w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91909889-410x308.jpg 410w\" sizes=\"(max-width: 1024px) 100vw, 1024px\" />\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\n</div>\n<div class=\"elementor-element elementor-element-8c3bb0e e-con e-atomic-element e-flexbox-base e-default-div e-21f3843 \" data-id=\"8c3bb0e\" data-element_type=\"e-flexbox\" data-e-type=\"e-flexbox\" data-interaction-id=\"8c3bb0e\">\n    \t\t<div class=\"elementor-element elementor-element-dcbddbd sc_fly_static elementor-widget elementor-widget-image\" data-id=\"dcbddbd\" data-element_type=\"widget\" data-e-type=\"widget\" data-widget_type=\"image.default\">\n\t\t\t\t<div class=\"elementor-widget-container\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<img loading=\"lazy\" decoding=\"async\" width=\"1024\" height=\"768\" src=\"https://mpem.gouv.sn/wp-content/uploads/2026/09/91900041-1024x768.jpg\" class=\"attachment-large size-large wp-image-5038\" alt=\"\" srcset=\"https://mpem.gouv.sn/wp-content/uploads/2026/09/91900041-1024x768.jpg 1024w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91900041-300x225.jpg 300w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91900041-768x576.jpg 768w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91900041-1536x1152.jpg 1536w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91900041-2048x1536.jpg 2048w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91900041-370x278.jpg 370w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91900041-924x693.jpg 924w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91900041-410x308.jpg 410w\" sizes=\"(max-width: 1024px) 100vw, 1024px\" />\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\n</div>\n\n</div>\n<div class=\"elementor-element elementor-element-76447e2 e-flex e-con-boxed sc_layouts_column_icons_position_left e-con e-parent\" data-id=\"76447e2\" data-element_type=\"container\" data-e-type=\"container\">\n\t\t\t\t\t<div class=\"e-con-inner\">\n\t\t\t\t<div class=\"elementor-element elementor-element-cc84b89 sc_fly_static elementor-widget elementor-widget-text-editor\" data-id=\"cc84b89\" data-element_type=\"widget\" data-e-type=\"widget\" data-widget_type=\"text-editor.default\">\n\t\t\t\t<div class=\"elementor-widget-container\">\n\t\t\t\t\t\t\t\t\t<h2 class=\"PDq2pG_selectionAnchorContainer\" dir=\"auto\" data-section-id=\"1xmn2e3\" data-start=\"434\" data-end=\"496\">24 pirogues et 5 vedettes pour renforcer la sécurité en mer</h2><p dir=\"auto\" data-start=\"498\" data-end=\"686\">Le lot réceptionné est composé de <strong data-start=\"532\" data-end=\"624\">24 pirogues en fibre de verre et de 5 vedettes destinées à la surveillance participative</strong>, pour une valeur marchande de <strong data-start=\"655\" data-end=\"685\">600 millions de francs CFA</strong>.</p><p dir=\"auto\" data-start=\"688\" data-end=\"870\">Ces équipements ont été acquis par le Projet SENRM dans le cadre de la mise en œuvre de sa <strong data-start=\"779\" data-end=\"869\">sous-composante 2.1 « Gestion des pêches et des initiatives de gestion communautaire »</strong>.</p><p dir=\"auto\" data-start=\"872\" data-end=\"1060\">À travers cet appui, le projet contribue au renforcement des capacités opérationnelles des acteurs de la pêche artisanale et à l’amélioration de leurs conditions de travail et de sécurité.</p>\t\t\t\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t<div class=\"elementor-element elementor-element-5784688 e-con e-atomic-element e-flexbox-base e-default-div e-7b1c71b \" data-id=\"5784688\" data-element_type=\"e-flexbox\" data-e-type=\"e-flexbox\" data-interaction-id=\"5784688\">\n    \t\t<div class=\"elementor-element elementor-element-4d9a839 sc_fly_static elementor-widget elementor-widget-image\" data-id=\"4d9a839\" data-element_type=\"widget\" data-e-type=\"widget\" data-widget_type=\"image.default\">\n\t\t\t\t<div class=\"elementor-widget-container\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<img loading=\"lazy\" decoding=\"async\" width=\"1024\" height=\"768\" src=\"https://mpem.gouv.sn/wp-content/uploads/2026/09/91900048-1024x768.jpg\" class=\"attachment-large size-large wp-image-5040\" alt=\"\" srcset=\"https://mpem.gouv.sn/wp-content/uploads/2026/09/91900048-1024x768.jpg 1024w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91900048-300x225.jpg 300w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91900048-768x576.jpg 768w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91900048-1536x1152.jpg 1536w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91900048-2048x1536.jpg 2048w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91900048-370x278.jpg 370w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91900048-924x693.jpg 924w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91900048-410x308.jpg 410w\" sizes=\"(max-width: 1024px) 100vw, 1024px\" />\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\n</div>\n<div class=\"elementor-element elementor-element-9b44b36 e-flex e-con-boxed sc_layouts_column_icons_position_left e-con e-parent\" data-id=\"9b44b36\" data-element_type=\"container\" data-e-type=\"container\">\n\t\t\t\t\t<div class=\"e-con-inner\">\n\t\t\t\t<div class=\"elementor-element elementor-element-6ead5d3 sc_fly_static elementor-widget elementor-widget-text-editor\" data-id=\"6ead5d3\" data-element_type=\"widget\" data-e-type=\"widget\" data-widget_type=\"text-editor.default\">\n\t\t\t\t<div class=\"elementor-widget-container\">\n\t\t\t\t\t\t\t\t\t<h2 class=\"PDq2pG_selectionAnchorContainer\" dir=\"auto\" data-section-id=\"1wsyqcu\" data-start=\"1062\" data-end=\"1125\">Un appui à la surveillance et à la protection des ressources</h2><p dir=\"auto\" data-start=\"1127\" data-end=\"1391\">Madame le Ministre s’est félicitée de cette initiative, qui vient renforcer les moyens d’intervention des pêcheurs et consolider l’action de la <strong data-start=\"1271\" data-end=\"1341\">Direction de la Protection et de la Surveillance des Pêches (DPSP)</strong>, notamment dans le domaine de la sécurité en mer.</p><p dir=\"auto\" data-start=\"1393\" data-end=\"1633\">Elle a également salué l’engagement du Projet SENRM et de ses partenaires techniques et financiers, dont la mobilisation contribue à la sécurisation des activités de pêche artisanale et à la préservation durable des ressources halieutiques.</p>\t\t\t\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t<div class=\"elementor-element elementor-element-eba6a1e e-con e-atomic-element e-flexbox-base e-default-div e-eba6a1e-6c6241a \" data-id=\"eba6a1e\" data-element_type=\"e-flexbox\" data-e-type=\"e-flexbox\" data-interaction-id=\"eba6a1e\">\n    <div class=\"elementor-element elementor-element-7985441 e-con e-atomic-element e-flexbox-base e-default-div e-7985441-3dca74c \" data-id=\"7985441\" data-element_type=\"e-flexbox\" data-e-type=\"e-flexbox\" data-interaction-id=\"7985441\">\n    \t\t<div class=\"elementor-element elementor-element-309e6cc sc_fly_static elementor-widget elementor-widget-image\" data-id=\"309e6cc\" data-element_type=\"widget\" data-e-type=\"widget\" data-widget_type=\"image.default\">\n\t\t\t\t<div class=\"elementor-widget-container\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<img loading=\"lazy\" decoding=\"async\" width=\"1024\" height=\"768\" src=\"https://mpem.gouv.sn/wp-content/uploads/2026/09/91900061-1024x768.jpg\" class=\"attachment-large size-large wp-image-5037\" alt=\"\" srcset=\"https://mpem.gouv.sn/wp-content/uploads/2026/09/91900061-1024x768.jpg 1024w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91900061-300x225.jpg 300w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91900061-768x576.jpg 768w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91900061-1536x1152.jpg 1536w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91900061-2048x1536.jpg 2048w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91900061-370x278.jpg 370w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91900061-924x693.jpg 924w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91900061-410x308.jpg 410w\" sizes=\"(max-width: 1024px) 100vw, 1024px\" />\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\n</div>\n<div class=\"elementor-element elementor-element-95b9234 e-con e-atomic-element e-flexbox-base e-default-div e-95b9234-0325f2a \" data-id=\"95b9234\" data-element_type=\"e-flexbox\" data-e-type=\"e-flexbox\" data-interaction-id=\"95b9234\">\n    \t\t<div class=\"elementor-element elementor-element-645331f sc_fly_static elementor-widget elementor-widget-image\" data-id=\"645331f\" data-element_type=\"widget\" data-e-type=\"widget\" data-widget_type=\"image.default\">\n\t\t\t\t<div class=\"elementor-widget-container\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<img loading=\"lazy\" decoding=\"async\" width=\"1024\" height=\"768\" src=\"https://mpem.gouv.sn/wp-content/uploads/2026/09/91909883-1024x768.jpg\" class=\"attachment-large size-large wp-image-5030\" alt=\"\" srcset=\"https://mpem.gouv.sn/wp-content/uploads/2026/09/91909883-1024x768.jpg 1024w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91909883-300x225.jpg 300w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91909883-768x576.jpg 768w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91909883-1536x1152.jpg 1536w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91909883-2048x1536.jpg 2048w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91909883-370x278.jpg 370w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91909883-924x693.jpg 924w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91909883-410x308.jpg 410w\" sizes=\"(max-width: 1024px) 100vw, 1024px\" />\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\n</div>\n<div class=\"elementor-element elementor-element-75bd5a5 e-con e-atomic-element e-flexbox-base e-default-div e-75bd5a5-9df276e \" data-id=\"75bd5a5\" data-element_type=\"e-flexbox\" data-e-type=\"e-flexbox\" data-interaction-id=\"75bd5a5\">\n    \t\t<div class=\"elementor-element elementor-element-6c08a53 sc_fly_static elementor-widget elementor-widget-image\" data-id=\"6c08a53\" data-element_type=\"widget\" data-e-type=\"widget\" data-widget_type=\"image.default\">\n\t\t\t\t<div class=\"elementor-widget-container\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<img loading=\"lazy\" decoding=\"async\" width=\"1024\" height=\"768\" src=\"https://mpem.gouv.sn/wp-content/uploads/2026/09/91900079-1024x768.jpg\" class=\"attachment-large size-large wp-image-5033\" alt=\"\" srcset=\"https://mpem.gouv.sn/wp-content/uploads/2026/09/91900079-1024x768.jpg 1024w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91900079-300x225.jpg 300w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91900079-768x576.jpg 768w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91900079-1536x1152.jpg 1536w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91900079-2048x1536.jpg 2048w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91900079-370x277.jpg 370w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91900079-924x693.jpg 924w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91900079-410x307.jpg 410w\" sizes=\"(max-width: 1024px) 100vw, 1024px\" />\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\n</div>\n\n</div>\n<div class=\"elementor-element elementor-element-a25733b e-flex e-con-boxed sc_layouts_column_icons_position_left e-con e-parent\" data-id=\"a25733b\" data-element_type=\"container\" data-e-type=\"container\">\n\t\t\t\t\t<div class=\"e-con-inner\">\n\t\t\t\t<div class=\"elementor-element elementor-element-8813e4a sc_fly_static elementor-widget elementor-widget-text-editor\" data-id=\"8813e4a\" data-element_type=\"widget\" data-e-type=\"widget\" data-widget_type=\"text-editor.default\">\n\t\t\t\t<div class=\"elementor-widget-container\">\n\t\t\t\t\t\t\t\t\t<h2 class=\"PDq2pG_selectionAnchorContainer\" dir=\"auto\" data-section-id=\"xpjcnm\" data-start=\"1635\" data-end=\"1691\">Visite du chantier de réhabilitation du quai de pêche</h2><p dir=\"auto\" data-start=\"1693\" data-end=\"1861\">À l’issue de la cérémonie, Madame le Ministre a effectué une visite du <strong data-start=\"1764\" data-end=\"1821\">chantier de réhabilitation du quai de pêche de Ouakam</strong>, également financé par le Projet SENRM.</p><p dir=\"auto\" data-start=\"1863\" data-end=\"2073\">Cette visite a permis de constater l’état d’avancement des travaux et de réaffirmer la volonté du Ministère de poursuivre la <strong data-start=\"1988\" data-end=\"2034\">modernisation des infrastructures de pêche</strong> sur l’ensemble du littoral sénégalais.</p>\t\t\t\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t<div class=\"elementor-element elementor-element-07997a2 e-con e-atomic-element e-flexbox-base e-default-div e-07997a2-c28cd3a \" data-id=\"07997a2\" data-element_type=\"e-flexbox\" data-e-type=\"e-flexbox\" data-interaction-id=\"07997a2\">\n    <div class=\"elementor-element elementor-element-4fb4a4b e-con e-atomic-element e-flexbox-base e-default-div e-4fb4a4b-46b6b54 \" data-id=\"4fb4a4b\" data-element_type=\"e-flexbox\" data-e-type=\"e-flexbox\" data-interaction-id=\"4fb4a4b\">\n    \t\t<div class=\"elementor-element elementor-element-5310d5d sc_fly_static elementor-widget elementor-widget-image\" data-id=\"5310d5d\" data-element_type=\"widget\" data-e-type=\"widget\" data-widget_type=\"image.default\">\n\t\t\t\t<div class=\"elementor-widget-container\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<img loading=\"lazy\" decoding=\"async\" width=\"1024\" height=\"768\" src=\"https://mpem.gouv.sn/wp-content/uploads/2026/09/91900035-1024x768.jpg\" class=\"attachment-large size-large wp-image-5044\" alt=\"\" srcset=\"https://mpem.gouv.sn/wp-content/uploads/2026/09/91900035-1024x768.jpg 1024w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91900035-300x225.jpg 300w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91900035-768x576.jpg 768w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91900035-1536x1152.jpg 1536w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91900035-2048x1536.jpg 2048w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91900035-370x278.jpg 370w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91900035-924x693.jpg 924w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91900035-410x308.jpg 410w\" sizes=\"(max-width: 1024px) 100vw, 1024px\" />\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\n</div>\n<div class=\"elementor-element elementor-element-633ecf1 e-con e-atomic-element e-flexbox-base e-default-div e-633ecf1-09a1fd1 \" data-id=\"633ecf1\" data-element_type=\"e-flexbox\" data-e-type=\"e-flexbox\" data-interaction-id=\"633ecf1\">\n    \t\t<div class=\"elementor-element elementor-element-fea6ff7 elementor-widget__width-initial sc_fly_static elementor-widget elementor-widget-image\" data-id=\"fea6ff7\" data-element_type=\"widget\" data-e-type=\"widget\" data-widget_type=\"image.default\">\n\t\t\t\t<div class=\"elementor-widget-container\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<img loading=\"lazy\" decoding=\"async\" width=\"1024\" height=\"768\" src=\"https://mpem.gouv.sn/wp-content/uploads/2026/09/91909893-1024x768.jpg\" class=\"attachment-large size-large wp-image-5029\" alt=\"\" srcset=\"https://mpem.gouv.sn/wp-content/uploads/2026/09/91909893-1024x768.jpg 1024w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91909893-300x225.jpg 300w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91909893-768x576.jpg 768w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91909893-1536x1152.jpg 1536w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91909893-2048x1536.jpg 2048w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91909893-370x278.jpg 370w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91909893-924x693.jpg 924w, https://mpem.gouv.sn/wp-content/uploads/2026/09/91909893-410x308.jpg 410w\" sizes=\"(max-width: 1024px) 100vw, 1024px\" />\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\n</div>\n\n</div>\n<div class=\"elementor-element elementor-element-512ba59 e-flex e-con-boxed sc_layouts_column_icons_position_left e-con e-parent\" data-id=\"512ba59\" data-element_type=\"container\" data-e-type=\"container\">\n\t\t\t\t\t<div class=\"e-con-inner\">\n\t\t\t\t<div class=\"elementor-element elementor-element-dd78d05 sc_fly_static elementor-widget elementor-widget-text-editor\" data-id=\"dd78d05\" data-element_type=\"widget\" data-e-type=\"widget\" data-widget_type=\"text-editor.default\">\n\t\t\t\t<div class=\"elementor-widget-container\">\n\t\t\t\t\t\t\t\t\t<h2 class=\"PDq2pG_selectionAnchorContainer\" dir=\"auto\" data-section-id=\"111xm5x\" data-start=\"2075\" data-end=\"2126\">Le SENRM encouragé à poursuivre ses réalisations</h2><p dir=\"auto\" data-start=\"2128\" data-end=\"2287\">Madame le Ministre a enfin adressé ses félicitations au <strong data-start=\"2184\" data-end=\"2200\">Projet SENRM</strong> ainsi qu’à son Coordonnateur, <strong data-start=\"2231\" data-end=\"2254\">M. Pape Namsa Keita</strong>, pour les réalisations engagées.</p><p dir=\"auto\" data-start=\"2289\" data-end=\"2456\">Elle les a encouragés à poursuivre cette dynamique dans la mise en œuvre des autres projets en cours, au bénéfice des communautés et des acteurs du secteur des pêches.</p><p dir=\"auto\" data-start=\"2458\" data-end=\"2697\">Cette cérémonie illustre ainsi l’engagement conjoint du Ministère et du Projet SENRM à renforcer les capacités des acteurs, améliorer les infrastructures et contribuer à une <strong data-start=\"2632\" data-end=\"2696\">gestion durable et participative des ressources halieutiques</strong>.</p>\t\t\t\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t",
+      "protected": false
+    },
+    "_links": {
+      "self": [
+        {
+          "href": "https://mpem.gouv.sn/wp-json/wp/v2/posts/5023",
+          "targetHints": { "allow": ["GET"] }
+        }
+      ],
+      "collection": [{ "href": "https://mpem.gouv.sn/wp-json/wp/v2/posts" }],
+      "about": [{ "href": "https://mpem.gouv.sn/wp-json/wp/v2/types/post" }],
+      "author": [{ "embeddable": true, "href": "https://mpem.gouv.sn/wp-json/wp/v2/users/1" }],
+      "replies": [
+        { "embeddable": true, "href": "https://mpem.gouv.sn/wp-json/wp/v2/comments?post=5023" }
+      ],
+      "version-history": [
+        { "count": 5, "href": "https://mpem.gouv.sn/wp-json/wp/v2/posts/5023/revisions" }
+      ],
+      "predecessor-version": [
+        { "id": 5048, "href": "https://mpem.gouv.sn/wp-json/wp/v2/posts/5023/revisions/5048" }
+      ],
+      "wp:featuredmedia": [
+        { "embeddable": true, "href": "https://mpem.gouv.sn/wp-json/wp/v2/media/5025" }
+      ],
+      "wp:attachment": [{ "href": "https://mpem.gouv.sn/wp-json/wp/v2/media?parent=5023" }],
+      "wp:term": [
+        {
+          "taxonomy": "category",
+          "embeddable": true,
+          "href": "https://mpem.gouv.sn/wp-json/wp/v2/categories?post=5023"
+        },
+        {
+          "taxonomy": "post_tag",
+          "embeddable": true,
+          "href": "https://mpem.gouv.sn/wp-json/wp/v2/tags?post=5023"
+        }
+      ],
+      "curies": [{ "name": "wp", "href": "https://api.w.org/{rel}", "templated": true }]
+    },
+    "_embedded": {
+      "wp:featuredmedia": [
+        {
+          "id": 5025,
+          "date": "2026-09-30T17:18:44",
+          "slug": "91900147",
+          "type": "attachment",
+          "link": "https://mpem.gouv.sn/ouakam-le-senrm-renforce-les-capacites-des-acteurs-de-la-peche-artisanale/attachment/91900147/",
+          "title": {
+            "rendered": "Ouakam : le SENRM renforce les capacités des acteurs de la pêche artisanale"
+          },
+          "author": 1,
+          "featured_media": 0,
+          "caption": { "rendered": "" },
+          "alt_text": "",
+          "media_type": "image",
+          "mime_type": "image/jpeg",
+          "media_details": {
+            "width": 2560,
+            "height": 1920,
+            "file": "2026/09/91900147-scaled.jpg",
+            "filesize": 373681,
+            "sizes": {
+              "medium": {
+                "file": "91900147-300x225.jpg",
+                "width": 300,
+                "height": 225,
+                "filesize": 14136,
+                "mime_type": "image/jpeg",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/09/91900147-300x225.jpg"
+              },
+              "large": {
+                "file": "91900147-1024x768.jpg",
+                "width": 1024,
+                "height": 768,
+                "filesize": 84301,
+                "mime_type": "image/jpeg",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/09/91900147-1024x768.jpg"
+              },
+              "thumbnail": {
+                "file": "91900147-150x150.jpg",
+                "width": 150,
+                "height": 150,
+                "filesize": 6626,
+                "mime_type": "image/jpeg",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/09/91900147-150x150.jpg"
+              },
+              "medium_large": {
+                "file": "91900147-768x576.jpg",
+                "width": 768,
+                "height": 576,
+                "filesize": 55252,
+                "mime_type": "image/jpeg",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/09/91900147-768x576.jpg"
+              },
+              "thumblist": {
+                "file": "91900147-300x300.jpg",
+                "width": 300,
+                "height": 300,
+                "filesize": 18380,
+                "mime_type": "image/jpeg",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/09/91900147-300x300.jpg"
+              },
+              "meccarouselthumb": {
+                "file": "91900147-474x324.jpg",
+                "width": 474,
+                "height": 324,
+                "filesize": 25279,
+                "mime_type": "image/jpeg",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/09/91900147-474x324.jpg"
+              },
+              "gridsquare": {
+                "file": "91900147-391x260.jpg",
+                "width": 391,
+                "height": 260,
+                "filesize": 18700,
+                "mime_type": "image/jpeg",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/09/91900147-391x260.jpg"
+              },
+              "tileview": {
+                "file": "91900147-300x400.jpg",
+                "width": 300,
+                "height": 400,
+                "filesize": 22374,
+                "mime_type": "image/jpeg",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/09/91900147-300x400.jpg"
+              },
+              "1536x1536": {
+                "file": "91900147-1536x1152.jpg",
+                "width": 1536,
+                "height": 1152,
+                "filesize": 156007,
+                "mime_type": "image/jpeg",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/09/91900147-1536x1152.jpg"
+              },
+              "2048x2048": {
+                "file": "91900147-2048x1536.jpg",
+                "width": 2048,
+                "height": 1536,
+                "filesize": 249559,
+                "mime_type": "image/jpeg",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/09/91900147-2048x1536.jpg"
+              },
+              "post-thumbnail": {
+                "file": "91900147-370x277.jpg",
+                "width": 370,
+                "height": 277,
+                "filesize": 19187,
+                "mime_type": "image/jpeg",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/09/91900147-370x277.jpg"
+              },
+              "veto-thumb-huge": {
+                "file": "91900147-1290x725.jpg",
+                "width": 1290,
+                "height": 725,
+                "filesize": 93237,
+                "mime_type": "image/jpeg",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/09/91900147-1290x725.jpg"
+              },
+              "veto-thumb-big": {
+                "file": "91900147-924x520.jpg",
+                "width": 924,
+                "height": 520,
+                "filesize": 56524,
+                "mime_type": "image/jpeg",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/09/91900147-924x520.jpg"
+              },
+              "veto-thumb-med": {
+                "file": "91900147-410x230.jpg",
+                "width": 410,
+                "height": 230,
+                "filesize": 17502,
+                "mime_type": "image/jpeg",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/09/91900147-410x230.jpg"
+              },
+              "veto-thumb-tiny": {
+                "file": "91900147-90x90.jpg",
+                "width": 90,
+                "height": 90,
+                "filesize": 3273,
+                "mime_type": "image/jpeg",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/09/91900147-90x90.jpg"
+              },
+              "veto-thumb-masonry-big": {
+                "file": "91900147-924x693.jpg",
+                "width": 924,
+                "height": 693,
+                "filesize": 73075,
+                "mime_type": "image/jpeg",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/09/91900147-924x693.jpg"
+              },
+              "veto-thumb-masonry": {
+                "file": "91900147-410x307.jpg",
+                "width": 410,
+                "height": 307,
+                "filesize": 22354,
+                "mime_type": "image/jpeg",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/09/91900147-410x307.jpg"
+              },
+              "trx_addons-thumb-avatar": {
+                "file": "91900147-370x370.jpg",
+                "width": 370,
+                "height": 370,
+                "filesize": 25392,
+                "mime_type": "image/jpeg",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/09/91900147-370x370.jpg"
+              },
+              "full": {
+                "file": "91900147-scaled.jpg",
+                "width": 2560,
+                "height": 1920,
+                "mime_type": "image/jpeg",
+                "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/09/91900147-scaled.jpg"
+              }
+            },
+            "image_meta": {
+              "aperture": "0",
+              "credit": "",
+              "camera": "",
+              "caption": "",
+              "created_timestamp": "1483312327",
+              "copyright": "",
+              "focal_length": "0",
+              "iso": "0",
+              "shutter_speed": "0",
+              "title": "",
+              "orientation": "0",
+              "keywords": [],
+              "alt": ""
+            },
+            "original_image": "91900147.jpg"
+          },
+          "source_url": "https://mpem.gouv.sn/wp-content/uploads/2026/09/91900147-scaled.jpg",
+          "_links": {
+            "self": [
+              {
+                "href": "https://mpem.gouv.sn/wp-json/wp/v2/media/5025",
+                "targetHints": { "allow": ["GET"] }
+              }
+            ],
+            "collection": [{ "href": "https://mpem.gouv.sn/wp-json/wp/v2/media" }],
+            "about": [{ "href": "https://mpem.gouv.sn/wp-json/wp/v2/types/attachment" }],
+            "author": [
+              { "embeddable": true, "href": "https://mpem.gouv.sn/wp-json/wp/v2/users/1" }
+            ],
+            "replies": [
+              {
+                "embeddable": true,
+                "href": "https://mpem.gouv.sn/wp-json/wp/v2/comments?post=5025"
+              }
+            ],
+            "wp:attached-to": [
+              {
+                "embeddable": true,
+                "post_type": "post",
+                "id": 5023,
+                "href": "https://mpem.gouv.sn/wp-json/wp/v2/posts/5023"
+              }
+            ],
+            "curies": [{ "name": "wp", "href": "https://api.w.org/{rel}", "templated": true }]
+          }
+        }
+      ]
+    }
+  }
+]

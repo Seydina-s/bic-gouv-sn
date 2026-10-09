@@ -39,7 +39,7 @@ Depuis le 09/10/2026, la plateforme couvre **tout le Gouvernement** : Présidenc
 |---|---|---|---|
 | Justice | justice.sec.gouv.sn | WordPress, flux RSS | 09/10/2026 |
 | Industrie et Commerce | industriecommerce.gouv.sn | WordPress, flux RSS (accueil « en maintenance », flux à jour) | 09/10/2026 |
-| Pêches et Économie maritime | mpem.gouv.sn | WordPress, flux RSS | 08/10/2026 |
+| Pêches et Économie maritime | mpem.gouv.sn | WordPress (collecté depuis le 09/10) | 08/10/2026 |
 | Intérieur | interieur.gouv.sn | pages HTML, pas de RSS, pas de `robots.txt` | 07/10/2026 |
 | Enseignement supérieur, Recherche et Innovation | mesr.gouv.sn (articles sur mesrisenegal.sn) | flux RSS (30 articles) | 05/10/2026 |
 | Énergie et Pétrole | energie-mines.gouv.sn | WordPress, flux RSS ; titre encore « Énergie, Pétrole et Mines » | 05/10/2026 |
@@ -74,6 +74,18 @@ Justice, Industrie et Commerce, Énergie et Pétrole, Hydraulique et Assainissem
 | Énergie et Pétrole | 174 | 5 | 2023 → 2026 | pages sans contenu (fiches de directions) |
 | Hydraulique et Assainissement | 303 | 7 | 2021 → 2026 | contenu vide à la source |
 | Agriculture | 250 | 10 | 2016 → 2026 | vidéo MP4, contenu vide, image hors du site |
+
+### Ministères ajoutés le 09/10/2026 au soir
+
+| Ministère | Site | Lecture | Essai du 09/10 |
+|---|---|---|---|
+| Pêches et Économie maritime | mpem.gouv.sn | WordPress ; ses réponses commencent par des blocs de style du constructeur de pages, ignorés | 75 articles sur 75 |
+| Emploi et Formation professionnelle | formation.gouv.sn | WordPress par l'adresse `/?rest_route=` (l'adresse `/wp-json/` du site renvoie une erreur 500) ; **dernier article le 10/12/2025** : historique repris, la collecte reprendra si le site publie de nouveau | 507 articles sur 508 |
+| Intérieur et Sécurité publique | www.interieur.gouv.sn | site Nuxt et Strapi ouvert en août 2026 : la page des actualités porte la liste complète dans ses données (`__NUXT_DATA__`), chaque page d'article son texte en blocs structurés, ses communiqués signés (PDF), ses vidéos et sa galerie ; rubriques Communiqués et Discours reprises, Activités et Dossiers en « Actualités » | 55 articles sur 58 (3 dossiers sans texte) |
+
+Règles ajoutées pour toutes les sources le 09/10 au soir :
+- un communiqué fait d'un seul PDF officiel est publié (le document apparaît dans « Documents officiels ») ;
+- un émoji copié de Facebook arrive comme une image de Facebook : l'émoji est gardé en texte, l'image n'est jamais chargée.
 
 ### Ministères : sites à revoir (non collectés pour l'instant)
 

@@ -67,6 +67,9 @@ export const fr = {
     energie: "Ministère de l'Énergie et du Pétrole",
     hydraulique: "Ministère de l'Hydraulique et de l'Assainissement",
     agriculture: "Ministère de l'Agriculture",
+    peches: "Ministère des Pêches et de l'Économie maritime",
+    "emploi-formation": "Ministère de l'Emploi et de la Formation professionnelle",
+    interieur: "Ministère de l'Intérieur et de la Sécurité publique",
   },
   /** Sections of the official sites, keyed by their slug. */
   categories: {
