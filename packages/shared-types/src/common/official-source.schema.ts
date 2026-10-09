@@ -1,12 +1,15 @@
+import { INSTITUTION_SITES, INSTITUTIONS } from "./institutions";
 import { httpsUrlSchema } from "./primitives.schema";
 
-/** The only hosts allowed as content sources (CLAUDE.md §1, "Sources de vérité"). */
-export const OFFICIAL_SOURCE_HOSTS = [
-  "presidence.sn",
-  "www.presidence.sn",
+/**
+ * The only hosts allowed as content sources (CLAUDE.md §1, "Sources de vérité"): the
+ * institutions of the Government, and e-senegal.sn for the procedures.
+ */
+export const OFFICIAL_SOURCE_HOSTS: readonly string[] = [
+  ...INSTITUTIONS.flatMap((id) => INSTITUTION_SITES[id].pageHosts),
   "e-senegal.sn",
   "www.e-senegal.sn",
-] as const;
+];
 
 const officialHosts: ReadonlySet<string> = new Set(OFFICIAL_SOURCE_HOSTS);
 
@@ -23,15 +26,13 @@ export function isOfficialSourceUrl(url: string): boolean {
 }
 
 export const officialSourceUrlSchema = httpsUrlSchema.refine(isOfficialSourceUrl, {
-  message: "URL must belong to an official source (presidence.sn or e-senegal.sn)",
+  message: "URL must belong to an official source (an institution's site or e-senegal.sn)",
 });
 
 /** Hosts serving the official media (photos, documents) of the content sources. */
-const OFFICIAL_MEDIA_HOSTS: ReadonlySet<string> = new Set([
-  "presidence.sn",
-  "www.presidence.sn",
-  "bo-admin.presidence.sn",
-]);
+const OFFICIAL_MEDIA_HOSTS: ReadonlySet<string> = new Set(
+  INSTITUTIONS.flatMap((id) => INSTITUTION_SITES[id].mediaHosts),
+);
 
 /**
  * Former media host of presidence.sn: its TLS certificate is invalid (never bypassed),

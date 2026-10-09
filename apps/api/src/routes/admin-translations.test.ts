@@ -45,6 +45,8 @@ function article(n: number, wolof: "machine" | "official" | null): NewsArticle {
   return {
     id: idOf(n),
     kind: "news-article",
+    publisher: "presidence",
+    alsoPublishedBy: [],
     category: "communiques",
     sourceUrl: url,
     sourcePublishedOn: `2025-11-0${String(n)}`,

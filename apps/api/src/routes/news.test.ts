@@ -17,6 +17,8 @@ function article(n: number, langs: ("fr" | "wo")[] = ["fr"]): NewsArticle {
   return {
     id: `00000000-0000-5000-8000-${String(n).padStart(12, "0")}`,
     kind: "news-article",
+    publisher: "presidence",
+    alsoPublishedBy: [],
     category: "communiques",
     sourceUrl: url(langs[0] ?? "fr"),
     sourcePublishedOn: `2026-09-${String(10 + n)}`,
@@ -181,6 +183,8 @@ describe("GET /v1/news/:id", () => {
     const detail = newsDetailSchema.parse(response.json());
     expect(detail.title).toBe("Titre wo 2");
     expect(detail.sourceUrl).toBe("https://www.presidence.sn/wo/actualites/test-2/");
+    expect(detail.publisher).toBe("presidence");
+    expect(detail.alsoPublishedBy).toEqual([]);
     expect(detail.blocks).toEqual([
       { type: "paragraph", inlines: [{ text: "Premier paragraphe 2." }] },
       { type: "paragraph", inlines: [{ text: "Suite." }] },

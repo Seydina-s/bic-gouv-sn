@@ -8,6 +8,8 @@ function article(translations: NewsArticle["translations"]): NewsArticle {
   return {
     id: "00000000-0000-5000-8000-000000000001",
     kind: "news-article",
+    publisher: "presidence",
+    alsoPublishedBy: [],
     category: "communiques",
     sourceUrl: "https://www.presidence.sn/fr/actualites/test-1/",
     sourcePublishedOn: "2026-09-21",

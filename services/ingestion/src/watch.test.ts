@@ -23,6 +23,8 @@ function article(sourceId: number, lang: Lang, title: string): NewsArticle {
   return {
     id: idOf(sourceId),
     kind: "news-article",
+    publisher: "presidence",
+    alsoPublishedBy: [],
     category: "communiques",
     sourceUrl,
     sourcePublishedOn: "2026-09-25",

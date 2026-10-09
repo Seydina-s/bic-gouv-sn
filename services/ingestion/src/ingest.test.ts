@@ -19,6 +19,8 @@ function version(lang: "fr" | "wo", title: string): NewsArticle {
   return {
     id: ID,
     kind: "news-article",
+    publisher: "presidence",
+    alsoPublishedBy: [],
     category: "communiques",
     sourceUrl,
     sourcePublishedOn: "2025-10-01",

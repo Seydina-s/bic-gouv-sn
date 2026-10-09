@@ -31,6 +31,37 @@ describe("newsArticleSchema", () => {
     expect(newsArticleSchema.safeParse(article).success).toBe(false);
   });
 
+  it("attaches an article stored before the whole-government scope to presidence.sn", () => {
+    const parsed = newsArticleSchema.parse(newsArticle());
+    expect(parsed.publisher).toBe("presidence");
+    expect(parsed.alsoPublishedBy).toEqual([]);
+  });
+
+  it("accepts a Primature article that also appeared on another institution's site", () => {
+    const sourceUrl = "https://primature.sn/publications/actualites/test-fixture";
+    const article = newsArticle({
+      publisher: "primature",
+      sourceUrl,
+      translations: [frTranslation({ sourceUrl })],
+      alsoPublishedBy: [
+        { publisher: "presidence", sourceUrl: "https://www.presidence.sn/fr/actualites/x/" },
+      ],
+    });
+    expect(issueMessages(article)).toEqual([]);
+  });
+
+  it("rejects an article whose page belongs to another institution than its publisher", () => {
+    expect(issueMessages(newsArticle({ publisher: "primature" }))).toContain(
+      "The source page must belong to the publishing institution",
+    );
+  });
+
+  it("rejects an institution that is not in the list", () => {
+    expect(newsArticleSchema.safeParse(newsArticle({ publisher: "le-soleil" })).success).toBe(
+      false,
+    );
+  });
+
   it("rejects content from a non-official source", () => {
     const article = newsArticle({ sourceUrl: "https://example.com/news" });
     expect(newsArticleSchema.safeParse(article).success).toBe(false);

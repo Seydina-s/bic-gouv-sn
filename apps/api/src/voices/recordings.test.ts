@@ -42,6 +42,8 @@ function article(n: number, withWolof: boolean): NewsArticle {
   return {
     id: idOf(n),
     kind: "news-article",
+    publisher: "presidence",
+    alsoPublishedBy: [],
     category: "communiques",
     sourceUrl: url,
     sourcePublishedOn: day,
