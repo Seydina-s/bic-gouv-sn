@@ -1,21 +1,24 @@
-// Cover photos of the stored history: `pnpm --filter @bgs/ingestion covers [fr|wo] [maxPages]`.
+// Cover photos of the stored history:
+//   pnpm --filter @bgs/ingestion covers [fr|wo] [maxPages] [--source primature]
 // Resumable: covers already attached are skipped. ~1 request per second.
 import { fileURLToPath } from "node:url";
 import { langSchema } from "@bgs/shared-types";
 import { openStores } from "../lib/stores";
 import { backfillCovers } from "../media/backfill-covers";
 import { FileMediaStorage } from "../media/media-storage";
-import { createPresidenceProvider } from "../sources/presidence/presidence-provider";
+import { NEWS_SOURCES, positionalArguments, sourceOption } from "../sources/news-sources";
 
-const lang = langSchema.parse(process.argv[2] ?? "fr");
-const maxPages = process.argv[3] === undefined ? undefined : Number(process.argv[3]);
+const [langArgument, pagesArgument] = positionalArguments(process.argv);
+const lang = langSchema.parse(langArgument ?? "fr");
+const maxPages = pagesArgument === undefined ? undefined : Number(pagesArgument);
+const source = sourceOption(process.argv);
 const mediaRoot =
   process.env["MEDIA_ROOT"] ?? fileURLToPath(new URL("../../../../.data/media", import.meta.url));
 const { stores, close } = await openStores();
 
 try {
   const result = await backfillCovers(
-    createPresidenceProvider(),
+    NEWS_SOURCES[source](),
     stores.articles,
     new FileMediaStorage(mediaRoot),
     lang,
@@ -24,7 +27,7 @@ try {
       onPage: (p) => {
         const o = p.outcomes;
         process.stdout.write(
-          `[${lang}] page ${String(p.page)}/${String(p.lastPage)} · attached ${String(o.attached)} · already ${String(o["already-done"])} · none ${String(o["no-cover"])} · failed ${String(p.failures.length)}\n`,
+          `[${source} ${lang}] page ${String(p.page)}/${String(p.lastPage)} · attached ${String(o.attached)} · already ${String(o["already-done"])} · none ${String(o["no-cover"])} · failed ${String(p.failures.length)}\n`,
         );
       },
     },

@@ -9,6 +9,18 @@ export const NEWS_SOURCES: Readonly<Record<Institution, () => SourceProvider>> =
   primature: createPrimatureProvider,
 };
 
+/** One provider per institution, each with its own pace and circuit breaker. */
+export function createNewsProviders(): Record<Institution, SourceProvider> {
+  return { presidence: NEWS_SOURCES.presidence(), primature: NEWS_SOURCES.primature() };
+}
+
+/** Command arguments without `--source <id>`, in order. */
+export function positionalArguments(argv: readonly string[]): string[] {
+  return argv
+    .slice(2)
+    .filter((arg, index, all) => !arg.startsWith("--") && all[index - 1] !== "--source");
+}
+
 /** The institution named by `--source <id>` in a command, presidence.sn by default. */
 export function sourceOption(argv: readonly string[]): Institution {
   const index = argv.indexOf("--source");
