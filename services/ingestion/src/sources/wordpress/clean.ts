@@ -45,7 +45,15 @@ export function builderMedia(html: string): string {
 }
 
 /** Blocks that are never the article, whatever the site. */
-const ALWAYS_DROPPED: readonly RegExp[] = [/^menu$/, /nav-menu/, /search-form/, /sidebar/, /share/];
+const ALWAYS_DROPPED: readonly RegExp[] = [
+  /^menu$/,
+  /nav-menu/,
+  /search-form/,
+  /sidebar/,
+  /share/,
+  // A list of other posts placed in the text (WordPress "query loop" block).
+  /^wp-block-query$/,
+];
 
 function normalized(text: string): string {
   return text.replace(/\s+/g, " ").trim().toLowerCase();

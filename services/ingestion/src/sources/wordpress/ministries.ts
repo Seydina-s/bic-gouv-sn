@@ -50,6 +50,11 @@ export const WORDPRESS_MINISTRIES = {
     queryRoute: true,
     cleanup: NO_EXTRA,
   },
+  culture: {
+    institution: "culture",
+    origin: "https://mcat.gouv.sn",
+    cleanup: NO_EXTRA,
+  },
   peches: {
     institution: "peches",
     origin: "https://mpem.gouv.sn",

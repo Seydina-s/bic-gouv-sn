@@ -87,6 +87,16 @@ Règles ajoutées pour toutes les sources le 09/10 au soir :
 - un communiqué fait d'un seul PDF officiel est publié (le document apparaît dans « Documents officiels ») ;
 - un émoji copié de Facebook arrive comme une image de Facebook : l'émoji est gardé en texte, l'image n'est jamais chargée.
 
+### Ministères ajoutés dans la nuit du 09 au 10/10/2026
+
+| Ministère | Site | Lecture | Essai |
+|---|---|---|---|
+| Santé et Hygiène publique | www.sante.gouv.sn | Drupal 7 : rubrique `/Actualites` page par page (≈ 135 pages), 10 s entre deux visites (`Crawl-delay`) ; **la liste n'affiche aucune date** : les articles récents sont datés par le flux `/rss.xml` (10 derniers), l'historique reste sans date (jamais devinée) | 36 articles sur 36 (3 pages) |
+| Forces armées | www.forcesarmees.gouv.sn | Drupal 7 : rubriques `/actualites`, `/communiques`, `/discours` (≈ 63 pages), date affichée dans la liste, 10 s entre deux visites | 36 articles sur 36 (3 pages) |
+| Culture, Artisanat et Tourisme | mcat.gouv.sn | WordPress ; un bloc « autres articles » placé dans le texte est retiré (règle commune) | 140 articles sur 154 : 8 en anglais, 6 vides |
+
+Règle ajoutée pour toutes les sources : un texte annoncé en français mais écrit en anglais est mis de côté avec ce motif (« text in English »), en attendant l'édition anglaise de la phase multilingue. Aucun des 1 352 textes français publiés n'est concerné.
+
 ### Ministères : sites à revoir (non collectés pour l'instant)
 
 | Ministère | Site | Constat du 09/10/2026 |
