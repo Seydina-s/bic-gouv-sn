@@ -21,6 +21,7 @@ export const INSTITUTIONS = [
   "sante",
   "forces-armees",
   "culture",
+  "enseignement-superieur",
 ] as const;
 
 export const institutionSchema = z.enum(INSTITUTIONS);
@@ -92,6 +93,10 @@ export const INSTITUTION_SITES: Readonly<Record<Institution, InstitutionSite>> =
   culture: {
     pageHosts: ["mcat.gouv.sn", "www.mcat.gouv.sn"],
     mediaHosts: ["mcat.gouv.sn", "www.mcat.gouv.sn"],
+  },
+  "enseignement-superieur": {
+    pageHosts: ["mesrisenegal.sn", "www.mesrisenegal.sn", "mesr.gouv.sn"],
+    mediaHosts: ["mesrisenegal.sn", "www.mesrisenegal.sn"],
   },
 };
 

@@ -73,6 +73,7 @@ export const fr = {
     sante: "Ministère de la Santé et de l'Hygiène publique",
     "forces-armees": "Ministère des Forces armées",
     culture: "Ministère de la Culture, de l'Artisanat et du Tourisme",
+    "enseignement-superieur": "Ministère de l'Enseignement supérieur, de la Recherche et de l'Innovation",
   },
   /** Sections of the official sites, keyed by their slug. */
   categories: {

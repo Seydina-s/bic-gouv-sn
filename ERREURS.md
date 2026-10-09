@@ -216,3 +216,10 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : j'ai mis à jour les tests de l'app mais pas les scripts de contrôle (`scripts/a11y-audit.ts`, `scripts/e2e.ts`), qui ne tournent qu'en intégration continue, ni la liste des textes wolof à traduire.
 - **Correctif** : scripts et liste mis à jour, message du catalogue d'erreurs aligné.
 - **Prévention** : avant de changer un texte visible, chercher l'ancien texte dans tout le dépôt (scripts, documentation, tests) et relancer `pnpm i18n:wolof`.
+
+## 10/10/2026 — Pages d'essai copiées de sites tiers : jetons techniques bloqués par le contrôle des secrets
+
+- **Ce qui s'est passé** : en enregistrant des pages des sites de la Santé et des Forces armées comme jeux d'essai, la validation contenait 4 « clés » repérées par gitleaks. Rien n'a été poussé.
+- **Cause racine** : ces pages Drupal portent un jeton technique (`theme_token`) que reçoit tout visiteur ; enregistrées telles quelles, elles l'auraient fait entrer dans notre historique.
+- **Correctif** : jetons remplacés par `removed` dans les pages d'essai, validation refaite avant tout envoi.
+- **Prévention** : une page copiée d'un site tiers comme jeu d'essai est nettoyée de ses jetons, clés et données intégrées volumineuses avant validation ; le contrôle des secrets reste obligatoire avant chaque envoi.
