@@ -58,9 +58,9 @@ Depuis le 09/10/2026, la plateforme couvre **tout le Gouvernement** : Présidenc
 |---|---|---|
 | Économie, Plan et Coopération | economie.gouv.sn | dernier article 20/05/2026 ; Drupal, collectable dès qu'il publie de nouveau |
 | Famille, Action sociale et Solidarités | femme.gouv.sn | dernier article 06/01/2026 |
-| Finances et Budget | finances.gouv.sn | ne répond pas depuis notre réseau (délai dépassé) ; à retenter depuis le serveur |
-| Budget | budget.sec.gouv.sn | certificat TLS incomplet |
-| Fonction publique, Travail et Réforme du service public | fonctionpublique.gouv.sn | refuse nos visites (429, trop de requêtes) ; à retenter |
+| Finances et Budget | finances.gouv.sn | relance du 09/10 : le nom se résout (41.208.146.4) mais le serveur ne répond ni en https ni en http (panne ou filtrage) ; à retenter depuis le serveur d'IA |
+| Budget | budget.sec.gouv.sn | site de la Direction générale du Budget : documents budgétaires (lois de finances, rapports d'exécution), **pas d'actualités** ; certificat incomplet (le maillon intermédiaire manque) |
+| Fonction publique, Travail et Réforme du service public | fonctionpublique.gouv.sn | relance du 09/10 : répond ; SPIP, flux `spip.php?page=backend` (10 articles), dernier article le 08/06/2026, publication irrégulière ; titres écrits en caractères décoratifs Unicode (à ramener en lettres ordinaires, NFKC) ; `robots.txt` absent |
 | Microfinance et Économie sociale et solidaire | microfinance-ess.gouv.sn | certificat TLS expiré |
 | Transports terrestres et aériens | mittd.gouv.sn | certificat TLS ne correspondant pas au site |
 | Urbanisme, Collectivités territoriales et Aménagement | urbanisme.gouv.sn ; decentralisation.gouv.sn | dernier article 05/2024 ; certificat invalide |
