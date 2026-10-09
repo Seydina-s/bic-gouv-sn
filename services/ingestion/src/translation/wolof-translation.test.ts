@@ -6,7 +6,7 @@ import type { NewsArticle } from "@bgs/shared-types";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { articleContentHash } from "../merge";
 import { ClaudeBatches, type BatchRequest, type BatchResult } from "./claude-batches";
-import { BATCH_PRICES, estimateCost } from "./cost-estimate";
+import { BATCH_PRICES, estimateCost, MEASURED_OVERRUN } from "./cost-estimate";
 import { outputTokensFor, WolofTranslation, type BatchClient } from "./wolof-translation";
 
 // Placeholder articles, not real content.
@@ -198,6 +198,8 @@ describe("the Wolof translation runs", () => {
       estimate.dollars["claude-haiku-4-5-20251001"] ?? 0,
     );
     expect(estimate.dollars["modele-inconnu"]).toBeNull();
+    const listed = (estimate.inputTokens * 2 + estimate.outputTokens * 10) / 1_000_000;
+    expect(estimate.dollars["claude-opus-5-5"]).toBeCloseTo(listed * MEASURED_OVERRUN, 10);
   });
 });
 

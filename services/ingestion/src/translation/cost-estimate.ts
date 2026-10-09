@@ -19,6 +19,12 @@ const FRENCH_CHARACTERS_PER_TOKEN = 3.5;
 const WOLOF_CHARACTERS_PER_TOKEN = 1.3;
 /** Wolof runs a little longer than the French it translates. */
 const WOLOF_LENGTH = 1.15;
+/**
+ * Measured gap between this model and the bill: the batch of 351 articles sent on
+ * 09/10/2026 was estimated at 14.45 $ and cost 18.83 $. Applied to every figure, so
+ * an estimate shown to the owner is no longer below what will be paid.
+ */
+export const MEASURED_OVERRUN = 1.3;
 
 export interface CostEstimate {
   articles: number;
@@ -50,7 +56,8 @@ export function estimateCost(
         model,
         price === undefined
           ? null
-          : (inputTokens * price.input + outputTokens * price.output) / 1_000_000,
+          : ((inputTokens * price.input + outputTokens * price.output) / 1_000_000) *
+            MEASURED_OVERRUN,
       ];
     }),
   );
