@@ -101,6 +101,9 @@ ${first.text.slice(-300)}`);
         ? null
         : (report.inputTokens * price.input + report.outputTokens * price.output) / 1_000_000;
     say(`Traductions enregistrées : ${String(report.saved)}`);
+    say(
+      `Jetons lus : ${String(report.inputTokens)} · jetons écrits : ${String(report.outputTokens)}`,
+    );
     say(`Écartées par les contrôles : ${JSON.stringify(report.refused)}`);
     say(
       `Échecs du service : ${String(report.failed)} · articles changés entre-temps : ${String(report.outdated)}`,
