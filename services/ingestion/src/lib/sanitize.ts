@@ -82,3 +82,11 @@ export function hasOfficialMedia(html: string): boolean {
     )
   );
 }
+
+/** Below this, a news article without official media is considered emptied. */
+const MIN_NEWS_TEXT_LENGTH = 40;
+
+/** True when a sanitized news article has neither enough text nor official media. */
+export function isEmptied(bodyHtml: string): boolean {
+  return textLength(bodyHtml) < MIN_NEWS_TEXT_LENGTH && !hasOfficialMedia(bodyHtml);
+}

@@ -1,6 +1,7 @@
 import type { Database } from "@bgs/database";
-import { isPublished, newsArticleSchema, type Lang, type NewsArticle } from "@bgs/shared-types";
+import { newsArticleSchema, shownLangs, type Lang, type NewsArticle } from "@bgs/shared-types";
 import {
+  withDuplicateOf,
   withTrack,
   type ArticlePage,
   type ArticleRepository,
@@ -33,7 +34,7 @@ export class PostgresArticleRepository implements ArticleRepository {
         article.category,
         article.sourcePublishedOn ?? "",
         article.sourceUpdatedAt ?? "",
-        article.translations.filter(isPublished).map((translation) => translation.lang),
+        shownLangs(article),
         article.translations.map((translation) => translation.lang),
       ],
     });
@@ -160,6 +161,14 @@ export class PostgresArticleRepository implements ArticleRepository {
       ...current,
       audio: withTrack(current.audio, track),
     }));
+  }
+
+  setDuplicateOf(id: string, referenceId: string | null): Promise<boolean> {
+    return this.table.replaceCurrent(id, (current) => withDuplicateOf(current, referenceId));
+  }
+
+  setAlsoPublishedBy(id: string, others: NewsArticle["alsoPublishedBy"]): Promise<boolean> {
+    return this.table.replaceCurrent(id, (current) => ({ ...current, alsoPublishedBy: others }));
   }
 
   /** A mark on the current version: its words stay as they are, no new version. */

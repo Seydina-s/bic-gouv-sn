@@ -1,6 +1,7 @@
 import type { ArticleRepository } from "@bgs/content-store";
 import { errorCodeOf, type Lang } from "@bgs/shared-types";
 import type { CollectionReport } from "./collect";
+import { saveCollected } from "./duplicates/reconcile";
 import { mergeArticle } from "./merge";
 import type { SourceProvider } from "./sources/source-provider";
 
@@ -55,7 +56,8 @@ export async function backfill(
         continue;
       }
       try {
-        const outcome = await repository.save(
+        const outcome = await saveCollected(
+          repository,
           mergeArticle(existing, await provider.fetchArticle(ref)),
         );
         if (outcome !== "unchanged") {

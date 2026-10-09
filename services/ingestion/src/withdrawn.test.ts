@@ -57,7 +57,7 @@ function source(): SourceProvider & { read: string[] } {
   return {
     read,
     listPage: () => Promise.resolve({ refs: [listed], lastPage: 1 }),
-    articleIdFor: (ref) => idOf(ref.sourceId),
+    articleIdFor: (ref) => idOf(Number(ref.sourceId)),
     downloadMedia: () => Promise.reject(new Error("unused")),
     fetchArticle: (ref) => {
       read.push(ref.slug);

@@ -155,6 +155,26 @@ describe.each(STORAGES)("articles stored %s", (_name, open) => {
     expect(await repo.setWithdrawn("missing", "fr", null)).toBe(false);
   });
 
+  it("hides a duplicate from the app, notes it on the reference, and can show it again", async () => {
+    await repo.save(article(1));
+    await repo.save(article(2));
+    const [duplicate, reference] = [article(1).id, article(2).id];
+    const other = { publisher: "presidence" as const, sourceUrl: article(1).sourceUrl };
+    expect(await repo.setDuplicateOf(duplicate, reference)).toBe(true);
+    expect(await repo.setAlsoPublishedBy(reference, [other])).toBe(true);
+    expect((await repo.list({ lang: "fr", limit: 10 })).items.map((a) => a.id)).toEqual([
+      reference,
+    ]);
+    expect((await repo.sections({ lang: "fr", perSection: 10 }))[0]?.total).toBe(1);
+    expect((await repo.list({ limit: 10, includeWithdrawn: true })).total).toBe(2);
+    expect((await repo.get(duplicate))?.version).toBe(1);
+    expect((await repo.get(reference))?.alsoPublishedBy).toEqual([other]);
+    await repo.setDuplicateOf(duplicate, null);
+    expect((await repo.get(duplicate))?.duplicateOf).toBeUndefined();
+    expect((await repo.list({ limit: 10 })).total).toBe(2);
+    expect(await repo.setDuplicateOf("missing", null)).toBe(false);
+  });
+
   it("lists newest first with cursor pagination", async () => {
     for (const n of [1, 3, 2]) {
       await repo.save(article(n));

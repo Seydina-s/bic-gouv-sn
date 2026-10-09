@@ -2,7 +2,7 @@ import { newsArticleSchema, type Lang, type NewsArticle } from "@bgs/shared-type
 import { QuarantineError } from "../../lib/errors";
 import { stableUuid } from "../../lib/identity";
 import { articleContentHash } from "../../merge";
-import { hasOfficialMedia, sanitizeArticleHtml, textLength } from "../../lib/sanitize";
+import { isEmptied, sanitizeArticleHtml } from "../../lib/sanitize";
 import type { DetailResponse } from "./api-schemas";
 
 export const SITE_ORIGIN = "https://www.presidence.sn";
@@ -13,12 +13,9 @@ export function canonicalArticleUrl(lang: Lang, slug: string): string {
 }
 
 /** Stable id of a presidence.sn article, shared by its French and Wolof versions. */
-export function presidenceArticleId(sourceArticleId: number): string {
+export function presidenceArticleId(sourceArticleId: number | string): string {
   return stableUuid(`${SITE_ORIGIN}/article/${String(sourceArticleId)}`);
 }
-
-/** Below this, an article without official media is considered emptied. */
-const MIN_TEXT_LENGTH = 40;
 
 export interface NormalizeContext {
   lang: Lang;
@@ -45,7 +42,7 @@ export function normalizeDetail(detail: DetailResponse, { lang, fetchedAt }: Nor
   if (category === undefined) {
     throw quarantine(`unknown category id ${String(base.categorieId)}`);
   }
-  if (textLength(bodyHtml) < MIN_TEXT_LENGTH && !hasOfficialMedia(bodyHtml)) {
+  if (isEmptied(bodyHtml)) {
     throw quarantine("article body is empty after sanitization");
   }
 

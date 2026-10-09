@@ -15,8 +15,8 @@ export interface ListQuery {
   /** Numbered pages: articles to skip (ignored when a cursor is given). */
   offset?: number | undefined;
   /**
-   * Also list versions the source withdrew (hidden from the app). For the
-   * collection only, which must be able to see them published again.
+   * Also list versions the source withdrew and duplicates (hidden from the app). For
+   * the collection only, which must be able to see them published again.
    */
   includeWithdrawn?: boolean | undefined;
 }
@@ -73,6 +73,20 @@ export interface ArticleRepository {
    * published again with null. The words are kept untouched. False if unknown.
    */
   setWithdrawn(id: string, lang: Lang, withdrawnAt: string | null): Promise<boolean>;
+  /**
+   * Marks the article as repeating the reference institution's article `referenceId`
+   * (hidden from the app, words kept), or as its own again with null. No new version.
+   */
+  setDuplicateOf(id: string, referenceId: string | null): Promise<boolean>;
+  /** Replaces the other institutions' publications of the same content. No new version. */
+  setAlsoPublishedBy(id: string, others: NewsArticle["alsoPublishedBy"]): Promise<boolean>;
+}
+
+/** `article` marked as a duplicate of `referenceId`, or unmarked with null. */
+export function withDuplicateOf(article: NewsArticle, referenceId: string | null): NewsArticle {
+  const unmarked = { ...article };
+  delete unmarked.duplicateOf;
+  return referenceId === null ? unmarked : { ...unmarked, duplicateOf: referenceId };
 }
 
 /** The recordings with `track` in place of the previous one of its language. */

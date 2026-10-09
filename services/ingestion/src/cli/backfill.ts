@@ -1,21 +1,26 @@
-// Full history import: `pnpm --filter @bgs/ingestion backfill [fr|wo] [maxPages]`.
+// Full history import:
+//   pnpm --filter @bgs/ingestion backfill [fr|wo] [maxPages] [--source primature]
 // Resumable: re-running skips what is already stored. ~1 request per second.
 // Into PostgreSQL when DATABASE_URL is set, else into .data/news.json.
 import { langSchema } from "@bgs/shared-types";
 import { backfill } from "../backfill";
 import { openStores } from "../lib/stores";
-import { createPresidenceProvider } from "../sources/presidence/presidence-provider";
+import { NEWS_SOURCES, sourceOption } from "../sources/news-sources";
 
-const lang = langSchema.parse(process.argv[2] ?? "fr");
-const maxPages = process.argv[3] === undefined ? undefined : Number(process.argv[3]);
+const [langArgument, pagesArgument] = process.argv.slice(2).filter((arg, index, all) => {
+  return !arg.startsWith("--") && all[index - 1] !== "--source";
+});
+const lang = langSchema.parse(langArgument ?? "fr");
+const maxPages = pagesArgument === undefined ? undefined : Number(pagesArgument);
+const source = sourceOption(process.argv);
 const { stores, close } = await openStores();
 
 try {
-  const result = await backfill(createPresidenceProvider(), stores.articles, lang, {
+  const result = await backfill(NEWS_SOURCES[source](), stores.articles, lang, {
     ...(maxPages === undefined ? {} : { maxPages }),
     onPage: (p) => {
       process.stdout.write(
-        `[${lang}] page ${String(p.page)}/${String(p.lastPage)} · created ${String(p.created)} · updated ${String(p.updated)} · skipped ${String(p.skipped)} · failed ${String(p.failures.length)}\n`,
+        `[${source} ${lang}] page ${String(p.page)}/${String(p.lastPage)} · created ${String(p.created)} · updated ${String(p.updated)} · skipped ${String(p.skipped)} · failed ${String(p.failures.length)}\n`,
       );
     },
   });

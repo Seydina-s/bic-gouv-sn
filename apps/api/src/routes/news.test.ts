@@ -191,6 +191,16 @@ describe("GET /v1/news/:id", () => {
     ]);
   });
 
+  it("serves the Présidence's version for a hidden repeat, and lists it no more", async () => {
+    await articles.setDuplicateOf(article(1).id, article(3).id);
+    const response = await app.inject({ method: "GET", url: `/v1/news/${article(1).id}` });
+    expect(newsDetailSchema.parse(response.json()).id).toBe(article(3).id);
+    const list = await app.inject({ method: "GET", url: "/v1/news" });
+    expect(list.json<{ items: { id: string }[] }>().items.map((item) => item.id)).not.toContain(
+      article(1).id,
+    );
+  });
+
   it("lists the official PDFs from our copies, and refreshes when one arrives", async () => {
     const url = `/v1/news/${article(1).id}`;
     const before = await app.inject({ method: "GET", url });

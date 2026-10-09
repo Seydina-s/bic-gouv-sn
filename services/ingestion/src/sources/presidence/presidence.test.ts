@@ -4,7 +4,8 @@ import { collectLatest } from "../../collect";
 import { QuarantineError, SourceUnreachableError } from "../../lib/errors";
 import { detailResponseSchema, type DetailResponse } from "./api-schemas";
 import { canonicalArticleUrl, normalizeDetail } from "./normalize";
-import { PRESIDENCE_API, USER_AGENT, createPresidenceProvider } from "./presidence-provider";
+import { USER_AGENT } from "../../lib/polite-http";
+import { PRESIDENCE_API, createPresidenceProvider } from "./presidence-provider";
 
 // Real responses of the presidence.sn API recorded on 25/09/2026 (trimmed).
 function fixture(name: string): unknown {

@@ -628,6 +628,15 @@ importers:
       blurhash:
         specifier: 2.0.5
         version: 2.0.5
+      dom-serializer:
+        specifier: 3.1.1
+        version: 3.1.1
+      domhandler:
+        specifier: 6.0.1
+        version: 6.0.1
+      htmlparser2:
+        specifier: 12.0.0
+        version: 12.0.0
       sanitize-html:
         specifier: 2.17.7
         version: 2.17.7

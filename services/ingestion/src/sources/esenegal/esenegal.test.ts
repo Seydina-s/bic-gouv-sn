@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { QuarantineError } from "../../lib/errors";
 import { detailResponseSchema, type ProcedureDetail } from "./api-schemas";
 import { createEsenegalProvider, ESENEGAL_API, type ProcedureSource } from "./esenegal-provider";
-import { USER_AGENT } from "../presidence/presidence-provider";
+import { USER_AGENT } from "../../lib/polite-http";
 import { importProcedures } from "./import-procedures";
 import { canonicalProcedureUrl, meaningful, normalizeProcedure } from "./normalize";
 

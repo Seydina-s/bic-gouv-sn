@@ -10,3 +10,5 @@ pnpm-lock.yaml
 *.md
 expo-env.d.ts
 .claude
+# Pages saved as the official sites publish them (test fixtures): never reformatted.
+**/fixtures/**/*.html
