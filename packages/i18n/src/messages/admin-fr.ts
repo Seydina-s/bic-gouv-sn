@@ -440,9 +440,9 @@ export const adminFr = {
     resumedDone: "Envoi automatique repris.",
     automaticSentAt: "Envoi automatique le {day} à {time}",
     burst: {
-      one: "{count} article annoncé automatiquement en 30 minutes. Vérifiez qu'il vient bien de la Présidence\u00a0; en cas de doute, mettez en pause.",
+      one: "{count} article annoncé automatiquement en 30 minutes. Vérifiez qu'il vient bien d'un site officiel (Présidence, Primature)\u00a0; en cas de doute, mettez en pause.",
       other:
-        "{count} articles annoncés automatiquement en 30 minutes. Vérifiez qu'ils viennent bien de la Présidence\u00a0; en cas de doute, mettez en pause.",
+        "{count} articles annoncés automatiquement en 30 minutes. Vérifiez qu'ils viennent bien d'un site officiel (Présidence, Primature)\u00a0; en cas de doute, mettez en pause.",
     },
     subscribersTitle: "Téléphones abonnés",
     subscribers: {
@@ -536,9 +536,9 @@ export const adminFr = {
       other: "{total} en cours, dont {count} bloquantes.",
     },
     burst: {
-      one: "{count} article annoncé automatiquement en 30 minutes : vérifiez qu'il vient bien de la Présidence.",
+      one: "{count} article annoncé automatiquement en 30 minutes : vérifiez qu'il vient bien d'un site officiel (Présidence, Primature).",
       other:
-        "{count} articles annoncés automatiquement en 30 minutes : vérifiez qu'ils viennent bien de la Présidence.",
+        "{count} articles annoncés automatiquement en 30 minutes : vérifiez qu'ils viennent bien d'un site officiel (Présidence, Primature).",
     },
     growth: "{count} téléphones abonnés en 24 heures, bien plus que d'habitude.",
     pending: {
@@ -562,7 +562,7 @@ export const adminFr = {
   translations: {
     title: "Traductions à relire",
     intro:
-      "Les articles que la Présidence n'a pas publiés en wolof sont traduits automatiquement. Dans l'application, ils portent la mention « Traduction automatique » jusqu'à leur relecture. Une personne qui parle wolof compare les deux versions, puis valide la traduction ou l'écarte.",
+      "Les articles publiés sans version wolof officielle (Présidence, Primature) sont traduits automatiquement. Dans l'application, ils portent la mention « Traduction automatique » jusqu'à leur relecture. Une personne qui parle wolof compare les deux versions, puis valide la traduction ou l'écarte.",
     count: {
       one: "{count} traduction à relire",
       other: "{count} traductions à relire",

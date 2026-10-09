@@ -12,8 +12,15 @@ import { acquireLock } from "../lib/single-instance";
 import { openStores } from "../lib/stores";
 import { FileMediaStorage } from "../media/media-storage";
 import { createPresidenceProvider } from "../sources/presidence/presidence-provider";
+import { createPrimatureProvider } from "../sources/primature/primature-provider";
 import { circuitStatuses, nextIngestionStatus, type PassOutcome } from "../status";
-import { nextPollDelayMs, pollOnce, retryDelayMs, SeenIndex } from "../watch";
+import {
+  nextPollDelayMs,
+  pollSources,
+  retryDelayMs,
+  SeenIndex,
+  type WatchedSource,
+} from "../watch";
 import { isWithdrawalCheckDue, reconcileWithdrawals } from "../withdrawn";
 
 // Into PostgreSQL when DATABASE_URL is set (SCALE-02), shared with the API; else .data/.
@@ -36,11 +43,32 @@ if (staleTemps > 0) {
   );
 }
 const provider = createPresidenceProvider();
+// The Présidence at the ordinary pace (freshness SLO < 2 min); the Primature, whose
+// site has no feed and publishes a few times a week, every 15 minutes (docs/sources.md).
+const sources: WatchedSource[] = [
+  {
+    name: "presidence.sn",
+    provider,
+    langs: ["fr", "wo"],
+    everyMs: 0,
+    essential: true,
+    seen: new SeenIndex(),
+    lastPassAt: null,
+  },
+  {
+    name: "primature.sn",
+    provider: createPrimatureProvider(),
+    langs: ["fr"],
+    everyMs: 15 * 60 * 1000,
+    essential: false,
+    seen: new SeenIndex(),
+    lastPassAt: null,
+  },
+];
 const repository = stores.articles;
 const media = new FileMediaStorage(
   process.env["MEDIA_ROOT"] ?? fileURLToPath(new URL("../../../../.data/media", import.meta.url)),
 );
-const seen = new SeenIndex();
 
 // Mutated from signal handlers: an object so the loop condition is re-read each time.
 const control = { running: true };
@@ -77,7 +105,7 @@ async function report(outcome: PassOutcome, lastChangeAt: Date | null): Promise<
   status = {
     ...next,
     nextAttemptAt: new Date(now.getTime() + delay).toISOString(),
-    circuits: circuitStatuses(provider.circuits?.() ?? []),
+    circuits: circuitStatuses(sources.flatMap((source) => source.provider.circuits?.() ?? [])),
   };
   await writeIngestionStatus(statusDocument, status).catch((error: unknown) => {
     process.stdout.write(`status report not written: ${String(error)}\n`);
@@ -126,14 +154,7 @@ while (control.running) {
   const startedAt = new Date();
   let delay: number;
   try {
-    const result = await pollOnce(
-      provider,
-      repository,
-      ["fr", "wo"],
-      seen,
-      () => new Date(),
-      media,
-    );
+    const result = await pollSources(sources, repository, () => new Date(), media);
     const { created, updated } = result.outcomes;
     if (created + updated > 0) {
       lastChangeAt = new Date();

@@ -6,7 +6,7 @@ import { INGESTION_STOPPED_AFTER_MS, type Lang, type NewsArticle } from "@bgs/sh
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { articleContentHash } from "./merge";
 import type { SourceArticleRef, SourceProvider } from "./sources/source-provider";
-import { nextPollDelayMs, pollOnce, retryDelayMs, SeenIndex } from "./watch";
+import { nextPollDelayMs, pollOnce, pollSources, retryDelayMs, SeenIndex } from "./watch";
 
 const NOW = new Date("2026-09-25T10:00:00Z");
 
@@ -231,5 +231,70 @@ describe("nextPollDelayMs", () => {
 
   it("polls every 5 minutes at night", () => {
     expect(nextPollDelayMs(new Date("2026-09-25T02:00:00Z"), null)).toBe(300_000);
+  });
+});
+
+describe("pollSources", () => {
+  let dir: string;
+  let repo: FileArticleRepository;
+
+  beforeEach(async () => {
+    dir = await mkdtemp(join(tmpdir(), "bgs-watch-sources-"));
+    repo = new FileArticleRepository(join(dir, "news.json"));
+  });
+
+  afterEach(async () => {
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  function watched(name: string, provider: SourceProvider, essential: boolean, everyMs = 0) {
+    return {
+      name,
+      provider,
+      langs: ["fr"] as const,
+      everyMs,
+      essential,
+      seen: new SeenIndex(),
+      lastPassAt: null,
+    };
+  }
+
+  const down: SourceProvider = {
+    ...liveSource().provider,
+    listPage: () =>
+      Promise.reject(
+        Object.assign(new Error("site down"), { code: "INGESTION_SOURCE_UNREACHABLE" }),
+      ),
+  };
+
+  it("reads every site, and lists a secondary site's outage without stopping", async () => {
+    const reference = liveSource();
+    const result = await pollSources(
+      [watched("presidence.sn", reference.provider, true), watched("primature.sn", down, false)],
+      repo,
+      () => NOW,
+    );
+    expect(result.outcomes.created).toBe(1);
+    expect(result.failures).toEqual([
+      { ref: "primature.sn", code: "INGESTION_OTHER_SOURCE_UNREACHABLE", message: "site down" },
+    ]);
+  });
+
+  it("fails the pass when the reference site is down", async () => {
+    await expect(
+      pollSources([watched("presidence.sn", down, true)], repo, () => NOW),
+    ).rejects.toThrow("site down");
+  });
+
+  it("reads a slower site only when its turn comes", async () => {
+    const slow = liveSource();
+    const sources = [watched("primature.sn", slow.provider, false, 15 * 60 * 1000)];
+    slow.state.page = [];
+    await pollSources(sources, repo, () => NOW);
+    slow.state.page = [{ sourceId: 7, updatedAt: "2026-09-25T10:01:00Z", title: "Nouveau" }];
+    const early = await pollSources(sources, repo, () => new Date(NOW.getTime() + 60_000));
+    expect(early.outcomes.created).toBe(0);
+    const onTime = await pollSources(sources, repo, () => new Date(NOW.getTime() + 15 * 60_000));
+    expect(onTime.outcomes.created).toBe(1);
   });
 });
