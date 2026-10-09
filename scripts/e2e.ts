@@ -92,7 +92,7 @@ const JOURNEYS: Journey[] = [
       await browser.press("Redémarrer");
       await browser.waitForText("Choisissez votre langue");
       for (const title of [
-        "L'action du gouvernement, chaque jour",
+        "Le Gouvernement, en un seul endroit",
         "La source, toujours",
         "Gardez l'essentiel, même sans réseau",
       ]) {

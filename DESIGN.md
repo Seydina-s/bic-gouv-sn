@@ -319,7 +319,7 @@ Une pilule flottante, discrète, par-dessus le contenu qui défile.
 - Bandeau tricolore (décoratif, masqué aux lecteurs d'écran), nom de l'app en famille display à la taille `title` en `text-brand` (rôle `header`), jour et date en `label` `text-secondary`, filet noir dessous, baobab en filigrane.
 
 ### Article à la une (`LeadStory`, `features/news/Stories.tsx`)
-- Photo pleine largeur en 16:10, puis rubrique, titre `lead-headline` (5 lignes au plus), extrait `body` `text-secondary` (3 lignes au plus), et « date · presidence.sn » en `body-small` `text-tertiary`. Pression : fond `surface`.
+- Photo pleine largeur en 16:10, puis rubrique, titre `lead-headline` (5 lignes au plus), extrait `body` `text-secondary` (3 lignes au plus), et « date · institution » (Présidence, Primature) en `body-small` `text-tertiary`. Pression : fond `surface`.
 
 ### Carte « Dernier Conseil des ministres » (`CouncilCard`)
 - Fond vert tendre, `rounded.lg`, bande tissée de chevrons en haut. Titre `story-title` (4 lignes au plus), date, puis l'action « Lire le communiqué » avec une flèche Phosphor. Tout le texte est en `on-primary-container`. Elle affiche toujours le dernier Conseil, même s'il est ancien.
