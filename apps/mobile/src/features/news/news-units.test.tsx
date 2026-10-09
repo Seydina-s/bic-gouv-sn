@@ -12,6 +12,7 @@ import { pickCoverSource } from "./CoverImage";
 import { formatDay, formatPublishedOn, freshnessOf, parseCalendarDate } from "./format";
 import { heroStories, orderSections } from "./front-page";
 import { spokenPieces } from "./spoken-text";
+import { institutionLabelKey } from "./institution";
 import { CouncilCard, LeadStory, StoryRow } from "./Stories";
 
 jest.mock("expo-localization", () => ({ getLocales: () => [{ languageTag: "fr-SN" }] }));
@@ -406,7 +407,7 @@ describe("stories", () => {
   it("shows the official photo, decorative, on the lead story and in the list", async () => {
     await show("lead", COVER);
     expect(screen.getByTestId("cover-image", { includeHiddenElements: true })).toBeOnTheScreen();
-    expect(screen.getByText("24 septembre 2026 · presidence.sn")).toBeOnTheScreen();
+    expect(screen.getByText("24 septembre 2026 · Présidence")).toBeOnTheScreen();
     await screen.unmount();
     await show("row", COVER);
     expect(screen.getByTestId("cover-image", { includeHiddenElements: true })).toBeOnTheScreen();
@@ -500,5 +501,61 @@ describe("freshnessOf", () => {
 
   it("never reports a negative age (clock changed)", () => {
     expect(freshnessOf(now + 60_000, now)).toEqual({ unit: "now" });
+  });
+});
+
+describe("ArticleView source", () => {
+  it("names the publishing site and the other institutions that published the text", async () => {
+    await render(
+      <TestProviders>
+        <ArticleView
+          detail={{
+            ...DETAIL,
+            publisher: "presidence",
+            alsoPublishedBy: [
+              {
+                publisher: "primature",
+                sourceUrl: "https://primature.sn/publications/actualites/x",
+              },
+            ],
+          }}
+          isPending={false}
+          paneWidth={390}
+          bottomInset={0}
+        />
+      </TestProviders>,
+    );
+    expect(screen.getByText("Source : presidence.sn")).toBeOnTheScreen();
+    expect(screen.getByText("Aussi publié par : Primature")).toBeOnTheScreen();
+    const open = jest.spyOn(Linking, "openURL").mockResolvedValue(true);
+    await fireEvent.press(screen.getByText("Lire sur primature.sn"));
+    expect(open).toHaveBeenCalledWith("https://primature.sn/publications/actualites/x");
+  });
+
+  it("names the Primature's site for its own articles", async () => {
+    await render(
+      <TestProviders>
+        <ArticleView
+          detail={{
+            ...DETAIL,
+            publisher: "primature",
+            sourceUrl: "https://www.primature.sn/publications/actualites/x",
+          }}
+          isPending={false}
+          paneWidth={390}
+          bottomInset={0}
+        />
+      </TestProviders>,
+    );
+    expect(screen.getByText("Source : primature.sn")).toBeOnTheScreen();
+    expect(screen.queryByText(/Aussi publié par/)).toBeNull();
+  });
+});
+
+describe("institutionLabelKey", () => {
+  it("reads an API older than the field as presidence.sn, and skips an unknown institution", () => {
+    expect(institutionLabelKey(undefined)).toBe("institutions.presidence");
+    expect(institutionLabelKey("primature")).toBe("institutions.primature");
+    expect(institutionLabelKey("ministere-futur")).toBeNull();
   });
 });

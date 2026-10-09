@@ -10,11 +10,10 @@ import { categoryLabelKey } from "./category";
 import { useCategoryTone } from "./CategoryIcon";
 import { CoverImage } from "./CoverImage";
 import { formatPublishedOn } from "./format";
+import { institutionLabelKey } from "./institution";
 import { SectionTag } from "./SectionTag";
 import { Selvage, SELVAGE_WIDTH, WovenStrip } from "./Selvage";
 import { usePrefetchArticle } from "./useNews";
-
-const SOURCE = "presidence.sn";
 
 export interface StoryProps {
   item: NewsSummary;
@@ -22,12 +21,20 @@ export interface StoryProps {
   onPress: (id: string) => void;
 }
 
-/** What a screen reader announces for one story: section, title, day. */
-export function useStoryLabel(item: NewsSummary): { label: string; day: string } {
+/** What a screen reader announces for one story: section, title, day, institution. */
+export function useStoryLabel(item: NewsSummary): {
+  label: string;
+  day: string;
+  institution: string;
+} {
   const { t, lang } = useTranslation();
   const day = formatPublishedOn(item.publishedOn, lang);
-  const label = [t(categoryLabelKey(item.category)), item.title, day].filter(Boolean).join(". ");
-  return { label, day };
+  const key = institutionLabelKey(item.publisher);
+  const institution = key === null ? "" : t(key);
+  const label = [t(categoryLabelKey(item.category)), item.title, day, institution]
+    .filter(Boolean)
+    .join(". ");
+  return { label, day, institution };
 }
 
 export interface LeadStoryProps extends StoryProps {
@@ -53,7 +60,7 @@ export function LeadStory({
   showSection = true,
 }: LeadStoryProps) {
   const { theme } = useTheme();
-  const { label, day } = useStoryLabel(item);
+  const { label, day, institution } = useStoryLabel(item);
   const prefetch = usePrefetchArticle();
   const { color, space, textStyle, layout } = theme;
 
@@ -99,7 +106,7 @@ export function LeadStory({
           </Text>
         )}
         <Text style={[textStyle.bodySmall, { color: color.textTertiary }]}>
-          {[day, SOURCE].filter(Boolean).join(" · ")}
+          {[day, institution].filter(Boolean).join(" · ")}
         </Text>
       </View>
     </Pressable>
@@ -170,7 +177,7 @@ export function StoryRow({
   showSection = true,
 }: StoryProps & { showSection?: boolean }) {
   const { theme } = useTheme();
-  const { label, day } = useStoryLabel(item);
+  const { label, day, institution } = useStoryLabel(item);
   const prefetch = usePrefetchArticle();
   const tone = useCategoryTone(item.category);
   const { color, space, textStyle, radius, layout } = theme;
@@ -208,7 +215,9 @@ export function StoryRow({
           {item.title}
         </Text>
         {day !== "" && (
-          <Text style={[textStyle.bodySmall, { color: color.textTertiary }]}>{day}</Text>
+          <Text style={[textStyle.bodySmall, { color: color.textTertiary }]}>
+            {[day, institution].filter(Boolean).join(" · ")}
+          </Text>
         )}
       </View>
       {item.cover !== null && (

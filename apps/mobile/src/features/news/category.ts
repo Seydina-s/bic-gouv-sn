@@ -6,6 +6,7 @@ const KNOWN = [
   "focus",
   "interviews",
   "agenda",
+  "actualites",
 ] as const;
 
 type KnownCategory = (typeof KNOWN)[number];

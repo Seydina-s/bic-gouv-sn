@@ -8,7 +8,7 @@ import { useFavorites } from "../favorites/FavoritesProvider";
 
 /**
  * Header actions of an article: keep it (readable offline) and share it. Sharing
- * sends the title and the official presidence.sn page, the traceable source.
+ * sends the title and the official page of the publishing institution, the traceable source.
  */
 export function ArticleActions({ detail }: { detail: NewsDetail }) {
   const { t } = useTranslation();

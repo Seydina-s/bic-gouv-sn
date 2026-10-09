@@ -24,6 +24,8 @@ export interface Passage {
   contentHash: string;
   /** The article's section ("conseil-des-ministres"…); none for a procedure. */
   section?: string;
+  /** Institution that published the article ("Primature"…); none for a procedure. */
+  publisher?: string;
   text: string;
 }
 
@@ -128,7 +130,11 @@ export function articlePassages(article: NewsArticle): Passage[] {
   return article.translations
     .filter(isQuotable)
     .flatMap((translation) => cut(article, translation, paragraphsOf(translation.bodyHtml)))
-    .map((passage) => ({ ...passage, section: article.category }));
+    .map((passage) => ({
+      ...passage,
+      section: article.category,
+      publisher: t(`institutions.${article.publisher}`),
+    }));
 }
 
 function listed(label: string, items: string[]): string[] {
