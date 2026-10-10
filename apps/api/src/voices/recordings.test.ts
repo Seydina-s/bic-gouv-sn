@@ -129,6 +129,33 @@ describe("the recordings of the articles", () => {
     expect(left.map((item) => item.lang)).toEqual(["wo"]);
   });
 
+  it("tries a group again after a cut connection, and stops when the voices stay down", async () => {
+    const todo = recordingsToMake(await allArticles(articles), ["fr"], 2);
+    const waits: number[] = [];
+    const wait = (ms: number) => {
+      waits.push(ms);
+      return Promise.resolve();
+    };
+    const working = voice();
+    let cuts = 2;
+    const flaky: Synthesizer = (jobs) => {
+      if (cuts > 0) {
+        cuts -= 1;
+        return Promise.reject(new Error("ssh exited with 255"));
+      }
+      return working(jobs);
+    };
+    const report = await record(todo, { articles, mediaRoot: dir, synthesize: flaky, wait });
+    expect(report.recorded).toBe(2);
+    expect(waits).toEqual([60_000, 120_000]);
+
+    const down: Synthesizer = () => Promise.reject(new Error("ssh exited with 255"));
+    await expect(
+      record(todo, { articles, mediaRoot: dir, synthesize: down, wait }),
+    ).rejects.toThrow("ssh exited with 255");
+    expect(waits).toHaveLength(2 + 4);
+  });
+
   it("no longer offers a recording once the words it reads have changed", async () => {
     const todo = recordingsToMake(await allArticles(articles), ["fr"], 1);
     await record(todo, { articles, mediaRoot: dir, synthesize: voice() });
