@@ -333,7 +333,7 @@ export const fr = {
     restartWelcomeHelp: "Revoir la présentation depuis le début, avec le choix de la langue.",
     about: "À propos",
     aboutNews:
-      "Bic Gouv Sn réunit en un seul endroit l'actualité officielle du Gouvernement du Sénégal. Comptes rendus du Conseil des ministres, communiqués, discours, audiences et visites officielles arrivent dans l'application dès leur publication sur les sites officiels de la Présidence de la République et de la Primature, en français et en wolof.",
+      "Bic Gouv Sn réunit en un seul endroit l'actualité officielle du Gouvernement du Sénégal. Comptes rendus du Conseil des ministres, communiqués, discours, audiences et visites officielles arrivent dans l'application dès leur publication sur les sites officiels de la Présidence de la République, de la Primature et des ministères, en français et, pour la Présidence, en wolof.",
     aboutProcedures:
       "Pour vos démarches administratives, l'application explique chaque procédure publiée sur e-senegal.sn avec les pièces à fournir, le coût, le délai et le lien pour la faire en ligne.",
     aboutSources:
