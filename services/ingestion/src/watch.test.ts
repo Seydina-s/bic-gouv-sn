@@ -9,6 +9,7 @@ import type { SourceArticleRef, SourceProvider } from "./sources/source-provider
 import {
   nextPollDelayMs,
   pollOnce,
+  dueSources,
   pollSources,
   retryDelayMs,
   SeenIndex,
@@ -22,10 +23,15 @@ function idOf(sourceId: number): string {
 }
 
 // Placeholder texts, not real content.
-function article(sourceId: number, lang: Lang, title: string): NewsArticle {
+function article(
+  sourceId: number,
+  lang: Lang,
+  title: string,
+  bodyHtml = "<p>Corps de test</p>",
+): NewsArticle {
   const sourceUrl = `https://www.presidence.sn/${lang}/actualites/t-${String(sourceId)}/`;
   const translations: NewsArticle["translations"] = [
-    { lang, status: "official", title, bodyHtml: "<p>Corps de test</p>", sourceUrl },
+    { lang, status: "official", title, bodyHtml, sourceUrl },
   ];
   return {
     id: idOf(sourceId),
@@ -55,10 +61,15 @@ function liveSource() {
     fetched: [] as number[],
     failing: false,
     cover: null as string | null,
+    body: undefined as string | undefined,
+    downloads: 0,
   };
   const provider: SourceProvider = {
     articleIdFor: (ref) => idOf(Number(ref.sourceId)),
-    downloadMedia: () => Promise.reject(new Error("no media")),
+    downloadMedia: () => {
+      state.downloads += 1;
+      return Promise.reject(new Error("no media"));
+    },
     listPage: (lang) =>
       Promise.resolve({
         lastPage: 1,
@@ -76,7 +87,9 @@ function liveSource() {
         return Promise.reject(new Error("down"));
       }
       const item = state.page.find((entry) => entry.sourceId === ref.sourceId);
-      return Promise.resolve(article(Number(ref.sourceId), ref.lang, item?.title ?? "?"));
+      return Promise.resolve(
+        article(Number(ref.sourceId), ref.lang, item?.title ?? "?", state.body),
+      );
     },
   };
   return { state, provider };
@@ -149,6 +162,20 @@ describe("pollOnce", () => {
     expect(first.failures[0]?.code).toBe("MEDIA_PROCESSING_FAILED");
     await pollOnce(provider, repo, ["fr"], seen, () => NOW, media);
     expect(state.fetched).toEqual([1, 1]);
+  });
+
+  it("leaves the text images of a known, unchanged article to the images job", async () => {
+    const { state, provider } = liveSource();
+    state.body =
+      '<p>Corps de test</p><p><img src="https://bo-admin.presidence.sn/storage/image/actualites/y.jpg" alt="" /></p>';
+    const media = { size: () => Promise.resolve(null), put: () => Promise.resolve() };
+    await pollOnce(provider, repo, ["fr"], new SeenIndex(), () => NOW, media);
+    const tried = state.downloads;
+    expect(tried).toBeGreaterThan(0);
+    // A restart forgets what was seen: the article is read again, unchanged.
+    const again = await pollOnce(provider, repo, ["fr"], new SeenIndex(), () => NOW, media);
+    expect(again.outcomes.unchanged).toBe(1);
+    expect(state.downloads).toBe(tried);
   });
 
   it("reports non-Error failures as text", async () => {
@@ -301,6 +328,25 @@ describe("pollSources", () => {
     expect(names(undefined)).toEqual(["presidence.sn", "primature.sn"]);
     expect(names("presidence")).toEqual(["presidence.sn"]);
     expect(names(" presidence , primature ")).toEqual(["presidence.sn", "primature.sn"]);
+  });
+
+  it("reads the reference site and only the secondary site that waited longest", () => {
+    const reference = watched("presidence.sn", down, true);
+    const recent = { ...watched("mesrisenegal.sn", down, false), lastPassAt: NOW };
+    const never = watched("www.sante.gouv.sn", down, false);
+    const older = {
+      ...watched("primature.sn", down, false),
+      lastPassAt: new Date(NOW.getTime() - 60_000),
+    };
+    const later = new Date(NOW.getTime() + 60_000);
+    expect(dueSources([reference, recent, older, never], later).map((s) => s.name)).toEqual([
+      "presidence.sn",
+      "www.sante.gouv.sn",
+    ]);
+    expect(dueSources([reference, recent, older], later).map((s) => s.name)).toEqual([
+      "presidence.sn",
+      "primature.sn",
+    ]);
   });
 
   it("reads a slower site only when its turn comes", async () => {
