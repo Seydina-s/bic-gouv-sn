@@ -1,4 +1,4 @@
-import { Text, type ChildNode, type Element } from "domhandler";
+import type { ChildNode, Element } from "domhandler";
 import render from "dom-serializer";
 import { DomUtils, parseDocument } from "htmlparser2";
 
@@ -85,44 +85,10 @@ function isDropped(element: Element, rules: CleanupRules, title: string, cover: 
   return src !== null && cover !== null && src.split("?")[0] === cover.split("?")[0];
 }
 
-/** Links to social network profiles carry tracking codes: their words stay, not the link. */
-function isSocialLink(element: Element): boolean {
-  try {
-    return (
-      element.name === "a" &&
-      /(^|\.)facebook\.com$/.test(new URL(element.attribs["href"] ?? "").hostname)
-    );
-  } catch {
-    return false;
-  }
-}
-
-/**
- * Emoji pasted from Facebook arrive as its pictures ("static.xx.fbcdn.net/…/emoji.php",
- * alt "🍅"), never shown by the app: the emoji itself is kept, as text.
- */
-function socialEmoji(element: Element): string | null {
-  const alt = element.attribs["alt"] ?? "";
-  try {
-    return element.name === "img" &&
-      new URL(element.attribs["src"] ?? "").hostname.endsWith("fbcdn.net") &&
-      alt !== "" &&
-      alt.length <= 12
-      ? alt
-      : null;
-  } catch {
-    return null;
-  }
-}
-
 function prune(nodes: ChildNode[], rules: CleanupRules, title: string, cover: string | null) {
   for (const element of DomUtils.findAll(() => true, nodes)) {
     if (element.parent !== null && isDropped(element, rules, title, cover)) {
       DomUtils.removeElement(element);
-    } else if (socialEmoji(element) !== null) {
-      DomUtils.replaceElement(element, new Text(socialEmoji(element) ?? ""));
-    } else if (isSocialLink(element)) {
-      delete element.attribs["href"];
     }
   }
 }

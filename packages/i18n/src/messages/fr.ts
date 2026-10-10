@@ -75,6 +75,7 @@ export const fr = {
     culture: "Ministère de la Culture, de l'Artisanat et du Tourisme",
     "enseignement-superieur":
       "Ministère de l'Enseignement supérieur, de la Recherche et de l'Innovation",
+    numerique: "Ministère des Télécommunications et du Numérique",
   },
   /** Sections of the official sites, keyed by their slug. */
   categories: {

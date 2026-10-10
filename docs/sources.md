@@ -101,6 +101,20 @@ Règle ajoutée pour toutes les sources : un texte annoncé en français mais é
 
 mesrisenegal.sn (mesr.gouv.sn y mène) : liste `/actualites?page=N` (98 pages, ≈ 1 170 articles), titre, heure exacte (`<time datetime>`), rubrique et texte (`#article-body`) sur chaque page. Les images placées dans le texte sont intégrées en données (jusqu'à 9 Mo par page) : écartées par le nettoyage. Un article sans texte (souvent un communiqué en image) est publié avec l'image principale de sa page (`og:image`, pleine taille). **Import limité aux pages récentes** depuis l'ordinateur de développement (poids des pages) ; l'historique complet sera repris depuis le serveur d'IA. Essai : 12 articles sur 12.
 
+### Télécommunications et Numérique (10/10/2026)
+
+mctn.sn est une application Angular qui lit sa propre interface publique, sans clé : `api.mctn.sn/api/publications/category/actualites?page=N` (30 pages, 293 publications), avec le texte complet, le jour, les photos et la rubrique. La page publique d'une publication est `www.mctn.sn/post/<nom>` ; ses photos sont servies par `api.mctn.sn/fichier/afficher`. Titres en lettres décoratives ramenés en lettres ordinaires. Une publication sans nom de page n'a pas de page publique : écartée avec ce motif. Essai : 291 sur 293.
+
+Règles communes déplacées dans le nettoyage de toutes les sources : lien vers un profil Facebook gardé comme texte sans son adresse (codes de pistage), émoji servi par Facebook gardé en texte.
+
+### Infrastructures : base Supabase (à faire)
+
+ministeredesinfrastructures.sn lit une base Supabase (table `actualites`, avec `title`, `title_en`, `excerpt`, `content`, `image`, `created_at`, `published`) avec la clé publique intégrée à son code, comme tout navigateur. Lecteur à écrire : la clé serait relue dans le code du site à chaque démarrage plutôt que copiée dans notre dépôt.
+
+### Éducation nationale
+
+education.sn (Next.js) lit une interface interne non ouverte au public (cms.education.sn). Son dernier article date du 30/04/2026 : à revoir s'il reprend.
+
 ### Ministères : sites à revoir (non collectés pour l'instant)
 
 | Ministère | Site | Constat du 09/10/2026 |

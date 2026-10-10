@@ -13,6 +13,7 @@ const KNOWN = [
   "forces-armees",
   "culture",
   "enseignement-superieur",
+  "numerique",
 ] as const;
 
 type KnownInstitution = (typeof KNOWN)[number];
