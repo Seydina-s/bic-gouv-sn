@@ -266,3 +266,15 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : torchaudio n'était pas déclaré. Il arrivait par une dépendance de parler-tts, en version 2.11 depuis PyPI (version pour carte graphique), alors que torch était en 2.14.1 sans carte graphique. Les deux ne se chargent ensemble que par hasard sous Windows.
 - **Correctif** : torch et torchaudio sont déclarés et figés tous deux en 2.11.0, depuis la source « sans carte graphique » (`services/voices/pyproject.toml`, `uv.lock`), puis vérifiés sur le serveur.
 - **Prévention** : une bibliothèque compilée qui dépend d'une autre (torchaudio de torch) est déclarée et figée à la même version, depuis la même source ; l'installation est essayée sur le système du serveur, pas seulement sur l'ordinateur de développement.
+
+## 10/10/2026 — Rattrapage wolof arrêté net par une coupure de connexion
+
+- **Ce qui s'est passé** : vers 19 h 30, la connexion internet de l'ordinateur a flanché (paquets perdus, GitHub injoignable). La liaison avec le serveur des voix a été coupée, et toute la commande d'enregistrement s'est arrêtée.
+- **Cause racine** : une erreur de l'appel aux voix, connexion comprise, remontait jusqu'en haut de la commande. Pour un traitement qui dure des jours, une coupure passagère est pourtant normale. De plus, ssh proposait aussi les autres clés de l'ordinateur, que le serveur peut compter comme des connexions ratées et bloquer.
+- **Correctif** :
+  - un groupe dont l'appel échoue est réessayé après 1, 2, 5 puis 10 minutes, et la commande ne s'arrête qu'après 5 échecs de suite ;
+  - chaque nouvel essai est écrit dans le journal ;
+  - ssh ne propose plus que notre clé (`IdentitiesOnly`) et attend 30 secondes au plus pour se connecter.
+  
+  Fichiers : `apps/api/src/voices/recordings.ts`, `remote-synthesizer.ts`, `cli/voices.ts`.
+- **Prévention** : tests « réessaie un groupe après une coupure » et « s'arrête quand les voix restent injoignables ». Règle : tout traitement long qui dépend du réseau réessaie avec des attentes croissantes au lieu de s'arrêter à la première erreur.
