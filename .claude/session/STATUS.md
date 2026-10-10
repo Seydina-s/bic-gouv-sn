@@ -3,7 +3,7 @@
 **Dernière mise à jour** : 10/10/2026 (13 h 45) · **Mode** : standard (fenêtre autonome terminée le 10/10 à 13 h). Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md`.
 
 ## 10/10 en bref : 16 ministères en ligne à côté de la Présidence et de la Primature
-- **Articles** : 7 156 dans l'app, dont 2 502 des ministères et de la Primature, plus 98 doublons masqués (la version de la Présidence est gardée).
+- **Articles** : 3 481 visibles dans l'app (978 de la Présidence, chacun en français et souvent en wolof ; 2 503 des ministères et de la Primature), plus 98 doublons masqués (la version de la Présidence est gardée). Chiffre corrigé le 10/10 au soir : le premier comptage (7 156) comptait deux fois les articles de la Présidence.
   - Ministères importés : Justice 113, Industrie-Commerce 10, Énergie 174, Hydraulique 303, Agriculture 250, Pêches 75, Emploi-Formation 507, Intérieur 55, Culture 137, Enseignement supérieur 23, Forces armées 172, Santé 180, Numérique 198, Infrastructures 5, Affaires étrangères 20.
   - Fusions : #294 à #298.
 - **Collecte** : suivi automatique de 17 sites. À chaque passage, la Présidence est lue d'abord, puis un seul autre site, celui qui attend depuis le plus longtemps (#300).
