@@ -2,12 +2,19 @@
 
 Chaque article est lu **une seule fois** par nos voix. Le fichier MP3 est rangé avec les photos, puis servi à tout le monde. Un million d'écoutes ne coûtent pas plus qu'une.
 
-| Langue | Voix | Licence | Vitesse mesurée sur l'ordinateur de développement (i5, 4 cœurs) |
+| Langue | Voix | Licence | Vitesse mesurée sur le serveur des voix (CPX32, 4 processeurs) |
 |---|---|---|---|
-| Français | Piper `fr_FR-upmc-medium`, voix **Jessica** | données CC BY-SA 4.0 (citer l'auteur) | 8 fois plus rapide que l'écoute : environ 30 s de calcul par article |
-| Wolof | **Adia_TTS** (CONCREE) | Apache 2.0 | 11 fois plus lente que l'écoute : environ 45 min de calcul par article |
+| Français | **Kokoro-82M**, voix `ff_siwis` (choisie par l'utilisateur à l'écoute en aveugle, 10/10/2026 ; remplace Jessica) | Apache 2.0, données SIWIS | 3,7 fois plus rapide que l'écoute : environ 30 s de calcul par article |
+| Wolof | **Adia_TTS** (CONCREE) | Apache 2.0 | 9,5 fois plus lente que l'écoute : environ 20 min de calcul par article |
 
-Le wolof demande donc un serveur avec carte graphique pour tout l'historique. Sur un processeur seul, on ne peut traiter qu'une poignée d'articles récents.
+## Le lecteur intelligent (français)
+
+Avant d'être lu, le texte français est préparé (`apps/api/src/voices/french-reading.ts`). Le texte affiché dans l'app reste celui de la source.
+
+- Titres et abréviations développés : « S.E.M. » devient « Son Excellence Monsieur », « M. » « Monsieur », « Mme » « Madame », « Dr » « Docteur », « n° » « numéro », etc.
+- Mots en capitales : un titre en capitales est lu comme des mots ordinaires ; un sigle est épelé (« P-M-E ») ou lu comme un mot (« Cédéao »).
+- Lexique (`apps/api/src/voices/french-lexicon.ts`) : les mots en capitales fréquents dans nos articles et les noms que la voix prononce mal. Chaque lecture y est écoutée et validée par l'utilisateur. Une prononciation peut y être donnée en phonèmes, quand aucune graphie ne suffit (Diagne, Niang).
+- Changer le lexique : modifier l'entrée, puis augmenter `version`. Les articles français sont alors enregistrés à nouveau ; en attendant, l'app reprend la voix du téléphone pour ceux qui ne sont pas encore refaits.
 
 ## Installer (une fois)
 

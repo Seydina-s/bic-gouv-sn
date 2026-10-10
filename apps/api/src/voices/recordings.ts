@@ -2,11 +2,12 @@ import { stat } from "node:fs/promises";
 import { join } from "node:path";
 import type { ArticleRepository } from "@bgs/content-store";
 import { publishedTranslation, type Lang, type NewsArticle } from "@bgs/shared-types";
-import { currentRecording, spokenPieces, spokenTextHash } from "./spoken-text";
+import { readAloudFrench } from "./french-reading";
+import { currentRecording, recordingHash, spokenPieces } from "./spoken-text";
 
 /*
  * Each article is read aloud once per language by our voices (workflow of 03/10/2026:
- * Jessica in French, Adia in Wolof), stored like the photos, then served to everyone
+ * Jessica in French then Kokoro from 10/10/2026, Adia in Wolof), stored like the photos, then served to everyone
  * from the media storage. Newest articles first; a recording whose words changed is
  * made again. Wolof machine translations are read too: they keep their label.
  */
@@ -61,8 +62,10 @@ export function recordingsToMake(
       if (translation === undefined || currentRecording(article, lang, translation) !== null) {
         continue;
       }
-      const pieces = spokenPieces(translation);
-      const textHash = spokenTextHash(pieces);
+      const written = spokenPieces(translation);
+      const textHash = recordingHash(lang, written);
+      // What the voice says: in French, abbreviations and acronyms read out.
+      const pieces = lang === "fr" ? written.map((piece) => readAloudFrench(piece)) : written;
       todo.push({
         article,
         lang,
