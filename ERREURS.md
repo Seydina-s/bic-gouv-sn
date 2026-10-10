@@ -223,3 +223,9 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : ces pages Drupal portent un jeton technique (`theme_token`) que reçoit tout visiteur ; enregistrées telles quelles, elles l'auraient fait entrer dans notre historique.
 - **Correctif** : jetons remplacés par `removed` dans les pages d'essai, validation refaite avant tout envoi.
 - **Prévention** : une page copiée d'un site tiers comme jeu d'essai est nettoyée de ses jetons, clés et données intégrées volumineuses avant validation ; le contrôle des secrets reste obligatoire avant chaque envoi.
+## 09-10/10/2026 — Deux envois avec un écart de mise en forme (n° 288 puis n° 297)
+
+- **Ce qui s'est passé** : deux fois, une demande de fusion est partie alors que Prettier signalait un fichier mal mis en forme ; il a fallu un complément « style: format ».
+- **Cause racine** : le contrôle était lancé sous la forme `prettier --check . | tail -1 && …` : le tuyau vers `tail` remplace le code d'erreur de Prettier par celui de `tail` (toujours 0), donc la suite de la chaîne s'exécutait.
+- **Correctif** : fichiers mis en forme, complément poussé avant la fusion.
+- **Prévention** : un contrôle qui doit bloquer la suite est relié par `&&` sans tuyau (`prettier --check . > /dev/null 2>&1 && …`), comme le contrôle des secrets.
