@@ -229,3 +229,19 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : le contrôle était lancé sous la forme `prettier --check . | tail -1 && …` : le tuyau vers `tail` remplace le code d'erreur de Prettier par celui de `tail` (toujours 0), donc la suite de la chaîne s'exécutait.
 - **Correctif** : fichiers mis en forme, complément poussé avant la fusion.
 - **Prévention** : un contrôle qui doit bloquer la suite est relié par `&&` sans tuyau (`prettier --check . > /dev/null 2>&1 && …`), comme le contrôle des secrets.
+
+## 10/10/2026 — Présidence non relevée de 4 h 12 à 8 h 30 (collecte bloquée par les galeries des ministères)
+
+- **Ce qui s'est passé** : après le redémarrage de 4 h 12 sur 17 sources, la collecte n'a terminé aucun passage en plus de quatre heures. Elle téléchargeait une à une les photos des galeries d'articles de ministères déjà connus. Pendant ce temps, la Présidence n'était plus relevée, et les trois nouveaux ministères n'avaient toujours aucun article.
+- **Cause racine** : deux défauts cumulés :
+  1. les sites étaient lus les uns après les autres dans un même passage, sans limite : un site lent retenait la Présidence ;
+  2. au premier passage après un redémarrage, chaque article de la première page est relu, et ses photos dans le texte étaient retéléchargées même quand l'article n'avait pas changé. Les galeries des ministères importés dans la nuit n'avaient jamais été traitées.
+  
+  S'y ajoute une erreur de procédure de ma part : le script du matin a lancé la collecte sur les nouveaux ministères sans importer leur historique avant.
+- **Correctif** :
+  - un passage lit la Présidence puis un seul autre site, celui qui attend depuis le plus longtemps (`dueSources`) ;
+  - les photos dans le texte et les documents ne sont traités que pour un article nouveau ou modifié, les autres restant à la tâche dédiée aux photos ;
+  - en attendant la fusion, collecte relancée sur la Présidence et la Primature seulement.
+  
+  Tests : `services/ingestion/src/watch.test.ts`.
+- **Prévention** : test « ne lit qu'un site secondaire par passage » et test « ne retélécharge pas les photos d'un article connu inchangé ». Procédure : une nouvelle source est importée, collecte arrêtée, avant d'entrer dans la collecte. Toute source ajoutée à une boucle de suivi doit avoir une durée de passage bornée.

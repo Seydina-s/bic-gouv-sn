@@ -83,12 +83,18 @@ export async function pollOnce(
             // Throws MediaProcessingError: the article stays saved but the ref is not
             // remembered, so the cover is retried on the next pass.
             await attachCover(ref, provider, repository, media);
-            // Images in the text and official documents: failures are reported but never
-            // block the article; the inline-images and documents jobs pick them up again.
-            const attachAll: AttachMedia[] = [
-              attachInlineImages,
-              (...args) => attachDocuments(...args, ref.documentUrls ?? []),
-            ];
+            // Images in the text and official documents of a new or edited article:
+            // failures are reported but never block the article; the inline-images and
+            // documents jobs pick them up again. A known, unchanged article is left to
+            // those jobs: after a restart, every first page is read again, and its
+            // galleries would hold up the reference site for hours.
+            const attachAll: AttachMedia[] =
+              outcome === "unchanged"
+                ? []
+                : [
+                    attachInlineImages,
+                    (...args) => attachDocuments(...args, ref.documentUrls ?? []),
+                  ];
             for (const attach of attachAll) {
               const saved = await repository.get(provider.articleIdFor(ref));
               if (saved !== null) {
@@ -163,7 +169,22 @@ function isDue(source: WatchedSource, now: Date): boolean {
 }
 
 /**
- * One pass over every site that is due (CLAUDE.md §4.4): a site that fails never
+ * Sites read in a pass: every due reference site, then the one secondary site that
+ * has waited longest. One secondary site per pass bounds how long a slow ministry
+ * site keeps the reference one waiting (freshness SLO < 2 min); with a pass every
+ * minute in the day, every secondary site still gets its turn on time.
+ */
+export function dueSources(sources: readonly WatchedSource[], now: Date): WatchedSource[] {
+  const due = sources.filter((source) => isDue(source, now));
+  const waitedLongest = due
+    .filter((source) => !source.essential)
+    .sort((a, b) => (a.lastPassAt?.getTime() ?? 0) - (b.lastPassAt?.getTime() ?? 0))
+    .slice(0, 1);
+  return [...due.filter((source) => source.essential), ...waitedLongest];
+}
+
+/**
+ * One pass over the sites whose turn it is (CLAUDE.md §4.4): a site that fails never
  * keeps the others from being read, except the reference one, which fails the pass.
  */
 export async function pollSources(
@@ -177,7 +198,7 @@ export async function pollSources(
     failures: [],
     detectionDelays: [],
   };
-  for (const source of sources.filter((candidate) => isDue(candidate, now()))) {
+  for (const source of dueSources(sources, now())) {
     source.lastPassAt = now();
     try {
       const pass = await pollOnce(
