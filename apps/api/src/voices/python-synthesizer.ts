@@ -3,7 +3,7 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { z } from "zod";
-import type { Synthesizer } from "./recordings";
+import type { SynthesisResult, Synthesizer } from "./recordings";
 
 /*
  * Our voices run in Python (services/voices): a separate process per group of
@@ -20,6 +20,18 @@ const resultSchema = z.union([
   }),
   z.object({ id: z.string(), ok: z.literal(false), error: z.string() }),
 ]);
+
+/** One result per JSON line the voices printed; other lines (model logs) are ignored. */
+export function parseSynthesisResults(output: string): SynthesisResult[] {
+  return output
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith("{"))
+    .flatMap((line) => {
+      const parsed = resultSchema.safeParse(JSON.parse(line));
+      return parsed.success ? [parsed.data] : [];
+    });
+}
 
 export interface PythonSynthesizerOptions {
   /** services/voices: its uv project and synthesize.py. */
@@ -63,14 +75,7 @@ export function pythonSynthesizer({
           }
         });
       });
-      return output
-        .split("\n")
-        .map((line) => line.trim())
-        .filter((line) => line.startsWith("{"))
-        .flatMap((line) => {
-          const parsed = resultSchema.safeParse(JSON.parse(line));
-          return parsed.success ? [parsed.data] : [];
-        });
+      return parseSynthesisResults(output);
     } finally {
       await rm(dir, { recursive: true, force: true });
     }
