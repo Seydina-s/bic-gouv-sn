@@ -49,7 +49,7 @@ describe("createMesriProvider", () => {
 
   it("publishes a communiqué that is the page's picture alone", async () => {
     const provider = createMesriProvider({
-      fetchImpl: (() => Promise.resolve(new Response(page("article.html")))) as never,
+      fetchImpl: () => Promise.resolve(new Response(page("article.html"))),
       intervalMs: 0,
     });
     const article = await provider.fetchArticle(ref);
@@ -61,7 +61,7 @@ describe("createMesriProvider", () => {
   it("sets aside a page with neither text nor picture", async () => {
     const html = page("article.html").replace(/<meta\s[^>]*og:image[^>]*>/g, "");
     const provider = createMesriProvider({
-      fetchImpl: (() => Promise.resolve(new Response(html))) as never,
+      fetchImpl: () => Promise.resolve(new Response(html)),
       intervalMs: 0,
     });
     await expect(provider.fetchArticle(ref)).rejects.toBeInstanceOf(QuarantineError);
