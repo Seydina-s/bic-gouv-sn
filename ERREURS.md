@@ -252,3 +252,17 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : le script attendait la fusion avec `gh pr view 300` sans préciser le dépôt, depuis un dossier de travail que l'environnement a supprimé après la fusion. La commande échouait (« not a git repository »), son erreur était jetée et la boucle recommençait sans fin.
 - **Correctif** : le script se place d'abord dans le dépôt principal et nomme le dépôt (`--repo Seydina-s/bic-gouv-sn`) ; il n'écarte plus les erreurs de `gh`. Import fait à 12 h 51 : 226 articles.
 - **Prévention** : une boucle d'attente ne masque jamais l'erreur de sa commande de contrôle, nomme explicitement ce qu'elle interroge (dépôt, dossier) et vérifie son effet peu après le moment attendu.
+
+## 10/10/2026 — Nombre d'articles annoncé deux fois trop haut (7 156 au lieu de 3 579)
+
+- **Ce qui s'est passé** : le bilan donné à l'utilisateur et écrit dans STATUS.md annonçait 7 156 articles. Il y en a 3 579, dont 3 481 visibles.
+- **Cause racine** : mon script de comptage ne connaissait pas la forme du fichier (`{ current, history }` par article). Il prenait l'historique de chaque article pour un article de plus, rangé par défaut sous la Présidence. Les chiffres par ministère étaient justes. Le total n'a pas été contrôlé contre une autre source (l'API ou la console).
+- **Correctif** : comptage refait sur `entry.current` ; STATUS.md corrigé ; l'utilisateur est prévenu.
+- **Prévention** : tout chiffre annoncé est compté avec le code du projet (lecture du stockage par le dépôt d'articles ou l'API), ou recoupé avec une seconde source, avant d'être donné.
+
+## 10/10/2026 — Voix impossibles à charger sur le serveur Linux (torchaudio)
+
+- **Ce qui s'est passé** : sur le serveur, la voix wolof ne se chargeait pas (« Could not load this library: _torchaudio.abi3.so »). Sur l'ordinateur Windows, elle fonctionnait.
+- **Cause racine** : torchaudio n'était pas déclaré. Il arrivait par une dépendance de parler-tts, en version 2.11 depuis PyPI (version pour carte graphique), alors que torch était en 2.14.1 sans carte graphique. Les deux ne se chargent ensemble que par hasard sous Windows.
+- **Correctif** : torch et torchaudio sont déclarés et figés tous deux en 2.11.0, depuis la source « sans carte graphique » (`services/voices/pyproject.toml`, `uv.lock`), puis vérifiés sur le serveur.
+- **Prévention** : une bibliothèque compilée qui dépend d'une autre (torchaudio de torch) est déclarée et figée à la même version, depuis la même source ; l'installation est essayée sur le système du serveur, pas seulement sur l'ordinateur de développement.

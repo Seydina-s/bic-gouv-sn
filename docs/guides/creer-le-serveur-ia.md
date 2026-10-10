@@ -2,7 +2,9 @@
 
 Le serveur d'IA lit les articles à voix haute (Jessica en français, Adia en wolof). Plus tard, il accueillera aussi la recherche par le sens et la reconnaissance du wolof.
 
-C'est un serveur **Hetzner CX43** : 8 processeurs, 16 Go de mémoire, en Allemagne ou en Finlande. Il coûte environ **16 € par mois**, plus environ 0,50 € pour l'adresse IPv4. Ce sont les prix relevés en octobre 2026 : le prix exact s'affiche avant la commande.
+C'est un serveur **Hetzner CPX32** : 4 processeurs AMD, 8 Go de mémoire, 160 Go de disque, à Helsinki. Il coûte **41,99 $ par mois**, plus 0,60 $ pour l'adresse IPv4, soit **42,59 $** (prix affiché à la commande le 10/10/2026).
+
+**Serveur créé par l'utilisateur le 10/10/2026.** Hetzner a augmenté ses prix le 15/06/2026, et la gamme « Cost-Optimized » (CX43, prévue au départ à environ 16 €) est signalée en disponibilité limitée. Le CPX22 (4 Go) est trop petit : la mesure du 10/10 montre 4,9 Go de mémoire occupés pendant la lecture en wolof.
 
 Il remplace le serveur Scaleway DEV1-XL (4 processeurs, 12 Go, ≈ 47,50 €), car Scaleway refuse les cartes virtuelles. Décision de l'utilisateur du 09/10/2026.
 
@@ -25,7 +27,7 @@ Vous créez le compte et le serveur. Claude installe et branche le reste à dist
 3. Réglez les options dans l'ordre de la page :
    - **Location** : Nuremberg, Falkenstein ou Helsinki, n'importe lequel ;
    - **Image** : **Ubuntu 24.04** ;
-   - **Type** : **Shared vCPU**, puis **x86**, puis **CX43** (8 vCPU, 16 GB RAM) ;
+   - **Type** : **Regular Performance**, puis **CPX32** (4 vCPU, 8 GB RAM) ;
    - **Networking** : laissez **Public IPv4** coché ;
    - **SSH keys** : choisissez **Add SSH key** et collez tout le contenu du fichier `cle-publique-serveur-ia.txt`, posé sur votre Bureau. Il commence par `ssh-ed25519`. Nommez la clé `claude-bic-gouv` ;
    - **Volumes**, **Firewalls**, **Backups**, **Placement groups**, **Labels**, **Cloud config** : ne touchez à rien. Claude ferme lui-même tous les accès inutiles ;
@@ -34,6 +36,8 @@ Vous créez le compte et le serveur. Claude installe et branche le reste à dist
 
 ## 3. Donner l'adresse du serveur
 
+Ce qui a été fait le 10/10/2026 : pare-feu (seule la connexion par clé est ouverte), mot de passe refusé, mises à jour de sécurité automatiques, protection contre les essais répétés (fail2ban), compte `voices` sans droits d'administration pour les voix.
+
 Dans la liste des serveurs du projet, copiez l'**adresse IPv4** de `bic-gouv-ia` (quatre nombres séparés par des points) et donnez-la à Claude. Ce n'est pas un secret.
 
 Claude installe alors les voix, ferme tout accès autre que la clé, puis lance la lecture des articles.
@@ -41,8 +45,12 @@ Claude installe alors les voix, ferme tout accès autre que la clé, puis lance 
 ## Ce qu'il faut savoir
 
 - **Facturation** : Hetzner compte à l'heure, sans dépasser le prix mensuel du serveur. Un serveur supprimé en cours de mois ne coûte que les heures utilisées.
-- **Processeurs partagés** : les 8 processeurs du CX43 sont partagés avec d'autres clients. Claude mesure la vitesse réelle des voix les premiers jours.
+- **Processeurs partagés** : les 4 processeurs du CPX32 sont partagés avec d'autres clients. Claude mesure la vitesse réelle des voix les premiers jours.
   - Si elle est insuffisante, le serveur peut passer à un modèle plus fort, avec **Rescale** dans la console, sans rien réinstaller.
   - Ce changement modifie le prix : il vous sera soumis avant.
-- **Wolof** : la lecture d'un article prend des dizaines de minutes de calcul sans carte graphique. Avec 8 processeurs au lieu de 4, le rattrapage de l'historique devrait aller environ deux fois plus vite que prévu sur Scaleway.
+- **Wolof** : la lecture d'un article prend des dizaines de minutes de calcul sans carte graphique. Le serveur n'est pas plus rapide que l'ordinateur de développement, mais il tourne jour et nuit sans l'occuper.
+- **Vitesse mesurée le 10/10/2026** (un article de la Présidence d'environ 1 400 caractères) :
+  - français (Jessica) : 7 secondes de calcul pour 1 min 40 s d'écoute ; tous les articles sans voix (3 375) en environ 10 heures ;
+  - wolof (Adia) : 19 min de calcul pour 2 min d'écoute ; les 693 articles en wolof sans voix en environ 16 jours de calcul continu, dont environ 10 jours pour les 378 publiés depuis octobre 2025.
+- **Mémoire** : la lecture en wolof monte à 7 Go sur 7,6 Go. Une mémoire de secours de 4 Go a été ajoutée sur le disque.
 - **Arrêter les frais** : dans la console, ouvrez `bic-gouv-ia`, puis **Delete**. Arrêter le serveur (**Power off**) ne suffit pas : un serveur arrêté reste facturé. Les enregistrements déjà faits restent sur notre stockage.
