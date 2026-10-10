@@ -97,6 +97,10 @@ Règles ajoutées pour toutes les sources le 09/10 au soir :
 
 Règle ajoutée pour toutes les sources : un texte annoncé en français mais écrit en anglais est mis de côté avec ce motif (« text in English »), en attendant l'édition anglaise de la phase multilingue. Aucun des 1 352 textes français publiés n'est concerné.
 
+### Enseignement supérieur, Recherche et Innovation (10/10/2026)
+
+mesrisenegal.sn (mesr.gouv.sn y mène) : liste `/actualites?page=N` (98 pages, ≈ 1 170 articles), titre, heure exacte (`<time datetime>`), rubrique et texte (`#article-body`) sur chaque page. Les images placées dans le texte sont intégrées en données (jusqu'à 9 Mo par page) : écartées par le nettoyage. Un article sans texte (souvent un communiqué en image) est publié avec l'image principale de sa page (`og:image`, pleine taille). **Import limité aux pages récentes** depuis l'ordinateur de développement (poids des pages) ; l'historique complet sera repris depuis le serveur d'IA. Essai : 12 articles sur 12.
+
 ### Ministères : sites à revoir (non collectés pour l'instant)
 
 | Ministère | Site | Constat du 09/10/2026 |

@@ -60,21 +60,23 @@ export function parseDrupalListing(
   isArticle: (path: string) => boolean,
 ): DrupalListing {
   const document = parseDocument(html);
-  const items: DrupalListing["items"] = [];
-  const seen = new Set<string>();
+  // In listing order; an article linked twice (a news ticker, then its card) takes the
+  // day and photo of whichever row shows them.
+  const items = new Map<string, DrupalListing["items"][number]>();
   for (const link of DomUtils.findAll((element) => element.name === "a", document.children)) {
     const path = pathOf(link.attribs["href"] ?? "", origin);
-    if (path === null || !isArticle(path) || seen.has(path)) {
+    if (path === null || !isArticle(path)) {
       continue;
     }
-    seen.add(path);
     const row = rowOf(link, isArticle, origin);
     const created = findByClass([row], "views-field-created");
     const image = DomUtils.findOne((element) => element.name === "img", [row]);
-    items.push({
+    const known = items.get(path);
+    items.set(path, {
       path,
-      publishedOn: created === null ? null : frenchDate(DomUtils.textContent(created)),
-      coverPath: image?.attribs["src"] ?? null,
+      publishedOn:
+        known?.publishedOn ?? (created === null ? null : frenchDate(DomUtils.textContent(created))),
+      coverPath: known?.coverPath ?? image?.attribs["src"] ?? null,
     });
   }
   const last = DomUtils.findOne(
@@ -82,7 +84,7 @@ export function parseDrupalListing(
     document.children,
   );
   return {
-    items,
+    items: [...items.values()],
     lastPageIndex: Number(/[?&]page=(\d+)/.exec(last?.attribs["href"] ?? "")?.[1] ?? "0"),
   };
 }

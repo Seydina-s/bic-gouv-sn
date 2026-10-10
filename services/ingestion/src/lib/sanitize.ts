@@ -49,6 +49,8 @@ const OPTIONS: sanitizeHtml.IOptions = {
   },
   exclusiveFilter: (frame) =>
     (frame.tag === "iframe" && frame.attribs["src"] === undefined) ||
+    // An image whose address was not kept (embedded data, not https) shows nothing.
+    (frame.tag === "img" && frame.attribs["src"] === undefined) ||
     (frame.tag === "p" && frame.text.trim() === "" && !frame.mediaChildren.length),
   nonTextTags: ["script", "style", "textarea", "noscript"],
 };
