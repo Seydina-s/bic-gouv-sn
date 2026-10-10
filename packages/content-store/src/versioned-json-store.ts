@@ -1,6 +1,7 @@
 import { readFile, stat } from "node:fs/promises";
 import { z } from "zod";
 import { writeFileDurably } from "./durable-file";
+import { withWriteLock } from "./write-lock";
 
 /** What the store needs from a content item: an id, a content fingerprint, a version. */
 export interface Versioned {
@@ -81,7 +82,11 @@ export class VersionedJsonStore<T extends Versioned> {
   }
 
   /** Saves a new version only when the content fingerprint changed. */
-  async save(item: T): Promise<SaveOutcome> {
+  save(item: T): Promise<SaveOutcome> {
+    return withWriteLock(this.lockPath, () => this.saveLocked(item));
+  }
+
+  private async saveLocked(item: T): Promise<SaveOutcome> {
     const entries = { ...(await this.entries()) };
     const existing = entries[item.id];
     if (existing?.current.contentHash === item.contentHash) {
@@ -99,21 +104,28 @@ export class VersionedJsonStore<T extends Versioned> {
   }
 
   /** Replaces the current version in place (enrichments such as images). */
-  async replaceCurrent(id: string, update: (current: T) => T): Promise<boolean> {
-    const entries = { ...(await this.entries()) };
-    const entry = entries[id];
-    if (entry === undefined) {
-      return false;
-    }
-    entries[id] = { ...entry, current: update(entry.current) };
-    await this.write(entries);
-    return true;
+  replaceCurrent(id: string, update: (current: T) => T): Promise<boolean> {
+    return withWriteLock(this.lockPath, async () => {
+      const entries = { ...(await this.entries()) };
+      const entry = entries[id];
+      if (entry === undefined) {
+        return false;
+      }
+      entries[id] = { ...entry, current: update(entry.current) };
+      await this.write(entries);
+      return true;
+    });
   }
 
   /** Changes whenever the file is replaced or rewritten (size, time, file id). */
   private async stampOf(path: string): Promise<string> {
     const { size, mtimeMs, ino } = await stat(path);
     return `${String(size)}:${String(mtimeMs)}:${String(ino)}`;
+  }
+
+  /** Held while reading then writing: several processes write this file. */
+  private get lockPath(): string {
+    return `${this.path}.write.lock`;
   }
 
   private get backupPath(): string {
@@ -126,7 +138,7 @@ export class VersionedJsonStore<T extends Versioned> {
     return this.entriesSchema.parse(Reflect.get(raw as object, this.collection) ?? {});
   }
 
-  /** Main file then backup, each flushed to disk before it replaces the previous one. */
+  /** Main file then backup (under the write lock), each flushed to disk before it replaces the previous one. */
   private async write(entries: Record<string, VersionedEntry<T>>): Promise<void> {
     const data = JSON.stringify({ schemaVersion: 1, [this.collection]: entries });
     await writeFileDurably(this.path, data);

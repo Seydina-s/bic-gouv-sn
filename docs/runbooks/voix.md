@@ -28,6 +28,20 @@ pnpm --filter @bgs/api voices:record --lang wo --limit 3
 - On peut arrêter puis relancer la commande à tout moment : ce qui est enregistré le reste.
 - Les traductions automatiques en wolof sont lues aussi. Dans l'app, elles gardent leur mention « Traduction automatique ».
 
+## Sur le serveur des voix (Hetzner)
+
+Le serveur (guide `docs/guides/creer-le-serveur-ia.md`) lit les textes à la place de l'ordinateur. L'ordinateur garde les articles et les fichiers : il envoie les textes, le serveur renvoie les MP3, et rien n'y reste après chaque groupe.
+
+1. Une fois : la clé `~/.ssh/bic_gouv_ai` est autorisée pour le compte `voices` du serveur, et l'adresse du serveur est déjà connue de l'ordinateur (première connexion faite à la main).
+2. Lancez la commande avec deux réglages :
+
+```
+VOICES_SSH_HOST=voices@<adresse du serveur> VOICES_SSH_KEY=~/.ssh/bic_gouv_ai pnpm --filter @bgs/api voices:record --lang wo --limit 50
+```
+
+- En wolof, un seul article par envoi : si la connexion coupe, on ne perd qu'une lecture d'environ 20 minutes.
+- La collecte peut continuer pendant l'enregistrement : chaque écriture du fichier des articles se fait sous un verrou (`.data/news.json.write.lock`), si bien qu'aucune modification ne se perd quand deux programmes écrivent en même temps.
+
 ## Dans l'app
 
 - **Avec un enregistrement** : le bouton « Écouter » lit le fichier, avec pause et reprise.

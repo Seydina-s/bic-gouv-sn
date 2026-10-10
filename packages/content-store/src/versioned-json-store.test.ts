@@ -48,6 +48,29 @@ describe("VersionedJsonStore", () => {
     expect((await store.get("a"))?.text).toBe("modifié");
   });
 
+  it("loses no change when several processes write at the same time", async () => {
+    const first = new VersionedJsonStore(path, itemSchema, "items");
+    await first.save(item("a", "un"));
+    await first.save(item("b", "deux"));
+    const writers = Array.from(
+      { length: 6 },
+      () => new VersionedJsonStore(path, itemSchema, "items"),
+    );
+    await Promise.all(
+      writers.map((writer, index) =>
+        index % 2 === 0
+          ? writer.replaceCurrent("a", (current) => ({
+              ...current,
+              text: `${current.text}+${String(index)}`,
+            }))
+          : writer.save(item(`n${String(index)}`, "nouveau")),
+      ),
+    );
+    const final = await new VersionedJsonStore(path, itemSchema, "items").entries();
+    expect(Object.keys(final).sort()).toEqual(["a", "b", "n1", "n3", "n5"]);
+    expect(final["a"]?.current.text.split("+").slice(1).sort()).toEqual(["0", "2", "4"]);
+  });
+
   it("still refuses a file that became invalid, and falls back on its backup", async () => {
     const store = new VersionedJsonStore(path, itemSchema, "items");
     await store.save(item("a", "un"));
