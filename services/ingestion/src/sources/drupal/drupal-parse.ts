@@ -79,20 +79,43 @@ export function parseDrupalListing(
       coverPath: known?.coverPath ?? image?.attribs["src"] ?? null,
     });
   }
-  const last = DomUtils.findOne(
-    (element) => element.name === "a" && /dernière page/i.test(element.attribs["title"] ?? ""),
-    document.children,
+  // The highest page linked by the pager (Drupal 9 has no "last page" link).
+  const pages = DomUtils.findAll((element) => element.name === "a", document.children).map(
+    (anchor) => Number(/[?&]page=(\d+)/.exec(anchor.attribs["href"] ?? "")?.[1] ?? "0"),
   );
-  return {
-    items: [...items.values()],
-    lastPageIndex: Number(/[?&]page=(\d+)/.exec(last?.attribs["href"] ?? "")?.[1] ?? "0"),
-  };
+  return { items: [...items.values()], lastPageIndex: Math.max(0, ...pages) };
 }
 
 export interface DrupalArticle {
   title: string;
   bodyHtml: string;
   imagePath: string | null;
+  /** Day the page shows ("jeu 08/10/2026 - 17:35", Drupal 9 "created" field), when shown. */
+  publishedOn: string | null;
+}
+
+/** "jeu 08/10/2026 - 17:35" → "2026-10-08"; null for anything else. */
+export function createdDay(text: string): string | null {
+  const match = /\b(\d{2})\/(\d{2})\/(\d{4})\b/.exec(text);
+  if (match === null) {
+    return null;
+  }
+  const [day, month, year] = [Number(match[1]), Number(match[2]), Number(match[3])];
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return date.getUTCDate() === day && date.getUTCMonth() === month - 1
+    ? date.toISOString().slice(0, 10)
+    : null;
+}
+
+/**
+ * The text container of a page: Drupal 7 puts it in "field-name-body > field-items",
+ * Drupal 9 in the "field--name-body" field itself.
+ */
+function bodyOf(nodes: ChildNode[]): Element | null {
+  const legacy = findByClass(nodes, "field-name-body");
+  return legacy === null
+    ? findByClass(nodes, "field--name-body")
+    : findByClass(legacy.children, "field-items");
 }
 
 /** The article of a page: title from the page head, text from its "body" field. */
@@ -100,20 +123,23 @@ export function parseDrupalArticle(html: string): DrupalArticle | null {
   const document = parseDocument(html);
   const head = DomUtils.findOne((element) => element.name === "title", document.children);
   const title = (head === null ? "" : DomUtils.textContent(head)).split(" | ")[0]?.trim() ?? "";
-  const body = findByClass(document.children, "field-name-body");
-  const items = body === null ? null : findByClass(body.children, "field-items");
-  if (items === null) {
+  const body = bodyOf(document.children);
+  if (body === null) {
     return null;
   }
-  const imageField = findByClass(document.children, "field-name-field-image");
+  const imageField =
+    findByClass(document.children, "field-name-field-image") ??
+    findByClass(document.children, "field--name-field-image");
   const image =
     imageField === null
       ? null
       : DomUtils.findOne((element) => element.name === "img", imageField.children);
+  const created = findByClass(document.children, "field--name-created");
   return {
     title,
-    bodyHtml: items.children.map((node) => render(node, { encodeEntities: "utf8" })).join(""),
+    bodyHtml: body.children.map((node) => render(node, { encodeEntities: "utf8" })).join(""),
     imagePath: image?.attribs["src"] ?? null,
+    publishedOn: created === null ? null : createdDay(DomUtils.textContent(created)),
   };
 }
 

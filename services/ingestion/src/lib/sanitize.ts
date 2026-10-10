@@ -46,6 +46,19 @@ const OPTIONS: sanitizeHtml.IOptions = {
         attribs: id === null ? {} : { src: `https://www.youtube-nocookie.com/embed/${id}` },
       };
     },
+    // Links to social network profiles carry tracking codes: their words stay, not the link.
+    a: (_tagName, attribs) => ({
+      tagName: "a",
+      attribs: hostOf(attribs["href"] ?? "").endsWith("facebook.com") ? {} : attribs,
+    }),
+    // Emoji pasted from Facebook arrive as its pictures (alt "🍅"): the emoji stays, as
+    // text; the picture, hosted by Facebook, is never loaded.
+    img: (_tagName, attribs) => {
+      const alt = attribs["alt"] ?? "";
+      return hostOf(attribs["src"] ?? "").endsWith("fbcdn.net") && alt !== "" && alt.length <= 12
+        ? { tagName: "span", attribs: {}, text: alt }
+        : { tagName: "img", attribs };
+    },
   },
   exclusiveFilter: (frame) =>
     (frame.tag === "iframe" && frame.attribs["src"] === undefined) ||
@@ -204,4 +217,13 @@ export function looksEnglish(html: string): boolean {
  */
 export function sanitizeNested(html: string): string {
   return sanitizeArticleHtml(sanitizeArticleHtml(html));
+}
+
+/** Host of an address ("" when it is not one). */
+function hostOf(url: string): string {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return "";
+  }
 }

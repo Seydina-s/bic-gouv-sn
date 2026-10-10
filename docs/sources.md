@@ -101,19 +101,33 @@ Règle ajoutée pour toutes les sources : un texte annoncé en français mais é
 
 mesrisenegal.sn (mesr.gouv.sn y mène) : liste `/actualites?page=N` (98 pages, ≈ 1 170 articles), titre, heure exacte (`<time datetime>`), rubrique et texte (`#article-body`) sur chaque page. Les images placées dans le texte sont intégrées en données (jusqu'à 9 Mo par page) : écartées par le nettoyage. Un article sans texte (souvent un communiqué en image) est publié avec l'image principale de sa page (`og:image`, pleine taille). **Import limité aux pages récentes** depuis l'ordinateur de développement (poids des pages) ; l'historique complet sera repris depuis le serveur d'IA. Essai : 12 articles sur 12.
 
+### Télécommunications et Numérique (10/10/2026)
+
+mctn.sn est une application Angular qui lit sa propre interface publique, sans clé : `api.mctn.sn/api/publications/category/actualites?page=N` (30 pages, 293 publications), avec le texte complet, le jour, les photos et la rubrique. La page publique d'une publication est `www.mctn.sn/post/<nom>` ; ses photos sont servies par `api.mctn.sn/fichier/afficher`. Titres en lettres décoratives ramenés en lettres ordinaires. Une publication sans nom de page n'a pas de page publique : écartée avec ce motif. Essai : 291 sur 293.
+
+Règles communes déplacées dans le nettoyage de toutes les sources : lien vers un profil Facebook gardé comme texte sans son adresse (codes de pistage), émoji servi par Facebook gardé en texte.
+
+### Infrastructures (10/10/2026)
+
+ministeredesinfrastructures.sn lit ses actualités publiées dans une base Supabase (table `actualites` : titre, texte, photo, galerie, et des versions anglaise et wolof pour certains articles), avec la clé publique que reçoit tout navigateur dans le code du site. Notre lecteur relit cette clé dans le code du site à chaque démarrage : **elle n'est jamais copiée dans notre dépôt**. Seules les lignes publiées sont lues. Texte brut découpé en paragraphes. 6 articles depuis l'ouverture du site (août 2026), 6 sur 6 à l'essai.
+
+### Éducation nationale
+
+education.sn (Next.js) lit une interface interne non ouverte au public (cms.education.sn). Son dernier article date du 30/04/2026 : à revoir s'il reprend.
+
 ### Ministères : sites à revoir (non collectés pour l'instant)
 
 | Ministère | Site | Constat du 09/10/2026 |
 |---|---|---|
 | Économie, Plan et Coopération | economie.gouv.sn | dernier article 20/05/2026 ; Drupal, collectable dès qu'il publie de nouveau |
-| Famille, Action sociale et Solidarités | femme.gouv.sn | dernier article 06/01/2026 |
+| Famille, Action sociale et Solidarités | femme.gouv.sn | un seul vrai article (06/01/2026) ; les autres sont des articles de démonstration du thème, en anglais |
 | Finances et Budget | finances.gouv.sn | relance du 09/10 : le nom se résout (41.208.146.4) mais le serveur ne répond ni en https ni en http (panne ou filtrage) ; à retenter depuis le serveur d'IA |
 | Budget | budget.sec.gouv.sn | site de la Direction générale du Budget : documents budgétaires (lois de finances, rapports d'exécution), **pas d'actualités** ; certificat incomplet (le maillon intermédiaire manque) |
 | Fonction publique, Travail et Réforme du service public | fonctionpublique.gouv.sn | relance du 09/10 : répond ; SPIP, flux `spip.php?page=backend` (10 articles), dernier article le 08/06/2026, publication irrégulière ; titres écrits en caractères décoratifs Unicode (à ramener en lettres ordinaires, NFKC) ; `robots.txt` absent |
 | Microfinance et Économie sociale et solidaire | microfinance-ess.gouv.sn | certificat TLS expiré |
 | Transports terrestres et aériens | mittd.gouv.sn | certificat TLS ne correspondant pas au site |
 | Urbanisme, Collectivités territoriales et Aménagement | urbanisme.gouv.sn ; decentralisation.gouv.sn | dernier article 05/2024 ; certificat invalide |
-| Intégration africaine et Affaires étrangères | diplomatie.gouv.sn | dernier article 03/2024 |
+| Intégration africaine et Affaires étrangères | diplomatie.gouv.sn | **collecté depuis le 10/10** : la page d'accueil est figée en 2024, mais la rubrique `/communique` est active (dernier communiqué le 08/10/2026) ; Drupal 9, communiqués à `/node/<numéro>`, datés sur leur page (« jeu 08/10/2026 - 17:35 ») ; 20 communiqués |
 | Jeunesse et Sports | mjsc.gouv.sn | site de l'ancien ministère (Jeunesse, Sports et Culture), dernier article 06/2025 |
 | Culture, Artisanat et Tourisme | culture.gouv.sn | site de l'ancien Secrétariat d'État, dernier article 06/2024 ; **nouveau site actif repéré le 09/10 : tourisme.gouv.sn** (et mcat.gouv.sn), à collecter |
 | Environnement et Transition écologique | environnement.gouv.sn | site fermé par mot de passe (en construction) |

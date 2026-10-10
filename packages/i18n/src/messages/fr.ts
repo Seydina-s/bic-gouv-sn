@@ -75,6 +75,9 @@ export const fr = {
     culture: "Ministère de la Culture, de l'Artisanat et du Tourisme",
     "enseignement-superieur":
       "Ministère de l'Enseignement supérieur, de la Recherche et de l'Innovation",
+    numerique: "Ministère des Télécommunications et du Numérique",
+    infrastructures: "Ministère des Infrastructures",
+    "affaires-etrangeres": "Ministère de l'Intégration africaine et des Affaires étrangères",
   },
   /** Sections of the official sites, keyed by their slug. */
   categories: {

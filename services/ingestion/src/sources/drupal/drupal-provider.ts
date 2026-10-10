@@ -24,6 +24,8 @@ export interface DrupalSection {
   path: string;
   /** Our section for its articles. */
   category: string;
+  /** Start of its articles' paths when not under the listing (Drupal 9: "/node/"). */
+  articlePrefix?: string;
 }
 
 export interface DrupalSite {
@@ -72,8 +74,9 @@ export function createDrupalProvider(
   });
   const page = (url: string) =>
     http.read(url, (response) => response.text(), { Accept: "text/html" });
+  const prefixOf = (section: DrupalSection) => section.articlePrefix ?? `${section.path}/`;
   const sectionOf = (path: string) =>
-    site.sections.find((section) => path.startsWith(`${section.path}/`));
+    site.sections.find((section) => path.startsWith(prefixOf(section)));
   /** Pages of each section, read again on every first page (new pages appear). */
   let pageCounts: number[] = [];
   const days = new Map<string, string>();
@@ -82,7 +85,7 @@ export function createDrupalProvider(
     const parsed = parseDrupalListing(
       await page(`${site.origin}${section.path}?page=${String(index)}`),
       site.origin,
-      (path) => path.startsWith(`${section.path}/`),
+      (path) => path.startsWith(prefixOf(section)),
     );
     if (index === 0) {
       pageCounts[site.sections.indexOf(section)] = parsed.lastPageIndex + 1;
@@ -167,7 +170,7 @@ export function createDrupalProvider(
         throw quarantine(`article ${problem}`);
       }
       const category = sectionOf(ref.slug)?.category ?? "actualites";
-      const day = ref.publishedOn ?? null;
+      const day = ref.publishedOn ?? parsed.publishedOn;
       const translations: NewsArticle["translations"] = [
         { lang: "fr", status: "official", title, bodyHtml, sourceUrl },
       ];
