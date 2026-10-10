@@ -129,6 +129,30 @@ describe("the recordings of the articles", () => {
     expect(left.map((item) => item.lang)).toEqual(["wo"]);
   });
 
+  it("gives the French voice the words to say, the Wolof voice the text as written", async () => {
+    await articles.save({
+      ...article(3, true),
+      translations: [
+        {
+          lang: "fr",
+          status: "official",
+          title: "M. Diop à la CEDEAO",
+          bodyHtml: "<p>Fictif.</p>",
+          sourceUrl: "https://www.presidence.sn/fr/actualites/test-3/",
+        },
+        { lang: "wo", status: "machine", title: "M. Diop", bodyHtml: "<p>Fictif.</p>" },
+      ],
+    });
+    const todo = recordingsToMake(await allArticles(articles), ["fr", "wo"], 2);
+    expect(todo.map((item) => must(item.pieces[0]))).toEqual([
+      "Monsieur Diop à la Cédéao",
+      "M. Diop",
+    ]);
+    // The French hash also holds the voice and lexicon version: a new one records again.
+    expect(must(todo[0]).textHash).not.toBe(spokenTextHash(["M. Diop à la CEDEAO", "Fictif."]));
+    expect(must(todo[1]).textHash).toBe(spokenTextHash(["M. Diop", "Fictif."]));
+  });
+
   it("no longer offers a recording once the words it reads have changed", async () => {
     const todo = recordingsToMake(await allArticles(articles), ["fr"], 1);
     await record(todo, { articles, mediaRoot: dir, synthesize: voice() });

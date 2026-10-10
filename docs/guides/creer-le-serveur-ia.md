@@ -1,6 +1,6 @@
 # Créer le serveur d'IA (Hetzner)
 
-Le serveur d'IA lit les articles à voix haute (Jessica en français, Adia en wolof). Plus tard, il accueillera aussi la recherche par le sens et la reconnaissance du wolof.
+Le serveur d'IA lit les articles à voix haute (Kokoro en français, Adia en wolof). Plus tard, il accueillera aussi la recherche par le sens et la reconnaissance du wolof.
 
 C'est un serveur **Hetzner CPX32** : 4 processeurs AMD, 8 Go de mémoire, 160 Go de disque, à Helsinki. Il coûte **41,99 $ par mois**, plus 0,60 $ pour l'adresse IPv4, soit **42,59 $** (prix affiché à la commande le 10/10/2026).
 
@@ -50,7 +50,7 @@ Claude installe alors les voix, ferme tout accès autre que la clé, puis lance 
   - Ce changement modifie le prix : il vous sera soumis avant.
 - **Wolof** : la lecture d'un article prend des dizaines de minutes de calcul sans carte graphique. Le serveur n'est pas plus rapide que l'ordinateur de développement, mais il tourne jour et nuit sans l'occuper.
 - **Vitesse mesurée le 10/10/2026** (un article de la Présidence d'environ 1 400 caractères) :
-  - français (Jessica) : 7 secondes de calcul pour 1 min 40 s d'écoute ; tous les articles sans voix (3 375) en environ 10 heures ;
+  - français : Jessica, 7 secondes de calcul pour 1 min 40 s d'écoute ; Kokoro (retenue le 10/10), 28 secondes pour 1 min 44 s, soit environ 1 jour et demi pour les 3 375 articles ;
   - wolof (Adia) : 19 min de calcul pour 2 min d'écoute ; les 693 articles en wolof sans voix en environ 16 jours de calcul continu, dont environ 10 jours pour les 378 publiés depuis octobre 2025.
 - **Mémoire** : la lecture en wolof monte à 7 Go sur 7,6 Go. Une mémoire de secours de 4 Go a été ajoutée sur le disque.
 - **Arrêter les frais** : dans la console, ouvrez `bic-gouv-ia`, puis **Delete**. Arrêter le serveur (**Power off**) ne suffit pas : un serveur arrêté reste facturé. Les enregistrements déjà faits restent sur notre stockage.

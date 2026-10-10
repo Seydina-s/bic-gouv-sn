@@ -1,6 +1,8 @@
 """Reads contents aloud once, for the app to play (workflow of 03/10/2026).
 
-French: Piper, voice fr_FR-upmc-medium, speaker Jessica (dataset CC BY-SA 4.0).
+French: Kokoro-82M, voice ff_siwis (Apache 2.0; SIWIS data), chosen by the owner in a
+blind listening test on 10/10/2026. Words given as "[word](/phonemes/)" are said with
+those phonemes (names the French rules mispronounce); see apps/api/src/voices.
 Wolof: Adia_TTS by CONCREE (Apache 2.0).
 
 Usage: python synthesize.py <jobs.json> <voices-dir>
@@ -9,10 +11,9 @@ One JSON line per job on stdout: {"id", "ok": true, "durationMs", "bytes", "voic
 or {"id", "ok": false, "error"}. Models load once, only for the languages asked.
 """
 
-import hashlib
 import json
+import re
 import sys
-import urllib.request
 from pathlib import Path
 
 import numpy as np
@@ -20,14 +21,14 @@ import soundfile as sf
 
 from chunks import sentences
 
-PIPER_VOICE = "fr_FR-upmc-medium"
-PIPER_BASE = "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/fr/fr_FR/upmc/medium/"
-# The files checked once (03/10/2026): any other content is refused.
-PIPER_SHA256 = {
-    f"{PIPER_VOICE}.onnx": "9abb3800c199148897a9ed64e100d224f3de83579f100044174ad19418f1786f",
-    f"{PIPER_VOICE}.onnx.json": "e8636ec15dfd5d72db37a02cb5320a20f2b8d339f2a0e4337da64c58a33a5868",
-}
-JESSICA = 0
+KOKORO = "hexgrad/Kokoro-82M"
+# Pinned revision: the files read are those checked on 10/10/2026. Kokoro loads its
+# weights with torch.load(weights_only=True): no code can run from them.
+KOKORO_REVISION = "f3ff3571791e39611d31c381e3a41a3af07b4987"
+KOKORO_VOICE = "ff_siwis"
+# Kokoro reads at most 510 phonemes at once: French sentences are cut well below.
+FRENCH_MAX = 300
+GIVEN_PHONEMES = re.compile(r"\[([^\]]+)\]\(/([^/]+)/\)")
 ADIA = "CONCREE/Adia_TTS"
 # Pinned revision, weights in safetensors only: transformers stays at 4.46.1 because
 # parler-tts requires it, and its known flaws are in loading untrusted (pickled)
@@ -39,39 +40,38 @@ PARAGRAPH_PAUSE_S = 0.6
 SENTENCE_PAUSE_S = 0.25
 
 
-def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as file:
-        for block in iter(lambda: file.read(1 << 20), b""):
-            digest.update(block)
-    return digest.hexdigest()
-
-
-def _piper_files(voices: Path) -> Path:
-    """The French voice, downloaded once from its official page, checked byte for byte."""
-    voices.mkdir(parents=True, exist_ok=True)
-    for name, expected in PIPER_SHA256.items():
-        path = voices / name
-        if not path.exists():
-            urllib.request.urlretrieve(PIPER_BASE + name, path)  # noqa: S310 (fixed https URL)
-        if _sha256(path) != expected:
-            path.unlink()
-            raise RuntimeError(f"{name}: unexpected content, removed")
-    return voices / f"{PIPER_VOICE}.onnx"
-
-
 class French:
-    voice_id = "piper-fr_FR-upmc-medium-jessica"
+    voice_id = "kokoro-ff_siwis"
 
     def __init__(self, voices: Path):
-        from piper import PiperVoice, SynthesisConfig
+        from huggingface_hub import hf_hub_download
+        from kokoro import KModel, KPipeline
 
-        self._voice = PiperVoice.load(str(_piper_files(voices)))
-        self._config = SynthesisConfig(speaker_id=JESSICA)
-        self.rate = self._voice.config.sample_rate
+        def pinned(name: str) -> str:
+            return hf_hub_download(KOKORO, name, revision=KOKORO_REVISION, cache_dir=voices)
+
+        model = KModel(repo_id=KOKORO, config=pinned("config.json"), model=pinned("kokoro-v1_0.pth")).eval()
+        self._pipeline = KPipeline(lang_code="f", repo_id=KOKORO, model=model)
+        self._voice = pinned(f"voices/{KOKORO_VOICE}.pt")
+        self.rate = 24000
+
+    def phonemes(self, sentence: str) -> str:
+        """The sentence's phonemes by the French rules, except the words given with theirs."""
+        parts: list[str] = []
+        start = 0
+        for given in GIVEN_PHONEMES.finditer(sentence):
+            parts.append(self._pipeline.g2p(sentence[start : given.start()])[0])
+            parts.append(given.group(2))
+            start = given.end()
+        parts.append(self._pipeline.g2p(sentence[start:])[0])
+        return " ".join(part.strip() for part in parts if part.strip())
 
     def read(self, piece: str) -> list[np.ndarray]:
-        return [chunk.audio_float_array for chunk in self._voice.synthesize(piece, syn_config=self._config)]
+        clips: list[np.ndarray] = []
+        for sentence in sentences(piece, FRENCH_MAX):
+            for result in self._pipeline.generate_from_tokens(self.phonemes(sentence), voice=self._voice):
+                clips.append(np.asarray(result.audio, dtype=np.float32))
+        return clips
 
 
 class Wolof:
