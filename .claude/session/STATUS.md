@@ -1,6 +1,22 @@
 # STATUS — Bic Gouv SN
 
-**Dernière mise à jour** : 09/10/2026 (fin d'après-midi) · **Mode** : autonome (accord de l'utilisateur du 08/10 au soir). Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md`.
+**Dernière mise à jour** : 10/10/2026 (13 h 45) · **Mode** : standard (fenêtre autonome terminée le 10/10 à 13 h). Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md`.
+
+## 10/10 en bref : 16 ministères en ligne à côté de la Présidence et de la Primature
+- **Articles** : 7 156 dans l'app, dont 2 502 des ministères et de la Primature, plus 98 doublons masqués (la version de la Présidence est gardée).
+  - Ministères importés : Justice 113, Industrie-Commerce 10, Énergie 174, Hydraulique 303, Agriculture 250, Pêches 75, Emploi-Formation 507, Intérieur 55, Culture 137, Enseignement supérieur 23, Forces armées 172, Santé 180, Numérique 198, Infrastructures 5, Affaires étrangères 20.
+  - Fusions : #294 à #298.
+- **Collecte** : suivi automatique de 17 sites. À chaque passage, la Présidence est lue d'abord, puis un seul autre site, celui qui attend depuis le plus longtemps (#300).
+- **Incidents du matin, réglés et consignés dans ERREURS.md** :
+  - Présidence non relevée de 4 h 12 à 8 h 30, la collecte étant retenue par les galeries des ministères ;
+  - import des trois derniers ministères retardé jusqu'à 12 h 51 par un script d'attente défaillant.
+- **App** : texte « À propos » mentionnant les ministères (#299). Les noms des ministères ajoutés après la version Android du 09/10 n'apparaîtront qu'avec la prochaine compilation ; leurs articles s'ouvrent déjà.
+- **À revoir** (`docs/sources.md`) : Finances, Budget, Économie, Famille, Fonction publique, Microfinance, Transports, Urbanisme, Jeunesse et Sports, Environnement, Éducation ; sans site : Mines, Communication, SGG. Robot Facebook non construit (bloqué par les garde-fous de l'outil) : voie officielle Meta (point 42).
+- **Reste à faire** :
+  - historique complet des sites lents depuis le serveur (GOV-21, point 38) ;
+  - photos des galeries des ministères (tâche dédiée, collecte arrêtée) ;
+  - nouvelle compilation Android ;
+  - phase multilingue avec budget global (ML-01 à ML-06).
 
 ## 09/10 en bref : la Primature rejoint la Présidence
 - **Décision de l'utilisateur** : la plateforme relaie tout le Gouvernement (Présidence, Primature, ministères) ; en cas de doublon, la version de la Présidence est gardée. CLAUDE.md §1 et `decisions.md` mis à jour (#283).

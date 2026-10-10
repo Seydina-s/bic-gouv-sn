@@ -245,3 +245,10 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
   
   Tests : `services/ingestion/src/watch.test.ts`.
 - **Prévention** : test « ne lit qu'un site secondaire par passage » et test « ne retélécharge pas les photos d'un article connu inchangé ». Procédure : une nouvelle source est importée, collecte arrêtée, avant d'entrer dans la collecte. Toute source ajoutée à une boucle de suivi doit avoir une durée de passage bornée.
+
+## 10/10/2026 — Import du matin resté en attente quatre heures (script d'attente lancé depuis un dossier supprimé)
+
+- **Ce qui s'est passé** : le script devait importer les trois nouveaux ministères juste après la fusion de la n° 300 (8 h 38). Il a attendu jusqu'à 12 h 50 sans rien faire. La collecte provisoire relevait pendant ce temps la Présidence et la Primature.
+- **Cause racine** : le script attendait la fusion avec `gh pr view 300` sans préciser le dépôt, depuis un dossier de travail que l'environnement a supprimé après la fusion. La commande échouait (« not a git repository »), son erreur était jetée et la boucle recommençait sans fin.
+- **Correctif** : le script se place d'abord dans le dépôt principal et nomme le dépôt (`--repo Seydina-s/bic-gouv-sn`) ; il n'écarte plus les erreurs de `gh`. Import fait à 12 h 51 : 226 articles.
+- **Prévention** : une boucle d'attente ne masque jamais l'erreur de sa commande de contrôle, nomme explicitement ce qu'elle interroge (dépôt, dossier) et vérifie son effet peu après le moment attendu.
