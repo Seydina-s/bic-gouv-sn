@@ -28,6 +28,7 @@ export const NEWS_SOURCES: Readonly<Record<Institution, () => SourceProvider>> =
   interieur: createInterieurProvider,
   sante: () => createDrupalProvider(DRUPAL_MINISTRIES.sante),
   "forces-armees": () => createDrupalProvider(DRUPAL_MINISTRIES["forces-armees"]),
+  "affaires-etrangeres": () => createDrupalProvider(DRUPAL_MINISTRIES["affaires-etrangeres"]),
   "emploi-formation": () => createWordpressProvider(WORDPRESS_MINISTRIES["emploi-formation"]),
 };
 

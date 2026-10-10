@@ -24,6 +24,7 @@ export const INSTITUTIONS = [
   "enseignement-superieur",
   "numerique",
   "infrastructures",
+  "affaires-etrangeres",
 ] as const;
 
 export const institutionSchema = z.enum(INSTITUTIONS);
@@ -107,6 +108,10 @@ export const INSTITUTION_SITES: Readonly<Record<Institution, InstitutionSite>> =
   infrastructures: {
     pageHosts: ["www.ministeredesinfrastructures.sn", "ministeredesinfrastructures.sn"],
     mediaHosts: ["usbtgkwvfxarfgncrtea.supabase.co"],
+  },
+  "affaires-etrangeres": {
+    pageHosts: ["www.diplomatie.gouv.sn", "diplomatie.gouv.sn"],
+    mediaHosts: ["www.diplomatie.gouv.sn", "diplomatie.gouv.sn"],
   },
 };
 

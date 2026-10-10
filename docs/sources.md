@@ -120,14 +120,14 @@ education.sn (Next.js) lit une interface interne non ouverte au public (cms.educ
 | Ministère | Site | Constat du 09/10/2026 |
 |---|---|---|
 | Économie, Plan et Coopération | economie.gouv.sn | dernier article 20/05/2026 ; Drupal, collectable dès qu'il publie de nouveau |
-| Famille, Action sociale et Solidarités | femme.gouv.sn | dernier article 06/01/2026 |
+| Famille, Action sociale et Solidarités | femme.gouv.sn | un seul vrai article (06/01/2026) ; les autres sont des articles de démonstration du thème, en anglais |
 | Finances et Budget | finances.gouv.sn | relance du 09/10 : le nom se résout (41.208.146.4) mais le serveur ne répond ni en https ni en http (panne ou filtrage) ; à retenter depuis le serveur d'IA |
 | Budget | budget.sec.gouv.sn | site de la Direction générale du Budget : documents budgétaires (lois de finances, rapports d'exécution), **pas d'actualités** ; certificat incomplet (le maillon intermédiaire manque) |
 | Fonction publique, Travail et Réforme du service public | fonctionpublique.gouv.sn | relance du 09/10 : répond ; SPIP, flux `spip.php?page=backend` (10 articles), dernier article le 08/06/2026, publication irrégulière ; titres écrits en caractères décoratifs Unicode (à ramener en lettres ordinaires, NFKC) ; `robots.txt` absent |
 | Microfinance et Économie sociale et solidaire | microfinance-ess.gouv.sn | certificat TLS expiré |
 | Transports terrestres et aériens | mittd.gouv.sn | certificat TLS ne correspondant pas au site |
 | Urbanisme, Collectivités territoriales et Aménagement | urbanisme.gouv.sn ; decentralisation.gouv.sn | dernier article 05/2024 ; certificat invalide |
-| Intégration africaine et Affaires étrangères | diplomatie.gouv.sn | dernier article 03/2024 |
+| Intégration africaine et Affaires étrangères | diplomatie.gouv.sn | **collecté depuis le 10/10** : la page d'accueil est figée en 2024, mais la rubrique `/communique` est active (dernier communiqué le 08/10/2026) ; Drupal 9, communiqués à `/node/<numéro>`, datés sur leur page (« jeu 08/10/2026 - 17:35 ») ; 20 communiqués |
 | Jeunesse et Sports | mjsc.gouv.sn | site de l'ancien ministère (Jeunesse, Sports et Culture), dernier article 06/2025 |
 | Culture, Artisanat et Tourisme | culture.gouv.sn | site de l'ancien Secrétariat d'État, dernier article 06/2024 ; **nouveau site actif repéré le 09/10 : tourisme.gouv.sn** (et mcat.gouv.sn), à collecter |
 | Environnement et Transition écologique | environnement.gouv.sn | site fermé par mot de passe (en construction) |

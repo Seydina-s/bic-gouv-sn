@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
 import { QuarantineError } from "../../lib/errors";
-import { feedDays, parseDrupalArticle, parseDrupalListing } from "./drupal-parse";
+import { createdDay, feedDays, parseDrupalArticle, parseDrupalListing } from "./drupal-parse";
 import { createDrupalProvider, drupalArticleId, originalImage } from "./drupal-provider";
 import { DRUPAL_MINISTRIES } from "./ministries";
 
@@ -153,5 +153,26 @@ describe("Drupal article text", () => {
     });
     expect(article.translations[0]?.bodyHtml).not.toMatch(/<p>\s*<p>/);
     expect(article.sourcePublishedOn).toBeNull();
+  });
+});
+
+describe("Foreign Affairs site (Drupal 9)", () => {
+  const SITE = "https://www.diplomatie.gouv.sn";
+
+  it("lists the communiqués at their node addresses, and both pages", () => {
+    const listing = parseDrupalListing(page("diplomatie-list.html"), SITE, (path) =>
+      path.startsWith("/node/"),
+    );
+    expect(listing.lastPageIndex).toBe(1);
+    expect(listing.items[0]?.path).toBe("/node/306");
+  });
+
+  it("reads a communiqué with the day shown on its page", () => {
+    expect(parseDrupalArticle(page("diplomatie-article.html"))).toMatchObject({
+      title: "Situation politique en République de Guinée-Bissau.",
+      publishedOn: "2026-10-08",
+    });
+    expect(createdDay("jeu 08/10/2026 - 17:35")).toBe("2026-10-08");
+    expect(createdDay("31/02/2026")).toBeNull();
   });
 });

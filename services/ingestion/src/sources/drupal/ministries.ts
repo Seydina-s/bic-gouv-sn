@@ -24,4 +24,11 @@ export const DRUPAL_MINISTRIES = {
     ],
     intervalMs: 10_000,
   },
+  "affaires-etrangeres": {
+    institution: "affaires-etrangeres",
+    origin: "https://www.diplomatie.gouv.sn",
+    // Drupal 9: the communiqués are listed here, each at "/node/<number>", dated on its page.
+    sections: [{ path: "/communique", articlePrefix: "/node/", category: "communiques" }],
+    intervalMs: 1000,
+  },
 } as const satisfies Record<string, DrupalSite>;
