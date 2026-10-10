@@ -76,6 +76,7 @@ export const fr = {
     "enseignement-superieur":
       "Ministère de l'Enseignement supérieur, de la Recherche et de l'Innovation",
     numerique: "Ministère des Télécommunications et du Numérique",
+    infrastructures: "Ministère des Infrastructures",
   },
   /** Sections of the official sites, keyed by their slug. */
   categories: {

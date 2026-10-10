@@ -107,9 +107,9 @@ mctn.sn est une application Angular qui lit sa propre interface publique, sans c
 
 Règles communes déplacées dans le nettoyage de toutes les sources : lien vers un profil Facebook gardé comme texte sans son adresse (codes de pistage), émoji servi par Facebook gardé en texte.
 
-### Infrastructures : base Supabase (à faire)
+### Infrastructures (10/10/2026)
 
-ministeredesinfrastructures.sn lit une base Supabase (table `actualites`, avec `title`, `title_en`, `excerpt`, `content`, `image`, `created_at`, `published`) avec la clé publique intégrée à son code, comme tout navigateur. Lecteur à écrire : la clé serait relue dans le code du site à chaque démarrage plutôt que copiée dans notre dépôt.
+ministeredesinfrastructures.sn lit ses actualités publiées dans une base Supabase (table `actualites` : titre, texte, photo, galerie, et des versions anglaise et wolof pour certains articles), avec la clé publique que reçoit tout navigateur dans le code du site. Notre lecteur relit cette clé dans le code du site à chaque démarrage : **elle n'est jamais copiée dans notre dépôt**. Seules les lignes publiées sont lues. Texte brut découpé en paragraphes. 6 articles depuis l'ouverture du site (août 2026), 6 sur 6 à l'essai.
 
 ### Éducation nationale
 
