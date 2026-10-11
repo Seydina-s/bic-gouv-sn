@@ -43,6 +43,7 @@ describe("the Claude provider", () => {
       model: DEFAULT_ASSISTANT_MODEL,
       max_tokens: 400,
       messages: [{ role: "user", content: "Question" }],
+      thinking: { type: "disabled" },
     });
     expect(body["system"]).toEqual([
       { type: "text", text: "Rules", cache_control: { type: "ephemeral" } },
