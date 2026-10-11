@@ -53,6 +53,22 @@ export const adminFr = {
     nextAttempt:
       "La collecte ne s'arrête pas : nouvel essai automatique à {time}, puis toutes les 10 minutes au plus tant que le site ne répond pas ; tout ce qui aura été publié entre-temps sera rattrapé.",
   },
+  sites: {
+    title: "Sites à revoir",
+    intro:
+      "Ces sites de ministères ne sont pas encore collectés. Ils sont revus chaque semaine, la nuit : dès que l'un d'eux publie de nouveau, il peut être ajouté à la collecte.",
+    checkedAt: "Dernière revue le {day} à {time}.",
+    none: "Aucune revue pour l'instant : la première a lieu la nuit qui suit la mise en service de la collecte.",
+    newestDay: "Dernière publication repérée : {day}.",
+    noDay: "Aucune date de publication repérée.",
+    status: {
+      publishing: "Publie de nouveau : peut être ajouté à la collecte",
+      frozen: "Plus de publication récente",
+      certificate: "Certificat de sécurité invalide : le site ne peut pas être lu sans risque",
+      protected: "Fermé par un mot de passe",
+      unreachable: "Ne répond pas",
+    },
+  },
   duration: {
     lessThanAMinute: "moins d'une minute",
     minutes: "{minutes} min",
@@ -558,6 +574,11 @@ export const adminFr = {
     assistantPaused:
       "L'assistant est en pause : toutes les questions prévues ce mois-ci ont été posées.",
     assistantNearLimit: "L'assistant a déjà utilisé {percent} des questions prévues ce mois-ci.",
+    sitesPublishing: {
+      one: "{count} site de ministère publie de nouveau : il peut être ajouté à la collecte.",
+      other:
+        "{count} sites de ministères publient de nouveau : ils peuvent être ajoutés à la collecte.",
+    },
   },
   translations: {
     title: "Traductions à relire",

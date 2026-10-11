@@ -27,7 +27,7 @@ export interface AttentionItem {
 /** A count to look at when there is one: "3 messages à lire". */
 function countItem(
   count: number | undefined,
-  key: "attention.participation" | "attention.opportunities",
+  key: "attention.participation" | "attention.opportunities" | "attention.sitesPublishing",
   href: string,
 ): AttentionItem[] {
   return count === undefined || count === 0
@@ -123,6 +123,8 @@ export function attentionItems(input: {
   opportunitiesPending?: number;
   /** This month's questions to the assistant (none: unknown, said nothing). */
   assistant?: AssistantUsage;
+  /** Ministry sites not collected yet that publish again (none: unknown, said nothing). */
+  sitesPublishing?: number | undefined;
 }): AttentionItem[] {
   const items = [
     ...(input.errors === null ? [] : errorItems(input.errors, input.now)),
@@ -130,6 +132,7 @@ export function attentionItems(input: {
     ...countItem(input.participationToRead, "attention.participation", "/participation"),
     ...countItem(input.opportunitiesPending, "attention.opportunities", "/opportunites"),
     ...(input.assistant === undefined ? [] : assistantItems(input.assistant)),
+    ...countItem(input.sitesPublishing, "attention.sitesPublishing", "/#sites-title"),
   ];
   if (input.errors === null || input.notifications === null) {
     items.push({ tone: "warning", text: t("attention.unreadable"), href: "/" });

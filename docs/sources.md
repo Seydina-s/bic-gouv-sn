@@ -133,6 +133,8 @@ Un site dont le dernier article est **antérieur au gouvernement en place** (avr
 
 ### Ministères : sites à revoir (non collectés pour l'instant)
 
+Depuis le 12/10/2026, la collecte revoit ces sites **chaque semaine, la nuit** (liste dans `services/ingestion/src/review/sites-review.ts`) : une visite de la page d'accueil, certificat vérifié comme toujours, date la plus récente visible sur la page (les dates techniques de l'en-tête et des scripts ne comptent pas). Un site dont la dernière date a moins de 120 jours est signalé dans la console (« Sites à revoir », et une alerte dans « À traiter ») : il peut alors être ajouté à la collecte. Première revue du 12/10 : Finances ne répond pas depuis le Sénégal, Urbanisme figé (22/05/2024), Microfinance et Transports au certificat invalide, Environnement fermé par mot de passe, Sports figé (12/06/2022), Mines figé (28/12/2023), Élevage ne répond pas.
+
 | Ministère | Site | Constat du 09/10/2026 |
 |---|---|---|
 | Économie, Finances et Plan | finances.gouv.sn | relance du 11/10 : **répond depuis notre serveur en Finlande, pas depuis le Sénégal** (filtrage selon l'origine) ; collecte possible en passant par le serveur, à décider (sécurité) |
