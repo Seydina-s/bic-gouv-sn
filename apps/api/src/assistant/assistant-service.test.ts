@@ -121,13 +121,14 @@ describe("the assistant service", () => {
     expect((await assistant.usage()).configured).toBe(false);
   });
 
-  it("does not count a question the base has nothing for (no model call)", async () => {
+  it("counts a question once, even when it is rephrased before searching", async () => {
     const llm = model();
     const { assistant } = service(llm);
+    // No word of it is in the base: rephrased (one call), then nothing found.
     const { reply } = await assistant.answer({ ...question, question: "aéroport lointain" });
     expect(reply.status).toBe("not_found");
-    expect(llm.requests).toHaveLength(0);
-    expect((await assistant.usage()).questions).toBe(0);
+    expect(llm.requests).toHaveLength(1);
+    expect((await assistant.usage()).questions).toBe(1);
   });
 
   it("pauses past the monthly limit until the first day of next month", async () => {
