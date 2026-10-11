@@ -4,6 +4,7 @@ import {
   ClaudeProvider,
   DEFAULT_ASSISTANT_MODEL,
   isClaudeOutage,
+  noThinkingFirst,
 } from "./claude-provider";
 
 const request = { system: "Rules", user: "Question", maxOutputTokens: 400 };
@@ -11,6 +12,14 @@ const request = { system: "Rules", user: "Question", maxOutputTokens: 400 };
 function replying(status: number, body: unknown) {
   return vi.fn<typeof fetch>(() => Promise.resolve(new Response(JSON.stringify(body), { status })));
 }
+
+describe("noThinkingFirst", () => {
+  it("skips the thinking before an answer the way each model asks", () => {
+    expect(noThinkingFirst("claude-haiku-4-5-20251001")).toEqual({ type: "disabled" });
+    expect(noThinkingFirst("claude-haiku-5-5")).toEqual({ type: "disabled" });
+    expect(noThinkingFirst("claude-sonnet-5-5")).toEqual({ type: "between_tools" });
+  });
+});
 
 describe("the Claude provider", () => {
   it("sends the rules and the question with the key, and reads the reply and its cost", async () => {
