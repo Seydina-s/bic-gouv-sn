@@ -1,6 +1,16 @@
 # STATUS — Bic Gouv SN
 
-**Dernière mise à jour** : 10/10/2026 (13 h 45) · **Mode** : standard (fenêtre autonome terminée le 10/10 à 13 h). Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md`.
+**Dernière mise à jour** : 11/10/2026 (soir) · **Mode** : standard (fenêtre autonome terminée le 10/10 à 13 h). Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md`.
+
+## 11/10 en bref : un assistant qui comprend, des voix plus naturelles
+- **Articles des ministères « non disponibles »** : le serveur de développement du téléphone servait encore le code du 08/10 (qui n'acceptait que presidence.sn) ; mis à jour, 300 articles récents vérifiés lisibles. Fermer puis rouvrir l'app suffit.
+- **Assistant** (batterie de 56 questions de citoyens, puis 15 en wolof) :
+  - cause des refus trouvée et corrigée : les 5 articles les plus récents de toute la base étaient imposés à chaque question d'actualité (#307) ;
+  - abréviations, fautes, postes actuels, institution citée, accueil et remerciements, message d'excuse avec solutions (#307) ;
+  - appels bloqués refaits une fois (#308) ; wolof de toute orthographe reformulé en recherche française (#309) ;
+  - comparatifs à l'aveugle : **wolof par Sonnet 5.5** (13 sur 15), **français par Haiku 4.5** (11 sur 15) ; coût réel affiché dans la console (#310, #311).
+- **Voix** : Kokoro remplace Jessica avec un lecteur intelligent et un lexique corrigé par l'utilisateur (#305) ; le serveur des voix lit désormais seul, même quand l'ordinateur dort (#312) ; rattrapage français puis wolof lancés.
+- **Reste à faire** : services de l'État dans l'assistant (après vérification), relecture du wolof par des natifs, historique complet des sites lents (GOV-21).
 
 ## 10/10 en bref : 16 ministères en ligne à côté de la Présidence et de la Primature
 - **Articles** : 3 481 visibles dans l'app (978 de la Présidence, chacun en français et souvent en wolof ; 2 503 des ministères et de la Primature), plus 98 doublons masqués (la version de la Présidence est gardée). Chiffre corrigé le 10/10 au soir : le premier comptage (7 156) comptait deux fois les articles de la Présidence.
