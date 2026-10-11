@@ -97,7 +97,7 @@ import { proceduresRoutes } from "./routes/procedures";
 import { servicesRoutes } from "./routes/services";
 import { mapRoutes } from "./routes/map";
 import { statusRoutes } from "./routes/status";
-import { CircuitBreaker, createResilientCall } from "@bgs/resilience";
+import { CircuitBreaker, createResilientCall, TimeoutError } from "@bgs/resilience";
 import { AssistantService } from "./assistant/assistant-service";
 import { ClaudeProvider, isClaudeOutage } from "./assistant/claude-provider";
 import { buildKnowledge, RefreshedKnowledge } from "./assistant/knowledge";
@@ -181,8 +181,14 @@ function defaultLlm(config: Config): LlmProvider | null {
     : new ClaudeProvider({ apiKey: config.ANTHROPIC_API_KEY, model: config.ASSISTANT_MODEL });
 }
 
-/** Most answers take 2 to 5 seconds; past this, the person is told to retry later. */
-const ASSISTANT_TIMEOUT_MS = 20_000;
+/**
+ * Most answers take 2 to 5 seconds, a few up to 11. A call still silent after this is
+ * stuck at the model's side (11/10/2026: 7 questions in 56 waited past 20 s while the
+ * network was fine): it is dropped and made once more, which answers at once.
+ */
+const ASSISTANT_ATTEMPT_MS = 13_000;
+/** Two attempts at most, under the app's 35 s wait. */
+const ASSISTANT_ATTEMPTS = 2;
 
 /** A Redis client that fails fast: every command has a time limit (CLAUDE.md §4.5). */
 function connectRedis(url: string): Redis {
@@ -371,7 +377,8 @@ export async function buildApp({
     state: sharedState,
     settings,
     journal: admin?.journal ?? null,
-    // Never retried: each call is paid for, and the person can ask again.
+    // Made again only when the model stayed silent: an answer, even a refusal, is
+    // never asked twice (each call is paid for).
     call: createResilientCall({
       breaker: new CircuitBreaker({
         dependency: "claude",
@@ -379,7 +386,14 @@ export async function buildApp({
         resetTimeoutMs: 60_000,
         isFailure: isClaudeOutage,
       }),
-      timeoutMs: ASSISTANT_TIMEOUT_MS,
+      timeoutMs: ASSISTANT_ATTEMPT_MS,
+      retry: {
+        idempotent: true,
+        maxAttempts: ASSISTANT_ATTEMPTS,
+        baseDelayMs: 200,
+        maxDelayMs: 500,
+        shouldRetry: (error) => error instanceof TimeoutError,
+      },
     }),
   });
   await app.register(assistantRoutes, {

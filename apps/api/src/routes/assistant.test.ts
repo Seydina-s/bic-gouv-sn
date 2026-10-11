@@ -2,6 +2,7 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { FileProcedureRepository, RemoteConfigStore, fileDocument } from "@bgs/content-store";
+import { TimeoutError } from "@bgs/resilience";
 import { assistantReplySchema, assistantUsageSchema } from "@bgs/shared-types";
 import type { FastifyInstance } from "fastify";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -173,6 +174,35 @@ describe("POST /v1/assistant/answers", () => {
     const warning = logs.find((line) => line.includes("Assistant model call failed"));
     expect(warning).toContain("Anthropic answered 529");
     expect(logs.join("")).not.toContain("passeport fictif");
+  });
+
+  it("asks once more when the model stayed silent, never after an answer or a refusal", async () => {
+    let calls = 0;
+    const answering = model();
+    const stuckOnce: LlmProvider = {
+      name: "test",
+      complete: (request, signal) => {
+        calls += 1;
+        // The first call hangs past the deadline, as on 11/10/2026.
+        return calls === 1
+          ? Promise.reject(new TimeoutError(13_000))
+          : answering.complete(request, signal);
+      },
+    };
+    const reply = assistantReplySchema.parse((await ask(await start({ llm: stuckOnce }))).json());
+    expect(reply.status).toBe("answered");
+    expect(calls).toBe(2);
+
+    let refused = 0;
+    const overloaded: LlmProvider = {
+      name: "test",
+      complete: () => {
+        refused += 1;
+        return Promise.reject(new Error("Anthropic answered 529"));
+      },
+    };
+    await ask(await start({ llm: overloaded }));
+    expect(refused).toBe(1);
   });
 
   it("lets only admins change the limit", async () => {
