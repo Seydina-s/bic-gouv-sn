@@ -3,9 +3,11 @@ import { z } from "zod";
 import type { LlmProvider, LlmResponse } from "./llm-provider";
 import type { PassageIndex } from "./passage-search";
 import type { Passage } from "./passages";
-import type { EmbeddingProvider, VectorIndex } from "./hybrid-search";
+import { fuseRankings, type EmbeddingProvider, type VectorIndex } from "./hybrid-search";
 import type { ScoredPassage } from "./passage-search";
-import { retrievePassages } from "./retrieval";
+import { needsRephrasing, rephraseQuestion } from "./question-rephrase";
+import { widenQuestion } from "./question-words";
+import { retrievePassages, searchedLanguages } from "./retrieval";
 
 /** A question is encoded in milliseconds: past this, the words answer alone. */
 const MEANING_TIMEOUT_MS = 3000;
@@ -21,13 +23,19 @@ async function closestInMeaning(
   }
   try {
     const [vector] = await meaning.embedder.embed(
-      [question],
+      [widenQuestion(question)],
       "query",
       AbortSignal.timeout(MEANING_TIMEOUT_MS),
     );
-    return vector === undefined
-      ? null
-      : meaning.vectors.search(vector, { lang, limit: MEANING_CANDIDATES });
+    if (vector === undefined) {
+      return null;
+    }
+    const rankings = searchedLanguages(lang).map((searched) =>
+      meaning.vectors.search(vector, { lang: searched, limit: MEANING_CANDIDATES }),
+    );
+    return rankings.length === 1
+      ? (rankings[0] ?? null)
+      : fuseRankings(rankings, MEANING_CANDIDATES);
   } catch {
     // Graceful degradation: the search by words answers alone.
     return null;
@@ -93,6 +101,21 @@ const TASKS: Record<AssistantMode, string | null> = {
   verify: "Task: check the claim in the question against the extracts (« Est-ce vrai ? »).",
 };
 
+const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+/**
+ * Today and the bounds of this week, worked out here: the model miscounted weeks
+ * (11/10/2026: a Council of 30 September said to be "this week").
+ */
+export function datesOf(today: string): string {
+  const day = new Date(`${today}T00:00:00Z`);
+  const fromMonday = (day.getUTCDay() + 6) % 7;
+  const monday = new Date(day.getTime() - fromMonday * 86_400_000);
+  const sunday = new Date(monday.getTime() + 6 * 86_400_000);
+  const iso = (date: Date) => date.toISOString().slice(0, 10);
+  return `Today's date: ${today} (${WEEKDAYS[day.getUTCDay()] ?? ""}). This week: Monday ${iso(monday)} to Sunday ${iso(sunday)}.`;
+}
+
 export function userMessage(
   question: string,
   lang: Lang,
@@ -107,7 +130,7 @@ export function userMessage(
   const task = TASKS[mode];
   return [
     `Language of the answer: ${LANGUAGE_NAMES[lang]}`,
-    ...(today === null ? [] : [`Today's date: ${today}`]),
+    ...(today === null ? [] : [datesOf(today)]),
     ...(task === null ? [] : [task]),
     `<question>${quoted(question)}</question>`,
     ...extracts,
@@ -168,7 +191,7 @@ export interface AnswerDependencies {
   meaning?: { vectors: VectorIndex; embedder: EmbeddingProvider } | null;
   llm: LlmProvider;
   /** Deadline, circuit breaker and retries of the model calls (@bgs/resilience). */
-  call: <T>(operation: (signal: AbortSignal) => Promise<T>) => Promise<T>;
+  call: <T>(operation: (signal: AbortSignal) => Promise<T>, signal?: AbortSignal) => Promise<T>;
 }
 
 /** Errors of the model call (deadline, open circuit) are left to the caller. */
@@ -181,21 +204,42 @@ export async function answerQuestion(
   }: { question: string; lang: Lang; mode?: AssistantMode; today?: string },
   { index, meaning = null, llm, call }: AnswerDependencies,
 ): Promise<GroundedAnswer> {
+  // Wolof in any spelling, or words found nowhere: searched with a French rephrasing too.
+  const rephrased = needsRephrasing(question, lang, index)
+    ? await rephraseQuestion(question, llm, call)
+    : { query: null, usage: null };
+  const searched = rephrased.query === null ? question : `${question} ${rephrased.query}`;
   const given = retrievePassages(
     index,
-    question,
+    searched,
     lang,
     today,
-    await closestInMeaning(question, lang, meaning),
+    await closestInMeaning(searched, lang, meaning),
   );
   if (given.length === 0) {
-    return refused("not_found", null, null);
+    return refused("not_found", null, rephrased.usage);
   }
   const request = {
     system: SYSTEM_RULES,
     user: userMessage(question, lang, given, mode, today),
     maxOutputTokens: MAX_OUTPUT_TOKENS,
   };
-  const response = await call((signal) => llm.complete(request, signal));
-  return checkAnswer(response, given);
+  const answer = checkAnswer(await call((signal) => llm.complete(request, signal)), given);
+  return { ...answer, usage: addedUsage(answer.usage, rephrased.usage) };
+}
+
+/** Both model calls of a question are counted in the month's use and cost. */
+function addedUsage(
+  answer: GroundedAnswer["usage"],
+  rephrase: GroundedAnswer["usage"],
+): GroundedAnswer["usage"] {
+  if (answer === null || rephrase === null) {
+    return answer ?? rephrase;
+  }
+  return {
+    ...answer,
+    inputTokens: answer.inputTokens + rephrase.inputTokens,
+    outputTokens: answer.outputTokens + rephrase.outputTokens,
+    costMicrodollars: answer.costMicrodollars + rephrase.costMicrodollars,
+  };
 }

@@ -65,6 +65,10 @@ try {
     onProgress: (done, total) => {
       say(`  ${String(done)} / ${String(total)}`);
     },
+    onRetry: (error, delayMs) => {
+      const why = error instanceof Error ? error.message : String(error);
+      say(`  Voix injoignables (${why}) : nouvel essai dans ${String(delayMs / 60_000)} min`);
+    },
   });
   say(
     `Enregistrés : ${String(report.recorded)} (${String(Math.round(report.audioMs / 60_000))} min d'écoute)`,

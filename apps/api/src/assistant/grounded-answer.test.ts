@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { answerQuestion, checkAnswer, SYSTEM_RULES, userMessage } from "./grounded-answer";
 import type { LlmProvider, LlmRequest } from "./llm-provider";
 import { PassageIndex } from "./passage-search";
+import { REPHRASE_RULES } from "./question-rephrase";
 import type { Passage } from "./passages";
 import { PASSAGES_GIVEN } from "./retrieval";
 
@@ -22,7 +23,12 @@ function passage(n: number, title: string, text: string): Passage {
 }
 
 const given = [passage(1, "Démarche du port", "Le port de test."), passage(2, "Quai", "Le quai.")];
-const usage = { model: "modele-de-test", inputTokens: 900, outputTokens: 60 };
+const usage = {
+  model: "modele-de-test",
+  inputTokens: 900,
+  outputTokens: 60,
+  costMicrodollars: 1200,
+};
 const reply = (text: string) => ({ text, ...usage });
 
 describe("userMessage", () => {
@@ -145,20 +151,58 @@ describe("answerQuestion", () => {
     expect(request?.maxOutputTokens).toBeGreaterThan(0);
   });
 
-  it("does not call the model when no passage matches", async () => {
+  it("only asks for a French rephrasing when no word is known, then says not found", async () => {
     const llm = provider("{}");
     const answer = await answerQuestion(
       { question: "aéroport", lang: "fr" },
       { index, llm, call: direct },
     );
-    expect(answer).toEqual({
-      status: "not_found",
-      text: null,
-      sources: [],
-      rejected: null,
-      usage: null,
-    });
-    expect(llm.requests).toHaveLength(0);
+    expect(answer).toMatchObject({ status: "not_found", text: null, sources: [], rejected: null });
+    expect(llm.requests.map((request) => request.system)).toEqual([REPHRASE_RULES]);
+    expect(answer.usage).not.toBeNull();
+  });
+
+  /** A model that rephrases first, then answers; `failFirst` makes the rephrasing fail. */
+  function scripted(failFirst = false): LlmProvider & { requests: LlmRequest[] } {
+    const requests: LlmRequest[] = [];
+    return {
+      name: "test",
+      requests,
+      complete: (request: LlmRequest) => {
+        requests.push(request);
+        if (request.system === REPHRASE_RULES) {
+          return failFirst
+            ? Promise.reject(new Error("panne"))
+            : Promise.resolve(reply('{"query": "le port"}'));
+        }
+        return Promise.resolve(reply('{"status":"answered","answer":"Réponse.","citations":[1]}'));
+      },
+    };
+  }
+
+  it("finds the French pages for a question in Wolof written in any spelling", async () => {
+    const llm = scripted();
+    // Placeholder Wolof, as people type it: no word of it is in the French pages.
+    const answer = await answerQuestion(
+      { question: "khamna fii la port bi nek", lang: "wo" },
+      { index, llm, call: direct },
+    );
+    expect(answer.status).toBe("answered");
+    expect(answer.sources[0]?.title).toMatch(/^Port/);
+    // The model that answers reads the question as written.
+    expect(llm.requests[1]?.user).toContain("khamna fii la port bi nek");
+    // Both calls are counted in the month's use.
+    expect(answer.usage?.inputTokens).toBe(2 * usage.inputTokens);
+  });
+
+  it("still searches the question as written when the rephrasing fails", async () => {
+    const llm = scripted(true);
+    const answer = await answerQuestion(
+      { question: "port bi", lang: "wo" },
+      { index, llm, call: direct },
+    );
+    expect(answer.status).toBe("answered");
+    expect(llm.requests).toHaveLength(2);
   });
 
   it("leaves a failed call to the caller", async () => {

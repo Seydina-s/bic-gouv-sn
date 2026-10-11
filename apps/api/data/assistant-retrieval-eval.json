@@ -1,5 +1,5 @@
 {
-  "about": "Internal test set for the assistant's passage search (AI-04), never shown in the app. Each question was written by Claude from a page of the base and links to the official page that answers it. 'direct' questions reuse the words of the source; 'reformulated' ones ask the same thing in other words. French only: Wolof questions await native speakers (W-01).",
+  "about": "Internal test set for the assistant's passage search (AI-04), never shown in the app. Each question was written by Claude from a page of the base and links to the official page that answers it. 'direct' questions reuse the words of the source; 'reformulated' ones ask the same thing in other words. French only: Wolof questions await native speakers (W-01). Citizen questions added on 11/10/2026 from the owner's report and a battery of 56 questions asked to the live assistant: typed as people do (short, abbreviated, with slips, in Wolof).",
   "cases": [
     {
       "question": "Comment demander un NINEA pour mon entreprise ?",
@@ -498,6 +498,131 @@
       "style": "reformulated",
       "expected": [
         "https://www.presidence.sn/fr/actualites/le-president-bassirou-diomaye-faye-recoit-son-homologue-du-kosovo-en-marge-de-lassemblee-generale-de-lonu/"
+      ]
+    },
+    {
+      "question": "Quelles sont les dernières actualités du ministère de l'Intérieur ?",
+      "style": "citizen",
+      "expected": [
+        "https://www.interieur.gouv.sn/actualites/activites/visite-de-travail-au-camp-abdou-diasse-bip-dpaf-services-sanitaires-gmi",
+        "https://www.interieur.gouv.sn/actualites/activites/joj-dakar-2026-anticiper-pour-mieux-proteger",
+        "https://www.interieur.gouv.sn/actualites/discours/inondations-declaration-du-ministre-dans-les-zones-affectees-par-les-eaux",
+        "https://www.interieur.gouv.sn/actualites/activites/inondations-le-ministre-aupres-des-populations-sinistrees-de-la-zone-de-captage"
+      ]
+    },
+    {
+      "question": "le president il était où cette semaine",
+      "style": "citizen",
+      "expected": [
+        "https://www.presidence.sn/fr/actualites/sante-le-president-bassirou-diomaye-faye-recoit-lordre-des-medecins-du-senegal/",
+        "https://www.presidence.sn/fr/actualites/economie-maritime-le-senegal-renforce-son-partenariat-avec-le-groupe-msc/",
+        "https://www.presidence.sn/fr/actualites/cedeao-le-president-bassirou-diomaye-faye-preside-la-prestation-de-serment-des-nouveaux-juges-de-la-cour-de-justice/"
+      ]
+    },
+    {
+      "question": "Qu'a fait le président cette semaine ?",
+      "style": "citizen",
+      "expected": [
+        "https://www.presidence.sn/fr/actualites/sante-le-president-bassirou-diomaye-faye-recoit-lordre-des-medecins-du-senegal/",
+        "https://www.presidence.sn/fr/actualites/economie-maritime-le-senegal-renforce-son-partenariat-avec-le-groupe-msc/",
+        "https://www.presidence.sn/fr/actualites/cedeao-le-president-bassirou-diomaye-faye-preside-la-prestation-de-serment-des-nouveaux-juges-de-la-cour-de-justice/"
+      ]
+    },
+    {
+      "question": "c ki le premier ministre",
+      "style": "citizen",
+      "expected": [
+        "https://primature.sn/publications/actualites/inondations-le-premier-ministre-ahmadou-alhaminou-lo-au-chevet-des",
+        "https://primature.sn/publications/actualites/le-premier-ministre-ahmadou-alhaminou-lo-conakry-pour-les-celebrations-du",
+        "https://primature.sn/publications/actualites/audience-du-premier-ministre-ahmadou-alhaminou-lo-monsieur-dimitri",
+        "https://primature.sn/publications/actualites/audience-du-premier-ministre-ahmadou-alhaminou-lo-monsieur-mohammed-akojee",
+        "https://primature.sn/publications/actualites/rencontre-du-premier-ministre-ahmadou-alhaminou-lo-avec-les-organisations",
+        "https://primature.sn/publications/actualites/note-au-public-sur-la-declaration-de-politique-generale-du-premier-ministre",
+        "https://primature.sn/publications/actualites/declaration-de-politique-generale-par-le-premier-ministre-ahmadou-alhaminou",
+        "https://primature.sn/publications/actualites/suivez-en-direct-la-declaration-de-politique-generale-du-premier-ministre-1",
+        "https://primature.sn/publications/actualites/le-premier-ministre-ahmadou-al-aminou-lo-fera-sa-declaration-de-politique-0",
+        "https://primature.sn/publications/actualites/journee-nationale-de-larbre-2026-le-discours-du-premier-ministre-ahmadou-al",
+        "https://primature.sn/publications/actualites/sante-et-engagement-citoyen-les-orientations-du-premier-ministre-ahmadou-al",
+        "https://primature.sn/publications/actualites/le-premier-ministre-ahmadou-al-aminou-lo-appelle-la-cohesion-et-la",
+        "https://primature.sn/publications/actualites/ahmadou-al-aminou-mohamed-lo-nouveau-premier-ministre-du-senegal",
+        "https://www.presidence.sn/fr/actualites/profil-du-nouveau-premier-ministre-de-la-republique-du-senegal/"
+      ]
+    },
+    {
+      "question": "Qui est le Premier ministre actuel ?",
+      "style": "citizen",
+      "expected": [
+        "https://primature.sn/publications/actualites/inondations-le-premier-ministre-ahmadou-alhaminou-lo-au-chevet-des",
+        "https://primature.sn/publications/actualites/le-premier-ministre-ahmadou-alhaminou-lo-conakry-pour-les-celebrations-du",
+        "https://primature.sn/publications/actualites/audience-du-premier-ministre-ahmadou-alhaminou-lo-monsieur-dimitri",
+        "https://primature.sn/publications/actualites/audience-du-premier-ministre-ahmadou-alhaminou-lo-monsieur-mohammed-akojee",
+        "https://primature.sn/publications/actualites/rencontre-du-premier-ministre-ahmadou-alhaminou-lo-avec-les-organisations",
+        "https://primature.sn/publications/actualites/note-au-public-sur-la-declaration-de-politique-generale-du-premier-ministre",
+        "https://primature.sn/publications/actualites/declaration-de-politique-generale-par-le-premier-ministre-ahmadou-alhaminou",
+        "https://primature.sn/publications/actualites/suivez-en-direct-la-declaration-de-politique-generale-du-premier-ministre-1",
+        "https://primature.sn/publications/actualites/le-premier-ministre-ahmadou-al-aminou-lo-fera-sa-declaration-de-politique-0",
+        "https://primature.sn/publications/actualites/journee-nationale-de-larbre-2026-le-discours-du-premier-ministre-ahmadou-al",
+        "https://primature.sn/publications/actualites/sante-et-engagement-citoyen-les-orientations-du-premier-ministre-ahmadou-al",
+        "https://primature.sn/publications/actualites/le-premier-ministre-ahmadou-al-aminou-lo-appelle-la-cohesion-et-la",
+        "https://primature.sn/publications/actualites/ahmadou-al-aminou-mohamed-lo-nouveau-premier-ministre-du-senegal",
+        "https://www.presidence.sn/fr/actualites/profil-du-nouveau-premier-ministre-de-la-republique-du-senegal/"
+      ]
+    },
+    {
+      "question": "Qui est l'actuel directeur général du BIC Gouv ?",
+      "style": "citizen",
+      "expected": [
+        "https://www.presidence.sn/fr/actualites/communique-du-conseil-des-ministres-du-jeudi-10-septembre-2026/"
+      ]
+    },
+    {
+      "question": "qui est le dg du bic",
+      "style": "citizen",
+      "expected": [
+        "https://www.presidence.sn/fr/actualites/communique-du-conseil-des-ministres-du-jeudi-10-septembre-2026/"
+      ]
+    },
+    {
+      "question": "Quels sont les ministères du gouvernement ?",
+      "style": "citizen",
+      "expected": ["https://www.presidence.sn/fr/actualites/composition-du-nouveau-gouvernement/"]
+    },
+    {
+      "question": "kom on fait pr avoir un pasport",
+      "style": "citizen",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-un-passeport-numerise",
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/sacquitter-du-paiement-de-la-quittance-correspondant-au-timbre-du-passeport"
+      ]
+    },
+    {
+      "question": "Naka laay def ngir am paaspoor ?",
+      "style": "citizen",
+      "lang": "wo",
+      "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-un-passeport-numerise",
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/sacquitter-du-paiement-de-la-quittance-correspondant-au-timbre-du-passeport"
+      ]
+    },
+    {
+      "question": "conseil des ministres mercredi c quoi les decisions",
+      "style": "citizen",
+      "expected": [
+        "https://www.presidence.sn/fr/actualites/communique-du-conseil-des-ministres-du-mercredi-30-septembre-2026/"
+      ]
+    },
+    {
+      "question": "dernier cm",
+      "style": "citizen",
+      "expected": [
+        "https://www.presidence.sn/fr/actualites/communique-du-conseil-des-ministres-du-mercredi-30-septembre-2026/"
+      ]
+    },
+    {
+      "question": "Qu'a fait le ministère de la Justice pour Octobre rose ?",
+      "style": "citizen",
+      "expected": [
+        "https://justice.sec.gouv.sn/octobre-rose-au-ministere-de-la-justice-le-garde-des-sceaux-me-moussa-sarr-descend-sur-le-terrain-contre-le-cancer/"
       ]
     }
   ]

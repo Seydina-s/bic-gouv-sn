@@ -1,5 +1,12 @@
 import { createTranslator, fr } from "@bgs/i18n";
-import type { Block, Lang, NewsArticle, Procedure, Translation } from "@bgs/shared-types";
+import type {
+  Block,
+  Institution,
+  Lang,
+  NewsArticle,
+  Procedure,
+  Translation,
+} from "@bgs/shared-types";
 import { htmlToBlocks } from "../news/html-to-blocks";
 
 /*
@@ -126,6 +133,11 @@ function cut(content: Content, translation: Translation, sections: string[]): Pa
   }));
 }
 
+/** How an institution is named in the passages ("Ministère de la Justice"). */
+export function publisherLabel(institution: Institution): string {
+  return t(`institutions.${institution}`);
+}
+
 export function articlePassages(article: NewsArticle): Passage[] {
   return article.translations
     .filter(isQuotable)
@@ -133,7 +145,7 @@ export function articlePassages(article: NewsArticle): Passage[] {
     .map((passage) => ({
       ...passage,
       section: article.category,
-      publisher: t(`institutions.${article.publisher}`),
+      publisher: publisherLabel(article.publisher),
     }));
 }
 

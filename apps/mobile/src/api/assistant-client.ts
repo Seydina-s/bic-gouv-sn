@@ -30,8 +30,8 @@ function failureOf(status: number): AskFailure {
 export function createAssistantClient({
   baseUrl,
   fetchImpl = (input, init) => fetch(input, init),
-  // The model takes a few seconds; the API gives up after 20.
-  timeoutMs = 25_000,
+  // The model takes a few seconds; the API gives up after two attempts of 13.
+  timeoutMs = 35_000,
 }: ApiClientOptions) {
   return {
     ask: async (question: AssistantQuestion): Promise<AssistantReply> => {

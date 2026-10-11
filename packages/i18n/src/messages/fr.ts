@@ -527,9 +527,16 @@ export const fr = {
     sourceSpoken: "{kind} : {title}, {date}",
     generated: "Réponse rédigée automatiquement à partir de ces sources officielles.",
     notFound:
-      "Les sources officielles ne contiennent pas d'information sur ce sujet : je ne peux ni répondre, ni confirmer, ni démentir.",
+      "Désolé, je ne suis pas en mesure de répondre à cette question\u00a0: les publications officielles n'en parlent pas. Vous pouvez chercher dans les actualités ou écrire directement au Gouvernement.",
     outOfScope:
-      "Je réponds uniquement sur l'action du Gouvernement, l'actualité officielle et les démarches administratives.",
+      "Désolé, je réponds seulement sur l'action du Gouvernement, l'actualité officielle et les démarches administratives.",
+    courtesy: {
+      greeting:
+        "Bonjour\u00a0! Posez-moi vos questions sur l'action du Gouvernement, l'actualité officielle ou vos démarches administratives. Je réponds avec les sources officielles.",
+      thanks: "Avec plaisir. Avez-vous une autre question\u00a0?",
+      identity:
+        "Je suis l'assistant de Bic Gouv Sn. Je réponds à partir des seules publications officielles du Gouvernement (Présidence, Primature, ministères) et des démarches d'e-senegal.sn, en citant chaque source. Je peux aussi vérifier une information qui circule.",
+    },
     pausedTitle: "L'assistant fait une pause",
     pausedBody:
       "Le nombre de questions prévu pour ce mois est atteint. L'assistant sera de nouveau disponible le {date}. Merci de votre patience.",

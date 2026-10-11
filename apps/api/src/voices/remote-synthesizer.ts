@@ -60,10 +60,15 @@ export function remoteSynthesizer({
     throw new Error("voice server paths must be plain absolute paths");
   }
   // Batch mode: never a password prompt. The server's key must already be known
-  // (first connection made by hand, docs/guides/creer-le-serveur-ia.md).
+  // (first connection made by hand, docs/guides/creer-le-serveur-ia.md). Only our key
+  // is offered: other keys tried first would count as failed logins on the server.
   const options = [
     "-i",
     keyPath,
+    "-o",
+    "IdentitiesOnly=yes",
+    "-o",
+    "ConnectTimeout=30",
     "-o",
     "BatchMode=yes",
     "-o",

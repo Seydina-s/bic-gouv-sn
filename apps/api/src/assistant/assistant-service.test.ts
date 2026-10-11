@@ -4,6 +4,7 @@ import type { AuditJournal } from "../admin/audit-journal";
 import type { SettingStore } from "../admin/setting-store";
 import { MemoryKeyValueStore } from "../shared-state/key-value-store";
 import { AssistantService, DEFAULT_MONTHLY_LIMIT, monthOf } from "./assistant-service";
+import { SYSTEM_RULES } from "./grounded-answer";
 import type { Knowledge } from "./knowledge";
 import type { LlmProvider, LlmRequest } from "./llm-provider";
 import { PassageIndex } from "./passage-search";
@@ -45,7 +46,13 @@ function model(text = ANSWER): LlmProvider & { requests: LlmRequest[] } {
     requests,
     complete: (request) => {
       requests.push(request);
-      return Promise.resolve({ text, model: "test", inputTokens: 1000, outputTokens: 50 });
+      return Promise.resolve({
+        text,
+        model: "test",
+        inputTokens: 1000,
+        outputTokens: 50,
+        costMicrodollars: 1250,
+      });
     },
   };
 }
@@ -61,7 +68,11 @@ function memorySettings(): SettingStore {
   };
 }
 
-function service(llm: LlmProvider | null, now = Date.parse("2026-10-07T10:00:00Z")) {
+function service(
+  llm: LlmProvider | null,
+  now = Date.parse("2026-10-07T10:00:00Z"),
+  wolofLlm: LlmProvider | null = null,
+) {
   const appended: AuditInput[] = [];
   const journal = {
     append: (input: AuditInput) => {
@@ -73,6 +84,7 @@ function service(llm: LlmProvider | null, now = Date.parse("2026-10-07T10:00:00Z
   let time = now;
   const assistant = new AssistantService({
     llm,
+    wolofLlm,
     knowledge: { read: () => Promise.resolve(knowledge) },
     state: new MemoryKeyValueStore(() => time),
     settings: memorySettings(),
@@ -92,6 +104,16 @@ function service(llm: LlmProvider | null, now = Date.parse("2026-10-07T10:00:00Z
 const question = { question: "Quand ouvre le port ?", lang: "fr", mode: "ask" } as const;
 
 describe("the assistant service", () => {
+  it("answers in Wolof with the model chosen for Wolof, in French with the usual one", async () => {
+    const french = model();
+    const wolof = model();
+    const { assistant } = service(french, undefined, wolof);
+    await assistant.answer(question);
+    await assistant.answer({ ...question, lang: "wo" });
+    expect(french.requests.map((request) => request.system)).toEqual([SYSTEM_RULES]);
+    expect(wolof.requests.at(-1)?.system).toBe(SYSTEM_RULES);
+  });
+
   it("answers with each official page once, and the procedure's slug to open it", async () => {
     const { assistant } = service(model());
     const { reply, problem } = await assistant.answer(question);
@@ -110,6 +132,8 @@ describe("the assistant service", () => {
       monthlyLimit: DEFAULT_MONTHLY_LIMIT,
       inputTokens: 1000,
       outputTokens: 50,
+      // What the call cost at its model's price, summed over the month.
+      costUsd: 0.00125,
       configured: true,
     });
   });
@@ -121,13 +145,14 @@ describe("the assistant service", () => {
     expect((await assistant.usage()).configured).toBe(false);
   });
 
-  it("does not count a question the base has nothing for (no model call)", async () => {
+  it("counts a question once, even when it is rephrased before searching", async () => {
     const llm = model();
     const { assistant } = service(llm);
+    // No word of it is in the base: rephrased (one call), then nothing found.
     const { reply } = await assistant.answer({ ...question, question: "aéroport lointain" });
     expect(reply.status).toBe("not_found");
-    expect(llm.requests).toHaveLength(0);
-    expect((await assistant.usage()).questions).toBe(0);
+    expect(llm.requests).toHaveLength(1);
+    expect((await assistant.usage()).questions).toBe(1);
   });
 
   it("pauses past the monthly limit until the first day of next month", async () => {

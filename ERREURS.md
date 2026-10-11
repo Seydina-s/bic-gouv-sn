@@ -266,3 +266,46 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : torchaudio n'était pas déclaré. Il arrivait par une dépendance de parler-tts, en version 2.11 depuis PyPI (version pour carte graphique), alors que torch était en 2.14.1 sans carte graphique. Les deux ne se chargent ensemble que par hasard sous Windows.
 - **Correctif** : torch et torchaudio sont déclarés et figés tous deux en 2.11.0, depuis la source « sans carte graphique » (`services/voices/pyproject.toml`, `uv.lock`), puis vérifiés sur le serveur.
 - **Prévention** : une bibliothèque compilée qui dépend d'une autre (torchaudio de torch) est déclarée et figée à la même version, depuis la même source ; l'installation est essayée sur le système du serveur, pas seulement sur l'ordinateur de développement.
+
+## 10/10/2026 — Rattrapage wolof arrêté net par une coupure de connexion
+
+- **Ce qui s'est passé** : vers 19 h 30, la connexion internet de l'ordinateur a flanché (paquets perdus, GitHub injoignable). La liaison avec le serveur des voix a été coupée, et toute la commande d'enregistrement s'est arrêtée.
+- **Cause racine** : une erreur de l'appel aux voix, connexion comprise, remontait jusqu'en haut de la commande. Pour un traitement qui dure des jours, une coupure passagère est pourtant normale. De plus, ssh proposait aussi les autres clés de l'ordinateur, que le serveur peut compter comme des connexions ratées et bloquer.
+- **Correctif** :
+  - un groupe dont l'appel échoue est réessayé après 1, 2, 5 puis 10 minutes, et la commande ne s'arrête qu'après 5 échecs de suite ;
+  - chaque nouvel essai est écrit dans le journal ;
+  - ssh ne propose plus que notre clé (`IdentitiesOnly`) et attend 30 secondes au plus pour se connecter.
+  
+  Fichiers : `apps/api/src/voices/recordings.ts`, `remote-synthesizer.ts`, `cli/voices.ts`.
+- **Prévention** : tests « réessaie un groupe après une coupure » et « s'arrête quand les voix restent injoignables ». Règle : tout traitement long qui dépend du réseau réessaie avec des attentes croissantes au lieu de s'arrêter à la première erreur.
+
+## 11/10/2026 — L'assistant refusait des questions simples depuis l'arrivée des ministères
+
+- **Ce qui s'est passé** : l'utilisateur a constaté des refus sur des questions de base. Une batterie de 56 questions posées au vrai assistant l'a confirmé :
+  - refus : « le président il était où cette semaine », les actualités du ministère de l'Intérieur, « le DG actuel du BIC Gouv », « Bonjour », « Merci » ;
+  - réponses contradictoires : « Qui est le Premier ministre ? » donnait M. Lo, « c ki le premier ministre » donnait M. Sonko (2025) ;
+  - un Conseil du 30 septembre dit « de cette semaine » le 11 octobre.
+- **Cause racine** :
+  - pour toute question d'actualité, la recherche ajoutait d'office les 5 articles les plus récents de toute la base. Avec la Présidence seule, c'était utile ; depuis les ministères, ce sont des articles sans rapport (ITIE, Octobre rose…), qui occupaient 5 des 8 extraits donnés au modèle ;
+  - les questions « qui occupe ce poste » ne favorisaient pas les textes récents ;
+  - l'institution citée n'orientait pas la recherche ; les abréviations (ki, DG, BIC) et les fautes de frappe n'étaient pas comprises ;
+  - une question en wolof ne cherchait que dans les textes wolof ;
+  - le modèle calculait lui-même les bornes de la semaine ;
+  - « Bonjour » et « Merci » étaient envoyés au modèle comme des questions.
+  
+  Le banc d'essai, centré sur les refus d'inventer, ne mesurait pas les refus à tort.
+- **Correctif** :
+  - articles récents favorisés **parmi ceux du sujet** ;
+  - poids de la date pour les questions de poste ;
+  - priorité à l'institution citée ;
+  - abréviations et sigles complétés, fautes corrigées sur les mots longs ;
+  - wolof cherché aussi en français ;
+  - dates de la semaine données au modèle ;
+  - accueil, remerciements et présentation traités dans l'app ;
+  - message « Désolé, je ne suis pas en mesure de répondre… » suivi des solutions.
+  
+  Fichiers : `apps/api/src/assistant/retrieval.ts`, `question-words.ts`, `passage-search.ts`, `grounded-answer.ts`, `apps/mobile/src/features/assistant/small-talk.ts`.
+- **Prévention** :
+  - 13 questions « citoyen » (abrégées, avec fautes, en wolof) ajoutées au banc d'essai de recherche, à mesurer avant chaque changement ;
+  - tests « jamais les articles récents d'un autre sujet », « l'institution citée d'abord », « le plus récent titulaire d'un poste d'abord » ;
+  - règle : quand la base change de taille ou de nature (nouvelles sources), repasser le banc d'essai de l'assistant.
