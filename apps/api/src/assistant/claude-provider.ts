@@ -61,6 +61,7 @@ export class ClaudeProvider implements LlmProvider {
         // by Anthropic, they cost a tenth. Counted at full price below (prudent).
         system: [{ type: "text", text: request.system, cache_control: { type: "ephemeral" } }],
         messages: [{ role: "user", content: request.user }],
+        thinking: noThinkingFirst(this.model),
       }),
     });
     if (!response.ok) {
@@ -80,6 +81,16 @@ export class ClaudeProvider implements LlmProvider {
       outputTokens: usage.output_tokens,
     };
   }
+}
+
+/**
+ * Short answers from given extracts: no thinking first. Newer models think by default,
+ * and their thinking used up the few tokens of an answer, which came back empty
+ * (11/10/2026, Haiku 5.5 and Sonnet 5.5 on trial). Sonnet 5.5 asks for "between_tools"
+ * to skip it (Anthropic's effort guide); the others accept "disabled".
+ */
+export function noThinkingFirst(model: string): { type: "disabled" | "between_tools" } {
+  return { type: model.startsWith("claude-sonnet-5-5") ? "between_tools" : "disabled" };
 }
 
 /** Failures that say nothing about Anthropic's health: they do not open the circuit. */
