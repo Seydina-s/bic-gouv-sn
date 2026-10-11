@@ -2,13 +2,18 @@ import { spawn } from "node:child_process";
 import { mkdir, rename } from "node:fs/promises";
 import { dirname } from "node:path";
 import { parseSynthesisResults } from "./python-synthesizer";
-import type { SynthesisResult, Synthesizer } from "./recordings";
+import type { SynthesisJob, SynthesisResult, Synthesizer } from "./recordings";
 
 /*
  * Our voices on the voice server (Hetzner, docs/guides/creer-le-serveur-ia.md): the
  * texts go there over SSH, services/voices reads them aloud, and the MP3 files come
  * back here, where the store and the media live. The server keeps no content: its
  * working folder is removed after each group.
+ *
+ * The reading runs on the server by itself (11/10/2026): until then it lived as long
+ * as one SSH connection, and stopped whenever this computer slept. This computer now
+ * starts it, then comes back every minute for what is ready, and hands each recording
+ * over as soon as it is copied; while it sleeps, the server goes on.
  */
 
 /** Runs a program with optional standard input; resolves with its standard output. */
@@ -24,11 +29,20 @@ export interface RemoteSynthesizerOptions {
   /** Where the server keeps the voice models. */
   models?: string;
   run?: Run;
+  /** Time between two looks at the server. */
+  pollMs?: number;
+  /** The server unreachable this long: the group is given up (and tried again). */
+  maxSilenceMs?: number;
+  wait?: (ms: number) => Promise<void>;
+  now?: () => number;
 }
 
 /** Plain absolute paths only: they are placed in a remote shell command. */
 const SAFE_PATH = /^\/[\w./-]+$/;
 const WORK_DIR = /^\/tmp\/bgs-voices-[\w]+$/;
+const RUNNING = "BGS-RUNNING";
+/** Copies of one recording tried before it is reported as failed. */
+const COPY_ATTEMPTS = 3;
 
 const runProgram: Run = (program, args, input) =>
   new Promise((resolve, reject) => {
@@ -55,6 +69,10 @@ export function remoteSynthesizer({
   project = "/home/voices/voices",
   models = "/home/voices/models",
   run = runProgram,
+  pollMs = 60_000,
+  maxSilenceMs = 6 * 60 * 60_000,
+  wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+  now = Date.now,
 }: RemoteSynthesizerOptions): Synthesizer {
   if (!SAFE_PATH.test(project) || !SAFE_PATH.test(models)) {
     throw new Error("voice server paths must be plain absolute paths");
@@ -78,7 +96,15 @@ export function remoteSynthesizer({
   ];
   const ssh = (command: string, input?: string) => run("ssh", [...options, host, command], input);
 
-  return async (jobs) => {
+  /** Copied next to its place, then moved: never a half file where the app looks. */
+  async function copyBack(dir: string, index: number, job: SynthesisJob): Promise<void> {
+    const partial = `${job.out}.part`;
+    await mkdir(dirname(job.out), { recursive: true });
+    await run("scp", ["-q", ...options, `${host}:${dir}/${String(index)}.mp3`, partial]);
+    await rename(partial, job.out);
+  }
+
+  return async (jobs, onResult) => {
     const dir = (await ssh("mktemp -d /tmp/bgs-voices-XXXXXXXX")).trim();
     if (!WORK_DIR.test(dir)) {
       throw new Error(`unexpected working folder on the voice server: ${dir}`);
@@ -86,38 +112,66 @@ export function remoteSynthesizer({
     try {
       const remoteJobs = jobs.map((job, index) => ({ ...job, out: `${dir}/${String(index)}.mp3` }));
       await ssh(`cat > ${dir}/jobs.json`, JSON.stringify(remoteJobs));
-      const results = parseSynthesisResults(
-        await ssh(`cd ${project} && .venv/bin/python synthesize.py ${dir}/jobs.json ${models}`),
-      );
-      const outById = new Map(jobs.map((job, index) => [job.id, { job, index }]));
-      const fetched: SynthesisResult[] = [];
-      for (const result of results) {
-        const known = outById.get(result.id);
-        if (known === undefined || !result.ok) {
-          fetched.push(result);
+      // Started apart from this connection: it goes on if this computer sleeps.
+      const pid = (
+        await ssh(
+          `cd ${project} && (nohup .venv/bin/python synthesize.py ${dir}/jobs.json ${models} > ${dir}/results.jsonl 2> ${dir}/voices.log < /dev/null & echo $!)`,
+        )
+      ).trim();
+      if (!/^\d+$/.test(pid)) {
+        throw new Error(`the voices did not start on the server: ${pid}`);
+      }
+      const indexOf = new Map(jobs.map((job, index) => [job.id, { job, index }]));
+      const settled = new Map<string, SynthesisResult>();
+      const copyFailures = new Map<string, number>();
+      let reachedAt = now();
+      for (;;) {
+        await wait(pollMs);
+        let state: string;
+        try {
+          // Running checked before reading: a result written meanwhile is read next time.
+          state = await ssh(
+            `if kill -0 ${pid} 2>/dev/null; then echo ${RUNNING}; fi; cat ${dir}/results.jsonl`,
+          );
+          reachedAt = now();
+        } catch (error) {
+          if (now() - reachedAt > maxSilenceMs) {
+            throw error;
+          }
           continue;
         }
-        try {
-          // Copied next to its place, then moved: never a half file where the app looks.
-          const partial = `${known.job.out}.part`;
-          await mkdir(dirname(known.job.out), { recursive: true });
-          await run("scp", [
-            "-q",
-            ...options,
-            `${host}:${dir}/${String(known.index)}.mp3`,
-            partial,
-          ]);
-          await rename(partial, known.job.out);
-          fetched.push(result);
-        } catch (error) {
-          fetched.push({
-            id: result.id,
-            ok: false,
-            error: `copy from the voice server failed: ${error instanceof Error ? error.message : String(error)}`,
-          });
+        for (const result of parseSynthesisResults(state)) {
+          const known = indexOf.get(result.id);
+          if (known === undefined || settled.has(result.id)) {
+            continue;
+          }
+          let outcome: SynthesisResult = result;
+          if (result.ok) {
+            try {
+              await copyBack(dir, known.index, known.job);
+            } catch (error) {
+              const failures = (copyFailures.get(result.id) ?? 0) + 1;
+              copyFailures.set(result.id, failures);
+              if (failures < COPY_ATTEMPTS) {
+                continue;
+              }
+              outcome = {
+                id: result.id,
+                ok: false,
+                error: `copy from the voice server failed: ${error instanceof Error ? error.message : String(error)}`,
+              };
+            }
+          }
+          settled.set(result.id, outcome);
+          await onResult?.(outcome);
+        }
+        const running = state.split("\n").some((line) => line.trim() === RUNNING);
+        const copyPending = [...copyFailures.keys()].some((id) => !settled.has(id));
+        if (!running && !copyPending) {
+          break;
         }
       }
-      return fetched;
+      return [...settled.values()];
     } finally {
       await ssh(`rm -rf ${dir}`).catch(() => undefined);
     }

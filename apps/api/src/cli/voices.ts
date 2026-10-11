@@ -59,9 +59,10 @@ try {
           models: resolveDataPath(".data/voices"),
           uv: process.env["UV_PATH"] ?? "uv",
         }),
-    // A Wolof reading takes about 20 minutes: one per group, so a cut connection
-    // loses one recording, never ten.
-    groupSize: lang === "wo" ? 1 : 10,
+    // The server reads a group by itself and each recording is kept as soon as it is
+    // back: 24 Wolof readings (about 8 hours) keep it busy through a night while this
+    // computer sleeps; French ones take about 30 seconds each.
+    groupSize: lang === "wo" ? 24 : 50,
     onProgress: (done, total) => {
       say(`  ${String(done)} / ${String(total)}`);
     },

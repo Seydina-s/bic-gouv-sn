@@ -309,3 +309,17 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
   - 13 questions « citoyen » (abrégées, avec fautes, en wolof) ajoutées au banc d'essai de recherche, à mesurer avant chaque changement ;
   - tests « jamais les articles récents d'un autre sujet », « l'institution citée d'abord », « le plus récent titulaire d'un poste d'abord » ;
   - règle : quand la base change de taille ou de nature (nouvelles sources), repasser le banc d'essai de l'assistant.
+
+## 10-11/10/2026 — Rattrapage wolof quasi arrêté la nuit (calcul lié à la liaison de l'ordinateur)
+
+- **Ce qui s'est passé** : du 10/10 vers 21 h au 11/10 vers 13 h, seuls 4 articles wolof ont été enregistrés au lieu d'une quarantaine.
+- **Cause racine** : la lecture tournait sur le serveur tant que durait la connexion SSH ouverte par l'ordinateur. Quand l'ordinateur s'est mis en veille, la connexion a été coupée, le calcul s'est arrêté avec elle, et plus rien n'est reparti avant le réveil. Défaut de conception de ma part, alors que le rattrapage durait des semaines.
+- **Correctif** :
+  - le serveur lit un lot (24 articles wolof, environ 8 heures) en arrière-plan, sans dépendre de la connexion ;
+  - l'ordinateur revient chaque minute chercher ce qui est prêt et range chaque enregistrement dès qu'il est copié ;
+  - après une coupure, seuls les articles non rangés sont relancés.
+  
+  Fichiers : `apps/api/src/voices/remote-synthesizer.ts`, `recordings.ts`, `cli/voices.ts`.
+- **Prévention** :
+  - tests « lit en arrière-plan et range chaque enregistrement », « attend tant que le serveur est injoignable », « ne relit que le reste après une coupure » ;
+  - règle : un traitement long confié à un serveur doit vivre sur ce serveur, pas dans une connexion ouverte depuis un poste qui peut s'éteindre.
