@@ -10,7 +10,12 @@ import { createPoliteHttp } from "../../lib/polite-http";
 import { plainLetters, sanitizeNested, unpublishable } from "../../lib/sanitize";
 import { articleContentHash } from "../../merge";
 import type { SourceArticleRef, SourceProvider } from "../source-provider";
-import { feedDays, parseDrupalArticle, parseDrupalListing } from "./drupal-parse";
+import {
+  feedDays,
+  parseDrupalArticle,
+  parseDrupalListing,
+  type DrupalLayout,
+} from "./drupal-parse";
 
 /*
  * Ministry sites built with Drupal 7: each section is listed page by page
@@ -36,6 +41,8 @@ export interface DrupalSite {
   feedPath?: string;
   /** The site's "Crawl-delay" (robots.txt), in milliseconds. */
   intervalMs: number;
+  /** Where the theme puts the text and photo, when not in Drupal's usual fields. */
+  layout?: DrupalLayout;
 }
 
 /** "/sites/default/files/styles/slider/public/a.jpg?itok=x" → the original file. */
@@ -156,7 +163,7 @@ export function createDrupalProvider(
     async fetchArticle(ref) {
       const sourceUrl = new URL(ref.slug, site.origin).href;
       const quarantine = (reason: string) => new QuarantineError(sourceUrl, reason);
-      const parsed = parseDrupalArticle(await page(sourceUrl));
+      const parsed = parseDrupalArticle(await page(sourceUrl), site.layout);
       if (parsed === null) {
         throw quarantine("no article in the page (site structure changed?)");
       }

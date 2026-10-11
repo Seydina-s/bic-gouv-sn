@@ -31,4 +31,13 @@ export const DRUPAL_MINISTRIES = {
     sections: [{ path: "/communique", articlePrefix: "/node/", category: "communiques" }],
     intervalMs: 1000,
   },
+  economie: {
+    institution: "economie",
+    origin: "https://www.economie.gouv.sn",
+    // Drupal 10: its listing shows its 20 newest articles, each at "/fr/blog/…", dated
+    // in the row (no other page, no sitemap); robots.txt asks no delay.
+    sections: [{ path: "/fr/actualites", articlePrefix: "/fr/blog/", category: "actualites" }],
+    layout: { body: { container: "whole-content", child: "content" }, image: "full-image" },
+    intervalMs: 1000,
+  },
 } as const satisfies Record<string, DrupalSite>;
