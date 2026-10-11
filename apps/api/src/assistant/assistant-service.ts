@@ -128,6 +128,8 @@ export class AssistantService {
     }
     const knowledge = await this.options.knowledge.read();
     let answer: GroundedAnswer;
+    // A question may call the model twice (a rephrasing, then the answer): counted once.
+    let counted: Promise<boolean> | null = null;
     try {
       answer = await answerQuestion(
         { ...question, today: new Date(time).toISOString().slice(0, 10) },
@@ -135,13 +137,14 @@ export class AssistantService {
           index: knowledge.index,
           meaning: this.meaning(),
           llm,
-          // Counted just before the model is called: atomic across instances, so
-          // the limit holds even when many people ask at the same moment.
-          call: async (operation) => {
-            if ((await this.add("questions", time, 1)) > limit) {
+          // Counted just before the model is first called: atomic across instances,
+          // so the limit holds even when many people ask at the same moment.
+          call: async (operation, signal) => {
+            counted ??= this.add("questions", time, 1).then((count) => count <= limit);
+            if (!(await counted)) {
               throw new QuotaReached();
             }
-            return this.options.call(operation);
+            return this.options.call(operation, signal);
           },
         },
       );

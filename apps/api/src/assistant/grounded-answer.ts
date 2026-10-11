@@ -5,6 +5,7 @@ import type { PassageIndex } from "./passage-search";
 import type { Passage } from "./passages";
 import { fuseRankings, type EmbeddingProvider, type VectorIndex } from "./hybrid-search";
 import type { ScoredPassage } from "./passage-search";
+import { needsRephrasing, rephraseQuestion } from "./question-rephrase";
 import { widenQuestion } from "./question-words";
 import { retrievePassages, searchedLanguages } from "./retrieval";
 
@@ -190,7 +191,7 @@ export interface AnswerDependencies {
   meaning?: { vectors: VectorIndex; embedder: EmbeddingProvider } | null;
   llm: LlmProvider;
   /** Deadline, circuit breaker and retries of the model calls (@bgs/resilience). */
-  call: <T>(operation: (signal: AbortSignal) => Promise<T>) => Promise<T>;
+  call: <T>(operation: (signal: AbortSignal) => Promise<T>, signal?: AbortSignal) => Promise<T>;
 }
 
 /** Errors of the model call (deadline, open circuit) are left to the caller. */
@@ -203,21 +204,41 @@ export async function answerQuestion(
   }: { question: string; lang: Lang; mode?: AssistantMode; today?: string },
   { index, meaning = null, llm, call }: AnswerDependencies,
 ): Promise<GroundedAnswer> {
+  // Wolof in any spelling, or words found nowhere: searched with a French rephrasing too.
+  const rephrased = needsRephrasing(question, lang, index)
+    ? await rephraseQuestion(question, llm, call)
+    : { query: null, usage: null };
+  const searched = rephrased.query === null ? question : `${question} ${rephrased.query}`;
   const given = retrievePassages(
     index,
-    question,
+    searched,
     lang,
     today,
-    await closestInMeaning(question, lang, meaning),
+    await closestInMeaning(searched, lang, meaning),
   );
   if (given.length === 0) {
-    return refused("not_found", null, null);
+    return refused("not_found", null, rephrased.usage);
   }
   const request = {
     system: SYSTEM_RULES,
     user: userMessage(question, lang, given, mode, today),
     maxOutputTokens: MAX_OUTPUT_TOKENS,
   };
-  const response = await call((signal) => llm.complete(request, signal));
-  return checkAnswer(response, given);
+  const answer = checkAnswer(await call((signal) => llm.complete(request, signal)), given);
+  return { ...answer, usage: addedUsage(answer.usage, rephrased.usage) };
+}
+
+/** Both model calls of a question are counted in the month's use and cost. */
+function addedUsage(
+  answer: GroundedAnswer["usage"],
+  rephrase: GroundedAnswer["usage"],
+): GroundedAnswer["usage"] {
+  if (answer === null || rephrase === null) {
+    return answer ?? rephrase;
+  }
+  return {
+    ...answer,
+    inputTokens: answer.inputTokens + rephrase.inputTokens,
+    outputTokens: answer.outputTokens + rephrase.outputTokens,
+  };
 }

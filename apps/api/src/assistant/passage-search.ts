@@ -43,6 +43,8 @@ const QUESTION_WORDS: ReadonlySet<string> = new Set([
 
 /** Shorter words are left as typed: one letter changes them into other words. */
 const MIN_CORRECTED_LENGTH = 5;
+/** Shorter unknown words ("c", "pr") are shortcuts or noise, not a sign of another language. */
+const MIN_UNKNOWN_LENGTH = 3;
 
 /** Whether `a` becomes `b` in at most `max` letters added, removed or changed. */
 export function withinEdits(a: string, b: string, max: number): boolean {
@@ -159,6 +161,12 @@ class LanguageIndex {
     return best;
   }
 
+  /** Whether some passage contains the word, as typed or within a slip. */
+  knows(word: string): boolean {
+    const stemmed = this.stem(word);
+    return this.postings.has(stemmed) || this.nearestKnown(stemmed) !== null;
+  }
+
   search(terms: ReadonlySet<string>, limit: number): ScoredPassage[] {
     const averageLength = this.totalLength / Math.max(this.count, 1);
     const scores = new Map<number, number>();
@@ -263,7 +271,20 @@ export class PassageIndex {
     if (index === undefined) {
       return [];
     }
-    const asked = searchTerms(query).filter((term) => lang !== "fr" || !QUESTION_WORDS.has(term));
-    return index.search(new Set(asked), limit);
+    return index.search(new Set(this.askedTerms(query, lang)), limit);
+  }
+
+  /** Words of the query no passage of `lang` contains, even with a slip ("khamna"). */
+  unknownWords(query: string, lang: Lang): string[] {
+    const index = this.byLang.get(lang);
+    return index === undefined
+      ? []
+      : this.askedTerms(query, lang).filter(
+          (term) => term.length >= MIN_UNKNOWN_LENGTH && !index.knows(term),
+        );
+  }
+
+  private askedTerms(query: string, lang: Lang): string[] {
+    return searchTerms(query).filter((term) => lang !== "fr" || !QUESTION_WORDS.has(term));
   }
 }
