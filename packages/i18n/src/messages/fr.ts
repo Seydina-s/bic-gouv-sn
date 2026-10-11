@@ -78,6 +78,11 @@ export const fr = {
     numerique: "Ministère des Télécommunications et du Numérique",
     infrastructures: "Ministère des Infrastructures",
     "affaires-etrangeres": "Ministère de l'Intégration africaine et des Affaires étrangères",
+    economie: "Ministère de l'Économie, du Plan et de la Coopération",
+    "fonction-publique":
+      "Ministère de la Fonction publique, du Travail et de la Réforme du service public",
+    famille: "Ministère de la Famille, de l'Action sociale et des Solidarités",
+    education: "Ministère de l'Éducation nationale",
   },
   /** Sections of the official sites, keyed by their slug. */
   categories: {

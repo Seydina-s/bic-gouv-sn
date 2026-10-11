@@ -176,3 +176,33 @@ describe("Foreign Affairs site (Drupal 9)", () => {
     expect(createdDay("31/02/2026")).toBeNull();
   });
 });
+
+describe("Economy site (Drupal 10, its own theme)", () => {
+  const SITE = "https://www.economie.gouv.sn";
+  const LAYOUT = DRUPAL_MINISTRIES.economie.layout;
+
+  it("lists the newest articles with the day each row shows", () => {
+    const listing = parseDrupalListing(page("economie-list.html"), SITE, (path) =>
+      path.startsWith("/fr/blog/"),
+    );
+    expect(listing.items[0]).toMatchObject({
+      path: "/fr/blog/indice-2025-de-lindustrialisation-le-senegal-1er-en-zone-uemoa",
+      publishedOn: "2026-06-01",
+    });
+    expect(listing.lastPageIndex).toBe(0);
+  });
+
+  it("reads the text where the theme puts it, not the sidebar's icons", () => {
+    const article = parseDrupalArticle(page("economie-article.html"), LAYOUT);
+    expect(article?.title).toBe(
+      "Indice 2025 de l’industrialisation : le Sénégal 1er en zone Uemoa",
+    );
+    expect(article?.bodyHtml).toContain("huitième place");
+    expect(article?.bodyHtml).not.toContain("social-icons");
+    expect(article?.imagePath).toBe("/sites/default/files/2026-06/energie.png");
+    // Without the theme's layout, the first "body" field is the sidebar's.
+    expect(parseDrupalArticle(page("economie-article.html"))?.bodyHtml).not.toContain(
+      "huitième place",
+    );
+  });
+});

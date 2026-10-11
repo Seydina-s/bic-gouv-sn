@@ -16,6 +16,10 @@ const KNOWN = [
   "numerique",
   "infrastructures",
   "affaires-etrangeres",
+  "economie",
+  "fonction-publique",
+  "famille",
+  "education",
 ] as const;
 
 type KnownInstitution = (typeof KNOWN)[number];

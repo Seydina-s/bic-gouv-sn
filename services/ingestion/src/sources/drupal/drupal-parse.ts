@@ -54,6 +54,23 @@ function rowOf(link: Element, isArticle: (path: string) => boolean, origin: stri
   return row;
 }
 
+/**
+ * The day a listing row shows: Drupal 7's "views-field-created" ("8 août 2026"), or a
+ * `<time datetime>` (Drupal 10, economie.gouv.sn); null when it shows none.
+ */
+function rowDay(row: Element): string | null {
+  const created = findByClass([row], "views-field-created");
+  if (created !== null) {
+    return frenchDate(DomUtils.textContent(created));
+  }
+  const time = DomUtils.findOne(
+    (element) => element.name === "time" && element.attribs["datetime"] !== undefined,
+    [row],
+  );
+  const day = /^(\d{4}-\d{2}-\d{2})T/.exec(time?.attribs["datetime"] ?? "")?.[1];
+  return day ?? null;
+}
+
 export function parseDrupalListing(
   html: string,
   origin: string,
@@ -69,13 +86,11 @@ export function parseDrupalListing(
       continue;
     }
     const row = rowOf(link, isArticle, origin);
-    const created = findByClass([row], "views-field-created");
     const image = DomUtils.findOne((element) => element.name === "img", [row]);
     const known = items.get(path);
     items.set(path, {
       path,
-      publishedOn:
-        known?.publishedOn ?? (created === null ? null : frenchDate(DomUtils.textContent(created))),
+      publishedOn: known?.publishedOn ?? rowDay(row),
       coverPath: known?.coverPath ?? image?.attribs["src"] ?? null,
     });
   }
@@ -118,16 +133,39 @@ function bodyOf(nodes: ChildNode[]): Element | null {
     : findByClass(legacy.children, "field-items");
 }
 
+/**
+ * Where a theme puts the text and photo, when not in Drupal's usual fields
+ * (economie.gouv.sn: its own "whole-content > content" and "full-image" blocks, its
+ * "body" fields holding the sidebar's social icons).
+ */
+export interface DrupalLayout {
+  /** The block holding the text: the first child of `container` with class `child`. */
+  body: { container: string; child: string };
+  /** The block holding the article's photo. */
+  image: string;
+}
+
+function themedBody(nodes: ChildNode[], layout: DrupalLayout): Element | null {
+  const container = findByClass(nodes, layout.body.container);
+  return (
+    container?.children.find(
+      (node): node is Element => isTag(node) && hasClass(node, layout.body.child),
+    ) ?? null
+  );
+}
+
 /** The article of a page: title from the page head, text from its "body" field. */
-export function parseDrupalArticle(html: string): DrupalArticle | null {
+export function parseDrupalArticle(html: string, layout?: DrupalLayout): DrupalArticle | null {
   const document = parseDocument(html);
   const head = DomUtils.findOne((element) => element.name === "title", document.children);
   const title = (head === null ? "" : DomUtils.textContent(head)).split(" | ")[0]?.trim() ?? "";
-  const body = bodyOf(document.children);
+  const body =
+    layout === undefined ? bodyOf(document.children) : themedBody(document.children, layout);
   if (body === null) {
     return null;
   }
   const imageField =
+    (layout === undefined ? null : findByClass(document.children, layout.image)) ??
     findByClass(document.children, "field-name-field-image") ??
     findByClass(document.children, "field--name-field-image");
   const image =

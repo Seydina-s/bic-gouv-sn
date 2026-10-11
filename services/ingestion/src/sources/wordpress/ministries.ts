@@ -61,4 +61,11 @@ export const WORDPRESS_MINISTRIES = {
     // Its REST answers start with the page builder's style blocks (parseRestBody).
     cleanup: NO_EXTRA,
   },
+  famille: {
+    institution: "famille",
+    origin: "https://femme.gouv.sn",
+    // One real article on 11/10/2026; the theme's demonstration posts are in English and
+    // set aside by the quality gate. Followed so that its next articles come in.
+    cleanup: NO_EXTRA,
+  },
 } as const satisfies Record<string, WordpressSite>;

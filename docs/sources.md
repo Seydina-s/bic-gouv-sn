@@ -111,29 +111,44 @@ Règles communes déplacées dans le nettoyage de toutes les sources : lien vers
 
 ministeredesinfrastructures.sn lit ses actualités publiées dans une base Supabase (table `actualites` : titre, texte, photo, galerie, et des versions anglaise et wolof pour certains articles), avec la clé publique que reçoit tout navigateur dans le code du site. Notre lecteur relit cette clé dans le code du site à chaque démarrage : **elle n'est jamais copiée dans notre dépôt**. Seules les lignes publiées sont lues. Texte brut découpé en paragraphes. 6 articles depuis l'ouverture du site (août 2026), 6 sur 6 à l'essai.
 
-### Éducation nationale
+### Éducation nationale (11/10/2026)
 
-education.sn (Next.js) lit une interface interne non ouverte au public (cms.education.sn). Son dernier article date du 30/04/2026 : à revoir s'il reprend.
+education.sn (Next.js) : sa page d'accueil est construite avec ses 9 derniers articles complets (titre, jour, texte, photo), présents dans les données de la page (`__NEXT_DATA__`, venant de son système cms.education.sn). Notre lecteur les lit là, sans appeler cms.education.sn ; chaque article reste relié à sa page `www.education.sn/posts/<nom>`. Dernier article le 30/04/2026 ; suivi en temps réel pour la reprise. Essai : 9 sur 9, photos comprises.
+
+### Économie, Plan et Coopération (11/10/2026)
+
+economie.gouv.sn (Drupal 10, thème propre) : la page `/fr/actualites` montre ses 20 derniers articles (`/fr/blog/<nom>`), datés dans la liste par `<time datetime>` ; ni pages suivantes ni plan du site. Le texte est dans le bloc « whole-content > content » du thème (les champs « body » de la page sont ceux de la barre latérale : icônes, fil Twitter). Dernier article le 01/06/2026. Essai : 20 sur 20. (Le ministère chargé de l'Économie, des Finances et du Plan, finances.gouv.sn, reste à revoir : voir le tableau.)
+
+### Fonction publique, Travail et Réforme du service public (11/10/2026)
+
+fonctionpublique.gouv.sn (SPIP) : son flux `spip.php?page=backend` porte ses 10 derniers articles **entiers** (titre, jour, texte) ; le flux est à la fois la liste et l'article, la page du site sert de lien vers la source. Titres en lettres décoratives Unicode ramenés en lettres ordinaires. Dernier article le 08/06/2026. Essai : 10 sur 10.
+
+### Famille, Action sociale et Solidarités (11/10/2026)
+
+femme.gouv.sn (WordPress, interface ouverte) : un seul vrai article (06/01/2026) ; les autres sont les articles de démonstration du thème, en anglais, écartés par le contrôle de qualité. Suivi en temps réel pour ses prochains articles.
+
+### Règle pour les sites figés (11/10/2026)
+
+Un site dont le dernier article est **antérieur au gouvernement en place** (avril 2024) n'est pas collecté : ses actualités sont celles d'un autre gouvernement, souvent d'un ministère au périmètre différent, et les afficher sous le nom du ministère actuel tromperait. Un site actif depuis, même ralenti, est collecté et suivi.
 
 ### Ministères : sites à revoir (non collectés pour l'instant)
 
 | Ministère | Site | Constat du 09/10/2026 |
 |---|---|---|
-| Économie, Plan et Coopération | economie.gouv.sn | dernier article 20/05/2026 ; Drupal, collectable dès qu'il publie de nouveau |
-| Famille, Action sociale et Solidarités | femme.gouv.sn | un seul vrai article (06/01/2026) ; les autres sont des articles de démonstration du thème, en anglais |
-| Finances et Budget | finances.gouv.sn | relance du 09/10 : le nom se résout (41.208.146.4) mais le serveur ne répond ni en https ni en http (panne ou filtrage) ; à retenter depuis le serveur d'IA |
+| Économie, Finances et Plan | finances.gouv.sn | relance du 11/10 : **répond depuis notre serveur en Finlande, pas depuis le Sénégal** (filtrage selon l'origine) ; collecte possible en passant par le serveur, à décider (sécurité) |
 | Budget | budget.sec.gouv.sn | site de la Direction générale du Budget : documents budgétaires (lois de finances, rapports d'exécution), **pas d'actualités** ; certificat incomplet (le maillon intermédiaire manque) |
-| Fonction publique, Travail et Réforme du service public | fonctionpublique.gouv.sn | relance du 09/10 : répond ; SPIP, flux `spip.php?page=backend` (10 articles), dernier article le 08/06/2026, publication irrégulière ; titres écrits en caractères décoratifs Unicode (à ramener en lettres ordinaires, NFKC) ; `robots.txt` absent |
 | Microfinance et Économie sociale et solidaire | microfinance-ess.gouv.sn | certificat TLS expiré |
-| Transports terrestres et aériens | mittd.gouv.sn | certificat TLS ne correspondant pas au site |
+| Transports terrestres et aériens | mittd.gouv.sn | certificat TLS ne correspondant pas au site (relance du 11/10 : inchangé) ; bindu-mitta.sec.gouv.sn est un portail de rendez-vous (permis), pas d'actualités |
 | Urbanisme, Collectivités territoriales et Aménagement | urbanisme.gouv.sn ; decentralisation.gouv.sn | dernier article 05/2024 ; certificat invalide |
 | Intégration africaine et Affaires étrangères | diplomatie.gouv.sn | **collecté depuis le 10/10** : la page d'accueil est figée en 2024, mais la rubrique `/communique` est active (dernier communiqué le 08/10/2026) ; Drupal 9, communiqués à `/node/<numéro>`, datés sur leur page (« jeu 08/10/2026 - 17:35 ») ; 20 communiqués |
-| Jeunesse et Sports | mjsc.gouv.sn | site de l'ancien ministère (Jeunesse, Sports et Culture), dernier article 06/2025 |
+| Jeunesse et Sports | mjsc.gouv.sn ; sports.gouv.sn ; jeunesse.gouv.sn | relance du 11/10 : sports.gouv.sn (WordPress, flux RSS) s'arrête le 13/01/2024, jeunesse.gouv.sn le 14/06/2022 : actualités d'avant le gouvernement en place, non collectées (règle des sites figés) |
 | Culture, Artisanat et Tourisme | culture.gouv.sn | site de l'ancien Secrétariat d'État, dernier article 06/2024 ; **nouveau site actif repéré le 09/10 : tourisme.gouv.sn** (et mcat.gouv.sn), à collecter |
 | Environnement et Transition écologique | environnement.gouv.sn | site fermé par mot de passe (en construction) |
-| Mines et Géologie | — | aucun site trouvé (minesgeologie.sec.gouv.sn n'existe plus) |
+| Mines et Géologie | www.minesgeologie.gouv.sn | relance du 11/10 : site WordPress trouvé, actualités publiées comme « événements », la dernière le 28/12/2023 ; interface et flux fermés ; non collecté (règle des sites figés) |
 | Communication et Relations avec les Institutions | — | aucun site trouvé |
 | Secrétariat général du Gouvernement | — | aucun site trouvé |
+| Élevage (ministre délégué) | elevage.sec.gouv.sn | relance du 11/10 : ne répond pas ; l'Élevage est rattaché au ministère de l'Agriculture, déjà collecté |
+| Budget (ministre délégué) | budget.sec.gouv.sn | documents budgétaires, pas d'actualités |
 
 ### Réseaux sociaux
 

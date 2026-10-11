@@ -1,6 +1,9 @@
 import { institutionSchema, type Institution } from "@bgs/shared-types";
 import { createDrupalProvider } from "./drupal/drupal-provider";
 import { DRUPAL_MINISTRIES } from "./drupal/ministries";
+import { createEducationProvider } from "./education/education-provider";
+import { createFeedProvider } from "./feed/feed-provider";
+import { FEED_MINISTRIES } from "./feed/ministries";
 import { createInfrastructuresProvider } from "./infrastructures/infrastructures-provider";
 import { createInterieurProvider } from "./interieur/interieur-provider";
 import { createMesriProvider } from "./mesri/mesri-provider";
@@ -29,6 +32,10 @@ export const NEWS_SOURCES: Readonly<Record<Institution, () => SourceProvider>> =
   sante: () => createDrupalProvider(DRUPAL_MINISTRIES.sante),
   "forces-armees": () => createDrupalProvider(DRUPAL_MINISTRIES["forces-armees"]),
   "affaires-etrangeres": () => createDrupalProvider(DRUPAL_MINISTRIES["affaires-etrangeres"]),
+  economie: () => createDrupalProvider(DRUPAL_MINISTRIES.economie),
+  "fonction-publique": () => createFeedProvider(FEED_MINISTRIES["fonction-publique"]),
+  famille: () => createWordpressProvider(WORDPRESS_MINISTRIES.famille),
+  education: () => createEducationProvider(),
   "emploi-formation": () => createWordpressProvider(WORDPRESS_MINISTRIES["emploi-formation"]),
 };
 

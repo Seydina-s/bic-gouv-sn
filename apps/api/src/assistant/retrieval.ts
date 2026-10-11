@@ -104,6 +104,16 @@ const NAMED: Readonly<Record<Institution, { cues: readonly string[]; ministry: b
     cues: [" affaires etrangeres ", " integration africaine ", " diplomatie "],
     ministry: true,
   },
+  economie: { cues: [" economie ", " plan ", " cooperation "], ministry: true },
+  "fonction-publique": {
+    cues: [" fonction publique ", " travail ", " reforme du service public "],
+    ministry: true,
+  },
+  famille: { cues: [" famille ", " action sociale ", " solidarites ", " femme "], ministry: true },
+  education: {
+    cues: [" education nationale ", " education ", " ecole ", " ecoles "],
+    ministry: true,
+  },
 };
 
 export interface QuestionIntent {

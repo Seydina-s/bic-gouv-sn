@@ -25,6 +25,10 @@ export const INSTITUTIONS = [
   "numerique",
   "infrastructures",
   "affaires-etrangeres",
+  "economie",
+  "fonction-publique",
+  "famille",
+  "education",
 ] as const;
 
 export const institutionSchema = z.enum(INSTITUTIONS);
@@ -112,6 +116,23 @@ export const INSTITUTION_SITES: Readonly<Record<Institution, InstitutionSite>> =
   "affaires-etrangeres": {
     pageHosts: ["www.diplomatie.gouv.sn", "diplomatie.gouv.sn"],
     mediaHosts: ["www.diplomatie.gouv.sn", "diplomatie.gouv.sn"],
+  },
+  economie: {
+    pageHosts: ["www.economie.gouv.sn", "economie.gouv.sn"],
+    mediaHosts: ["www.economie.gouv.sn", "economie.gouv.sn"],
+  },
+  "fonction-publique": {
+    pageHosts: ["www.fonctionpublique.gouv.sn", "fonctionpublique.gouv.sn"],
+    mediaHosts: ["www.fonctionpublique.gouv.sn", "fonctionpublique.gouv.sn"],
+  },
+  famille: {
+    pageHosts: ["femme.gouv.sn", "www.femme.gouv.sn"],
+    mediaHosts: ["femme.gouv.sn", "www.femme.gouv.sn"],
+  },
+  education: {
+    pageHosts: ["www.education.sn", "education.sn"],
+    // Photos are served by the site's content system.
+    mediaHosts: ["cms.education.sn", "www.education.sn"],
   },
 };
 
