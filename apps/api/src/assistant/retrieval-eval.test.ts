@@ -41,6 +41,7 @@ describe("rankOf", () => {
     const result = rankOf(byWordsOnly(index), {
       question: "le port",
       style: "direct",
+      lang: "fr",
       expected: [url("b")],
     });
     expect(result.rank).toBe(2);
@@ -50,6 +51,7 @@ describe("rankOf", () => {
     const result = rankOf(byWordsOnly(index), {
       question: "le port",
       style: "direct",
+      lang: "fr",
       expected: [url("c")],
     });
     expect(result.rank).toBeNull();
@@ -58,7 +60,12 @@ describe("rankOf", () => {
 
 describe("summarize", () => {
   it("counts the share within each rank and the mean reciprocal rank", () => {
-    const testCase = { question: "q", style: "direct" as const, expected: [url("a")] };
+    const testCase = {
+      question: "q",
+      style: "direct" as const,
+      lang: "fr" as const,
+      expected: [url("a")],
+    };
     const results: CaseResult[] = [
       { testCase, rank: 1 },
       { testCase, rank: 4 },

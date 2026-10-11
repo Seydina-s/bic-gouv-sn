@@ -1,3 +1,4 @@
+import { langSchema, type Lang } from "@bgs/shared-types";
 import { z } from "zod";
 import type { PassageIndex } from "./passage-search";
 import type { Passage } from "./passages";
@@ -11,8 +12,13 @@ import type { Passage } from "./passages";
 
 export const retrievalCaseSchema = z.strictObject({
   question: z.string().min(3),
-  /** "direct" reuses the words of the source; "reformulated" asks in other words. */
-  style: z.enum(["direct", "reformulated"]),
+  /**
+   * "direct" reuses the words of the source; "reformulated" asks in other words;
+   * "citizen" is typed as people do (short, abbreviated, with slips, in Wolof).
+   */
+  style: z.enum(["direct", "reformulated", "citizen"]),
+  /** Language of the question; French when not given. */
+  lang: langSchema.default("fr"),
   expected: z.array(z.url({ protocol: /^https$/ })).min(1),
 });
 export type RetrievalCase = z.infer<typeof retrievalCaseSchema>;
@@ -41,16 +47,16 @@ export interface RetrievalSummary {
 }
 
 /** The passages a search finds for a question, best first. */
-export type Search = (question: string, depth: number) => readonly Passage[];
+export type Search = (question: string, depth: number, lang: Lang) => readonly Passage[];
 
 /** The search by words alone, the baseline. */
 export function byWordsOnly(index: PassageIndex): Search {
-  return (question, depth) =>
-    index.search(question, { lang: "fr", limit: depth }).map(({ passage }) => passage);
+  return (question, depth, lang) =>
+    index.search(question, { lang, limit: depth }).map(({ passage }) => passage);
 }
 
 export function rankOf(search: Search, testCase: RetrievalCase): CaseResult {
-  const found = search(testCase.question, DEPTH);
+  const found = search(testCase.question, DEPTH, testCase.lang);
   const pages = [...new Set(found.map((passage) => passage.sourceUrl))];
   const position = pages.findIndex((url) => testCase.expected.includes(url));
   return { testCase, rank: position < 0 ? null : position + 1 };
