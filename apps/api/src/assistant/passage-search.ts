@@ -41,6 +41,33 @@ const QUESTION_WORDS: ReadonlySet<string> = new Set([
   "lesquelles",
 ]);
 
+/** Shorter words are left as typed: one letter changes them into other words. */
+const MIN_CORRECTED_LENGTH = 5;
+
+/** Whether `a` becomes `b` in at most `max` letters added, removed or changed. */
+export function withinEdits(a: string, b: string, max: number): boolean {
+  let previous = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i += 1) {
+    const current = [i];
+    let rowBest = i;
+    for (let j = 1; j <= b.length; j += 1) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      const value = Math.min(
+        (previous[j] ?? Infinity) + 1,
+        (current[j - 1] ?? Infinity) + 1,
+        (previous[j - 1] ?? Infinity) + cost,
+      );
+      current.push(value);
+      rowBest = Math.min(rowBest, value);
+    }
+    if (rowBest > max) {
+      return false;
+    }
+    previous = current;
+  }
+  return (previous[b.length] ?? Infinity) <= max;
+}
+
 export interface ScoredPassage {
   passage: Passage;
   score: number;
@@ -108,11 +135,37 @@ class LanguageIndex {
     this.positionsByContent.delete(contentId);
   }
 
+  /**
+   * A word no passage contains, typed with a slip ("presidant", "pasport"): the known
+   * word within one letter (two for long words), the most common one when several.
+   */
+  private nearestKnown(word: string): string | null {
+    if (word.length < MIN_CORRECTED_LENGTH) {
+      return null;
+    }
+    const allowed = word.length >= 8 ? 2 : 1;
+    let best: string | null = null;
+    let bestCount = 0;
+    for (const [known, counts] of this.postings) {
+      if (
+        Math.abs(known.length - word.length) <= allowed &&
+        counts.size > bestCount &&
+        withinEdits(word, known, allowed)
+      ) {
+        best = known;
+        bestCount = counts.size;
+      }
+    }
+    return best;
+  }
+
   search(terms: ReadonlySet<string>, limit: number): ScoredPassage[] {
     const averageLength = this.totalLength / Math.max(this.count, 1);
     const scores = new Map<number, number>();
     for (const term of terms) {
-      const counts = this.postings.get(this.stem(term));
+      const stemmed = this.stem(term);
+      const known = this.postings.has(stemmed) ? stemmed : this.nearestKnown(stemmed);
+      const counts = known === null ? undefined : this.postings.get(known);
       if (counts === undefined) {
         continue;
       }
@@ -133,13 +186,15 @@ class LanguageIndex {
       });
   }
 
-  /** The opening passages of the newest contents, of one section when given. */
+  /** The opening passages of the newest contents, of one section or publisher when given. */
   latest({
     section,
+    publisher = null,
     contents,
     perContent,
   }: {
     section: string | null;
+    publisher?: string | null;
     contents: number;
     perContent: number;
   }): Passage[] {
@@ -147,6 +202,7 @@ class LanguageIndex {
       .map((positions) => positions.flatMap((position) => this.passages[position] ?? []))
       .filter((passages) => passages.length > 0)
       .filter((passages) => section === null || passages[0]?.section === section)
+      .filter((passages) => publisher === null || passages[0]?.publisher === publisher)
       .sort(([a], [b]) => (a === undefined || b === undefined ? 0 : byNewest(a, b)));
     return firsts.slice(0, contents).flatMap((passages) => passages.slice(0, perContent));
   }
@@ -190,10 +246,11 @@ export class PassageIndex {
     }
   }
 
-  /** The opening passages of the newest contents in `lang`, of one section when given. */
+  /** The opening passages of the newest contents in `lang`, of one section or publisher when given. */
   latest(options: {
     lang: Lang;
     section: string | null;
+    publisher?: string | null;
     contents: number;
     perContent: number;
   }): Passage[] {

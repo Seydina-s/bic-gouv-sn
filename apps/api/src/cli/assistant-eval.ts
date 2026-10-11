@@ -17,7 +17,9 @@ import {
   type CaseResult,
   type Search,
 } from "../assistant/retrieval-eval";
-import { retrievePassages } from "../assistant/retrieval";
+import { fuseRankings } from "../assistant/hybrid-search";
+import { widenQuestion } from "../assistant/question-words";
+import { retrievePassages, searchedLanguages } from "../assistant/retrieval";
 import { SemanticLayer } from "../assistant/semantic-layer";
 import { TransformersEmbedder } from "../assistant/transformers-embedder";
 import { loadConfig } from "../config";
@@ -67,7 +69,8 @@ async function main(): Promise<void> {
     ["Mots seuls", byWordsOnly(index)],
     [
       "Mots, date et rubrique",
-      (question, depth) => retrievePassages(index, question, "fr", today, null, { limit: depth }),
+      (question, depth, lang) =>
+        retrievePassages(index, question, lang, today, null, { limit: depth }),
     ],
   ];
   // --meaning: the search by meaning too, fused with several weights.
@@ -79,7 +82,7 @@ async function main(): Promise<void> {
     await semantic.update(passages);
     const vectors = semantic.current();
     const questions = await semantic.embedder.embed(
-      cases.map((testCase) => testCase.question),
+      cases.map((testCase) => widenQuestion(testCase.question)),
       "query",
       new AbortController().signal,
     );
@@ -90,7 +93,12 @@ async function main(): Promise<void> {
           testCase.question,
           vectors === null || vector === undefined
             ? []
-            : vectors.search(vector, { lang: "fr", limit: 60 }),
+            : fuseRankings(
+                searchedLanguages(testCase.lang).map((lang) =>
+                  vectors.search(vector, { lang, limit: 60 }),
+                ),
+                60,
+              ),
         ];
       }),
     );
@@ -101,8 +109,8 @@ async function main(): Promise<void> {
     for (const weight of [1, 2, 3]) {
       searches.push([
         `Mots + sens (poids ${String(weight)}), date et rubrique`,
-        (question, depth) =>
-          retrievePassages(index, question, "fr", today, meaningOf.get(question) ?? null, {
+        (question, depth, lang) =>
+          retrievePassages(index, question, lang, today, meaningOf.get(question) ?? null, {
             limit: depth,
             meaningWeight: weight,
           }),
@@ -116,8 +124,9 @@ async function main(): Promise<void> {
   const last = searches.at(-1)?.[1] ?? byWordsOnly(index);
   const results = cases.map((testCase) => rankOf(last, testCase));
   process.stdout.write(`\nDernière recherche mesurée :\n${report("Toutes", results)}\n`);
-  for (const style of ["direct", "reformulated"] as const) {
-    const label = style === "direct" ? "Mots de la source" : "Reformulées";
+  const labels = { direct: "Mots de la source", reformulated: "Reformulées", citizen: "Citoyens" };
+  for (const style of ["direct", "reformulated", "citizen"] as const) {
+    const label = labels[style];
     process.stdout.write(
       `${report(
         label,

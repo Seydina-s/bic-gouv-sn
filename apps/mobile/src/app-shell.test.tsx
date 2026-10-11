@@ -973,7 +973,7 @@ describe("app shell", () => {
     await fireEvent.changeText(field, "Une question sans réponse ?");
     await fireEvent.press(screen.getByRole("button", { name: "Envoyer" }));
     expect(
-      await screen.findByText(/^Les sources officielles ne contiennent pas d'information/),
+      await screen.findByText(/^Désolé, je ne suis pas en mesure de répondre à cette question/),
     ).toBeOnTheScreen();
     expect(screen.getByRole("button", { name: "Écrire au gouvernement" })).toBeOnTheScreen();
     offline = true;
@@ -983,8 +983,24 @@ describe("app shell", () => {
     offline = false;
     await fireEvent.press(screen.getByRole("button", { name: "Réessayer" }));
     expect(
-      await screen.findAllByText(/^Les sources officielles ne contiennent pas d'information/),
+      await screen.findAllByText(/^Désolé, je ne suis pas en mesure de répondre à cette question/),
     ).toHaveLength(2);
+  });
+
+  it("answers a greeting at once, without asking the assistant", async () => {
+    let asked = 0;
+    globalThis.fetch = newsFetch({
+      assistant: () => {
+        asked += 1;
+        return new Response("{}");
+      },
+    }) as unknown as typeof fetch;
+    await renderRouter(routes, { initialUrl: "/assistant" });
+    const field = await screen.findByLabelText("Posez une question ou vérifiez une information");
+    await fireEvent.changeText(field, "Bonjour");
+    await fireEvent.press(screen.getByRole("button", { name: "Envoyer" }));
+    expect(await screen.findByText(/^Bonjour.+Posez-moi vos questions/)).toBeOnTheScreen();
+    expect(asked).toBe(0);
   });
 
   it("offers to try again when the assistant is unavailable for a moment", async () => {

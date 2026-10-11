@@ -2,6 +2,7 @@ import type { AssistantReply, Lang } from "@bgs/shared-types";
 import { useCallback, useRef, useState } from "react";
 import { AskError, type AskFailure, createAssistantClient } from "../../api/assistant-client";
 import { API_BASE_URL } from "../../api/base-url";
+import { smallTalkOf, type SmallTalk } from "./small-talk";
 
 const client = createAssistantClient({ baseUrl: API_BASE_URL });
 
@@ -12,6 +13,7 @@ const KEPT_TURNS = 30;
 export type ChatTurn = { id: number; question: string } & (
   | { state: "pending" }
   | { state: "replied"; reply: AssistantReply }
+  | { state: "courtesy"; kind: SmallTalk }
   | { state: "failed"; failure: AskFailure }
 );
 
@@ -34,6 +36,15 @@ export function useConversation(ask = client.ask) {
       const id = next.current;
       next.current += 1;
       const text = question.trim();
+      const courtesy = smallTalkOf(text);
+      if (courtesy !== null) {
+        // "Bonjour", "Merci": answered here, at once, without using a question.
+        setTurns((current) => [
+          ...current.slice(-(KEPT_TURNS - 1)),
+          { id, question: text, state: "courtesy", kind: courtesy },
+        ]);
+        return;
+      }
       setTurns((current) => [
         ...current.slice(-(KEPT_TURNS - 1)),
         { id, question: text, state: "pending" },

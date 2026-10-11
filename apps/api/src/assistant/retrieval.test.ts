@@ -4,7 +4,14 @@ import type { Passage } from "./passages";
 import { PASSAGES_GIVEN, questionIntent, retrievePassages } from "./retrieval";
 
 // Placeholder texts, not real content.
-function passage(n: number, publishedOn: string, section: string, text: string, part = 0): Passage {
+function passage(
+  n: number,
+  publishedOn: string,
+  section: string,
+  text: string,
+  part = 0,
+  publisher = "Présidence",
+): Passage {
   return {
     id: `content-${String(n)}:fr:${String(part)}`,
     contentId: `content-${String(n)}`,
@@ -16,6 +23,7 @@ function passage(n: number, publishedOn: string, section: string, text: string, 
     publishedOn,
     contentHash: "1".repeat(64),
     section,
+    publisher,
     text,
   };
 }
@@ -29,22 +37,64 @@ const index = new PassageIndex([
   passage(4, "2026-09-30", "conseil-des-ministres", "Le Conseil a examiné un projet fictif.", 0),
   passage(4, "2026-09-30", "conseil-des-ministres", "Mesures individuelles fictives.", 1),
   passage(5, "2026-09-10", "conseil-des-ministres", "Un ancien conseil fictif."),
+  passage(
+    6,
+    "2026-10-08",
+    "actualites",
+    "Remise fictive de matériel agricole.",
+    0,
+    "Ministère de l'Agriculture",
+  ),
+  passage(
+    7,
+    "2026-03-02",
+    "actualites",
+    "Le ministre de l'Intérieur inaugure un commissariat fictif.",
+    0,
+    "Ministère de l'Intérieur et de la Sécurité publique",
+  ),
+  passage(
+    8,
+    "2026-03-03",
+    "communiques",
+    "Un commissariat fictif est inauguré par le Président.",
+    0,
+  ),
+  passage(9, "2026-05-25", "focus", "Profil fictif du nouveau Premier ministre.", 0),
+  passage(10, "2024-04-02", "actualites", "Un Premier ministre fictif est nommé.", 0, "Primature"),
 ]);
 
 describe("the question's intent", () => {
   it("hears a question about recent news, and a section it names", () => {
     expect(questionIntent("Où est allé le président cette semaine ?")).toEqual({
       recent: true,
+      current: false,
       section: null,
+      publisher: "Présidence",
     });
-    expect(questionIntent("Qu'a dit le dernier Conseil des ministres ?")).toEqual({
+    expect(questionIntent("Qu'a dit le dernier Conseil des ministres ?")).toMatchObject({
       recent: true,
       section: "conseil-des-ministres",
     });
     expect(questionIntent("Comment obtenir un passeport ?")).toEqual({
       recent: false,
+      current: false,
       section: null,
+      publisher: null,
     });
+  });
+
+  it("hears who holds a post, and the ministry named, as people type them", () => {
+    expect(questionIntent("c ki le premier ministre")).toMatchObject({
+      current: true,
+      publisher: "Primature",
+    });
+    expect(questionIntent("Les dernières nouvelles du ministère de l'Intérieur ?")).toMatchObject({
+      recent: true,
+      publisher: "Ministère de l'Intérieur et de la Sécurité publique",
+    });
+    // "Justice" alone is not the ministry.
+    expect(questionIntent("Que fait l'État pour la justice sociale ?").publisher).toBeNull();
   });
 });
 
@@ -61,12 +111,33 @@ describe("the extracts given to the model", () => {
 
   it("bring this week's news first for a question about recent news", () => {
     const given = retrievePassages(index, "Où est allé le président cette semaine ?", "fr", TODAY);
-    expect(given[0]?.contentId).toBe("content-3");
-    expect(given.findIndex((p) => p.contentId === "content-1")).toBeGreaterThan(
-      given.findIndex((p) => p.contentId === "content-2"),
-    );
+    expect(
+      given
+        .slice(0, 2)
+        .map((p) => p.contentId)
+        .sort(),
+    ).toEqual(["content-2", "content-3"]);
+    expect(given.findIndex((p) => p.contentId === "content-1")).toBeGreaterThan(1);
     expect(given.length).toBeLessThanOrEqual(PASSAGES_GIVEN);
     expect(new Set(given.map((p) => p.id)).size).toBe(given.length);
+  });
+
+  it("never bring the newest articles of the base when they are about something else", () => {
+    // 11/10/2026: the five newest articles crowded every news question out.
+    const given = retrievePassages(index, "Où est allé le président cette semaine ?", "fr", TODAY);
+    expect(given.map((p) => p.contentId)).not.toContain("content-6");
+  });
+
+  it("bring the ministry named, and the newest holder of a post first", () => {
+    const interior = retrievePassages(
+      index,
+      "Quelles sont les dernières actualités du ministère de l'Intérieur ?",
+      "fr",
+      TODAY,
+    );
+    expect(interior[0]?.contentId).toBe("content-7");
+    const prime = retrievePassages(index, "c ki le premier ministre", "fr", TODAY);
+    expect(prime[0]?.contentId).toBe("content-9");
   });
 
   it("still follow the words for any other question, newer first only when equal", () => {

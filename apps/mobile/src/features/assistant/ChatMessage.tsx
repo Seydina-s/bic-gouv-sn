@@ -201,6 +201,9 @@ function TurnBody({ turn, actions }: { turn: ChatTurn; actions: ChatActions }) {
   if (turn.state === "pending") {
     return <TypingDots />;
   }
+  if (turn.state === "courtesy") {
+    return <Said>{t(`assistant.courtesy.${turn.kind}`)}</Said>;
+  }
   if (turn.state === "failed") {
     return (
       <>
