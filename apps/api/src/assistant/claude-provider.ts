@@ -10,6 +10,26 @@ import type { LlmProvider, LlmRequest, LlmResponse } from "./llm-provider";
 const MESSAGES_URL = "https://api.anthropic.com/v1/messages";
 const API_VERSION = "2023-06-01";
 export const DEFAULT_ASSISTANT_MODEL = "claude-haiku-4-5-20251001";
+/** Answers in Wolof: chosen by the owner in a blind comparison (11/10/2026). */
+export const DEFAULT_WOLOF_MODEL = "claude-sonnet-5-5";
+
+/**
+ * Dollars per million tokens, from Anthropic's price list (read 11/10/2026). A model not
+ * listed is counted at the highest price listed: the console never shows less than paid.
+ */
+const PRICES: readonly (readonly [prefix: string, input: number, output: number])[] = [
+  ["claude-haiku-4-5", 1, 5],
+  ["claude-haiku-5-5", 0.1, 0.5],
+  ["claude-sonnet-5-5", 2, 10],
+];
+const HIGHEST = { input: 2, output: 10 };
+
+/** What a call cost, in millionths of a dollar (dollars per million tokens × tokens). */
+export function costOf(model: string, inputTokens: number, outputTokens: number): number {
+  const listed = PRICES.find(([prefix]) => model.startsWith(prefix));
+  const price = listed === undefined ? HIGHEST : { input: listed[1], output: listed[2] };
+  return Math.ceil(inputTokens * price.input + outputTokens * price.output);
+}
 
 const messageSchema = z.object({
   model: z.string().min(1),
@@ -69,16 +89,18 @@ export class ClaudeProvider implements LlmProvider {
     }
     const message = messageSchema.parse(await response.json());
     const { usage } = message;
+    const inputTokens =
+      usage.input_tokens +
+      (usage.cache_read_input_tokens ?? 0) +
+      (usage.cache_creation_input_tokens ?? 0);
     return {
       text: message.content
         .map((block) => (block.type === "text" ? (block.text ?? "") : ""))
         .join(""),
       model: message.model,
-      inputTokens:
-        usage.input_tokens +
-        (usage.cache_read_input_tokens ?? 0) +
-        (usage.cache_creation_input_tokens ?? 0),
+      inputTokens,
       outputTokens: usage.output_tokens,
+      costMicrodollars: costOf(message.model, inputTokens, usage.output_tokens),
     };
   }
 }

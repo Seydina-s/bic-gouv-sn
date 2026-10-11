@@ -23,7 +23,12 @@ function passage(n: number, title: string, text: string): Passage {
 }
 
 const given = [passage(1, "Démarche du port", "Le port de test."), passage(2, "Quai", "Le quai.")];
-const usage = { model: "modele-de-test", inputTokens: 900, outputTokens: 60 };
+const usage = {
+  model: "modele-de-test",
+  inputTokens: 900,
+  outputTokens: 60,
+  costMicrodollars: 1200,
+};
 const reply = (text: string) => ({ text, ...usage });
 
 describe("userMessage", () => {

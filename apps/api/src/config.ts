@@ -1,6 +1,6 @@
 import type { ErrorCode } from "@bgs/shared-types";
 import { z } from "zod";
-import { DEFAULT_ASSISTANT_MODEL } from "./assistant/claude-provider";
+import { DEFAULT_ASSISTANT_MODEL, DEFAULT_WOLOF_MODEL } from "./assistant/claude-provider";
 import { resolveDataPath } from "./data-path";
 
 /** Every setting comes from environment variables; secrets are never hard-coded. */
@@ -219,6 +219,11 @@ const envSchema = z.object({
   ANTHROPIC_API_KEY: z.string().min(1).optional(),
   /** The Claude model answering (the cheapest that answers well enough). */
   ASSISTANT_MODEL: z.string().min(1).default(DEFAULT_ASSISTANT_MODEL),
+  /**
+   * The Claude model answering when the app is in Wolof: the owner preferred Sonnet
+   * 5.5's Wolof in a blind comparison of 15 questions (11/10/2026, 13 of 15).
+   */
+  ASSISTANT_WOLOF_MODEL: z.string().min(1).default(DEFAULT_WOLOF_MODEL),
   /**
    * The assistant also searches by meaning (an open model run on this server, free):
    * about 400 MB of memory more, and a few minutes of computing the first time.

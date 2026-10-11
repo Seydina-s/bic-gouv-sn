@@ -158,6 +158,8 @@ export interface AppOptions {
   settings?: SettingStore;
   /** The assistant's model; defaults to Claude when ANTHROPIC_API_KEY is set, else none. */
   llm?: LlmProvider | null;
+  /** The model answering in Wolof; the same as `llm` when not given. */
+  wolofLlm?: LlmProvider | null;
 }
 
 export interface AdminServices {
@@ -175,10 +177,10 @@ function defaultPushProvider(config: Config, subscriptions: PushSubscriptionStor
 }
 
 /** The model behind the assistant: none until the owner has entered the key. */
-function defaultLlm(config: Config): LlmProvider | null {
+function defaultLlm(config: Config, model = config.ASSISTANT_MODEL): LlmProvider | null {
   return config.ANTHROPIC_API_KEY === undefined
     ? null
-    : new ClaudeProvider({ apiKey: config.ANTHROPIC_API_KEY, model: config.ASSISTANT_MODEL });
+    : new ClaudeProvider({ apiKey: config.ANTHROPIC_API_KEY, model });
 }
 
 /**
@@ -256,6 +258,7 @@ export async function buildApp({
     ? new FileSettingStore(config.SETTINGS_PATH)
     : new PostgresSettingStore(database),
   llm = defaultLlm(config),
+  wolofLlm = llm === null ? null : (defaultLlm(config, config.ASSISTANT_WOLOF_MODEL) ?? llm),
 }: AppOptions): Promise<FastifyInstance> {
   const app = Fastify({
     trustProxy: trustedProxies(config.TRUST_PROXY),
@@ -362,6 +365,7 @@ export async function buildApp({
       : null;
   const assistant = new AssistantService({
     llm,
+    wolofLlm,
     semantic,
     knowledge: new RefreshedKnowledge({
       build: async () => {

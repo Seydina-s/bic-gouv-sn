@@ -65,6 +65,8 @@ function reply(status: AssistantReply["status"], resumesOn: string | null = null
 export interface AssistantServiceOptions {
   /** None while no model is configured: the assistant says it is unavailable. */
   llm: LlmProvider | null;
+  /** The model answering in Wolof (rephrasing included); `llm` when none. */
+  wolofLlm?: LlmProvider | null;
   knowledge: KnowledgeSource;
   /** The search by meaning, when switched on (ASSISTANT_SEMANTIC_SEARCH). */
   semantic?: SemanticLayer | null;
@@ -113,7 +115,8 @@ export class AssistantService {
   }
 
   async answer(question: AssistantQuestion): Promise<AssistantOutcome> {
-    const { llm } = this.options;
+    const llm =
+      question.lang === "wo" ? (this.options.wolofLlm ?? this.options.llm) : this.options.llm;
     if (llm === null) {
       return { reply: reply("unavailable"), problem: null };
     }
@@ -158,6 +161,7 @@ export class AssistantService {
       await Promise.all([
         this.add("input-tokens", time, answer.usage.inputTokens),
         this.add("output-tokens", time, answer.usage.outputTokens),
+        this.add("cost-microdollars", time, answer.usage.costMicrodollars),
       ]);
     }
     return {
@@ -173,12 +177,14 @@ export class AssistantService {
 
   async usage(): Promise<AssistantUsage> {
     const time = this.now();
-    const [questions, inputTokens, outputTokens, monthlyLimit] = await Promise.all([
-      this.count("questions", time),
-      this.count("input-tokens", time),
-      this.count("output-tokens", time),
-      this.monthlyLimit(),
-    ]);
+    const [questions, inputTokens, outputTokens, costMicrodollars, monthlyLimit] =
+      await Promise.all([
+        this.count("questions", time),
+        this.count("input-tokens", time),
+        this.count("output-tokens", time),
+        this.count("cost-microdollars", time),
+        this.monthlyLimit(),
+      ]);
     return {
       month: monthOf(time),
       // Refused questions past the limit are counted too: never shown above it.
@@ -186,6 +192,7 @@ export class AssistantService {
       monthlyLimit,
       inputTokens,
       outputTokens,
+      costUsd: costMicrodollars / 1_000_000,
       configured: this.configured,
     };
   }

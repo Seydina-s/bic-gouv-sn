@@ -29,7 +29,13 @@ function model(text = ANSWER): LlmProvider & { calls: number } {
     calls: 0,
     complete: () => {
       llm.calls += 1;
-      return Promise.resolve({ text, model: "test", inputTokens: 800, outputTokens: 40 });
+      return Promise.resolve({
+        text,
+        model: "test",
+        inputTokens: 800,
+        outputTokens: 40,
+        costMicrodollars: 1000,
+      });
     },
   };
   return llm;
@@ -155,6 +161,7 @@ describe("POST /v1/assistant/answers", () => {
       monthlyLimit: 1,
       inputTokens: 800,
       outputTokens: 40,
+      costUsd: 0.001,
       configured: true,
     });
     const audit = await admin.admin.journal.entries();
