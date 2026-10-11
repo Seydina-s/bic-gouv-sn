@@ -93,6 +93,7 @@ describe("the search by meaning", () => {
           model: "test",
           inputTokens: 1,
           outputTokens: 1,
+          costMicrodollars: 1,
         });
       },
     };

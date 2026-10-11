@@ -240,5 +240,6 @@ function addedUsage(
     ...answer,
     inputTokens: answer.inputTokens + rephrase.inputTokens,
     outputTokens: answer.outputTokens + rephrase.outputTokens,
+    costMicrodollars: answer.costMicrodollars + rephrase.costMicrodollars,
   };
 }

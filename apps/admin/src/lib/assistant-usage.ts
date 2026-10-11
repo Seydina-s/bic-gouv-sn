@@ -1,15 +1,21 @@
 import type { AssistantUsage } from "@bgs/shared-types";
 
-/** Claude Haiku 4.5, in dollars per million tokens (Anthropic's price list, 03/10/2026). */
+/** Claude Haiku 4.5, in dollars per million tokens (Anthropic's price list, 03/10/2026): older APIs only. */
 const PRICE_PER_MILLION = { input: 1, output: 5 } as const;
 /** From this share of the month's questions, the console's first screen says so. */
 export const NEAR_LIMIT_SHARE = 0.8;
 
-/** What this month's questions cost, at the assistant model's price. */
-export function estimatedCost(usage: Pick<AssistantUsage, "inputTokens" | "outputTokens">): number {
+/**
+ * What this month's questions cost: as counted by the API at each model's price, or,
+ * from an older API, the tokens at Haiku 4.5's price.
+ */
+export function estimatedCost(
+  usage: Pick<AssistantUsage, "inputTokens" | "outputTokens" | "costUsd">,
+): number {
   return (
+    usage.costUsd ??
     (usage.inputTokens * PRICE_PER_MILLION.input + usage.outputTokens * PRICE_PER_MILLION.output) /
-    1_000_000
+      1_000_000
   );
 }
 

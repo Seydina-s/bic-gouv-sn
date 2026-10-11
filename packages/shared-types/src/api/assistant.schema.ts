@@ -71,6 +71,11 @@ export const assistantUsageSchema = z.object({
   /** Read and written by the model this month: its cost. */
   inputTokens: z.int().nonnegative(),
   outputTokens: z.int().nonnegative(),
+  /**
+   * What this month's calls cost, in dollars, at the price of the model that made each
+   * one (two models since 11/10/2026: one per language). Absent from older APIs.
+   */
+  costUsd: z.number().nonnegative().optional(),
   /** A model is configured: the assistant can answer. */
   configured: z.boolean(),
 });

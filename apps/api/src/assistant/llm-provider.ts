@@ -18,6 +18,8 @@ export interface LlmResponse {
   model: string;
   inputTokens: number;
   outputTokens: number;
+  /** What the call cost at the model's price, in millionths of a dollar. */
+  costMicrodollars: number;
 }
 
 export interface LlmProvider {

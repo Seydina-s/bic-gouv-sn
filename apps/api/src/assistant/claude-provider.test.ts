@@ -5,6 +5,7 @@ import {
   DEFAULT_ASSISTANT_MODEL,
   isClaudeOutage,
   noThinkingFirst,
+  costOf,
 } from "./claude-provider";
 
 const request = { system: "Rules", user: "Question", maxOutputTokens: 400 };
@@ -40,6 +41,8 @@ describe("the Claude provider", () => {
       model: "claude-haiku-4-5-20251001",
       inputTokens: 1000,
       outputTokens: 20,
+      // 1 000 tokens read at 1 $ and 20 written at 5 $ per million.
+      costMicrodollars: 1100,
     });
     const [url, init] = fetchImpl.mock.calls[0] ?? [];
     expect(url).toBe("https://api.anthropic.com/v1/messages");
@@ -88,5 +91,15 @@ describe("the Claude provider", () => {
     expect(isClaudeOutage(new ClaudeError(429))).toBe(true);
     expect(isClaudeOutage(new Error("network down"))).toBe(true);
     expect(isClaudeOutage(new ClaudeError(400))).toBe(false);
+  });
+});
+
+describe("costOf", () => {
+  it("counts each call at its model's price, an unknown model at the highest one", () => {
+    // 1 000 tokens read, 100 written.
+    expect(costOf("claude-haiku-4-5-20251001", 1000, 100)).toBe(1500);
+    expect(costOf("claude-haiku-5-5", 1000, 100)).toBe(150);
+    expect(costOf("claude-sonnet-5-5", 1000, 100)).toBe(3000);
+    expect(costOf("un-modele-inconnu", 1000, 100)).toBe(3000);
   });
 });
