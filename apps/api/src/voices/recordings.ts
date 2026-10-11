@@ -26,8 +26,14 @@ export type SynthesisResult =
   | { id: string; ok: true; durationMs: number; bytes: number; voiceId: string }
   | { id: string; ok: false; error: string };
 
-/** Reads the jobs aloud (our Python voices); one result per job, in any order. */
-export type Synthesizer = (jobs: readonly SynthesisJob[]) => Promise<SynthesisResult[]>;
+/**
+ * Reads the jobs aloud (our Python voices); one result per job, in any order.
+ * `onResult`, when given, receives each result as soon as it is ready.
+ */
+export type Synthesizer = (
+  jobs: readonly SynthesisJob[],
+  onResult?: (result: SynthesisResult) => Promise<void>,
+) => Promise<SynthesisResult[]>;
 
 export interface Recording {
   article: NewsArticle;
@@ -93,16 +99,20 @@ const RETRY_DELAYS_MS = [1 * MINUTE, 2 * MINUTE, 5 * MINUTE, 10 * MINUTE] as con
 /** Failed calls in a row before the run stops: the server is really down. */
 const MAX_FAILED_CALLS = 5;
 
-/** Calls the voices for one group, again after a wait when the call itself fails. */
+/**
+ * Calls the voices for one group, again after a wait when the call itself fails: only
+ * for the jobs `left()` still has (those already handed over are not read twice).
+ */
 async function synthesizePatiently(
-  synthesize: Synthesizer,
-  jobs: SynthesisJob[],
+  synthesize: (jobs: SynthesisJob[]) => Promise<SynthesisResult[]>,
+  left: () => SynthesisJob[],
   wait: (ms: number) => Promise<void>,
   onRetry?: (error: unknown, delayMs: number) => void,
 ): Promise<SynthesisResult[]> {
   for (let failed = 1; ; failed += 1) {
     try {
-      return await synthesize(jobs);
+      const jobs = left();
+      return jobs.length === 0 ? [] : await synthesize(jobs);
     } catch (error) {
       if (failed >= MAX_FAILED_CALLS) {
         throw error;
@@ -141,43 +151,54 @@ export async function record(
   for (let start = 0; start < todo.length; start += groupSize) {
     const group = todo.slice(start, start + groupSize);
     const byId = new Map(group.map((item) => [`${item.article.id}:${item.lang}`, item]));
+    const jobs = group.map((item) => ({
+      id: `${item.article.id}:${item.lang}`,
+      lang: item.lang,
+      pieces: item.pieces,
+      out: join(options.mediaRoot, item.key),
+    }));
+    // Each recording is attached as soon as it comes back, once.
+    const handled = new Set<string>();
+    const handle = async (result: SynthesisResult) => {
+      const item = byId.get(result.id);
+      if (item === undefined || handled.has(result.id)) {
+        return;
+      }
+      handled.add(result.id);
+      await attach(item, result);
+    };
     const results = await synthesizePatiently(
-      options.synthesize,
-      group.map((item) => ({
-        id: `${item.article.id}:${item.lang}`,
-        lang: item.lang,
-        pieces: item.pieces,
-        out: join(options.mediaRoot, item.key),
-      })),
+      (left) => options.synthesize(left, handle),
+      () => jobs.filter((job) => !handled.has(job.id)),
       wait,
       options.onRetry,
     );
     for (const result of results) {
-      const item = byId.get(result.id);
-      if (item === undefined) {
-        continue;
-      }
-      if (!result.ok) {
-        report.failed.push({ id: item.article.id, lang: item.lang, error: result.error });
-        continue;
-      }
-      // The file must really be there before the app is told about it.
-      const bytes = (await stat(join(options.mediaRoot, item.key))).size;
-      await options.articles.setAudioTrack(item.article.id, {
-        lang: item.lang,
-        origin: "tts",
-        key: item.key,
-        format: "mp3",
-        durationMs: result.durationMs,
-        bytes,
-        voiceId: result.voiceId,
-        textHash: item.textHash,
-        createdAt: now().toISOString(),
-      });
-      report.recorded += 1;
-      report.audioMs += result.durationMs;
+      await handle(result);
     }
     options.onProgress?.(Math.min(start + groupSize, todo.length), todo.length);
   }
   return report;
+
+  async function attach(item: Recording, result: SynthesisResult): Promise<void> {
+    if (!result.ok) {
+      report.failed.push({ id: item.article.id, lang: item.lang, error: result.error });
+      return;
+    }
+    // The file must really be there before the app is told about it.
+    const bytes = (await stat(join(options.mediaRoot, item.key))).size;
+    await options.articles.setAudioTrack(item.article.id, {
+      lang: item.lang,
+      origin: "tts",
+      key: item.key,
+      format: "mp3",
+      durationMs: result.durationMs,
+      bytes,
+      voiceId: result.voiceId,
+      textHash: item.textHash,
+      createdAt: now().toISOString(),
+    });
+    report.recorded += 1;
+    report.audioMs += result.durationMs;
+  }
 }
