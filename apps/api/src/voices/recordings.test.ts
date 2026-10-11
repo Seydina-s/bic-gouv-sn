@@ -129,6 +129,34 @@ describe("the recordings of the articles", () => {
     expect(left.map((item) => item.lang)).toEqual(["wo"]);
   });
 
+  it("keeps what came back before a cut, and reads again only the rest", async () => {
+    const todo = recordingsToMake(await allArticles(articles), ["fr"], 2);
+    const working = voice();
+    const asked: string[][] = [];
+    let cut = true;
+    // The first call hands one recording over, then the connection is cut.
+    const flaky: Synthesizer = async (jobs, onResult) => {
+      asked.push(jobs.map((job) => job.id));
+      if (cut) {
+        cut = false;
+        const [first] = await working(jobs.slice(0, 1));
+        if (first !== undefined) {
+          await onResult?.(first);
+        }
+        throw new Error("ssh exited with 255");
+      }
+      return working(jobs);
+    };
+    const report = await record(todo, {
+      articles,
+      mediaRoot: dir,
+      synthesize: flaky,
+      wait: () => Promise.resolve(),
+    });
+    expect(report.recorded).toBe(2);
+    expect(asked).toEqual([[`${idOf(2)}:fr`, `${idOf(1)}:fr`], [`${idOf(1)}:fr`]]);
+  });
+
   it("gives the French voice the words to say, the Wolof voice the text as written", async () => {
     await articles.save({
       ...article(3, true),
