@@ -62,3 +62,62 @@ describe("createFeedProvider", () => {
     expect(fetchImpl).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("the feed's edge cases", () => {
+  const item = (inner: string) => `<rss><channel><item>${inner}</item></channel></rss>`;
+  const ORIGIN = "https://www.fonctionpublique.gouv.sn";
+
+  it("skips links elsewhere, without a day or not an address, and reads other dates and texts", () => {
+    const xml = [
+      item(
+        "<title>Ailleurs</title><link>https://exemple.org/?a</link><pubDate>Mon, 01 Jun 2026 10:00:00 +0000</pubDate>",
+      ),
+      item("<title>Sans date</title><link>https://www.fonctionpublique.gouv.sn/?b</link>"),
+      item(
+        "<title>Mauvaise adresse</title><link>http://[</link><pubDate>Mon, 01 Jun 2026 10:00:00 +0000</pubDate>",
+      ),
+      item(
+        "<title><![CDATA[Titre &#x26; suite]]></title><link>/?c</link><pubDate>Mon, 01 Jun 2026 10:00:00 +0000</pubDate><description>&lt;p&gt;Résumé&lt;/p&gt;</description>",
+      ),
+    ].join("");
+    const items = parseFeed(xml, ORIGIN);
+    expect(items).toHaveLength(1);
+    expect(items[0]).toMatchObject({
+      title: "Titre &#x26; suite",
+      link: "https://www.fonctionpublique.gouv.sn/?c",
+      day: "2026-06-01",
+      html: "<p>Résumé</p>",
+    });
+  });
+
+  it("sets aside an article without a title, and one no longer in the feed", async () => {
+    const [first] = parseFeed(feed(), SITE.origin);
+    if (first === undefined) {
+      throw new Error("no item");
+    }
+    expect(() => normalizeFeedItem({ ...first, title: "" }, SITE, "2026-10-11T22:00:00Z")).toThrow(
+      "no title",
+    );
+    const fetchImpl = vi.fn<typeof fetch>(() => Promise.resolve(new Response(feed())));
+    const provider = createFeedProvider({ ...SITE, intervalMs: 0 }, { fetchImpl });
+    expect(await provider.listPage("fr", 2)).toEqual({ refs: [], lastPage: 1 });
+    await expect(
+      provider.fetchArticle({
+        sourceId: "https://www.fonctionpublique.gouv.sn/?disparu",
+        slug: "disparu",
+        lang: "fr",
+        sourceUpdatedAt: "",
+        coverSourceUrl: null,
+      }),
+    ).rejects.toBeInstanceOf(QuarantineError);
+    expect(provider.circuits?.()).toHaveLength(1);
+  });
+
+  it("downloads a photo of the site", async () => {
+    const fetchImpl = vi.fn<typeof fetch>(() => Promise.resolve(new Response("jpg")));
+    const provider = createFeedProvider({ ...SITE, intervalMs: 0 }, { fetchImpl });
+    expect(
+      (await provider.downloadMedia("https://www.fonctionpublique.gouv.sn/IMG/a.jpg")).toString(),
+    ).toBe("jpg");
+  });
+});

@@ -61,3 +61,51 @@ describe("createEducationProvider", () => {
     await expect(provider.listPage("fr", 1)).rejects.toBeInstanceOf(QuarantineError);
   });
 });
+
+describe("the education site's edge cases", () => {
+  const page = (fallback: unknown) =>
+    `<script id="__NEXT_DATA__" type="application/json">${JSON.stringify({ props: { pageProps: { fallback } } })}</script>`;
+
+  it("keeps only well-formed articles, and none without the expected data", () => {
+    const [post] = postsOf(home());
+    expect(postsOf(page({ "/posts?x": [post, { id: "pas un nombre" }] }))).toHaveLength(1);
+    expect(postsOf(page({ "/autre": [post] }))).toEqual([]);
+    expect(postsOf(page({ "/posts?x": "pas une liste" }))).toEqual([]);
+    expect(
+      postsOf('<script id="__NEXT_DATA__" type="application/json">{"props":{}}</script>'),
+    ).toEqual([]);
+  });
+
+  it("sets aside an article without a title, lists nothing in Wolof, and one gone", async () => {
+    const [post] = postsOf(home());
+    if (post === undefined) {
+      throw new Error("no post");
+    }
+    expect(() => normalizeEducationPost({ ...post, title: " " }, "2026-10-11T23:00:00Z")).toThrow(
+      "no title",
+    );
+    const withoutCover = page({ "/posts?x": [{ ...post, cover: null }] });
+    const fetchImpl = vi.fn<typeof fetch>(() => Promise.resolve(new Response(withoutCover)));
+    const provider = createEducationProvider({ fetchImpl, intervalMs: 0 });
+    expect(await provider.listPage("wo", 1)).toEqual({ refs: [], lastPage: 1 });
+    expect((await provider.listPage("fr", 1)).refs[0]?.coverSourceUrl).toBeNull();
+    await expect(
+      provider.fetchArticle({
+        sourceId: "disparu",
+        slug: "disparu",
+        lang: "fr",
+        sourceUpdatedAt: "",
+        coverSourceUrl: null,
+      }),
+    ).rejects.toBeInstanceOf(QuarantineError);
+    expect(provider.circuits?.()).toHaveLength(1);
+    const photo = vi.fn<typeof fetch>(() => Promise.resolve(new Response("jpg")));
+    expect(
+      (
+        await createEducationProvider({ fetchImpl: photo, intervalMs: 0 }).downloadMedia(
+          "https://cms.education.sn/uploads/a.jpg",
+        )
+      ).toString(),
+    ).toBe("jpg");
+  });
+});

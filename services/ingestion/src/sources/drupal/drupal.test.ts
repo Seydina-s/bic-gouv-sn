@@ -206,3 +206,14 @@ describe("Economy site (Drupal 10, its own theme)", () => {
     );
   });
 });
+
+describe("listing rows", () => {
+  it("keep no day when the row shows none", () => {
+    const listing = parseDrupalListing(
+      '<div><a href="/fr/blog/a">A</a></div><div><a href="/fr/blog/b">B</a><time>sans date</time></div>',
+      "https://www.economie.gouv.sn",
+      (path) => path.startsWith("/fr/blog/"),
+    );
+    expect(listing.items.map((item) => item.publishedOn)).toEqual([null, null]);
+  });
+});
