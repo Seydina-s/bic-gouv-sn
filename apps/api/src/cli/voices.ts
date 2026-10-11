@@ -1,4 +1,4 @@
-// Reads the newest articles aloud with our voices (Jessica in French, Adia in Wolof)
+// Reads the newest articles aloud with our voices (Kokoro in French, Adia in Wolof)
 // and attaches the recordings: `pnpm --filter @bgs/api voices:record [--lang fr|wo]
 // [--limit 20]`. Runs the voices on the voice server when VOICES_SSH_HOST
 // ("voices@<address>") and VOICES_SSH_KEY (key file) are set, otherwise here with uv

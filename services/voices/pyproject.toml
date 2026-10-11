@@ -1,11 +1,12 @@
 [project]
 name = "bgs-voices"
 version = "0.0.0"
-description = "Reads the official contents aloud once, in French (Piper, Jessica) and Wolof (Adia_TTS), for the app to play"
+description = "Reads the official contents aloud once, in French (Kokoro, ff_siwis) and Wolof (Adia_TTS), for the app to play"
 requires-python = "==3.11.*"
 dependencies = [
   "numpy==2.4.6",
-  "piper-tts==1.8.0",
+  "kokoro==0.9.4",
+  "misaki[en]==0.9.4",
   "soundfile==0.14.0",
   "torch==2.11.0",
   "torchaudio==2.11.0",
