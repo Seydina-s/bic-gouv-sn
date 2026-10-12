@@ -100,6 +100,13 @@ const RETRY_DELAYS_MS = [1 * MINUTE, 2 * MINUTE, 5 * MINUTE, 10 * MINUTE] as con
 const MAX_FAILED_CALLS = 5;
 
 /**
+ * The articles refused a recording (12/10/2026: a run started before a new institution
+ * was added could no longer read them). No wait mends it: the run stops at once instead
+ * of reading the group again and again as if the voices were down.
+ */
+export class StoreRefusalError extends Error {}
+
+/**
  * Calls the voices for one group, again after a wait when the call itself fails: only
  * for the jobs `left()` still has (those already handed over are not read twice).
  */
@@ -114,7 +121,7 @@ async function synthesizePatiently(
       const jobs = left();
       return jobs.length === 0 ? [] : await synthesize(jobs);
     } catch (error) {
-      if (failed >= MAX_FAILED_CALLS) {
+      if (error instanceof StoreRefusalError || failed >= MAX_FAILED_CALLS) {
         throw error;
       }
       const delay = RETRY_DELAYS_MS[Math.min(failed, RETRY_DELAYS_MS.length) - 1] ?? 10 * MINUTE;
@@ -165,7 +172,13 @@ export async function record(
         return;
       }
       handled.add(result.id);
-      await attach(item, result);
+      try {
+        await attach(item, result);
+      } catch (error) {
+        throw new StoreRefusalError(`the articles refused the recording ${result.id}`, {
+          cause: error,
+        });
+      }
     };
     const results = await synthesizePatiently(
       (left) => options.synthesize(left, handle),

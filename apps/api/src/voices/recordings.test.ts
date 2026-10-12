@@ -5,7 +5,13 @@ import { articleContentHash, FileArticleRepository } from "@bgs/content-store";
 import type { NewsArticle } from "@bgs/shared-types";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { toDetail } from "../news/present";
-import { allArticles, record, recordingsToMake, type Synthesizer } from "./recordings";
+import {
+  allArticles,
+  record,
+  recordingsToMake,
+  StoreRefusalError,
+  type Synthesizer,
+} from "./recordings";
 import { currentRecording, spokenPieces, spokenTextHash } from "./spoken-text";
 
 /** The value, or a failed test when it is missing. */
@@ -206,6 +212,29 @@ describe("the recordings of the articles", () => {
       record(todo, { articles, mediaRoot: dir, synthesize: down, wait }),
     ).rejects.toThrow("ssh exited with 255");
     expect(waits).toHaveLength(2 + 4);
+  });
+
+  it("stops at once when the articles refuse a recording, never blaming the voices", async () => {
+    const todo = recordingsToMake(await allArticles(articles), ["fr"], 2);
+    const refusing = Object.assign(Object.create(articles) as FileArticleRepository, {
+      setAudioTrack: () => Promise.reject(new Error("unknown institution")),
+    });
+    const waits: number[] = [];
+    const wait = (ms: number) => {
+      waits.push(ms);
+      return Promise.resolve();
+    };
+    const working = voice();
+    const synthesize: Synthesizer = async (jobs, onResult) => {
+      for (const result of await working(jobs)) {
+        await onResult?.(result);
+      }
+      return [];
+    };
+    const run = record(todo, { articles: refusing, mediaRoot: dir, synthesize, wait });
+    await expect(run).rejects.toBeInstanceOf(StoreRefusalError);
+    expect(waits).toEqual([]);
+    expect(working.jobs).toHaveLength(2);
   });
 
   it("no longer offers a recording once the words it reads have changed", async () => {
