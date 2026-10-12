@@ -117,6 +117,8 @@ education.sn (Next.js) : sa page d'accueil est construite avec ses 9 derniers ar
 
 ### Économie, Plan et Coopération (11/10/2026)
 
+finances.gouv.sn (Nuxt, 12/10/2026) : le site est construit à partir du service de contenu officiel du ministère, `apimfb.finances.gouv.sn`, dont la liste `/article/published?page=N&limit=20` donne chaque article entier (titre, jour de publication, texte, photo, version anglaise). Nom officiel affiché par le site : « Ministère de l'Économie, des Finances et du Plan ». Le site et son service ne répondent pas depuis le Sénégal : la collecte les lit **par notre serveur** (connexion SSH existante, `curl` en https vers `apimfb.finances.gouv.sn` seulement, aucune redirection suivie, aucun port ouvert ; décision de l'utilisateur du 12/10, `services/ingestion/src/lib/ssh-relay.ts`). Le service nomme aussi l'agent qui a saisi l'article : jamais conservé. Essai : 57 articles sur 58 (un communiqué rédigé en anglais seulement est écarté).
+
 economie.gouv.sn (Drupal 10, thème propre) : la page `/fr/actualites` montre ses 20 derniers articles (`/fr/blog/<nom>`), datés dans la liste par `<time datetime>` ; ni pages suivantes ni plan du site. Le texte est dans le bloc « whole-content > content » du thème (les champs « body » de la page sont ceux de la barre latérale : icônes, fil Twitter). Dernier article le 01/06/2026. Essai : 20 sur 20. (Le ministère chargé de l'Économie, des Finances et du Plan, finances.gouv.sn, reste à revoir : voir le tableau.)
 
 ### Fonction publique, Travail et Réforme du service public (11/10/2026)
@@ -137,7 +139,7 @@ Depuis le 12/10/2026, la collecte revoit ces sites **chaque semaine, la nuit** (
 
 | Ministère | Site | Constat du 09/10/2026 |
 |---|---|---|
-| Économie, Finances et Plan | finances.gouv.sn | relance du 11/10 : **répond depuis notre serveur en Finlande, pas depuis le Sénégal** (filtrage selon l'origine) ; collecte possible en passant par le serveur, à décider (sécurité) |
+| Économie, Finances et Plan | finances.gouv.sn | **collecté depuis le 12/10** par un relais limité passant par notre serveur (le site filtre les visites venant du Sénégal) : voir le paragraphe « finances.gouv.sn » |
 | Budget | budget.sec.gouv.sn | site de la Direction générale du Budget : documents budgétaires (lois de finances, rapports d'exécution), **pas d'actualités** ; certificat incomplet (le maillon intermédiaire manque) |
 | Microfinance et Économie sociale et solidaire | microfinance-ess.gouv.sn | certificat TLS expiré |
 | Transports terrestres et aériens | mittd.gouv.sn | certificat TLS ne correspondant pas au site (relance du 11/10 : inchangé) ; bindu-mitta.sec.gouv.sn est un portail de rendez-vous (permis), pas d'actualités |

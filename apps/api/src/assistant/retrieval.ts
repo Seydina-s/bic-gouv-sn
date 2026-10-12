@@ -105,6 +105,7 @@ const NAMED: Readonly<Record<Institution, { cues: readonly string[]; ministry: b
     ministry: true,
   },
   economie: { cues: [" economie ", " plan ", " cooperation "], ministry: true },
+  finances: { cues: [" finances ", " budget ", " dette ", " tresor "], ministry: true },
   "fonction-publique": {
     cues: [" fonction publique ", " travail ", " reforme du service public "],
     ministry: true,

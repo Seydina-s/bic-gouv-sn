@@ -17,7 +17,6 @@ export interface SiteToReview {
 
 /** Re-checked on 11/10/2026 (docs/sources.md). */
 export const SITES_TO_REVIEW: readonly SiteToReview[] = [
-  { name: "Économie, Finances et Plan", url: "https://finances.gouv.sn/" },
   {
     name: "Urbanisme, Collectivités territoriales et Aménagement des territoires",
     url: "https://www.urbanisme.gouv.sn/",
