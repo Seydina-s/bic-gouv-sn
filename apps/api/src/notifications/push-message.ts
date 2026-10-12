@@ -19,11 +19,18 @@ export interface PushMessage {
   category: string;
   /** JPEG (every phone shows it) of the cover; null without a public media address. */
   imageUrl: string | null;
+  /** The official site the article comes from, as the article names it: "primature.sn". */
+  source: string;
   /** Per language the article is published in. */
   versions: Partial<Record<Lang, PushVersion>>;
 }
 
 const LANGS: readonly Lang[] = ["fr", "wo"];
+
+/** The site of an official page, as people write it: "primature.sn". */
+export function siteOf(url: string): string {
+  return new URL(url).hostname.replace(/^www./, "");
+}
 
 function coverJpegUrl(article: NewsArticle, mediaBaseUrl: string | undefined): string | null {
   const cover = article.images.find((image) => image.role === "cover");
@@ -55,6 +62,7 @@ export function pushMessageFor(
     articleId: article.id,
     category: article.category,
     imageUrl: coverJpegUrl(article, mediaBaseUrl),
+    source: siteOf(article.sourceUrl),
     versions,
   };
 }

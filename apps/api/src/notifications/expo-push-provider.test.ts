@@ -14,6 +14,8 @@ const NOTIFICATION: PushMessage = {
   articleId: "00000000-0000-5000-8000-000000000001",
   category: "conseil-des-ministres",
   imageUrl: null,
+  // An article of the Primature: the source named is its own site (12/10/2026).
+  source: "primature.sn",
   versions: { fr: { title: "Titre officiel de test", excerpt: "" } },
 };
 const NOON = Date.parse("2026-09-29T12:00:00Z");
@@ -61,7 +63,7 @@ describe("sending a notification through Expo", () => {
     expect(requests[1]?.map((message) => message.to).sort()).toEqual([token(1), token(3)]);
     expect(requests[1]?.[0]).toMatchObject({
       title: "Titre officiel de test",
-      body: "Source\u00a0: presidence.sn",
+      body: "Source\u00a0: primature.sn",
     });
   });
 
@@ -106,7 +108,7 @@ describe("sending a notification through Expo", () => {
     });
     // A no-break space before the colon (French typography): "\s" matches it.
     expect(sent.get(token(1))?.body).toMatch(
-      /^\[wo\] premiers mots de test\nSource\s:\spresidence\.sn$/,
+      /^\[wo\] premiers mots de test\nSource\s:\sprimature\.sn$/,
     );
     expect(sent.get(token(2))).toMatchObject({ title: "Titre" });
   });

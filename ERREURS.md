@@ -358,3 +358,14 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Prévention** :
   - test « attend pendant que Windows supprime encore le verrou précédent », et « une autre erreur remonte aussitôt » ;
   - règle : sous Windows, les opérations sur un fichier qui vient d'être supprimé ou remplacé peuvent échouer brièvement avec EPERM/EACCES/EBUSY ; tout code qui crée, renomme ou supprime un fichier partagé doit traiter ces codes comme passagers (même règle que le renommage du 08/10/2026).
+
+## 12/10/2026 — Notifications toujours signées « presidence.sn »
+
+- **Ce qui s'est passé** : signalé par l'utilisateur. Une notification annonçant l'article d'un ministère ou de la Primature indiquait « Source : presidence.sn », alors que l'article lui-même cite bien son site d'origine.
+- **Cause racine** : le texte de la notification a été écrit quand seule la Présidence était collectée, avec « presidence.sn » en dur. L'ajout des autres institutions (09-12/10) n'a pas repris ce texte.
+- **Correctif** : chaque notification porte le site officiel de son article, calculé comme dans le pied de page de l'article (`source` dans `push-message.ts`).
+
+  Fichiers : `apps/api/src/notifications/push-message.ts`, `expo-push-provider.ts` et leurs tests.
+- **Prévention** :
+  - test « nomme le site officiel de l'article, jamais presidence.sn par défaut » ;
+  - rappel de la règle du 12/10 (BUG-12) : quand une source s'ajoute, rechercher dans le code toute mention en dur de la première source (`grep presidence.sn`).
