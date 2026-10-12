@@ -1,3 +1,5 @@
+import { useRouter } from "expo-router";
+import { BuildingsIcon as Buildings } from "phosphor-react-native/src/icons/Buildings";
 import { useRef } from "react";
 import { ScrollView } from "react-native";
 import { useTranslation } from "../../i18n/useTranslation";
@@ -11,12 +13,16 @@ export interface SectionFilterProps {
   onSelect: (category: string | null) => void;
 }
 
-/** Row of section chips under the masthead: one section at a time, or all. */
+/**
+ * Row of section chips under the masthead: one section at a time, or all; then
+ * "Institutions", which opens the list of institutions.
+ */
 export function SectionFilter({ selected, onSelect }: SectionFilterProps) {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const { space } = theme;
   const row = useRef<ScrollView>(null);
+  const router = useRouter();
 
   const chip = (category: string | null, label: string) => {
     const active = selected === category;
@@ -51,6 +57,15 @@ export function SectionFilter({ selected, onSelect }: SectionFilterProps) {
       }}
     >
       {chip(null, t("feed.allSections"))}
+      <SectionChip
+        category={null}
+        glyph={Buildings}
+        label={t("institutionPages.chip")}
+        active={false}
+        onPress={() => {
+          router.push("/institutions");
+        }}
+      />
       {SECTION_FILTERS.map((category) => chip(category, t(categoryLabelKey(category))))}
     </ScrollView>
   );

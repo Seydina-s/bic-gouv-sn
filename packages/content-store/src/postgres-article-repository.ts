@@ -1,11 +1,18 @@
 import type { Database } from "@bgs/database";
-import { newsArticleSchema, shownLangs, type Lang, type NewsArticle } from "@bgs/shared-types";
+import {
+  institutionSchema,
+  newsArticleSchema,
+  shownLangs,
+  type Lang,
+  type NewsArticle,
+} from "@bgs/shared-types";
 import {
   withDuplicateOf,
   withTrack,
   type ArticlePage,
   type ArticleRepository,
   type ListQuery,
+  type PublisherCount,
   type SaveOutcome,
   type SectionPage,
   type SectionsQuery,
@@ -60,6 +67,7 @@ export class PostgresArticleRepository implements ArticleRepository {
   async list({
     lang,
     category,
+    publisher,
     limit,
     cursor,
     offset = 0,
@@ -70,6 +78,13 @@ export class PostgresArticleRepository implements ArticleRepository {
     if (category !== undefined) {
       params.push(category);
       where.push(`category = $${String(params.length)}`);
+    }
+    if (publisher !== undefined) {
+      params.push(publisher);
+      const at = `$${String(params.length)}::text`;
+      where.push(
+        `(data->>'publisher' = ${at} OR data->'alsoPublishedBy' @> jsonb_build_array(jsonb_build_object('publisher', ${at})))`,
+      );
     }
     const matching = where.join(" AND ");
     const count = await this.database.query(
@@ -116,6 +131,24 @@ export class PostgresArticleRepository implements ArticleRepository {
     return (
       (rows[0] as { published_on: string; updated_at: string; id: string } | undefined) ?? null
     );
+  }
+
+  async publishers(lang?: Lang): Promise<PublisherCount[]> {
+    const params: unknown[] = [];
+    const shown = shownFilter(lang, false, params);
+    const { rows } = await this.database.query(
+      `SELECT publisher, count(*)::int AS total FROM (
+         SELECT data->>'publisher' AS publisher FROM articles WHERE ${shown}
+         UNION ALL
+         SELECT jsonb_array_elements(data->'alsoPublishedBy')->>'publisher' FROM articles WHERE ${shown}
+       ) AS publications
+       GROUP BY publisher ORDER BY publisher`,
+      params,
+    );
+    return (rows as { publisher: string; total: number }[]).flatMap(({ publisher, total }) => {
+      const known = institutionSchema.safeParse(publisher);
+      return known.success ? [{ publisher: known.data, total }] : [];
+    });
   }
 
   async sections({ lang, perSection }: SectionsQuery): Promise<SectionPage[]> {

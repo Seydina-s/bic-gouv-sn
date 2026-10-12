@@ -149,6 +149,21 @@ export const newsSectionsResponseSchema = z.object({
 });
 export type NewsSectionsResponse = z.infer<typeof newsSectionsResponseSchema>;
 
+/**
+ * How many articles each institution has, for the list of institutions. A plain
+ * string: an institution added later never makes the answer unreadable to the app.
+ */
+export const newsPublishersResponseSchema = z.object({
+  publishers: z.array(
+    z.object({
+      publisher: z.string().min(1),
+      /** Articles it published or also published, shown in the language asked. */
+      total: z.int().nonnegative(),
+    }),
+  ),
+});
+export type NewsPublishersResponse = z.infer<typeof newsPublishersResponseSchema>;
+
 export const newsDetailSchema = newsSummarySchema.omit({ excerpt: true }).extend({
   blocks: z.array(blockSchema),
   /**

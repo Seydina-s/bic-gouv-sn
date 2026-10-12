@@ -1,6 +1,8 @@
 import { useEffect, useRef } from "react";
 import type { NewsDetail } from "@bgs/shared-types";
+import { useRouter } from "expo-router";
 import { ArrowSquareOutIcon as ArrowSquareOut } from "phosphor-react-native/src/icons/ArrowSquareOut";
+import { BuildingsIcon as Buildings } from "phosphor-react-native/src/icons/Buildings";
 import type { ScrollView } from "react-native";
 import {
   ActivityIndicator,
@@ -229,6 +231,7 @@ function ArticleBody({
             {t("content.sourceAttribution", { source: siteOf(detail.sourceUrl) })}
           </Text>
           <SourceLink url={detail.sourceUrl} />
+          <InstitutionLink publisher={detail.publisher} />
           {others.length > 0 && (
             <Text style={[textStyle.bodySmall, { color: color.textSecondary }]}>
               {t("content.alsoPublishedBy", { institutions: others.join(", ") })}
@@ -278,7 +281,37 @@ function SourceLink({ url }: { url: string }) {
   );
 }
 
+/** To every story of the institution that published this one. */
+function InstitutionLink({ publisher = "presidence" }: { publisher: string | undefined }) {
+  const { theme } = useTheme();
+  const { t } = useTranslation();
+  const router = useRouter();
+  const key = institutionLabelKey(publisher);
+  if (key === null) {
+    return null;
+  }
+  const { color, space, textStyle } = theme;
+  return (
+    <Pressable
+      accessibilityRole="link"
+      onPress={() => {
+        router.push({ pathname: "/institution/[id]", params: { id: publisher } });
+      }}
+      style={dimWhenPressed(
+        [styles.sourceLink, { minHeight: theme.touchTarget.min, gap: space.sm }],
+        theme.opacity.controlPressed,
+      )}
+    >
+      <Icon icon={Buildings} size="sm" color={color.textBrand} />
+      <Text style={[textStyle.label, styles.linkText, { color: color.textBrand }]}>
+        {t("institutionPages.allNews", { institution: t(key) })}
+      </Text>
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
+  linkText: { flexShrink: 1 },
   scrollRoot: { flex: 1 },
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
   source: { borderTopWidth: StyleSheet.hairlineWidth },

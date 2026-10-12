@@ -1,4 +1,4 @@
-import { pageCount, pageSlots } from "./page-slots";
+import { pageCount, pageSlots, parsePage } from "./page-slots";
 
 describe("pageSlots", () => {
   it("lists every page when there are few", () => {
@@ -35,5 +35,15 @@ describe("pageCount", () => {
     expect(pageCount(0, 20)).toBe(1);
     expect(pageCount(20, 20)).toBe(1);
     expect(pageCount(41, 20)).toBe(3);
+  });
+});
+
+describe("parsePage", () => {
+  it("reads a page number from the address, the first page otherwise", () => {
+    expect(parsePage("3")).toBe(3);
+    expect(parsePage(undefined)).toBe(1);
+    expect(parsePage("0")).toBe(1);
+    expect(parsePage("2.5")).toBe(1);
+    expect(parsePage("abc")).toBe(1);
   });
 });

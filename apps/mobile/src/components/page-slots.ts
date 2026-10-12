@@ -26,3 +26,9 @@ export function pageSlots(current: number, count: number): PageSlot[] {
 export function pageCount(total: number, pageSize: number): number {
   return Math.max(1, Math.ceil(total / pageSize));
 }
+
+/** A page number from the address; anything else reads as the first page. */
+export function parsePage(raw: string | undefined): number {
+  const page = Number(raw);
+  return Number.isInteger(page) && page >= 1 ? page : 1;
+}

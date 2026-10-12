@@ -1,11 +1,19 @@
-import { isPublished, newsArticleSchema, type Lang, type NewsArticle } from "@bgs/shared-types";
+import {
+  isPublished,
+  newsArticleSchema,
+  type Institution,
+  type Lang,
+  type NewsArticle,
+} from "@bgs/shared-types";
 import {
   compareNewestFirst,
+  isPublishedBy,
   withDuplicateOf,
   withTrack,
   type ArticlePage,
   type ArticleRepository,
   type ListQuery,
+  type PublisherCount,
   type SaveOutcome,
   type SectionPage,
   type SectionsQuery,
@@ -33,13 +41,16 @@ export class FileArticleRepository implements ArticleRepository {
   async list({
     lang,
     category,
+    publisher,
     limit,
     cursor,
     offset = 0,
     includeWithdrawn = false,
   }: ListQuery): Promise<ArticlePage> {
     const all = (await this.newestFirst(lang, includeWithdrawn)).filter(
-      (article) => category === undefined || article.category === category,
+      (article) =>
+        (category === undefined || article.category === category) &&
+        (publisher === undefined || isPublishedBy(article, publisher)),
     );
     const start =
       cursor === undefined ? offset : all.findIndex((article) => article.id === cursor) + 1;
@@ -47,6 +58,21 @@ export class FileArticleRepository implements ArticleRepository {
     const last = items.at(-1);
     const hasMore = start + limit < all.length;
     return { items, nextCursor: hasMore && last !== undefined ? last.id : null, total: all.length };
+  }
+
+  async publishers(lang?: Lang): Promise<PublisherCount[]> {
+    const totals = new Map<Institution, number>();
+    for (const article of await this.newestFirst(lang)) {
+      for (const institution of [
+        article.publisher,
+        ...article.alsoPublishedBy.map((other) => other.publisher),
+      ]) {
+        totals.set(institution, (totals.get(institution) ?? 0) + 1);
+      }
+    }
+    return [...totals]
+      .map(([publisher, total]) => ({ publisher, total }))
+      .sort((a, b) => a.publisher.localeCompare(b.publisher));
   }
 
   async sections({ lang, perSection }: SectionsQuery): Promise<SectionPage[]> {

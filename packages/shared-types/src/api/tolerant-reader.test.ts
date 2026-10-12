@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   readNewsDetail,
   readNewsList,
+  readNewsPublishers,
   readNewsSections,
   readProcedureDetail,
   readProcedureList,
@@ -78,6 +79,22 @@ describe("readNewsList (a newer API talking to an older app)", () => {
     expect(readNewsList(null)).toBeNull();
     expect(readNewsList({ items: "no", nextCursor: null })).toBeNull();
     expect(readNewsList({ items: [] })).toBeNull();
+  });
+});
+
+describe("readNewsPublishers", () => {
+  it("keeps the readable counts, and refuses a broken answer", () => {
+    expect(
+      readNewsPublishers({
+        publishers: [
+          { publisher: "primature", total: 3 },
+          { publisher: "", total: 1 },
+          { publisher: "sante", total: -1 },
+        ],
+      }),
+    ).toEqual({ publishers: [{ publisher: "primature", total: 3 }] });
+    expect(readNewsPublishers({ publishers: "none" })).toBeNull();
+    expect(readNewsPublishers(null)).toBeNull();
   });
 });
 

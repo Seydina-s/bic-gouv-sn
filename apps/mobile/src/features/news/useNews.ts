@@ -5,7 +5,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { useCallback, useEffect } from "react";
-import { createNewsClient } from "../../api/news-client";
+import { createNewsClient, type StoryFilter } from "../../api/news-client";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useDataSaver } from "../data-saver/DataSaverProvider";
 import { API_BASE_URL } from "../../api/base-url";
@@ -26,13 +26,27 @@ export function useNewsFeed(category: string | null = null) {
   });
 }
 
-/** One numbered page of a section; the previous page stays shown while the next loads. */
-export function useSectionPage(category: string, page: number) {
+/**
+ * One numbered page of a section or of an institution; the previous page stays shown
+ * while the next loads.
+ */
+export function useStoryPage(filter: StoryFilter, page: number) {
+  const { lang } = useTranslation();
+  const scope =
+    "category" in filter ? ["section", filter.category] : ["institution", filter.publisher];
+  return useQuery({
+    queryKey: ["news", lang, ...scope, page],
+    queryFn: ({ signal }) => client.storyPage(lang, filter, page, signal),
+    placeholderData: keepPreviousData,
+  });
+}
+
+/** How many stories each institution has, for the list of institutions. */
+export function usePublishers() {
   const { lang } = useTranslation();
   return useQuery({
-    queryKey: ["news", lang, "section", category, page],
-    queryFn: ({ signal }) => client.sectionPage(lang, category, page, signal),
-    placeholderData: keepPreviousData,
+    queryKey: ["news", lang, "publishers"],
+    queryFn: ({ signal }) => client.publishers(lang, signal),
   });
 }
 

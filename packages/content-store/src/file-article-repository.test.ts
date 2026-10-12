@@ -228,6 +228,38 @@ describe.each(STORAGES)("articles stored %s", (_name, open) => {
     expect(items.map((item) => item.id)).toEqual([article(2).id]);
   });
 
+  it("filters by institution, a duplicate counting for each institution that published it", async () => {
+    const primature = (n: number, overrides: Partial<NewsArticle> = {}) => {
+      const sourceUrl = `https://primature.sn/publications/actualites/test-${String(n)}`;
+      const base = article(n);
+      return article(n, {
+        publisher: "primature",
+        sourceUrl,
+        translations: base.translations.map((translation) => ({ ...translation, sourceUrl })),
+        ...overrides,
+      });
+    };
+    await repo.save(article(1));
+    await repo.save(
+      article(2, {
+        alsoPublishedBy: [
+          { publisher: "primature", sourceUrl: "https://primature.sn/publications/actualites/x" },
+        ],
+      }),
+    );
+    await repo.save(primature(3));
+    const ids = async (publisher: "presidence" | "primature" | "sante") =>
+      (await repo.list({ limit: 5, publisher })).items.map((item) => item.id);
+    expect(await ids("primature")).toEqual([article(3).id, article(2).id]);
+    expect(await ids("presidence")).toEqual([article(2).id, article(1).id]);
+    expect(await ids("sante")).toEqual([]);
+    expect(await repo.publishers("fr")).toEqual([
+      { publisher: "presidence", total: 2 },
+      { publisher: "primature", total: 2 },
+    ]);
+    expect(await repo.publishers("wo")).toEqual([]);
+  });
+
   it("filters by language", async () => {
     await repo.save(article(1));
     expect((await repo.list({ lang: "wo", limit: 5 })).items).toEqual([]);
