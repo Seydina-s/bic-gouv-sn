@@ -148,8 +148,7 @@ export class PostgresArticleRepository implements ArticleRepository {
        GROUP BY publisher ORDER BY publisher`,
       params,
     );
-    type Row = { publisher: string; total: number; newest_on: string; last_fetched_at: string };
-    return (rows as Row[]).flatMap((row) => {
+    return (rows as PublisherRow[]).flatMap((row) => {
       const known = institutionSchema.safeParse(row.publisher);
       return known.success
         ? [
@@ -235,6 +234,15 @@ export class PostgresArticleRepository implements ArticleRepository {
 }
 
 /** Articles with a version in `lang` (any language if undefined) the app may show. */
+/** One institution's line of the publishers query. */
+interface PublisherRow {
+  publisher: string;
+  total: number;
+  /** Empty when none of its articles is dated. */
+  newest_on: string;
+  last_fetched_at: string;
+}
+
 function shownFilter(lang: Lang | undefined, includeWithdrawn: boolean, params: unknown[]): string {
   const column = includeWithdrawn ? "all_langs" : "shown_langs";
   if (lang === undefined) {
