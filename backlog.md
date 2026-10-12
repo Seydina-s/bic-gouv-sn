@@ -68,7 +68,7 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 24/09/2026 | O-01 🔴 Section « Opportunités » conservée : définir contenu, sources officielles et priorité | Réponse utilisateur |
 | 24/09/2026 | S1-06 ✅ Node 24 LTS isolé par projet via fnm (Node 20 système conservé) | Revue du stack |
 | 24/09/2026 | L-01 🔴 Obtenir la preuve écrite d'autorisation de la Présidence avant soumission aux stores | Réponse utilisateur |
-| 24/09/2026 | T-01 🔴 (29/09 : TypeScript 7.0.2 est sorti, mais typescript-eslint n’accepte encore que les versions inférieures à 6.1 : toujours bloqué) Passer à TypeScript 7 dès que typescript-eslint le supporte | F-02 |
+| 24/09/2026 | T-01 🔴 (12/10 : toujours bloqué, typescript-eslint 8.71 accepte TypeScript < 6.1 et TypeScript 7.0.2 est sorti ; 29/09 : TypeScript 7.0.2 est sorti, mais typescript-eslint n’accepte encore que les versions inférieures à 6.1 : toujours bloqué) Passer à TypeScript 7 dès que typescript-eslint le supporte | F-02 |
 | 24/09/2026 | W-01 🔴 Identifier qui rédige et valide les textes wolof de l'interface (catalogue `packages/i18n/src/messages/wo.ts`) | F-05 |
 | 24/09/2026 | A-01 🔴 Logo officiel, icônes d'app et écran de lancement (actuellement icônes génériques du modèle Expo — à remplacer, ne rien inventer) | F-07 |
 | 24/09/2026 | A-02 🔴 Identifiant de publication de l'app (ex. `sn.gouv.bic…`) à valider avec le BIC avant tout build de store | F-07 |

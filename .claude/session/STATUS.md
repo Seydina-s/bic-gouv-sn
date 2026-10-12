@@ -1,6 +1,20 @@
 # STATUS — Bic Gouv SN
 
-**Dernière mise à jour** : 11/10/2026 (soir) · **Mode** : standard (fenêtre autonome terminée le 10/10 à 13 h). Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md`.
+**Dernière mise à jour** : 12/10/2026 (matin) · **Mode** : autonome jusqu'au 12/10 à 14 h (demande de l'utilisateur), puis standard. Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md`.
+
+## Nuit du 11 au 12/10 (mode autonome) en bref : tous les ministères lisibles, deux défauts graves corrigés
+- **Ministères** : 19 ministères collectés sur 26 (plus la Présidence et la Primature), 21 sites suivis en temps réel. Les 7 autres n'ont pas de site lisible (certificat invalide, mot de passe, site figé avant le gouvernement actuel, aucun site) ou attendent une décision (Finances, point 43).
+- **Sites à revoir** (#315) : revus automatiquement chaque semaine, la nuit ; la console les montre et alerte dès qu'un site publie de nouveau. Première revue le 12/10 à 2 h 18 : aucun n'est revenu.
+- **Par institution** (#317, #320) : pastille « Institutions » à côté de « Tout », liste des institutions avec leur nombre d'articles, une page par institution, lien « Toutes les actualités : … » dans chaque article. Sur votre téléphone : fermer puis rouvrir l'app.
+- **Console** (#321) : tableau « Sources suivies » (par institution : articles, dernier article, dernière arrivée dans l'app, protection du site).
+- **Historiques** : Numérique, Forces armées et Enseignement supérieur chargés en entier (≈ 1 500 articles de plus) ; la Santé est en cours.
+- **Défauts graves trouvés et corrigés** (ERREURS.md) :
+  - 15 articles de ministères masqués à tort cette nuit par la vérification des retraits, qui les relisait sur presidence.sn : corrigé (#318) et réaffichés ;
+  - verrou d'écriture qui échouait sous Windows au lieu d'attendre son tour (#322) ;
+  - rattrapage des voix bloqué 2 h sur l'ancien code, puis une lecture orpheline sur le serveur : arrêt net désormais en cas de refus de la base (#316).
+- **Assistant** : banc d'essai élargi à tous les ministères (#319) ; aucune question ministérielle hors des 3 premières pages.
+- **Voix** : rattrapage français en cours (≈ 3 400 articles restants), puis wolof.
+- **Décisions qui vous attendent** : points 43 à 46 de `A-FAIRE-UTILISATEUR.md`.
 
 ## 11/10 en bref : un assistant qui comprend, des voix plus naturelles
 - **Articles des ministères « non disponibles »** : le serveur de développement du téléphone servait encore le code du 08/10 (qui n'acceptait que presidence.sn) ; mis à jour, 300 articles récents vérifiés lisibles. Fermer puis rouvrir l'app suffit.
