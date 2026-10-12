@@ -178,7 +178,9 @@ export const newsRoutes: FastifyPluginAsyncZod<NewsRoutesOptions> = (
       const publishers = await articles.publishers(request.query.lang);
       const fingerprint = [
         request.query.lang,
-        ...publishers.map((count) => `${count.publisher}:${String(count.total)}`),
+        ...publishers.map(
+          (count) => `${count.publisher}:${String(count.total)}:${count.lastFetchedAt}`,
+        ),
       ].join("|");
       return sendCached(request, reply, fingerprint, { publishers });
     },

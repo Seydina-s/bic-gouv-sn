@@ -145,3 +145,24 @@ export function institutionOfUrl(url: string): Institution | null {
     return null;
   }
 }
+
+/** "Ministère de l'Agriculture" is filed under "Agriculture", as people look for it. */
+function filingName(name: string): string {
+  return name.replace(/^Ministère (de la |de l'|des |du |de )/i, "");
+}
+
+/**
+ * The order people expect institutions in: the Présidence, the Primature, then the
+ * ministries by their subject (`name` is the institution's name, as shown).
+ */
+export function compareInstitutions(
+  a: { publisher: string; name: string },
+  b: { publisher: string; name: string },
+): number {
+  const rank = (publisher: string) =>
+    publisher === "presidence" ? 0 : publisher === "primature" ? 1 : 2;
+  return (
+    rank(a.publisher) - rank(b.publisher) ||
+    filingName(a.name).localeCompare(filingName(b.name), "fr")
+  );
+}

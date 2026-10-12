@@ -137,17 +137,30 @@ export class PostgresArticleRepository implements ArticleRepository {
     const params: unknown[] = [];
     const shown = shownFilter(lang, false, params);
     const { rows } = await this.database.query(
-      `SELECT publisher, count(*)::int AS total FROM (
-         SELECT data->>'publisher' AS publisher FROM articles WHERE ${shown}
+      `SELECT publisher, count(*)::int AS total, max(published_on) AS newest_on,
+         max(fetched_at) AS last_fetched_at FROM (
+         SELECT data->>'publisher' AS publisher, published_on, data->>'fetchedAt' AS fetched_at
+           FROM articles WHERE ${shown}
          UNION ALL
-         SELECT jsonb_array_elements(data->'alsoPublishedBy')->>'publisher' FROM articles WHERE ${shown}
+         SELECT jsonb_array_elements(data->'alsoPublishedBy')->>'publisher', published_on,
+           data->>'fetchedAt' FROM articles WHERE ${shown}
        ) AS publications
        GROUP BY publisher ORDER BY publisher`,
       params,
     );
-    return (rows as { publisher: string; total: number }[]).flatMap(({ publisher, total }) => {
-      const known = institutionSchema.safeParse(publisher);
-      return known.success ? [{ publisher: known.data, total }] : [];
+    return (rows as PublisherRow[]).flatMap((row) => {
+      const known = institutionSchema.safeParse(row.publisher);
+      return known.success
+        ? [
+            {
+              publisher: known.data,
+              total: row.total,
+              // Undated articles are stored with an empty day.
+              newestOn: row.newest_on === "" ? null : row.newest_on,
+              lastFetchedAt: row.last_fetched_at,
+            },
+          ]
+        : [];
     });
   }
 
@@ -221,6 +234,15 @@ export class PostgresArticleRepository implements ArticleRepository {
 }
 
 /** Articles with a version in `lang` (any language if undefined) the app may show. */
+/** One institution's line of the publishers query. */
+interface PublisherRow {
+  publisher: string;
+  total: number;
+  /** Empty when none of its articles is dated. */
+  newest_on: string;
+  last_fetched_at: string;
+}
+
 function shownFilter(lang: Lang | undefined, includeWithdrawn: boolean, params: unknown[]): string {
   const column = includeWithdrawn ? "all_langs" : "shown_langs";
   if (lang === undefined) {

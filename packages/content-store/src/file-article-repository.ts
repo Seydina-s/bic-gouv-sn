@@ -61,18 +61,27 @@ export class FileArticleRepository implements ArticleRepository {
   }
 
   async publishers(lang?: Lang): Promise<PublisherCount[]> {
-    const totals = new Map<Institution, number>();
+    const counts = new Map<Institution, PublisherCount>();
+    // Newest first: the first article met is each institution's newest.
     for (const article of await this.newestFirst(lang)) {
       for (const institution of [
         article.publisher,
         ...article.alsoPublishedBy.map((other) => other.publisher),
       ]) {
-        totals.set(institution, (totals.get(institution) ?? 0) + 1);
+        const count = counts.get(institution) ?? {
+          publisher: institution,
+          total: 0,
+          newestOn: article.sourcePublishedOn,
+          lastFetchedAt: article.fetchedAt,
+        };
+        count.total += 1;
+        if (article.fetchedAt > count.lastFetchedAt) {
+          count.lastFetchedAt = article.fetchedAt;
+        }
+        counts.set(institution, count);
       }
     }
-    return [...totals]
-      .map(([publisher, total]) => ({ publisher, total }))
-      .sort((a, b) => a.publisher.localeCompare(b.publisher));
+    return [...counts.values()].sort((a, b) => a.publisher.localeCompare(b.publisher));
   }
 
   async sections({ lang, perSection }: SectionsQuery): Promise<SectionPage[]> {

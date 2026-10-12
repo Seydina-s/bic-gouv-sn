@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { institutionOfUrl } from "./institutions";
+import { compareInstitutions, institutionOfUrl } from "./institutions";
 import { officialMediaUrl, officialSourceUrlSchema } from "./official-source.schema";
 
 describe("institutionOfUrl", () => {
@@ -27,5 +27,24 @@ describe("Primature as an official source", () => {
     expect(officialMediaUrl("https://primature.sn/sites/default/files/2026-10/PM.jpg")).toBe(
       "https://primature.sn/sites/default/files/2026-10/PM.jpg",
     );
+  });
+});
+
+describe("compareInstitutions", () => {
+  it("puts the Présidence and the Primature first, then the ministries by subject", () => {
+    const names = [
+      { publisher: "sante", name: "Ministère de la Santé" },
+      { publisher: "peches", name: "Ministère des Pêches" },
+      { publisher: "primature", name: "Primature" },
+      { publisher: "agriculture", name: "Ministère de l'Agriculture" },
+      { publisher: "presidence", name: "Présidence" },
+    ];
+    expect([...names].sort(compareInstitutions).map((item) => item.publisher)).toEqual([
+      "presidence",
+      "primature",
+      "agriculture",
+      "peches",
+      "sante",
+    ]);
   });
 });
