@@ -29,6 +29,7 @@ export const INSTITUTIONS = [
   "fonction-publique",
   "famille",
   "education",
+  "finances",
 ] as const;
 
 export const institutionSchema = z.enum(INSTITUTIONS);
@@ -128,6 +129,11 @@ export const INSTITUTION_SITES: Readonly<Record<Institution, InstitutionSite>> =
   famille: {
     pageHosts: ["femme.gouv.sn", "www.femme.gouv.sn"],
     mediaHosts: ["femme.gouv.sn", "www.femme.gouv.sn"],
+  },
+  finances: {
+    pageHosts: ["finances.gouv.sn", "www.finances.gouv.sn"],
+    // Photos and documents are served by the ministry's content service.
+    mediaHosts: ["apimfb.finances.gouv.sn"],
   },
   education: {
     pageHosts: ["www.education.sn", "education.sn"],

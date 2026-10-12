@@ -2,6 +2,7 @@ import { institutionSchema, type Institution } from "@bgs/shared-types";
 import { createDrupalProvider } from "./drupal/drupal-provider";
 import { DRUPAL_MINISTRIES } from "./drupal/ministries";
 import { createEducationProvider } from "./education/education-provider";
+import { createFinancesProvider, FINANCES_RELAY_HOSTS } from "./finances/finances-provider";
 import { createFeedProvider } from "./feed/feed-provider";
 import { FEED_MINISTRIES } from "./feed/ministries";
 import { createInfrastructuresProvider } from "./infrastructures/infrastructures-provider";
@@ -12,6 +13,7 @@ import { createPresidenceProvider } from "./presidence/presidence-provider";
 import { createPrimatureProvider } from "./primature/primature-provider";
 import type { SourceProvider } from "./source-provider";
 import { WORDPRESS_MINISTRIES } from "./wordpress/ministries";
+import { relayFetchFrom } from "../lib/ssh-relay";
 import { createWordpressProvider } from "./wordpress/wordpress-provider";
 
 /** The collector of each institution's news (docs/sources.md). */
@@ -36,6 +38,9 @@ export const NEWS_SOURCES: Readonly<Record<Institution, () => SourceProvider>> =
   "fonction-publique": () => createFeedProvider(FEED_MINISTRIES["fonction-publique"]),
   famille: () => createWordpressProvider(WORDPRESS_MINISTRIES.famille),
   education: () => createEducationProvider(),
+  // Read through our server where finances.gouv.sn filters Senegal (RELAY_SSH_*).
+  finances: () =>
+    createFinancesProvider({ fetchImpl: relayFetchFrom(process.env, FINANCES_RELAY_HOSTS) }),
   "emploi-formation": () => createWordpressProvider(WORDPRESS_MINISTRIES["emploi-formation"]),
 };
 

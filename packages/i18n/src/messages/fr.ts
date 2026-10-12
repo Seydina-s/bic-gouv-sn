@@ -83,6 +83,7 @@ export const fr = {
       "Ministère de la Fonction publique, du Travail et de la Réforme du service public",
     famille: "Ministère de la Famille, de l'Action sociale et des Solidarités",
     education: "Ministère de l'Éducation nationale",
+    finances: "Ministère de l'Économie, des Finances et du Plan",
   },
   /** Sections of the official sites, keyed by their slug. */
   categories: {
