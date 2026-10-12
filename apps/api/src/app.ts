@@ -128,6 +128,8 @@ export interface AppOptions {
   remoteConfig?: RemoteConfigStore;
   /** Defaults to the collection's report file at INGESTION_STATUS_PATH. */
   ingestionStatus?: JsonDocument;
+  /** Weekly review of the ministry sites not collected yet (GOV-08). */
+  sitesReview?: JsonDocument;
   /** Defaults to the file stores when ADMIN_SECRET_KEY is set; none otherwise. */
   admin?: AdminServices | null;
   /** Where the logs go: standard output by default, tests read them here. */
@@ -235,6 +237,7 @@ export async function buildApp({
   stateServices = new StateServiceStore(fileDocument(config.STATE_SERVICES_PATH)),
   remoteConfig = new RemoteConfigStore(fileDocument(config.REMOTE_CONFIG_PATH)),
   ingestionStatus = fileDocument(config.INGESTION_STATUS_PATH),
+  sitesReview = fileDocument(config.SITES_REVIEW_PATH),
   redis = config.REDIS_URL === undefined ? null : connectRedis(config.REDIS_URL),
   sharedState = redis === null ? new MemoryKeyValueStore() : new RedisKeyValueStore(redis),
   database = null,
@@ -419,6 +422,7 @@ export async function buildApp({
   await app.register(statusRoutes, {
     prefix: "/v1",
     ingestionStatus,
+    sitesReview,
   });
   await app.register(newsRoutes, {
     prefix: "/v1",

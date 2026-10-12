@@ -2,6 +2,7 @@ export * from "./article-repository";
 export * from "./file-article-repository";
 export * from "./durable-file";
 export * from "./ingestion-status-file";
+export * from "./sites-review-file";
 export * from "./daily-snapshot";
 export * from "./versioned-json-store";
 export * from "./procedure-repository";
