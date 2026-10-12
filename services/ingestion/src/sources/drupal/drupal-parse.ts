@@ -154,6 +154,28 @@ function themedBody(nodes: ChildNode[], layout: DrupalLayout): Element | null {
   );
 }
 
+/**
+ * A page made of a document alone (sante.gouv.sn's communiqués of 2020-2022: a
+ * scanned page and its PDF, no text): the links of its file fields to PDF files, as
+ * the page writes them (the file's official name). Owner's decision of 12/10/2026:
+ * published as the document it is, nothing written for it.
+ */
+function documentLinks(nodes: ChildNode[]): string | null {
+  const fields = DomUtils.findAll(
+    (element) => hasClass(element, "field-type-file") || hasClass(element, "field--type-file"),
+    nodes,
+  );
+  const links = DomUtils.findAll(
+    (element) =>
+      element.name === "a" &&
+      /.pdf$/i.test(new URL(element.attribs["href"] ?? "", "https://x").pathname),
+    fields,
+  );
+  return links.length === 0
+    ? null
+    : links.map((link) => `<p>${render(link, { encodeEntities: "utf8" })}</p>`).join("");
+}
+
 /** The article of a page: title from the page head, text from its "body" field. */
 export function parseDrupalArticle(html: string, layout?: DrupalLayout): DrupalArticle | null {
   const document = parseDocument(html);
@@ -161,7 +183,8 @@ export function parseDrupalArticle(html: string, layout?: DrupalLayout): DrupalA
   const title = (head === null ? "" : DomUtils.textContent(head)).split(" | ")[0]?.trim() ?? "";
   const body =
     layout === undefined ? bodyOf(document.children) : themedBody(document.children, layout);
-  if (body === null) {
+  const documents = body === null ? documentLinks(document.children) : null;
+  if (body === null && documents === null) {
     return null;
   }
   const imageField =
@@ -175,7 +198,10 @@ export function parseDrupalArticle(html: string, layout?: DrupalLayout): DrupalA
   const created = findByClass(document.children, "field--name-created");
   return {
     title,
-    bodyHtml: body.children.map((node) => render(node, { encodeEntities: "utf8" })).join(""),
+    bodyHtml:
+      body === null
+        ? (documents ?? "")
+        : body.children.map((node) => render(node, { encodeEntities: "utf8" })).join(""),
     imagePath: image?.attribs["src"] ?? null,
     publishedOn: created === null ? null : createdDay(DomUtils.textContent(created)),
   };
