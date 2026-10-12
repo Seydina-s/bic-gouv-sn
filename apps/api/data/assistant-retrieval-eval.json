@@ -1,5 +1,5 @@
 {
-  "about": "Internal test set for the assistant's passage search (AI-04), never shown in the app. Each question was written by Claude from a page of the base and links to the official page that answers it. 'direct' questions reuse the words of the source; 'reformulated' ones ask the same thing in other words. French only: Wolof questions await native speakers (W-01). Citizen questions added on 11/10/2026 from the owner's report and a battery of 56 questions asked to the live assistant: typed as people do (short, abbreviated, with slips, in Wolof).",
+  "about": "Internal test set for the assistant's passage search (AI-04), never shown in the app. Each question was written by Claude from a page of the base and links to the official page that answers it. 'direct' questions reuse the words of the source; 'reformulated' ones ask the same thing in other words. French only: Wolof questions await native speakers (W-01). Citizen questions added on 11/10/2026 from the owner's report and a battery of 56 questions asked to the live assistant: typed as people do (short, abbreviated, with slips, in Wolof). Ministry questions added on 12/10/2026 (GOV-12): one or two per ministry, each written from the title of a real article of the base, which is the expected page.",
   "cases": [
     {
       "question": "Comment demander un NINEA pour mon entreprise ?",
@@ -623,6 +623,159 @@
       "style": "citizen",
       "expected": [
         "https://justice.sec.gouv.sn/octobre-rose-au-ministere-de-la-justice-le-garde-des-sceaux-me-moussa-sarr-descend-sur-le-terrain-contre-le-cancer/"
+      ]
+    },
+    {
+      "question": "Quelles priorités et réformes le ministère de l'Énergie a-t-il présentées pour l'énergie et les hydrocarbures ?",
+      "style": "reformulated",
+      "expected": [
+        "https://energie-mines.gouv.sn/energie-et-hydrocarbures-le-ministere-presente-ses-priorites-et-reformes/"
+      ]
+    },
+    {
+      "question": "conference itie bruxelles 2026",
+      "style": "citizen",
+      "expected": ["https://energie-mines.gouv.sn/conference-mondiale-de-litie-2026-a-bruxelles/"]
+    },
+    {
+      "question": "Digitalisation de la distribution des intrants agricoles avec l'ERP PAS",
+      "style": "direct",
+      "expected": [
+        "https://agriculture.gouv.sn/agriculture-le-senegal-generalise-la-digitalisation-de-la-distribution-des-intrants-agricoles-avec-lerp-pas/"
+      ]
+    },
+    {
+      "question": "Que fait le ministère des Pêches pour les pêcheurs touchés par les intempéries sur le littoral ?",
+      "style": "reformulated",
+      "expected": [
+        "https://mpem.gouv.sn/communique-intemperies-sur-le-littoral-le-mpem-aux-cotes-des-pecheurs-sinistres/"
+      ]
+    },
+    {
+      "question": "pots a poulpe joal",
+      "style": "citizen",
+      "expected": ["https://mpem.gouv.sn/joal-ceremonie-de-mise-a-leau-des-pots-a-poulpe-en-2025/"]
+    },
+    {
+      "question": "Comment le ministère de l'Hydraulique suit-il l'assainissement et les eaux de pluie pendant les JOJ ?",
+      "style": "reformulated",
+      "expected": [
+        "https://mha.gouv.sn/joj-dakar-2026-le-ministere-renforce-le-suivi-des-dispositifs-dassainissement-et-de-gestion-des-eaux-pluviales/"
+      ]
+    },
+    {
+      "question": "declaration ministre interieur inondations zones touchees",
+      "style": "citizen",
+      "expected": [
+        "https://www.interieur.gouv.sn/actualites/discours/inondations-declaration-du-ministre-dans-les-zones-affectees-par-les-eaux"
+      ]
+    },
+    {
+      "question": "La Casamance au cœur de la stratégie de valorisation artisanale et de la promotion touristique",
+      "style": "direct",
+      "expected": [
+        "https://mcat.gouv.sn/la-casamance-au-coeur-de-la-strategie-de-valorisation-artisanale-et-de-la-promotion-touristique/"
+      ]
+    },
+    {
+      "question": "forum partenaires sgci 3 namibie",
+      "style": "citizen",
+      "expected": [
+        "https://mesrisenegal.sn/article/forum-des-partenaires-de-la-sgci-3-le-senegal-represente-en-namibie"
+      ]
+    },
+    {
+      "question": "Prytanée militaire de Saint-Louis : l'excellence scolaire à l'honneur",
+      "style": "direct",
+      "expected": [
+        "https://www.forcesarmees.gouv.sn/actualites/prytanee-militaire-de-saint-louis-lexcellence-scolaire-lhonneur"
+      ]
+    },
+    {
+      "question": "Combien d'opérations des yeux ont été faites contre la cécité ?",
+      "style": "reformulated",
+      "expected": [
+        "https://www.sante.gouv.sn/Actualites/lutte-contre-la-c%C3%A9cit%C3%A9-481-interventions-ophtalmologiques-au-profit-des-populations-0"
+      ]
+    },
+    {
+      "question": "comite regional oms afrique 76e session senegal",
+      "style": "citizen",
+      "expected": [
+        "https://www.sante.gouv.sn/Actualites/76%C3%A8me-session-du-comit%C3%A9-r%C3%A9gional-de-l%E2%80%99oms-pour-l%E2%80%99afrique-le-s%C3%A9n%C3%A9gal-r%C3%A9affirme-son"
+      ]
+    },
+    {
+      "question": "reception village olympique joj",
+      "style": "citizen",
+      "expected": [
+        "https://www.ministeredesinfrastructures.sn/actualites/66884a75-2964-4d26-be9f-69618a3b5cf2"
+      ]
+    },
+    {
+      "question": "aminata seck etats unis",
+      "style": "citizen",
+      "expected": ["https://www.diplomatie.gouv.sn/node/302"]
+    },
+    {
+      "question": "Samba Diouf en visite chez Groupes Univers Telecom",
+      "style": "direct",
+      "expected": ["https://www.mctn.sn/post/publication-1791477130"]
+    },
+    {
+      "question": "senegal 1er uemoa indice industrialisation 2025",
+      "style": "citizen",
+      "expected": [
+        "https://www.economie.gouv.sn/fr/blog/indice-2025-de-lindustrialisation-le-senegal-1er-en-zone-uemoa"
+      ]
+    },
+    {
+      "question": "Combien le programme national de développement local a-t-il investi en deux ans ?",
+      "style": "reformulated",
+      "expected": [
+        "https://www.economie.gouv.sn/fr/blog/programme-national-de-developpement-local-pndl-plus-de-6-milliards-de-fcfa-investis-en-2-ans"
+      ]
+    },
+    {
+      "question": "Qui a remplacé Olivier Boucal lors de la passation de service à la Fonction publique ?",
+      "style": "reformulated",
+      "expected": [
+        "https://www.fonctionpublique.gouv.sn/?%F0%9D%90%8F%F0%9D%90%9A%F0%9D%90%AC%F0%9D%90%AC%F0%9D%90%9A%F0%9D%90%AD%F0%9D%90%A2%F0%9D%90%A8%F0%9D%90%A7-%F0%9D%90%9D%F0%9D%90%9E-%F0%9D%90%AC%F0%9D%90%9E%F0%9D%90%AB%F0%9D%90%AF%F0%9D%90%A2%F0%9D%90%9C%F0%9D%90%9E"
+      ]
+    },
+    {
+      "question": "don de vivres institut jeunes aveugles thies",
+      "style": "citizen",
+      "expected": [
+        "https://www.education.sn/posts/thies-un-important-don-de-vivres-du-men-a-linstitut-national-deducation-et-de-formation-des-jeunes-aveugles"
+      ]
+    },
+    {
+      "question": "Justice numérique : digitalisation des archives judiciaires avec le PNUD",
+      "style": "direct",
+      "expected": [
+        "https://justice.sec.gouv.sn/justice-numerique-le-senegal-et-le-pnud-accelerent-la-digitalisation-des-archives-judiciaires/"
+      ]
+    },
+    {
+      "question": "Partenariat BNDE PNDAS pour financer les projets agro-industriels",
+      "style": "direct",
+      "expected": [
+        "https://industriecommerce.gouv.sn/2026/09/30/bnde-pndas-un-partenariat-pour-renforcer-le-financement-des-projets-agro-industriels/"
+      ]
+    },
+    {
+      "question": "Que fait le Sénégal pour la protection de l'enfance avec l'UNICEF ?",
+      "style": "reformulated",
+      "expected": [
+        "https://justice.sec.gouv.sn/protection-de-lenfance-me-moussa-sarr-et-lunicef-veulent-renforcer-leur-cooperation/"
+      ]
+    },
+    {
+      "question": "hivernage cngi coordination interventions",
+      "style": "citizen",
+      "expected": [
+        "https://mha.gouv.sn/hivernage-2026-le-cngi-renforce-le-suivi-et-la-coordination-des-interventions/"
       ]
     }
   ]
