@@ -35,8 +35,8 @@ export interface StoryPagesProps {
   ink: string;
   /** Said when the list has no story. */
   emptyText: string;
-  /** Off on a section's pages, whose band already names the section. */
-  showSection: boolean;
+  /** What the band already names, so that no story repeats it. */
+  named: "section" | "institution";
   onPage: (page: number) => void;
   testID: string;
 }
@@ -53,7 +53,7 @@ export function StoryPages({
   header,
   ink,
   emptyText,
-  showSection,
+  named,
   onPage,
   testID,
 }: StoryPagesProps) {
@@ -124,12 +124,19 @@ export function StoryPages({
               <LeadStory
                 item={item}
                 lastOpened={false}
-                showSection={showSection}
+                showSection={named !== "section"}
+                showInstitution={named !== "institution"}
                 width={columnWidth}
                 onPress={open}
               />
             ) : (
-              <StoryRow item={item} lastOpened={false} showSection={showSection} onPress={open} />
+              <StoryRow
+                item={item}
+                lastOpened={false}
+                showSection={named !== "section"}
+                showInstitution={named !== "institution"}
+                onPress={open}
+              />
             )
           }
           ListHeaderComponent={<View>{header}</View>}
