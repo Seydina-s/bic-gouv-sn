@@ -1,11 +1,13 @@
-import { readIngestionStatus, type JsonDocument } from "@bgs/content-store";
-import { ingestionStatusSchema } from "@bgs/shared-types";
+import { readIngestionStatus, readSitesReview, type JsonDocument } from "@bgs/content-store";
+import { ingestionStatusSchema, sitesReviewSchema } from "@bgs/shared-types";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
 
 export interface StatusRoutesOptions {
   /** Report written by the collection after each pass. */
   ingestionStatus: JsonDocument;
+  /** Weekly review of the ministry sites not collected yet (GOV-08). */
+  sitesReview: JsonDocument;
 }
 
 /**
@@ -14,7 +16,7 @@ export interface StatusRoutesOptions {
  */
 export const statusRoutes: FastifyPluginAsyncZod<StatusRoutesOptions> = (
   app,
-  { ingestionStatus },
+  { ingestionStatus, sitesReview },
 ) => {
   app.get(
     "/status/ingestion",
@@ -28,6 +30,20 @@ export const statusRoutes: FastifyPluginAsyncZod<StatusRoutesOptions> = (
     async (_request, reply) => {
       void reply.header("cache-control", "no-store");
       return { report: await readIngestionStatus(ingestionStatus) };
+    },
+  );
+  app.get(
+    "/status/sites",
+    {
+      schema: {
+        tags: ["status"],
+        summary: "Last weekly review of the ministry sites the collection cannot read yet",
+        response: { 200: z.object({ review: sitesReviewSchema.nullable() }) },
+      },
+    },
+    async (_request, reply) => {
+      void reply.header("cache-control", "no-store");
+      return { review: await readSitesReview(sitesReview) };
     },
   );
   return Promise.resolve();

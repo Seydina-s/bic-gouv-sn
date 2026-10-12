@@ -6,10 +6,13 @@ import {
   removeStaleTemps,
   snapshotDaily,
   writeIngestionStatus,
+  readSitesReview,
+  writeSitesReview,
 } from "@bgs/content-store";
 import { errorCodeOf, INSTITUTION_SITES, INSTITUTIONS } from "@bgs/shared-types";
 import { acquireLock } from "../lib/single-instance";
 import { openStores } from "../lib/stores";
+import { isSitesReviewDue, reviewSites, SITES_TO_REVIEW } from "../review/sites-review";
 import { FileMediaStorage } from "../media/media-storage";
 import { createPresidenceProvider } from "../sources/presidence/presidence-provider";
 import { NEWS_SOURCES } from "../sources/news-sources";
@@ -29,7 +32,7 @@ import {
 import { isWithdrawalCheckDue, reconcileWithdrawals } from "../withdrawn";
 
 // Into PostgreSQL when DATABASE_URL is set (SCALE-02), shared with the API; else .data/.
-const { stores, inDatabase, paths, close } = await openStores();
+const { stores, inDatabase, paths, close, document } = await openStores();
 const storePath = paths.news;
 // The store has a single writer: a second watcher refuses to start (ERREURS.md, 28/09).
 const lock = await acquireLock(`${storePath}.watch.lock`);
@@ -150,6 +153,31 @@ async function report(outcome: PassOutcome, lastChangeAt: Date | null): Promise<
 
 // Articles withdrawn by the source are hidden, once a night (ING-03).
 let lastWithdrawalCheckAt: Date | null = null;
+// The ministry sites not collected yet, looked at again once a week (GOV-08).
+const sitesReview = document("sites-review");
+async function reviewSitesIfDue() {
+  const now = new Date();
+  const last = await readSitesReview(sitesReview);
+  if (!isSitesReviewDue(now, last?.checkedAt ?? null)) {
+    return;
+  }
+  try {
+    const review = await reviewSites(SITES_TO_REVIEW);
+    await writeSitesReview(sitesReview, review);
+    const back = review.sites
+      .filter((site) => site.status === "publishing")
+      .map((site) => site.name);
+    process.stdout.write(
+      `${now.toISOString()} sites to review checked · publishing again: ${back.length === 0 ? "none" : back.join(", ")}
+`,
+    );
+  } catch (error) {
+    // Tried again at the next pass; the collection itself is not affected.
+    process.stdout.write(`${now.toISOString()} ✗ sites review: ${String(error)}
+`);
+  }
+}
+
 async function checkWithdrawalsIfDue() {
   const now = new Date();
   if (!isWithdrawalCheckDue(now, lastWithdrawalCheckAt)) {
@@ -191,6 +219,7 @@ while (control.running) {
       process.stdout.write(`${startedAt.toISOString()} ✗ ${failure.code} ${failure.ref}\n`);
     }
     await checkWithdrawalsIfDue();
+    await reviewSitesIfDue();
   } catch (error) {
     delay = await report({ error: { code: errorCodeOf(error) ?? "UNKNOWN" } }, lastChangeAt);
     process.stdout.write(

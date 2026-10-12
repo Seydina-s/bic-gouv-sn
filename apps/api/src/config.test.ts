@@ -35,6 +35,7 @@ describe("loadConfig", () => {
       OPPORTUNITIES_PATH: fromRoot(".data/opportunities.json"),
       NOTIFICATIONS_PATH: fromRoot(".data/admin/notifications.json"),
       INGESTION_STATUS_PATH: fromRoot(".data/ingestion-status.json"),
+      SITES_REVIEW_PATH: fromRoot(".data/sites-review.json"),
       MEDIA_ROOT: fromRoot(".data/media"),
       ADMIN_SECRET_KEYS_PREVIOUS: [],
       ADMIN_ACCOUNTS_PATH: fromRoot(".data/admin/accounts.json"),
