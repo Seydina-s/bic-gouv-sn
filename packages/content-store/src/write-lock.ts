@@ -18,9 +18,28 @@ export interface WriteLockOptions {
   /** A lock older than this is left by a writer that died mid-write: taken over. */
   staleMs?: number;
   running?: (pid: number) => boolean;
+  /** Creates the lock file, failing when it exists (tests only). */
+  create?: (path: string) => Promise<void>;
 }
 
 const RETRY_DELAY_MS = 50;
+
+/**
+ * "Someone holds it": the lock exists, or, on Windows, the previous holder's lock is
+ * still being deleted, which refuses its creation with EPERM or EACCES for an instant
+ * (12/10/2026: a writer then failed instead of waiting its turn).
+ */
+const TAKEN = new Set(["EEXIST", "EPERM", "EACCES", "EBUSY"]);
+
+/** The lock file, created only if absent, holding this process's id. */
+async function createExclusive(path: string): Promise<void> {
+  const handle = await open(path, "wx");
+  try {
+    await handle.writeFile(String(process.pid));
+  } finally {
+    await handle.close();
+  }
+}
 
 /** Removes the lock when its holder died, or when it is older than any real write. */
 async function clearIfStale(
@@ -48,21 +67,21 @@ async function clearIfStale(
 export async function withWriteLock<T>(
   path: string,
   write: () => Promise<T>,
-  { timeoutMs = 60_000, staleMs = 120_000, running = isRunning }: WriteLockOptions = {},
+  {
+    timeoutMs = 60_000,
+    staleMs = 120_000,
+    running = isRunning,
+    create = createExclusive,
+  }: WriteLockOptions = {},
 ): Promise<T> {
   await mkdir(dirname(path), { recursive: true });
   const deadline = Date.now() + timeoutMs;
   for (;;) {
     try {
-      const handle = await open(path, "wx");
-      try {
-        await handle.writeFile(String(process.pid));
-      } finally {
-        await handle.close();
-      }
+      await create(path);
       break;
     } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== "EEXIST") {
+      if (!TAKEN.has((error as NodeJS.ErrnoException).code ?? "")) {
         throw error;
       }
       if (Date.now() >= deadline) {
