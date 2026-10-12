@@ -3,6 +3,7 @@ export * from "./api/contract";
 export * from "./api/tolerant-reader";
 export * from "./api/health.schema";
 export * from "./api/ingestion-status.schema";
+export * from "./api/sites-review.schema";
 export * from "./api/remote-config.schema";
 export * from "./common/institutions";
 export * from "./common/official-source.schema";

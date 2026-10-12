@@ -1,5 +1,5 @@
 import packageJson from "../package.json" with { type: "json" };
-import { contentStores } from "@bgs/content-store";
+import { contentStores, fileDocument, postgresDocument } from "@bgs/content-store";
 import { buildApp } from "./app";
 import { loadConfig } from "./config";
 import { openDatabase } from "@bgs/database";
@@ -43,6 +43,11 @@ const app = await buildApp({
   config,
   version: packageJson.version,
   ...contents,
+  // Written by the collection as one of its own documents: same place, file or base.
+  sitesReview:
+    database === null
+      ? fileDocument(config.SITES_REVIEW_PATH)
+      : postgresDocument(database, "sites-review"),
   errorJournal,
   searchMisses,
   usageStats,

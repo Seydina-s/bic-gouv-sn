@@ -132,6 +132,19 @@ describe("attentionItems", () => {
     expect(items(10_000, false)).toEqual([]);
   });
 
+  it("points to the ministry sites publishing again, none when none does", () => {
+    const items = (count: number) =>
+      attentionItems({ errors: [], notifications: quiet, now: NOW, sitesPublishing: count });
+    expect(items(0)).toEqual([]);
+    expect(items(2)).toEqual([
+      {
+        tone: "warning",
+        text: "2 sites de ministères publient de nouveau : ils peuvent être ajoutés à la collecte.",
+        href: "/#sites-title",
+      },
+    ]);
+  });
+
   it("says when it could not read a source, rather than passing for calm", () => {
     const items = attentionItems({ errors: null, notifications: quiet, now: NOW });
     expect(items).toEqual([expect.objectContaining({ tone: "warning", href: "/" })]);
