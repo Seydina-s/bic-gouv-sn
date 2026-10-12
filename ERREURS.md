@@ -335,3 +335,15 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
   - test « s'arrête aussitôt quand la base refuse un enregistrement, sans accuser les voix » ;
   - règle : après l'ajout d'une institution (ou de tout changement des schémas partagés), redémarrer **tous** les processus longs qui lisent la base (API, suivi des nouveautés, rattrapage des voix, chargement d'historiques), pas seulement l'API ;
   - règle : une boucle de nouvel essai ne réessaie que les pannes que l'attente peut réparer (réseau, serveur) ; une erreur de données ou de validation l'arrête.
+
+## 12/10/2026 — Articles de ministères masqués comme « retirés par leur site »
+
+- **Ce qui s'est passé** : la nuit du 12/10, vers 2 h, la vérification des retraits a masqué les 10 articles de la Fonction publique et 5 articles de l'Emploi et de la Formation professionnelle. Ils ont disparu de l'app alors qu'ils sont toujours en ligne sur leurs sites. Le défaut a été repéré le matin même, en élargissant le banc d'essai de l'assistant aux ministères : deux pages attendues étaient « absentes de la base ».
+- **Cause racine** : la vérification nocturne (ING-03) a été écrite quand seule la Présidence était collectée. Elle parcourt tous les articles de la base et relit, avec le lecteur de presidence.sn, chacun de ceux que la liste de presidence.sn ne montre plus. Après l'arrivée des ministères, chacun de leurs articles était donc « absent de la liste » puis relu sur presidence.sn. Pour les adresses sans chemin (`?p=8417`, `?Article`), presidence.sn répondait « page introuvable » et l'article était marqué retiré. Pour les autres, la relecture échouait autrement (« non confirmé ») : pas de masquage, mais des milliers de requêtes inutiles vers presidence.sn chaque nuit.
+- **Correctif** : la vérification ne regarde plus que les articles de l'institution du site qu'elle lit (`institution` obligatoire dans `reconcileWithdrawals`). Les 15 articles masqués à tort ont été réaffichés, après une copie de sauvegarde de la base.
+
+  Fichiers : `services/ingestion/src/withdrawn.ts`, `withdrawn.test.ts`, `cli/watch.ts`, `cli/withdrawn.ts`.
+- **Prévention** :
+  - test « ne relit ni ne masque jamais l'article d'une autre institution sur ce site » ;
+  - règle : quand une source s'ajoute, relire chaque traitement qui parcourt toute la base (retraits, doublons, traductions, voix) et vérifier qu'il ne suppose pas une seule source ;
+  - le banc d'essai de l'assistant signale toute page attendue absente de la base : à lancer après chaque ajout de source.

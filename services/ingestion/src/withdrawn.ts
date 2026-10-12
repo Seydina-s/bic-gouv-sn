@@ -1,5 +1,5 @@
 import type { ArticleRepository } from "@bgs/content-store";
-import type { Lang } from "@bgs/shared-types";
+import type { Institution, Lang } from "@bgs/shared-types";
 import { QuarantineError, SourceUnreachableError } from "./lib/errors";
 import { walkListing } from "./media/walk-listing";
 import type { SourceProvider } from "./sources/source-provider";
@@ -85,6 +85,11 @@ export interface ReconcileOptions {
   /** False: report only, change nothing (the `withdrawn --dry-run` command). */
   apply: boolean;
   now: () => Date;
+  /**
+   * The institution whose site `provider` reads: only its own articles are checked
+   * (12/10/2026: read again on presidence.sn, ministry articles were hidden as gone).
+   */
+  institution: Institution;
 }
 
 async function listedIds(provider: SourceProvider, lang: Lang): Promise<Set<string>> {
@@ -106,7 +111,7 @@ export async function reconcileWithdrawals(
   provider: SourceProvider,
   repository: ArticleRepository,
   langs: readonly Lang[],
-  { apply, now }: ReconcileOptions,
+  { apply, now, institution }: ReconcileOptions,
 ): Promise<WithdrawalReport> {
   const listed = new Map<Lang, Set<string>>();
   for (const lang of langs) {
@@ -122,6 +127,9 @@ export async function reconcileWithdrawals(
   do {
     const page = await repository.list({ limit: PAGE_SIZE, cursor, includeWithdrawn: true });
     for (const article of page.items) {
+      if (article.publisher !== institution) {
+        continue;
+      }
       for (const translation of article.translations) {
         const ids = listed.get(translation.lang);
         if (ids === undefined || translation.status !== "official") {

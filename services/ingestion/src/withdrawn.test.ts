@@ -100,7 +100,7 @@ afterEach(async () => {
 });
 
 const NOW = new Date("2026-09-28T02:00:00Z");
-const APPLY = { apply: true, now: () => NOW };
+const APPLY = { apply: true, now: () => NOW, institution: "presidence" as const };
 
 /** Which stored versions are hidden, by slug. */
 async function hidden(): Promise<string[]> {
@@ -159,6 +159,23 @@ describe("reconcileWithdrawals", () => {
     const report = await reconcileWithdrawals(source(), repo, ["fr"], APPLY);
     expect(report.restored).toBe(2);
     expect(await hidden()).toEqual([urlOf("depublie"), urlOf("retire")]);
+  });
+
+  it("never reads another institution's articles on this site, nor hides them", async () => {
+    // A ministry's article, at an address presidence.sn does not know (12/10/2026).
+    const sourceUrl = "https://www.fonctionpublique.gouv.sn/?Article-fictif";
+    const ministry = article(6, "retire");
+    await repo.save({
+      ...ministry,
+      publisher: "fonction-publique",
+      sourceUrl,
+      translations: ministry.translations.map((translation) => ({ ...translation, sourceUrl })),
+    });
+    const provider = source();
+    const report = await reconcileWithdrawals(provider, repo, ["fr"], APPLY);
+    expect(report.missing.map((entry) => entry.sourceUrl)).not.toContain(sourceUrl);
+    expect(provider.read.filter((slug) => slug === "retire")).toHaveLength(1);
+    expect(await hidden()).not.toContain(sourceUrl);
   });
 
   it("changes nothing when only asked for a report", async () => {
