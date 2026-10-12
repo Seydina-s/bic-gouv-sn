@@ -189,7 +189,7 @@ async function checkWithdrawalsIfDue() {
       provider,
       repository,
       ["fr", "wo"],
-      { apply: true, now: () => new Date() },
+      { apply: true, now: () => new Date(), institution: "presidence" },
     );
     process.stdout.write(
       `${now.toISOString()} withdrawals checked · ${String(missing.length)} unlisted · newly hidden ${String(hidden)} · shown again ${String(restored)}\n`,

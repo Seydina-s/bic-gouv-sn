@@ -14,7 +14,7 @@ try {
     createPresidenceProvider(),
     stores.articles,
     ["fr", "wo"],
-    { apply, now: () => new Date() },
+    { apply, now: () => new Date(), institution: "presidence" },
   );
   const count = (check: string) =>
     String(report.missing.filter((entry) => entry.check === check).length);
