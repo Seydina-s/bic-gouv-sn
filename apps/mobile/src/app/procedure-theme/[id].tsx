@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { THEME_PAGE_SIZE } from "../../api/procedures-client";
 import { PageBand, usePageMeta } from "../../components/PageBand";
 import { PageNavigation } from "../../components/PageNavigation";
-import { pageCount } from "../../components/page-slots";
+import { pageCount, parsePage } from "../../components/page-slots";
 import {
   ScrollTopButton,
   useScrollTop,
@@ -22,12 +22,6 @@ import { FloatingAppBar } from "../../features/shell/FloatingAppBar";
 import { FeatureGate } from "../../features/remote-config/FeatureGate";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
-
-/** A page number from the address; anything else reads as the first page. */
-function parsePage(raw: string | undefined): number {
-  const page = Number(raw);
-  return Number.isInteger(page) && page >= 1 ? page : 1;
-}
 
 /**
  * The procedures filed under one theme, 20 per numbered page, under a band in the

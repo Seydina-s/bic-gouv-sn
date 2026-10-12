@@ -12,12 +12,16 @@ import { pickCoverSource } from "./CoverImage";
 import { formatDay, formatPublishedOn, freshnessOf, parseCalendarDate } from "./format";
 import { heroStories, orderSections } from "./front-page";
 import { spokenPieces } from "./spoken-text";
-import { institutionLabelKey } from "./institution";
+import { institutionLabelKey, orderInstitutions } from "./institution";
 import { CouncilCard, LeadStory, StoryRow } from "./Stories";
 
 jest.mock("expo-localization", () => ({ getLocales: () => [{ languageTag: "fr-SN" }] }));
 // Screens here render outside a navigator: they are always "focused".
-jest.mock("expo-router", () => ({ useIsFocused: () => true }));
+const mockPush = jest.fn();
+jest.mock("expo-router", () => ({
+  useIsFocused: () => true,
+  useRouter: () => ({ push: mockPush }),
+}));
 jest.mock("expo-speech", () => ({
   speak: jest.fn(),
   stop: jest.fn(() => Promise.resolve()),
@@ -39,6 +43,20 @@ describe("createNewsClient", () => {
     expect(fetchImpl.mock.calls[0]).toEqual(
       expect.arrayContaining(["https://api.test/v1/news?lang=wo&limit=20&cursor=abc"]),
     );
+  });
+
+  it("asks one institution's numbered page, and how many stories each institution has", async () => {
+    const fetchImpl = respond(LIST);
+    const client = createNewsClient({ baseUrl: "https://api.test", fetchImpl });
+    await client.storyPage("fr", { publisher: "primature" }, 2);
+    expect(fetchImpl.mock.calls[0]).toEqual(
+      expect.arrayContaining([
+        "https://api.test/v1/news?lang=fr&limit=20&publisher=primature&page=2",
+      ]),
+    );
+    const counts = { publishers: [{ publisher: "primature", total: 4 }] };
+    const client2 = createNewsClient({ baseUrl: "https://api.test", fetchImpl: respond(counts) });
+    await expect(client2.publishers("wo")).resolves.toEqual(counts);
   });
 
   it("validates the article it receives", async () => {
@@ -549,6 +567,11 @@ describe("ArticleView source", () => {
     );
     expect(screen.getByText("Source : primature.sn")).toBeOnTheScreen();
     expect(screen.queryByText(/Aussi publié par/)).toBeNull();
+    await fireEvent.press(screen.getByText("Toutes les actualités : Primature"));
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: "/institution/[id]",
+      params: { id: "primature" },
+    });
   });
 });
 
@@ -557,5 +580,34 @@ describe("institutionLabelKey", () => {
     expect(institutionLabelKey(undefined)).toBe("institutions.presidence");
     expect(institutionLabelKey("primature")).toBe("institutions.primature");
     expect(institutionLabelKey("ministere-futur")).toBeNull();
+  });
+});
+
+describe("orderInstitutions", () => {
+  it("puts the Présidence and the Primature first, then the ministries by subject", () => {
+    const names: Record<string, string> = {
+      "institutions.presidence": "Présidence",
+      "institutions.primature": "Primature",
+      "institutions.sante": "Ministère de la Santé",
+      "institutions.agriculture": "Ministère de l'Agriculture",
+      "institutions.peches": "Ministère des Pêches",
+    };
+    const ordered = orderInstitutions(
+      [
+        { publisher: "sante", total: 4 },
+        { publisher: "peches", total: 2 },
+        { publisher: "primature", total: 9 },
+        { publisher: "ministere-futur", total: 3 },
+        { publisher: "agriculture", total: 0 },
+        { publisher: "presidence", total: 12 },
+      ],
+      (key) => names[key] ?? key,
+    );
+    expect(ordered.map((item) => item.publisher)).toEqual([
+      "presidence",
+      "primature",
+      "peches",
+      "sante",
+    ]);
   });
 });

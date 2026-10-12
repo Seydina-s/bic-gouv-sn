@@ -5,7 +5,10 @@ import { TestProviders } from "../../testing/TestProviders";
 import { ArticleView } from "./ArticleView";
 
 jest.mock("expo-localization", () => ({ getLocales: () => [{ languageTag: "fr-SN" }] }));
-jest.mock("expo-router", () => ({ useIsFocused: () => true }));
+jest.mock("expo-router", () => ({
+  useIsFocused: () => true,
+  useRouter: () => ({ push: jest.fn() }),
+}));
 jest.mock("expo-speech", () => ({
   speak: jest.fn(),
   stop: jest.fn(() => Promise.resolve()),
