@@ -38,7 +38,7 @@ export default function InstitutionScreen() {
       listKey={id}
       ink={color.textBrand}
       emptyText={t("institutionPages.empty")}
-      showSection
+      named="institution"
       onPage={(next) => {
         router.setParams({ page: String(next) });
       }}

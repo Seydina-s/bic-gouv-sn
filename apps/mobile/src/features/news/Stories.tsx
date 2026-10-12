@@ -44,6 +44,8 @@ export interface LeadStoryProps extends StoryProps {
   position?: string;
   /** Off on a section page, whose title already names the section. */
   showSection?: boolean;
+  /** Off on an institution's page, whose title already names it. */
+  showInstitution?: boolean;
 }
 
 /**
@@ -58,6 +60,7 @@ export function LeadStory({
   width,
   position,
   showSection = true,
+  showInstitution = true,
 }: LeadStoryProps) {
   const { theme } = useTheme();
   const { label, day, institution } = useStoryLabel(item);
@@ -106,7 +109,7 @@ export function LeadStory({
           </Text>
         )}
         <Text style={[textStyle.bodySmall, { color: color.textTertiary }]}>
-          {[day, institution].filter(Boolean).join(" · ")}
+          {[day, showInstitution ? institution : ""].filter(Boolean).join(" · ")}
         </Text>
       </View>
     </Pressable>
@@ -175,7 +178,8 @@ export function StoryRow({
   lastOpened,
   onPress,
   showSection = true,
-}: StoryProps & { showSection?: boolean }) {
+  showInstitution = true,
+}: StoryProps & { showSection?: boolean; showInstitution?: boolean }) {
   const { theme } = useTheme();
   const { label, day, institution } = useStoryLabel(item);
   const prefetch = usePrefetchArticle();
@@ -216,7 +220,7 @@ export function StoryRow({
         </Text>
         {day !== "" && (
           <Text style={[textStyle.bodySmall, { color: color.textTertiary }]}>
-            {[day, institution].filter(Boolean).join(" · ")}
+            {[day, showInstitution ? institution : ""].filter(Boolean).join(" · ")}
           </Text>
         )}
       </View>

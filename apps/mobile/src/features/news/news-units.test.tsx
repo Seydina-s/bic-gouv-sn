@@ -461,6 +461,27 @@ describe("stories", () => {
     expect(screen.queryByText("Dernière lecture")).toBeNull();
   });
 
+  it("leaves the institution out of the stories of its own page", async () => {
+    const item = LIST.items[0];
+    if (item === undefined) {
+      throw new Error("fixture");
+    }
+    await render(
+      <TestProviders>
+        <LeadStory
+          item={item}
+          lastOpened={false}
+          width={390}
+          showInstitution={false}
+          onPress={jest.fn()}
+        />
+        <StoryRow item={item} lastOpened={false} showInstitution={false} onPress={jest.fn()} />
+      </TestProviders>,
+    );
+    expect(screen.getAllByText("24 septembre 2026")).toHaveLength(2);
+    expect(screen.queryByText(/Présidence/)).toBeNull();
+  });
+
   it("opens the latest Conseil des ministres from its card", async () => {
     const onPress = await show("council", null);
     expect(screen.getByText("Dernier Conseil des ministres")).toBeOnTheScreen();

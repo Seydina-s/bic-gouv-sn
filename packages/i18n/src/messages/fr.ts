@@ -137,6 +137,10 @@ export const fr = {
     empty: "Aucune actualité de cette institution pour le moment.",
     error: "La liste des institutions n'a pas pu être chargée.",
     allNews: "Toutes les actualités : {institution}",
+    institutionCount: {
+      one: "{count} institution",
+      other: "{count} institutions",
+    },
   },
   article: {
     back: "Retour",

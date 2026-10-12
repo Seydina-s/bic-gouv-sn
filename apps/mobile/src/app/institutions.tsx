@@ -67,7 +67,11 @@ export default function InstitutionsScreen() {
             <Icon icon={Buildings} size="lg" weight="duotone" color={color.onPrimaryContainer} />
           }
           title={t("institutionPages.title")}
-          meta={null}
+          meta={
+            institutions.length === 0
+              ? null
+              : t("institutionPages.institutionCount", { count: institutions.length })
+          }
           background={color.primaryContainer}
           ink={color.onPrimaryContainer}
         />

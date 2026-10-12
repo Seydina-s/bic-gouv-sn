@@ -40,7 +40,7 @@ export default function SectionScreen() {
       listKey={slug}
       ink={tone.ink}
       emptyText={t("feed.emptySection")}
-      showSection={false}
+      named="section"
       onPage={(next) => {
         goTo({ page: next });
       }}
