@@ -1,16 +1,21 @@
 import {
   readNewsDetail,
   readNewsList,
+  readNewsPublishers,
   readNewsSections,
   type Lang,
   type NewsDetail,
   type NewsListResponse,
+  type NewsPublishersResponse,
   type NewsSectionsResponse,
 } from "@bgs/shared-types";
 import { createJsonGetter, type ApiClientOptions } from "./json-getter";
 
 export { NewsApiError } from "./json-getter";
 export type { ApiClientOptions as NewsClientOptions } from "./json-getter";
+
+/** What a numbered page shows: one section, or one institution's stories. */
+export type StoryFilter = { category: string } | { publisher: string };
 
 /** Stories per numbered page of a section. */
 export const SECTION_PAGE_SIZE = 20;
@@ -41,20 +46,27 @@ export function createNewsClient(options: ApiClientOptions) {
       }
       return getJson(`/v1/news?${query.toString()}`, readNewsList, signal);
     },
-    /** Numbered page of one section (from 1), with the total when the API gives it. */
-    sectionPage(
+    /**
+     * Numbered page (from 1) of one section or one institution, with the total when
+     * the API gives it.
+     */
+    storyPage(
       lang: Lang,
-      category: string,
+      filter: StoryFilter,
       page: number,
       signal?: AbortSignal,
     ): Promise<NewsListResponse> {
       const query = new URLSearchParams({
         lang,
         limit: String(SECTION_PAGE_SIZE),
-        category,
+        ...filter,
         page: String(page),
       });
       return getJson(`/v1/news?${query.toString()}`, readNewsList, signal);
+    },
+    /** How many stories each institution has, for the list of institutions. */
+    publishers(lang: Lang, signal?: AbortSignal): Promise<NewsPublishersResponse> {
+      return getJson(`/v1/news/publishers?lang=${lang}`, readNewsPublishers, signal);
     },
     /** The newest stories of every section, for the front page rows (one request). */
     sections(lang: Lang, signal?: AbortSignal): Promise<NewsSectionsResponse> {

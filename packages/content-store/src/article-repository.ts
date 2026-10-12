@@ -1,4 +1,4 @@
-import type { Lang, NewsArticle } from "@bgs/shared-types";
+import type { Institution, Lang, NewsArticle } from "@bgs/shared-types";
 
 import type { SaveOutcome } from "./versioned-json-store";
 
@@ -9,6 +9,8 @@ export interface ListQuery {
   lang?: Lang | undefined;
   /** Only articles of this section (slug, e.g. "conseil-des-ministres"). */
   category?: string | undefined;
+  /** Only articles this institution published, or also published (a duplicate kept once). */
+  publisher?: Institution | undefined;
   limit: number;
   /** Opaque position returned by the previous page. */
   cursor?: string | undefined;
@@ -35,6 +37,12 @@ export interface SectionsQuery {
   perSection: number;
 }
 
+export interface PublisherCount {
+  publisher: Institution;
+  /** Articles it published or also published, shown in the language asked. */
+  total: number;
+}
+
 export interface SectionPage {
   category: string;
   /** Newest first, at most `perSection`. */
@@ -53,6 +61,8 @@ export interface ArticleRepository {
   list(query: ListQuery): Promise<ArticlePage>;
   /** Newest articles of every section, sections ordered by their newest article. */
   sections(query: SectionsQuery): Promise<SectionPage[]>;
+  /** How many shown articles each institution has, in `lang` (any if undefined). */
+  publishers(lang?: Lang): Promise<PublisherCount[]>;
   save(article: NewsArticle): Promise<SaveOutcome>;
   /** Previous versions of an article, oldest first. */
   history(id: string): Promise<NewsArticle[]>;
@@ -83,6 +93,14 @@ export interface ArticleRepository {
 }
 
 /** `article` marked as a duplicate of `referenceId`, or unmarked with null. */
+/** Whether `institution` published the article, or also published it. */
+export function isPublishedBy(article: NewsArticle, institution: Institution): boolean {
+  return (
+    article.publisher === institution ||
+    article.alsoPublishedBy.some((other) => other.publisher === institution)
+  );
+}
+
 export function withDuplicateOf(article: NewsArticle, referenceId: string | null): NewsArticle {
   const unmarked = { ...article };
   delete unmarked.duplicateOf;

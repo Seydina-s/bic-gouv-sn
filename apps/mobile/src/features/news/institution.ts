@@ -48,3 +48,36 @@ export function siteOf(url: string): string {
     return url;
   }
 }
+
+export interface NamedInstitution {
+  publisher: string;
+  label: string;
+  total: number;
+}
+
+/** "Ministère de l'Agriculture" is filed under "Agriculture", as people look for it. */
+function filingName(label: string): string {
+  return label.replace(/^Ministère (de la |de l'|des |du |de )/i, "");
+}
+
+/**
+ * The institutions this version can name, in the order people expect: the Présidence,
+ * the Primature, then the ministries by their subject.
+ */
+export function orderInstitutions(
+  counts: readonly { publisher: string; total: number }[],
+  name: (key: NonNullable<ReturnType<typeof institutionLabelKey>>) => string,
+): NamedInstitution[] {
+  const rank = (publisher: string) =>
+    publisher === "presidence" ? 0 : publisher === "primature" ? 1 : 2;
+  return counts
+    .flatMap(({ publisher, total }) => {
+      const key = institutionLabelKey(publisher);
+      return key === null || total === 0 ? [] : [{ publisher, label: name(key), total }];
+    })
+    .sort(
+      (a, b) =>
+        rank(a.publisher) - rank(b.publisher) ||
+        filingName(a.label).localeCompare(filingName(b.label), "fr"),
+    );
+}

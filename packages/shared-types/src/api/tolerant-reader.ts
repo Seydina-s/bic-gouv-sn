@@ -6,10 +6,12 @@ import {
   newsAudioSchema,
   newsDocumentSchema,
   newsListResponseSchema,
+  newsPublishersResponseSchema,
   newsSectionsResponseSchema,
   newsSummarySchema,
   type NewsDetail,
   type NewsListResponse,
+  type NewsPublishersResponse,
   type NewsSectionsResponse,
 } from "./news.schema";
 import {
@@ -99,6 +101,19 @@ export function readNewsSections(raw: unknown): NewsSectionsResponse | null {
     sections: keepValid(sections, newsSectionsResponseSchema.shape.sections.element),
   });
   return parsed.success ? parsed.data : null;
+}
+
+/** Articles per institution: broken entries dropped. Null if the answer is broken. */
+export function readNewsPublishers(raw: unknown): NewsPublishersResponse | null {
+  if (!isRecord(raw) || !Array.isArray(raw["publishers"])) {
+    return null;
+  }
+  return {
+    publishers: keepValid(
+      raw["publishers"],
+      newsPublishersResponseSchema.shape.publishers.element,
+    ) as NewsPublishersResponse["publishers"],
+  };
 }
 
 function readableSummaries(raw: Record<string, unknown>): unknown {

@@ -1,5 +1,8 @@
 import { tracking } from "@bgs/ui";
+import type { IconProps as PhosphorProps } from "phosphor-react-native";
+import type { ComponentType } from "react";
 import { Pressable, StyleSheet, Text, type LayoutChangeEvent } from "react-native";
+import { Icon } from "../../components/Icon";
 import { useTheme } from "../../theme/useTheme";
 import { CategoryIcon } from "./CategoryIcon";
 
@@ -12,6 +15,8 @@ export interface SectionChipProps {
   /** "button" for a single choice (front page), "checkbox" for several (settings). */
   role?: "button" | "checkbox";
   onLayout?: (event: LayoutChangeEvent) => void;
+  /** Icon of a chip that is no section (e.g. "Institutions"). */
+  glyph?: ComponentType<PhosphorProps>;
 }
 
 /**
@@ -25,6 +30,7 @@ export function SectionChip({
   onPress,
   role = "button",
   onLayout,
+  glyph,
 }: SectionChipProps) {
   const { theme } = useTheme();
   const { color, space, textStyle, radius, touchTarget } = theme;
@@ -52,6 +58,9 @@ export function SectionChip({
       ]}
     >
       {category !== null && <CategoryIcon category={category} color={ink} />}
+      {category === null && glyph !== undefined && (
+        <Icon icon={glyph} size="sm" weight="duotone" color={ink} />
+      )}
       <Text style={[textStyle.caption, styles.caps, { color: ink }]}>{label}</Text>
     </Pressable>
   );

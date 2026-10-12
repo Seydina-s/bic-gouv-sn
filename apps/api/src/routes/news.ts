@@ -2,10 +2,12 @@ import { createHash } from "node:crypto";
 import type { ArticleRepository } from "@bgs/content-store";
 import {
   apiErrorSchema,
+  institutionSchema,
   langSchema,
   slugSchema,
   newsDetailSchema,
   newsListResponseSchema,
+  newsPublishersResponseSchema,
   newsSectionsResponseSchema,
   type ErrorCode,
 } from "@bgs/shared-types";
@@ -94,15 +96,17 @@ export const newsRoutes: FastifyPluginAsyncZod<NewsRoutesOptions> = (
           page: z.coerce.number().int().min(1).max(10_000).optional(),
           /** Only this section, e.g. the latest Conseil des ministres. */
           category: slugSchema.optional(),
+          /** Only this institution's articles (published or also published by it). */
+          publisher: institutionSchema.optional(),
         }),
         response: { 200: newsListResponseSchema, 304: z.null() },
       },
     },
     async (request, reply) => {
-      const { lang, limit, cursor, page: pageNumber, category } = request.query;
+      const { lang, limit, cursor, page: pageNumber, category, publisher } = request.query;
       const offset =
         cursor === undefined && pageNumber !== undefined ? (pageNumber - 1) * limit : 0;
-      const page = await articles.list({ lang, limit, cursor, offset, category });
+      const page = await articles.list({ lang, limit, cursor, offset, category, publisher });
       const media = mediaBaseUrlFor(request, mediaBaseUrl);
       const items = page.items.flatMap((article) => toSummary(article, lang, media) ?? []);
       const fingerprint = [
@@ -110,6 +114,7 @@ export const newsRoutes: FastifyPluginAsyncZod<NewsRoutesOptions> = (
         cursor,
         offset,
         category,
+        publisher,
         media,
         page.total,
         ...page.items.map(freshnessKey),
@@ -156,6 +161,26 @@ export const newsRoutes: FastifyPluginAsyncZod<NewsRoutesOptions> = (
           items: section.items.flatMap((article) => toSummary(article, lang, media) ?? []),
         })),
       });
+    },
+  );
+
+  app.get(
+    "/news/publishers",
+    {
+      schema: {
+        tags: ["news"],
+        summary: "How many articles each institution has, for the list of institutions",
+        querystring: z.object({ lang: langSchema.default("fr") }),
+        response: { 200: newsPublishersResponseSchema, 304: z.null() },
+      },
+    },
+    async (request, reply) => {
+      const publishers = await articles.publishers(request.query.lang);
+      const fingerprint = [
+        request.query.lang,
+        ...publishers.map((count) => `${count.publisher}:${String(count.total)}`),
+      ].join("|");
+      return sendCached(request, reply, fingerprint, { publishers });
     },
   );
 

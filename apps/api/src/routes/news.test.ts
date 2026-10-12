@@ -2,6 +2,7 @@ import {
   apiErrorSchema,
   newsDetailSchema,
   newsListResponseSchema,
+  newsPublishersResponseSchema,
   newsSectionsResponseSchema,
   type NewsArticle,
 } from "@bgs/shared-types";
@@ -128,6 +129,27 @@ describe("GET /v1/news", () => {
     expect((await app.inject({ method: "GET", url: "/v1/news?category=../x" })).statusCode).toBe(
       400,
     );
+  });
+
+  it("filters by institution, counts each one's articles, and refuses an unknown one", async () => {
+    const mine = await app.inject({ method: "GET", url: "/v1/news?publisher=presidence" });
+    expect(newsListResponseSchema.parse(mine.json()).total).toBe(3);
+    const none = await app.inject({ method: "GET", url: "/v1/news?publisher=primature" });
+    expect(newsListResponseSchema.parse(none.json()).items).toEqual([]);
+    expect(
+      (await app.inject({ method: "GET", url: "/v1/news?publisher=le-soleil" })).statusCode,
+    ).toBe(400);
+    const counts = await app.inject({ method: "GET", url: "/v1/news/publishers?lang=wo" });
+    expect(counts.headers["cache-control"]).toContain("stale-while-revalidate");
+    expect(newsPublishersResponseSchema.parse(counts.json())).toEqual({
+      publishers: [{ publisher: "presidence", total: 1 }],
+    });
+    const again = await app.inject({
+      method: "GET",
+      url: "/v1/news/publishers?lang=wo",
+      headers: { "if-none-match": String(counts.headers.etag) },
+    });
+    expect(again.statusCode).toBe(304);
   });
 
   it("searches the news, and refuses a query too short", async () => {

@@ -127,6 +127,17 @@ export const fr = {
     pause: "Mettre en pause le défilement",
     play: "Reprendre le défilement",
   },
+  institutionPages: {
+    title: "Institutions",
+    chip: "Institutions",
+    count: {
+      one: "{count} article",
+      other: "{count} articles",
+    },
+    empty: "Aucune actualité de cette institution pour le moment.",
+    error: "La liste des institutions n'a pas pu être chargée.",
+    allNews: "Toutes les actualités : {institution}",
+  },
   article: {
     back: "Retour",
     openSource: "Lire sur {source}",
