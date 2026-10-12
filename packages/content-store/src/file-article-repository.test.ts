@@ -247,15 +247,25 @@ describe.each(STORAGES)("articles stored %s", (_name, open) => {
         ],
       }),
     );
-    await repo.save(primature(3));
+    await repo.save(primature(3, { fetchedAt: "2026-09-26T08:00:00Z" }));
     const ids = async (publisher: "presidence" | "primature" | "sante") =>
       (await repo.list({ limit: 5, publisher })).items.map((item) => item.id);
     expect(await ids("primature")).toEqual([article(3).id, article(2).id]);
     expect(await ids("presidence")).toEqual([article(2).id, article(1).id]);
     expect(await ids("sante")).toEqual([]);
     expect(await repo.publishers("fr")).toEqual([
-      { publisher: "presidence", total: 2 },
-      { publisher: "primature", total: 2 },
+      {
+        publisher: "presidence",
+        total: 2,
+        newestOn: article(2).sourcePublishedOn,
+        lastFetchedAt: "2026-09-25T10:00:00Z",
+      },
+      {
+        publisher: "primature",
+        total: 2,
+        newestOn: article(3).sourcePublishedOn,
+        lastFetchedAt: "2026-09-26T08:00:00Z",
+      },
     ]);
     expect(await repo.publishers("wo")).toEqual([]);
   });

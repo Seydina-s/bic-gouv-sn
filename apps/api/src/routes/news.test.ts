@@ -142,7 +142,14 @@ describe("GET /v1/news", () => {
     const counts = await app.inject({ method: "GET", url: "/v1/news/publishers?lang=wo" });
     expect(counts.headers["cache-control"]).toContain("stale-while-revalidate");
     expect(newsPublishersResponseSchema.parse(counts.json())).toEqual({
-      publishers: [{ publisher: "presidence", total: 1 }],
+      publishers: [
+        {
+          publisher: "presidence",
+          total: 1,
+          newestOn: article(2).sourcePublishedOn,
+          lastFetchedAt: "2026-09-25T10:00:00Z",
+        },
+      ],
     });
     const again = await app.inject({
       method: "GET",

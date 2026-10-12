@@ -159,6 +159,10 @@ export const newsPublishersResponseSchema = z.object({
       publisher: z.string().min(1),
       /** Articles it published or also published, shown in the language asked. */
       total: z.int().nonnegative(),
+      /** Publication day of its newest article. Absent from older APIs. */
+      newestOn: isoDateSchema.nullable().optional(),
+      /** When its most recently collected article reached the platform. Absent before. */
+      lastFetchedAt: isoDateTimeSchema.optional(),
     }),
   ),
 });

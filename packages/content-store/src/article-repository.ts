@@ -41,6 +41,10 @@ export interface PublisherCount {
   publisher: Institution;
   /** Articles it published or also published, shown in the language asked. */
   total: number;
+  /** Publication day of its newest article ("2026-10-02"), null when none is dated. */
+  newestOn: string | null;
+  /** When its most recently collected article reached our store. */
+  lastFetchedAt: string;
 }
 
 export interface SectionPage {

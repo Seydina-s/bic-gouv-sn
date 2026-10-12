@@ -95,7 +95,7 @@ function InstitutionRow({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`${institution.label}. ${count}`}
+      accessibilityLabel={`${institution.name}. ${count}`}
       onPress={() => {
         onPress(institution.publisher);
       }}
@@ -112,9 +112,7 @@ function InstitutionRow({
       ]}
     >
       <View style={[styles.text, { gap: space.xs }]}>
-        <Text style={[textStyle.storyTitle, { color: color.textPrimary }]}>
-          {institution.label}
-        </Text>
+        <Text style={[textStyle.storyTitle, { color: color.textPrimary }]}>{institution.name}</Text>
         <Text style={[textStyle.bodySmall, { color: color.textSecondary }]}>{count}</Text>
       </View>
       <Icon icon={CaretRight} size="sm" color={color.textTertiary} />

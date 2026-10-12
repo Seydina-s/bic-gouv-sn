@@ -53,6 +53,27 @@ export const adminFr = {
     nextAttempt:
       "La collecte ne s'arrête pas : nouvel essai automatique à {time}, puis toutes les 10 minutes au plus tant que le site ne répond pas ; tout ce qui aura été publié entre-temps sera rattrapé.",
   },
+  sources: {
+    title: "Sources suivies",
+    intro:
+      "Une ligne par institution dont l'app relaie les actualités : combien d'articles, la date du dernier, quand le dernier article est arrivé dans l'app, et l'état de la protection de son site.",
+    unreadable: "La liste des sources n'a pas pu être lue : l'API ne répond peut-être pas.",
+    unknownDay: "Inconnue",
+    fetchedAt: "{day} à {time}",
+    columns: {
+      institution: "Institution",
+      articles: "Articles",
+      newest: "Dernier article publié",
+      fetched: "Dernière arrivée dans l'app",
+      protection: "Protection du site",
+    },
+    protection: {
+      closed: "Normale",
+      halfOpen: "Reprise en cours",
+      open: "Demandes suspendues",
+      unknown: "Non suivie",
+    },
+  },
   sites: {
     title: "Sites à revoir",
     intro:
