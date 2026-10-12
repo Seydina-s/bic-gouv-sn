@@ -55,7 +55,7 @@ function expoMessage(
   message: PushMessage,
   version: { title: string; excerpt: string },
 ) {
-  const source = t("content.sourceAttribution", { source: "presidence.sn" });
+  const source = t("content.sourceAttribution", { source: message.source });
   return {
     to: token,
     title: version.title,
