@@ -323,3 +323,15 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Prévention** :
   - tests « lit en arrière-plan et range chaque enregistrement », « attend tant que le serveur est injoignable », « ne relit que le reste après une coupure » ;
   - règle : un traitement long confié à un serveur doit vivre sur ce serveur, pas dans une connexion ouverte depuis un poste qui peut s'éteindre.
+
+## 11-12/10/2026 — Rattrapage des voix françaises bloqué après l'ajout de quatre ministères
+
+- **Ce qui s'est passé** : de 21 h 40 à minuit, le rattrapage des voix françaises n'a rangé aucun enregistrement. Toutes les 10 minutes, il annonçait « Voix injoignables » et faisait relire le même groupe de 50 articles au serveur.
+- **Cause racine** : le rattrapage avait démarré sur le code d'avant #314. Après la fusion, les quatre nouveaux ministères ont écrit leurs articles dans la base, et l'ancien code, qui ne connaissait pas ces institutions, refusait de la relire au moment de ranger chaque enregistrement. Ce refus local était traité comme une panne du serveur des voix : attente puis nouvel essai, sans fin utile. De plus, la lecture refusée était déjà marquée comme traitée et n'était plus jamais rangée dans ce passage.
+- **Correctif** : un refus de la base arrête aussitôt le rattrapage, avec un message distinct qui n'accuse pas le serveur des voix. Le rattrapage a été relancé sur le code à jour.
+
+  Fichiers : `apps/api/src/voices/recordings.ts`, `recordings.test.ts`.
+- **Prévention** :
+  - test « s'arrête aussitôt quand la base refuse un enregistrement, sans accuser les voix » ;
+  - règle : après l'ajout d'une institution (ou de tout changement des schémas partagés), redémarrer **tous** les processus longs qui lisent la base (API, suivi des nouveautés, rattrapage des voix, chargement d'historiques), pas seulement l'API ;
+  - règle : une boucle de nouvel essai ne réessaie que les pannes que l'attente peut réparer (réseau, serveur) ; une erreur de données ou de validation l'arrête.
