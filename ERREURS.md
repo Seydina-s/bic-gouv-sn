@@ -347,3 +347,14 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
   - test « ne relit ni ne masque jamais l'article d'une autre institution sur ce site » ;
   - règle : quand une source s'ajoute, relire chaque traitement qui parcourt toute la base (retraits, doublons, traductions, voix) et vérifier qu'il ne suppose pas une seule source ;
   - le banc d'essai de l'assistant signale toute page attendue absente de la base : à lancer après chaque ajout de source.
+
+## 12/10/2026 — Écriture refusée par le verrou quand Windows supprimait encore le verrou précédent
+
+- **Ce qui s'est passé** : le test « aucune écriture perdue quand plusieurs processus écrivent en même temps » a échoué une fois, en 204 ms, pendant une vérification complète sur une machine très chargée. Il est passé lors des 18 relances suivantes.
+- **Cause racine** : sous Windows, recréer un fichier dont la suppression n'est pas encore terminée est refusé avec EPERM (ou EACCES), et non avec EEXIST (« déjà présent »). Le verrou d'écriture ne considérait que EEXIST comme « quelqu'un le tient » : tout autre code faisait échouer l'écriture au lieu d'attendre son tour. Mesuré sur cette machine : 230 refus EPERM sur 9 000 créations concurrentes. En production, ce refus pouvait faire échouer la sauvegarde d'un article (rattrapée au passage suivant) ou arrêter le rattrapage des voix.
+- **Correctif** : EPERM, EACCES et EBUSY à la création du verrou sont traités comme « verrou tenu » : l'écrivain attend et réessaie, dans le même délai maximal. Les autres erreurs (disque plein…) remontent toujours aussitôt.
+
+  Fichiers : `packages/content-store/src/write-lock.ts`, `write-lock.test.ts`.
+- **Prévention** :
+  - test « attend pendant que Windows supprime encore le verrou précédent », et « une autre erreur remonte aussitôt » ;
+  - règle : sous Windows, les opérations sur un fichier qui vient d'être supprimé ou remplacé peuvent échouer brièvement avec EPERM/EACCES/EBUSY ; tout code qui crée, renomme ou supprime un fichier partagé doit traiter ces codes comme passagers (même règle que le renommage du 08/10/2026).
