@@ -35,6 +35,23 @@ describe("withWriteLock", () => {
     await expect(stat(lock)).rejects.toThrow();
   });
 
+  it("waits while Windows still deletes the previous holder's lock", async () => {
+    let refusals = 2;
+    const create = async (path: string) => {
+      if (refusals > 0) {
+        refusals -= 1;
+        throw Object.assign(new Error("operation not permitted"), { code: "EPERM" });
+      }
+      await writeFile(path, String(process.pid), { flag: "wx" });
+    };
+    expect(await withWriteLock(lock, () => Promise.resolve("ok"), { create })).toBe("ok");
+    expect(refusals).toBe(0);
+    const broken = () => Promise.reject(Object.assign(new Error("no space"), { code: "ENOSPC" }));
+    await expect(
+      withWriteLock(lock, () => Promise.resolve("never"), { create: broken }),
+    ).rejects.toThrow("no space");
+  });
+
   it("takes over a lock left by a writer that died", async () => {
     await writeFile(lock, "999999");
     const result = await withWriteLock(lock, () => Promise.resolve("ok"), { running: () => false });
