@@ -369,3 +369,14 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Prévention** :
   - test « nomme le site officiel de l'article, jamais presidence.sn par défaut » ;
   - rappel de la règle du 12/10 (BUG-12) : quand une source s'ajoute, rechercher dans le code toute mention en dur de la première source (`grep presidence.sn`).
+
+## 12/10/2026 — Rattrapage des voix arrêté : remplacement de la base refusé par Windows
+
+- **Ce qui s'est passé** : à 19 h 26, le rattrapage des voix françaises s'est arrêté après 100 enregistrements sur 4 875. Le remplacement de `news.json` par sa nouvelle version a été refusé par Windows (EPERM).
+- **Cause racine** : Windows refuse de remplacer un fichier qu'un autre processus tient ouvert. Depuis le 08/10, l'écriture réessayait 8 fois en 0,7 seconde au total. La base dépasse maintenant 20 Mo, et plusieurs programmes la lisent en même temps (API, suivi, images, voix) : chaque lecture la tient ouverte plus longtemps, et 0,7 seconde ne suffisait plus. De plus, la copie temporaire de la base restait sur le disque après l'échec.
+- **Correctif** : jusqu'à 30 essais sur environ 11 secondes (délai croissant, plafonné à 1 seconde), et suppression de la copie temporaire en cas d'échec définitif.
+
+  Fichiers : `packages/content-store/src/durable-file.ts`, `durable-file.test.ts`.
+- **Prévention** :
+  - test « 12 refus de suite, puis réussite » et « aucune copie temporaire laissée » ;
+  - le passage à PostgreSQL (SCALE-02, prêt) supprime ce partage de fichier : à activer avec l'hébergement.
