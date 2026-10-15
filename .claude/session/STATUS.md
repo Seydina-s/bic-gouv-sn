@@ -12,6 +12,7 @@
 - **Incidents corrigés** : une mise à jour construite depuis une copie de travail (republiée proprement, script verrouillé) ; l'en-tête du backlog abîmé par un script (réparé). Voir ERREURS.md.
 - **À choisir** : le panneau « Filtrer » (trois maquettes, point 48).
 - **Entreprendre (DER/FJ)** : espace en service (10 pages officielles, 20 actualités), carte sur l'accueil, mise à jour publiée.
+- **Soir du 15/10** : panneau « Filtrer » (option A) en service ; accueil allégé (cause probable de la fermeture sur iPhone) ; serveur des voix et ordinateur nettoyés.
 - **iPhone / TestFlight** : profil prêt ; il manque votre connexion Apple une fois (point 55).
 - **Alerte disque** : plein cette nuit, rattrapage des voix arrêté ; 9,6 Go libres après nettoyage du cache npm (point 54). Voix et PDF de la Santé relancés.
 
