@@ -9,6 +9,8 @@ import { TestProviders } from "../../testing/TestProviders";
 import { ArticleView } from "../news/ArticleView";
 import { NowReadingBar } from "./NowReadingBar";
 
+/** The non-breaking space French puts before a colon. */
+const NBSP = String.fromCharCode(160);
 let mockPath = "/";
 const mockPush = jest.fn();
 jest.mock("expo-localization", () => ({ getLocales: () => [{ languageTag: "fr-SN" }] }));
@@ -71,7 +73,7 @@ describe("the app's one reader", () => {
     await fireEvent.press(screen.getByRole("button", { name: "Mettre la lecture en pause" }));
     expect(screen.getByRole("button", { name: "Reprendre la lecture" })).toBeOnTheScreen();
     await fireEvent.press(
-      screen.getByRole("link", { name: `En lecture : ${DETAIL.title}. Ouvrir` }),
+      screen.getByRole("link", { name: `En lecture${NBSP}: ${DETAIL.title}. Ouvrir` }),
     );
     expect(mockPush).toHaveBeenCalledWith(`/article/${DETAIL.id}`);
     await fireEvent.press(screen.getByRole("button", { name: "Arrêter la lecture" }));
