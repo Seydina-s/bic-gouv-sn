@@ -320,14 +320,6 @@ describe("app shell", () => {
     expect(await screen.findByRole("radio", { name: "Sombre" })).toBeOnTheScreen();
     // The front page is still mounted underneath (a pop-up, not a new page).
     expect(screen.getByTestId("news-feed", { includeHiddenElements: true })).toBeTruthy();
-    // "À propos" credits the data, fonts and icons, each with its licence.
-    const openURL = jest.spyOn(Linking, "openURL").mockResolvedValue(true);
-    await fireEvent.press(screen.getByRole("link", { name: /OpenStreetMap, licence ODbL$/ }));
-    expect(openURL).toHaveBeenCalledWith("https://www.openstreetmap.org/copyright");
-    for (const credit of [/SIL Open Font License$/, /Mapzen, licence MIT$/, /Phosphor Icons/]) {
-      expect(screen.getByRole("link", { name: credit })).toBeOnTheScreen();
-    }
-    openURL.mockRestore();
     await fireEvent.press(first(screen.getAllByRole("button", { name: "Fermer les réglages" })));
     expect(screen.queryByRole("radio", { name: "Sombre" })).toBeNull();
     expect(screen.getByTestId("news-feed")).toBeOnTheScreen();
@@ -535,13 +527,20 @@ describe("app shell", () => {
     expect(await screen.findByText("Une nouvelle version est nécessaire")).toBeOnTheScreen();
   });
 
-  it("lists the free software of the app, each with its copyright and licence", async () => {
+  it("lists the credits and the free software from one button of the settings", async () => {
     await renderRouter(routes, { initialUrl: "/" });
     await fireEvent.press(await screen.findByRole("button", { name: "Réglages" }));
-    await fireEvent.press(
-      await screen.findByRole("button", { name: /^Logiciels libres utilisés \(\d+\)$/ }),
-    );
+    await fireEvent.press(await screen.findByRole("button", { name: "Logiciels et licences" }));
     expect(await screen.findByText(/logiciels libres font fonctionner/)).toBeOnTheScreen();
+    // The page credits the data, fonts and icons, each with its licence.
+    const openURL = jest.spyOn(Linking, "openURL").mockResolvedValue(true);
+    await fireEvent.press(screen.getByRole("link", { name: /OpenStreetMap, licence ODbL$/ }));
+    expect(openURL).toHaveBeenCalledWith("https://www.openstreetmap.org/copyright");
+    for (const credit of [/SIL Open Font License$/, /Mapzen, licence MIT$/, /Phosphor Icons/]) {
+      expect(screen.getByRole("link", { name: credit })).toBeOnTheScreen();
+    }
+    openURL.mockRestore();
+
     await fireEvent.press(screen.getByRole("button", { name: /^zod \d/ }));
     expect(screen.getByText(/Copyright \(c\) \d{4} Colin McDonnell/)).toBeOnTheScreen();
     expect(screen.getByText(/Permission is hereby granted/)).toBeOnTheScreen();
