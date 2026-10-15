@@ -29,6 +29,27 @@ describe("sanitizeArticleHtml: embedded videos", () => {
     ).toBe('<p><iframe src="https://www.youtube-nocookie.com/embed/m6gWj4NjCp4"></iframe></p>');
   });
 
+  it("keeps a video file stored by an official site, with its title, and nothing else", () => {
+    const html = sanitizeArticleHtml(
+      '<video src="//www.interieur.gouv.sn/media/a.mp4" title="Déclaration" autoplay onplay="x()"></video>' +
+        '<video><source src="https://www.sante.gouv.sn/files/b.mp4" type="video/mp4" /></video>',
+    );
+    expect(html).toBe(
+      '<video src="https://www.interieur.gouv.sn/media/a.mp4" title="Déclaration"></video>' +
+        '<video><source src="https://www.sante.gouv.sn/files/b.mp4"></source></video>',
+    );
+    expect(hasVideo(html)).toBe(true);
+    expect(hasOfficialMedia(html)).toBe(true);
+  });
+
+  it.each([
+    ["another host", '<video src="https://evil.example/a.mp4"></video>'],
+    ["an official page, not a file", '<video src="https://www.interieur.gouv.sn/a"></video>'],
+    ["plain http", '<video src="http://www.interieur.gouv.sn/a.mp4"></video>'],
+  ])("drops the file of a video from %s", (_label, video) => {
+    expect(hasVideo(sanitizeArticleHtml(`<p>Texte</p>${video}`))).toBe(false);
+  });
+
   it("recognises official media in an article without text", () => {
     expect(hasOfficialMedia('<p><img src="https://bo-admin.presidence.sn/a.png" /></p>')).toBe(
       true,
