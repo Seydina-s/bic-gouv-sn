@@ -68,6 +68,25 @@ describe("htmlToBlocks", () => {
     ]);
   });
 
+  it("turns a video file stored by an official site into a video block, with its title", () => {
+    expect(
+      htmlToBlocks(
+        '<p><video src="https://www.interieur.gouv.sn/media/a.mp4" title="Déclaration"></video>Texte</p>' +
+          '<video><source src="https://www.sante.gouv.sn/files/b.mp4" /></video>' +
+          '<video src="https://evil.example/c.mp4"></video>',
+      ),
+    ).toEqual([
+      {
+        type: "video",
+        provider: "official",
+        url: "https://www.interieur.gouv.sn/media/a.mp4",
+        title: "Déclaration",
+      },
+      { type: "paragraph", inlines: [{ text: "Texte" }] },
+      { type: "video", provider: "official", url: "https://www.sante.gouv.sn/files/b.mp4" },
+    ]);
+  });
+
   it("keeps only official HTTPS images and uses null for a missing alt", () => {
     expect(
       htmlToBlocks(

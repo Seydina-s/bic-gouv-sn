@@ -17,6 +17,8 @@ const config: NextConfig = {
   // Workspace packages are shipped as TypeScript sources.
   transpilePackages: ["@bgs/i18n", "@bgs/resilience", "@bgs/shared-types", "@bgs/ui"],
   headers: () => Promise.resolve([{ source: "/:path*", headers: securityHeaders }]),
+  // A notification's photo travels through a server action: 6 MB at most, plus the form.
+  experimental: { serverActions: { bodySizeLimit: "7mb" } },
 };
 
 export default config;

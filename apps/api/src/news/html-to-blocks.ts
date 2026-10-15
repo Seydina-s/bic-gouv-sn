@@ -1,4 +1,10 @@
-import { officialMediaUrl, youtubeVideoId, type Block, type Inline } from "@bgs/shared-types";
+import {
+  officialMediaUrl,
+  officialVideoFileUrl,
+  youtubeVideoId,
+  type Block,
+  type Inline,
+} from "@bgs/shared-types";
 import { isTag, isText, type ChildNode, type Element } from "domhandler";
 import { parseDocument } from "htmlparser2";
 
@@ -91,14 +97,39 @@ function videoBlock(element: Element): Block[] {
       ];
 }
 
+/** Video file stored by the official site (its own src, or its first source's). */
+function videoFileBlock(element: Element): Block[] {
+  const sources = [
+    element.attribs["src"],
+    ...element.children
+      .filter((child): child is Element => isTag(child) && child.name === "source")
+      .map((source) => source.attribs["src"]),
+  ];
+  const url = sources.map((src) => officialVideoFileUrl(src ?? "")).find((found) => found !== null);
+  if (url === undefined) {
+    return [];
+  }
+  const title = nonEmpty(element.attribs["title"]);
+  return [{ type: "video", provider: "official", url, ...(title === null ? {} : { title }) }];
+}
+
+const MEDIA_TAGS: ReadonlySet<string> = new Set(["img", "iframe", "video"]);
+
 function mediaBlock(element: Element): Block[] {
-  return element.name === "iframe" ? videoBlock(element) : imageBlock(element);
+  switch (element.name) {
+    case "iframe":
+      return videoBlock(element);
+    case "video":
+      return videoFileBlock(element);
+    default:
+      return imageBlock(element);
+  }
 }
 
 /** Images and videos nested in a paragraph become their own blocks, around the text. */
 function textBlock(element: Element, make: (inlines: Inline[]) => Block): Block[] {
   const media = element.children.filter(
-    (child): child is Element => isTag(child) && (child.name === "img" || child.name === "iframe"),
+    (child): child is Element => isTag(child) && MEDIA_TAGS.has(child.name),
   );
   const inlines = inlinesOf(element.children);
   return [...media.flatMap(mediaBlock), ...(inlines.length > 0 ? [make(inlines)] : [])];
@@ -123,6 +154,7 @@ function blocksOf(node: ChildNode): Block[] {
   switch (node.name) {
     case "img":
     case "iframe":
+    case "video":
       return mediaBlock(node);
     case "h2":
     case "h3":

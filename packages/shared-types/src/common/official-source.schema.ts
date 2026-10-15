@@ -61,6 +61,17 @@ export function officialMediaUrl(url: string): string | null {
   }
 }
 
+const VIDEO_FILE = /.(mp4|m4v|webm|mov)$/i;
+
+/**
+ * Canonical URL of a video file stored by an official site (MP4 and the like), or
+ * null. Never throws.
+ */
+export function officialVideoFileUrl(url: string): string | null {
+  const official = officialMediaUrl(url);
+  return official !== null && VIDEO_FILE.test(new URL(official).pathname) ? official : null;
+}
+
 const YOUTUBE_EMBED_HOSTS: ReadonlySet<string> = new Set([
   "www.youtube.com",
   "youtube.com",

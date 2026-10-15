@@ -132,9 +132,12 @@ export class AutomaticNotifier {
     const notification: Notification = {
       id: randomUUID(),
       origin: "automatic",
+      kind: "article",
       articleId: article.id,
       lang: translation.lang,
       title: translation.title,
+      body: null,
+      imageKey: null,
       category: article.category,
       status: "approved",
       preparedBy: AUTOMATIC_SENDER,

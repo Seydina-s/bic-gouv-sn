@@ -80,11 +80,6 @@ export function WovenStrip({ category, color }: { category: string; color: strin
   return <Weave category={category} color={color} width="100%" height={SELVAGE_WIDTH} sideways />;
 }
 
-/** Small woven chip set before a section name: the pattern names the section. */
-export function WovenSwatch({ category, color }: { category: string; color: string }) {
-  return <Weave category={category} color={color} width={SELVAGE_WIDTH * 2} height={TILE * 1.5} />;
-}
-
 const styles = StyleSheet.create({
   stretch: { alignSelf: "stretch" },
 });

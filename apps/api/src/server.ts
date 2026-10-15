@@ -58,6 +58,7 @@ const app = await buildApp({
   database,
   // Within the "< 2 minutes" objective: a new article is announced in 30 s at most.
   automaticNotificationsEveryMs: 30_000,
+  automaticOpportunitiesEveryMs: 10 * 60_000,
 });
 database?.onConnectionError((error) => {
   app.log.warn({ err: error }, "A database connection was lost");
