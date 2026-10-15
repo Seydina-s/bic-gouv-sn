@@ -3,7 +3,7 @@
     "name": "Bic Gouv Sn",
     "slug": "bic-gouv-sn",
     "scheme": "bicgouvsn",
-    "version": "0.0.0",
+    "version": "1.0.0",
     "orientation": "default",
     "userInterfaceStyle": "automatic",
     "icon": "./assets/icon.png",
@@ -109,7 +109,7 @@
     },
     "owner": "seydina-s",
     "runtimeVersion": {
-      "policy": "fingerprint"
+      "policy": "appVersion"
     },
     "updates": {
       "url": "https://u.expo.dev/9ce1c61b-d8b6-456e-b982-0f1a1f664322",
