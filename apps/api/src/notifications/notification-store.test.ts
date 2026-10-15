@@ -50,9 +50,12 @@ const ARTICLE = "00000000-0000-5000-8000-000000000001";
 const pending = (): Notification => ({
   id: randomUUID(),
   origin: "console",
+  kind: "article",
   articleId: ARTICLE,
   lang: "fr",
   title: "Communiqué du Conseil des ministres",
+  body: null,
+  imageKey: null,
   category: "conseil-des-ministres",
   status: "pending",
   preparedBy: { id: "a", name: "Personne A" },

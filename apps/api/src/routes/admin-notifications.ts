@@ -3,6 +3,7 @@ import {
   automaticNotificationsSchema,
   notificationSchema,
   notificationsResponseSchema,
+  prepareMessageNotificationSchema,
   prepareNotificationSchema,
   setAutomaticNotificationsSchema,
 } from "@bgs/shared-types";
@@ -33,7 +34,11 @@ const STATUS_OF: Record<string, number> = {
   NOTIFICATION_ALREADY_PENDING: 409,
   NOTIFICATION_SAME_PERSON: 403,
   NOTIFICATION_ARTICLE_UNKNOWN: 422,
+  NOTIFICATION_PHOTO_INVALID: 422,
 };
+
+/** A message may carry a photo (6 MB once decoded, a third more as base64). */
+const MESSAGE_BODY_LIMIT = 9 * 1024 * 1024;
 
 async function refuse(request: FastifyRequest, reply: FastifyReply, error: unknown) {
   if (!(error instanceof NotificationRuleError)) {
@@ -135,6 +140,59 @@ export const adminNotificationsRoutes: FastifyPluginAsyncZod<AdminNotificationsO
       } catch (error) {
         return refuse(request, reply, error);
       }
+    },
+  );
+
+  app.post(
+    "/notifications/message",
+    {
+      bodyLimit: MESSAGE_BODY_LIMIT,
+      schema: {
+        tags: ["admin"],
+        summary: "Prepare a message written in the console, with an optional photo",
+        body: prepareMessageNotificationSchema,
+        response: { 201: notificationSchema, 422: apiErrorSchema, ...errors },
+      },
+    },
+    async (request, reply) => {
+      const account = await authorize(request, reply, signIn, "notifications.send");
+      if (account === null) {
+        return reply;
+      }
+      try {
+        const prepared = await notifications.prepareMessage(personOf(account), request.body);
+        return await reply.code(201).send(prepared);
+      } catch (error) {
+        return refuse(request, reply, error);
+      }
+    },
+  );
+
+  app.get(
+    "/notifications/:id/photo",
+    {
+      schema: {
+        tags: ["admin"],
+        summary: "The photo of a written message (JPEG, its hidden data removed)",
+        params: z.object({ id: z.uuid() }),
+      },
+    },
+    async (request, reply) => {
+      if ((await authorize(request, reply, signIn, "console.read")) === null) {
+        return reply;
+      }
+      const photo = await notifications.photo(request.params.id);
+      if (photo === null) {
+        return reply.code(404).send({
+          code: "NOTIFICATION_NOT_FOUND",
+          message: "No such photo",
+          requestId: request.id,
+        });
+      }
+      return reply
+        .header("content-type", "image/jpeg")
+        .header("cache-control", "no-store")
+        .send(photo);
     },
   );
 

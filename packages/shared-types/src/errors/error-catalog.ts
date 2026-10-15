@@ -295,6 +295,13 @@ export const ERROR_CATALOG = {
     severity: "info",
     action: "Choisissez un article dans la liste proposée.",
   },
+  NOTIFICATION_PHOTO_INVALID: {
+    what: "La photo jointe à une notification n'a pas pu être lue.",
+    where: "Centre d'administration, notifications",
+    impact: "Rien n'a été préparé ; le message reste dans le formulaire.",
+    severity: "info",
+    action: "Choisissez une photo JPEG, PNG ou WebP de moins de 6 Mo, ou envoyez sans photo.",
+  },
   ADMIN_FORBIDDEN: {
     what: "Un compte a tenté une action que son rôle ne permet pas.",
     where: "Centre d'administration",

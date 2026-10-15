@@ -72,9 +72,9 @@ import {
   FileParticipationStore,
   ParticipationService,
   type ParticipationStore,
-  PhotoFolder,
   PostgresParticipationStore,
 } from "./participation/participation";
+import { PhotoFolder } from "./media/photos";
 import {
   FileOpportunityStore,
   OpportunityService,
@@ -87,6 +87,7 @@ import type { SearchMisses } from "./journal/search-misses";
 import { adminUsageRoutes, usageSignalsRoutes } from "./routes/usage";
 import type { UsageStats } from "./usage/usage-stats";
 import {
+  NOTIFICATION_PHOTOS_FOLDER,
   NotificationService,
   noPushProvider,
   type PushProvider,
@@ -464,6 +465,7 @@ export async function buildApp({
       push: pushProvider,
       journal: admin.journal,
       mediaBaseUrl: config.MEDIA_BASE_URL,
+      photos: new PhotoFolder(join(config.MEDIA_ROOT, NOTIFICATION_PHOTOS_FOLDER)),
     };
     const automatic = new AutomaticNotifier({
       ...notificationServices,

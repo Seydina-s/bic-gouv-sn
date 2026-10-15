@@ -1,6 +1,4 @@
 import { randomUUID } from "node:crypto";
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
-import { join } from "node:path";
 import {
   PARTICIPATION_KEPT_DAYS,
   participationEntrySchema,
@@ -9,7 +7,6 @@ import {
   type ParticipationEntry,
   type ReportSubmission,
 } from "@bgs/shared-types";
-import sharp from "sharp";
 import type { AuditJournal } from "../admin/audit-journal";
 import type { Database } from "@bgs/database";
 import {
@@ -17,6 +14,7 @@ import {
   FileDocumentStore,
   PostgresDocumentStore,
 } from "../database/document-store";
+import { cleanPhoto, type PhotoFolder } from "../media/photos";
 import type { Person } from "../notifications/notifications";
 
 export type ParticipationStore = DocumentStore<ParticipationEntry>;
@@ -45,52 +43,7 @@ export class ParticipationRuleError extends Error {
 
 /** Longest side of a stored photo: enough to see a pothole, far lighter than a 12 MP shot. */
 const PHOTO_SIDE = 1600;
-/** Larger pictures are refused before decoding (decompression bombs). */
-const MAX_PIXELS = 50_000_000;
 const DAY_MS = 24 * 60 * 60 * 1000;
-
-/**
- * A photo as it is kept: turned upright, no larger than needed, re-encoded as JPEG,
- * which drops its hidden data (place where it was taken, device). Anything that is
- * not a picture is refused.
- */
-export async function cleanPhoto(base64: string): Promise<Buffer> {
-  try {
-    return await sharp(Buffer.from(base64, "base64"), { limitInputPixels: MAX_PIXELS })
-      .rotate()
-      .resize({ width: PHOTO_SIDE, height: PHOTO_SIDE, fit: "inside", withoutEnlargement: true })
-      .jpeg({ quality: 80, mozjpeg: true })
-      .toBuffer();
-  } catch {
-    throw new ParticipationRuleError("PARTICIPATION_PHOTO_INVALID");
-  }
-}
-
-/** Where the photos are kept: a private folder, never served to the public. */
-export class PhotoFolder {
-  constructor(private readonly root: string) {}
-
-  private pathOf(id: string): string {
-    return join(this.root, `${id}.jpg`);
-  }
-
-  async save(id: string, photo: Buffer): Promise<void> {
-    await mkdir(this.root, { recursive: true });
-    await writeFile(this.pathOf(id), photo);
-  }
-
-  async read(id: string): Promise<Buffer | null> {
-    try {
-      return await readFile(this.pathOf(id));
-    } catch {
-      return null;
-    }
-  }
-
-  async remove(id: string): Promise<void> {
-    await rm(this.pathOf(id), { force: true });
-  }
-}
 
 const base = (lang: ParticipationEntry["lang"], text: string, at: string) => ({
   id: randomUUID(),
@@ -126,7 +79,10 @@ export class ParticipationService {
   }
 
   async receiveReport(submission: ReportSubmission): Promise<ParticipationEntry> {
-    const photo = submission.photo === null ? null : await cleanPhoto(submission.photo);
+    const photo = submission.photo === null ? null : await cleanPhoto(submission.photo, PHOTO_SIDE);
+    if (submission.photo !== null && photo === null) {
+      throw new ParticipationRuleError("PARTICIPATION_PHOTO_INVALID");
+    }
     const photoId = photo === null ? null : randomUUID();
     if (photo !== null && photoId !== null) {
       await this.photos.save(photoId, photo);
