@@ -53,8 +53,23 @@ export async function buildKnowledge(
   };
 }
 
+/**
+ * A cheap mark of the published news, changing as soon as an article arrives: how
+ * many there are, and the newest one with its version.
+ */
+export async function newsStamp(articles: ArticleRepository): Promise<string> {
+  const newest = await articles.list({ limit: 1 });
+  const first = newest.items[0];
+  return `${String(newest.total)}:${first?.id ?? ""}:${String(first?.version ?? 0)}`;
+}
+
 export interface RefreshedKnowledgeOptions {
   build: () => Promise<Knowledge>;
+  /**
+   * A mark of the sources: when it changes, the base is built again before answering
+   * (14/10/2026: an article arrived minutes before was missing from the answers).
+   */
+  stamp?: () => Promise<string>;
   refreshEveryMs?: number;
   now?: () => number;
   /** A failed rebuild keeps the previous base; told here. */
@@ -62,7 +77,7 @@ export interface RefreshedKnowledgeOptions {
 }
 
 export class RefreshedKnowledge implements KnowledgeSource {
-  private latest: { knowledge: Knowledge; builtAt: number } | null = null;
+  private latest: { knowledge: Knowledge; builtAt: number; stamp: string | null } | null = null;
   private building: Promise<Knowledge> | null = null;
   private readonly now: () => number;
 
@@ -70,23 +85,25 @@ export class RefreshedKnowledge implements KnowledgeSource {
     this.now = options.now ?? Date.now;
   }
 
-  read(): Promise<Knowledge> {
+  async read(): Promise<Knowledge> {
+    const stamp = (await this.options.stamp?.().catch(() => null)) ?? null;
     const { latest } = this;
-    if (latest === null) {
-      return this.rebuild();
+    // New sources since the last build: answered from them, never from the old base.
+    if (latest === null || (stamp !== null && stamp !== latest.stamp)) {
+      return this.rebuild(stamp);
     }
     if (this.now() - latest.builtAt >= (this.options.refreshEveryMs ?? KNOWLEDGE_REFRESH_MS)) {
-      this.rebuild().catch((error: unknown) => this.options.onRefreshError?.(error));
+      this.rebuild(stamp).catch((error: unknown) => this.options.onRefreshError?.(error));
     }
-    return Promise.resolve(latest.knowledge);
+    return latest.knowledge;
   }
 
   /** One rebuild at a time, whoever asks. */
-  private rebuild(): Promise<Knowledge> {
+  private rebuild(stamp: string | null = null): Promise<Knowledge> {
     this.building ??= this.options
       .build()
       .then((knowledge) => {
-        this.latest = { knowledge, builtAt: this.now() };
+        this.latest = { knowledge, builtAt: this.now(), stamp };
         return knowledge;
       })
       .finally(() => {

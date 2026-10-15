@@ -125,6 +125,12 @@ const envSchema = z.object({
     .min(1)
     .default(".data/ingestion-status.json")
     .transform((path) => resolveDataPath(path)),
+  /** The assistant's counters of the month without Redis: kept across restarts (AST-28). */
+  ASSISTANT_COUNTERS_PATH: z
+    .string()
+    .min(1)
+    .default(".data/assistant-counters.json")
+    .transform((path) => resolveDataPath(path)),
   /** Weekly review of the ministry sites not collected yet, written by the collection (GOV-08). */
   SITES_REVIEW_PATH: z
     .string()
