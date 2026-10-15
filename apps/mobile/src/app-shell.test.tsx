@@ -12,6 +12,7 @@ import NearMeScreen from "./app/(tabs)/near-me";
 import ParticipateScreen from "./app/(tabs)/participate";
 import ProceduresScreen from "./app/(tabs)/procedures";
 import ArticleScreen from "./app/article/[id]";
+import FilteredScreen from "./app/filtered";
 import OpportunitiesScreen from "./app/opportunities";
 import OpportunityScreen from "./app/opportunity/[id]";
 import ProcedureScreen from "./app/procedure/[slug]";
@@ -106,6 +107,7 @@ const routes = {
   "procedure-theme/[id]": ProcedureThemeScreen,
   "section/[slug]": SectionScreen,
   "service/[id]": ServiceScreen,
+  filtered: FilteredScreen,
   opportunities: OpportunitiesScreen,
   "opportunity/[id]": OpportunityScreen,
   favorites: FavoritesScreen,
@@ -269,6 +271,31 @@ describe("app shell", () => {
         { timeout: 3000 },
       ),
     ).toBeOnTheScreen();
+  });
+
+  it("filters the articles from the front page and shows the ones matching", async () => {
+    const fetchMock = newsFetch({
+      list: () => new Response(JSON.stringify({ ...LIST, total: 7 })),
+    });
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    await renderRouter(routes, { initialUrl: "/" });
+    await fireEvent.press(await screen.findByRole("button", { name: "Filtrer" }));
+    expect(await screen.findByRole("header", { name: "Trier" })).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole("radio", { name: "Plus anciens" }));
+    await fireEvent.press(screen.getByRole("checkbox", { name: "Discours" }));
+    await fireEvent(screen.getByLabelText("Avec document PDF"), "valueChange", true);
+    // Counted as the choice is made.
+    await fireEvent.press(await screen.findByRole("button", { name: "Voir les 7 articles" }));
+    expect(await screen.findByRole("header", { name: "Articles filtrés" })).toBeOnTheScreen();
+    const asked = fetchMock.mock.calls.map(([url]) => url).filter((url) => url.includes("page=1"));
+    expect(
+      asked.some(
+        (url) =>
+          url.includes("order=oldest") &&
+          url.includes("categories=discours") &&
+          url.includes("documents=true"),
+      ),
+    ).toBe(true);
   });
 
   it("opens the chosen article beside the front page on a wide window, then closes it", async () => {

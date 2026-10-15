@@ -270,6 +270,62 @@ describe.each(STORAGES)("articles stored %s", (_name, open) => {
     expect(await repo.publishers("wo")).toEqual([]);
   });
 
+  it("filters as the « Filtrer » panel asks: sections, institutions, period, Wolof, audio, PDF, order", async () => {
+    const wolof = article(3).translations.map((translation) => ({
+      ...translation,
+      lang: "wo" as const,
+      title: "Tiitar 3",
+    }));
+    await repo.save(article(1));
+    await repo.save(article(2, { category: "discours" }));
+    await repo.save(article(3, { translations: [...article(3).translations, ...wolof] }));
+    await repo.save(
+      article(4, {
+        category: "discours",
+        attachments: [
+          {
+            sourceUrl: "https://www.presidence.sn/fr/document-test.pdf",
+            key: "documents/test/4.pdf",
+            title: null,
+            mimeType: "application/pdf",
+            bytes: 1000,
+            contentHash: "b".repeat(64),
+          },
+        ],
+      }),
+    );
+    await repo.setAudioTrack(article(1).id, {
+      lang: "fr",
+      origin: "tts",
+      key: "audio/test/fr-1.mp3",
+      format: "mp3",
+      durationMs: 42_000,
+      bytes: 120_000,
+      textHash: "a".repeat(64),
+      createdAt: "2026-10-08T10:00:00Z",
+    });
+    const ids = async (query: Omit<Parameters<ArticleRepository["list"]>[0], "limit">) => {
+      const page = await repo.list({ lang: "fr", limit: 10, ...query });
+      return { ids: page.items.map((item) => item.id.slice(-1)), total: page.total };
+    };
+    expect(await ids({ categories: ["discours", "communiques"] })).toEqual({
+      ids: ["4", "3", "2", "1"],
+      total: 4,
+    });
+    expect(await ids({ categories: ["discours"], oldestFirst: true })).toEqual({
+      ids: ["2", "4"],
+      total: 2,
+    });
+    expect(await ids({ publishers: ["primature", "presidence"], since: "2026-09-13" })).toEqual({
+      ids: ["4", "3"],
+      total: 2,
+    });
+    expect(await ids({ alsoIn: "wo" })).toEqual({ ids: ["3"], total: 1 });
+    expect(await ids({ withAudio: true })).toEqual({ ids: ["1"], total: 1 });
+    expect(await ids({ withDocuments: true })).toEqual({ ids: ["4"], total: 1 });
+    expect(await ids({ publishers: ["sante"] })).toEqual({ ids: [], total: 0 });
+  });
+
   it("filters by language", async () => {
     await repo.save(article(1));
     expect((await repo.list({ lang: "wo", limit: 5 })).items).toEqual([]);

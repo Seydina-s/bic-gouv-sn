@@ -131,6 +131,25 @@ describe("GET /v1/news", () => {
     );
   });
 
+  it("filters as the « Filtrer » panel asks, and refuses what it does not know", async () => {
+    const ids = async (query: string) => {
+      const response = await app.inject({ method: "GET", url: `/v1/news?${query}` });
+      const page = newsListResponseSchema.parse(response.json());
+      return { ids: page.items.map((item) => item.id.slice(-1)), total: page.total };
+    };
+    expect(await ids("categories=communiques,discours&publishers=presidence,primature")).toEqual({
+      ids: ["3", "2", "1"],
+      total: 3,
+    });
+    expect(await ids("order=oldest&since=2026-09-12")).toEqual({ ids: ["2", "3"], total: 2 });
+    expect(await ids("alsoIn=wo")).toEqual({ ids: ["2"], total: 1 });
+    expect(await ids("audio=true")).toEqual({ ids: [], total: 0 });
+    expect(await ids("documents=true")).toEqual({ ids: [], total: 0 });
+    for (const bad of ["publishers=le-soleil", "categories=../x", "since=hier", "order=random"]) {
+      expect((await app.inject({ method: "GET", url: `/v1/news?${bad}` })).statusCode).toBe(400);
+    }
+  });
+
   it("filters by institution, counts each one's articles, and refuses an unknown one", async () => {
     const mine = await app.inject({ method: "GET", url: "/v1/news?publisher=presidence" });
     expect(newsListResponseSchema.parse(mine.json()).total).toBe(3);

@@ -22,6 +22,7 @@ import type { VersionedEntry } from "./versioned-json-store";
 
 /** compareNewestFirst, in SQL: newest publication day, then update time, then id. */
 const NEWEST_FIRST = "published_on DESC, updated_at DESC, id";
+const OLDEST_FIRST = "published_on ASC, updated_at ASC, id";
 
 /**
  * Articles in PostgreSQL (SCALE-02), behind the same interface as the file store:
@@ -64,28 +65,11 @@ export class PostgresArticleRepository implements ArticleRepository {
     return this.table.importEntry(entry);
   }
 
-  async list({
-    lang,
-    category,
-    publisher,
-    limit,
-    cursor,
-    offset = 0,
-    includeWithdrawn = false,
-  }: ListQuery): Promise<ArticlePage> {
+  async list(query: ListQuery): Promise<ArticlePage> {
+    const { lang, limit, offset = 0, includeWithdrawn = false, oldestFirst = false } = query;
+    const cursor = oldestFirst ? undefined : query.cursor;
     const params: unknown[] = [];
-    const where = [shownFilter(lang, includeWithdrawn, params)];
-    if (category !== undefined) {
-      params.push(category);
-      where.push(`category = $${String(params.length)}`);
-    }
-    if (publisher !== undefined) {
-      params.push(publisher);
-      const at = `$${String(params.length)}::text`;
-      where.push(
-        `(data->>'publisher' = ${at} OR data->'alsoPublishedBy' @> jsonb_build_array(jsonb_build_object('publisher', ${at})))`,
-      );
-    }
+    const where = [shownFilter(lang, includeWithdrawn, params), ...filters(query, params)];
     const matching = where.join(" AND ");
     const count = await this.database.query(
       `SELECT count(*)::int AS total FROM articles WHERE ${matching}`,
@@ -111,7 +95,7 @@ export class PostgresArticleRepository implements ArticleRepository {
     const n = pageParams.length;
     const { rows } = await this.database.query(
       `SELECT data FROM articles WHERE ${matching}${keyset}
-       ORDER BY ${NEWEST_FIRST} LIMIT $${String(n - 1)} OFFSET $${String(n)}`,
+       ORDER BY ${oldestFirst ? OLDEST_FIRST : NEWEST_FIRST} LIMIT $${String(n - 1)} OFFSET $${String(n)}`,
       pageParams,
     );
     const page = this.table.parse(rows);
@@ -250,4 +234,43 @@ function shownFilter(lang: Lang | undefined, includeWithdrawn: boolean, params: 
   }
   params.push(lang);
   return `$${String(params.length)} = ANY(${column})`;
+}
+
+/** An institution among `at` published the article, or also published it. */
+function publishedByOneOf(at: string): string {
+  return `(data->>'publisher' = ANY(${at}) OR EXISTS (SELECT 1 FROM jsonb_array_elements(data->'alsoPublishedBy') AS other WHERE other->>'publisher' = ANY(${at})))`;
+}
+
+/** The filters of a list as SQL conditions, their values pushed onto `params`. */
+function filters(query: ListQuery, params: unknown[]): string[] {
+  const where: string[] = [];
+  const next = (value: unknown) => {
+    params.push(value);
+    return `$${String(params.length)}`;
+  };
+  if (query.category !== undefined) {
+    where.push(`category = ${next(query.category)}`);
+  }
+  if (query.publisher !== undefined) {
+    where.push(publishedByOneOf(`${next([query.publisher])}::text[]`));
+  }
+  if (query.categories !== undefined) {
+    where.push(`category = ANY(${next([...query.categories])}::text[])`);
+  }
+  if (query.publishers !== undefined) {
+    where.push(publishedByOneOf(`${next([...query.publishers])}::text[]`));
+  }
+  if (query.since !== undefined) {
+    where.push(`published_on >= ${next(query.since)}`);
+  }
+  if (query.alsoIn !== undefined) {
+    where.push(`${next(query.alsoIn)} = ANY(shown_langs)`);
+  }
+  if (query.withAudio === true) {
+    where.push("jsonb_array_length(data->'audio') > 0");
+  }
+  if (query.withDocuments === true) {
+    where.push("jsonb_array_length(data->'attachments') > 0");
+  }
+  return where;
 }
