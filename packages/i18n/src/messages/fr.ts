@@ -151,7 +151,7 @@ export const fr = {
     image: "Photo de l'article",
     showPhoto: "Afficher la photo",
     watchVideo: "Regarder la vidéo",
-    videoHost: "Sur YouTube",
+    videoHost: "Sur {host}",
     share: "Partager",
     documents: "Documents officiels",
     document: "Document PDF",

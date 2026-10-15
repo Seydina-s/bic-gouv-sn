@@ -213,7 +213,7 @@ function ArticleBody({
           {detail.translationStatus === "machine" ? ` · ${t("content.machineTranslation")}` : ""}
         </Text>
         <View {...languageProps(detail.lang)}>
-          <BlockRenderer blocks={detail.blocks} />
+          <BlockRenderer blocks={detail.blocks} poster={detail.cover} />
         </View>
         <DocumentList documents={detail.documents ?? []} />
         <View
