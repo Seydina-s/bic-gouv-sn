@@ -10,6 +10,17 @@ import { OPEN_SOURCE, type OpenSourcePackage } from "../features/licences/open-s
 import { useTranslation } from "../i18n/useTranslation";
 import { useTheme } from "../theme/useTheme";
 
+/** The data, fonts and icons the app shows, each with its licence. */
+const CREDITS = [
+  { key: "licenceData", url: "https://www.openstreetmap.org/copyright" },
+  { key: "licenceFonts", url: "https://openfontlicense.org" },
+  { key: "licenceMapIcons", url: "https://github.com/tangrams/icons/blob/master/LICENSE.md" },
+  {
+    key: "licenceAppIcons",
+    url: "https://github.com/duongdev/phosphor-react-native/blob/main/LICENSE",
+  },
+] as const;
+
 /** One package: its name and licence; opened, its copyright, licence text and site. */
 function PackageRow({ item }: { item: OpenSourcePackage }) {
   const { theme } = useTheme();
@@ -74,8 +85,9 @@ function PackageRow({ item }: { item: OpenSourcePackage }) {
 }
 
 /**
- * The free software that makes the app work, as shipped (generated from the
- * production bundle), each with its copyright and full licence text (LIC-01).
+ * Software and licences, reached by one button of the settings (owner's request,
+ * 15/10/2026): the data, fonts and icons credited, then the free software that makes
+ * the app work, as shipped, each opening on its copyright and licence (LIC-01).
  */
 export default function LicencesScreen() {
   const { theme } = useTheme();
@@ -83,7 +95,7 @@ export default function LicencesScreen() {
   const insets = useSafeAreaInsets();
   const list = useRef<FlashListRef<OpenSourcePackage>>(null);
   const scrollTop = useScrollTop();
-  const { color, space, textStyle } = theme;
+  const { color, space, textStyle, touchTarget } = theme;
 
   return (
     <View style={[styles.root, { backgroundColor: color.background }]}>
@@ -107,6 +119,24 @@ export default function LicencesScreen() {
         renderItem={({ item }) => <PackageRow item={item} />}
         ListHeaderComponent={
           <View style={{ padding: space.lg, gap: space.md }}>
+            <Text
+              accessibilityRole="header"
+              style={[textStyle.subtitle, { color: color.textPrimary }]}
+            >
+              {t("licences.creditsTitle")}
+            </Text>
+            {CREDITS.map(({ key, url }) => (
+              <Pressable
+                key={key}
+                accessibilityRole="link"
+                onPress={() => void Linking.openURL(url)}
+                style={[styles.link, { minHeight: touchTarget.min }]}
+              >
+                <Text style={[textStyle.body, { color: color.textBrand }]}>
+                  {t(`licences.${key}`)}
+                </Text>
+              </Pressable>
+            ))}
             <Text
               accessibilityRole="header"
               style={[textStyle.subtitle, { color: color.textPrimary }]}
