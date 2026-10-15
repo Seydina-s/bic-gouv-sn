@@ -7,6 +7,7 @@ import {
   sinceOf,
   type NewsFilters,
 } from "./filters";
+import { panelSections } from "./category";
 
 const TODAY = new Date("2026-10-15T10:00:00Z");
 
@@ -60,5 +61,15 @@ describe("the Filtrer panel's choice", () => {
       },
     );
     expect(decodeFilters(undefined)).toEqual(NO_FILTERS);
+  });
+});
+
+describe("the sections the panel offers", () => {
+  it("are those with articles, « Actualités » first, in the panel's order", () => {
+    expect(panelSections(["discours", "x", "actualites", "communiques"])).toEqual([
+      "actualites",
+      "communiques",
+      "discours",
+    ]);
   });
 });
