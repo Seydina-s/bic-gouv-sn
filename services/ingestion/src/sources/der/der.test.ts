@@ -1,7 +1,12 @@
 import type { JsonDocument } from "@bgs/content-store";
 import { ENTREPRENDRE_PAGES, entreprendreDocumentSchema } from "@bgs/shared-types";
 import { describe, expect, it } from "vitest";
-import { collectEntreprendre, type DerPageRead, type DerSource } from "./der-collector";
+import {
+  collectEntreprendre,
+  createDerSource,
+  type DerPageRead,
+  type DerSource,
+} from "./der-collector";
 import { derPageHtml } from "./der-page";
 
 // A page built like der.sn's (Divi modules), with placeholder words.
@@ -121,5 +126,75 @@ describe("the Entreprendre space collected", () => {
       bodyHtml: LONG,
     });
     expect(kept.news).toHaveLength(1);
+  });
+});
+
+describe("der.sn read through its own interface", () => {
+  // Placeholder answers shaped like der.sn's WordPress interface and pages.
+  const fakeDer = ((input: string | URL | Request) => {
+    const url = String(input);
+    if (url.includes("/wp-json/wp/v2/pages")) {
+      return Promise.resolve(
+        Response.json([
+          {
+            title: { rendered: "Pr&#233;sentation fictive" },
+            modified_gmt: "2026-10-01T10:00:00",
+            link: "https://www.der.sn/la-der-fj/presentation/",
+          },
+        ]),
+      );
+    }
+    if (url.includes("/wp-json/wp/v2/posts")) {
+      return Promise.resolve(
+        Response.json([
+          {
+            date: "2026-10-12T14:18:17",
+            link: "https://www.der.sn/actualite-fictive/",
+            title: { rendered: "𝐀𝐩𝐩𝐞𝐥 &#224; candidatures fictif &amp; ouvert" },
+            excerpt: { rendered: `<p>${"Mot fictif ".repeat(40)}[&hellip;]</p>` },
+          },
+        ]),
+      );
+    }
+    return Promise.resolve(new Response(PAGE));
+  }) as typeof fetch;
+
+  it("reads a page's title and date there, and its words on the page itself", async () => {
+    const [presentation] = ENTREPRENDRE_PAGES;
+    const read = await createDerSource(fakeDer).page(presentation);
+    expect(read).toMatchObject({
+      title: "Présentation fictive",
+      sourceUrl: "https://www.der.sn/la-der-fj/presentation/",
+      sourceUpdatedAt: "2026-10-01T10:00:00Z",
+    });
+    expect(read.bodyHtml).toContain("<h3>Documents à scanner</h3>");
+  });
+
+  it("reads the news with plain titles and first words cut at a word", async () => {
+    const [news] = await createDerSource(fakeDer).news();
+    expect(news).toMatchObject({
+      title: "Appel à candidatures fictif & ouvert",
+      publishedOn: "2026-10-12",
+      sourceUrl: "https://www.der.sn/actualite-fictive/",
+    });
+    expect(news?.excerpt.length).toBeLessThanOrEqual(221);
+    expect(news?.excerpt.endsWith("…")).toBe(true);
+  });
+});
+
+describe("the Entreprendre news when der.sn does not answer", () => {
+  it("keeps the last news read and says why", async () => {
+    const document = memoryDocument();
+    await collectEntreprendre(
+      document,
+      source(() => LONG),
+    );
+    const silent: DerSource = {
+      page: () => Promise.reject(new Error("unreachable")),
+      news: () => Promise.reject(new Error("news unreachable")),
+    };
+    const report = await collectEntreprendre(document, silent);
+    expect(report).toMatchObject({ news: null, newsError: "news unreachable" });
+    expect(entreprendreDocumentSchema.parse(document.value).news).toHaveLength(1);
   });
 });
