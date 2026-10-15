@@ -56,7 +56,12 @@ const documentSchema = z.object({
   titre: z.string().nullable().optional(),
   fichier: z.object({ url: z.string(), ext: z.string() }),
 });
-const videoSchema = z.object({ url: z.string().nullable().optional() });
+const videoSchema = z.object({
+  url: z.string().nullable().optional(),
+  titre: z.string().nullable().optional(),
+  /** A video stored by the site itself (MP4). */
+  fichier: z.object({ url: z.string() }).nullable().optional(),
+});
 
 function absolute(path: string): string {
   return new URL(path, INTERIEUR_ORIGIN).href;
@@ -92,13 +97,25 @@ function component(raw: z.infer<typeof componentSchema>): string {
       return `<p><a href="${escape(absolute(parsed.data.fichier.url))}">${escape(words)}</a></p>`;
     }
     case "blocks.video": {
-      // Videos stored by the site (MP4) are not read by the app yet (GOV-17).
-      const id = youtubeIdOf(videoSchema.safeParse(raw).data?.url ?? "");
-      return id === null ? "" : `<iframe src="https://www.youtube.com/embed/${id}"></iframe>`;
+      const video = videoSchema.safeParse(raw).data;
+      const id = youtubeIdOf(video?.url ?? "");
+      if (id !== null) {
+        return `<iframe src="https://www.youtube.com/embed/${id}"></iframe>`;
+      }
+      return storedVideo(video?.fichier?.url ?? video?.url ?? "", video?.titre ?? null);
     }
     default:
       return "";
   }
+}
+
+/** A file stored by the site (MP4), with its title: kept when it is one (sanitize.ts). */
+function storedVideo(path: string, title: string | null): string {
+  if (path.trim() === "") {
+    return "";
+  }
+  const titled = title === null || title.trim() === "" ? "" : ` title="${escape(title.trim())}"`;
+  return `<video src="${escape(absolute(path))}"${titled}></video>`;
 }
 
 function photo(media: z.infer<typeof mediaSchema>): string {
@@ -111,7 +128,11 @@ export function normalizeInterieur(article: Article, fetchedAt: string): NewsArt
   const quarantine = (reason: string) => new QuarantineError(sourceUrl, reason);
   const title = plainLetters(article.titre.trim());
   const bodyHtml = sanitizeArticleHtml(
-    [...article.contenu.map(component), ...(article.galerie ?? []).map(photo)].join(""),
+    [
+      storedVideo(article.videoUrl ?? "", null),
+      ...article.contenu.map(component),
+      ...(article.galerie ?? []).map(photo),
+    ].join(""),
   );
   if (title === "") {
     throw quarantine("article has no title");
