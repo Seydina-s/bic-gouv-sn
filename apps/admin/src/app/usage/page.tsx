@@ -4,6 +4,8 @@ import { adminRequest } from "../../lib/admin-api";
 import { formatDay } from "../../lib/format";
 import { t } from "../../lib/i18n";
 import { requireAccount } from "../../lib/session";
+import { Breakdown } from "./Breakdown";
+import { TrendChart } from "./TrendChart";
 
 export const dynamic = "force-dynamic";
 
@@ -34,80 +36,35 @@ function Section({
   );
 }
 
-/** Each of the last 30 days as a bar, its numbers in words for everyone. */
-function Days({ days }: { days: UsageReport["days"] }) {
-  const most = Math.max(1, ...days.map((day) => day.active));
-  return (
-    <ol className="space-y-1">
-      {days.map((day) => {
-        const words = t("usage.dayLine", {
-          count: day.active,
-          firstEver: day.firstEver,
-          day: formatDay(new Date(day.day)),
-        });
-        return (
-          <li key={day.day} className="flex items-center gap-3 text-sm">
-            <span className="sr-only">{words}</span>
-            <span aria-hidden="true" className="w-16 shrink-0 text-ink-soft tabular-nums">
-              {day.day.slice(8, 10)}/{day.day.slice(5, 7)}
-            </span>
-            <span aria-hidden="true" className="h-3 flex-1 rounded-full bg-surface">
-              <span
-                className="block h-3 rounded-full bg-primary"
-                style={{ width: `${String((day.active / most) * 100)}%` }}
-              />
-            </span>
-            <span aria-hidden="true" className="w-12 shrink-0 text-right tabular-nums">
-              {number.format(day.active)}
-            </span>
-          </li>
-        );
-      })}
-    </ol>
-  );
-}
-
-function Shares({
-  title,
-  rows,
-}: {
-  title: string;
-  rows: readonly { name: string; count: number }[];
-}) {
-  return (
-    <div className="space-y-2">
-      <h3 className="font-semibold">{title}</h3>
-      {rows.length === 0 ? (
-        <p className="text-sm text-ink-soft">{t("usage.noContent")}</p>
-      ) : (
-        <ul className="space-y-1 text-sm">
-          {rows.map((row) => (
-            <li key={row.name} className="flex justify-between gap-4">
-              <span>{row.name}</span>
-              <span className="tabular-nums">{number.format(row.count)}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-
+/** The most read (or listened) articles, each bar as long as its share of the first. */
 function TopArticles({ rows }: { rows: UsageReport["topRead"] }) {
   if (rows.length === 0) {
     return <p className="text-ink-soft">{t("usage.noContent")}</p>;
   }
+  const most = Math.max(1, ...rows.map((row) => row.count));
   return (
-    <ol className="divide-y divide-line rounded-lg border border-line">
-      {rows.map((row) => (
-        <li
-          key={row.articleId}
-          className="flex flex-wrap items-baseline justify-between gap-x-6 p-4"
-        >
-          <span className={row.title === null ? "text-ink-soft" : "font-semibold"}>
-            {row.title ?? t("usage.unknownArticle")}
+    <ol className="space-y-2 rounded-2xl border border-line bg-surface-raised p-3 shadow-sm">
+      {rows.map((row, index) => (
+        <li key={row.articleId} className="relative overflow-hidden rounded-lg">
+          <span
+            aria-hidden="true"
+            className="absolute inset-y-0 left-0 rounded-lg bg-primary-container/70"
+            style={{ width: `${String((row.count / most) * 100)}%` }}
+          />
+          <span className="relative flex items-baseline gap-4 px-4 py-3">
+            <span
+              aria-hidden="true"
+              className="w-6 shrink-0 font-display font-extrabold text-brand tabular-nums"
+            >
+              {index + 1}
+            </span>
+            <span className={`flex-1 ${row.title === null ? "text-ink-soft" : "font-semibold"}`}>
+              {row.title ?? t("usage.unknownArticle")}
+            </span>
+            <span className="shrink-0 text-sm tabular-nums">
+              {t("usage.times", { count: row.count })}
+            </span>
           </span>
-          <span className="text-sm tabular-nums">{t("usage.times", { count: row.count })}</span>
         </li>
       ))}
     </ol>
@@ -189,19 +146,19 @@ function UsageReportView({ report, since }: { report: UsageReport; since: string
         </dl>
       </Section>
       <Section id="usage-days" title={t("usage.daysTitle")}>
-        <Days days={report.days} />
+        <TrendChart days={report.days} />
       </Section>
       <Section id="usage-phones" title={t("usage.phonesTitle")}>
-        <div className="grid gap-8 md:grid-cols-3">
-          <Shares
+        <div className="grid gap-6 lg:grid-cols-2 2xl:grid-cols-3">
+          <Breakdown
             title={t("usage.platforms")}
             rows={report.platforms.map((row) => ({ ...row, name: platformName(row.name) }))}
           />
-          <Shares
+          <Breakdown
             title={t("usage.osVersions")}
             rows={report.osVersions.map((row) => ({ ...row, name: systemName(row.name) }))}
           />
-          <Shares title={t("usage.appVersions")} rows={report.appVersions} />
+          <Breakdown title={t("usage.appVersions")} rows={report.appVersions} />
         </div>
       </Section>
       <Section id="usage-read" title={t("usage.readTitle")}>
