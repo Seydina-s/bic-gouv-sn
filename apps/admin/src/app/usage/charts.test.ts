@@ -21,7 +21,12 @@ describe("the usage charts", () => {
     expect(weekChange(days, "active")).toBeCloseTo(0.5);
     expect(weekChange(days, "firstEver")).toBeCloseTo(-0.5);
     expect(weekChange(days.slice(1), "active")).toBeNull();
-    expect(weekChange(days.map((item) => ({ ...item, active: 0 })), "active")).toBeNull();
+    expect(
+      weekChange(
+        days.map((item) => ({ ...item, active: 0 })),
+        "active",
+      ),
+    ).toBeNull();
   });
 
   it("keeps the largest shares and groups the rest under « Autres »", () => {
