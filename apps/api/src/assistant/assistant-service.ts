@@ -7,7 +7,7 @@ import type {
 import { z } from "zod";
 import type { AuditJournal } from "../admin/audit-journal";
 import type { SettingStore } from "../admin/setting-store";
-import type { KeyValueStore } from "../shared-state/key-value-store";
+import type { CounterStore } from "../shared-state/document-counters";
 import { answerQuestion, type AnswerDependencies, type GroundedAnswer } from "./grounded-answer";
 import type { KnowledgeSource } from "./knowledge";
 import type { SemanticLayer } from "./semantic-layer";
@@ -70,7 +70,8 @@ export interface AssistantServiceOptions {
   knowledge: KnowledgeSource;
   /** The search by meaning, when switched on (ASSISTANT_SEMANTIC_SEARCH). */
   semantic?: SemanticLayer | null;
-  state: KeyValueStore;
+  /** The monthly counters (questions, tokens, spending). */
+  counters: CounterStore;
   settings: SettingStore;
   journal: AuditJournal | null;
   /** Deadline and circuit breaker of the model calls. */
@@ -106,12 +107,12 @@ export class AssistantService {
   }
 
   private async count(name: string, time: number): Promise<number> {
-    return Number(await this.options.state.get(this.counter(name, time))) || 0;
+    return Number(await this.options.counters.get(this.counter(name, time))) || 0;
   }
 
   private add(name: string, time: number, by: number): Promise<number> {
     const ttlMs = nextMonthStart(time) - time + COUNTER_MARGIN_MS;
-    return this.options.state.increment(this.counter(name, time), ttlMs, by);
+    return this.options.counters.increment(this.counter(name, time), ttlMs, by);
   }
 
   async answer(question: AssistantQuestion): Promise<AssistantOutcome> {

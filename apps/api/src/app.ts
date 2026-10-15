@@ -39,6 +39,7 @@ import {
 import { pushSubscriptionRoutes } from "./routes/push-subscriptions";
 import { registerIdempotency } from "./idempotency/idempotency";
 import { Redis } from "ioredis";
+import { DocumentCounters } from "./shared-state/document-counters";
 import {
   MemoryKeyValueStore,
   RedisKeyValueStore,
@@ -100,7 +101,7 @@ import { statusRoutes } from "./routes/status";
 import { CircuitBreaker, createResilientCall, TimeoutError } from "@bgs/resilience";
 import { AssistantService } from "./assistant/assistant-service";
 import { ClaudeProvider, isClaudeOutage } from "./assistant/claude-provider";
-import { buildKnowledge, RefreshedKnowledge } from "./assistant/knowledge";
+import { buildKnowledge, newsStamp, RefreshedKnowledge } from "./assistant/knowledge";
 import { SemanticLayer } from "./assistant/semantic-layer";
 import { TransformersEmbedder } from "./assistant/transformers-embedder";
 import type { LlmProvider } from "./assistant/llm-provider";
@@ -128,6 +129,8 @@ export interface AppOptions {
   ingestionStatus?: JsonDocument;
   /** Weekly review of the ministry sites not collected yet (GOV-08). */
   sitesReview?: JsonDocument;
+  /** The assistant's monthly counters when there is no Redis (a file, or a database row). */
+  assistantCounters?: JsonDocument;
   /** Defaults to the file stores when ADMIN_SECRET_KEY is set; none otherwise. */
   admin?: AdminServices | null;
   /** Where the logs go: standard output by default, tests read them here. */
@@ -236,6 +239,7 @@ export async function buildApp({
   remoteConfig = new RemoteConfigStore(fileDocument(config.REMOTE_CONFIG_PATH)),
   ingestionStatus = fileDocument(config.INGESTION_STATUS_PATH),
   sitesReview = fileDocument(config.SITES_REVIEW_PATH),
+  assistantCounters,
   redis = config.REDIS_URL === undefined ? null : connectRedis(config.REDIS_URL),
   sharedState = redis === null ? new MemoryKeyValueStore() : new RedisKeyValueStore(redis),
   database = null,
@@ -369,6 +373,7 @@ export async function buildApp({
     wolofLlm,
     semantic,
     knowledge: new RefreshedKnowledge({
+      stamp: () => newsStamp(articles),
       build: async () => {
         const knowledge = await buildKnowledge(articles, procedures);
         // The vectors follow in the background; the words answer meanwhile.
@@ -379,7 +384,12 @@ export async function buildApp({
         app.log.warn({ err: error }, "Assistant knowledge not refreshed");
       },
     }),
-    state: sharedState,
+    // Redis keeps them for every instance; without it, the saved document the
+    // server gives (in memory they started again from zero at each restart).
+    counters:
+      redis === null && assistantCounters !== undefined
+        ? new DocumentCounters(assistantCounters)
+        : sharedState,
     settings,
     journal: admin?.journal ?? null,
     // Made again only when the model stayed silent: an answer, even a refusal, is
