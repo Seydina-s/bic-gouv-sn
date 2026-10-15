@@ -1,6 +1,7 @@
-// State services of Senegal from OpenStreetMap, as proposals to check in the console:
-// `pnpm --filter @bgs/ingestion services:osm`. Nothing is shown in the app before a
-// person verifies it; a verified service is never changed silently by a new import.
+// State services of Senegal from OpenStreetMap: `pnpm --filter @bgs/ingestion services:osm`.
+// New services are validated by default (owner's decision of 14/10/2026) but those named
+// like a company, which wait in the console; a verified service is never changed
+// silently by a new import.
 // OpenStreetMap data: © OpenStreetMap contributors, ODbL. Messages are in French.
 import { openStores } from "../lib/stores";
 import { toImportedService, toPlace } from "../sources/osm/classify";
@@ -25,7 +26,7 @@ for (const [category, count] of [...counts].sort((a, b) => b[1] - a[1])) {
 process.stdout.write(
   [
     `${String(services.length)} services lus, ${String(places.length)} villes et quartiers.`,
-    `${String(outcome.added)} nouveaux (à vérifier dans la console), ${String(outcome.updated)} propositions mises à jour, ${String(outcome.unchanged)} inchangés.`,
+    `${String(outcome.added)} nouveaux (validés par défaut, sauf les noms d'entreprises à vérifier dans la console), ${String(outcome.updated)} propositions mises à jour, ${String(outcome.unchanged)} inchangés.`,
     `${String(outcome.changedAfterReview)} services déjà vérifiés ont changé à la source : le changement attend une vérification.`,
     "",
   ].join("\n"),

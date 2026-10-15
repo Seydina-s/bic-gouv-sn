@@ -8,6 +8,9 @@ describe("hints for the person who verifies services", () => {
     ["Banque de test", ["notState"]],
     ["Fédération de test de football", ["notState"]],
     ["Hôtel de test", ["notState"]],
+    // Accented last letter: missed before 15/10/2026.
+    ["Société de test", ["notState"]],
+    ["Entreprise générale", ["notState"]],
     ["Hôtel de ville de Test", []],
     ["Mairie", ["vague"]],
     ["Annexe Mairie", ["vague"]],

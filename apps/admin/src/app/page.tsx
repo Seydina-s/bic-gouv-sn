@@ -16,6 +16,7 @@ import { attentionItems } from "../lib/attention";
 import { readApiUrl } from "../lib/config";
 import { t } from "../lib/i18n";
 import { getIngestionReport } from "../lib/ingestion-status";
+import { unreadCount } from "../lib/participation-count";
 import { notificationsOverview } from "../lib/pending-notifications";
 import { requireAccount } from "../lib/session";
 import { getSitesReview, sitesPublishingAgain } from "../lib/sites-review";
@@ -58,8 +59,7 @@ export default async function StatusPage() {
     now: status.checkedAt,
     ...(participation.ok
       ? {
-          participationToRead: participation.data.entries.filter((entry) => entry.status === "new")
-            .length,
+          participationToRead: unreadCount(participation.data.entries),
         }
       : {}),
     ...(opportunities.ok

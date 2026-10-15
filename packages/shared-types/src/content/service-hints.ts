@@ -6,9 +6,13 @@
 
 export type ServiceHint = "notState" | "vague";
 
-/** Words of company or private-body names: rarely a state service. */
+/**
+ * Words of company or private-body names: rarely a state service. Bounded by letters
+ * of any alphabet: JavaScript's \b ignores accented letters, so "Société" was missed
+ * (found on 15/10/2026).
+ */
 const PRIVATE_BODY =
-  /\b(?:s\.?a\.?r\.?l|suarl|gie|banque|bank|restaurant|boutique|f[ée]d[ée]ration|ong|association|clinique|pharmacie|soci[ée]t[ée]|entreprise|cabinet|solutions?)\b|\bh[ôo]tel\b(?! de ville)/i;
+  /(?<!\p{L})(?:s\.?a\.?r\.?l|suarl|gie|banque|bank|restaurant|boutique|f[ée]d[ée]ration|ong|association|clinique|pharmacie|soci[ée]t[ée]|entreprise|cabinet|solutions?)(?!\p{L})|(?<!\p{L})h[ôo]tel(?!\p{L})(?! de ville)/iu;
 
 /** A name that only says what it is, not which one: its place must be checked. */
 const GENERIC_NAME =
