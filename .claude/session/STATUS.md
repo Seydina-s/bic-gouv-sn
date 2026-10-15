@@ -11,6 +11,8 @@
 - **Nettoyage** : code mort et dépendances inutiles retirés ; essais de voix du serveur à supprimer avec votre accord (point 47).
 - **Incidents corrigés** : une mise à jour construite depuis une copie de travail (republiée proprement, script verrouillé) ; l'en-tête du backlog abîmé par un script (réparé). Voir ERREURS.md.
 - **À choisir** : le panneau « Filtrer » (trois maquettes, point 48).
+- **Entreprendre (DER/FJ)** : espace en service (10 pages officielles, 20 actualités), carte sur l'accueil, mise à jour publiée.
+- **iPhone / TestFlight** : profil prêt ; il manque votre connexion Apple une fois (point 55).
 - **Alerte disque** : plein cette nuit, rattrapage des voix arrêté ; 9,6 Go libres après nettoyage du cache npm (point 54). Voix et PDF de la Santé relancés.
 
 ## Nuit du 11 au 12/10 (mode autonome) en bref : tous les ministères lisibles, deux défauts graves corrigés
