@@ -252,6 +252,7 @@ function NearMe() {
         />
         <ScrollTopButton
           visible={scrollTop.visible}
+          progress={scrollTop.progress}
           bottom={bottomInset + space.sm}
           onPress={() => {
             list.current?.scrollToOffset({ offset: 0, animated: true });

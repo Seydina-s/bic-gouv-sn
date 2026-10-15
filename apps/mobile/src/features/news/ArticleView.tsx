@@ -244,6 +244,7 @@ function ArticleBody({
       </Animated.ScrollView>
       <ScrollTopButton
         visible={scrollTop.visible}
+        progress={scrollTop.progress}
         bottom={bottomInset + space.lg}
         onPress={() => {
           scroller.current?.scrollTo({ y: 0, animated: true });
