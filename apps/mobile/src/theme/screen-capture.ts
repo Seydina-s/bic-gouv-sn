@@ -1,5 +1,5 @@
 import { Platform, TurboModuleRegistry } from "react-native";
-import type * as ViewShot from "react-native-view-shot";
+import type * as ViewShot from "./view-shot";
 
 export interface ScreenCapture {
   /** A picture of the screen as it is now, saved in a temporary file. */
@@ -18,7 +18,7 @@ export function loadScreenCapture(): ScreenCapture | null {
     return null;
   }
   // eslint-disable-next-line @typescript-eslint/no-require-imports -- see above
-  const { captureScreen, releaseCapture } = require("react-native-view-shot") as typeof ViewShot;
+  const { captureScreen, releaseCapture } = require("./view-shot") as typeof ViewShot;
   return {
     take: () => captureScreen({ format: "jpg", quality: 0.9, result: "tmpfile" }),
     release: releaseCapture,

@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { Image, StyleSheet } from "react-native";
 import Animated, {
   Easing,
@@ -37,6 +37,8 @@ export function useThemeTransition(target: Theme): { theme: Theme; layer: ReactN
   const [cover, setCover] = useState<Cover | null>(null);
   const shownRef = useRef(target);
   const latest = useRef(target);
+  // The change under way: re-running the effect for the same mode never starts it again.
+  const pending = useRef<{ target: Theme; cancel: () => void } | null>(null);
   const opacity = useSharedValue(0);
   const duration = target.motion.duration.themeFade;
 
@@ -79,6 +81,11 @@ export function useThemeTransition(target: Theme): { theme: Theme; layer: ReactN
 
   useLayoutEffect(() => {
     latest.current = target;
+    if (pending.current?.target === target) {
+      return;
+    }
+    pending.current?.cancel();
+    pending.current = null;
     const from = shownRef.current;
     if (fadeFrom(from, target, reduceMotion) === null) {
       show(target);
@@ -93,6 +100,13 @@ export function useThemeTransition(target: Theme): { theme: Theme; layer: ReactN
       settled = true;
       veil(from, target);
     }, CAPTURE_WAIT_MS);
+    pending.current = {
+      target,
+      cancel: () => {
+        settled = true;
+        clearTimeout(late);
+      },
+    };
     capture.take().then(
       (uri) => {
         if (settled) {
@@ -113,11 +127,14 @@ export function useThemeTransition(target: Theme): { theme: Theme; layer: ReactN
         }
       },
     );
-    return () => {
-      settled = true;
-      clearTimeout(late);
-    };
   }, [target, reduceMotion, show, veil, opacity]);
+
+  useEffect(
+    () => () => {
+      pending.current?.cancel();
+    },
+    [],
+  );
 
   const onPictureShown = useCallback(
     (done: Cover) => {
@@ -145,6 +162,7 @@ export function useThemeTransition(target: Theme): { theme: Theme; layer: ReactN
       >
         {cover.kind === "picture" && (
           <Image
+            testID="theme-fade-picture"
             source={{ uri: cover.uri }}
             fadeDuration={0}
             resizeMode="cover"

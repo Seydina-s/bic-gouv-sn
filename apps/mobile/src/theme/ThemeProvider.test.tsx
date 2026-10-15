@@ -1,8 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { act, fireEvent, render, screen } from "@testing-library/react-native";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react-native";
 import { themes } from "@bgs/ui";
 import { AccessibilityInfo, Text, type ColorSchemeName } from "react-native";
-import { fadeFrom, ThemeFade } from "./ThemeFade";
+import { fadeFrom } from "./ThemeFade";
 import { ThemeProvider } from "./ThemeProvider";
 import { useTheme } from "./useTheme";
 
@@ -26,6 +26,18 @@ jest.mock("react-native/Libraries/Utilities/Appearance", () => ({
   },
 }));
 
+// The picture of the screen taken before a change of mode (react-native-view-shot).
+const mockTake = jest.fn<Promise<string>, []>();
+const mockRelease = jest.fn<undefined, [string]>();
+jest.mock("./screen-capture", () => ({
+  loadScreenCapture: () => ({
+    take: () => mockTake(),
+    release: (uri: string) => {
+      mockRelease(uri);
+    },
+  }),
+}));
+
 function setPhoneScheme(scheme: ColorSchemeName) {
   mockSystemScheme = scheme;
   mockListeners.forEach((listener) => {
@@ -35,6 +47,9 @@ function setPhoneScheme(scheme: ColorSchemeName) {
 
 beforeEach(async () => {
   mockSystemScheme = "light";
+  // By default the picture cannot be taken: the plain veil is used.
+  mockTake.mockRejectedValue(new Error("no capture"));
+  mockRelease.mockClear();
   // A scheme forced in Settings by one test must not carry over to the next.
   await AsyncStorage.clear();
 });
@@ -80,10 +95,33 @@ describe("ThemeProvider", () => {
 
   it("switches live when the phone changes mode during use", async () => {
     const scheme = await renderProbe();
-    await act(() => {
+    await act(async () => {
       setPhoneScheme("dark");
+      await Promise.resolve();
     });
     expect(scheme()).toHaveTextContent("dark");
+    expect(mockTake).toHaveBeenCalled();
+  });
+
+  it("cross-fades from a picture of the screen taken in the old mode", async () => {
+    mockTake.mockResolvedValue("file:///shot.jpg");
+    const scheme = await renderProbe();
+    await act(async () => {
+      setPhoneScheme("dark");
+      await Promise.resolve();
+    });
+    // The picture covers the screen first; the app only switches once it is shown.
+    expect(scheme()).toHaveTextContent("light");
+    const picture = screen.getByTestId("theme-fade-picture", { includeHiddenElements: true });
+    expect(picture).toHaveProp("source", { uri: "file:///shot.jpg" });
+    await fireEvent(picture, "load");
+    await waitFor(() => {
+      expect(scheme()).toHaveTextContent("dark");
+    });
+    // Once faded, the picture is deleted from the phone.
+    await waitFor(() => {
+      expect(mockRelease).toHaveBeenCalledWith("file:///shot.jpg");
+    });
   });
 
   it("keeps the scheme forced in Settings whatever the phone mode", async () => {
@@ -105,7 +143,6 @@ describe("ThemeProvider", () => {
     await render(
       <ThemeProvider>
         <SchemeProbe />
-        <ThemeFade />
       </ThemeProvider>,
     );
     await act(async () => {
