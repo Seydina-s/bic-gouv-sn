@@ -17,16 +17,22 @@ allowBuilds:
 # Official Expo SDK 57 packages, exempted by `expo install` from the minimum
 # release age protection. Review at each SDK upgrade.
 minimumReleaseAgeExclude:
-  - "@expo/cli@57.0.27"
+  - "@expo/cli@57.0.30"
   - "@expo/router-server@57.0.11"
   - babel-preset-expo@57.0.13
-  - expo-modules-core@57.0.19
+  - "expo-modules-core@57.0.23"
   - expo-modules-jsi@57.1.1
-  - expo@57.0.25
-  - "@expo/ui@57.0.20"
+  - "expo@57.0.29"
+  - "@expo/ui@57.0.24"
   - expo-glass-effect@57.0.4
-  - expo-linking@57.0.11
-  - expo-router@57.0.23
+  - "expo-linking@57.0.13"
+  - "expo-router@57.0.27"
+  - expo-asset@57.0.20
+  - expo-constants@57.0.22
+  - "@expo/prebuild-config@57.0.19"
+  - expo-modules-autolinking@57.0.16
+  - "@expo/metro-runtime@57.0.17"
+  - expo-notifications@57.0.23
 
 # Audit exceptions (decision of the owner, 02/10/2026): one advisory each, with no
 # patched version and outside the shipped app. Reviewed at each Expo SDK upgrade.
