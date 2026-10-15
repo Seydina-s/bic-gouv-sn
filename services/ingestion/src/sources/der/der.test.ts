@@ -132,7 +132,7 @@ describe("the Entreprendre space collected", () => {
 describe("der.sn read through its own interface", () => {
   // Placeholder answers shaped like der.sn's WordPress interface and pages.
   const fakeDer = ((input: string | URL | Request) => {
-    const url = String(input);
+    const url = input instanceof Request ? input.url : input.toString();
     if (url.includes("/wp-json/wp/v2/pages")) {
       return Promise.resolve(
         Response.json([
