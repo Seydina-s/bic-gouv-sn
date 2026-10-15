@@ -16,7 +16,7 @@ describe("completing a certificate chain", () => {
     const served = (body: Uint8Array | null) =>
       (() =>
         Promise.resolve(
-          body === null ? new Response(null, { status: 404 }) : new Response(body),
+          body === null ? new Response(null, { status: 404 }) : new Response(Buffer.from(body)),
         )) as unknown as typeof fetch;
     await expect(trustedIntermediate("http://ca.example/r.crt", served(ROOT.raw))).resolves.toBe(
       ROOT.toString(),

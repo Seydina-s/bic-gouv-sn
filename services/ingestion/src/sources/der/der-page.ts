@@ -1,4 +1,4 @@
-import { isTag, type ChildNode, type Element } from "domhandler";
+import { isTag, type Element } from "domhandler";
 import render from "dom-serializer";
 import { DomUtils, parseDocument } from "htmlparser2";
 import { plainLetters, sanitizeArticleHtml } from "../../lib/sanitize";
@@ -98,7 +98,7 @@ export function derPageHtml(html: string): string {
   }
   const modules = DomUtils.findAll(
     (element: Element) => kindOf(element) !== null,
-    main.children as ChildNode[],
+    main.children,
   ).filter(
     // A module nested in another one is read with its parent.
     (element) => !hasModuleAncestor(element),
