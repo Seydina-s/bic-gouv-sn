@@ -67,6 +67,37 @@ describe("sending a notification through Expo", () => {
     });
   });
 
+  it("sends a message written in the console to every phone, whatever its sections", async () => {
+    const { store, requests, fetchImpl } = await setUp([
+      subscription(1),
+      subscription(2, { topics: ["discours"] }),
+      subscription(3, { quietHours: { from: 11, to: 14 } }),
+    ]);
+    const written: PushMessage = {
+      articleId: null,
+      category: null,
+      imageUrl: "https://media.example/notifications/photo.jpg",
+      source: null,
+      versions: { fr: { title: "Message de test", excerpt: "Texte de test." } },
+    };
+    const provider = new ExpoPushProvider({ subscriptions: store, fetchImpl, now: () => NOON });
+    expect(await provider.send(written)).toEqual({ outcome: "sent", recipients: 2 });
+    // Every section, but quiet hours are kept; no "Source" line, no article to open.
+    expect(
+      requests
+        .flat()
+        .map((message) => message.to)
+        .sort(),
+    ).toEqual([token(1), token(2)]);
+    expect(requests[0]?.[0]).toEqual(
+      expect.objectContaining({
+        title: "Message de test",
+        body: "Texte de test.",
+        data: { imageUrl: "https://media.example/notifications/photo.jpg" },
+      }),
+    );
+  });
+
   it("sends by batches of 100 and forgets phones Expo no longer knows", async () => {
     const all = Array.from({ length: 150 }, (_, n) => subscription(n));
     const { store, requests, fetchImpl } = await setUp(all, (to) =>

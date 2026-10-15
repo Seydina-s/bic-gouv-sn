@@ -9,11 +9,8 @@ import { RemoteConfigStore, fileDocument } from "@bgs/content-store";
 import { writeFile } from "node:fs/promises";
 import { buildApp } from "../app";
 import { loadConfig } from "../config";
-import {
-  FileParticipationStore,
-  ParticipationService,
-  PhotoFolder,
-} from "../participation/participation";
+import { PhotoFolder } from "../media/photos";
+import { FileParticipationStore, ParticipationService } from "../participation/participation";
 import { adminForTests } from "../testing/admin-session";
 import { temporaryStore } from "../testing/store";
 

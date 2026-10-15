@@ -1,4 +1,9 @@
-import { publishedTranslation, type Lang, type NewsArticle } from "@bgs/shared-types";
+import {
+  publishedTranslation,
+  type Lang,
+  type NewsArticle,
+  type Notification,
+} from "@bgs/shared-types";
 import { excerptOf, htmlToBlocks } from "../news/html-to-blocks";
 
 /** First words shown under the title: a few lines on a locked screen. */
@@ -13,14 +18,19 @@ export interface PushVersion {
   excerpt: string;
 }
 
-/** What a notification announces: one official article, nothing written by hand. */
+/**
+ * What a notification says: one official article in its own words, or a message
+ * written in the console (approved by a second person all the same).
+ */
 export interface PushMessage {
-  articleId: string;
-  category: string;
-  /** JPEG (every phone shows it) of the cover; null without a public media address. */
+  /** The article opened on tap; null for a written message. */
+  articleId: string | null;
+  /** People are notified per section they follow; null: every subscribed phone. */
+  category: string | null;
+  /** JPEG (every phone shows it); null without one, or without a public media address. */
   imageUrl: string | null;
-  /** The official site the article comes from, as the article names it: "primature.sn". */
-  source: string;
+  /** The official site the article comes from: "primature.sn"; null for a message. */
+  source: string | null;
   /** Per language the article is published in. */
   versions: Partial<Record<Lang, PushVersion>>;
 }
@@ -64,6 +74,24 @@ export function pushMessageFor(
     imageUrl: coverJpegUrl(article, mediaBaseUrl),
     source: siteOf(article.sourceUrl),
     versions,
+  };
+}
+
+/** A message written in the console, in the language it was written in. */
+export function writtenPushMessage(
+  notification: Notification,
+  mediaBaseUrl: string | undefined,
+): PushMessage {
+  const { imageKey } = notification;
+  return {
+    articleId: null,
+    category: null,
+    imageUrl:
+      mediaBaseUrl === undefined || imageKey === null ? null : `${mediaBaseUrl}/${imageKey}`,
+    source: null,
+    versions: {
+      [notification.lang]: { title: notification.title, excerpt: notification.body ?? "" },
+    },
   };
 }
 

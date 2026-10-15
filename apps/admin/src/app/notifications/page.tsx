@@ -11,7 +11,7 @@ import { t } from "../../lib/i18n";
 import { latestNews } from "../../lib/latest-news";
 import { requireAccount } from "../../lib/session";
 import { unusualGrowth } from "../../lib/subscriber-growth";
-import { AutomaticForm, DecisionForm, PrepareForm } from "./NotificationForms";
+import { AutomaticForm, DecisionForm, MessageForm, PrepareForm } from "./NotificationForms";
 
 export const dynamic = "force-dynamic";
 
@@ -51,6 +51,35 @@ function decisionLine(notification: Notification): string | null {
     name: notification.decidedBy.name,
     ...when(notification.decidedAt),
   });
+}
+
+/** A written message's words and photo; nothing more for an article (its title says it). */
+function WrittenMessage({ notification }: { notification: Notification }) {
+  if (notification.kind !== "message") {
+    return null;
+  }
+  return (
+    <>
+      <p className="flex flex-wrap gap-2 text-sm">
+        <span className="rounded-full bg-accent-container px-3 py-0.5 font-semibold text-on-accent-container">
+          {t("notifications.writtenBadge")}
+        </span>
+        <span className="text-ink-soft">{t("notifications.toEveryone")}</span>
+      </p>
+      {notification.body !== null && (
+        <p className="max-w-prose whitespace-pre-line">{notification.body}</p>
+      )}
+      {notification.imageKey !== null && (
+        // Served by the console's own route, under the person's session.
+        <img
+          src={`/notifications/photos/${notification.id}`}
+          alt={t("notifications.photoAlt")}
+          loading="lazy"
+          className="max-h-64 w-auto rounded-md border border-line"
+        />
+      )}
+    </>
+  );
 }
 
 /** Where the automatic notifications stand, in one sentence. */
@@ -167,10 +196,11 @@ export default async function NotificationsPage() {
       </section>
 
       {canPrepare && (
-        <section aria-labelledby="prepare-title" className="space-y-4">
+        <section aria-labelledby="prepare-title" className="space-y-6">
           <h2 id="prepare-title" className="font-display text-2xl font-bold">
             {t("notifications.prepareTitle")}
           </h2>
+          <h3 className="font-display text-xl font-bold">{t("notifications.articleTitle")}</h3>
           <PrepareForm
             idempotencyKey={randomUUID()}
             articles={articles.map((article) => ({
@@ -181,6 +211,9 @@ export default async function NotificationsPage() {
                   : `${formatDay(new Date(article.publishedOn))} · ${article.title}`,
             }))}
           />
+          <h3 className="font-display text-xl font-bold">{t("notifications.messageTitle")}</h3>
+          <p className="max-w-prose text-ink-soft">{t("notifications.messageIntro")}</p>
+          <MessageForm idempotencyKey={randomUUID()} />
         </section>
       )}
 
@@ -199,6 +232,7 @@ export default async function NotificationsPage() {
                   <p className="font-display text-lg font-bold leading-snug">
                     {notification.title}
                   </p>
+                  <WrittenMessage notification={notification} />
                   <p className="text-sm text-ink-soft">
                     {t("notifications.preparedBy", {
                       name: notification.preparedBy.name,
@@ -225,6 +259,7 @@ export default async function NotificationsPage() {
             {decided.map((notification) => (
               <li key={notification.id} className="space-y-1 p-5">
                 <p className="font-semibold leading-snug">{notification.title}</p>
+                <WrittenMessage notification={notification} />
                 {historyLines(notification).map(
                   (line) =>
                     line !== null && (
