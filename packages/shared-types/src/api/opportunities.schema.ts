@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionOfUrl } from "../common/institutions";
 import { httpsUrlSchema, isoDateSchema, isoDateTimeSchema } from "../common/primitives.schema";
 
 /*
@@ -39,12 +40,17 @@ export const OPPORTUNITY_SOURCE_DOMAINS = [
   "sgee-sn.org",
 ] as const;
 
-/** True when the link leads to an official portal. Never throws. */
+/**
+ * True when the link leads to an official portal, or to the site of an institution
+ * the platform relays (opportunities collected from its news). Never throws.
+ */
 export function isOfficialOpportunityUrl(url: string): boolean {
   try {
     const { hostname } = new URL(url);
-    return OPPORTUNITY_SOURCE_DOMAINS.some(
-      (domain) => hostname === domain || hostname.endsWith(`.${domain}`),
+    return (
+      OPPORTUNITY_SOURCE_DOMAINS.some(
+        (domain) => hostname === domain || hostname.endsWith(`.${domain}`),
+      ) || institutionOfUrl(url) !== null
     );
   } catch {
     return false;

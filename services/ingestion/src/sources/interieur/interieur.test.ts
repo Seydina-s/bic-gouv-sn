@@ -112,12 +112,14 @@ describe("createInterieurProvider", () => {
     );
   });
 
-  it("files a speech under the speeches, without the stored video the app cannot play", async () => {
+  it("files a speech under the speeches, with the video the site stores itself", async () => {
     const article = await provider(page("article-discours.html")).source.fetchArticle(
       ref("discours/x"),
     );
     expect(article.category).toBe("discours");
-    expect(article.translations[0]?.bodyHtml).not.toContain(".mp4");
+    expect(article.translations[0]?.bodyHtml).toContain(
+      '<video src="https://www.interieur.gouv.sn/media/declaration_inondations_13f1365312.mp4" title="Le Ministre dans les zones affectées par les eaux — 5 octobre 2026"></video>',
+    );
   });
 
   it("quarantines a page without article data", async () => {

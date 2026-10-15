@@ -1,23 +1,14 @@
-import type { Block, Inline } from "@bgs/shared-types";
+import type { Block, Cover, Inline } from "@bgs/shared-types";
 import { Image } from "expo-image";
 import { useState } from "react";
-import { PlayCircleIcon as PlayCircle } from "phosphor-react-native/src/icons/PlayCircle";
-import {
-  Linking,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-  useWindowDimensions,
-  type TextStyle,
-} from "react-native";
-import { Icon } from "../../components/Icon";
+import { Linking, StyleSheet, Text, View, useWindowDimensions, type TextStyle } from "react-native";
 import { useProgressive } from "../../components/useProgressive";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 import { useDataSaver } from "../data-saver/DataSaverProvider";
 import { ShowPhotoButton } from "../data-saver/ShowPhotoButton";
 import { CoverImage } from "./CoverImage";
+import { VideoCard } from "./VideoCard";
 
 /** Formatted text runs (bold, italic, links), inside a parent <Text>. */
 export function Runs({ inlines }: { inlines: Inline[] }) {
@@ -105,7 +96,14 @@ function ArticleImage({ block }: { block: ImageBlock }) {
 export const FIRST_BLOCKS = 6;
 
 /** Renders the API's structured blocks with native components: no web view, no HTML. */
-export function BlockRenderer({ blocks }: { blocks: Block[] }) {
+/** `poster`: the article's photo, shown in the preview of its videos. */
+export function BlockRenderer({
+  blocks,
+  poster = null,
+}: {
+  blocks: Block[];
+  poster?: Cover | null;
+}) {
   const { theme } = useTheme();
   const { color, space, textStyle } = theme;
   const text = { color: color.textPrimary, marginBottom: space.lg };
@@ -164,50 +162,12 @@ export function BlockRenderer({ blocks }: { blocks: Block[] }) {
           </View>
         );
       case "video":
-        return <VideoCard key={key} url={block.url} />;
+        return <VideoCard key={key} block={block} poster={poster} />;
     }
   });
 }
 
-/**
- * Official video: a card that opens it in YouTube on tap. No embedded player:
- * lighter on modest phones, and nothing reaches the video host until the reader asks.
- */
-function VideoCard({ url }: { url: string }) {
-  const { theme } = useTheme();
-  const { t } = useTranslation();
-  const { color, space, textStyle, radius } = theme;
-  const title = t("article.watchVideo");
-  const host = t("article.videoHost");
-  return (
-    <Pressable
-      accessibilityRole="link"
-      accessibilityLabel={`${title}. ${host}`}
-      onPress={() => void Linking.openURL(url)}
-      style={({ pressed }) => [
-        styles.video,
-        {
-          gap: space.md,
-          padding: space.lg,
-          marginBottom: space.lg,
-          minHeight: theme.touchTarget.min,
-          borderRadius: radius.md,
-          backgroundColor: color.primaryContainer,
-          opacity: pressed ? theme.opacity.cardPressed : 1,
-        },
-      ]}
-    >
-      <Icon icon={PlayCircle} size="lg" weight="fill" color={color.onPrimaryContainer} />
-      <View style={styles.flex}>
-        <Text style={[textStyle.label, { color: color.onPrimaryContainer }]}>{title}</Text>
-        <Text style={[textStyle.bodySmall, { color: color.onPrimaryContainer }]}>{host}</Text>
-      </View>
-    </Pressable>
-  );
-}
-
 const styles = StyleSheet.create({
-  video: { flexDirection: "row", alignItems: "center" },
   image: { width: "100%" },
   listItem: { flexDirection: "row" },
   flex: { flex: 1 },
