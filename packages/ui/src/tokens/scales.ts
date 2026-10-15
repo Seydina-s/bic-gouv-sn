@@ -27,7 +27,8 @@ export const radius = {
 export const touchTarget = { min: 48 } as const;
 
 /** Border widths: the chosen one of a set of options stands out by its outline. */
-export const borderWidth = { selected: 2 } as const;
+/** Lines that carry meaning: the selected item, the ring of a progress. */
+export const borderWidth = { selected: 2, progress: 3 } as const;
 
 export const iconSize = {
   sm: 16,

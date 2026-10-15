@@ -7,6 +7,7 @@ import {
   type NativeSyntheticEvent,
 } from "react-native";
 import { Icon } from "../../components/Icon";
+import { ProgressRing } from "../../components/ProgressRing";
 import { useReduceMotion } from "../../theme/useSystemAccessibility";
 import { useTheme } from "../../theme/useTheme";
 import { useListenFace, type Listening } from "./ListenButton";
@@ -72,7 +73,8 @@ export function useListenScroll(onScrollJs: (event: ScrollEvent) => void): Liste
  * While an article or a procedure is being read aloud and its "Écouter" pill has
  * scrolled away, a round button floats above "back to top" to pause or resume from
  * anywhere in the text (owner's request, 02/10/2026). It grows out as the pill
- * leaves and melts back as the reader returns to the top, following the scroll.
+ * leaves and melts back as the reader returns to the top, following the scroll. A
+ * ring around it fills as the reading goes on (owner's request, 14/10/2026).
  */
 export function FloatingListenButton({
   listening,
@@ -88,7 +90,7 @@ export function FloatingListenButton({
   const reduceMotion = useReduceMotion();
   const face = useListenFace(listening);
   const [reading] = useState(() => new Animated.Value(0));
-  const { color, space, radius, touchTarget, motion } = theme;
+  const { color, space, radius, touchTarget, motion, borderWidth } = theme;
   const active = listening.offered && listening.status !== "idle";
   const visible = active && scroll.away;
   const size = touchTarget.min + space.sm;
@@ -145,6 +147,13 @@ export function FloatingListenButton({
           },
         ]}
       >
+        <ProgressRing
+          progress={listening.progress}
+          size={size}
+          thickness={borderWidth.progress}
+          color={color.onPrimary}
+          trackColor={color.primaryPressed}
+        />
         <Icon icon={face.icon} weight="fill" color={color.onPrimary} />
       </Pressable>
     </Animated.View>

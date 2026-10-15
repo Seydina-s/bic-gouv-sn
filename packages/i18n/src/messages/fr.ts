@@ -24,6 +24,8 @@ export const fr = {
     pauseReading: "Mettre la lecture en pause",
     resumeReading: "Reprendre la lecture",
     wolofVoiceSoon: "Voix wolof bientôt disponible",
+    nowReading: "En lecture : {title}. Ouvrir",
+    stopReading: "Arrêter la lecture",
     updatedJustNow: "Mis à jour à l'instant.",
     updatedMinutesAgo: "Mis à jour il y a {count} min.",
     updatedHoursAgo: {
@@ -125,8 +127,6 @@ export const fr = {
     backToTop: "Revenir en haut",
     carousel: "À la une",
     slide: "Article {current} sur {total}",
-    pause: "Mettre en pause le défilement",
-    play: "Reprendre le défilement",
   },
   institutionPages: {
     title: "Institutions",

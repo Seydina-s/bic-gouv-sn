@@ -10,7 +10,8 @@ import { ScalesIcon as Scales } from "phosphor-react-native/src/icons/Scales";
 import { ShieldCheckIcon as ShieldCheck } from "phosphor-react-native/src/icons/ShieldCheck";
 import { ShieldStarIcon as ShieldStar } from "phosphor-react-native/src/icons/ShieldStar";
 import type { ComponentType } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Icon } from "../../components/Icon";
 import { selectedEdge } from "../../components/selection";
 import { useTranslation } from "../../i18n/useTranslation";
@@ -124,7 +125,11 @@ export function ServiceRow({
   );
 }
 
-/** Kind of service to show, as a row of chips; "Tous" shows every kind. */
+/**
+ * Kind of service to show, as a row of chips; "Tous" shows every kind. The row scrolls
+ * with the gesture handler: inside the sliding panel of the map, a plain ScrollView
+ * lost its swipes to the panel on Android (tester's report, 14/10/2026).
+ */
 export function ServiceFilters({
   selected,
   onSelect,

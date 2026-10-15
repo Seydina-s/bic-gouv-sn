@@ -1,10 +1,7 @@
 import type { NewsSummary } from "@bgs/shared-types";
 import { useIsFocused } from "expo-router";
-import { PauseIcon as Pause } from "phosphor-react-native/src/icons/Pause";
-import { PlayIcon as Play } from "phosphor-react-native/src/icons/Play";
 import { useEffect, useRef, useState } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
-import { IconButton } from "../../components/IconButton";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useReduceMotion, useScreenReader } from "../../theme/useSystemAccessibility";
 import { useTheme } from "../../theme/useTheme";
@@ -20,16 +17,18 @@ export interface HeroCarouselProps {
 
 /**
  * "À la une": the newest pictured stories take turns every few seconds, sliding
- * sideways. Swipeable at any time. Turning stops while a finger is on it, when the
- * reader pauses it, off screen, and for good with "reduce motion" or a screen reader
- * (WCAG 2.2.2): the stories then stay reachable by swiping.
+ * sideways. Swipeable at any time. Turning stops while a finger is on it, off screen,
+ * and for good once the reader swipes it (the swipe is the pause of WCAG 2.2.2: the
+ * owner removed the pause button on 14/10/2026), with "reduce motion" or a screen
+ * reader: the stories then stay reachable by swiping.
  */
 export function HeroCarousel({ stories, width, lastOpened, onPress }: HeroCarouselProps) {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const list = useRef<FlatList<NewsSummary>>(null);
   const [index, setIndex] = useState(0);
-  const [paused, setPaused] = useState(false);
+  /** The reader swiped: the stories no longer turn by themselves. */
+  const [swiped, setSwiped] = useState(false);
   const [touching, setTouching] = useState(false);
   const reduceMotion = useReduceMotion();
   const screenReader = useScreenReader();
@@ -37,7 +36,7 @@ export function HeroCarousel({ stories, width, lastOpened, onPress }: HeroCarous
   const { color, space, radius } = theme;
   const count = stories.length;
   const canTurn = count > 1 && reduceMotion === false && screenReader === false;
-  const turning = canTurn && !paused && !touching && focused;
+  const turning = canTurn && !swiped && !touching && focused;
 
   useEffect(() => {
     if (!turning) {
@@ -76,6 +75,9 @@ export function HeroCarousel({ stories, width, lastOpened, onPress }: HeroCarous
         onTouchCancel={() => {
           setTouching(false);
         }}
+        onScrollBeginDrag={() => {
+          setSwiped(true);
+        }}
         onMomentumScrollEnd={(event) => {
           setIndex(Math.round(event.nativeEvent.contentOffset.x / width));
         }}
@@ -91,7 +93,12 @@ export function HeroCarousel({ stories, width, lastOpened, onPress }: HeroCarous
         testID="hero-carousel"
       />
       {count > 1 && (
-        <View style={[styles.controls, { paddingHorizontal: space.lg, gap: space.sm }]}>
+        <View
+          style={[
+            styles.controls,
+            { paddingHorizontal: space.lg, minHeight: theme.touchTarget.min },
+          ]}
+        >
           <View
             style={[styles.dots, { gap: space.xs }]}
             accessibilityElementsHidden
@@ -109,15 +116,6 @@ export function HeroCarousel({ stories, width, lastOpened, onPress }: HeroCarous
               />
             ))}
           </View>
-          {canTurn && (
-            <IconButton
-              icon={paused ? Play : Pause}
-              label={paused ? t("section.play") : t("section.pause")}
-              onPress={() => {
-                setPaused(!paused);
-              }}
-            />
-          )}
         </View>
       )}
     </View>
@@ -125,6 +123,6 @@ export function HeroCarousel({ stories, width, lastOpened, onPress }: HeroCarous
 }
 
 const styles = StyleSheet.create({
-  controls: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  controls: { flexDirection: "row", alignItems: "center" },
   dots: { flexDirection: "row", alignItems: "center" },
 });

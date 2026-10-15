@@ -128,6 +128,11 @@ function ProcedureSheetView({
   const scrollTop = useScrollTop();
   const listenScroll = useListenScroll(scrollTop.onScroll);
   const listening = useListening({
+    reading: {
+      id: `procedure:${detail.slug}`,
+      title: detail.title,
+      path: `/procedure/${detail.slug}`,
+    },
     voice: FRENCH_VOICE,
     pieces: () =>
       spokenProcedure(
@@ -260,6 +265,7 @@ function ProcedureSheetView({
       </Animated.ScrollView>
       <ScrollTopButton
         visible={scrollTop.visible}
+        progress={scrollTop.progress}
         bottom={barHeight + space.md}
         onPress={() => {
           scrollTo(0);

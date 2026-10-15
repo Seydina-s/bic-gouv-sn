@@ -4,8 +4,9 @@ import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import * as SystemUI from "expo-system-ui";
 import { useCallback, useEffect, useState, type ComponentType } from "react";
-import { Platform, StyleSheet } from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { QueryProvider } from "../data/QueryProvider";
 import { DataSaverProvider } from "../features/data-saver/DataSaverProvider";
 import { UsageStatsProvider } from "../features/usage-stats/UsageStatsProvider";
@@ -18,6 +19,8 @@ import { LaunchLayer } from "../features/launch/LaunchLayer";
 import { LocationProvider } from "../features/location/LocationProvider";
 import { OnboardingLayer } from "../features/onboarding/OnboardingLayer";
 import { OnboardingProvider, useOnboardingDone } from "../features/onboarding/OnboardingProvider";
+import { NowReadingBar } from "../features/player/NowReadingBar";
+import { PlayerProvider } from "../features/player/PlayerProvider";
 import { I18nProvider } from "../i18n/I18nProvider";
 import { useDocumentLanguage } from "../i18n/language";
 import { initMonitoring } from "../monitoring/monitoring";
@@ -67,12 +70,19 @@ function ThemedStack() {
   return (
     <>
       <StatusBar style={theme.scheme === "dark" ? "light" : "dark"} />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: theme.color.background },
-        }}
-      />
+      {/* A reading under way is pinned above the screens, never over their controls. */}
+      <View style={[styles.fill, { backgroundColor: theme.color.background }]}>
+        <NowReadingBar />
+        {/* Below the bar, the screens' safe area (and their headers) starts under it. */}
+        <SafeAreaProvider style={styles.fill}>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: theme.color.background },
+            }}
+          />
+        </SafeAreaProvider>
+      </View>
       {/* First run: welcome screens above the app (the navigator stays mounted). */}
       {onboarding.done === false && <OnboardingLayer onFinish={onboarding.finish} />}
       {launching && <LaunchLayer onDone={launched} />}
@@ -96,7 +106,9 @@ function RootLayout() {
                       <OnboardingProvider>
                         <SettingsProvider>
                           <UpdateGate>
-                            <ThemedStack />
+                            <PlayerProvider>
+                              <ThemedStack />
+                            </PlayerProvider>
                           </UpdateGate>
                         </SettingsProvider>
                       </OnboardingProvider>
