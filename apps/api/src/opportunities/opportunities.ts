@@ -47,6 +47,26 @@ function dayOf(now: Date): string {
   return now.toISOString().slice(0, 10);
 }
 
+/** Who publishes the opportunities collected from the official sites. */
+export const AUTOMATIC_COLLECTOR: Person = { id: "automatic", name: "Collecte automatique" };
+
+/**
+ * An opportunity collected without a closing date leaves the app after this many days
+ * (its call is very likely over); one entered by the team stays until withdrawn.
+ */
+export const UNDATED_SHOWN_DAYS = 45;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** Still worth showing: open, and not an undated collected call grown old. */
+function current(item: Opportunity, now: Date): boolean {
+  if (!isOpen(item, dayOf(now))) {
+    return false;
+  }
+  const undatedCollected = item.deadline === null && item.preparedBy.id === AUTOMATIC_COLLECTOR.id;
+  const oldest = new Date(now.getTime() - UNDATED_SHOWN_DAYS * DAY_MS).toISOString();
+  return !undatedCollected || item.preparedAt >= oldest;
+}
+
 /**
  * Opportunités (decision of the user, 01/10/2026): one person prepares an
  * opportunity from its official page, another publishes it, either withdraws it.
@@ -66,9 +86,9 @@ export class OpportunityService {
 
   /** For the app: published and still open, closing soonest first. */
   async published(): Promise<PublicOpportunity[]> {
-    const today = dayOf(this.now());
+    const now = this.now();
     return (await this.store.all())
-      .filter((item) => item.status === "published" && isOpen(item, today))
+      .filter((item) => item.status === "published" && current(item, now))
       .map((item): PublicOpportunity => ({
         id: item.id,
         kind: item.kind,
@@ -98,6 +118,39 @@ export class OpportunityService {
     await this.store.update((all) => ({ next: [...all, opportunity], result: null }));
     await this.audit(person, "opportunity.prepared", opportunity, at);
     return opportunity;
+  }
+
+  /**
+   * Publishes what the official sites announce (AutomaticOpportunities), once each:
+   * an official link already known, even withdrawn by the team, is never added again.
+   */
+  async collect(drafts: readonly OpportunityDraft[]): Promise<Opportunity[]> {
+    const at = this.now().toISOString();
+    const added = await this.store.update((all) => {
+      const known = new Set(all.map((item) => item.officialUrl));
+      const fresh: Opportunity[] = [];
+      for (const draft of drafts) {
+        if (!known.has(draft.officialUrl)) {
+          known.add(draft.officialUrl);
+          fresh.push({
+            ...draft,
+            id: randomUUID(),
+            status: "published",
+            preparedBy: AUTOMATIC_COLLECTOR,
+            preparedAt: at,
+            publishedBy: AUTOMATIC_COLLECTOR,
+            publishedAt: at,
+            withdrawnBy: null,
+            withdrawnAt: null,
+          });
+        }
+      }
+      return { next: [...all, ...fresh], result: fresh };
+    });
+    for (const item of added) {
+      await this.audit(AUTOMATIC_COLLECTOR, "opportunity.collected", item, at);
+    }
+    return added;
   }
 
   /** A second person publishes: never the one who prepared it. */

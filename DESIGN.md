@@ -332,7 +332,7 @@ Une pilule flottante, discrète, par-dessus le contenu qui défile.
 - Pastille tissée de la rubrique, puis le nom de la rubrique en `caption`, en capitales espacées (0,8), `text-brand` par défaut. Le texte est toujours le nom réel de la rubrique source (presidence.sn) via l'i18n, jamais une accroche inventée.
 - **Nœud « dernier ouvert »** : pilule `accent-container` / `on-accent-container`, alignée à droite, sur l'article ouvert en dernier (restauré au retour).
 
-### Motifs tissés (`features/news/Selvage.tsx` : `Selvage`, `WovenStrip`, `WovenSwatch`)
+### Motifs tissés (`features/news/Selvage.tsx` : `Selvage`, `WovenStrip`)
 Le tissage identifie la rubrique.
 - Un motif par rubrique : chevron (Conseil des ministres), points (Communiqués), sergé diagonal (International), échelle (Discours), losange (Focus), tiret (Interviews), grille (Agenda). Les autres rubriques ont un fil vertical simple.
 - Toujours décoratif (masqué aux lecteurs d'écran), jamais derrière un texte, toujours doublé du nom de la rubrique en toutes lettres. Une nouvelle rubrique reçoit un nouveau motif dans `PATTERNS`, une icône (`CategoryIcon`) et un ton (`category-tones.ts`).

@@ -1,5 +1,5 @@
-import { useLayoutEffect, useRef, useState } from "react";
-import { StyleSheet } from "react-native";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { Image, StyleSheet } from "react-native";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -8,57 +8,175 @@ import Animated, {
 } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
 import type { Theme } from "@bgs/ui";
+import { loadScreenCapture } from "./screen-capture";
 import { useReduceMotion } from "./useSystemAccessibility";
-import { useTheme } from "./useTheme";
 
 /** Colour of the veil when the theme changes from `before` to `after`; null: none. */
 export function fadeFrom(before: Theme, after: Theme, reduceMotion: boolean | null): string | null {
   return before.scheme === after.scheme || reduceMotion === true ? null : before.color.background;
 }
 
+/** Longest wait for the picture of the screen before switching without it. */
+const CAPTURE_WAIT_MS = 400;
+
+const capture = loadScreenCapture();
+
+type Cover = { kind: "veil"; color: string } | { kind: "picture"; uri: string };
+
 /**
- * Light and dark modes dissolve into each other (user's request, 02/10/2026): when
- * the scheme changes, a veil of the previous background covers the new one, then
- * fades away. It is laid before the screen is painted, so nothing snaps; it never
- * takes a touch, and it is skipped when the phone asks for less motion.
+ * Light and dark modes dissolve into each other (owner's request, 02/10/2026, and
+ * again on 14/10: the plain veil only flashed the old background). A picture of the
+ * screen in the old mode is laid over it, the app switches underneath, then the
+ * picture fades away: the whole screen cross-fades. Without the capture module (older
+ * builds), or when the picture is late, the old background fades instead. Nothing
+ * takes a touch, and the switch is immediate when the phone asks for less motion.
  */
-export function ThemeFade() {
-  const { theme } = useTheme();
+export function useThemeTransition(target: Theme): { theme: Theme; layer: ReactNode } {
   const reduceMotion = useReduceMotion();
-  const previous = useRef(theme);
-  const [veil, setVeil] = useState<string | null>(null);
+  const [shown, setShown] = useState(target);
+  const [cover, setCover] = useState<Cover | null>(null);
+  const shownRef = useRef(target);
+  const latest = useRef(target);
+  // The change under way: re-running the effect for the same mode never starts it again.
+  const pending = useRef<{ target: Theme; cancel: () => void } | null>(null);
   const opacity = useSharedValue(0);
+  const duration = target.motion.duration.themeFade;
+
+  const show = useCallback((theme: Theme) => {
+    shownRef.current = theme;
+    setShown(theme);
+  }, []);
+
+  const uncover = useCallback((done: Cover) => {
+    // A newer change may have laid its own cover meanwhile: only this one goes.
+    setCover((current) => (current === done ? null : current));
+    if (done.kind === "picture") {
+      capture?.release(done.uri);
+    }
+  }, []);
+
+  const fadeAway = useCallback(
+    (done: Cover) => {
+      opacity.set(
+        withTiming(0, { duration, easing: Easing.out(Easing.cubic) }, (finished) => {
+          if (finished === true) {
+            scheduleOnRN(uncover, done);
+          }
+        }),
+      );
+    },
+    [opacity, duration, uncover],
+  );
+
+  const veil = useCallback(
+    (from: Theme, to: Theme) => {
+      const done: Cover = { kind: "veil", color: from.color.background };
+      opacity.set(1);
+      setCover(done);
+      show(to);
+      fadeAway(done);
+    },
+    [opacity, show, fadeAway],
+  );
 
   useLayoutEffect(() => {
-    const from = fadeFrom(previous.current, theme, reduceMotion);
-    previous.current = theme;
-    if (from === null) {
+    latest.current = target;
+    if (pending.current?.target === target) {
       return;
     }
-    setVeil(from);
-    opacity.value = 1;
-    opacity.value = withTiming(
-      0,
-      { duration: theme.motion.duration.themeFade, easing: Easing.out(Easing.cubic) },
-      (finished) => {
-        if (finished === true) {
-          scheduleOnRN(setVeil, null);
+    pending.current?.cancel();
+    pending.current = null;
+    const from = shownRef.current;
+    if (fadeFrom(from, target, reduceMotion) === null) {
+      show(target);
+      return;
+    }
+    if (capture === null) {
+      veil(from, target);
+      return;
+    }
+    let settled = false;
+    const late = setTimeout(() => {
+      settled = true;
+      veil(from, target);
+    }, CAPTURE_WAIT_MS);
+    pending.current = {
+      target,
+      cancel: () => {
+        settled = true;
+        clearTimeout(late);
+      },
+    };
+    capture.take().then(
+      (uri) => {
+        if (settled) {
+          capture.release(uri);
+          return;
+        }
+        settled = true;
+        clearTimeout(late);
+        opacity.set(1);
+        // The switch waits for the picture to be on screen (onPictureShown).
+        setCover({ kind: "picture", uri });
+      },
+      () => {
+        if (!settled) {
+          settled = true;
+          clearTimeout(late);
+          veil(from, target);
         }
       },
     );
-  }, [theme, reduceMotion, opacity]);
+  }, [target, reduceMotion, show, veil, opacity]);
 
-  const fade = useAnimatedStyle(() => ({ opacity: opacity.value }));
-  if (veil === null) {
-    return null;
-  }
-  return (
-    <Animated.View
-      testID="theme-fade"
-      pointerEvents="none"
-      accessibilityElementsHidden
-      importantForAccessibility="no-hide-descendants"
-      style={[StyleSheet.absoluteFill, { backgroundColor: veil }, fade]}
-    />
+  useEffect(
+    () => () => {
+      pending.current?.cancel();
+    },
+    [],
   );
+
+  const onPictureShown = useCallback(
+    (done: Cover) => {
+      requestAnimationFrame(() => {
+        show(latest.current);
+        fadeAway(done);
+      });
+    },
+    [show, fadeAway],
+  );
+
+  const fade = useAnimatedStyle(() => ({ opacity: opacity.get() }));
+  const layer =
+    cover === null ? null : (
+      <Animated.View
+        testID="theme-fade"
+        pointerEvents="none"
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+        style={[
+          StyleSheet.absoluteFill,
+          cover.kind === "veil" && { backgroundColor: cover.color },
+          fade,
+        ]}
+      >
+        {cover.kind === "picture" && (
+          <Image
+            testID="theme-fade-picture"
+            source={{ uri: cover.uri }}
+            fadeDuration={0}
+            resizeMode="cover"
+            style={StyleSheet.absoluteFill}
+            onLoad={() => {
+              onPictureShown(cover);
+            }}
+            onError={() => {
+              show(latest.current);
+              uncover(cover);
+            }}
+          />
+        )}
+      </Animated.View>
+    );
+  return { theme: shown, layer };
 }
