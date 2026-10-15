@@ -6,17 +6,19 @@ import { NavLink, type NavBadge } from "./NavLink";
 /**
  * The console's sections, grouped by what the person comes to do: follow the
  * service, look after the contents, change a setting. A column beside the page on
- * a computer, above it on a narrow screen. Shown only once signed in.
+ * a computer, scrolling on its own under the pointer (owner's request, 14/10/2026),
+ * above the page on a narrow screen. Shown only once signed in.
  */
 const GROUPS = [
   {
     id: "follow",
     label: "nav.groups.follow",
+    // Usage first: what the team looks at most (owner's request, 14/10/2026).
     links: [
+      { href: "/usage", label: "nav.usage" },
       { href: "/", label: "nav.status" },
       { href: "/erreurs", label: "nav.errors" },
       { href: "/recherches", label: "nav.searches" },
-      { href: "/usage", label: "nav.usage" },
       { href: "/assistant", label: "nav.assistant" },
     ],
   },
@@ -26,7 +28,6 @@ const GROUPS = [
     links: [
       { href: "/demarches", label: "nav.procedures" },
       { href: "/services", label: "nav.services" },
-      { href: "/traductions", label: "nav.translations" },
       { href: "/masques", label: "nav.withdrawn" },
       { href: "/notifications", label: "nav.notifications" },
       { href: "/opportunites", label: "nav.opportunities" },
@@ -59,7 +60,7 @@ export async function ConsoleNav() {
   return (
     <nav
       aria-label={t("nav.label")}
-      className="flex flex-wrap gap-x-10 gap-y-6 border-b border-line py-6 lg:sticky lg:top-0 lg:w-60 lg:shrink-0 lg:flex-col lg:self-start lg:border-b-0 lg:py-12"
+      className="flex flex-wrap gap-x-10 gap-y-6 border-b border-line py-6 lg:sticky lg:top-0 lg:max-h-dvh lg:w-60 lg:shrink-0 lg:flex-col lg:flex-nowrap lg:self-start lg:overflow-y-auto lg:overscroll-contain lg:border-b-0 lg:py-12"
     >
       {GROUPS.map((group) => (
         <div key={group.id}>

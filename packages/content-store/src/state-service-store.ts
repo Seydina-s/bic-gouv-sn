@@ -1,4 +1,5 @@
 import {
+  serviceHints,
   stateServicesFileSchema,
   type GeoPoint,
   type Place,
@@ -43,22 +44,37 @@ function sameFacts(a: ServiceFacts, b: ServiceFacts): boolean {
   return JSON.stringify(factsOf(a)) === JSON.stringify(factsOf(b));
 }
 
-/** A new service waiting for a person's review: never shown before it. */
-function asProposal(found: ImportedService): StateService {
+/** Who validated a service shown without a person's look (owner's decision). */
+export const DEFAULT_REVIEWER = "Validation par défaut (décision du 14/10/2026)";
+
+/**
+ * Whether a service is shown without waiting for a person (owner's decision of
+ * 14/10/2026: services validated by default, corrected later in the console), all
+ * but those named like a company or a private body: a person decides on those, for
+ * the map shows the State's services only.
+ */
+export function validatedByDefault(name: string): boolean {
+  return !serviceHints(name).includes("notState");
+}
+
+/** A new service: validated by default, or waiting for a person's look. */
+function asNew(found: ImportedService, now: string): StateService {
+  const shown = validatedByDefault(found.name);
   return {
     ...found,
-    status: "proposed",
-    reviewedBy: null,
-    reviewedAt: null,
+    status: shown ? "verified" : "proposed",
+    reviewedBy: shown ? DEFAULT_REVIEWER : null,
+    reviewedAt: shown ? now : null,
     pendingUpdate: null,
     corrections: {},
   };
 }
 
 /**
- * The internal base of state services and the towns used to search them. Imports
- * only ever add proposals; a person verifies or rejects each service in the console,
- * and only verified services are shown. One validated document, in a file or in
+ * The internal base of state services and the towns used to search them. New
+ * services are validated by default (owner's decision of 14/10/2026), all but those
+ * named like a company, which wait for a person; any service is corrected or
+ * rejected later in the console, and only verified services are shown. One validated document, in a file or in
  * PostgreSQL (SCALE-02); each change reads and writes it under one lock.
  */
 export class StateServiceStore {
@@ -79,19 +95,24 @@ export class StateServiceStore {
   }
 
   /**
-   * Records what an import found. A new service is a proposal; a proposal follows
+   * Records what an import found. A new service is validated by default (see
+   * validatedByDefault) or waits for a person; a proposal follows
    * its source; a reviewed service keeps its reviewed facts and sets the source's
    * change aside for a person. Services the import no longer finds stay as they are.
    * The towns are replaced when the import brings some.
    */
-  importServices(imported: ImportedService[], places: Place[]): Promise<ImportOutcome> {
+  importServices(
+    imported: ImportedService[],
+    places: Place[],
+    now: string = new Date().toISOString(),
+  ): Promise<ImportOutcome> {
     return this.document.change((file) => {
       const services = { ...file.services };
       const outcome: ImportOutcome = { added: 0, updated: 0, unchanged: 0, changedAfterReview: 0 };
       for (const found of imported) {
         const current = services[found.id];
         if (current === undefined) {
-          services[found.id] = asProposal(found);
+          services[found.id] = asNew(found, now);
           outcome.added += 1;
         } else if (sameFacts(current, found)) {
           services[found.id] = { ...current, origin: found.origin };
@@ -145,15 +166,41 @@ export class StateServiceStore {
   }
 
   /**
-   * A service a person typed in the console because the source misses it: a proposal
-   * like the imported ones, shown once verified. Null when its id is already taken.
+   * The services still waiting, validated by default at once (14/10/2026), all but
+   * those named like a company. Returns how many were validated.
    */
-  add(service: ImportedService): Promise<StateService | null> {
+  validateWaiting(now: string): Promise<number> {
+    return this.document.change((file) => {
+      const services = { ...file.services };
+      let validated = 0;
+      for (const [id, service] of Object.entries(services)) {
+        if (service.status === "proposed" && validatedByDefault(service.name)) {
+          services[id] = {
+            ...service,
+            status: "verified",
+            reviewedBy: DEFAULT_REVIEWER,
+            reviewedAt: now,
+          };
+          validated += 1;
+        }
+      }
+      return { next: { ...file, services }, result: validated };
+    });
+  }
+
+  /**
+   * A service a person typed in the console because the source misses it, validated
+   * by default like the imported ones. Null when its id is already taken.
+   */
+  add(
+    service: ImportedService,
+    now: string = new Date().toISOString(),
+  ): Promise<StateService | null> {
     return this.document.change((file) => {
       if (file.services[service.id] !== undefined) {
         return { result: null };
       }
-      const added = asProposal(service);
+      const added = asNew(service, now);
       return {
         next: { ...file, services: { ...file.services, [service.id]: added } },
         result: added,

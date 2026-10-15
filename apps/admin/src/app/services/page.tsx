@@ -2,11 +2,10 @@ import { serviceCategorySchema, type ServiceCategory } from "@bgs/shared-types";
 import Link from "next/link";
 import { z } from "zod";
 import { adminRequest } from "../../lib/admin-api";
-import { formatDay } from "../../lib/format";
 import { secondaryLink } from "../../lib/form-styles";
 import { t } from "../../lib/i18n";
 import { checkLink, movedFrom, positionText } from "../../lib/position";
-import { serviceHints } from "../../lib/service-hints";
+import { serviceHints } from "@bgs/shared-types";
 import { requireAccount } from "../../lib/session";
 import { ServiceReviewForm, type ReviewService } from "./ServiceReviewForm";
 
@@ -90,8 +89,9 @@ function label(category: ServiceCategory): string {
 }
 
 /**
- * Verification of the state services imported from OpenStreetMap: nothing reaches
- * the app before a person has checked it here (CLAUDE.md §1). Dakar first.
+ * The state services, validated by default (owner's decision of 14/10/2026): the
+ * categories first, each opening its services to correct them; only names that look
+ * like a company, and changes at the source, wait for a person here. Dakar first.
  */
 export default async function StateServicesPage({
   searchParams,
@@ -113,20 +113,15 @@ export default async function StateServicesPage({
   const categories = serviceCategorySchema.options;
   const count = (category: ServiceCategory, status: Row["status"]) =>
     inZone.filter((row) => row.category === category && row.status === status).length;
-  const selected =
-    categories.find((category) => category === params.category) ??
-    categories.find((category) => count(category, "proposed") > 0) ??
-    "mairie";
-  const rows = inZone.filter((row) => row.category === selected);
-  // Names of companies last: the likely state services come first.
-  const likelyPrivate = (row: Row) => serviceHints(row.name).includes("notState");
-  const proposed = rows
-    .filter((row) => row.status === "proposed")
-    .sort((a, b) => Number(likelyPrivate(a)) - Number(likelyPrivate(b)));
-  const verified = rows.filter((row) => row.status === "verified");
+  const selected = categories.find((category) => category === params.category) ?? null;
+  const rows = selected === null ? [] : inZone.filter((row) => row.category === selected);
+  const waiting = rows.filter((row) => row.status === "proposed");
+  const shown = rows.filter((row) => row.status === "verified");
   const changed = inZone.filter((row) => row.pendingUpdate !== null);
-  const href = (next: { category?: string; zone?: string }) =>
-    `/services?zone=${next.zone ?? zone}&category=${next.category ?? selected}`;
+  const href = (next: { category?: string | null; zone?: string }) => {
+    const category = next.category === undefined ? selected : next.category;
+    return `/services?zone=${next.zone ?? zone}${category === null ? "" : `&category=${category}`}`;
+  };
   const tab =
     "rounded-md px-3 py-2 font-semibold hover:bg-surface aria-[current=page]:bg-primary-container aria-[current=page]:text-on-primary-container";
 
@@ -158,68 +153,75 @@ export default async function StateServicesPage({
         </Link>
       </nav>
 
-      <div className="mt-8 grid gap-10 md:grid-cols-[18rem_1fr]">
-        <nav aria-label={t("services.categories")}>
-          <ul className="space-y-1">
+      {changed.length > 0 && (
+        <div className="mt-8 space-y-4">
+          <h2 className="font-display text-2xl font-bold">{t("services.changedTitle")}</h2>
+          <p className="text-ink-soft">{t("services.changedIntro")}</p>
+          <ServiceReviewForm services={changed.map(toReview)} />
+        </div>
+      )}
+
+      {selected === null ? (
+        <nav aria-label={t("services.categories")} className="mt-8">
+          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {categories.map((category) => (
               <li key={category}>
                 <Link
                   href={href({ category })}
-                  aria-current={category === selected ? "page" : undefined}
-                  className="block rounded-md px-3 py-2 hover:bg-surface aria-[current=page]:bg-primary-container aria-[current=page]:text-on-primary-container"
+                  className="block h-full rounded-lg border border-line p-5 hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
                 >
-                  <span className="block font-semibold">{label(category)}</span>
-                  <span className="block text-sm text-ink-soft">
-                    {`${t("services.toCheck", { count: count(category, "proposed") })} · ${t("services.verified", { count: count(category, "verified") })}`}
+                  <span className="block font-display text-lg font-bold">{label(category)}</span>
+                  <span className="mt-1 block text-sm text-ink-soft">
+                    {t("services.verified", { count: count(category, "verified") })}
+                    {count(category, "proposed") > 0 &&
+                      ` · ${t("services.toCheck", { count: count(category, "proposed") })}`}
                   </span>
                 </Link>
               </li>
             ))}
           </ul>
         </nav>
-
-        <div className="min-w-0 space-y-10">
-          {changed.length > 0 && (
+      ) : (
+        <div className="mt-8 space-y-10">
+          <Link href={href({ category: null })} className={secondaryLink}>
+            {t("services.allCategories")}
+          </Link>
+          {waiting.length > 0 && (
             <div className="space-y-4">
-              <h2 className="font-display text-2xl font-bold">{t("services.changedTitle")}</h2>
-              <p className="text-ink-soft">{t("services.changedIntro")}</p>
-              <ServiceReviewForm services={changed.map(toReview)} />
+              <h2 className="font-display text-2xl font-bold">
+                {t("services.proposedTitle", { category: label(selected) })}
+              </h2>
+              <p className="text-ink-soft">{t("services.proposedIntro")}</p>
+              <ServiceReviewForm services={waiting.map(toReview)} />
             </div>
           )}
-          <div className="space-y-4">
-            <h2 className="font-display text-2xl font-bold">
-              {t("services.proposedTitle", { category: label(selected) })}
-            </h2>
-            {proposed.length === 0 ? (
+          <div className="space-y-3">
+            <h2 className="font-display text-2xl font-bold">{label(selected)}</h2>
+            {shown.length === 0 ? (
               <p>{t("services.none")}</p>
             ) : (
-              <>
-                <p className="text-ink-soft">{t("services.proposedIntro")}</p>
-                <ServiceReviewForm services={proposed.map(toReview)} />
-              </>
-            )}
-          </div>
-          {verified.length > 0 && (
-            <div className="space-y-3">
-              <h2 className="font-display text-xl font-bold">
-                {t("services.verifiedTitle", { category: label(selected) })}
-              </h2>
-              <ul className="list-disc space-y-1 pl-6 text-ink-soft">
-                {verified.map((row) => (
-                  <li key={row.id}>
-                    {row.name}
-                    {row.reviewedAt !== null && (
-                      <span className="ml-2 text-sm text-ink-faint">
-                        {t("services.verifiedOn", { date: formatDay(new Date(row.reviewedAt)) })}
+              <ul className="divide-y divide-line rounded-lg border border-line">
+                {shown.map((row) => (
+                  <li
+                    key={row.id}
+                    className="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-3"
+                  >
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-semibold">{row.name}</span>
+                      <span className="block text-sm text-ink-soft">
+                        {[row.town ?? row.nearTown, row.address].filter(Boolean).join(" · ")}
                       </span>
-                    )}
+                    </span>
+                    <Link href={`/services/${row.id}`} className={secondaryLink}>
+                      {t("services.correct")}
+                    </Link>
                   </li>
                 ))}
               </ul>
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </section>
   );
 }

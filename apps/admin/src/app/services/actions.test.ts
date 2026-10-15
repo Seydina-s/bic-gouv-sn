@@ -128,7 +128,7 @@ describe("correcting a state service", () => {
     expect(adminRequest).not.toHaveBeenCalled();
   });
 
-  it("adds a service the source misses, which then waits for its verification", async () => {
+  it("adds a service the source misses, shown at once (validated by default, 14/10/2026)", async () => {
     const { addService } = await import("./actions");
     adminRequest.mockResolvedValue({ ok: true, data: { id: "manual-1" } });
     const data = new FormData();
@@ -138,7 +138,7 @@ describe("correcting a state service", () => {
     data.set("address", "  ");
     data.set("phone", "+221 00 000 00 00");
     expect(await addService({}, data)).toEqual({
-      message: "Service ajouté. Il attend maintenant sa vérification dans la liste « À vérifier ».",
+      message: "Service ajouté : il apparaît dans l'application.",
     });
     expect(adminRequest.mock.calls[0]?.[0]).toMatchObject({
       path: "/services",
