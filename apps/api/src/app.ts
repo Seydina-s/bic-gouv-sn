@@ -62,6 +62,7 @@ import {
   PostgresNotificationStore,
 } from "./notifications/notification-store";
 import { AutomaticNotifier } from "./notifications/automatic-notifier";
+import { AutomaticOpportunities } from "./opportunities/automatic-opportunities";
 import { FileSettingStore, PostgresSettingStore } from "./admin/setting-store";
 import { adminServicesRoutes } from "./routes/admin-services";
 import { adminOpportunitiesRoutes } from "./routes/admin-opportunities";
@@ -156,6 +157,8 @@ export interface AppOptions {
   automaticNotificationsEveryMs?: number | null;
   /** Opportunities of the console; defaults from database. */
   opportunityStore?: OpportunityStore;
+  /** Official articles read for opportunities this often (OPP-10); null: not at all (tests). */
+  automaticOpportunitiesEveryMs?: number | null;
   /** Messages and reports of Participer; defaults from database. */
   participationStore?: ParticipationStore;
   /** Settings changed in the console; defaults from database. */
@@ -254,6 +257,7 @@ export async function buildApp({
     : new PostgresPushSubscriptionStore(database),
   pushProvider = defaultPushProvider(config, pushSubscriptions),
   automaticNotificationsEveryMs = null,
+  automaticOpportunitiesEveryMs = null,
   opportunityStore = database === null
     ? new FileOpportunityStore(config.OPPORTUNITIES_PATH)
     : new PostgresOpportunityStore(database),
@@ -349,6 +353,16 @@ export async function buildApp({
   await app.register(servicesRoutes, { prefix: "/v1", services: stateServices });
   const opportunities = new OpportunityService(opportunityStore, admin?.journal ?? null);
   await app.register(opportunitiesRoutes, { prefix: "/v1", opportunities });
+  if (automaticOpportunitiesEveryMs !== null) {
+    const collector = new AutomaticOpportunities({ articles, opportunities });
+    app.addHook("onReady", () => {
+      collector.start(automaticOpportunitiesEveryMs, (error) => {
+        app.log.error({ err: error }, "Automatic opportunities failed");
+      });
+      return Promise.resolve();
+    });
+    app.addHook("onClose", () => collector.close());
+  }
   const participation = new ParticipationService(
     participationStore,
     new PhotoFolder(config.PARTICIPATION_PHOTOS_ROOT),
