@@ -37,33 +37,38 @@ export interface ExpoPushOptions {
   retryBaseDelayMs?: number;
 }
 
-/** The subscriptions to reach now: following the section, outside their quiet hours. */
+/**
+ * The subscriptions to reach now: following the section (any section for a written
+ * message, category null), outside their quiet hours.
+ */
 export function recipients(
   subscriptions: readonly PushSubscription[],
-  category: string,
+  category: string | null,
   hour: number,
 ): PushSubscription[] {
   return subscriptions.filter(
     (subscription) =>
-      followsSection(subscription, category) && !isQuietHour(subscription.quietHours, hour),
+      (category === null || followsSection(subscription, category)) &&
+      !isQuietHour(subscription.quietHours, hour),
   );
 }
 
-/** One phone's message: the title, the first words, the source, and the cover. */
+/** One phone's message: the title, the first words, the source (articles), the photo. */
 function expoMessage(
   token: string,
   message: PushMessage,
   version: { title: string; excerpt: string },
 ) {
-  const source = t("content.sourceAttribution", { source: message.source });
+  const source =
+    message.source === null ? "" : t("content.sourceAttribution", { source: message.source });
   return {
     to: token,
     title: version.title,
-    body: version.excerpt === "" ? source : `${version.excerpt}\n${source}`,
+    body: [version.excerpt, source].filter((line) => line !== "").join("\n"),
     // The photo's address travels in the data too: the iPhone's notification
     // extension (apps/mobile/targets/notification-service) reads it there.
     data: {
-      articleId: message.articleId,
+      ...(message.articleId === null ? {} : { articleId: message.articleId }),
       ...(message.imageUrl === null ? {} : { imageUrl: message.imageUrl }),
     },
     sound: "default",
@@ -78,7 +83,8 @@ function expoMessage(
  * Sends an approved notification (two people, ADM-07) to the phones following its
  * section, except those in their quiet hours (nothing is queued for later: the
  * article waits in the app). Tokens Expo reports as no longer registered are
- * forgotten. The official title, and the source, nothing written by hand.
+ * forgotten. An article goes with its official title and its source; a message
+ * written in the console reaches every subscribed phone.
  */
 export class ExpoPushProvider implements PushProvider {
   readonly ready = true;
@@ -92,11 +98,11 @@ export class ExpoPushProvider implements PushProvider {
 
   async send(message: PushMessage): Promise<PushResult> {
     const hour = new Date(this.now()).getUTCHours(); // Dakar is on UTC all year.
-    const targets = recipients(
-      await this.options.subscriptions.following(message.category),
-      message.category,
-      hour,
-    );
+    const { category } = message;
+    const subscribed = await (category === null
+      ? this.options.subscriptions.list()
+      : this.options.subscriptions.following(category));
+    const targets = recipients(subscribed, category, hour);
     const messages = targets.flatMap((subscription) => {
       const version = versionFor(message, subscription.lang);
       return version === undefined ? [] : [expoMessage(subscription.token, message, version)];

@@ -125,8 +125,8 @@ export const adminFr = {
     signedInAs: "Connecté : {name}",
     inbox: "Messages des citoyens",
     inboxUnread: {
-      one: "Messages des citoyens : {count} non lu",
-      other: "Messages des citoyens : {count} non lus",
+      one: "Messages des citoyens\u00a0: {count} non lu",
+      other: "Messages des citoyens\u00a0: {count} non lus",
     },
   },
   signIn: {
@@ -482,7 +482,7 @@ export const adminFr = {
   notifications: {
     title: "Notifications",
     intro:
-      "Une notification annonce un article officiel, avec son titre et ses premiers mots : rien n'est rédigé à la main. Chaque nouvel article est annoncé tout seul aux personnes qui ont accepté les notifications. Pour un envoi exceptionnel, une personne prépare la notification et une autre la vérifie : un envoi préparé à la main demande toujours deux personnes.",
+      "Chaque nouvel article est annoncé tout seul, avec son titre et ses premiers mots, aux personnes qui ont accepté les notifications. L'équipe peut aussi annoncer un article choisi, ou écrire un message avec une photo\u00a0: un envoi préparé à la main demande toujours deux personnes, l'une le prépare, l'autre le vérifie.",
     automaticTitle: "Envoi automatique",
     automaticOn:
       "Actif : chaque nouvel article est annoncé dès sa publication, {perHour} au plus par heure, jamais pendant les heures calmes que chacun a choisies.",
@@ -513,6 +513,31 @@ export const adminFr = {
     notYet:
       "Aucun envoi réel pour l'instant : l'app ne peut pas encore recevoir de notifications (il faut d'abord la version de test). Les notifications validées sont enregistrées et le seront toujours dans l'historique.",
     prepareTitle: "Préparer une notification",
+    articleTitle: "Annoncer un article",
+    messageTitle: "Écrire un message",
+    messageIntro:
+      "Il part vers tous les téléphones abonnés, hors heures calmes, une fois vérifié par une autre personne.",
+    messageHeading: "Titre",
+    messageBody: "Message",
+    messageLang: "Langue du message",
+    langFr: "Français",
+    langWo: "Wolof",
+    photo: "Photo (facultative)",
+    photoHelp:
+      "JPEG, PNG ou WebP, 6\u00a0Mo au plus. Elle est redressée, allégée et débarrassée de ses données cachées (lieu, appareil).",
+    remaining: {
+      one: "{count} caractère restant",
+      other: "{count} caractères restants",
+    },
+    preview: "Aperçu sur un téléphone",
+    previewApp: "Bic Gouv SN",
+    previewEmpty: "Le titre et le message apparaîtront ici.",
+    messageMissing: "Écrivez un titre et un message.",
+    photoTooLarge: "Cette photo dépasse 6\u00a0Mo\u00a0: choisissez-en une plus légère.",
+    photoInvalid: "Cette photo n'a pas pu être lue\u00a0: choisissez une photo JPEG, PNG ou WebP.",
+    writtenBadge: "Message écrit",
+    toEveryone: "Pour tous les téléphones abonnés",
+    photoAlt: "Photo jointe au message",
     article: "Article à annoncer",
     choose: "Choisissez un article",
     prepare: "Préparer",
