@@ -2,13 +2,16 @@ import { mkdir, open, readdir, rename, stat, unlink } from "node:fs/promises";
 import { dirname, join } from "node:path";
 
 /**
- * Windows refuses to replace a file another process has open for an instant (the
- * API reading the store while a command writes it): the rename is tried again a few
- * times, a little later each time (ERREURS.md, 08/10/2026). Elsewhere it never waits.
+ * Windows refuses to replace a file another process has open (the API reading the
+ * store while a command writes it): the rename is tried again, a little later each
+ * time (ERREURS.md, 08/10/2026). About 11 s in all: at 20 MB and with several
+ * readers, 0.7 s was not enough and a voices catch-up stopped (12/10/2026).
+ * Elsewhere it never waits.
  */
 const BUSY = new Set(["EPERM", "EACCES", "EBUSY"]);
-const RENAME_ATTEMPTS = 8;
+const RENAME_ATTEMPTS = 30;
 const RENAME_DELAY_MS = 25;
+const RENAME_MAX_DELAY_MS = 1000;
 
 async function renamePatiently(
   from: string,
@@ -24,7 +27,9 @@ async function renamePatiently(
       if (!BUSY.has(code) || attempt >= RENAME_ATTEMPTS) {
         throw error;
       }
-      await new Promise((resolve) => setTimeout(resolve, RENAME_DELAY_MS * attempt));
+      await new Promise((resolve) =>
+        setTimeout(resolve, Math.min(RENAME_DELAY_MS * attempt, RENAME_MAX_DELAY_MS)),
+      );
     }
   }
 }
@@ -77,5 +82,11 @@ export async function writeFileDurably(
   } finally {
     await handle.close();
   }
-  await renamePatiently(temp, path, move);
+  try {
+    await renamePatiently(temp, path, move);
+  } catch (error) {
+    // Never a temporary copy of the whole store left behind.
+    await unlink(temp).catch(() => undefined);
+    throw error;
+  }
 }

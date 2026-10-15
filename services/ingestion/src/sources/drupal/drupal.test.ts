@@ -154,6 +154,32 @@ describe("Drupal article text", () => {
     expect(article.translations[0]?.bodyHtml).not.toMatch(/<p>\s*<p>/);
     expect(article.sourcePublishedOn).toBeNull();
   });
+
+  it("publishes a communiqué made of its document alone, as the page gives it", async () => {
+    // sante.gouv.sn, 2020-2022: a scanned page and its PDF, no text (decision of 12/10/2026).
+    const parsed = parseDrupalArticle(page("sante-document-only.html"));
+    expect(parsed?.imagePath).toBe(
+      "https://www.sante.gouv.sn/sites/default/files/msascoro_4_125_3_255.jpg",
+    );
+    const provider = createDrupalProvider(DRUPAL_MINISTRIES.sante, {
+      fetchImpl: () => Promise.resolve(new Response(page("sante-document-only.html"))),
+      intervalMs: 0,
+    });
+    const article = await provider.fetchArticle({
+      sourceId: "/Actualites/communique-885",
+      slug: "/Actualites/communique-885",
+      lang: "fr",
+      sourceUpdatedAt: "",
+      coverSourceUrl: null,
+    });
+    const body = article.translations[0]?.bodyHtml ?? "";
+    expect(body).toContain(
+      'href="https://www.sante.gouv.sn/sites/default/files/COMMUNIQUE%20885%20du%20jeudi%2004%20Ao%C3%BBt%202020.pdf"',
+    );
+    expect(body).toContain("COMMUNIQUE 885 du jeudi 04 Août 2020.pdf");
+    // The listing gives no day and none is guessed from the title or the file.
+    expect(article.sourcePublishedOn).toBeNull();
+  });
 });
 
 describe("Foreign Affairs site (Drupal 9)", () => {
