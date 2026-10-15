@@ -407,3 +407,11 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : le script de mise à jour cherchait la ligne de chaque tâche pour y ajouter son nouvel état ; ne la trouvant pas, il a écrit l'entrée en tête avec une date lue sur une ligne inexistante, sans s'arrêter.
 - **Correctif** : titre rétabli, chaque entrée réécrite comme une ligne datée en fin de tableau, comme les autres mises à jour.
 - **Prévention** : un script qui modifie un fichier de suivi s'arrête net (`throw`) quand il ne trouve pas ce qu'il cherche, et ajoute toujours en fin de tableau des lignes complètes ; relire le haut et la fin du fichier avant de valider.
+
+## 15/10/2026 — Fusion bloquée : couverture des tests sous le seuil
+
+- **Ce qui s'est passé** : la collecte de der.sn (#344) a échoué en CI : couverture des branches de l'ingestion à 79,77 % pour un seuil de 80 %.
+- **Cause racine** : le nouveau code qui parle au réseau (lecture de der.sn) n'était pas testé, et je n'avais lancé que `vitest run` paquet par paquet, sans la couverture que `pnpm test` impose.
+- **Correctif** : tests avec un faux site (pages, actualités, actualités illisibles) : 80,44 %. Puis `pnpm test` complet à la racine avant chaque envoi.
+- **Prévention** : règle globale (ERREURS-GLOBALES) ; le script de livraison lance désormais `pnpm test` à la racine avant toute demande de fusion.
+
