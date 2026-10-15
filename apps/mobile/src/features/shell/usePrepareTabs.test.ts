@@ -2,7 +2,12 @@ import { act, renderHook } from "@testing-library/react-native";
 import { PREPARE_TABS_AFTER_MS, usePrepareTabs } from "./usePrepareTabs";
 
 const mockPrefetch = jest.fn();
+const mockQuery = jest.fn(() => Promise.resolve());
 let mockSaving = false;
+jest.mock("@tanstack/react-query", () => ({
+  ...jest.requireActual<object>("@tanstack/react-query"),
+  useQueryClient: () => ({ query: mockQuery }),
+}));
 jest.mock("expo-router", () => ({ useRouter: () => ({ prefetch: mockPrefetch }) }));
 jest.mock("../data-saver/DataSaverProvider", () => ({
   useDataSaver: () => ({ saving: mockSaving }),
@@ -11,6 +16,7 @@ jest.mock("../data-saver/DataSaverProvider", () => ({
 beforeEach(() => {
   jest.useFakeTimers();
   mockPrefetch.mockClear();
+  mockQuery.mockClear();
   mockSaving = false;
 });
 
@@ -19,7 +25,7 @@ afterEach(() => {
 });
 
 describe("usePrepareTabs", () => {
-  it("prepares the heavy tabs once the front page has settled", async () => {
+  it("prepares the procedures and the map's services once the front page has settled, never the map itself", async () => {
     await renderHook(() => {
       usePrepareTabs(true);
     });
@@ -30,7 +36,8 @@ describe("usePrepareTabs", () => {
     await act(() => {
       jest.advanceTimersByTime(1);
     });
-    expect(mockPrefetch.mock.calls).toEqual([["/procedures"], ["/near-me"]]);
+    expect(mockPrefetch.mock.calls).toEqual([["/procedures"]]);
+    expect(mockQuery).toHaveBeenCalledWith(expect.objectContaining({ queryKey: ["services"] }));
   });
 
   it("leaves the map alone when saving data, and waits while the page is not shown", async () => {
@@ -50,5 +57,6 @@ describe("usePrepareTabs", () => {
       jest.advanceTimersByTime(PREPARE_TABS_AFTER_MS);
     });
     expect(mockPrefetch.mock.calls).toEqual([["/procedures"]]);
+    expect(mockQuery).not.toHaveBeenCalled();
   });
 });
