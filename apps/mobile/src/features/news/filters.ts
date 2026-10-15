@@ -1,5 +1,5 @@
 import { INSTITUTIONS, type Institution } from "@bgs/shared-types";
-import { SECTION_FILTERS } from "./category";
+import { isKnown } from "./category";
 
 /*
  * The "Filtrer" panel (FILT-01, option A chosen by the owner on 15/10/2026): order,
@@ -95,12 +95,11 @@ export function decodeFilters(text: string | undefined): NewsFilters {
   const period = params.get("p");
   const switches = list(params.get("f"));
   const institutions: readonly string[] = INSTITUTIONS;
-  const sections: readonly string[] = SECTION_FILTERS;
   return {
     order: params.get("o") === "oldest" ? "oldest" : "newest",
     period: PERIODS.find((known) => known === period) ?? "all",
     publishers: list(params.get("i")).filter((id): id is Institution => institutions.includes(id)),
-    categories: list(params.get("r")).filter((slug) => sections.includes(slug)),
+    categories: list(params.get("r")).filter(isKnown),
     wolof: switches.includes("wo"),
     audio: switches.includes("audio"),
     documents: switches.includes("pdf"),

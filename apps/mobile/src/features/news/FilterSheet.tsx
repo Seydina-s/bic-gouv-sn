@@ -4,10 +4,10 @@ import { Modal, Pressable, ScrollView, StyleSheet, Switch, Text, View } from "re
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
-import { categoryLabelKey, SECTION_FILTERS } from "./category";
+import { categoryLabelKey, panelSections } from "./category";
 import { activeCount, filterParams, NO_FILTERS, PERIODS, type NewsFilters } from "./filters";
 import { orderInstitutions } from "./institution";
-import { useFilteredCount, usePublishers } from "./useNews";
+import { useFilteredCount, useFrontSections, usePublishers } from "./useNews";
 
 /** Institutions shown before "+ N autres" (the chosen ones always show). */
 const FIRST_INSTITUTIONS = 5;
@@ -128,6 +128,14 @@ export function FilterSheet({
   const [filters, setFilters] = useState(initial);
   const [allInstitutions, setAllInstitutions] = useState(false);
   const publishers = usePublishers();
+  const front = useFrontSections();
+  // The sections that have articles; the chosen ones always show.
+  const sections = panelSections([
+    ...(front.data?.sections ?? [])
+      .filter((section) => section.total > 0)
+      .map((section) => section.category),
+    ...filters.categories,
+  ]);
   const params = filterParams(filters, new Date());
   const count = useFilteredCount(params, visible);
   const { color, space, textStyle, radius, touchTarget } = theme;
@@ -294,7 +302,7 @@ export function FilterSheet({
             <View style={{ gap: space.sm }}>
               <Heading text={t("filters.sections")} />
               <View style={[styles.wrap, { gap: space.sm }]}>
-                {SECTION_FILTERS.map((category) => (
+                {sections.map((category) => (
                   <Pill
                     key={category}
                     label={t(categoryLabelKey(category))}

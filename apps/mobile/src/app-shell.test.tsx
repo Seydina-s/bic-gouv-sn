@@ -282,7 +282,7 @@ describe("app shell", () => {
     await fireEvent.press(await screen.findByRole("button", { name: "Filtrer" }));
     expect(await screen.findByRole("header", { name: "Trier" })).toBeOnTheScreen();
     await fireEvent.press(screen.getByRole("radio", { name: "Plus anciens" }));
-    await fireEvent.press(screen.getByRole("checkbox", { name: "Discours" }));
+    await fireEvent.press(await screen.findByRole("checkbox", { name: "Conseil des ministres" }));
     await fireEvent(screen.getByLabelText("Avec document PDF"), "valueChange", true);
     // Counted as the choice is made.
     await fireEvent.press(await screen.findByRole("button", { name: "Voir les 7 articles" }));
@@ -292,7 +292,7 @@ describe("app shell", () => {
       asked.some(
         (url) =>
           url.includes("order=oldest") &&
-          url.includes("categories=discours") &&
+          url.includes("categories=conseil-des-ministres") &&
           url.includes("documents=true"),
       ),
     ).toBe(true);
