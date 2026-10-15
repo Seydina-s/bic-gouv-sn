@@ -277,7 +277,7 @@ describe("app shell", () => {
     try {
       await renderRouter(routes, { initialUrl: "/" });
       // The front page takes the whole width until a story is chosen.
-      await fireEvent.press((await screen.findAllByText("Titre de test B"))[0]);
+      await fireEvent.press(first(await screen.findAllByText("Titre de test B")));
       expect(await screen.findByText("Paragraphe de test.")).toBeOnTheScreen();
       expect(screen.getByTestId("list-detail-pane")).toBeOnTheScreen();
       expect(screen.getByRole("button", { name: "Ajouter aux favoris" })).toBeOnTheScreen();
