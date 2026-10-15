@@ -38,22 +38,23 @@ export class FileArticleRepository implements ArticleRepository {
     return this.store.get(id);
   }
 
-  async list({
-    lang,
-    category,
-    publisher,
-    limit,
-    cursor,
-    offset = 0,
-    includeWithdrawn = false,
-  }: ListQuery): Promise<ArticlePage> {
-    const all = (await this.newestFirst(lang, includeWithdrawn)).filter(
-      (article) =>
-        (category === undefined || article.category === category) &&
-        (publisher === undefined || isPublishedBy(article, publisher)),
+  async list(query: ListQuery): Promise<ArticlePage> {
+    const {
+      lang,
+      limit,
+      cursor,
+      offset = 0,
+      includeWithdrawn = false,
+      oldestFirst = false,
+    } = query;
+    const matching = (await this.newestFirst(lang, includeWithdrawn)).filter((article) =>
+      matches(article, query),
     );
+    const all = oldestFirst ? [...matching].reverse() : matching;
     const start =
-      cursor === undefined ? offset : all.findIndex((article) => article.id === cursor) + 1;
+      cursor === undefined || oldestFirst
+        ? offset
+        : all.findIndex((article) => article.id === cursor) + 1;
     const items = all.slice(start, start + limit);
     const last = items.at(-1);
     const hasMore = start + limit < all.length;
@@ -189,4 +190,24 @@ export class FileArticleRepository implements ArticleRepository {
       }),
     );
   }
+}
+
+/** The filters of a list (section, institutions, period, languages, audio, PDF). */
+function matches(article: NewsArticle, query: ListQuery): boolean {
+  const { category, publisher, categories, publishers, since, alsoIn, withAudio, withDocuments } =
+    query;
+  return (
+    (category === undefined || article.category === category) &&
+    (publisher === undefined || isPublishedBy(article, publisher)) &&
+    (categories === undefined || categories.includes(article.category)) &&
+    (publishers === undefined || publishers.some((one) => isPublishedBy(article, one))) &&
+    (since === undefined ||
+      (article.sourcePublishedOn !== null && article.sourcePublishedOn >= since)) &&
+    (alsoIn === undefined ||
+      article.translations.some(
+        (translation) => translation.lang === alsoIn && isPublished(translation),
+      )) &&
+    (withAudio !== true || article.audio.length > 0) &&
+    (withDocuments !== true || article.attachments.length > 0)
+  );
 }

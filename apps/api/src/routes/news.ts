@@ -3,6 +3,7 @@ import type { ArticleRepository } from "@bgs/content-store";
 import {
   apiErrorSchema,
   institutionSchema,
+  isoDateSchema,
   langSchema,
   slugSchema,
   newsDetailSchema,
@@ -48,6 +49,14 @@ function sendCached<T>(request: FastifyRequest, reply: FastifyReply, fingerprint
   }
   return body;
 }
+
+/** A comma-separated list in a query ("a,b"). */
+const commaSeparated = z
+  .string()
+  .transform((text) => text.split(",").filter((part) => part !== ""));
+/** The "Filtrer" panel's sections and institutions (30 at most each). */
+const categoriesQuery = commaSeparated.pipe(z.array(slugSchema).min(1).max(30));
+const publishersQuery = commaSeparated.pipe(z.array(institutionSchema).min(1).max(30));
 
 export const newsRoutes: FastifyPluginAsyncZod<NewsRoutesOptions> = (
   app,
@@ -98,15 +107,41 @@ export const newsRoutes: FastifyPluginAsyncZod<NewsRoutesOptions> = (
           category: slugSchema.optional(),
           /** Only this institution's articles (published or also published by it). */
           publisher: institutionSchema.optional(),
+          /** The "Filtrer" panel (FILT-01): sections, comma-separated. */
+          categories: categoriesQuery.optional(),
+          /** Institutions, comma-separated. */
+          publishers: publishersQuery.optional(),
+          /** Published on this day or after. */
+          since: isoDateSchema.optional(),
+          order: z.enum(["newest", "oldest"]).default("newest"),
+          /** Also shown in this language ("available in Wolof"). */
+          alsoIn: langSchema.optional(),
+          audio: z.literal("true").optional(),
+          documents: z.literal("true").optional(),
         }),
         response: { 200: newsListResponseSchema, 304: z.null() },
       },
     },
     async (request, reply) => {
       const { lang, limit, cursor, page: pageNumber, category, publisher } = request.query;
+      const { categories, publishers, since, order, alsoIn, audio, documents } = request.query;
       const offset =
         cursor === undefined && pageNumber !== undefined ? (pageNumber - 1) * limit : 0;
-      const page = await articles.list({ lang, limit, cursor, offset, category, publisher });
+      const page = await articles.list({
+        lang,
+        limit,
+        cursor,
+        offset,
+        category,
+        publisher,
+        categories,
+        publishers,
+        since,
+        oldestFirst: order === "oldest",
+        alsoIn,
+        withAudio: audio === "true",
+        withDocuments: documents === "true",
+      });
       const media = mediaBaseUrlFor(request, mediaBaseUrl);
       const items = page.items.flatMap((article) => toSummary(article, lang, media) ?? []);
       const fingerprint = [
@@ -115,6 +150,13 @@ export const newsRoutes: FastifyPluginAsyncZod<NewsRoutesOptions> = (
         offset,
         category,
         publisher,
+        categories?.join(","),
+        publishers?.join(","),
+        since,
+        order,
+        alsoIn,
+        audio,
+        documents,
         media,
         page.total,
         ...page.items.map(freshnessKey),

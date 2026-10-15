@@ -11,6 +11,20 @@ export interface ListQuery {
   category?: string | undefined;
   /** Only articles this institution published, or also published (a duplicate kept once). */
   publisher?: Institution | undefined;
+  /** Only articles of one of these sections (the "Filtrer" panel, FILT-01). */
+  categories?: readonly string[] | undefined;
+  /** Only articles one of these institutions published or also published. */
+  publishers?: readonly Institution[] | undefined;
+  /** Only articles published on this day or after ("2026-10-01"). */
+  since?: string | undefined;
+  /** Oldest first; such pages are numbered (offset), a cursor is not used. */
+  oldestFirst?: boolean | undefined;
+  /** Only articles also shown in this language (e.g. "available in Wolof"). */
+  alsoIn?: Lang | undefined;
+  /** Only articles with a recording to listen to. */
+  withAudio?: boolean | undefined;
+  /** Only articles with an official PDF. */
+  withDocuments?: boolean | undefined;
   limit: number;
   /** Opaque position returned by the previous page. */
   cursor?: string | undefined;
