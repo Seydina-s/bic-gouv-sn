@@ -19,9 +19,9 @@ export type ReportCategory = z.infer<typeof reportCategorySchema>;
 
 const textSchema = z.string().trim().min(10).max(2000);
 
-/** A photo sent with a report, as base64 (JPEG or PNG), 6 MB at most once decoded. */
+/** A photo sent with a report (or a notification), as base64, 6 MB at most once decoded. */
 export const PHOTO_MAX_BYTES = 6 * 1024 * 1024;
-const photoSchema = z
+export const base64PhotoSchema = z
   .string()
   .max(Math.ceil((PHOTO_MAX_BYTES * 4) / 3) + 4)
   .regex(/^[A-Za-z0-9+/]+={0,2}$/);
@@ -45,7 +45,7 @@ export const reportSubmissionSchema = z
     text: textSchema,
     /** The district or town, as the person writes it; never a position. */
     place: z.string().trim().max(120).nullable(),
-    photo: photoSchema.nullable(),
+    photo: base64PhotoSchema.nullable(),
     lang: langSchema,
   })
   .refine((report) => (report.category === "autre") === (report.detail !== null), {

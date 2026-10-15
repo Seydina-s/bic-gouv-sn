@@ -1,12 +1,26 @@
 import { z } from "zod";
 import { isoDateTimeSchema, langSchema, slugSchema } from "../common/primitives.schema";
+import { base64PhotoSchema } from "./participation.schema";
 
 /*
- * Push notifications. Each one only ever announces an official article, with that
- * article's own title and first words: no free text. Two origins (decision of
- * 30/09/2026): sent automatically for every new article, or prepared in the
- * console and approved by a second person ("validation à deux personnes").
+ * Push notifications. Most announce an official article, with that article's own
+ * title and first words. Two origins (decision of 30/09/2026): sent automatically for
+ * every new article, or prepared in the console and approved by a second person
+ * ("validation à deux personnes"). Since the owner's request of 14/10/2026, the
+ * console may also write a message of its own, with a photo: it is approved by a
+ * second person all the same.
  */
+
+/** "article": an official article, in its own words; "message": written in the console. */
+export const notificationKindSchema = z.enum(["article", "message"]);
+export type NotificationKind = z.infer<typeof notificationKindSchema>;
+
+/** A written message fits a locked screen: a short title, a few lines. */
+export const MESSAGE_TITLE_MAX = 65;
+export const MESSAGE_BODY_MAX = 240;
+
+/** Our copy of a written message's photo, in the public media folder. */
+export const notificationImageKeySchema = z.string().regex(/^notifications\/[0-9a-f-]{36}\.jpg$/);
 
 export const notificationStatusSchema = z.enum(["pending", "approved", "cancelled"]);
 export type NotificationStatus = z.infer<typeof notificationStatusSchema>;
@@ -31,12 +45,21 @@ export const notificationOriginSchema = z.enum(["console", "automatic"]);
 export const notificationSchema = z.object({
   id: z.uuid(),
   origin: notificationOriginSchema.default("console"),
-  articleId: z.uuid(),
+  kind: notificationKindSchema.default("article"),
+  /** The article announced; null for a written message. */
+  articleId: z.uuid().nullable(),
   lang: langSchema,
-  /** The article's title, copied from the store when prepared. */
+  /** The article's title, copied from the store when prepared, or the message's. */
   title: z.string().min(1),
-  /** Section of the article: people are notified per section they follow. */
-  category: slugSchema,
+  /** A written message's text; null for an article (its first words are sent). */
+  body: z.string().min(1).nullable().default(null),
+  /** A written message's photo, when one was chosen. */
+  imageKey: notificationImageKeySchema.nullable().default(null),
+  /**
+   * Section of the article: people are notified per section they follow. Null for a
+   * written message: every subscribed phone receives it.
+   */
+  category: slugSchema.nullable(),
   status: notificationStatusSchema,
   preparedBy: personSchema,
   preparedAt: isoDateTimeSchema,
@@ -90,3 +113,12 @@ export const prepareNotificationSchema = z.object({
   articleId: z.uuid(),
   lang: langSchema,
 });
+
+/** A message written in the console, with an optional photo (base64). */
+export const prepareMessageNotificationSchema = z.strictObject({
+  title: z.string().trim().min(1).max(MESSAGE_TITLE_MAX),
+  body: z.string().trim().min(1).max(MESSAGE_BODY_MAX),
+  lang: langSchema,
+  photo: base64PhotoSchema.nullable(),
+});
+export type PrepareMessageNotification = z.infer<typeof prepareMessageNotificationSchema>;

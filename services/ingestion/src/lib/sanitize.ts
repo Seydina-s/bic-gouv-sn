@@ -1,4 +1,4 @@
-import { officialMediaUrl, youtubeVideoId } from "@bgs/shared-types";
+import { officialMediaUrl, officialVideoFileUrl, youtubeVideoId } from "@bgs/shared-types";
 import sanitizeHtml from "sanitize-html";
 
 /**
@@ -26,8 +26,16 @@ const OPTIONS: sanitizeHtml.IOptions = {
     "a",
     "img",
     "iframe",
+    "video",
+    "source",
   ],
-  allowedAttributes: { a: ["href"], img: ["src", "alt"], iframe: ["src"] },
+  allowedAttributes: {
+    a: ["href"],
+    img: ["src", "alt"],
+    iframe: ["src"],
+    video: ["src", "title"],
+    source: ["src"],
+  },
   allowedSchemes: ["https"],
   allowedSchemesAppliedToAttributes: ["href", "src"],
   allowProtocolRelative: false,
@@ -46,6 +54,9 @@ const OPTIONS: sanitizeHtml.IOptions = {
         attribs: id === null ? {} : { src: `https://www.youtube-nocookie.com/embed/${id}` },
       };
     },
+    // Videos stored by the official site itself (GOV-17): any other file is dropped.
+    video: (_tagName, attribs) => officialVideo("video", attribs),
+    source: (_tagName, attribs) => officialVideo("source", attribs),
     // Links to social network profiles carry tracking codes: their words stay, not the link.
     a: (_tagName, attribs) => ({
       tagName: "a",
@@ -116,7 +127,7 @@ export function textLength(html: string): number {
 
 /** True when the sanitized article carries an official video. */
 export function hasVideo(html: string): boolean {
-  return html.includes("<iframe ");
+  return html.includes("<iframe ") || /<(video|source) src=/.test(html);
 }
 
 /**
@@ -226,4 +237,15 @@ function hostOf(url: string): string {
   } catch {
     return "";
   }
+}
+
+/** A video tag (or its source) kept only with a file stored by an official site. */
+function officialVideo(tagName: string, attribs: sanitizeHtml.Attributes): sanitizeHtml.Tag {
+  const src = attribs["src"] ?? "";
+  const url = officialVideoFileUrl(src.startsWith("//") ? `https:${src}` : src);
+  const title = attribs["title"];
+  return {
+    tagName,
+    attribs: url === null ? {} : { src: url, ...(title === undefined ? {} : { title }) },
+  };
 }
