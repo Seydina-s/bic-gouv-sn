@@ -15,7 +15,9 @@ export { NewsApiError } from "./json-getter";
 export type { ApiClientOptions as NewsClientOptions } from "./json-getter";
 
 /** What a numbered page shows: one section, or one institution's stories. */
-export type StoryFilter = { category: string } | { publisher: string };
+/** One section, one institution, or the "Filtrer" panel's query (FILT-01). */
+export type StoryFilter =
+  { category: string } | { publisher: string } | { params: Readonly<Record<string, string>> };
 
 /** Stories per numbered page of a section. */
 export const SECTION_PAGE_SIZE = 20;
@@ -59,7 +61,7 @@ export function createNewsClient(options: ApiClientOptions) {
       const query = new URLSearchParams({
         lang,
         limit: String(SECTION_PAGE_SIZE),
-        ...filter,
+        ...("params" in filter ? filter.params : filter),
         page: String(page),
       });
       return getJson(`/v1/news?${query.toString()}`, readNewsList, signal);
