@@ -38,7 +38,9 @@ beforeEach(async () => {
   dir = await mkdtemp(join(tmpdir(), "bgs-api-services-"));
   store = new StateServiceStore(fileDocument(join(dir, "state-services.json")));
   await store.importServices(
-    [service(1, "Mairie de test B"), service(2, "Mairie de test A"), service(3, "Mairie C")],
+    // Named like companies: they wait for a person (the State's services are shown by
+    // default since 14/10/2026), so these tests follow the review.
+    [service(1, "Société de test B"), service(2, "Société de test A"), service(3, "Société C")],
     [{ id: "osm-n9", name: "Ville de test", kind: "city", location: { lat: 14.7, lng: -17.4 } }],
   );
   admin = await adminForTests();
@@ -97,8 +99,8 @@ describe("state services", () => {
 
     const { response, body } = await publicList();
     expect(body.services.map((item) => [item.name, item.origin])).toEqual([
-      ["Mairie de test A", "osm"],
-      ["Mairie de test B", "osm"],
+      ["Société de test A", "osm"],
+      ["Société de test B", "osm"],
     ]);
     // The account that verified stays in the console: never in the public answer.
     expect(JSON.stringify(body)).not.toContain("reviewedBy");
@@ -142,7 +144,7 @@ describe("state services", () => {
       listing
         .json<{ services: { id: string; category: string; source: unknown }[] }>()
         .services.find((item) => item.id === "osm-n3"),
-    ).toMatchObject({ category: "police", source: { category: "mairie", name: "Mairie C" } });
+    ).toMatchObject({ category: "police", source: { category: "mairie", name: "Société C" } });
     await review(token, "verified", ["osm-n3"]);
     expect((await publicList()).body.services.map((item) => [item.name, item.category])).toEqual([
       ["Commissariat C", "police"],
@@ -191,7 +193,7 @@ describe("state services", () => {
     expect(entry?.details).toEqual({ location: "14.6928,-17.4467" });
   });
 
-  it("lets an editor add a service the source misses, shown once verified", async () => {
+  it("lets an editor add a service the source misses, shown at once", async () => {
     const token = await admin.tokenFor("editor");
     const add = (payload: object) =>
       app.inject({
@@ -211,9 +213,7 @@ describe("state services", () => {
     expect(created.statusCode).toBe(201);
     const { id } = created.json<{ id: string }>();
     expect(id).toMatch(/^manual-[0-9a-f-]+$/);
-    // A proposal like the imported ones: nothing public before a person verifies it.
-    expect((await publicList()).body.services).toEqual([]);
-    await review(token, "verified", [id]);
+    // A State's service typed by hand is shown at once (validated by default, 14/10/2026).
     expect((await publicList()).body.services).toMatchObject([
       { id, name: "Sous-préfecture de test", origin: "manual", address: null },
     ]);
