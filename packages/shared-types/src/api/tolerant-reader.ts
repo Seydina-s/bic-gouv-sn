@@ -23,6 +23,13 @@ import {
   type ProcedureListResponse,
   type ProcedureThemesResponse,
 } from "./procedures.schema";
+import {
+  entreprendreDetailSchema,
+  entreprendreNewsSchema,
+  entreprendreOverviewSchema,
+  type EntreprendreDetail,
+  type EntreprendreOverview,
+} from "./entreprendre.schema";
 import { placeSchema } from "../content/state-service.schema";
 import {
   opportunitiesResponseSchema,
@@ -201,5 +208,23 @@ export function readOpportunities(raw: unknown): OpportunitiesResponse | null {
   const parsed = opportunitiesResponseSchema.safeParse({
     opportunities: keepValid(raw["opportunities"], publicOpportunitySchema),
   });
+  return parsed.success ? parsed.data : null;
+}
+
+/** The Entreprendre space: pages and news this version can show; none readable: null. */
+export function readEntreprendreOverview(raw: unknown): EntreprendreOverview | null {
+  if (!isRecord(raw) || !Array.isArray(raw["pages"])) {
+    return null;
+  }
+  const parsed = entreprendreOverviewSchema.safeParse({
+    pages: keepValid(raw["pages"], entreprendreOverviewSchema.shape.pages.element),
+    news: keepValid(raw["news"], entreprendreNewsSchema),
+  });
+  return parsed.success ? parsed.data : null;
+}
+
+/** One page of the Entreprendre space, with the blocks this version can show. */
+export function readEntreprendreDetail(raw: unknown): EntreprendreDetail | null {
+  const parsed = entreprendreDetailSchema.safeParse(withReadableBlocks(raw));
   return parsed.success ? parsed.data : null;
 }
