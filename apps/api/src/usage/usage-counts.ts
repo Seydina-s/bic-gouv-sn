@@ -26,10 +26,6 @@ export function emptyDay(): UsageDay {
   };
 }
 
-export function isEmptyUsage(usage: UsageFile): boolean {
-  return [usage.days, usage.weeks, usage.months].every((part) => Object.keys(part).length === 0);
-}
-
 const limitOf = (map: CountMap) =>
   map === "reads" || map === "listens" ? MAX_ARTICLES_PER_DAY : Infinity;
 

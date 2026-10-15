@@ -343,9 +343,6 @@ importers:
       ioredis:
         specifier: 5.8.2
         version: 5.8.2(supports-color@8.1.1)
-      pg:
-        specifier: 8.23.0
-        version: 8.23.0
       pmtiles:
         specifier: 4.5.0
         version: 4.5.0
@@ -356,9 +353,6 @@ importers:
         specifier: 4.6.5
         version: 4.6.5
     devDependencies:
-      '@maplibre/maplibre-gl-style-spec':
-        specifier: 26.4.4
-        version: 26.4.4
       '@types/node':
         specifier: 24.19.0
         version: 24.19.0
@@ -1993,10 +1987,6 @@ packages:
 
   '@maplibre/maplibre-gl-style-spec@26.2.1':
     resolution: {integrity: sha512-QFKCXkOeSzOr8jF75jm6kySOg+dUvOehPhRi68gcOYPHb7U5JloUq0dJW0Y5/fZV8ygfT0Vp2RWodvq+fyxFWA==}
-    hasBin: true
-
-  '@maplibre/maplibre-gl-style-spec@26.4.4':
-    resolution: {integrity: sha512-hG4RZR4PBd/+6A3ODdZ3AnQRF106ZQk1y3bhwDg8bH/A4Oz2tnRUJVVWs9BZa6gXZ1d3UKe89C+Mm+olGBELvA==}
     hasBin: true
 
   '@maplibre/maplibre-react-native@11.4.0':
@@ -8912,15 +8902,6 @@ snapshots:
   '@mapbox/unitbezier@1.0.0': {}
 
   '@maplibre/maplibre-gl-style-spec@26.2.1':
-    dependencies:
-      '@mapbox/jsonlint-lines-primitives': 2.0.3
-      '@mapbox/unitbezier': 1.0.0
-      json-stringify-pretty-compact: 4.0.0
-      minimist: 1.2.8
-      quickselect: 3.0.0
-      tinyqueue: 3.0.0
-
-  '@maplibre/maplibre-gl-style-spec@26.4.4':
     dependencies:
       '@mapbox/jsonlint-lines-primitives': 2.0.3
       '@mapbox/unitbezier': 1.0.0
