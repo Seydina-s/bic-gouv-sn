@@ -33,7 +33,11 @@ export function useNewsFeed(category: string | null = null) {
 export function useStoryPage(filter: StoryFilter, page: number) {
   const { lang } = useTranslation();
   const scope =
-    "category" in filter ? ["section", filter.category] : ["institution", filter.publisher];
+    "category" in filter
+      ? ["section", filter.category]
+      : "publisher" in filter
+        ? ["institution", filter.publisher]
+        : ["filtered", new URLSearchParams(filter.params).toString()];
   return useQuery({
     queryKey: ["news", lang, ...scope, page],
     queryFn: ({ signal }) => client.storyPage(lang, filter, page, signal),
@@ -135,4 +139,16 @@ export function usePrefetchArticle(): (id: string) => void {
     },
     [lang, queryClient],
   );
+}
+
+/** How many stories match the "Filtrer" panel's choice, while it is being made. */
+export function useFilteredCount(params: Readonly<Record<string, string>>, enabled: boolean) {
+  const { lang } = useTranslation();
+  return useQuery({
+    queryKey: ["news", lang, "filtered-count", new URLSearchParams(params).toString()],
+    queryFn: ({ signal }) =>
+      client.storyPage(lang, { params: { ...params, limit: "1" } }, 1, signal),
+    enabled,
+    placeholderData: keepPreviousData,
+  });
 }

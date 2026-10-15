@@ -36,7 +36,7 @@ export interface StoryPagesProps {
   /** Said when the list has no story. */
   emptyText: string;
   /** What the band already names, so that no story repeats it. */
-  named: "section" | "institution";
+  named: "section" | "institution" | "none";
   onPage: (page: number) => void;
   testID: string;
 }
