@@ -1,4 +1,4 @@
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -8,6 +8,7 @@ import {
   type NewsArticle,
 } from "@bgs/shared-types";
 import type { FastifyInstance } from "fastify";
+import sharp from "sharp";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { buildApp } from "../app";
 import { loadConfig } from "../config";
@@ -59,6 +60,8 @@ async function start(pushProvider?: PushProvider) {
       LOG_LEVEL: "silent",
       NOTIFICATIONS_PATH: join(dir, "notifications.json"),
       SETTINGS_PATH: join(dir, "settings.json"),
+      MEDIA_ROOT: join(dir, "media"),
+      MEDIA_BASE_URL: "https://media.example",
     }),
     version: "1.0.0",
     articles,
@@ -136,6 +139,80 @@ describe("notifications, two people", () => {
     expect(actions).toEqual(
       expect.arrayContaining(["notification.prepared", "notification.approved"]),
     );
+  });
+
+  it("sends a message written in the console, with its photo, to every phone once approved", async () => {
+    await start({
+      ready: true,
+      send: (message) => {
+        sent.push(message);
+        return Promise.resolve({ outcome: "sent" as const, recipients: 3 });
+      },
+    });
+    const photo = await sharp({
+      create: { width: 40, height: 20, channels: 3, background: "#00853F" },
+    })
+      .png()
+      .toBuffer();
+    const response = await call(await admin.tokenFor("editor"), "POST", "/notifications/message", {
+      title: "Message de test",
+      body: "Texte de test, écrit dans la console.",
+      lang: "fr",
+      photo: photo.toString("base64"),
+    });
+    expect(response.statusCode).toBe(201);
+    const prepared = notificationSchema.parse(response.json());
+    expect(prepared).toMatchObject({
+      kind: "message",
+      articleId: null,
+      category: null,
+      body: "Texte de test, écrit dans la console.",
+      status: "pending",
+    });
+    // Kept as a JPEG in the public media folder, and shown in the console.
+    const kept = await readFile(join(dir, "media", prepared.imageKey ?? "missing"));
+    expect((await sharp(kept).metadata()).format).toBe("jpeg");
+    const shown = await call(
+      await admin.tokenFor("reviewer"),
+      "GET",
+      `/notifications/${prepared.id}/photo`,
+    );
+    expect(shown.statusCode).toBe(200);
+    expect(shown.headers["content-type"]).toBe("image/jpeg");
+    const approved = notificationSchema.parse(
+      (
+        await call(await admin.tokenFor("editor"), "POST", `/notifications/${prepared.id}/approve`)
+      ).json(),
+    );
+    expect(approved.delivery).toMatchObject({ outcome: "sent", recipients: 3 });
+    expect(sent).toEqual([
+      {
+        articleId: null,
+        category: null,
+        imageUrl: `https://media.example/${prepared.imageKey ?? ""}`,
+        source: null,
+        versions: {
+          fr: { title: "Message de test", excerpt: "Texte de test, écrit dans la console." },
+        },
+      },
+    ]);
+  });
+
+  it("refuses a message whose photo is not a picture, and prepares nothing", async () => {
+    await start();
+    const token = await admin.tokenFor("editor");
+    const response = await call(token, "POST", "/notifications/message", {
+      title: "Message de test",
+      body: "Texte de test.",
+      lang: "fr",
+      photo: Buffer.from("pas une image").toString("base64"),
+    });
+    expect(response.statusCode).toBe(422);
+    expect(apiErrorSchema.parse(response.json()).code).toBe("NOTIFICATION_PHOTO_INVALID");
+    const list = notificationsResponseSchema.parse(
+      (await call(token, "GET", "/notifications")).json(),
+    );
+    expect(list.notifications).toHaveLength(0);
   });
 
   it("prepares a notification sent twice with the same key only once", async () => {

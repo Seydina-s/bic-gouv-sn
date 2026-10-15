@@ -5,10 +5,17 @@ import {
   type ErrorCode,
   type Lang,
   type Notification,
+  type PrepareMessageNotification,
 } from "@bgs/shared-types";
 import type { AuditJournal } from "../admin/audit-journal";
+import { cleanPhoto, type PhotoFolder } from "../media/photos";
 import type { NotificationStore } from "./notification-store";
-import { type PushMessage, pushMessageFor } from "./push-message";
+import { type PushMessage, pushMessageFor, writtenPushMessage } from "./push-message";
+
+/** Longest side of a message's photo: sharp in a notification, light on a slow network. */
+const PHOTO_SIDE = 960;
+/** Folder of the messages' photos, inside the public media folder. */
+export const NOTIFICATION_PHOTOS_FOLDER = "notifications";
 
 /**
  * Hands an approved notification to a push service (CLAUDE.md §4.2: a provider
@@ -56,6 +63,8 @@ export interface NotificationServices {
   journal: AuditJournal;
   /** Public address of the media (CDN): the cover shown in the notification. */
   mediaBaseUrl: string | undefined;
+  /** The messages' photos, in the public media folder (NOTIFICATION_PHOTOS_FOLDER). */
+  photos: PhotoFolder;
   now?: () => Date;
 }
 
@@ -111,9 +120,12 @@ export class NotificationService {
     const notification: Notification = {
       id: randomUUID(),
       origin: "console",
+      kind: "article",
       articleId,
       lang,
       title: translation.title,
+      body: null,
+      imageKey: null,
       category: article.category,
       status: "pending",
       preparedBy: person,
@@ -137,9 +149,57 @@ export class NotificationService {
     return notification;
   }
 
+  /**
+   * A message written in the console (owner's request, 14/10/2026), with its photo
+   * cleaned (upright, lighter, hidden data dropped): sent once a second person approves.
+   */
+  async prepareMessage(person: Person, input: PrepareMessageNotification): Promise<Notification> {
+    const id = randomUUID();
+    const photo = input.photo === null ? null : await cleanPhoto(input.photo, PHOTO_SIDE);
+    if (input.photo !== null && photo === null) {
+      throw new NotificationRuleError("NOTIFICATION_PHOTO_INVALID");
+    }
+    if (photo !== null) {
+      await this.services.photos.save(id, photo);
+    }
+    const notification: Notification = {
+      id,
+      origin: "console",
+      kind: "message",
+      articleId: null,
+      lang: input.lang,
+      title: input.title,
+      body: input.body,
+      imageKey: photo === null ? null : `${NOTIFICATION_PHOTOS_FOLDER}/${id}.jpg`,
+      category: null,
+      status: "pending",
+      preparedBy: person,
+      preparedAt: this.now().toISOString(),
+      decidedBy: null,
+      decidedAt: null,
+      delivery: null,
+    };
+    await this.store.update((all) => ({ next: [...all, notification], result: null }));
+    await this.record(person, "notification.prepared", notification);
+    return notification;
+  }
+
+  /** The photo of a written message (JPEG), or null when it has none. */
+  async photo(id: string): Promise<Buffer | null> {
+    const notification = (await this.store.all()).find((item) => item.id === id);
+    return notification?.imageKey === null || notification === undefined
+      ? null
+      : this.services.photos.read(id);
+  }
+
   async approve(person: Person, id: string): Promise<Notification> {
     const approved = await this.decide(person, id, "approved");
-    const outcome = await deliver(this.services, approved.articleId);
+    const outcome =
+      approved.articleId === null
+        ? await this.services.push
+            .send(writtenPushMessage(approved, this.services.mediaBaseUrl))
+            .catch((): Delivery => ({ outcome: "failed" }))
+        : await deliver(this.services, approved.articleId);
     const delivered = await this.store.update((all) => {
       const next = all.map((item) =>
         item.id === id ? { ...item, delivery: { ...outcome, at: this.now().toISOString() } } : item,
@@ -197,7 +257,11 @@ export class NotificationService {
       actor: person.id,
       action,
       target: notification.id,
-      details: { articleId: notification.articleId, title: notification.title, ...extra },
+      details: {
+        ...(notification.articleId === null ? {} : { articleId: notification.articleId }),
+        title: notification.title,
+        ...extra,
+      },
     });
   }
 }
