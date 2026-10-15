@@ -3,7 +3,7 @@
     "name": "Bic Gouv Sn",
     "slug": "bic-gouv-sn",
     "scheme": "bicgouvsn",
-    "version": "0.0.0",
+    "version": "1.0.0",
     "orientation": "default",
     "userInterfaceStyle": "automatic",
     "icon": "./assets/icon.png",
@@ -94,7 +94,9 @@
           "microphonePermission": "Le micro sert à dicter vos questions à l'assistant. L'application ne conserve pas votre voix.",
           "speechRecognitionPermission": "La reconnaissance vocale transforme votre voix en texte pour poser vos questions à l'assistant."
         }
-      ]
+      ],
+      "expo-asset",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true
@@ -105,6 +107,14 @@
         "projectId": "9ce1c61b-d8b6-456e-b982-0f1a1f664322"
       }
     },
-    "owner": "seydina-s"
+    "owner": "seydina-s",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/9ce1c61b-d8b6-456e-b982-0f1a1f664322",
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0
+    }
   }
 }

@@ -61,6 +61,29 @@ function shippedPackages(exportDir: string): Map<string, string> {
   return folders;
 }
 
+/**
+ * Package name → folder, for each direct dependency of the app that carries native
+ * code (an Expo module or an Android or iOS project): shipped in the installed app
+ * even before any JavaScript calls it (expo-updates, for instance).
+ */
+function nativeModules(): Map<string, string> {
+  const manifest = JSON.parse(readFileSync(join(app, "package.json"), "utf8")) as {
+    dependencies?: Record<string, string>;
+  };
+  const folders = new Map<string, string>();
+  for (const name of Object.keys(manifest.dependencies ?? {})) {
+    const folder = join(app, "node_modules", name);
+    const native = ["expo-module.config.json", "android", "ios"].some((part) =>
+      existsSync(join(folder, part)),
+    );
+    // The development client is built into development builds only.
+    if (native && !name.startsWith("@bgs/") && name !== "expo-dev-client") {
+      folders.set(name, folder);
+    }
+  }
+  return folders;
+}
+
 function textOf(manifest: Manifest): string {
   return typeof manifest.license === "string" ? manifest.license : (manifest.license?.type ?? "");
 }
@@ -100,9 +123,8 @@ function main(): void {
     const texts: string[] = [];
     const byLicence = new Map<string, number>();
     const pending: { item: Omit<OpenSourcePackage, "text">; body: string | null }[] = [];
-    for (const [name, folder] of [...shippedPackages(exportDir)].sort(([a], [b]) =>
-      a.localeCompare(b),
-    )) {
+    const shipped = new Map([...nativeModules(), ...shippedPackages(exportDir)]);
+    for (const [name, folder] of [...shipped].sort(([a], [b]) => a.localeCompare(b))) {
       const manifest = JSON.parse(readFileSync(join(folder, "package.json"), "utf8")) as Manifest;
       const file = LICENCE_FILES.map((candidate) => join(folder, candidate)).find(existsSync);
       const lines = file === undefined ? [] : readFileSync(file, "utf8").split(/\r?\n/);

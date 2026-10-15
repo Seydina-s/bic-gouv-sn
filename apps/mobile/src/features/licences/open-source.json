@@ -10,7 +10,7 @@
     },
     {
       "name": "@expo/cli",
-      "version": "57.0.27",
+      "version": "57.0.30",
       "licence": "MIT",
       "copyright": ["Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)"],
       "url": "https://github.com/expo/expo/tree/main/packages/@expo/cli",
@@ -18,7 +18,7 @@
     },
     {
       "name": "@expo/metro-runtime",
-      "version": "57.0.16",
+      "version": "57.0.17",
       "licence": "MIT",
       "copyright": ["Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)"],
       "url": "https://github.com/expo/expo/tree/main/packages/@expo/metro-runtime",
@@ -26,7 +26,7 @@
     },
     {
       "name": "@expo/ui",
-      "version": "57.0.20",
+      "version": "57.0.24",
       "licence": "MIT",
       "copyright": ["© 650 Industries, Inc."],
       "url": "https://docs.expo.dev/versions/latest/sdk/ui/",
@@ -363,7 +363,7 @@
     },
     {
       "name": "expo",
-      "version": "57.0.25",
+      "version": "57.0.29",
       "licence": "MIT",
       "copyright": ["Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)"],
       "url": "https://github.com/expo/expo/tree/main/packages/expo",
@@ -379,7 +379,7 @@
     },
     {
       "name": "expo-asset",
-      "version": "57.0.18",
+      "version": "57.0.20",
       "licence": "MIT",
       "copyright": ["Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)"],
       "url": "https://docs.expo.dev/versions/latest/sdk/asset/",
@@ -403,7 +403,7 @@
     },
     {
       "name": "expo-constants",
-      "version": "57.0.19",
+      "version": "57.0.22",
       "licence": "MIT",
       "copyright": ["Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)"],
       "url": "https://docs.expo.dev/versions/latest/sdk/constants/",
@@ -451,7 +451,7 @@
     },
     {
       "name": "expo-linking",
-      "version": "57.0.11",
+      "version": "57.0.13",
       "licence": "MIT",
       "copyright": ["Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)"],
       "url": "https://docs.expo.dev/versions/latest/sdk/linking",
@@ -467,7 +467,7 @@
     },
     {
       "name": "expo-location",
-      "version": "57.0.20",
+      "version": "57.0.21",
       "licence": "MIT",
       "copyright": ["Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)"],
       "url": "https://docs.expo.dev/versions/latest/sdk/location/",
@@ -475,7 +475,7 @@
     },
     {
       "name": "expo-modules-core",
-      "version": "57.0.19",
+      "version": "57.0.23",
       "licence": "MIT",
       "copyright": ["Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)"],
       "url": "https://github.com/expo/expo/tree/main/packages/expo-modules-core",
@@ -491,7 +491,7 @@
     },
     {
       "name": "expo-notifications",
-      "version": "57.0.21",
+      "version": "57.0.23",
       "licence": "MIT",
       "copyright": ["Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)"],
       "url": "https://docs.expo.dev/versions/latest/sdk/notifications/",
@@ -499,7 +499,7 @@
     },
     {
       "name": "expo-router",
-      "version": "57.0.23",
+      "version": "57.0.27",
       "licence": "MIT",
       "copyright": ["© 650 Industries, Inc."],
       "url": "https://docs.expo.dev/routing/introduction/",
@@ -523,7 +523,7 @@
     },
     {
       "name": "expo-splash-screen",
-      "version": "57.0.9",
+      "version": "57.0.10",
       "licence": "MIT",
       "copyright": ["Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)"],
       "url": "https://docs.expo.dev/versions/latest/sdk/splash-screen/",
@@ -543,6 +543,22 @@
       "licence": "MIT",
       "copyright": ["Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)"],
       "url": "https://docs.expo.dev/versions/latest/sdk/system-ui",
+      "text": 1
+    },
+    {
+      "name": "expo-updates",
+      "version": "57.0.26",
+      "licence": "MIT",
+      "copyright": ["© 650 Industries, Inc."],
+      "url": "https://docs.expo.dev/versions/latest/sdk/updates/",
+      "text": 0
+    },
+    {
+      "name": "expo-web-browser",
+      "version": "57.0.3",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2015-present 650 Industries, Inc. (aka Expo)"],
+      "url": "https://docs.expo.dev/versions/latest/sdk/webbrowser/",
       "text": 1
     },
     {
@@ -732,6 +748,14 @@
       "licence": "MIT",
       "copyright": ["Copyright (c) [2015-2016] [Horcrux]"],
       "url": "https://github.com/react-native-community/react-native-svg",
+      "text": 1
+    },
+    {
+      "name": "react-native-view-shot",
+      "version": "5.1.0",
+      "licence": "MIT",
+      "copyright": ["Copyright (c) 2016 Gaëtan Renaudeau"],
+      "url": "https://github.com/gre/react-native-view-shot",
       "text": 1
     },
     {
