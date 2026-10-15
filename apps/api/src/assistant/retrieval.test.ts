@@ -71,6 +71,7 @@ describe("the question's intent", () => {
       current: false,
       section: null,
       publisher: "Présidence",
+      members: [],
     });
     expect(questionIntent("Qu'a dit le dernier Conseil des ministres ?")).toMatchObject({
       recent: true,
@@ -81,6 +82,7 @@ describe("the question's intent", () => {
       current: false,
       section: null,
       publisher: null,
+      members: [],
     });
   });
 
@@ -95,6 +97,51 @@ describe("the question's intent", () => {
     });
     // "Justice" alone is not the ministry.
     expect(questionIntent("Que fait l'État pour la justice sociale ?").publisher).toBeNull();
+  });
+});
+
+describe("a portfolio without a site of its own", () => {
+  const communication = new PassageIndex([
+    passage(
+      20,
+      "2026-07-02",
+      "conseil-des-ministres",
+      "Le Ministre de la Communication fictif, Bacary SARR, a fait une communication.",
+      0,
+      "Primature",
+    ),
+    passage(
+      21,
+      "2026-10-01",
+      "conseil-des-ministres",
+      "Bacary SARR a présenté un rapport fictif au Conseil.",
+      0,
+      "Primature",
+    ),
+    passage(22, "2026-10-07", "actualites", "Une communication fictive sur la pêche.", 0),
+    passage(23, "2026-10-08", "actualites", "Le ministre fictif Moussa SARR en visite.", 0),
+  ]);
+
+  it("is known by its minister, from the Government's official page", () => {
+    expect(questionIntent("Dernières activités du ministère de la communication").members).toEqual([
+      {
+        name: "Bacary SARR",
+        post: "Ministre de la Communication et des Relations avec les Institutions, Porte-Parole du Gouvernement",
+      },
+    ]);
+    // A portfolio is named only with "ministre" or "ministère".
+    expect(questionIntent("Comment améliorer la communication ?").members).toEqual([]);
+    expect(questionIntent("Qu'a dit le porte-parole du gouvernement ?").members).toHaveLength(1);
+  });
+
+  it("brings the newest extracts naming the minister for a news question", () => {
+    const given = retrievePassages(
+      communication,
+      "Dernières activités du ministère de la communication",
+      "fr",
+      TODAY,
+    );
+    expect(given.slice(0, 2).map((item) => item.contentId)).toEqual(["content-21", "content-20"]);
   });
 });
 

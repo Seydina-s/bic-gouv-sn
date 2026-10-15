@@ -1,6 +1,7 @@
 import { INSTITUTIONS, type Institution, type Lang } from "@bgs/shared-types";
 import { fuseRankings } from "./hybrid-search";
 import type { PassageIndex, ScoredPassage } from "./passage-search";
+import { membersNamed } from "./government";
 import { publisherLabel, type Passage } from "./passages";
 import { widenQuestion } from "./question-words";
 
@@ -25,6 +26,8 @@ export const MEANING_WEIGHT = 3;
 const CANDIDATES = 40;
 /** How much more the articles of an institution named in the question weigh. */
 const PUBLISHER_BOOST = 1.5;
+/** Newest extracts naming a minister, for a news question about a portfolio. */
+const MEMBER_NEWEST = 3;
 const DAY_MS = 24 * 60 * 60_000;
 
 /** Folded like the search: lower case, no accents, apostrophes as spaces. */
@@ -126,6 +129,11 @@ export interface QuestionIntent {
   section: string | null;
   /** The institution the question names, as the passages name it; null if none. */
   publisher: string | null;
+  /**
+   * The ministers whose portfolio the question names, with their post (official
+   * page of the Primature): their ministry may have no site of its own.
+   */
+  members: { name: string; post: string }[];
 }
 
 function namedPublisher(text: string): string | null {
@@ -144,7 +152,13 @@ export function questionIntent(question: string): QuestionIntent {
     current: CURRENT.some((cue) => text.includes(cue)),
     section: SECTIONS.find(([cue]) => text.includes(cue))?.[1] ?? null,
     publisher: namedPublisher(text),
+    members: membersNamed(text).map(({ name, post }) => ({ name, post })),
   };
+}
+
+/** The question, plus the minister and post of each portfolio it names. */
+function withMembers(question: string, intent: QuestionIntent): string {
+  return [question, ...intent.members.map(({ name, post }) => `${name} ${post}`)].join(" ");
 }
 
 /** How much newer extracts weigh: a lot for news, some for current posts, a little otherwise. */
@@ -171,6 +185,32 @@ function byWords(index: PassageIndex, question: string, lang: Lang): ScoredPassa
   return rankings.length === 1 ? (rankings[0] ?? []) : fuseRankings(rankings, CANDIDATES);
 }
 
+/** Newest first, undated last. */
+function byNewest(a: Passage, b: Passage): number {
+  return (b.publishedOn ?? "").localeCompare(a.publishedOn ?? "");
+}
+
+/**
+ * For a news question about a minister's portfolio without an institution of its
+ * own: the newest extracts naming the minister (Conseil des ministres, other
+ * institutions' articles).
+ */
+function newestNamingMembers(index: PassageIndex, lang: Lang, intent: QuestionIntent): Passage[] {
+  if (!intent.recent || intent.publisher !== null || intent.members.length === 0) {
+    return [];
+  }
+  return intent.members.flatMap(({ name }) => {
+    // The whole name: "Bacary SARR", never another Sarr of the Government.
+    const named = folded(name);
+    return index
+      .search(name, { lang, limit: CANDIDATES })
+      .map(({ passage }) => passage)
+      .filter((passage) => folded(passage.text).includes(named))
+      .sort(byNewest)
+      .slice(0, MEMBER_NEWEST);
+  });
+}
+
 /** The newest articles of the section or institution named, for a news question. */
 function newestNamed(index: PassageIndex, lang: Lang, intent: QuestionIntent): Passage[] {
   return searchedLanguages(lang).flatMap((searched) => {
@@ -185,7 +225,7 @@ function newestNamed(index: PassageIndex, lang: Lang, intent: QuestionIntent): P
           contents: 3,
           perContent: 1,
         })
-      : [];
+      : newestNamingMembers(index, searched, intent);
   });
 }
 
@@ -203,7 +243,7 @@ export function retrievePassages(
   { limit = PASSAGES_GIVEN, meaningWeight = MEANING_WEIGHT } = {},
 ): Passage[] {
   const intent = questionIntent(question);
-  const words = byWords(index, widenQuestion(question), lang);
+  const words = byWords(index, withMembers(widenQuestion(question), intent), lang);
   const candidates =
     byMeaning === null ? words : fuseRankings([words, byMeaning], CANDIDATES, [1, meaningWeight]);
   const ranked = candidates
