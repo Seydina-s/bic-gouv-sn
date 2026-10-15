@@ -5,6 +5,7 @@ import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } fr
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTabBarInset } from "../../components/GlassTabBar";
 import { SegmentedChoice } from "../../components/SegmentedChoice";
+import { useContentWidth } from "../../components/useTwoPane";
 import { MessageFlow } from "../../features/participate/MessageFlow";
 import { ReportFlow } from "../../features/participate/ReportFlow";
 import { FeatureGate } from "../../features/remote-config/FeatureGate";
@@ -24,7 +25,8 @@ function Participate() {
   const insets = useSafeAreaInsets();
   const bottomInset = useTabBarInset();
   const [mode, setMode] = useState<Mode>("write");
-  const { color, space, textStyle, layout } = theme;
+  const contentWidth = useContentWidth();
+  const { color, space, textStyle } = theme;
 
   return (
     <KeyboardAvoidingView
@@ -38,8 +40,7 @@ function Participate() {
           paddingHorizontal: space.lg,
           paddingBottom: bottomInset + space.xxl,
           gap: space.xl,
-          width: "100%",
-          maxWidth: layout.readingMaxWidth,
+          width: contentWidth,
           alignSelf: "center",
         }}
       >

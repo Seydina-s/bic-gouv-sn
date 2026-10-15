@@ -76,8 +76,6 @@ export interface ArticleViewProps {
   bottomInset: number;
   /** The app bar slides in on scroll; off in the two-pane layout (the front page has it). */
   withAppBar?: boolean;
-  /** False when shown without the person choosing it (the first story beside the list). */
-  countsAsRead?: boolean;
 }
 
 /** One official article, identical to the source, with its link back to it. */
@@ -88,9 +86,8 @@ export function ArticleView({
   paneWidth,
   bottomInset,
   withAppBar = true,
-  countsAsRead = true,
 }: ArticleViewProps) {
-  useRecordRead(countsAsRead ? detail?.id : undefined);
+  useRecordRead(detail?.id);
   const { theme } = useTheme();
   const { t } = useTranslation();
   const { color, space, textStyle } = theme;

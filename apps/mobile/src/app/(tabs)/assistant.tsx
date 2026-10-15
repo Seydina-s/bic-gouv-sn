@@ -18,6 +18,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BrandMark } from "../../components/BrandMark";
 import { useTabBarInset } from "../../components/GlassTabBar";
 import { Icon } from "../../components/Icon";
+import { useContentWidth } from "../../components/useTwoPane";
 import { AssistantTurn, UserBubble, type ChatActions } from "../../features/assistant/ChatMessage";
 import { Composer } from "../../features/assistant/Composer";
 import { useConversation, type ChatTurn } from "../../features/assistant/useConversation";
@@ -45,7 +46,8 @@ function Assistant() {
   const [draft, setDraft] = useState("");
   const { turns, busy, send, reset } = useConversation();
   const voice = useVoiceInput(lang, setDraft);
-  const { color, space, textStyle, layout, touchTarget } = theme;
+  const contentWidth = useContentWidth();
+  const { color, space, textStyle, touchTarget } = theme;
 
   const submit = useCallback(() => {
     const question = draft.trim();
@@ -79,11 +81,8 @@ function Assistant() {
     },
   };
 
-  const column = {
-    width: "100%" as const,
-    maxWidth: layout.readingMaxWidth,
-    alignSelf: "center" as const,
-  };
+  // The same column as the other tabs, so margins never jump from one tab to the next.
+  const column = { width: contentWidth, alignSelf: "center" as const };
 
   return (
     <KeyboardAvoidingView

@@ -271,17 +271,22 @@ describe("app shell", () => {
     ).toBeOnTheScreen();
   });
 
-  it("shows list and article side by side on a wide window (tablet, unfolded)", async () => {
+  it("opens the chosen article beside the front page on a wide window, then closes it", async () => {
     const phone = Dimensions.get("window");
     Dimensions.set({ window: { ...phone, width: 1024, height: 768 } });
     try {
       await renderRouter(routes, { initialUrl: "/" });
-      expect((await screen.findAllByText("Titre de test B"))[0]).toBeOnTheScreen();
-      // The first story opens in the detail pane, with its actions, without navigating.
+      // The front page takes the whole width until a story is chosen.
+      await fireEvent.press(first(await screen.findAllByText("Titre de test B")));
       expect(await screen.findByText("Paragraphe de test.")).toBeOnTheScreen();
+      expect(screen.getByTestId("list-detail-pane")).toBeOnTheScreen();
       expect(screen.getByRole("button", { name: "Ajouter aux favoris" })).toBeOnTheScreen();
-      // Both at once: on a phone, the paragraph only shows after opening the article.
+      // Both at once, without navigating: the front page stays beside the article.
       expect(screen.getAllByText("Titre de test B")[0]).toBeOnTheScreen();
+      await fireEvent.press(screen.getByRole("button", { name: "Fermer l'article" }));
+      await waitFor(() => {
+        expect(screen.queryByTestId("list-detail-pane")).toBeNull();
+      });
     } finally {
       // The screens still mounted re-render for the new size: inside act, like any update.
       await act(() => {
@@ -320,14 +325,6 @@ describe("app shell", () => {
     expect(await screen.findByRole("radio", { name: "Sombre" })).toBeOnTheScreen();
     // The front page is still mounted underneath (a pop-up, not a new page).
     expect(screen.getByTestId("news-feed", { includeHiddenElements: true })).toBeTruthy();
-    // "À propos" credits the data, fonts and icons, each with its licence.
-    const openURL = jest.spyOn(Linking, "openURL").mockResolvedValue(true);
-    await fireEvent.press(screen.getByRole("link", { name: /OpenStreetMap, licence ODbL$/ }));
-    expect(openURL).toHaveBeenCalledWith("https://www.openstreetmap.org/copyright");
-    for (const credit of [/SIL Open Font License$/, /Mapzen, licence MIT$/, /Phosphor Icons/]) {
-      expect(screen.getByRole("link", { name: credit })).toBeOnTheScreen();
-    }
-    openURL.mockRestore();
     await fireEvent.press(first(screen.getAllByRole("button", { name: "Fermer les réglages" })));
     expect(screen.queryByRole("radio", { name: "Sombre" })).toBeNull();
     expect(screen.getByTestId("news-feed")).toBeOnTheScreen();
@@ -535,13 +532,20 @@ describe("app shell", () => {
     expect(await screen.findByText("Une nouvelle version est nécessaire")).toBeOnTheScreen();
   });
 
-  it("lists the free software of the app, each with its copyright and licence", async () => {
+  it("lists the credits and the free software from one button of the settings", async () => {
     await renderRouter(routes, { initialUrl: "/" });
     await fireEvent.press(await screen.findByRole("button", { name: "Réglages" }));
-    await fireEvent.press(
-      await screen.findByRole("button", { name: /^Logiciels libres utilisés \(\d+\)$/ }),
-    );
+    await fireEvent.press(await screen.findByRole("button", { name: "Logiciels et licences" }));
     expect(await screen.findByText(/logiciels libres font fonctionner/)).toBeOnTheScreen();
+    // The page credits the data, fonts and icons, each with its licence.
+    const openURL = jest.spyOn(Linking, "openURL").mockResolvedValue(true);
+    await fireEvent.press(screen.getByRole("link", { name: /OpenStreetMap, licence ODbL$/ }));
+    expect(openURL).toHaveBeenCalledWith("https://www.openstreetmap.org/copyright");
+    for (const credit of [/SIL Open Font License$/, /Mapzen, licence MIT$/, /Phosphor Icons/]) {
+      expect(screen.getByRole("link", { name: credit })).toBeOnTheScreen();
+    }
+    openURL.mockRestore();
+
     await fireEvent.press(screen.getByRole("button", { name: /^zod \d/ }));
     expect(screen.getByText(/Copyright \(c\) \d{4} Colin McDonnell/)).toBeOnTheScreen();
     expect(screen.getByText(/Permission is hereby granted/)).toBeOnTheScreen();
@@ -1431,7 +1435,7 @@ describe("app shell", () => {
     }
   });
 
-  it("shows search results beside the first procedure found, theme cards in full width", async () => {
+  it("opens a procedure found beside the results on a wide window, theme cards in full width", async () => {
     const phone = Dimensions.get("window");
     Dimensions.set({ window: { ...phone, width: 1024, height: 768 } });
     try {
@@ -1442,9 +1446,16 @@ describe("app shell", () => {
       expect(screen.queryByText("Public de test.")).toBeNull();
       const search = screen.getByLabelText("Rechercher une démarche");
       await fireEvent.changeText(search, "test");
-      expect(await screen.findByText("Public de test.", {}, { timeout: 3000 })).toBeOnTheScreen();
+      await fireEvent.press(
+        await screen.findByRole("button", { name: /^Démarche de test A/ }, { timeout: 3000 }),
+      );
+      expect(await screen.findByText("Public de test.")).toBeOnTheScreen();
       // The search field is the same one: what was typed is still there.
       expect(screen.getByLabelText("Rechercher une démarche")).toHaveDisplayValue("test");
+      await fireEvent.press(screen.getByRole("button", { name: "Fermer la démarche" }));
+      await waitFor(() => {
+        expect(screen.queryByText("Public de test.")).toBeNull();
+      });
     } finally {
       await act(() => {
         Dimensions.set({ window: phone });

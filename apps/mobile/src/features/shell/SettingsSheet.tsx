@@ -39,21 +39,9 @@ import { useOnboardingDone } from "../onboarding/OnboardingProvider";
 import { toggleTopic } from "../notifications/notification-preferences";
 import { categoryLabelKey, SECTION_FILTERS } from "../news/category";
 import { SectionChip } from "../news/SectionChip";
-import { OPEN_SOURCE } from "../licences/open-source";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useReduceMotion } from "../../theme/useSystemAccessibility";
 import { useTheme } from "../../theme/useTheme";
-
-/** Data, fonts and icons the app shows, each with the licence text it asks to credit. */
-const LICENCES = [
-  { key: "licenceData", url: "https://www.openstreetmap.org/copyright" },
-  { key: "licenceFonts", url: "https://openfontlicense.org" },
-  { key: "licenceMapIcons", url: "https://github.com/tangrams/icons/blob/master/LICENSE.md" },
-  {
-    key: "licenceAppIcons",
-    url: "https://github.com/duongdev/phosphor-react-native/blob/main/LICENSE",
-  },
-] as const;
 
 /**
  * Settings as a pop-up laid over the current screen, never a new page: the screen
@@ -218,17 +206,12 @@ export function SettingsSheet({ visible, onClose }: { visible: boolean; onClose:
               selected={choice}
               onSelect={setLang}
             />
-            <View style={{ gap: space.sm }}>
-              <SegmentedChoice
-                title={t("settings.dataSaver")}
-                segments={dataSavings}
-                selected={dataSaver.preference}
-                onSelect={dataSaver.setPreference}
-              />
-              <Text style={[textStyle.bodySmall, { color: color.textSecondary }]}>
-                {t("settings.dataSaverHelp")}
-              </Text>
-            </View>
+            <SegmentedChoice
+              title={t("settings.dataSaver")}
+              segments={dataSavings}
+              selected={dataSaver.preference}
+              onSelect={dataSaver.setPreference}
+            />
             {notifications.supported && (
               <View style={{ gap: space.sm }}>
                 <SegmentedChoice
@@ -239,9 +222,6 @@ export function SettingsSheet({ visible, onClose }: { visible: boolean; onClose:
                     void notifications.setChoice(next);
                   }}
                 />
-                <Text style={[textStyle.bodySmall, { color: color.textSecondary }]}>
-                  {t("settings.notificationsHelp")}
-                </Text>
                 {notifications.blocked && (
                   <View>
                     <Text style={[textStyle.bodySmall, { color: color.textPrimary }]}>
@@ -262,9 +242,6 @@ export function SettingsSheet({ visible, onClose }: { visible: boolean; onClose:
                       selected={notifications.quiet}
                       onSelect={notifications.setQuiet}
                     />
-                    <Text style={[textStyle.bodySmall, { color: color.textSecondary }]}>
-                      {t("settings.quietHelp")}
-                    </Text>
                     <Text
                       accessibilityRole="header"
                       style={[textStyle.label, { color: color.textSecondary }]}
@@ -294,9 +271,6 @@ export function SettingsSheet({ visible, onClose }: { visible: boolean; onClose:
                         />
                       ))}
                     </View>
-                    <Text style={[textStyle.bodySmall, { color: color.textSecondary }]}>
-                      {t("settings.notificationTopicsHelp")}
-                    </Text>
                   </>
                 )}
               </View>
@@ -362,9 +336,6 @@ export function SettingsSheet({ visible, onClose }: { visible: boolean; onClose:
                   onboarding.restart();
                 }}
               />
-              <Text style={[textStyle.bodySmall, { color: color.textSecondary }]}>
-                {t("settings.restartWelcomeHelp")}
-              </Text>
             </View>
             <View style={{ gap: space.sm }}>
               <Text
@@ -373,37 +344,19 @@ export function SettingsSheet({ visible, onClose }: { visible: boolean; onClose:
               >
                 {t("settings.about")}
               </Text>
-              {(["aboutNews", "aboutProcedures", "aboutSources"] as const).map((key) => (
-                <Text key={key} style={[textStyle.body, { color: color.textPrimary }]}>
-                  {t(`settings.${key}`)}
-                </Text>
-              ))}
-            </View>
-            <View style={{ gap: space.sm }}>
-              <Text
-                accessibilityRole="header"
-                style={[textStyle.label, { color: color.textSecondary }]}
-              >
-                {t("settings.licences")}
+              <Text style={[textStyle.body, { color: color.textPrimary }]}>
+                {t("settings.aboutApp")}
               </Text>
-              <View>
-                {LICENCES.map(({ key, url }) => (
-                  <LinkRow
-                    key={key}
-                    label={t(`settings.${key}`)}
-                    role="link"
-                    onPress={() => void Linking.openURL(url)}
-                  />
-                ))}
-                <LinkRow
-                  label={t("settings.openSource", { count: OPEN_SOURCE.packages.length })}
-                  role="button"
-                  onPress={() => {
-                    close();
-                    router.push("/licences");
-                  }}
-                />
-              </View>
+            </View>
+            <View>
+              <LinkRow
+                label={t("settings.licencesLink")}
+                role="button"
+                onPress={() => {
+                  close();
+                  router.push("/licences");
+                }}
+              />
               <Text style={[textStyle.bodySmall, { color: color.textTertiary }]}>
                 {t("settings.version", { version: Constants.expoConfig?.version ?? "—" })}
               </Text>
