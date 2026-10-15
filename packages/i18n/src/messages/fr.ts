@@ -445,6 +445,26 @@ export const fr = {
       failed: "L'envoi n'a pas abouti. Réessayez dans un instant.",
     },
   },
+  entreprendre: {
+    title: "Entreprendre",
+    tagline: "Financer et lancer votre activité avec la DER/FJ",
+    intro:
+      "L'offre de la Délégation générale à l'Entrepreneuriat rapide des Femmes et des Jeunes, telle qu'elle la publie sur der.sn.",
+    discover: "Découvrir l'espace",
+    groups: {
+      der: "La DER/FJ",
+      deposer: "Déposer un dossier",
+      financer: "Financements",
+      accompagner: "Se faire accompagner",
+      trouver: "Trouver une antenne",
+    },
+    newsTitle: "Actualités de la DER/FJ",
+    readOn: "Lu sur der.sn le {date}",
+    official: "Voir la page sur der.sn",
+    empty: "L'espace se remplit dès la première lecture de der.sn.",
+    notFound: "Cette page n'est pas encore disponible.",
+    step: "Étape {count}",
+  },
   opportunities: {
     title: "Opportunités",
     derOrganization:
