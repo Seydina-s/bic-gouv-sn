@@ -33,6 +33,19 @@ import { dimWhenPressed } from "../../components/press-feedback";
 /** Reduced at first (the map leads), then halfway, then most of the screen. */
 export const SHEET_SNAPS = ["25%", "45%", "70%"] as const;
 const SIZES = ["reduced", "medium", "expanded"] as const;
+/** The share of the map's area each resting height shows above the tab bar. */
+export const SHEET_SHARES = SHEET_SNAPS.map((snap) => Number.parseFloat(snap) / 100);
+
+/**
+ * The resting heights, measured from the bottom of the screen: the share shown
+ * above the bar, plus the bar's own height (the panel runs under it). Shares alone
+ * until the area is measured.
+ */
+export function restingHeights(areaHeight: number, barHeight: number): (string | number)[] {
+  return areaHeight > 0
+    ? SHEET_SHARES.map((share) => Math.round(share * areaHeight + barHeight))
+    : [...SHEET_SNAPS];
+}
 const OPENED_ON_SERVICE = 1;
 
 export interface NearbyRow {
@@ -56,8 +69,13 @@ export interface NearMeSheetProps {
   selected: PublicService | null;
   onSelect: (id: string) => void;
   onBack: () => void;
-  /** Height of the tab bar under the panel. */
+  /**
+   * Height of the tab bar, which floats over the panel's foot: the panel reaches the
+   * bottom of the screen (owner's request, 15/10/2026), its list ends above the bar.
+   */
   bottomInset: number;
+  /** Height of the map's area, to set the resting heights above the bar. */
+  areaHeight: number;
   /** Written by the panel as it moves: its top edge, for the controls above it. */
   position: SharedValue<number>;
   /** The resting height index, for the map to keep its points clear of the panel. */
@@ -104,10 +122,21 @@ type ContentProps = Pick<
 > & {
   /** Inside the sliding panel (its own lists), or in the side panel (plain ones). */
   inSheet: boolean;
+  /** Room left at the end of the lists, for the tab bar floating over them. */
+  endSpace?: number;
 };
 
 /** The list of services, or the one chosen with a way back: the panel's content. */
-function PanelContent({ inSheet, header, rows, empty, selected, onSelect, onBack }: ContentProps) {
+function PanelContent({
+  inSheet,
+  header,
+  rows,
+  empty,
+  selected,
+  onSelect,
+  onBack,
+  endSpace = 0,
+}: ContentProps) {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const { color, space, textStyle, touchTarget } = theme;
@@ -126,13 +155,17 @@ function PanelContent({ inSheet, header, rows, empty, selected, onSelect, onBack
           onPress={onSelect}
         />
       ),
-      contentContainerStyle: { paddingBottom: space.xl },
+      contentContainerStyle: { paddingBottom: endSpace + space.xl },
       testID: "near-me-sheet-list",
     };
     return inSheet ? <BottomSheetFlatList {...list} /> : <FlatList {...list} />;
   }
   const scroll: ScrollViewProps = {
-    contentContainerStyle: { paddingHorizontal: space.lg, paddingBottom: space.xxl, gap: space.md },
+    contentContainerStyle: {
+      paddingHorizontal: space.lg,
+      paddingBottom: endSpace + space.xxl,
+      gap: space.md,
+    },
   };
   const body = (
     <>
@@ -203,6 +236,7 @@ export function NearMeSheet({
   onSelect,
   onBack,
   bottomInset,
+  areaHeight,
   position,
   onRest,
 }: NearMeSheetProps) {
@@ -230,8 +264,7 @@ export function NearMeSheet({
     <BottomSheet
       ref={sheet}
       index={0}
-      snapPoints={[...SHEET_SNAPS]}
-      bottomInset={bottomInset}
+      snapPoints={restingHeights(areaHeight, bottomInset)}
       animatedPosition={position}
       enableDynamicSizing={false}
       keyboardBehavior="extend"
@@ -253,6 +286,7 @@ export function NearMeSheet({
           selected={selected}
           onSelect={onSelect}
           onBack={onBack}
+          endSpace={bottomInset}
         />
       </InPanel>
     </BottomSheet>

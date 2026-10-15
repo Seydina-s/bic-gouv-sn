@@ -13,6 +13,7 @@ import { loadServiceMap } from "./load-service-map";
 import {
   NearMeSheet,
   NearMeSidePanel,
+  SHEET_SHARES,
   SHEET_SNAPS,
   type NearbyRow,
   type NearMeSheetHandle,
@@ -22,8 +23,8 @@ import { useOfflineArea } from "./useOfflineArea";
 
 const ServiceMap = lazy(loadServiceMap);
 
-/** The share of the screen each resting height of the panel covers. */
-const SHARES = SHEET_SNAPS.map((snap) => Number.parseFloat(snap) / 100);
+/** The share of the screen each resting height of the panel covers, above the bar. */
+const SHARES = SHEET_SHARES;
 const EXPANDED = SHEET_SNAPS.length - 1;
 
 export interface NearMeMapProps {
@@ -185,6 +186,7 @@ export function NearMeMap({
             setSelectedId(null);
           }}
           bottomInset={tabBar}
+          areaHeight={height}
           position={position}
           onRest={setRest}
         />
