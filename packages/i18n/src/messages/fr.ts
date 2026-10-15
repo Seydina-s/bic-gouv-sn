@@ -467,6 +467,8 @@ export const fr = {
   },
   opportunities: {
     title: "Opportunités",
+    derOrganization:
+      "Délégation générale à l'Entrepreneuriat rapide des Femmes et des Jeunes (DER/FJ)",
     intro:
       "Emplois, concours, formations, appels à candidatures, financements, bourses et appels d'offres de l'État, chacun avec sa page officielle.",
     seeAll: "Tout voir",
