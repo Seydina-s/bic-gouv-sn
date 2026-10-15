@@ -86,7 +86,7 @@ function service(
     llm,
     wolofLlm,
     knowledge: { read: () => Promise.resolve(knowledge) },
-    state: new MemoryKeyValueStore(() => time),
+    counters: new MemoryKeyValueStore(() => time),
     settings: memorySettings(),
     journal,
     call: (operation) => operation(new AbortController().signal),

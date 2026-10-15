@@ -1,4 +1,5 @@
-# backlog.md — Bic Gouv SN
+| undefined | AST-28 ✅ (15/10 : compteurs du mois durables (fichier ou base) au lieu de la mémoire, remise à zéro à chaque redémarrage corrigée ; chiffres tirés de chaque réponse de l’API Claude) # backlog.md — Bic Gouv SN
+| undefined | PART-10 ✅ (15/10 : icône de messages dans l’en-tête avec le nombre de non lus) | undefined | DEM-20 ✅ (15/10 : thèmes cliquables, démarches d’un thème avec « Modifier ») | undefined | SRV-10 ✅ (15/10 : validés par défaut sauf noms d’entreprises ; catégories cliquables puis services avec « Corriger » ; la détection des noms d’entreprises comprend désormais les accents) | undefined | TRAD-02 ✅ (15/10 : onglet de relecture retiré avec sa route et son code ; mention « Traduction automatique » gardée dans l’app) | undefined | ADM-20 ✅ (15/10 : menu de la console à défilement indépendant) # backlog.md — Bic Gouv SN
 
 Source de vérité unique de l'avancement. Mis à jour en temps réel. Aucune tâche n'est supprimée, seul son état change.
 
@@ -550,7 +551,7 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 14/10/2026 | AUD-01 🔴 Lecture d’un article qui continue hors de l’article : lecteur épinglé en haut de l’écran (comme WhatsApp), sinon arrêt | Demande de l’utilisateur (12-14/10) |
 | 14/10/2026 | RESP-01 🔴 Paysage : marges de « Démarches » et « Participer » alignées sur les autres onglets | Demande de l’utilisateur (12-14/10) |
 | 14/10/2026 | RESP-02 🔴 Paysage : l’accueil occupe tout l’écran ; le volet de l’article ne s’ouvre qu’au toucher d’un article, avec un bouton qui le referme en glissant vers la droite | Demande de l’utilisateur (12-14/10) |
-| 14/10/2026 | AST-27 🔴 Assistant : « dernières activités du ministère de la Communication » sans réponse (ministère nommé « Télécommunications et Numérique » dans l’app : nom officiel à vérifier) ; articles tout juste arrivés pris en compte sans délai ; solution durable | Demande de l’utilisateur (12-14/10) |
+| 14/10/2026 | AST-27 🔵 (15/10 : la base de l’assistant est reconstruite dès qu’un article arrive, avant de répondre ; reste l’annuaire du Gouvernement) Assistant : « dernières activités du ministère de la Communication » sans réponse (ministère nommé « Télécommunications et Numérique » dans l’app : nom officiel à vérifier) ; articles tout juste arrivés pris en compte sans délai ; solution durable | Demande de l’utilisateur (12-14/10) |
 | 14/10/2026 | PERF-10 🔴 Fluidité : petites lenteurs et une fermeture brutale signalées ; mesurer et corriger | Demande de l’utilisateur (12-14/10) |
 | 14/10/2026 | CLEAN-01 🔴 Nettoyage complet : modèles, paquets, extensions abandonnés (dont Qwen), doublons, fichiers temporaires, code mort | Demande de l’utilisateur (12-14/10) |
 | 14/10/2026 | ADM-20 🔴 Console : la colonne de réglages de droite défile indépendamment du reste | Demande de l’utilisateur (12-14/10) |
@@ -563,3 +564,5 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 14/10/2026 | PART-10 🔴 Console : icône de messages avec le nombre de messages et signalements non lus ; un toucher ouvre la liste | Demande de l’utilisateur (12-14/10) |
 | 14/10/2026 | OPP-10 🔴 Opportunités alimentées automatiquement depuis des sources officielles | Demande de l’utilisateur (12-14/10) |
 | 14/10/2026 | DOC-02 🔴 Tableau simple des ministères : dans l’app (articles, dernière publication, source) et absents (raison, solution) | Demande de l’utilisateur (12-14/10) |
+| 15/10/2026 | SET-01 🔴 Réglages de l’app : seulement l’essentiel ; logiciels libres retirés de l’écran, remplacés par un bouton « Logiciels libres utilisés » vers une page où chaque licence se déplie (la console, réservée à l’équipe, ne peut pas servir aux citoyens) | Demande de l’utilisateur (15/10) |
+| 15/10/2026 | DOC-02 ✅ Tableau des ministères (dans l’app et absents, raison, solution) : document partagé « Ministères dans Bic Gouv SN » | Demande de l’utilisateur (14/10) |

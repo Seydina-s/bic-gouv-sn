@@ -108,7 +108,6 @@ export const adminFr = {
     services: "Services de l'État",
     errors: "Erreurs",
     withdrawn: "Articles masqués",
-    translations: "Traductions à relire",
     searches: "Recherches sans résultat",
     usage: "Usage de l'application",
     assistant: "Assistant",
@@ -124,6 +123,11 @@ export const adminFr = {
     accounts: "Comptes",
     signOut: "Se déconnecter",
     signedInAs: "Connecté : {name}",
+    inbox: "Messages des citoyens",
+    inboxUnread: {
+      one: "Messages des citoyens : {count} non lu",
+      other: "Messages des citoyens : {count} non lus",
+    },
   },
   signIn: {
     title: "Connexion",
@@ -146,9 +150,11 @@ export const adminFr = {
     unavailable: "La connexion est momentanément indisponible. Réessayez dans un instant.",
   },
   review: {
+    allThemes: "Tous les thèmes",
+    edit: "Modifier",
     title: "Thèmes des démarches",
     intro:
-      "e-senegal.sn ne classe pas encore ses démarches. Un thème est proposé automatiquement pour chacune : vérifiez-le avant qu'il n'apparaisse dans l'application.",
+      "Les démarches d'e-senegal.sn rangées par thème, telles que l'application les montre. Ouvrez un thème pour voir ses démarches et en changer une de thème si besoin.",
     themes: "Thèmes",
     toCheck: "{count} à vérifier",
     validated: {
@@ -158,15 +164,12 @@ export const adminFr = {
     unclassified: "À classer",
     unclassifiedIntro: "Aucun thème n'a pu être proposé pour ces démarches : choisissez-en un.",
     proposedTitle: "Proposées pour « {theme} »",
-    proposedIntro:
-      "Décochez celles qui ne vont pas dans ce thème : elles resteront à vérifier. Pour en déplacer une, ouvrez « Mettre une de ces démarches dans un autre thème », plus bas.",
+    proposedIntro: "Décochez celles qui ne vont pas dans ce thème : elles resteront à vérifier.",
     validateChecked: "Valider les démarches cochées",
-    validatedTitle: "Déjà validées dans « {theme} »",
     moveTo: "Thème pour « {procedure} »",
     fileHere: "Classer ici",
     byClaude: "classée par Claude (délégation)",
     addedTheme: "thème ajouté",
-    moveSummary: "Mettre une de ces démarches dans un autre thème",
     none: "Rien à vérifier dans ce thème.",
     done: {
       one: "{count} démarche validée dans « {theme} ».",
@@ -178,7 +181,7 @@ export const adminFr = {
   services: {
     title: "Services de l'État",
     intro:
-      "Importés d'OpenStreetMap. Rien n'apparaît dans l'application avant d'être vérifié ici : ouvrez chaque service sur la carte, puis cochez ceux qui sont justes.",
+      "Importés d'OpenStreetMap et validés par défaut : ils apparaissent dans l'application. Ouvrez une catégorie pour corriger un service (nom, type, emplacement). Seuls les noms qui ressemblent à une entreprise attendent une vérification.",
     categories: "Catégories",
     category: {
       mairie: "Mairies",
@@ -197,17 +200,16 @@ export const adminFr = {
       one: "{count} vérifié",
       other: "{count} vérifiés",
     },
-    proposedTitle: "À vérifier : {category}",
+    proposedTitle: "Noms d'entreprises à vérifier : {category}",
     proposedIntro:
-      "Cochez les services que vous avez vérifiés (nom et emplacement). Ceux qui ne sont pas des services de l'État, ou qui n'existent plus, s'écartent de la même façon.",
+      "Ces noms ressemblent à ceux d'entreprises ou d'organismes privés : vérifiez qu'il s'agit bien de services de l'État avant de les montrer, sinon écartez-les.",
+    allCategories: "Toutes les catégories",
     openMap: "Voir sur la carte",
     verifyChecked: "Vérifier les services cochés",
     rejectChecked: "Écarter les services cochés",
     changedTitle: "Changés à la source depuis leur vérification",
     changedIntro:
       "OpenStreetMap indique un changement pour ces services ; l'application montre toujours la version vérifiée. Vérifiez-les de nouveau pour prendre le changement.",
-    verifiedTitle: "Déjà vérifiés : {category}",
-    verifiedOn: "vérifié le {date}",
     sourceNow: "Selon la source : {name}",
     nearTown: "près de {town}",
     correct: "Corriger",
@@ -229,11 +231,11 @@ export const adminFr = {
     addService: "Ajouter un service absent de la liste",
     addTitle: "Ajouter un service de l'État",
     addIntro:
-      "Pour un service qu'OpenStreetMap ne connaît pas. Il rejoint les services à vérifier : il n'apparaît dans l'application qu'une fois vérifié.",
+      "Pour un service qu'OpenStreetMap ne connaît pas. Il apparaît aussitôt dans l'application ; vous pourrez le corriger ensuite.",
     addressLabel: "Adresse (facultatif)",
     phoneLabel: "Téléphone (facultatif)",
     saveAdd: "Ajouter le service",
-    added: "Service ajouté. Il attend maintenant sa vérification dans la liste « À vérifier ».",
+    added: "Service ajouté : il apparaît dans l'application.",
     saveCorrection: "Enregistrer la correction",
     corrected: "Correction enregistrée.",
     correctedFrom: "Corrigé (à la source : {name}, {category})",
@@ -241,7 +243,7 @@ export const adminFr = {
     hintNotState: "Nom d'entreprise ou d'organisme privé : probablement pas un service de l'État",
     hintVague: "Nom trop général : vérifiez l'emplacement sur la carte",
     unknown: "Ce service n'existe pas.",
-    none: "Rien à vérifier ici.",
+    none: "Aucun service dans cette catégorie pour cette zone.",
     doneVerified: {
       one: "{count} service vérifié : il apparaît dans l'application.",
       other: "{count} services vérifiés : ils apparaissent dans l'application.",
@@ -600,30 +602,6 @@ export const adminFr = {
       other:
         "{count} sites de ministères publient de nouveau : ils peuvent être ajoutés à la collecte.",
     },
-  },
-  translations: {
-    title: "Traductions à relire",
-    intro:
-      "Les articles publiés sans version wolof officielle (Présidence, Primature) sont traduits automatiquement. Dans l'application, ils portent la mention « Traduction automatique » jusqu'à leur relecture. Une personne qui parle wolof compare les deux versions, puis valide la traduction ou l'écarte.",
-    count: {
-      one: "{count} traduction à relire",
-      other: "{count} traductions à relire",
-    },
-    none: "Aucune traduction à relire pour l'instant.",
-    failed: "Les traductions n'ont pas pu être lues. Rechargez la page.",
-    publishedOn: "Publié le {day}",
-    back: "Toutes les traductions à relire",
-    french: "Français (version officielle)",
-    wolof: "Wolof (traduction automatique)",
-    source: "Voir l'article officiel",
-    decide: "Votre décision",
-    validate: "Valider la traduction",
-    validateHelp: "La mention « Traduction automatique » disparaît de l'application.",
-    setAside: "Écarter la traduction",
-    setAsideHelp:
-      "L'article est de nouveau montré en français seulement ; il pourra être traduit à nouveau.",
-    notPending:
-      "Cette traduction n'est plus à relire : elle a déjà été traitée, ou la version officielle en wolof est parue.",
   },
   assistant: {
     title: "Assistant",

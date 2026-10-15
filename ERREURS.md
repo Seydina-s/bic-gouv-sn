@@ -380,3 +380,14 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Prévention** :
   - test « 12 refus de suite, puis réussite » et « aucune copie temporaire laissée » ;
   - le passage à PostgreSQL (SCALE-02, prêt) supprime ce partage de fichier : à activer avec l'hébergement.
+
+## 15/10/2026 — Console : bien moins de questions à l'assistant que de questions posées
+
+- **Ce qui s'est passé** : signalé par l'utilisateur le 14/10. La page « Assistant » de la console affichait un nombre de questions du mois très inférieur à celui des questions réellement posées, et donc un coût sous-estimé.
+- **Cause racine** : sans serveur Redis, comme sur l'ordinateur de démonstration, les compteurs du mois (questions, jetons, dépense) étaient gardés **en mémoire**. Chaque redémarrage de l'API les remettait à zéro, et il y en a eu des dizaines ces derniers jours pour les mises en service. Le plafond mensuel de questions, qui repose sur ces mêmes compteurs, n'était donc pas tenu non plus.
+- **Correctif** : sans Redis, les compteurs vivent dans un document enregistré (un fichier, ou une ligne de la base PostgreSQL quand elle est branchée), qui survit aux redémarrages. Avec Redis, rien ne change. Les chiffres sont ceux que l'API de Claude renvoie pour chaque appel (jetons lus et écrits), au prix du modèle utilisé. Les questions d'octobre posées avant ce correctif ne sont pas récupérables : la console d'Anthropic garde la vraie dépense du mois.
+
+  Fichiers : `apps/api/src/shared-state/document-counters.ts`, `assistant/assistant-service.ts`, `app.ts`, `server.ts`, `config.ts`.
+- **Prévention** :
+  - test « garde ses comptes après un redémarrage » ;
+  - règle : toute donnée qui compte (plafond, coût, statistique) est enregistrée durablement ; la mémoire ne sert qu'à ce qu'on peut perdre sans conséquence (une limite de débit, un cache).
