@@ -148,6 +148,7 @@ export function StoryPages({
       </View>
       <ScrollTopButton
         visible={scrollTop.visible}
+        progress={scrollTop.progress}
         bottom={insets.bottom + space.lg}
         onPress={() => {
           list.current?.scrollToOffset({ offset: 0, animated: true });

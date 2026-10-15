@@ -4,6 +4,7 @@ import { useState, type ReactNode } from "react";
 import { DataSaverProvider } from "../features/data-saver/DataSaverProvider";
 import { NotificationsProvider } from "../features/notifications/NotificationsProvider";
 import { OnboardingProvider } from "../features/onboarding/OnboardingProvider";
+import { PlayerProvider } from "../features/player/PlayerProvider";
 import { UsageStatsProvider } from "../features/usage-stats/UsageStatsProvider";
 import { I18nProvider } from "../i18n/I18nProvider";
 import { ThemeProvider } from "../theme/ThemeProvider";
@@ -25,7 +26,9 @@ export function TestProviders({ children }: { children: ReactNode }) {
           <DataSaverProvider>
             <UsageStatsProvider>
               <NotificationsProvider>
-                <OnboardingProvider>{children}</OnboardingProvider>
+                <OnboardingProvider>
+                  <PlayerProvider>{children}</PlayerProvider>
+                </OnboardingProvider>
               </NotificationsProvider>
             </UsageStatsProvider>
           </DataSaverProvider>

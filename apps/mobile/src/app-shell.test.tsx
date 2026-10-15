@@ -223,12 +223,11 @@ describe("app shell", () => {
     });
   });
 
-  it("lets the reader pause the carousel", async () => {
+  it("stops the carousel by a swipe, with no pause button (owner's decision, 14/10/2026)", async () => {
     await renderRouter(routes, { initialUrl: "/" });
-    await fireEvent.press(
-      await screen.findByRole("button", { name: "Mettre en pause le défilement" }),
-    );
-    expect(screen.getByRole("button", { name: "Reprendre le défilement" })).toBeOnTheScreen();
+    const carousel = await screen.findByTestId("hero-carousel");
+    await fireEvent(carousel, "scrollBeginDrag");
+    expect(screen.queryByRole("button", { name: /défilement/ })).toBeNull();
   });
 
   it("searches the news from the front page and opens a result", async () => {

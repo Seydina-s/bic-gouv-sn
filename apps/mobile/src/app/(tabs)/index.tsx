@@ -240,6 +240,7 @@ export default function HomeScreen() {
       </ScrollView>
       <ScrollTopButton
         visible={scrollTop.visible}
+        progress={scrollTop.progress}
         bottom={bottomInset + space.sm}
         onPress={() => {
           scroller.current?.scrollTo({ y: 0, animated: true });
