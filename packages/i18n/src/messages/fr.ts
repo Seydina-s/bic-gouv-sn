@@ -145,6 +145,7 @@ export const fr = {
   },
   article: {
     back: "Retour",
+    close: "Fermer l'article",
     openSource: "Lire sur {source}",
     notFound: "Cet article n'est pas disponible.",
     withdrawn: "Cet article a été retiré de son site d'origine.",
@@ -167,6 +168,7 @@ export const fr = {
   },
   procedures: {
     title: "Démarches",
+    close: "Fermer la démarche",
     intro: "Les démarches administratives officielles, expliquées simplement.",
     count: {
       one: "{count} démarche",

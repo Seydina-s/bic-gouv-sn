@@ -8,11 +8,11 @@ import {
   StyleSheet,
   Text,
   View,
-  useWindowDimensions,
 } from "react-native";
 import { useTabBarInset } from "../../components/GlassTabBar";
 import { ScrollTopButton, useScrollTop } from "../../components/ScrollTopButton";
-import { useTwoPane } from "../../components/useTwoPane";
+import { ListDetail } from "../../components/ListDetail";
+import { useContentWidth, useTwoPane } from "../../components/useTwoPane";
 import { ArticlePane } from "../../features/news/ArticlePane";
 import { freshnessOf, type Freshness } from "../../features/news/format";
 import { COUNCIL_CATEGORY, heroStories, orderSections } from "../../features/news/front-page";
@@ -134,18 +134,15 @@ export default function HomeScreen() {
   const { lastOpened, markOpened } = useLastOpened();
   const scroller = useRef<ScrollView>(null);
   const scrollTop = useScrollTop();
-  const { color, space, layout } = theme;
-  const { width } = useWindowDimensions();
-  // Tablets and unfolded foldables: front page and article side by side (recomputed live).
+  const { color, space } = theme;
+  // On a wide screen, a chosen article opens beside the front page (recomputed live).
   const { twoPane, listPaneWidth, detailPaneWidth } = useTwoPane();
-  const columnWidth = twoPane
-    ? listPaneWidth
-    : Math.min(width, layout.readingMaxWidth + space.xxxl);
+  const contentWidth = useContentWidth();
   const hero = heroStories(feed.data?.pages[0]?.items ?? []);
   usePrefetchLikely(hero.map((story) => story.id));
   const rails = orderSections(front.data?.sections ?? []);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const shownId = selectedId ?? hero[0]?.id ?? null;
+  const columnWidth = twoPane && selectedId !== null ? listPaneWidth : contentWidth;
   const hasContent = hero.length > 0 || rails.length > 0;
   const failed = feed.isError || front.isError;
 
@@ -249,38 +246,27 @@ export default function HomeScreen() {
     </View>
   );
 
-  if (twoPane) {
-    return (
-      <View style={[styles.split, { backgroundColor: color.background }]}>
-        <View style={[styles.listPane, { width: listPaneWidth, borderRightColor: color.border }]}>
-          {page}
-        </View>
-        {shownId !== null && (
-          <ArticlePane
-            id={shownId}
-            paneWidth={detailPaneWidth}
-            bottomInset={bottomInset}
-            chosen={selectedId !== null}
-          />
-        )}
-        <Invitations visible={focused} />
-      </View>
-    );
-  }
-
   return (
-    <View style={[styles.root, { backgroundColor: color.background }]}>
-      <View style={[styles.column, { width: columnWidth }]}>{page}</View>
+    <View style={styles.flex}>
+      <ListDetail
+        list={<View style={[styles.column, { width: columnWidth }]}>{page}</View>}
+        detail={
+          selectedId === null ? null : (
+            <ArticlePane id={selectedId} paneWidth={detailPaneWidth} bottomInset={bottomInset} />
+          )
+        }
+        onClose={() => {
+          setSelectedId(null);
+        }}
+        closeLabel={t("article.close")}
+      />
       <Invitations visible={focused} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, alignItems: "center" },
   column: { flex: 1 },
   flex: { flex: 1 },
-  split: { flex: 1, flexDirection: "row" },
-  listPane: { borderRightWidth: StyleSheet.hairlineWidth },
   button: { alignSelf: "flex-start", justifyContent: "center" },
 });
