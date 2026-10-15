@@ -1,4 +1,4 @@
-# backlog.md — Bic Gouv SN
+| undefined | PART-10 ✅ (15/10 : icône de messages dans l’en-tête avec le nombre de non lus) | undefined | DEM-20 ✅ (15/10 : thèmes cliquables, démarches d’un thème avec « Modifier ») | undefined | SRV-10 ✅ (15/10 : validés par défaut sauf noms d’entreprises ; catégories cliquables puis services avec « Corriger » ; la détection des noms d’entreprises comprend désormais les accents) | undefined | TRAD-02 ✅ (15/10 : onglet de relecture retiré avec sa route et son code ; mention « Traduction automatique » gardée dans l’app) | undefined | ADM-20 ✅ (15/10 : menu de la console à défilement indépendant) # backlog.md — Bic Gouv SN
 
 Source de vérité unique de l'avancement. Mis à jour en temps réel. Aucune tâche n'est supprimée, seul son état change.
 

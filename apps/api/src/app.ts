@@ -105,8 +105,6 @@ import { SemanticLayer } from "./assistant/semantic-layer";
 import { TransformersEmbedder } from "./assistant/transformers-embedder";
 import type { LlmProvider } from "./assistant/llm-provider";
 import { adminAssistantRoutes, assistantRoutes } from "./routes/assistant";
-import { TranslationReview } from "./news/translation-review";
-import { adminTranslationsRoutes } from "./routes/admin-translations";
 import type { SettingStore } from "./admin/setting-store";
 
 /** Longest path parameter accepted (a procedure slug, an article id). */
@@ -489,11 +487,6 @@ export async function buildApp({
       store: remoteConfig,
     });
     await app.register(adminNewsRoutes, { prefix: "/admin/v1", signIn: admin.signIn, articles });
-    await app.register(adminTranslationsRoutes, {
-      prefix: "/admin/v1",
-      signIn: admin.signIn,
-      review: new TranslationReview(articles, admin.journal),
-    });
     await app.register(adminAssistantRoutes, {
       prefix: "/admin/v1",
       signIn: admin.signIn,
