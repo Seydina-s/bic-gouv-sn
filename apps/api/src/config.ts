@@ -131,6 +131,12 @@ const envSchema = z.object({
     .min(1)
     .default(".data/assistant-counters.json")
     .transform((path) => resolveDataPath(path)),
+  /** The "Entreprendre" space (der.sn), written by the collection (DER-01). */
+  ENTREPRENDRE_PATH: z
+    .string()
+    .min(1)
+    .default(".data/entreprendre.json")
+    .transform((path) => resolveDataPath(path)),
   /** Weekly review of the ministry sites not collected yet, written by the collection (GOV-08). */
   SITES_REVIEW_PATH: z
     .string()

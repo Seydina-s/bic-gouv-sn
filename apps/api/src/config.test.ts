@@ -36,6 +36,7 @@ describe("loadConfig", () => {
       NOTIFICATIONS_PATH: fromRoot(".data/admin/notifications.json"),
       INGESTION_STATUS_PATH: fromRoot(".data/ingestion-status.json"),
       ASSISTANT_COUNTERS_PATH: fromRoot(".data/assistant-counters.json"),
+      ENTREPRENDRE_PATH: fromRoot(".data/entreprendre.json"),
       SITES_REVIEW_PATH: fromRoot(".data/sites-review.json"),
       MEDIA_ROOT: fromRoot(".data/media"),
       ADMIN_SECRET_KEYS_PREVIOUS: [],

@@ -295,6 +295,15 @@ export const ERROR_CATALOG = {
     severity: "info",
     action: "Choisissez un article dans la liste proposée.",
   },
+  ENTREPRENDRE_NOT_FOUND: {
+    what: "Une page de l'espace Entreprendre a été demandée avant d'avoir été collectée sur der.sn.",
+    where: "Application, Entreprendre",
+    impact:
+      "La page s'affiche dès que la collecte l'a lue ; la personne voit un message d'attente.",
+    severity: "info",
+    action:
+      "Rien à faire si c'est ponctuel ; si cela dure, vérifiez la collecte de der.sn dans la supervision.",
+  },
   NOTIFICATION_PHOTO_INVALID: {
     what: "La photo jointe à une notification n'a pas pu être lue.",
     where: "Centre d'administration, notifications",

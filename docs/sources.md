@@ -307,3 +307,14 @@ Rues, quartiers, eau et noms de lieux sous les services de « Près de moi ». C
 - Servies par notre API avec le style, les lettres et les icônes : aucun service de carte extérieur n'est appelé par l'application.
 - Même licence ODbL que ci-dessus : l'attribution avec son lien fait partie du style.
 - Fichier en place : Protomaps Basemap 4.15.2, données du 27/09/2026 à 04 h (UTC). Procédure de mise à jour et pannes : `docs/runbooks/fond-de-carte.md`.
+
+## der.sn (DER/FJ, espace « Entreprendre », 15/10/2026)
+
+Site officiel de la Délégation générale à l'Entrepreneuriat rapide des Femmes et des Jeunes, rattachée au Secrétariat général de la Présidence de la République (décret n° 2017-2123, rappelé sur sa page « Présentation »). Ajouté à la demande de l'utilisateur du 12/10 (DER-01).
+
+- **Règles d'accès** : `robots.txt` n'interdit que `/wp-admin/` ; lecture polie, une requête par seconde.
+- **Certificat** : le site envoie son certificat sans l'intermédiaire (Sectigo DV R36). La collecte complète la chaîne depuis l'adresse « CA Issuers » du certificat et n'accepte cet intermédiaire que s'il est signé par une autorité racine de confiance du système (`completed-chain-fetch.ts`) ; la vérification n'est jamais désactivée.
+- **Pages lues** (liste dans `ENTREPRENDRE_PAGES`) : présentation, dépôt d'un dossier (pièces et guide pas à pas e-DER), types de financements, accompagnement financier, secteurs prioritaires, formation et assistance technique, formalisation, guichet unique, adresses des antennes départementales et des points de nano-crédit. Pages construites avec Divi : seuls les modules de texte, d'encadré et dépliables sont repris (`der-page.ts`), mis en forme dans l'app, jamais réécrits.
+- **Actualités** : les 20 dernières par l'interface WordPress (`/wp-json/wp/v2/posts`), titre et premiers mots, ouvertes sur der.sn.
+- **Rythme** : relu toutes les 6 heures par la surveillance ; une page illisible garde sa dernière version, un changement de texte crée une nouvelle version.
+- **Non repris** : l'adresse de la plateforme e-DER (aucun lien sur les pages officielles : l'app renvoie à la page « Comment déposer un dossier »).

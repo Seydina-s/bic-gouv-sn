@@ -66,6 +66,7 @@ import { AutomaticOpportunities } from "./opportunities/automatic-opportunities"
 import { FileSettingStore, PostgresSettingStore } from "./admin/setting-store";
 import { adminServicesRoutes } from "./routes/admin-services";
 import { adminOpportunitiesRoutes } from "./routes/admin-opportunities";
+import { entreprendreRoutes } from "./routes/entreprendre";
 import { opportunitiesRoutes } from "./routes/opportunities";
 import { adminParticipationRoutes } from "./routes/admin-participation";
 import { participationRoutes } from "./routes/participation";
@@ -131,6 +132,8 @@ export interface AppOptions {
   ingestionStatus?: JsonDocument;
   /** Weekly review of the ministry sites not collected yet (GOV-08). */
   sitesReview?: JsonDocument;
+  /** The "Entreprendre" space (der.sn, DER-01); defaults to its file. */
+  entreprendre?: JsonDocument;
   /** The assistant's monthly counters when there is no Redis (a file, or a database row). */
   assistantCounters?: JsonDocument;
   /** Defaults to the file stores when ADMIN_SECRET_KEY is set; none otherwise. */
@@ -243,6 +246,7 @@ export async function buildApp({
   remoteConfig = new RemoteConfigStore(fileDocument(config.REMOTE_CONFIG_PATH)),
   ingestionStatus = fileDocument(config.INGESTION_STATUS_PATH),
   sitesReview = fileDocument(config.SITES_REVIEW_PATH),
+  entreprendre = fileDocument(config.ENTREPRENDRE_PATH),
   assistantCounters,
   redis = config.REDIS_URL === undefined ? null : connectRedis(config.REDIS_URL),
   sharedState = redis === null ? new MemoryKeyValueStore() : new RedisKeyValueStore(redis),
@@ -447,6 +451,7 @@ export async function buildApp({
     ingestionStatus,
     sitesReview,
   });
+  await app.register(entreprendreRoutes, { prefix: "/v1", entreprendre });
   await app.register(newsRoutes, {
     prefix: "/v1",
     articles,
