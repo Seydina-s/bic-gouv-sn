@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen } from "@testing-library/react-native";
 import type { Block } from "@bgs/shared-types";
 import * as Speech from "expo-speech";
+import { openBrowserAsync } from "expo-web-browser";
 import { Linking, StyleSheet } from "react-native";
 import { createNewsClient, NewsApiError } from "../../api/news-client";
 import { COVER, DETAIL, LIST } from "../../testing/news-fixtures";
@@ -14,6 +15,11 @@ import { heroStories, orderSections } from "./front-page";
 import { spokenPieces } from "./spoken-text";
 import { institutionLabelKey, orderInstitutions } from "./institution";
 import { CouncilCard, LeadStory, StoryRow } from "./Stories";
+
+// Official videos open in a browser tab inside the app (open-video.ts).
+jest.mock("expo-web-browser", () => ({
+  openBrowserAsync: jest.fn(() => Promise.resolve({ type: "opened" })),
+}));
 
 jest.mock("expo-localization", () => ({ getLocales: () => [{ languageTag: "fr-SN" }] }));
 // Screens here render outside a navigator: they are always "focused".
@@ -154,9 +160,7 @@ describe("BlockRenderer", () => {
     expect(openURL).toHaveBeenCalledWith("https://www.presidence.sn/fr/");
   });
 
-  it("opens an official video in YouTube only when the reader taps it", async () => {
-    const openURL = jest.spyOn(Linking, "openURL").mockResolvedValue(true);
-    openURL.mockClear();
+  it("opens an official video inside the app only when the reader taps it", async () => {
     await render(
       <TestProviders>
         <BlockRenderer
@@ -171,9 +175,36 @@ describe("BlockRenderer", () => {
         />
       </TestProviders>,
     );
-    expect(openURL).not.toHaveBeenCalled();
+    expect(openBrowserAsync).not.toHaveBeenCalled();
     await fireEvent.press(screen.getByRole("link", { name: "Regarder la vidéo. Sur YouTube" }));
-    expect(openURL).toHaveBeenCalledWith("https://www.youtube.com/watch?v=UMZm4iPcFWE");
+    expect(openBrowserAsync).toHaveBeenCalledWith(
+      "https://www.youtube.com/watch?v=UMZm4iPcFWE",
+      expect.objectContaining({ enableBarCollapsing: true }),
+    );
+  });
+
+  it("previews a video stored by a ministry, with its title and site, and opens it on tap", async () => {
+    await render(
+      <TestProviders>
+        <BlockRenderer
+          blocks={[
+            {
+              type: "video",
+              provider: "official",
+              url: "https://www.interieur.gouv.sn/media/a.mp4",
+              title: "Déclaration du Ministre",
+            },
+          ]}
+        />
+      </TestProviders>,
+    );
+    await fireEvent.press(
+      screen.getByRole("link", { name: "Déclaration du Ministre. Sur interieur.gouv.sn" }),
+    );
+    expect(openBrowserAsync).toHaveBeenLastCalledWith(
+      "https://www.interieur.gouv.sn/media/a.mp4",
+      expect.anything(),
+    );
   });
 
   it("shows our stored copy of an image in the text, with its description", async () => {

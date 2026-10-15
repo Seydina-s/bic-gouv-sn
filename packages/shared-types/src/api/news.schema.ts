@@ -68,15 +68,25 @@ export const blockSchema = z.discriminatedUnion("type", [
     media: coverSchema.optional(),
   }),
   /**
-   * Video embedded by the official page. The app shows a card that opens the video
-   * on tap: no embedded player (heavy, and it would contact the host unasked).
+   * Video of the official page: on YouTube, or a file stored by the official site
+   * itself (MP4). The app shows a preview that opens the video on tap: no embedded
+   * player (heavy, and it would contact the host unasked).
    */
-  z.object({
-    type: z.literal("video"),
-    provider: z.literal("youtube"),
-    videoId: z.string().regex(/^[A-Za-z0-9_-]{11}$/),
-    url: httpsUrlSchema,
-  }),
+  z.discriminatedUnion("provider", [
+    z.object({
+      type: z.literal("video"),
+      provider: z.literal("youtube"),
+      videoId: z.string().regex(/^[A-Za-z0-9_-]{11}$/),
+      url: httpsUrlSchema,
+    }),
+    z.object({
+      type: z.literal("video"),
+      provider: z.literal("official"),
+      url: httpsUrlSchema,
+      /** The title the official site gives the video, when it gives one. */
+      title: z.string().min(1).optional(),
+    }),
+  ]),
 ]);
 export type Block = z.infer<typeof blockSchema>;
 

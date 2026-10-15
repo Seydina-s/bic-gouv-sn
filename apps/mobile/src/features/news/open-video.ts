@@ -1,0 +1,30 @@
+import { requireOptionalNativeModule } from "expo";
+import { Linking, Platform } from "react-native";
+import type * as WebBrowser from "./web-browser";
+
+export interface BrowserColours {
+  /** Bar of the tab (Android). */
+  toolbar: string;
+  /** Its buttons (iOS). */
+  controls: string;
+}
+
+/**
+ * Opens an official video in a browser tab inside the app (owner's choice, 14/10/2026):
+ * the video plays from the official site, and one gesture brings the reader back to
+ * the article. Builds made before the module came (15/10) open the phone's browser
+ * or its YouTube app instead.
+ */
+export async function openVideo(url: string, colours: BrowserColours): Promise<void> {
+  if (Platform.OS !== "web" && requireOptionalNativeModule("ExpoWebBrowser") !== null) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports -- see above
+    const { openBrowserAsync } = require("./web-browser") as typeof WebBrowser;
+    await openBrowserAsync(url, {
+      toolbarColor: colours.toolbar,
+      controlsColor: colours.controls,
+      enableBarCollapsing: true,
+    });
+    return;
+  }
+  await Linking.openURL(url);
+}

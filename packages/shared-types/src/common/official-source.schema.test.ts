@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   officialMediaUrl,
   officialSourceUrlSchema,
+  officialVideoFileUrl,
   youtubeVideoId,
 } from "./official-source.schema";
 
@@ -45,6 +46,23 @@ describe("officialMediaUrl", () => {
     ["not a URL", "not a url"],
   ])("refuses %s", (_label, url) => {
     expect(officialMediaUrl(url)).toBeNull();
+  });
+});
+
+describe("officialVideoFileUrl", () => {
+  it("accepts a video file stored by an official site", () => {
+    expect(officialVideoFileUrl("https://www.interieur.gouv.sn/media/a.MP4")).toBe(
+      "https://www.interieur.gouv.sn/media/a.MP4",
+    );
+  });
+
+  it.each([
+    "https://evil.example/a.mp4",
+    "https://www.interieur.gouv.sn/media/a.jpg",
+    "http://www.interieur.gouv.sn/media/a.mp4",
+    "not a url",
+  ])("refuses %s", (url) => {
+    expect(officialVideoFileUrl(url)).toBeNull();
   });
 });
 

@@ -347,6 +347,22 @@ export const adminFr = {
     after30: "Un mois après",
     notEnough: "Pas encore assez de données",
     daysTitle: "Les 30 derniers jours",
+    metric: "Mesure affichée",
+    metricActive: "Personnes actives",
+    metricNew: "Nouvelles personnes",
+    weekChange: "ces 7 derniers jours, par rapport aux 7 précédents",
+    chartLabel: "Courbe des 30 derniers jours",
+    chartHelp: "Pointez un jour, ou utilisez les flèches du clavier, pour lire ses chiffres.",
+    tooltipActive: {
+      one: "{count} personne active",
+      other: "{count} personnes actives",
+    },
+    tooltipNew: {
+      one: "dont {count} nouvelle",
+      other: "dont {count} nouvelles",
+    },
+    others: "Autres",
+    total: "au total",
     dayLine: {
       one: "{day} : {count} personne active, {firstEver} nouvelle",
       other: "{day} : {count} personnes actives, {firstEver} nouvelles",
