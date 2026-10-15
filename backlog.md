@@ -1,5 +1,4 @@
-| undefined | AST-28 ✅ (15/10 : compteurs du mois durables (fichier ou base) au lieu de la mémoire, remise à zéro à chaque redémarrage corrigée ; chiffres tirés de chaque réponse de l’API Claude) # backlog.md — Bic Gouv SN
-| undefined | PART-10 ✅ (15/10 : icône de messages dans l’en-tête avec le nombre de non lus) | undefined | DEM-20 ✅ (15/10 : thèmes cliquables, démarches d’un thème avec « Modifier ») | undefined | SRV-10 ✅ (15/10 : validés par défaut sauf noms d’entreprises ; catégories cliquables puis services avec « Corriger » ; la détection des noms d’entreprises comprend désormais les accents) | undefined | TRAD-02 ✅ (15/10 : onglet de relecture retiré avec sa route et son code ; mention « Traduction automatique » gardée dans l’app) | undefined | ADM-20 ✅ (15/10 : menu de la console à défilement indépendant) # backlog.md — Bic Gouv SN
+# backlog.md — Bic Gouv SN
 
 Source de vérité unique de l'avancement. Mis à jour en temps réel. Aucune tâche n'est supprimée, seul son état change.
 
@@ -566,3 +565,25 @@ Critère de sortie : CI verte, app vide déployable Android/iOS.
 | 14/10/2026 | DOC-02 🔴 Tableau simple des ministères : dans l’app (articles, dernière publication, source) et absents (raison, solution) | Demande de l’utilisateur (12-14/10) |
 | 15/10/2026 | SET-01 🔴 Réglages de l’app : seulement l’essentiel ; logiciels libres retirés de l’écran, remplacés par un bouton « Logiciels libres utilisés » vers une page où chaque licence se déplie (la console, réservée à l’équipe, ne peut pas servir aux citoyens) | Demande de l’utilisateur (15/10) |
 | 15/10/2026 | DOC-02 ✅ Tableau des ministères (dans l’app et absents, raison, solution) : document partagé « Ministères dans Bic Gouv SN » | Demande de l’utilisateur (14/10) |
+| 15/10/2026 | AST-28 ✅ (15/10 : compteurs du mois durables (fichier ou base) au lieu de la mémoire, remise à zéro à chaque redémarrage corrigée ; chiffres tirés de chaque réponse de l’API Claude) | Demande de l’utilisateur (14/10) |
+| 15/10/2026 | PART-10 ✅ (15/10 : icône de messages dans l’en-tête avec le nombre de non lus) | Demande de l’utilisateur (14/10) |
+| 15/10/2026 | DEM-20 ✅ (15/10 : thèmes cliquables, démarches d’un thème avec « Modifier ») | Demande de l’utilisateur (14/10) |
+| 15/10/2026 | SRV-10 ✅ (15/10 : validés par défaut sauf noms d’entreprises ; catégories cliquables puis services avec « Corriger » ; la détection des noms d’entreprises comprend désormais les accents) | Demande de l’utilisateur (14/10) |
+| 15/10/2026 | TRAD-02 ✅ (15/10 : onglet de relecture retiré avec sa route et son code ; mention « Traduction automatique » gardée dans l’app) | Demande de l’utilisateur (14/10) |
+| 15/10/2026 | ADM-20 ✅ (15/10 : menu de la console à défilement indépendant) | Demande de l’utilisateur (14/10) |
+| 15/10/2026 | AUD-01 ✅ (PR #330) Lecture qui continue hors de l’article : barre épinglée en haut de l’écran (titre, pause, fermeture), comme WhatsApp | Demande de l’utilisateur (14/10) |
+| 15/10/2026 | UX-10 ✅ (PR #330) Cercle de progression autour de « Revenir en haut » et du bouton Pause/Lecture des articles | Demande de l’utilisateur (14/10) |
+| 15/10/2026 | UX-11 ✅ (PR #330) Bouton Pause/Lecture du carrousel « À la une » retiré | Demande de l’utilisateur (14/10) |
+| 15/10/2026 | MAP-20 ✅ (PR #330) Listes horizontales de services de la carte défilables sur Android | Demande de l’utilisateur (14/10) |
+| 15/10/2026 | SET-01 ✅ (PR #334) Réglages réduits à l’essentiel ; « Logiciels et licences » sur une page à part, chaque logiciel dépliable | Demande de l’utilisateur (14/10) |
+| 15/10/2026 | RESP-01 ✅ (PR #335) Une seule largeur de colonne pour tous les onglets (Démarches, Participer, Assistant alignés) | Demande de l’utilisateur (14/10) |
+| 15/10/2026 | RESP-02 ✅ (PR #335) Paysage et grands écrans : accueil en pleine largeur, volet de l’article (ou de la démarche) seulement au toucher, bouton rond qui le referme en glissant vers la droite | Demande de l’utilisateur (14/10) |
+| 15/10/2026 | PUSH-10 ✅ (PR #336) Console : message écrit (titre, texte, photo facultative) avec aperçu téléphone, vérifié par une seconde personne, envoyé à tous les abonnés hors heures calmes | Demande de l’utilisateur (14/10) |
+| 15/10/2026 | USE-10 ✅ (PR #337) Console : courbe interactive des 30 derniers jours (personnes actives ou nouvelles, semaine comparée à la précédente), anneaux des téléphones et versions, classements d’articles en barres | Demande de l’utilisateur (14/10) |
+| 15/10/2026 | GOV-17 ✅ (PR #338) Vidéos hébergées par les sites officiels (MP4) gardées à l’ingestion ; aperçu 16:9 avec bouton lecture, vidéo ouverte dans un onglet intégré à l’app | Demande de l’utilisateur (14/10) |
+| 15/10/2026 | OPP-10 ✅ (PR #339) Opportunités alimentées depuis les annonces des sites officiels (appels, concours, recrutements, bourses, appels d’offres), une fois par lien, date limite seulement si écrite ; volume limité par les sources (4 annonces depuis juillet), grands portails bloqués | Demande de l’utilisateur (14/10) |
+| 15/10/2026 | AST-27 ✅ (PR #340) Assistant : annuaire officiel du Gouvernement (Primature, 15/10) ; « dernières activités du ministère de la Communication » ramène les communiqués du Conseil des ministres qui citent son ministre | Demande de l’utilisateur (14/10) |
+| 15/10/2026 | UX-02 🔵 Fondu clair ↔ sombre refait : capture de l’écran puis fondu enchaîné (le voile uni ne se voyait pas) ; demande la compilation Android du 15/10 | Demande de l’utilisateur (14/10) |
+| 15/10/2026 | CLEAN-01 🔵 Code mort et dépendances inutilisées retirés (vérifiés un par un) ; suppression des essais de voix du serveur (≈ 6 Go) en attente de votre accord ; copies de travail anciennes à retirer | Demande de l’utilisateur (14/10) |
+| 15/10/2026 | FILT-01 🔵 Trois maquettes du panneau « Filtrer » à choisir (feuille à puces, une question à la fois, tableau visuel) | Demande de l’utilisateur (14/10) |
+| 15/10/2026 | PERF-10 ⏸ Fluidité : besoin de précisions (écran, moment, téléphone) pour la fermeture brutale signalée ; la dépendance manquante qui pouvait faire planter (expo-asset) est corrigée depuis la compilation du 15/10 | Demande de l’utilisateur (14/10) |

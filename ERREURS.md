@@ -391,3 +391,19 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Prévention** :
   - test « garde ses comptes après un redémarrage » ;
   - règle : toute donnée qui compte (plafond, coût, statistique) est enregistrée durablement ; la mémoire ne sert qu'à ce qu'on peut perdre sans conséquence (une limite de débit, un cache).
+
+## 15/10/2026 — Mise à jour à distance construite avec les modifications d'une autre branche
+
+- **Ce qui s'est passé** : la mise à jour à distance du mode paysage (#335) a été construite depuis une copie de travail où les notifications personnalisées étaient en cours d'écriture. Le script de publication y avait placé `main` sans vérifier que la copie était propre ; Expo l'a signalé (commit marqué `*`). Les fichiers modifiés n'étaient lus que par l'API et la console : l'app publiée se comportait comme `main`.
+- **Cause racine** : le script de publication réutilisait une copie de travail de développement (`/c/bic-gouv-sn-vf`), et `git checkout --detach` emporte les modifications non validées au lieu de refuser.
+- **Correctif** : mise à jour republiée depuis une copie dédiée et propre (groupe `e882f57c`). Le script publie désormais uniquement depuis `/c/bic-gouv-sn-ota`, et refuse de publier si cette copie n'est pas propre, avant comme après l'installation des paquets.
+- **Prévention** :
+  - règle : une copie de travail sert à une seule chose ; on ne construit jamais une version à publier dans une copie où l'on développe ;
+  - vérifier `git status --porcelain` vide avant toute construction destinée à être publiée.
+
+## 15/10/2026 — En-tête du backlog abîmé par un script de mise à jour
+
+- **Ce qui s'est passé** : relevé en relisant `backlog.md` avant de le mettre à jour. Six entrées du 15/10 (AST-28, PART-10, DEM-20, SRV-10, TRAD-02, ADM-20) avaient été écrites **avant** le titre du fichier, avec la date « undefined », sur deux lignes.
+- **Cause racine** : le script de mise à jour cherchait la ligne de chaque tâche pour y ajouter son nouvel état ; ne la trouvant pas, il a écrit l'entrée en tête avec une date lue sur une ligne inexistante, sans s'arrêter.
+- **Correctif** : titre rétabli, chaque entrée réécrite comme une ligne datée en fin de tableau, comme les autres mises à jour.
+- **Prévention** : un script qui modifie un fichier de suivi s'arrête net (`throw`) quand il ne trouve pas ce qu'il cherche, et ajoute toujours en fin de tableau des lignes complètes ; relire le haut et la fin du fichier avant de valider.

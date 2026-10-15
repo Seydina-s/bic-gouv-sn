@@ -1,6 +1,17 @@
 # STATUS — Bic Gouv SN
 
-**Dernière mise à jour** : 12/10/2026 (matin) · **Mode** : autonome jusqu'au 12/10 à 14 h (demande de l'utilisateur), puis standard. Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md`.
+**Dernière mise à jour** : 15/10/2026 (après-midi) · **Mode** : autonome prolongé (demande de l'utilisateur du 14/10). Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md` (points 47 à 53).
+
+## 14 et 15/10 en bref : vos demandes livrées une à une
+- **Android** : nouvelle version installable (modules natifs : mises à jour à distance, navigateur intégré, capture d'écran) ; depuis, chaque amélioration arrive seule par mise à jour à distance (Réglages, paysage, vidéos…).
+- **App** : lecture qui continue dans une barre en haut (comme WhatsApp), cercles de progression, carrousel sans bouton pause, listes de la carte défilables sur Android, Réglages allégés avec une page « Logiciels et licences », accueil en pleine largeur en paysage avec un volet refermable, vidéos officielles en aperçu et lues dans l'app. Le fondu clair ↔ sombre est refait (capture de l'écran puis fondu) : en fusion.
+- **Console** : menu à défilement indépendant, Usage en tête avec des graphiques interactifs, icône des messages non lus, services de l'État validés d'office (866) et classés par catégorie, démarches par thème, relecture des traductions retirée, notifications écrites avec photo (deux personnes), compteur de l'assistant fidèle à la consommation réelle.
+- **Opportunités** : alimentées toutes seules par les annonces des 22 sites officiels ; peu nombreuses tant que les grands portails restent bloqués.
+- **Assistant** : annuaire officiel du Gouvernement ; « dernières activités du ministère de la Communication » trouve les communiqués qui citent son ministre.
+- **Nettoyage** : code mort et dépendances inutiles retirés ; essais de voix du serveur à supprimer avec votre accord (point 47).
+- **Incidents corrigés** : une mise à jour construite depuis une copie de travail (republiée proprement, script verrouillé) ; l'en-tête du backlog abîmé par un script (réparé). Voir ERREURS.md.
+- **À choisir** : le panneau « Filtrer » (trois maquettes, point 48).
+- **Alerte disque** : plein cette nuit, rattrapage des voix arrêté ; 9,6 Go libres après nettoyage du cache npm (point 54). Voix et PDF de la Santé relancés.
 
 ## Nuit du 11 au 12/10 (mode autonome) en bref : tous les ministères lisibles, deux défauts graves corrigés
 - **Ministères** : 19 ministères collectés sur 26 (plus la Présidence et la Primature), 21 sites suivis en temps réel. Les 7 autres n'ont pas de site lisible (certificat invalide, mot de passe, site figé avant le gouvernement actuel, aucun site) ou attendent une décision (Finances, point 43).
