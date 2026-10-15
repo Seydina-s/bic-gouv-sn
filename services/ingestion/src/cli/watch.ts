@@ -13,6 +13,7 @@ import { errorCodeOf, INSTITUTION_SITES, INSTITUTIONS } from "@bgs/shared-types"
 import { acquireLock } from "../lib/single-instance";
 import { openStores } from "../lib/stores";
 import { isSitesReviewDue, reviewSites, SITES_TO_REVIEW } from "../review/sites-review";
+import { collectEntreprendre, createDerSource } from "../sources/der/der-collector";
 import { FileMediaStorage } from "../media/media-storage";
 import { createPresidenceProvider } from "../sources/presidence/presidence-provider";
 import { NEWS_SOURCES } from "../sources/news-sources";
@@ -178,6 +179,33 @@ async function reviewSitesIfDue() {
   }
 }
 
+// The "Entreprendre" space (der.sn), read again every 6 hours (DER-01).
+const ENTREPRENDRE_EVERY_MS = 6 * 60 * 60 * 1000;
+const entreprendre = document("entreprendre");
+const derSource = createDerSource();
+let lastEntreprendreAt: Date | null = null;
+async function collectEntreprendreIfDue() {
+  const now = new Date();
+  if (
+    lastEntreprendreAt !== null &&
+    now.getTime() - lastEntreprendreAt.getTime() < ENTREPRENDRE_EVERY_MS
+  ) {
+    return;
+  }
+  lastEntreprendreAt = now;
+  try {
+    const report = await collectEntreprendre(entreprendre, derSource);
+    process.stdout.write(
+      `${now.toISOString()} entreprendre · changed ${String(report.created.length + report.updated.length)} · kept ${report.kept.map(({ slug, reason }) => `${slug} (${reason})`).join(", ") || "none"}
+`,
+    );
+  } catch (error) {
+    // Tried again 6 hours later; the collection itself is not affected.
+    process.stdout.write(`${now.toISOString()} ✗ entreprendre: ${String(error)}
+`);
+  }
+}
+
 async function checkWithdrawalsIfDue() {
   const now = new Date();
   if (!isWithdrawalCheckDue(now, lastWithdrawalCheckAt)) {
@@ -220,6 +248,7 @@ while (control.running) {
     }
     await checkWithdrawalsIfDue();
     await reviewSitesIfDue();
+    await collectEntreprendreIfDue();
   } catch (error) {
     delay = await report({ error: { code: errorCodeOf(error) ?? "UNKNOWN" } }, lastChangeAt);
     process.stdout.write(

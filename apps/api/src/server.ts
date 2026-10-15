@@ -48,6 +48,10 @@ const app = await buildApp({
     database === null
       ? fileDocument(config.SITES_REVIEW_PATH)
       : postgresDocument(database, "sites-review"),
+  entreprendre:
+    database === null
+      ? fileDocument(config.ENTREPRENDRE_PATH)
+      : postgresDocument(database, "entreprendre"),
   assistantCounters:
     database === null
       ? fileDocument(config.ASSISTANT_COUNTERS_PATH)
