@@ -54,3 +54,22 @@ describe("the refreshed knowledge", () => {
     expect(await source.read()).toBe(base);
   });
 });
+
+describe("a base that follows the sources", () => {
+  it("answers from the new sources as soon as an article arrives, without waiting", async () => {
+    let stamp = "1:a:1";
+    const bases = [knowledge(), knowledge()];
+    let built = 0;
+    const source = new RefreshedKnowledge({
+      build: () => Promise.resolve(bases[built++] ?? knowledge()),
+      stamp: () => Promise.resolve(stamp),
+      now: () => 0,
+    });
+    expect(await source.read()).toBe(bases[0]);
+    expect(await source.read()).toBe(bases[0]);
+    // An article lands: the next question already sees it.
+    stamp = "2:b:1";
+    expect(await source.read()).toBe(bases[1]);
+    expect(built).toBe(2);
+  });
+});
