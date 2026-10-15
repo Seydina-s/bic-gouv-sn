@@ -54,7 +54,7 @@ const APP_SCREENS: readonly Screen[] = [
   // Not yet available: the screen's heading, then "Bientôt disponible".
   ["/assistant", { heading: "Assistant IA" }],
   ["/participate", { heading: "Participer" }],
-  ["/licences", { heading: "Logiciels libres" }],
+  ["/licences", { heading: "Logiciels et licences" }],
   ["/opportunities", { text: "Opportunité fictive pour les tests" }],
   [`/opportunity/${OPPORTUNITY_ID}`, { text: "Voir l'offre officielle" }],
 ];
