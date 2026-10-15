@@ -1,7 +1,9 @@
-import type { ArticleRepository } from "@bgs/content-store";
+import type { ArticleRepository, JsonDocument } from "@bgs/content-store";
 import { createTranslator, fr } from "@bgs/i18n";
 import {
+  entreprendreDocumentSchema,
   isOfficialOpportunityUrl,
+  type EntreprendreNews,
   publishedTranslation,
   type NewsArticle,
   type OpportunityDraft,
@@ -100,35 +102,80 @@ function dayBefore(now: Date, days: number): string {
  */
 export function opportunityFromArticle(article: NewsArticle, now: Date): OpportunityDraft | null {
   const translation = publishedTranslation(article, "fr");
-  const published = article.sourcePublishedOn;
-  if (translation === undefined || published === null || published < dayBefore(now, COLLECT_DAYS)) {
-    return null;
-  }
-  const title = translation.title.normalize("NFKC").trim();
-  const kind = opportunityKindOf(title);
-  if (kind === null || !isOfficialOpportunityUrl(article.sourceUrl)) {
+  if (translation === undefined) {
     return null;
   }
   const blocks = htmlToBlocks(translation.bodyHtml);
-  const summary = excerptOf(blocks, SUMMARY_LENGTH);
-  const deadline = deadlineIn(excerptOf(blocks, Number.MAX_SAFE_INTEGER));
+  return announcedOpportunity(
+    {
+      title: translation.title,
+      summary: excerptOf(blocks, SUMMARY_LENGTH),
+      text: excerptOf(blocks, Number.MAX_SAFE_INTEGER),
+      publishedOn: article.sourcePublishedOn,
+      url: article.sourceUrl,
+      organization: t(`institutions.${article.publisher}`),
+    },
+    now,
+  );
+}
+
+/** The opportunity a news item of der.sn announces (DER-01), from its title and first words. */
+export function opportunityFromDerNews(news: EntreprendreNews, now: Date): OpportunityDraft | null {
+  return announcedOpportunity(
+    {
+      title: news.title,
+      summary: news.excerpt,
+      text: news.excerpt,
+      publishedOn: news.publishedOn,
+      url: news.sourceUrl,
+      organization: t("opportunities.derOrganization"),
+    },
+    now,
+  );
+}
+
+interface Announcement {
+  title: string;
+  /** Its first words, shown as they are. */
+  summary: string;
+  /** All the words read, where the closing date is looked for. */
+  text: string;
+  publishedOn: string | null;
+  url: string;
+  organization: string;
+}
+
+/** The common rules: an announcement clearly titled, recent, official, not closed. */
+function announcedOpportunity(announcement: Announcement, now: Date): OpportunityDraft | null {
+  const { publishedOn, url } = announcement;
+  if (publishedOn === null || publishedOn < dayBefore(now, COLLECT_DAYS)) {
+    return null;
+  }
+  const title = announcement.title.normalize("NFKC").trim();
+  const kind = opportunityKindOf(title);
+  if (kind === null || !isOfficialOpportunityUrl(url)) {
+    return null;
+  }
+  const deadline = deadlineIn(announcement.text);
   const today = now.toISOString().slice(0, 10);
-  const open = deadline === null ? published >= dayBefore(now, UNDATED_DAYS) : deadline >= today;
+  const open = deadline === null ? publishedOn >= dayBefore(now, UNDATED_DAYS) : deadline >= today;
   if (!open) {
     return null;
   }
   return {
     kind,
     title: title.slice(0, TITLE_LENGTH),
-    organization: t(`institutions.${article.publisher}`),
-    summary: summary.length >= 10 ? summary : title,
+    organization: announcement.organization,
+    summary: announcement.summary.length >= 10 ? announcement.summary : title,
     deadline,
-    officialUrl: article.sourceUrl,
+    officialUrl: url,
   };
 }
 
 export interface AutomaticOpportunitiesOptions {
   articles: ArticleRepository;
+  /** The Entreprendre space (der.sn): the DER/FJ's calls are read in its news. */
+  entreprendre?: JsonDocument;
   opportunities: OpportunityService;
   now?: () => Date;
 }
@@ -152,10 +199,11 @@ export class AutomaticOpportunities {
   async tick(): Promise<number> {
     const now = this.now();
     const { items } = await this.options.articles.list({ lang: "fr", limit: SCAN });
-    const drafts = items.flatMap((article) => {
-      const draft = opportunityFromArticle(article, now);
-      return draft === null ? [] : [draft];
-    });
+    const space = entreprendreDocumentSchema.safeParse(await this.options.entreprendre?.read());
+    const drafts = [
+      ...items.map((article) => opportunityFromArticle(article, now)),
+      ...(space.success ? space.data.news : []).map((news) => opportunityFromDerNews(news, now)),
+    ].filter((draft) => draft !== null);
     return (await this.options.opportunities.collect(drafts)).length;
   }
 

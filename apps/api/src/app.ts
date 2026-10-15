@@ -358,7 +358,7 @@ export async function buildApp({
   const opportunities = new OpportunityService(opportunityStore, admin?.journal ?? null);
   await app.register(opportunitiesRoutes, { prefix: "/v1", opportunities });
   if (automaticOpportunitiesEveryMs !== null) {
-    const collector = new AutomaticOpportunities({ articles, opportunities });
+    const collector = new AutomaticOpportunities({ articles, opportunities, entreprendre });
     app.addHook("onReady", () => {
       collector.start(automaticOpportunitiesEveryMs, (error) => {
         app.log.error({ err: error }, "Automatic opportunities failed");
