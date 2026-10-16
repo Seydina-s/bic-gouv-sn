@@ -3,10 +3,12 @@ import {
   assessIngestion,
   describeError,
   detectionObjective,
+  diskIsLow,
   type CircuitStatus,
+  type DiskSpace,
   type IngestionStatus,
 } from "@bgs/shared-types";
-import { formatClockTime, formatDuration } from "../lib/format";
+import { formatClockTime, formatDuration, formatGigabytes } from "../lib/format";
 import { t } from "../lib/i18n";
 
 const SHARE = new Intl.NumberFormat("fr-FR", { style: "percent", maximumFractionDigits: 0 });
@@ -67,7 +69,30 @@ export function IngestionPanel({ report, now }: { report: IngestionStatus | null
           </ul>
         </section>
       )}
+      {report?.disk !== undefined && <DiskLine disk={report.disk} />}
     </div>
+  );
+}
+
+/** The server's free space; red when almost full (a full disk once stopped the voices). */
+function DiskLine({ disk }: { disk: DiskSpace }) {
+  const low = diskIsLow(disk);
+  const values = { free: formatGigabytes(disk.freeBytes), total: formatGigabytes(disk.totalBytes) };
+  return (
+    <section
+      aria-labelledby="disk-title"
+      className={low ? "rounded-lg bg-danger-surface p-4 text-on-danger-surface" : "px-1"}
+    >
+      <h3 id="disk-title" className="text-sm font-bold">
+        {t("ingestion.disk.title")}
+      </h3>
+      <p
+        className={low ? "mt-1 text-base" : "mt-1 text-sm text-ink-soft"}
+        role={low ? "alert" : undefined}
+      >
+        {t(low ? "ingestion.disk.low" : "ingestion.disk.ok", values)}
+      </p>
+    </section>
   );
 }
 

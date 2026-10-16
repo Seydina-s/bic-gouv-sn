@@ -12,6 +12,7 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "../i18n/useTranslation";
 import { useReduceMotion } from "../theme/useSystemAccessibility";
+import { InvertedTheme } from "../theme/InvertedTheme";
 import { useTheme } from "../theme/useTheme";
 import { GlassBackdrop } from "./GlassBackdrop";
 
@@ -80,12 +81,26 @@ function useSlidingIndicator(index: number, slot: number) {
   }));
 }
 
+/** The tab whose panel runs under the bar: there the bar takes the opposite mode. */
+const UNDER_THE_BAR = "near-me";
+
 /**
  * Floating frosted-glass tab bar: content scrolls visibly beneath it, the active
  * section wears a soft green indicator and a filled icon, and every icon keeps its
- * label (CLAUDE.md: never an icon alone in the navigation).
+ * label (CLAUDE.md: never an icon alone in the navigation). On "Près de moi", whose
+ * panel reaches the bottom of the screen under the bar, the bar is drawn in the
+ * opposite mode, so that the two never blend (owner's request, 15/10/2026).
  */
-export function GlassTabBar({ state, descriptors, navigation }: TabBarProps) {
+export function GlassTabBar(props: TabBarProps) {
+  const onMap = props.state.routes[props.state.index]?.name === UNDER_THE_BAR;
+  return (
+    <InvertedTheme when={onMap}>
+      <TabBarBody {...props} />
+    </InvertedTheme>
+  );
+}
+
+function TabBarBody({ state, descriptors, navigation }: TabBarProps) {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();

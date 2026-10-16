@@ -25,6 +25,32 @@ export function articleIdOfResponse(response: unknown): string | null {
   );
 }
 
+/** The notification behind a response, to open each one once. */
+export function responseKey(response: unknown): string | null {
+  const identifier = field(field(field(response, "notification"), "request"), "identifier");
+  return typeof identifier === "string" ? identifier : null;
+}
+
+/**
+ * Responses already opened in this session: a cold start delivers the same one both
+ * as the last response and to the listener, and the hook may mount again; each
+ * opened the article once more on top of itself (audit of 15/10/2026).
+ */
+const opened = new Set<string>();
+
+/** True the first time a response is seen; false for the same one again. */
+export function firstTimeFor(response: unknown): boolean {
+  const key = responseKey(response);
+  if (key === null) {
+    return true;
+  }
+  if (opened.has(key)) {
+    return false;
+  }
+  opened.add(key);
+  return true;
+}
+
 /**
  * Touching a notification opens its article, whether the app was closed or not.
  * One received while the app is open shows as a quiet banner (no sound).
@@ -46,7 +72,7 @@ export function useNotificationTaps(): void {
     });
     const open = (response: unknown) => {
       const id = articleIdOfResponse(response);
-      if (id !== null) {
+      if (id !== null && firstTimeFor(response)) {
         router.push({ pathname: "/article/[id]", params: { id } });
       }
     };

@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   assessIngestion,
   detectionObjective,
+  DISK_LOW_BYTES,
+  diskIsLow,
   ingestionStatusSchema,
   type IngestionStatus,
 } from "./ingestion-status.schema";
@@ -88,5 +90,16 @@ describe("the < 2 minutes objective", () => {
     expect(
       detectionObjective(status({ detections: [{ at: at(45), seconds: 30 }] }), NOW),
     ).toBeNull();
+  });
+});
+
+describe("the disk space", () => {
+  it("is low below 5 GB free, and older reports without it still read", () => {
+    expect(diskIsLow({ freeBytes: DISK_LOW_BYTES - 1, totalBytes: 255 * 1024 ** 3 })).toBe(true);
+    expect(diskIsLow({ freeBytes: DISK_LOW_BYTES, totalBytes: 255 * 1024 ** 3 })).toBe(false);
+    expect(ingestionStatusSchema.safeParse(status()).success).toBe(true);
+    expect(
+      ingestionStatusSchema.safeParse(status({ disk: { freeBytes: 1, totalBytes: 0 } })).success,
+    ).toBe(false);
   });
 });

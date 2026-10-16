@@ -70,15 +70,25 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     at: VoicePosition;
   } | null>(null);
 
-  const silence = useCallback(() => {
+  /**
+   * Silences whatever is heard, at once (owner's report, 15/10/2026: two articles
+   * were heard together). A recording is paused before it is released: released
+   * alone, Android's background playback could go on. Resolves once the phone's
+   * voice has really stopped, so that a new reading never overlaps it.
+   */
+  const silence = useCallback((): Promise<void> => {
     run.current += 1;
-    void Speech.stop();
-    recording.current?.remove();
+    const heardNow = recording.current;
     recording.current = null;
+    if (heardNow !== null) {
+      heardNow.pause();
+      heardNow.remove();
+    }
+    return Speech.stop().catch(() => undefined);
   }, []);
 
   const finish = useCallback(() => {
-    silence();
+    void silence();
     voice.current = null;
     setNow(null);
     setStatus("idle");
@@ -94,7 +104,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   const speakFrom = useCallback(
     (language: string, pieces: readonly string[], from: VoicePosition) => {
-      silence();
+      const stopped = silence();
       const current = run.current;
       const isCurrent = () => run.current === current;
       const speakPiece = (index: number, char: number) => {
@@ -128,18 +138,20 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         });
       };
       setStatus("playing");
-      speakPiece(from.piece, from.char);
+      void stopped.then(() => {
+        speakPiece(from.piece, from.char);
+      });
     },
     [silence, finish, heard],
   );
 
   const playRecording = useCallback(
     async (url: string) => {
-      silence();
+      const stopped = silence();
       const current = run.current;
       setStatus("playing");
       try {
-        const opened = await loadAudioPlayer().openRecording(url);
+        const [opened] = await Promise.all([loadAudioPlayer().openRecording(url), stopped]);
         if (run.current !== current) {
           opened.remove();
           return;
@@ -186,7 +198,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     } else {
       // The phone has no pause of its own on Android: stopped, resumed at the word.
       run.current += 1;
-      void Speech.stop();
+      Speech.stop().catch(() => undefined);
     }
     setStatus("paused");
   }, []);

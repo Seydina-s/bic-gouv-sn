@@ -18,6 +18,23 @@ export type CircuitStatus = z.infer<typeof circuitStatusSchema>;
  * the API for the administration console. Times and error codes only: no content,
  * no personal data.
  */
+/**
+ * Below this, the disk is said to be almost full: on 15/10/2026 it filled up at
+ * night and the voices stopped without a word (audit of silent failures).
+ */
+export const DISK_LOW_BYTES = 5 * 1024 ** 3;
+
+export const diskSpaceSchema = z.object({
+  freeBytes: z.number().nonnegative(),
+  totalBytes: z.number().positive(),
+});
+export type DiskSpace = z.infer<typeof diskSpaceSchema>;
+
+/** True when the disk holding the data is almost full. */
+export function diskIsLow(disk: DiskSpace): boolean {
+  return disk.freeBytes < DISK_LOW_BYTES;
+}
+
 export const ingestionStatusSchema = z.object({
   /** Last pass, successful or not. */
   checkedAt: isoDateTimeSchema,
@@ -44,6 +61,8 @@ export const ingestionStatusSchema = z.object({
    * visible in the console). Absent from reports written before this field.
    */
   circuits: z.array(circuitStatusSchema).optional(),
+  /** Space on the disk holding the data, measured at each pass. Absent before. */
+  disk: diskSpaceSchema.optional(),
   /**
    * Recent detection times, newest last, at most DETECTION_HISTORY (CLAUDE.md §1:
    * the "< 2 minutes" objective is measured in the console). Absent before.

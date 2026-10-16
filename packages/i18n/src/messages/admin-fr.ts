@@ -50,6 +50,11 @@ export const adminFr = {
       halfOpen:
         "{name} : reprise en cours, une demande d'essai vérifie que le site répond de nouveau.",
     },
+    disk: {
+      title: "Espace disque du serveur",
+      ok: "{free} Go libres sur {total} Go.",
+      low: "Plus que {free} Go libres sur {total} Go : le disque est presque plein. Les voix et les nouveaux articles risquent de s'arrêter. Libérez de la place dès maintenant.",
+    },
     nextAttempt:
       "La collecte ne s'arrête pas : nouvel essai automatique à {time}, puis toutes les 10 minutes au plus tant que le site ne répond pas ; tout ce qui aura été publié entre-temps sera rattrapé.",
   },

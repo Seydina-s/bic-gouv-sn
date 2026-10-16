@@ -10,6 +10,7 @@ import {
   writeSitesReview,
 } from "@bgs/content-store";
 import { errorCodeOf, INSTITUTION_SITES, INSTITUTIONS } from "@bgs/shared-types";
+import { diskSpace } from "../lib/disk-space";
 import { acquireLock } from "../lib/single-instance";
 import { openStores } from "../lib/stores";
 import { isSitesReviewDue, reviewSites, SITES_TO_REVIEW } from "../review/sites-review";
@@ -133,6 +134,8 @@ async function report(outcome: PassOutcome, lastChangeAt: Date | null): Promise<
     ...next,
     nextAttemptAt: new Date(now.getTime() + delay).toISOString(),
     circuits: circuitStatuses(sources.flatMap((source) => source.provider.circuits?.() ?? [])),
+    // A full disk once stopped the voices without a word: the console now warns.
+    disk: await diskSpace(dirname(storePath)),
   };
   await writeIngestionStatus(statusDocument, status).catch((error: unknown) => {
     process.stdout.write(`status report not written: ${String(error)}\n`);
