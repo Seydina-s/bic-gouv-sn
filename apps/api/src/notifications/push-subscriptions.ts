@@ -104,6 +104,7 @@ export class FilePushSubscriptionStore implements PushSubscriptionStore {
       quietHours: count((item) => item.quietHours !== null),
       french: count((item) => item.lang === "fr"),
       wolof: count((item) => item.lang === "wo"),
+      english: count((item) => item.lang === "en"),
       newLastDay: count(subscribedBetween(dayStart)),
       newWeekBefore: count(subscribedBetween(weekStart, dayStart)),
     };
@@ -157,6 +158,7 @@ const summaryRowSchema = z.object({
   quiet_hours: count,
   french: count,
   wolof: count,
+  english: count,
   new_last_day: count,
   new_week_before: count,
 });
@@ -198,6 +200,7 @@ export class PostgresPushSubscriptionStore implements PushSubscriptionStore {
          count(*) FILTER (WHERE quiet_hours IS NOT NULL) AS quiet_hours,
          count(*) FILTER (WHERE lang = 'fr') AS french,
          count(*) FILTER (WHERE lang = 'wo') AS wolof,
+         count(*) FILTER (WHERE lang = 'en') AS english,
          count(*) FILTER (WHERE subscribed_at > $1) AS new_last_day,
          count(*) FILTER (WHERE subscribed_at > $2 AND subscribed_at <= $1) AS new_week_before
        FROM push_subscriptions`,
@@ -210,6 +213,7 @@ export class PostgresPushSubscriptionStore implements PushSubscriptionStore {
       quietHours: totals.quiet_hours,
       french: totals.french,
       wolof: totals.wolof,
+      english: totals.english,
       newLastDay: totals.new_last_day,
       newWeekBefore: totals.new_week_before,
     };

@@ -31,11 +31,12 @@ export const REPHRASE_TIMEOUT_MS = 6000;
 const outputSchema = z.object({ query: z.string().trim().min(3).max(MAX_QUERY_LENGTH) });
 
 /**
- * Whether the question needs rephrasing: always in Wolof (the French pages hold the
- * procedures), in French when a word is found in no passage even with one slip.
+ * Whether the question needs rephrasing: always outside French, in Wolof or English
+ * (the official pages are in French), in French when a word is found in no passage
+ * even with one slip.
  */
 export function needsRephrasing(question: string, lang: Lang, index: PassageIndex): boolean {
-  return lang === "wo" || index.unknownWords(widenQuestion(question), "fr").length > 0;
+  return lang !== "fr" || index.unknownWords(widenQuestion(question), "fr").length > 0;
 }
 
 export interface Rephrased {

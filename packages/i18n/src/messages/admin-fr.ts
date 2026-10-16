@@ -510,7 +510,7 @@ export const adminFr = {
       other: "{count} téléphones abonnés aux notifications.",
     },
     subscribersDetail:
-      "Toutes les rubriques\u00a0: {everySection} · Heures calmes\u00a0: {quietHours} · Français\u00a0: {french} · Wolof\u00a0: {wolof}",
+      "Toutes les rubriques\u00a0: {everySection} · Heures calmes\u00a0: {quietHours} · Français\u00a0: {french} · Wolof\u00a0: {wolof} · Anglais\u00a0: {english}",
     subscriberGrowth:
       "{count} téléphones se sont abonnés en 24 heures, bien plus que d'habitude ({usual} par jour la semaine d'avant). Si rien ne l'explique (lancement, annonce importante), prévenez l'équipe technique\u00a0: il peut s'agir de faux abonnements.",
     subscribersNote:

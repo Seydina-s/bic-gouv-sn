@@ -102,19 +102,22 @@ describe.each(pairs)("the push subscriptions kept %s", (_name, makePair) => {
       quietHours: 0,
       french: 0,
       wolof: 0,
+      english: 0,
       newLastDay: 0,
       newWeekBefore: 0,
     });
     await store.save({ ...phone("a", ["discours"]), quietHours: { from: 22, to: 7 } });
     await store.save({ ...phone("b", []), topics: null, lang: "wo" });
     await store.save({ ...phone("c", []), topics: null });
+    await store.save({ ...phone("d", []), topics: null, lang: "en" });
     expect(await store.summary()).toEqual({
-      total: 3,
-      everySection: 2,
+      total: 4,
+      everySection: 3,
       quietHours: 1,
       french: 2,
       wolof: 1,
-      newLastDay: 3,
+      english: 1,
+      newLastDay: 4,
       newWeekBefore: 0,
     });
   });
@@ -142,6 +145,7 @@ describe("the console's totals", () => {
     quietHours: 0,
     french: 1,
     wolof: 0,
+    english: 0,
     newLastDay: 1,
     newWeekBefore: 0,
   };

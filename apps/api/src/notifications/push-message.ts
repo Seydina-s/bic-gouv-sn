@@ -1,4 +1,5 @@
 import {
+  langSchema,
   publishedTranslation,
   type Lang,
   type NewsArticle,
@@ -35,7 +36,7 @@ export interface PushMessage {
   versions: Partial<Record<Lang, PushVersion>>;
 }
 
-const LANGS: readonly Lang[] = ["fr", "wo"];
+const LANGS: readonly Lang[] = langSchema.options;
 
 /** The site of an official page, as people write it: "primature.sn". */
 export function siteOf(url: string): string {
