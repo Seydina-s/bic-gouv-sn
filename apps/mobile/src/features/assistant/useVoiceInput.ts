@@ -7,8 +7,8 @@ import { loadVoiceInput, voiceInputAvailable } from "./load-voice-input";
 export type VoiceProblem = "denied" | "unavailable" | "wolof" | "failed";
 
 /**
- * The microphone of the composer: dictates a question in French into the field,
- * live. Wolof has no phone recognizer yet: the screen says so instead of guessing.
+ * The microphone of the composer: dictates a question in French or English into the
+ * field, live. Wolof has no phone recognizer yet: the screen says so instead of guessing.
  * A reading under way is paused first, so that the two never share the sound.
  */
 export function useVoiceInput(lang: Lang, onText: (text: string) => void) {
@@ -35,21 +35,24 @@ export function useVoiceInput(lang: Lang, onText: (text: string) => void) {
     }
     setListening(true);
     try {
-      const outcome = await loadVoiceInput().listen({
-        onText: (text) => {
-          onText(text);
+      const outcome = await loadVoiceInput().listen(
+        {
+          onText: (text) => {
+            onText(text);
+          },
+          onEnd: () => {
+            setListening(false);
+          },
+          onError: (code) => {
+            setListening(false);
+            // Silence or a stop by the person are not problems.
+            if (code !== "aborted" && code !== "no-speech") {
+              setProblem("failed");
+            }
+          },
         },
-        onEnd: () => {
-          setListening(false);
-        },
-        onError: (code) => {
-          setListening(false);
-          // Silence or a stop by the person are not problems.
-          if (code !== "aborted" && code !== "no-speech") {
-            setProblem("failed");
-          }
-        },
-      });
+        lang === "en" ? "en-US" : "fr-FR",
+      );
       if (outcome !== "started") {
         setListening(false);
         setProblem(outcome);

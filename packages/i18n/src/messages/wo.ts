@@ -24,6 +24,7 @@ export const wo: PartialCatalog<FrCatalog> = {
     sourceAttribution: "Fi mu jóge: {source}",
     alsoPublishedBy: "Siiwal nañu ko it ci: {institutions}",
     machineTranslation: "Masin moo ko tekki",
+    onlyInFrench: "Ci farañse rekk la am",
     listen: "Déglu",
     pause: "Taxawal",
     resume: "Delloo",
@@ -233,6 +234,7 @@ export const wo: PartialCatalog<FrCatalog> = {
     usefulLinks: "Lëkkalekaay yu am solo",
     related: "Yoon yu ci ànd",
     goOfficial: "Def yoon wi ci e-senegal.sn",
+    onlyInFrench: "Kayit bii ci farañse rekk la am",
     nextProcedures: "Yoon yi topp",
     nearest: {
       mairie: "Wut meeri bi gën a jege",
@@ -347,6 +349,7 @@ export const wo: PartialCatalog<FrCatalog> = {
     languageAuto: "Ni telefon bi",
     languageFr: "Français",
     languageWo: "Wolof",
+    languageEn: "English",
     languageWoMachine: "Masin moo tekki wolof bu aplikasioŋ bi, ñu ngi koy xoolaat.",
     dataSaver: "Wàññi done yi",
     dataSaverNever: "Mukk",

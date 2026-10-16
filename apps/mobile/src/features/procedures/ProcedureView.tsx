@@ -1,3 +1,4 @@
+import { createTranslator, fr, type FrCatalog, type Translate } from "@bgs/i18n";
 import type { ProcedureDetail, ServiceCategory } from "@bgs/shared-types";
 import { CaretRightIcon as CaretRight } from "phosphor-react-native/src/icons/CaretRight";
 import { MapPinIcon as MapPin } from "phosphor-react-native/src/icons/MapPin";
@@ -15,9 +16,9 @@ import { FloatingListenButton, useListenScroll } from "../news/FloatingListenBut
 import { FRENCH_VOICE, ListenPill, useListening } from "../news/ListenButton";
 import { FloatingAppBar } from "../shell/FloatingAppBar";
 import { ProcedureActionBar } from "./ProcedureActionBar";
-import { ProcedureBrief, useBriefLabels } from "./ProcedureBrief";
+import { briefLabelsOf, ProcedureBrief } from "./ProcedureBrief";
 import { ProcedureExtras } from "./ProcedureExtras";
-import { useFeeWording } from "./ProcedureFacts";
+import { feeWordingOf } from "./ProcedureFacts";
 import { procedurePage, type PageWords } from "./procedure-page";
 import { whereToGo, type LinkedKind } from "./service-link";
 import { SheetItems, SheetSectionView } from "./SheetContent";
@@ -25,21 +26,30 @@ import { spokenProcedure } from "./spoken-procedure";
 
 const SOURCE = "e-senegal.sn";
 
+/** The page's own words in the language of `t`. */
+function pageWordsOf(t: Translate<FrCatalog>): PageWords {
+  return {
+    eligibility: t("procedures.eligibility"),
+    documents: t("procedures.documents"),
+    fee: feeWordingOf(t),
+    delay: (days: number) => t("procedures.delayDays", { count: days }),
+    pieces: (count: number) => t("procedures.documentsCount", { count }),
+    online: t("procedures.onlinePossible"),
+  };
+}
+
 function usePageWords(): PageWords {
   const { t } = useTranslation();
-  const fee = useFeeWording();
-  return useMemo(
-    () => ({
-      eligibility: t("procedures.eligibility"),
-      documents: t("procedures.documents"),
-      fee,
-      delay: (days: number) => t("procedures.delayDays", { count: days }),
-      pieces: (count: number) => t("procedures.documentsCount", { count }),
-      online: t("procedures.onlinePossible"),
-    }),
-    [t, fee],
-  );
+  return useMemo(() => pageWordsOf(t), [t]);
 }
+
+/**
+ * Procedures are in French and read by the French voice: what is read aloud around
+ * them stays French whatever the interface's language (16/10/2026).
+ */
+const FRENCH = createTranslator({ lang: "fr", reference: fr, catalog: fr });
+const FRENCH_WORDS = pageWordsOf(FRENCH);
+const FRENCH_LABELS = briefLabelsOf(FRENCH);
 
 export interface ProcedureViewProps {
   detail: ProcedureDetail | undefined;
@@ -113,9 +123,8 @@ function ProcedureSheetView({
   services: ProcedureViewProps["services"];
 }) {
   const { theme } = useTheme();
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
   const words = usePageWords();
-  const labels = useBriefLabels();
   const page = useMemo(() => procedurePage(detail, words), [detail, words]);
   // The first sections come with the screen, the others on the next frame.
   const shownSections = useProgressive(page.sections.length, FIRST_SECTIONS);
@@ -137,11 +146,11 @@ function ProcedureSheetView({
     pieces: () =>
       spokenProcedure(
         detail.title,
-        page,
+        procedurePage(detail, FRENCH_WORDS),
         {
-          brief: t("procedures.brief"),
-          fact: (fact) => `${labels[fact.kind]} : ${fact.value}`,
-          note: t("procedures.note"),
+          brief: FRENCH("procedures.brief"),
+          fact: (fact) => `${FRENCH_LABELS[fact.kind]} : ${fact.value}`,
+          note: FRENCH("procedures.note"),
         },
         Speech.maxSpeechInputLength,
       ),
@@ -178,6 +187,11 @@ function ProcedureSheetView({
         {page.lead !== null && (
           <Text style={[textStyle.body, { color: color.textSecondary, marginTop: space.sm }]}>
             <Runs inlines={page.lead} />
+          </Text>
+        )}
+        {lang !== "fr" && (
+          <Text style={[textStyle.bodySmall, { color: color.textTertiary, marginTop: space.xs }]}>
+            {t("procedures.onlyInFrench")}
           </Text>
         )}
         {detail.translationStatus === "machine" && (

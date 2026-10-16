@@ -13,6 +13,10 @@ jest.mock("@react-native-async-storage/async-storage", () =>
   jest.requireActual<object>("@react-native-async-storage/async-storage/jest/async-storage-mock"),
 );
 
+// The phone speaks French in tests (the simulator's default is English, which the
+// app now follows): a test that needs another language says so itself.
+jest.mock("expo-localization", () => ({ getLocales: () => [{ languageTag: "fr-SN" }] }));
+
 // The network is Wi-Fi in tests: the data saver's "mobile only" choice stays off
 // (its rule is tested on its own, see data-saver.test.ts).
 jest.mock("expo-network", () => {

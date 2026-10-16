@@ -1,7 +1,7 @@
 import { ExpoSpeechRecognitionModule } from "expo-speech-recognition";
 
 /**
- * Dictation of a question (French), by the phone's own speech recognition. Only
+ * Dictation of a question (French or English), by the phone's own speech recognition. Only
  * required through load-voice-input.ts: builds made before it was added do not have
  * its native module. Recognition stays on the phone when the phone can do it; the
  * app never keeps the voice.
@@ -25,7 +25,13 @@ function release(): void {
   subscriptions = [];
 }
 
-export async function listen(handlers: ListenHandlers): Promise<ListenOutcome> {
+/** The phone's recognition language: US English or French (no Wolof recognition yet). */
+export type ListenLocale = "fr-FR" | "en-US";
+
+export async function listen(
+  handlers: ListenHandlers,
+  locale: ListenLocale,
+): Promise<ListenOutcome> {
   const permission = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
   if (!permission.granted) {
     return "denied";
@@ -48,7 +54,7 @@ export async function listen(handlers: ListenHandlers): Promise<ListenOutcome> {
     }),
   ];
   ExpoSpeechRecognitionModule.start({
-    lang: "fr-FR",
+    lang: locale,
     interimResults: true,
     addsPunctuation: true,
     continuous: false,

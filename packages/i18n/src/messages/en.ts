@@ -22,6 +22,7 @@ export const en: PartialCatalog<FrCatalog> = {
     sourceAttribution: "Source: {source}",
     alsoPublishedBy: "Also published by: {institutions}",
     machineTranslation: "Machine translation",
+    onlyInFrench: "Only available in French",
     listen: "Listen",
     pause: "Pause",
     resume: "Resume",
@@ -240,6 +241,7 @@ export const en: PartialCatalog<FrCatalog> = {
     usefulLinks: "Useful links",
     related: "Related procedures",
     goOfficial: "Apply on e-senegal.sn",
+    onlyInFrench: "This page is only available in French",
     nextProcedures: "Next procedures",
     nearest: {
       mairie: "Find the nearest town hall",
@@ -356,6 +358,7 @@ export const en: PartialCatalog<FrCatalog> = {
     languageAuto: "Same as the phone",
     languageFr: "Français",
     languageWo: "Wolof",
+    languageEn: "English",
     languageWoMachine: "The Wolof interface is a machine translation, awaiting review.",
     dataSaver: "Data saver",
     dataSaverNever: "Never",
