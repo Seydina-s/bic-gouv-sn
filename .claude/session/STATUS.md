@@ -1,6 +1,12 @@
 # STATUS — Bic Gouv SN
 
-**Dernière mise à jour** : 16/10/2026 (15 h, passage de session) · **Mode** : autonome prolongé (demande de l'utilisateur du 14/10). Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md` (points 47 à 56).
+**Dernière mise à jour** : 16/10/2026 (17 h) · **Mode** : autonome prolongé (demande de l'utilisateur du 14/10). Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md` (points 50, 52 à 58).
+
+## 16/10, après-midi, en bref
+- **ING-04 fusionnée (#356)** : retraits vérifiés aussi sur la Primature et 14 ministères (6 sites non vérifiables, `docs/sources.md`) ; essai réel : le discours FILDAK retiré par la Primature est trouvé, aucun faux retrait. **Déploiement à lancer par l'utilisateur** (point 57, refusé par la protection de sécurité).
+- **Phase multilingue chiffrée** (`docs/cadrage/phase-multilingue.md`) : 6 520 articles visibles, 5 824 sans wolof, aucun en anglais ; décisions attendues au point 58.
+- **Découvert** : articles de démonstration de WordPress publiés comme actualités (DATA-10), à vérifier puis écarter.
+- **Erreur consignée** : fichier effacé par `git checkout --` pendant un test de mutation (ERREURS.md, règle globale ajoutée).
 
 ## Reprise de session (préparée le 16/10/2026, 15 h)
 
@@ -25,7 +31,9 @@
 1. **IOS-10 TestFlight** : l'utilisateur doit lancer une fois la commande du point 55 (connexion Apple). Ensuite : suivre la compilation, vérifier l'envoi à App Store Connect, inviter le testeur et lui donner le lien TestFlight.
 2. **VOX-11 / VOX-12** : laisser finir le rattrapage français. Ensuite, mettre à jour le serveur des voix (alerte `protobuf`), puis lancer le rattrapage wolof (`--lang wo`).
 3. **Retours de l'utilisateur sur la version #353** : audio, panneau de la carte, barre inversée, réglages, bouton « Filtrer ».
-4. Puis reprendre le backlog : ING-04 (retraits des sites des ministères), GOV-21 (historique des sites lents), AST-25 (services de l'État dans l'assistant, une fois vérifiés).
+4. **ML-07** (16/10) : travail sans coût de la phase multilingue (anglais dans le modèle, l'API et l'app ; langue choisie appliquée à toute l'app) ; partie payante après le point 58.
+5. **DATA-10** : articles de démonstration de WordPress à vérifier puis écarter.
+6. Puis : GOV-21 (historique des sites lents), AST-25 (services de l'État dans l'assistant). ING-04 fait (#356), déploiement au point 57.
 
 **Règles apprises récemment** (détail dans ERREURS.md)
 - Lancer `pnpm e2e` en local avant d'envoyer un changement d'animation de fenêtre ou de panneau.
