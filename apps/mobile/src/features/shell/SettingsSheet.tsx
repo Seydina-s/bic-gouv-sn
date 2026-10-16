@@ -32,6 +32,7 @@ import { LinkRow } from "../../components/LinkRow";
 import { useLocation } from "../location/LocationProvider";
 import { SegmentedChoice, type Segment } from "../../components/SegmentedChoice";
 import type { LangChoice } from "../../i18n/I18nProvider";
+import { MachineTranslationNote } from "../../i18n/MachineTranslationNote";
 import { type DataSaverPreference, useDataSaver } from "../data-saver/DataSaverProvider";
 import { type UsageConsent, useUsageStats } from "../usage-stats/UsageStatsProvider";
 import type { NotificationChoice, QuietChoice } from "../notifications/notification-preferences";
@@ -216,12 +217,15 @@ export function SettingsSheet({ visible, onClose }: { visible: boolean; onClose:
               selected={preference}
               onSelect={setPreference}
             />
-            <SegmentedChoice
-              title={t("settings.language")}
-              segments={languages}
-              selected={choice}
-              onSelect={setLang}
-            />
+            <View style={{ gap: space.sm }}>
+              <SegmentedChoice
+                title={t("settings.language")}
+                segments={languages}
+                selected={choice}
+                onSelect={setLang}
+              />
+              <MachineTranslationNote />
+            </View>
             <SegmentedChoice
               title={t("settings.dataSaver")}
               segments={dataSavings}

@@ -1,21 +1,22 @@
-# Traduire l'application en wolof
+# Relire l'application en wolof
 
-Aucun texte wolof n'est écrit par l'équipe technique ni par l'IA : il est rédigé et validé par des locuteurs natifs (W-01). En attendant, l'application affiche le français.
+Depuis le 16/10/2026 (décision de l'utilisateur), l'interface existe en wolof en **traduction automatique**, signalée comme telle dans l'application (Réglages et présentation). Elle attend la relecture de locuteurs natifs (W-01).
 
-## Le fichier à remplir
+## Le fichier à relire
 
-`wolof-a-traduire.csv` contient chaque texte de l'application qui n'a pas encore de version wolof : sa clé, le texte français et une colonne « Wolof » vide. Il s'ouvre dans Excel, LibreOffice ou Google Sheets.
+`wolof-a-relire.csv` contient chaque texte de l'application : sa clé, le texte français, le wolof affiché aujourd'hui et une colonne « Correction » vide. Il s'ouvre dans Excel, LibreOffice ou Google Sheets.
 
-- Remplissez seulement la colonne « Wolof ». Ne touchez pas à la clé.
+- Lisez le wolof actuel. S'il convient, laissez « Correction » vide ; sinon, écrivez-y le bon texte. Ne touchez pas à la clé.
 - Ce qui est entre accolades, comme `{count}` ou `{source}`, doit rester tel quel : l'application y met un nombre ou un nom.
-- Une ligne marquée « pluriel » existe en deux formes (`one` pour 1, `other` pour plusieurs). Le wolof peut n'en utiliser qu'une : dans ce cas, mettez le même texte dans les deux.
+- Une ligne « nombre variable » sert pour un ou plusieurs éléments : le wolof n'en a qu'une forme.
+- Les noms officiels des ministères restent en français, faute de forme wolof officielle.
 - Gardez des phrases courtes : elles s'affichent sur des petits écrans.
 - Les lettres wolof (ë, é, à, ó, ñ, ŋ) sont prises en charge par les polices de l'application.
 
 ## Ensuite
 
-Le fichier rempli revient à l'équipe technique, qui l'intègre dans l'application. Une personne de l'équipe vérifie chaque écran en wolof avant la mise en ligne.
+Le fichier relu revient à l'équipe technique, qui intègre les corrections. Une fois tout relu, la mention « traduction automatique » de l'interface est retirée.
 
 ## Mettre le fichier à jour
 
-Après l'ajout de nouveaux textes : `pnpm i18n:wolof`. Seuls les textes encore sans wolof sont listés.
+Après l'ajout ou la correction de textes : `pnpm i18n:wolof`.

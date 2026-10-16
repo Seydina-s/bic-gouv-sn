@@ -2,6 +2,8 @@ import { fireEvent, render, screen } from "@testing-library/react-native";
 import { getLocales } from "expo-localization";
 import { Text } from "react-native";
 import { I18nProvider } from "./I18nProvider";
+import { MachineTranslationNote } from "./MachineTranslationNote";
+import { ThemeProvider } from "../theme/ThemeProvider";
 import { useTranslation } from "./useTranslation";
 
 jest.mock("expo-localization", () => ({ getLocales: jest.fn() }));
@@ -39,9 +41,29 @@ describe("I18nProvider", () => {
     expect((await renderProbe())()).toHaveTextContent("fr|Accueil");
   });
 
-  it("uses Wolof on a Wolof phone, with French fallback for untranslated strings", async () => {
+  it("uses Wolof on a Wolof phone, interface included, said to be machine-translated", async () => {
     mockDeviceLanguages("wo-SN", "fr-FR");
-    expect((await renderProbe())()).toHaveTextContent("wo|Accueil");
+    expect((await renderProbe())()).toHaveTextContent("wo|Dalal");
+    await render(
+      <ThemeProvider>
+        <I18nProvider>
+          <MachineTranslationNote />
+        </I18nProvider>
+      </ThemeProvider>,
+    );
+    expect(screen.getByText(/traduction automatique|Masin moo tekki/)).toBeOnTheScreen();
+  });
+
+  it("says nothing of machine translation in French", async () => {
+    mockDeviceLanguages("fr-SN");
+    await render(
+      <ThemeProvider>
+        <I18nProvider>
+          <MachineTranslationNote />
+        </I18nProvider>
+      </ThemeProvider>,
+    );
+    expect(screen.queryByText(/traduction automatique/)).toBeNull();
   });
 
   it("applies the language chosen by the user", async () => {
