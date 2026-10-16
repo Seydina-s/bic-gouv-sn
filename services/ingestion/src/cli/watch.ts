@@ -9,12 +9,7 @@ import {
   readSitesReview,
   writeSitesReview,
 } from "@bgs/content-store";
-import {
-  errorCodeOf,
-  INSTITUTION_SITES,
-  INSTITUTIONS,
-  type Institution,
-} from "@bgs/shared-types";
+import { errorCodeOf, INSTITUTION_SITES, INSTITUTIONS, type Institution } from "@bgs/shared-types";
 import { diskSpace } from "../lib/disk-space";
 import { acquireLock } from "../lib/single-instance";
 import { openStores } from "../lib/stores";

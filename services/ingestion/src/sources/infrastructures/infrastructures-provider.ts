@@ -233,7 +233,10 @@ export function createInfrastructuresProvider({
       recheckWith(async () => {
         const id = encodeURIComponent(lastSegmentOf(sourceUrl));
         const answer = await rows(`select=id&published=eq.true&id=eq.${id}`);
-        const found = z.array(z.object({ id: z.unknown() })).max(1).safeParse(answer.rows);
+        const found = z
+          .array(z.object({ id: z.unknown() }))
+          .max(1)
+          .safeParse(answer.rows);
         if (!found.success) {
           throw new QuarantineError(sourceUrl, "unexpected answer (site structure changed?)");
         }

@@ -192,8 +192,6 @@ export function createNumeriqueProvider({
 
     // The interface answers 404 to a removed publication, or gives its status.
     recheck: (sourceUrl) =>
-      recheckWith(
-        async () => (await publication(lastSegmentOf(sourceUrl))).status === "published",
-      ),
+      recheckWith(async () => (await publication(lastSegmentOf(sourceUrl))).status === "published"),
   };
 }

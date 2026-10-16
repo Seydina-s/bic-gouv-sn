@@ -133,6 +133,24 @@ femme.gouv.sn (WordPress, interface ouverte) : un seul vrai article (06/01/2026)
 
 Un site dont le dernier article est **antérieur au gouvernement en place** (avril 2024) n'est pas collecté : ses actualités sont celles d'un autre gouvernement, souvent d'un ministère au périmètre différent, et les afficher sous le nom du ministère actuel tromperait. Un site actif depuis, même ralenti, est collecté et suivi.
 
+### Articles retirés par les sites (ING-04, 16/10/2026)
+
+Chaque nuit (2 h – 5 h, une institution par passage), la collecte relit les articles qu'un site ne liste plus. Un article n'est masqué que si sa relecture prouve qu'il a disparu ; une panne ou une page inattendue ne masque rien. Plus de 10 retraits d'un coup sur un site : rien n'est masqué, l'anomalie est signalée (site en panne ou refait). Commande : `pnpm --filter @bgs/ingestion withdrawn --source <institution> [--dry-run]`.
+
+| Institution | Comment on relit un article | Fenêtre |
+|---|---|---|
+| Présidence | Interface du site (404, ou « non publié ») | Toute la liste |
+| Primature | Page officielle (404) | 3 pages les plus récentes |
+| Justice, Industrie-Commerce, Énergie, Hydraulique, Agriculture, Pêches, Culture, Famille, Emploi-Formation (WordPress) | Page officielle (404) | 3 pages |
+| Enseignement supérieur, Affaires étrangères, Économie | Page officielle (404) | 3 pages |
+| Numérique | Interface du site (404, ou statut non publié) | 3 pages |
+| Infrastructures | Base du site (ligne publiée ou non) | 3 pages |
+| Intérieur, Santé, Forces armées, Fonction publique | **Non vérifiés** : le site répond « trouvé » à n'importe quelle adresse | — |
+| Éducation | **Non vérifié** : une adresse inconnue répond « erreur du serveur » (500), indiscernable d'une panne | — |
+| Finances | **Non vérifié** : lu par le relais, non testé | — |
+
+Sur les sites de ministères, seuls les articles plus récents que le bas de la fenêtre sont relus : un retrait ancien n'y est pas vu (rare). Essai du 16/10/2026, en lecture seule : 1 retrait réel trouvé à la Primature (discours de la FILDAK, remplacé par un autre article), aucun faux retrait sur les 14 autres sites.
+
 ### Ministères : sites à revoir (non collectés pour l'instant)
 
 Depuis le 12/10/2026, la collecte revoit ces sites **chaque semaine, la nuit** (liste dans `services/ingestion/src/review/sites-review.ts`) : une visite de la page d'accueil, certificat vérifié comme toujours, date la plus récente visible sur la page (les dates techniques de l'en-tête et des scripts ne comptent pas). Un site dont la dernière date a moins de 120 jours est signalé dans la console (« Sites à revoir », et une alerte dans « À traiter ») : il peut alors être ajouté à la collecte. Première revue du 12/10 : Finances ne répond pas depuis le Sénégal, Urbanisme figé (22/05/2024), Microfinance et Transports au certificat invalide, Environnement fermé par mot de passe, Sports figé (12/06/2022), Mines figé (28/12/2023), Élevage ne répond pas.

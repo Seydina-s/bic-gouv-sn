@@ -119,4 +119,17 @@ describe("createInfrastructuresProvider", () => {
       }),
     ).rejects.toBeInstanceOf(QuarantineError);
   });
+
+  it("tells a withdrawn article by its database row, the pages answering everything", async () => {
+    const sourceUrl = `${INFRASTRUCTURES_SITE}/actualites/${ROW.id}`;
+    const recheck = (rows: unknown) =>
+      createInfrastructuresProvider({ fetchImpl: site(rows) as never, intervalMs: 0 }).recheck?.(
+        sourceUrl,
+        "fr",
+      );
+    expect(await recheck([{ id: ROW.id }])).toBe("still-published");
+    expect(await recheck([])).toBe("withdrawn");
+    // An answer of an unexpected shape never hides anything.
+    expect(await recheck({ message: "error" })).toBe("unconfirmed");
+  });
 });

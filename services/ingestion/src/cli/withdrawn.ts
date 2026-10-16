@@ -8,11 +8,18 @@ import { listingPagesFor, reconcileWithdrawals } from "../withdrawn";
 
 const apply = !process.argv.includes("--dry-run");
 const institution = sourceOption(process.argv);
+const provider = NEWS_SOURCES[institution]();
+if (provider.recheck === undefined) {
+  process.stdout.write(
+    `${institution}: its site answers every address as found, a withdrawal cannot be checked (docs/sources.md).\n`,
+  );
+  process.exit(1);
+}
 const { stores, close } = await openStores();
 
 try {
   const report = await reconcileWithdrawals(
-    NEWS_SOURCES[institution](),
+    provider,
     stores.articles,
     institution === "presidence" ? ["fr", "wo"] : ["fr"],
     {

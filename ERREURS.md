@@ -450,3 +450,10 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : des chemins écrits dans un script avec des séquences `\b`, `\v`, `\a` interprétées (règle globale déjà existante sur les chemins Windows, non appliquée à un ajout récent).
 - **Correctif** : chemins réparés ; aucun autre caractère de contrôle dans les fichiers suivis.
 - **Prévention** : écrire les chemins Windows avec l'outil d'édition, jamais dans une chaîne de script.
+
+## 16/10/2026 — Fichier en cours effacé pendant un test de mutation
+
+- **Ce qui s'est passé** : pour annuler une mutation volontaire de `services/ingestion/src/withdrawn.ts`, j'ai lancé `git checkout -- src/withdrawn.ts` ; le fichier, réécrit mais pas encore commité, est revenu à sa version de `main`. Repéré aussitôt (le code attendu manquait), réécrit à l'identique, tests verts.
+- **Cause racine** : `git checkout -- <fichier>` remet la version du dernier commit, pas celle d'avant la mutation.
+- **Correctif** : fichier réécrit, commit d'étape local avant de poursuivre.
+- **Prévention** : règle globale « test de mutation sur un fichier non commité ».
