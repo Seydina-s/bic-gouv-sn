@@ -1,5 +1,6 @@
 import { officialMediaUrl } from "@bgs/shared-types";
 import { createPoliteHttp } from "../../lib/polite-http";
+import { recheckPage } from "../../lib/recheck";
 import type { SourceProvider } from "../source-provider";
 import { normalizePrimature, primatureArticleId, primatureArticleUrl } from "./normalize";
 import { NEWS_PATH, PRIMATURE_ORIGIN, parseArticlePage, parseListingPage } from "./parse";
@@ -63,5 +64,8 @@ export function createPrimatureProvider({
         fetchedAt: now().toISOString(),
       });
     },
+
+    // The site answers 404 to an article it removed (16/10/2026: the FILDAK speech).
+    recheck: (sourceUrl) => recheckPage(http, sourceUrl),
   };
 }

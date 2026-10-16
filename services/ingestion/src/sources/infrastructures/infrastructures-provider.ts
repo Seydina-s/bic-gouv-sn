@@ -3,6 +3,7 @@ import { z } from "zod";
 import { QuarantineError } from "../../lib/errors";
 import { stableUuid } from "../../lib/identity";
 import { createPoliteHttp } from "../../lib/polite-http";
+import { lastSegmentOf, recheckWith } from "../../lib/recheck";
 import { plainLetters, sanitizeNested, unpublishable } from "../../lib/sanitize";
 import { articleContentHash } from "../../merge";
 import type { SourceArticleRef, SourceProvider } from "../source-provider";
@@ -226,5 +227,20 @@ export function createInfrastructuresProvider({
       }
       return normalizeInfrastructures(parsed.data[0], now().toISOString());
     },
+
+    // The site's pages answer every address; its database tells a published row.
+    recheck: (sourceUrl) =>
+      recheckWith(async () => {
+        const id = encodeURIComponent(lastSegmentOf(sourceUrl));
+        const answer = await rows(`select=id&published=eq.true&id=eq.${id}`);
+        const found = z
+          .array(z.object({ id: z.unknown() }))
+          .max(1)
+          .safeParse(answer.rows);
+        if (!found.success) {
+          throw new QuarantineError(sourceUrl, "unexpected answer (site structure changed?)");
+        }
+        return found.data.length === 1;
+      }),
   };
 }

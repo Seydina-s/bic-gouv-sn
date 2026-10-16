@@ -29,11 +29,20 @@ export interface SourcePage {
   lastPage: number;
 }
 
+/** What a second reading of a stored article says about it. */
+export type WithdrawalCheck = "withdrawn" | "still-published" | "unconfirmed";
+
 /**
  * Any official source (presidence.sn API today; a Firecrawl or Playwright fallback
  * later) is read through this interface, so switching tools means one new adapter.
  */
 export interface SourceProvider {
+  /**
+   * Reads again the official page of a stored article in `lang` (ING-04). Absent when
+   * the site cannot tell a withdrawn article from any other address (it answers every
+   * address as found): its withdrawals are then never checked.
+   */
+  recheck?(sourceUrl: string, lang: Lang): Promise<WithdrawalCheck>;
   listPage(lang: Lang, page: number): Promise<SourcePage>;
   /** Id the stored article gets for this source item (same for all its languages). */
   articleIdFor(ref: SourceArticleRef): string;

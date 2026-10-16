@@ -9,6 +9,7 @@ import { z } from "zod";
 import { QuarantineError } from "../../lib/errors";
 import { stableUuid } from "../../lib/identity";
 import { createPoliteHttp } from "../../lib/polite-http";
+import { recheckPage } from "../../lib/recheck";
 import { isEmptied, plainLetters, sanitizeNested, unpublishable } from "../../lib/sanitize";
 import { articleContentHash } from "../../merge";
 import type { SourceArticleRef, SourceProvider } from "../source-provider";
@@ -211,5 +212,8 @@ export function createWordpressProvider(
       }
       return normalizeWordpressPost(site, parsed.data, ref.coverSourceUrl, now().toISOString());
     },
+
+    // WordPress answers 404 to a removed post's page (every site checked on 16/10/2026).
+    recheck: (sourceUrl) => recheckPage(http, sourceUrl),
   };
 }

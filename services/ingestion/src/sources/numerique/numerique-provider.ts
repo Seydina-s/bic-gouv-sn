@@ -3,6 +3,7 @@ import { z } from "zod";
 import { QuarantineError } from "../../lib/errors";
 import { stableUuid } from "../../lib/identity";
 import { createPoliteHttp } from "../../lib/polite-http";
+import { lastSegmentOf, recheckWith } from "../../lib/recheck";
 import { plainLetters, sanitizeNested, unpublishable } from "../../lib/sanitize";
 import { articleContentHash } from "../../merge";
 import type { SourceArticleRef, SourceProvider } from "../source-provider";
@@ -121,6 +122,16 @@ export function createNumeriqueProvider({
       Accept: "application/json",
     });
 
+  async function publication(slug: string): Promise<Publication> {
+    const url = `${NUMERIQUE_API}/publication/${encodeURIComponent(slug)}`;
+    const body = (await json(url)) as { data?: unknown } | null;
+    const parsed = publicationSchema.safeParse(body?.data ?? body);
+    if (!parsed.success) {
+      throw new QuarantineError(url, "unexpected publication shape (site structure changed?)");
+    }
+    return parsed.data;
+  }
+
   return {
     circuits: () => [http.breaker.snapshot()],
 
@@ -176,13 +187,11 @@ export function createNumeriqueProvider({
           "publication without a public page (no name, or an unexpected shape)",
         );
       }
-      const url = `${NUMERIQUE_API}/publication/${encodeURIComponent(ref.slug)}`;
-      const body = (await json(url)) as { data?: unknown } | null;
-      const parsed = publicationSchema.safeParse(body?.data ?? body);
-      if (!parsed.success) {
-        throw new QuarantineError(url, "unexpected publication shape (site structure changed?)");
-      }
-      return normalizeNumerique(parsed.data, now().toISOString());
+      return normalizeNumerique(await publication(ref.slug), now().toISOString());
     },
+
+    // The interface answers 404 to a removed publication, or gives its status.
+    recheck: (sourceUrl) =>
+      recheckWith(async () => (await publication(lastSegmentOf(sourceUrl))).status === "published"),
   };
 }
