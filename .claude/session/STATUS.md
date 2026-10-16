@@ -1,6 +1,16 @@
 # STATUS — Bic Gouv SN
 
-**Dernière mise à jour** : 15/10/2026 (après-midi) · **Mode** : autonome prolongé (demande de l'utilisateur du 14/10). Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md` (points 47 à 53).
+**Dernière mise à jour** : 16/10/2026 (nuit) · **Mode** : autonome prolongé (demande de l'utilisateur du 14/10). Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md` (points 47 à 56).
+
+## Nuit du 15 au 16/10 en bref : lecture unique, carte, réglages, audit
+- **Audio** : écouter un autre article coupe aussitôt la lecture en cours ; la dictée de l'assistant met la lecture en pause.
+- **Près de moi** : le panneau de la carte descend jusqu'en bas, sous la barre de navigation ; sur cet onglet seulement, la barre prend la couleur inverse du thème.
+- **Réglages** : entrée et sortie fluides ; section « Rubriques » retirée (toutes les rubriques sont notifiées).
+- **Accueil** : « Agenda », vide, masqué ; bouton « Filtrer » visible dès l'arrivée.
+- **Audit des bugs silencieux** (`docs/audits/2026-10-15-bugs-silencieux.md`) : courses au démarrage, doubles ouvertures, notification traitée deux fois, rubriques écrites en dur, alerte « disque presque plein » dans la console.
+- **Incidents** : parcours de bout en bout bloqués par la nouvelle fermeture animée (corrigé) ; mise à jour publiée malgré une fusion ratée (sans dommage, script corrigé) ; chemins Windows abîmés dans A-FAIRE (réparés). Voir ERREURS.md.
+- **Livré** : PR #353, mise à jour à distance « Lecture unique, carte et barre, réglages, audit » ; serveur, console et surveillance redéployés.
+- **En attente de vous** : TestFlight (point 55) ; dossier vide verrouillé `C:\bic-gouv-sn-w3` à supprimer à la main (point 56).
 
 ## 14 et 15/10 en bref : vos demandes livrées une à une
 - **Android** : nouvelle version installable (modules natifs : mises à jour à distance, navigateur intégré, capture d'écran) ; depuis, chaque amélioration arrive seule par mise à jour à distance (Réglages, paysage, vidéos…).

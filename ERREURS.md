@@ -415,3 +415,38 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Correctif** : tests avec un faux site (pages, actualités, actualités illisibles) : 80,44 %. Puis `pnpm test` complet à la racine avant chaque envoi.
 - **Prévention** : règle globale (ERREURS-GLOBALES) ; le script de livraison lance désormais `pnpm test` à la racine avant toute demande de fusion.
 
+
+## 15/10/2026 — Deux lectures audio superposées
+
+- **Ce qui s'est passé** : lancer l'écoute d'un autre article pendant une lecture faisait entendre les deux voix en même temps.
+- **Cause racine** : le lecteur démarrait le nouveau son sans attendre la fin de l'arrêt de l'ancien (enregistrement libéré sans pause, voix du téléphone arrêtée de façon asynchrone).
+- **Correctif** : une seule fonction coupe tout (`silence()`), et tout nouveau départ attend qu'elle ait fini ; la dictée de l'assistant met la lecture en pause (`apps/mobile/src/features/player/PlayerProvider.tsx`, `useVoiceInput.ts`).
+- **Prévention** : test sur l'ordre des événements (`one-reading.test.tsx`) ; audit de toutes les ressources partagées (`docs/audits/2026-10-15-bugs-silencieux.md`) ; règle globale « ressources partagées et événements en double ».
+
+## 15/10/2026 — Disque plein : voix arrêtées sans signal
+
+- **Ce qui s'est passé** : le disque de l'ordinateur s'est rempli dans la nuit, et le rattrapage des voix s'est arrêté sans rien signaler.
+- **Cause racine** : aucune mesure de l'espace libre ; un disque plein ne produit d'erreur que dans le journal du processus arrêté.
+- **Correctif** : la surveillance mesure l'espace libre à chaque passage ; la console l'affiche, en rouge sous 5 Go (`services/ingestion/src/lib/disk-space.ts`, `apps/admin/src/components/IngestionPanel.tsx`).
+- **Prévention** : règle globale « disque plein ».
+
+## 16/10/2026 — Parcours de bout en bout en échec après la fermeture animée des réglages
+
+- **Ce qui s'est passé** : la vérification « Production builds » de #353 a échoué : 4 parcours sur 11.
+- **Cause racine** : les réglages s'effacent désormais en 0,16 s au lieu de disparaître d'un coup ; le parcours appuyait sur « Suivant » pendant ce temps, l'appui tombait sur la fenêtre des réglages, et les parcours suivants restaient bloqués sur la présentation. Les parcours n'avaient pas été lancés en local.
+- **Correctif** : le parcours attend la disparition des réglages (`scripts/e2e.ts`) ; 11 sur 11 en local puis en CI.
+- **Prévention** : règle globale « animations de sortie et tests de bout en bout » (lancer `pnpm e2e` en local après un changement d'animation de fenêtre).
+
+## 16/10/2026 — Mise à jour publiée alors que la fusion avait échoué
+
+- **Ce qui s'est passé** : le script de livraison a publié une mise à jour à distance bien que #353 n'ait pas été fusionnée ; elle ne contenait que la version déjà en service (sans dommage).
+- **Cause racine** : la fonction shell se terminait par une ligne de journal, qui réussit toujours ; l'échec de la fusion était donc ignoré.
+- **Correctif** : le code de la fusion est capturé et renvoyé ; une demande de fusion déjà ouverte est réutilisée (script de livraison).
+- **Prévention** : règle globale « code de retour d'une fonction shell ».
+
+## 16/10/2026 — Chemins Windows abîmés dans A-FAIRE-UTILISATEUR.md
+
+- **Ce qui s'est passé** : trois chemins avaient perdu leurs barres obliques inverses (`C:\b…` devenu un caractère de contrôle), y compris la commande TestFlight à copier.
+- **Cause racine** : des chemins écrits dans un script avec des séquences `\b`, `\v`, `\a` interprétées (règle globale déjà existante sur les chemins Windows, non appliquée à un ajout récent).
+- **Correctif** : chemins réparés ; aucun autre caractère de contrôle dans les fichiers suivis.
+- **Prévention** : écrire les chemins Windows avec l'outil d'édition, jamais dans une chaîne de script.
