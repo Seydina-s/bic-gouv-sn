@@ -88,7 +88,7 @@ export const SYSTEM_RULES = [
   'Reply with JSON only: {"status": "answered" | "not_found" | "out_of_scope", "answer": "...", "citations": [numbers]}.',
 ].join("\n");
 
-const LANGUAGE_NAMES: Record<Lang, string> = { fr: "French", wo: "Wolof" };
+const LANGUAGE_NAMES: Record<Lang, string> = { fr: "French", wo: "Wolof", en: "English" };
 
 /** Angle brackets would let a text pass for the end of its own tag. */
 function quoted(text: string): string {

@@ -8,12 +8,16 @@ export type PluralCategory = "one" | "many" | "other";
  * is not guaranteed on the mobile JS engine (Hermes).
  * - fr: "one" for 0 ≤ n < 2; "many" for exact millions (1 000 000 de…); else "other"
  * - wo: always "other"
+ * - en: "one" for exactly 1 (0 is plural: "0 articles"); else "other"
  */
 export function pluralCategory(lang: Lang, count: number): PluralCategory {
   if (lang === "wo") {
     return "other";
   }
   const absolute = Math.abs(count);
+  if (lang === "en") {
+    return absolute === 1 ? "one" : "other";
+  }
   if (absolute < 2) {
     return "one";
   }

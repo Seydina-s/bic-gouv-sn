@@ -1,5 +1,6 @@
 import {
   createTranslator,
+  en,
   fr,
   interfaceLanguage,
   resolveLang,
@@ -28,7 +29,7 @@ const CHOICES: readonly LangChoice[] = ["auto", "fr", "wo"];
 
 export const I18nContext = createContext<I18nContextValue | null>(null);
 
-const catalogs: Record<Lang, object> = { fr, wo };
+const catalogs: Record<Lang, object> = { fr, wo, en };
 
 function deviceLanguageTags(): string[] {
   return getLocales().map((locale) => locale.languageTag);

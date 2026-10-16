@@ -23,6 +23,17 @@ describe("pluralCategory", () => {
       "other",
     ]);
   });
+
+  it("uses one for exactly 1 in English, 0 being plural", () => {
+    expect([0, 1, -1, 1.5, 2, 1_000_000].map((n) => pluralCategory("en", n))).toEqual([
+      "other",
+      "one",
+      "one",
+      "other",
+      "other",
+      "other",
+    ]);
+  });
 });
 
 describe("selectPluralForm", () => {

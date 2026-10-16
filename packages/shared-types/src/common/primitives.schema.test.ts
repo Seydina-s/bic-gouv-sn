@@ -8,9 +8,9 @@ import {
 } from "./primitives.schema";
 
 describe("primitives", () => {
-  it("accepts only French and Wolof", () => {
-    expect(langSchema.safeParse("wo").success).toBe(true);
-    expect(langSchema.safeParse("en").success).toBe(false);
+  it("accepts only French, Wolof and English", () => {
+    expect(["fr", "wo", "en"].every((lang) => langSchema.safeParse(lang).success)).toBe(true);
+    expect(langSchema.safeParse("pt").success).toBe(false);
   });
 
   it("requires ISO date-times with an offset", () => {

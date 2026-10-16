@@ -1,7 +1,10 @@
 import { z } from "zod";
 
-/** Languages supported by the app: French and Wolof. */
-export const langSchema = z.enum(["fr", "wo"]);
+/**
+ * Languages supported by the app: French (the sources' language), Wolof and English
+ * (owner's decision of 16/10/2026). The chosen one applies to the whole app.
+ */
+export const langSchema = z.enum(["fr", "wo", "en"]);
 export type Lang = z.infer<typeof langSchema>;
 
 /** ISO 8601 date-time with an explicit offset (e.g. 2026-09-24T10:00:00Z). */

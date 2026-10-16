@@ -586,7 +586,7 @@ export const adminFr = {
     none: "Aucune recherche sans résultat faite au moins {minCount} fois pour l'instant.",
     failed: "La liste n'a pas pu être chargée. Vérifiez l'état du service.",
     area: { news: "Actualités", procedures: "Démarches" },
-    language: { fr: "Français", wo: "Wolof" },
+    language: { fr: "Français", wo: "Wolof", en: "Anglais" },
     times: {
       one: "{count} fois",
       other: "{count} fois",
@@ -605,7 +605,7 @@ export const adminFr = {
       other: "{count} versions masquées",
     },
     withdrawnOn: "Retiré le {day} à {time}",
-    language: { fr: "Français", wo: "Wolof" },
+    language: { fr: "Français", wo: "Wolof", en: "Anglais" },
     source: "Ancienne page (lien d'origine)",
   },
   attention: {

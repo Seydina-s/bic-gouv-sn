@@ -1,4 +1,4 @@
-import type { AssistantSource } from "@bgs/shared-types";
+import type { AssistantSource, Lang } from "@bgs/shared-types";
 import { ArrowClockwiseIcon as ArrowClockwise } from "phosphor-react-native/src/icons/ArrowClockwise";
 import { ListChecksIcon as ListChecks } from "phosphor-react-native/src/icons/ListChecks";
 import { NewspaperIcon as Newspaper } from "phosphor-react-native/src/icons/Newspaper";
@@ -276,7 +276,7 @@ function TurnBody({ turn, actions }: { turn: ChatTurn; actions: ChatActions }) {
 }
 
 /** The day the assistant answers again; French writes the first of the month « 1er ». */
-export function resumeDay(isoDate: string | null, lang: "fr" | "wo"): string {
+export function resumeDay(isoDate: string | null, lang: Lang): string {
   const day = formatPublishedOn(isoDate, lang);
   return lang === "fr" ? day.replace(/^1 /, "1er ") : day;
 }

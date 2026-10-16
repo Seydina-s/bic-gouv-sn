@@ -1,10 +1,11 @@
 import type { Lang } from "@bgs/shared-types";
 
 /**
- * Dates are formatted in French for both languages until Wolof date words are
- * written by native speakers (W-01): nothing is machine-invented.
+ * Dates are formatted in French for Wolof until Wolof date words are written by
+ * native speakers (W-01): nothing is machine-invented. English uses US forms (the
+ * American voice chosen on 16/10/2026).
  */
-const LOCALE: Record<Lang, string> = { fr: "fr-FR", wo: "fr-FR" };
+const LOCALE: Record<Lang, string> = { fr: "fr-FR", wo: "fr-FR", en: "en-US" };
 
 /** "2026-09-24" → a local calendar date (no time zone shift). */
 export function parseCalendarDate(isoDate: string): Date {

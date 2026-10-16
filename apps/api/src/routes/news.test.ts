@@ -193,7 +193,7 @@ describe("GET /v1/news", () => {
   });
 
   it("rejects an invalid language or limit", async () => {
-    expect((await app.inject({ method: "GET", url: "/v1/news?lang=en" })).statusCode).toBe(400);
+    expect((await app.inject({ method: "GET", url: "/v1/news?lang=pt" })).statusCode).toBe(400);
     expect((await app.inject({ method: "GET", url: "/v1/news?limit=500" })).statusCode).toBe(400);
   });
 });
