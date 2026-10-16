@@ -29,6 +29,7 @@ const quiet: Notifications = {
     quietHours: 0,
     french: 0,
     wolof: 0,
+    english: 0,
     newLastDay: 0,
     newWeekBefore: 0,
   },

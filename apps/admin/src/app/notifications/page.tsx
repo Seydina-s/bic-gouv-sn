@@ -189,6 +189,7 @@ export default async function NotificationsPage() {
               quietHours: subscribers.quietHours,
               french: subscribers.french,
               wolof: subscribers.wolof,
+              english: subscribers.english,
             })}
           </p>
         )}

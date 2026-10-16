@@ -1,6 +1,6 @@
 import type { NewsArticle } from "@bgs/shared-types";
 import { describe, expect, it } from "vitest";
-import { pushMessageFor } from "./push-message";
+import { pushMessageFor, versionFor } from "./push-message";
 
 // Placeholder article, not real content.
 function article(sourceUrl: string, publisher: NewsArticle["publisher"]): NewsArticle {
@@ -46,5 +46,26 @@ describe("pushMessageFor", () => {
         undefined,
       )?.source,
     ).toBe("primature.sn");
+  });
+
+  it("speaks to each phone in its language, in French when the article has no such version", () => {
+    const french = article("https://primature.sn/publications/actualites/test", "primature");
+    const message = pushMessageFor(french, undefined);
+    expect(message === null ? undefined : versionFor(message, "en")?.title).toBe("Titre fictif");
+    const english = {
+      ...french,
+      translations: [
+        ...french.translations,
+        {
+          lang: "en" as const,
+          status: "machine" as const,
+          title: "Made-up title",
+          bodyHtml: "<p>Made-up body.</p>",
+        },
+      ],
+    };
+    const both = pushMessageFor(english, undefined);
+    expect(both === null ? undefined : versionFor(both, "en")?.title).toBe("Made-up title");
+    expect(both === null ? undefined : versionFor(both, "fr")?.title).toBe("Titre fictif");
   });
 });
