@@ -17,24 +17,52 @@ function live(article: NewsArticle, lang: "fr" | "wo"): Translation | undefined 
   );
 }
 
-/** The official French version to translate, when the article has no Wolof one at all. */
-export function frenchToTranslate(article: NewsArticle): Translation | null {
-  if (article.translations.some((translation) => translation.lang === "wo")) {
+/** The official French version to translate into `lang`, when the article has none in it. */
+export function frenchWithout(article: NewsArticle, lang: "wo" | "en"): Translation | null {
+  if (article.translations.some((translation) => translation.lang === lang)) {
     return null;
   }
   const french = live(article, "fr");
   return french?.status === "official" ? french : null;
 }
 
+/** The official French version to translate, when the article has no Wolof one at all. */
+export function frenchToTranslate(article: NewsArticle): Translation | null {
+  return frenchWithout(article, "wo");
+}
+
 /** Articles to translate, newest first, published on `since` or later when given. */
 export function articlesToTranslate(
   articles: readonly NewsArticle[],
   since: string | null,
+  pick: (article: NewsArticle) => Translation | null = frenchToTranslate,
 ): NewsArticle[] {
   return articles
-    .filter((article) => frenchToTranslate(article) !== null)
+    .filter((article) => pick(article) !== null)
     .filter((article) => since === null || (article.sourcePublishedOn ?? "") >= since)
     .sort((a, b) => (b.sourcePublishedOn ?? "").localeCompare(a.sourcePublishedOn ?? ""));
+}
+
+/** The current government's first day: the multilingual phase starts there (16/10/2026). */
+export const CURRENT_GOVERNMENT_SINCE = "2024-04-02";
+
+/**
+ * Articles for a trial, the same for Wolof and English so that both can be read side
+ * by side: the newest article of each institution (varied styles), without either
+ * language yet, published since the current government; at most `count`.
+ */
+export function trialPicks(articles: readonly NewsArticle[], count: number): NewsArticle[] {
+  const seen = new Set<string>();
+  return articlesToTranslate(articles, CURRENT_GOVERNMENT_SINCE)
+    .filter((article) => frenchWithout(article, "en") !== null)
+    .filter((article) => {
+      if (seen.has(article.publisher)) {
+        return false;
+      }
+      seen.add(article.publisher);
+      return true;
+    })
+    .slice(0, count);
 }
 
 export interface OfficialPair {
