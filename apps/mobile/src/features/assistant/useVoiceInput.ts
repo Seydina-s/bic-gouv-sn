@@ -1,5 +1,6 @@
 import type { Lang } from "@bgs/shared-types";
 import { useCallback, useEffect, useState } from "react";
+import { usePlayer } from "../player/PlayerProvider";
 import { loadVoiceInput, voiceInputAvailable } from "./load-voice-input";
 
 /** Why dictation could not start or went wrong, as the screen says it. */
@@ -8,10 +9,14 @@ export type VoiceProblem = "denied" | "unavailable" | "wolof" | "failed";
 /**
  * The microphone of the composer: dictates a question in French into the field,
  * live. Wolof has no phone recognizer yet: the screen says so instead of guessing.
+ * A reading under way is paused first, so that the two never share the sound.
  */
 export function useVoiceInput(lang: Lang, onText: (text: string) => void) {
   const [listening, setListening] = useState(false);
   const [problem, setProblem] = useState<VoiceProblem | null>(null);
+  const player = usePlayer();
+  const { pause } = player;
+  const reading = player.status === "playing";
 
   const start = useCallback(async () => {
     setProblem(null);
@@ -22,6 +27,11 @@ export function useVoiceInput(lang: Lang, onText: (text: string) => void) {
     if (!voiceInputAvailable()) {
       setProblem("unavailable");
       return;
+    }
+    // The microphone never hears a reading under way: it is paused first (audit of
+    // 15/10/2026), and can be resumed from the bar at the top.
+    if (reading) {
+      pause();
     }
     setListening(true);
     try {
@@ -48,7 +58,7 @@ export function useVoiceInput(lang: Lang, onText: (text: string) => void) {
       setListening(false);
       setProblem("failed");
     }
-  }, [lang, onText]);
+  }, [lang, onText, reading, pause]);
 
   const stop = useCallback(() => {
     if (listening && voiceInputAvailable()) {
