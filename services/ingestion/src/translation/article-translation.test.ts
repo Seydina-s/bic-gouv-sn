@@ -7,7 +7,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { articleContentHash } from "../merge";
 import { ClaudeBatches, type BatchRequest, type BatchResult } from "./claude-batches";
 import { BATCH_PRICES, estimateCost, MEASURED_OVERRUN } from "./cost-estimate";
-import { outputTokensFor, WolofTranslation, type BatchClient } from "./wolof-translation";
+import { ArticleTranslation, outputTokensFor, type BatchClient } from "./article-translation";
+import { ENGLISH, WOLOF as WOLOF_TARGET } from "./targets";
+import { trialPicks } from "./wolof-candidates";
 
 // Placeholder articles, not real content.
 const idOf = (n: number) => `00000000-0000-5000-8000-${String(n).padStart(12, "0")}`;
@@ -72,18 +74,23 @@ function batches(reply: (request: BatchRequest) => BatchResult) {
   };
 }
 
-const translated = (request: BatchRequest): BatchResult => ({
-  customId: request.customId,
-  ok: true,
-  text: JSON.stringify({ title: "Tur bu fictif", bodyHtml: WOLOF }),
-  inputTokens: 1000,
-  outputTokens: 200,
-  truncated: false,
-});
+/** A successful batch reply carrying `text`, as the model would write it. */
+const replyWith =
+  (text: string) =>
+  (request: BatchRequest): BatchResult => ({
+    customId: request.customId,
+    ok: true,
+    text,
+    inputTokens: 1000,
+    outputTokens: 200,
+    truncated: false,
+  });
+
+const translated = replyWith(JSON.stringify({ title: "Tur bu fictif", bodyHtml: WOLOF }));
 
 let dir: string;
 let articles: FileArticleRepository;
-let translation: WolofTranslation;
+let translation: ArticleTranslation;
 
 beforeEach(async () => {
   dir = await mkdtemp(join(tmpdir(), "bgs-translation-"));
@@ -91,8 +98,9 @@ beforeEach(async () => {
   await articles.save(article(1, "2025-11-02"));
   await articles.save(article(2, "2025-10-05"));
   await articles.save(article(3, "2025-09-01"));
-  translation = new WolofTranslation({
+  translation = new ArticleTranslation({
     articles,
+    target: WOLOF_TARGET,
     state: fileDocument(join(dir, "runs.json")),
     now: () => new Date("2026-10-08T10:00:00Z"),
   });
@@ -193,7 +201,10 @@ describe("the Wolof translation runs", () => {
 
   it("estimates the cost before anything is sent", async () => {
     const { toSend } = await translation.pending(null);
-    const estimate = estimateCost(toSend, [], [...Object.keys(BATCH_PRICES), "modele-inconnu"]);
+    const estimate = estimateCost(toSend, "", WOLOF_TARGET, [
+      ...Object.keys(BATCH_PRICES),
+      "modele-inconnu",
+    ]);
     expect(estimate.articles).toBe(3);
     expect(estimate.inputTokens).toBeGreaterThan(0);
     expect(estimate.dollars["claude-opus-5-5"]).toBeGreaterThan(
@@ -202,6 +213,108 @@ describe("the Wolof translation runs", () => {
     expect(estimate.dollars["modele-inconnu"]).toBeNull();
     const listed = (estimate.inputTokens * 2 + estimate.outputTokens * 10) / 1_000_000;
     expect(estimate.dollars["claude-opus-5-5"]).toBeCloseTo(listed * MEASURED_OVERRUN, 10);
+    // Sonnet 5.5, chosen on 16/10/2026, costs half of Opus 5.5.
+    expect(estimate.dollars["claude-sonnet-5-5"]).toBeCloseTo(
+      (estimate.dollars["claude-opus-5-5"] ?? 0) / 2,
+      10,
+    );
+  });
+});
+
+describe("the English translation runs", () => {
+  const english = () =>
+    new ArticleTranslation({
+      articles,
+      target: ENGLISH,
+      state: fileDocument(join(dir, "runs-en.json")),
+    });
+  const inEnglish = replyWith(
+    JSON.stringify({
+      title: "A made-up title",
+      bodyHtml: "<p>A made-up English text for the translation tests.</p>",
+    }),
+  );
+
+  it("translates every article without English, Wolof ones included, and saves it as English", async () => {
+    const wolof = article(4, "2025-12-01");
+    const translations = [
+      ...wolof.translations,
+      {
+        lang: "wo" as const,
+        status: "official" as const,
+        title: "Tur",
+        bodyHtml: WOLOF,
+        sourceUrl: "https://www.presidence.sn/wo/actualites/test-4/",
+      },
+    ];
+    await articles.save({ ...wolof, translations });
+    const service = batches(inEnglish);
+    const runs = english();
+    expect(
+      await runs.submit(service.client, "claude-sonnet-5-5", { since: null, limit: 10 }),
+    ).toMatchObject({ sent: 4 });
+    expect(service.sent[0]?.[0]?.system).toContain("into English");
+    service.end();
+    expect(await runs.collect(service.client)).toMatchObject({ saved: 4 });
+    const saved = await articles.get(idOf(4));
+    expect(saved?.translations.map((t) => `${t.lang}:${t.status}`)).toEqual([
+      "fr:official",
+      "wo:official",
+      "en:machine",
+    ]);
+    // A second run finds nothing left to translate into English.
+    expect(await runs.pending(null)).toMatchObject({ toSend: [] });
+  });
+
+  it("keeps its runs apart from the Wolof ones", async () => {
+    const service = batches(inEnglish);
+    await translation.submit(service.client, "claude-sonnet-5-5", { since: null, limit: 1 });
+    // The Wolof run in progress does not hold the article back from English.
+    expect((await english().pending(null)).toSend).toHaveLength(3);
+  });
+});
+
+describe("a trial", () => {
+  it("sends the chosen articles, then gives the checked replies without saving any", async () => {
+    const service = batches(translated);
+    const chosen = trialPicks(
+      [
+        article(5, "2024-05-01"),
+        article(6, "2024-01-01"),
+        {
+          ...article(7, "2025-01-01"),
+          publisher: "primature" as const,
+          sourceUrl: "https://primature.sn/publications/actualites/test-7",
+        },
+      ],
+      10,
+    );
+    // Since the current government only, one article per institution.
+    expect(chosen.map((a) => a.id)).toEqual([idOf(7), idOf(5)]);
+    await articles.save(article(5, "2024-05-01"));
+    const batchId = await translation.submitTrial(service.client, [article(5, "2024-05-01")]);
+    expect(await translation.trialReplies(service.client, batchId)).toBeNull();
+    service.end();
+    const replies = await translation.trialReplies(service.client, batchId);
+    expect(replies).toEqual([
+      expect.objectContaining({
+        id: idOf(5),
+        translation: { title: "Tur bu fictif", bodyHtml: WOLOF },
+        problem: null,
+      }),
+    ]);
+    // Nothing saved, nothing remembered: a full run still takes the article.
+    expect((await articles.get(idOf(5)))?.translations).toHaveLength(1);
+    expect((await translation.pending(null)).toSend.map((a) => a.id)).toContain(idOf(5));
+  });
+
+  it("says why a reply was refused", async () => {
+    const service = batches(replyWith("pas du JSON"));
+    const batchId = await translation.submitTrial(service.client, [article(1, "2025-11-02")]);
+    service.end();
+    expect(await translation.trialReplies(service.client, batchId)).toEqual([
+      expect.objectContaining({ translation: null, problem: "unreadable" }),
+    ]);
   });
 });
 
