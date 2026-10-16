@@ -293,3 +293,68 @@ describe("GET /v1/news/:id", () => {
     expect((await app.inject({ method: "GET", url: "/v1/news/not-a-uuid" })).statusCode).toBe(400);
   });
 });
+
+describe("fallback=fr: an article missing in the language asked is shown in French", () => {
+  const titles = async (url: string) =>
+    newsListResponseSchema
+      .parse((await app.inject({ method: "GET", url })).json())
+      .items.map((item) => `${item.lang}:${item.title}`);
+
+  it("keeps the feed whole, each article saying the language it is shown in", async () => {
+    // Without the parameter (installed apps), only the Wolof version is listed.
+    expect(await titles("/v1/news?lang=wo")).toEqual(["wo:Titre wo 2"]);
+    expect(await titles("/v1/news?lang=wo&fallback=fr")).toEqual([
+      "fr:Titre fr 3",
+      "wo:Titre wo 2",
+      "fr:Titre fr 1",
+    ]);
+    expect(await titles("/v1/news?lang=en&fallback=fr")).toEqual([
+      "fr:Titre fr 3",
+      "fr:Titre fr 2",
+      "fr:Titre fr 1",
+    ]);
+  });
+
+  it("applies to the front page rows, the institutions and the search", async () => {
+    const sections = newsSectionsResponseSchema.parse(
+      (await app.inject({ method: "GET", url: "/v1/news/sections?lang=wo&fallback=fr" })).json(),
+    );
+    expect(sections.sections[0]?.items.map((item) => item.lang)).toEqual(["fr", "wo", "fr"]);
+    const publishers = newsPublishersResponseSchema.parse(
+      (await app.inject({ method: "GET", url: "/v1/news/publishers?lang=en&fallback=fr" })).json(),
+    );
+    expect(publishers.publishers[0]?.total).toBe(3);
+    expect(await titles("/v1/news/search?q=titre&lang=wo&fallback=fr")).toHaveLength(3);
+    expect(await titles("/v1/news/search?q=titre&lang=wo")).toEqual(["wo:Titre wo 2"]);
+  });
+
+  it("opens an article in French when it has no version in the language asked", async () => {
+    const id = article(1).id;
+    expect((await app.inject({ method: "GET", url: `/v1/news/${id}?lang=en` })).statusCode).toBe(
+      404,
+    );
+    const shown = await app.inject({ method: "GET", url: `/v1/news/${id}?lang=en&fallback=fr` });
+    expect(newsDetailSchema.parse(shown.json())).toMatchObject({ lang: "fr", title: "Titre fr 1" });
+    const wolof = await app.inject({
+      method: "GET",
+      url: `/v1/news/${article(2).id}?lang=wo&fallback=fr`,
+    });
+    expect(newsDetailSchema.parse(wolof.json()).lang).toBe("wo");
+  });
+
+  it("shows the French version when the source withdrew the one asked", async () => {
+    await articles.setWithdrawn(article(2).id, "wo", "2026-09-28T02:00:00Z");
+    const id = article(2).id;
+    expect((await app.inject({ method: "GET", url: `/v1/news/${id}?lang=wo` })).statusCode).toBe(
+      410,
+    );
+    const shown = await app.inject({ method: "GET", url: `/v1/news/${id}?lang=wo&fallback=fr` });
+    expect(newsDetailSchema.parse(shown.json()).lang).toBe("fr");
+  });
+
+  it("refuses another fallback than French", async () => {
+    expect(
+      (await app.inject({ method: "GET", url: "/v1/news?lang=wo&fallback=en" })).statusCode,
+    ).toBe(400);
+  });
+});

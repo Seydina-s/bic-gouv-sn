@@ -11,6 +11,8 @@ import {
   newsPublishersResponseSchema,
   newsSectionsResponseSchema,
   type ErrorCode,
+  type Lang,
+  type NewsArticle,
 } from "@bgs/shared-types";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
@@ -19,6 +21,23 @@ import type { SearchMisses } from "../journal/search-misses";
 import { freshnessKey, isWithdrawnIn, toDetail, toSummary } from "../news/present";
 import { searchArticles } from "../news/search";
 import { mediaBaseUrlFor } from "./media";
+
+/** Articles matching `query` in `lang`, then in `fallback` (no repeats), at most `limit`. */
+async function searchIn(
+  articles: ArticleRepository,
+  query: string,
+  lang: Lang,
+  fallback: Lang | null,
+  limit: number,
+): Promise<NewsArticle[]> {
+  const hits = await searchArticles(articles, { query, lang, limit });
+  if (fallback === null || fallback === lang || hits.length >= limit) {
+    return hits;
+  }
+  const seen = new Set(hits.map((article) => article.id));
+  const more = await searchArticles(articles, { query, lang: fallback, limit });
+  return [...hits, ...more.filter((article) => !seen.has(article.id))].slice(0, limit);
+}
 
 export interface NewsRoutesOptions {
   articles: ArticleRepository;
@@ -57,6 +76,11 @@ const commaSeparated = z
 /** The "Filtrer" panel's sections and institutions (30 at most each). */
 const categoriesQuery = commaSeparated.pipe(z.array(slugSchema).min(1).max(30));
 const publishersQuery = commaSeparated.pipe(z.array(institutionSchema).min(1).max(30));
+/**
+ * `fallback=fr`: an article missing in the language asked is shown in French
+ * instead of disappearing (16/10/2026). Apps installed before do not send it.
+ */
+const fallbackQuery = z.enum(["fr"]).optional();
 
 export const newsRoutes: FastifyPluginAsyncZod<NewsRoutesOptions> = (
   app,
@@ -72,20 +96,21 @@ export const newsRoutes: FastifyPluginAsyncZod<NewsRoutesOptions> = (
           q: z.string().trim().min(2).max(120),
           lang: langSchema.default("fr"),
           limit: z.coerce.number().int().min(1).max(50).default(20),
+          fallback: fallbackQuery,
         }),
         response: { 200: newsListResponseSchema },
       },
     },
     async (request, reply) => {
-      const { q, lang, limit } = request.query;
+      const { q, lang, limit, fallback = null } = request.query;
       const media = mediaBaseUrlFor(request, mediaBaseUrl);
-      const hits = await searchArticles(articles, { query: q, lang, limit });
+      const hits = await searchIn(articles, q, lang, fallback, limit);
       if (hits.length === 0) {
         searchMisses?.record("news", lang, q);
       }
       void reply.header("cache-control", SEARCH_CACHE_CONTROL);
       return {
-        items: hits.flatMap((article) => toSummary(article, lang, media) ?? []),
+        items: hits.flatMap((article) => toSummary(article, lang, media, fallback) ?? []),
         nextCursor: null,
       };
     },
@@ -118,6 +143,7 @@ export const newsRoutes: FastifyPluginAsyncZod<NewsRoutesOptions> = (
           alsoIn: langSchema.optional(),
           audio: z.literal("true").optional(),
           documents: z.literal("true").optional(),
+          fallback: fallbackQuery,
         }),
         response: { 200: newsListResponseSchema, 304: z.null() },
       },
@@ -125,10 +151,11 @@ export const newsRoutes: FastifyPluginAsyncZod<NewsRoutesOptions> = (
     async (request, reply) => {
       const { lang, limit, cursor, page: pageNumber, category, publisher } = request.query;
       const { categories, publishers, since, order, alsoIn, audio, documents } = request.query;
+      const fallback = request.query.fallback ?? null;
       const offset =
         cursor === undefined && pageNumber !== undefined ? (pageNumber - 1) * limit : 0;
       const page = await articles.list({
-        lang,
+        lang: fallback ?? lang,
         limit,
         cursor,
         offset,
@@ -143,9 +170,12 @@ export const newsRoutes: FastifyPluginAsyncZod<NewsRoutesOptions> = (
         withDocuments: documents === "true",
       });
       const media = mediaBaseUrlFor(request, mediaBaseUrl);
-      const items = page.items.flatMap((article) => toSummary(article, lang, media) ?? []);
+      const items = page.items.flatMap(
+        (article) => toSummary(article, lang, media, fallback) ?? [],
+      );
       const fingerprint = [
         lang,
+        fallback,
         cursor,
         offset,
         category,
@@ -178,16 +208,18 @@ export const newsRoutes: FastifyPluginAsyncZod<NewsRoutesOptions> = (
         querystring: z.object({
           lang: langSchema.default("fr"),
           perSection: z.coerce.number().int().min(1).max(20).default(10),
+          fallback: fallbackQuery,
         }),
         response: { 200: newsSectionsResponseSchema, 304: z.null() },
       },
     },
     async (request, reply) => {
-      const { lang, perSection } = request.query;
-      const sections = await articles.sections({ lang, perSection });
+      const { lang, perSection, fallback = null } = request.query;
+      const sections = await articles.sections({ lang: fallback ?? lang, perSection });
       const media = mediaBaseUrlFor(request, mediaBaseUrl);
       const fingerprint = [
         lang,
+        fallback,
         perSection,
         media,
         ...sections.flatMap((section) => [
@@ -200,7 +232,9 @@ export const newsRoutes: FastifyPluginAsyncZod<NewsRoutesOptions> = (
         sections: sections.map((section) => ({
           category: section.category,
           total: section.total,
-          items: section.items.flatMap((article) => toSummary(article, lang, media) ?? []),
+          items: section.items.flatMap(
+            (article) => toSummary(article, lang, media, fallback) ?? [],
+          ),
         })),
       });
     },
@@ -212,14 +246,15 @@ export const newsRoutes: FastifyPluginAsyncZod<NewsRoutesOptions> = (
       schema: {
         tags: ["news"],
         summary: "How many articles each institution has, for the list of institutions",
-        querystring: z.object({ lang: langSchema.default("fr") }),
+        querystring: z.object({ lang: langSchema.default("fr"), fallback: fallbackQuery }),
         response: { 200: newsPublishersResponseSchema, 304: z.null() },
       },
     },
     async (request, reply) => {
-      const publishers = await articles.publishers(request.query.lang);
+      const { lang, fallback } = request.query;
+      const publishers = await articles.publishers(fallback ?? lang);
       const fingerprint = [
-        request.query.lang,
+        fallback ?? lang,
         ...publishers.map(
           (count) => `${count.publisher}:${String(count.total)}:${count.lastFetchedAt}`,
         ),
@@ -235,7 +270,7 @@ export const newsRoutes: FastifyPluginAsyncZod<NewsRoutesOptions> = (
         tags: ["news"],
         summary: "One article in the requested language",
         params: z.object({ id: z.uuid() }),
-        querystring: z.object({ lang: langSchema.default("fr") }),
+        querystring: z.object({ lang: langSchema.default("fr"), fallback: fallbackQuery }),
         response: {
           200: newsDetailSchema,
           304: z.null(),
@@ -253,8 +288,10 @@ export const newsRoutes: FastifyPluginAsyncZod<NewsRoutesOptions> = (
           ? stored
           : ((await articles.get(stored.duplicateOf)) ?? stored);
       const media = mediaBaseUrlFor(request, mediaBaseUrl);
-      const detail = article === null ? null : toDetail(article, request.query.lang, media);
-      if (article !== null && isWithdrawnIn(article, request.query.lang)) {
+      const { lang, fallback = null } = request.query;
+      const detail = article === null ? null : toDetail(article, lang, media, fallback);
+      const asked = fallback === null ? [lang] : [lang, fallback];
+      if (article !== null && detail === null && asked.some((l) => isWithdrawnIn(article, l))) {
         // Gone for good, unlike a missing article: the app drops its saved copy too.
         return reply.code(410).send({
           code: WITHDRAWN,
@@ -272,7 +309,7 @@ export const newsRoutes: FastifyPluginAsyncZod<NewsRoutesOptions> = (
       return sendCached(
         request,
         reply,
-        `${request.query.lang}|${media}|${freshnessKey(article)}`,
+        `${lang}|${String(fallback)}|${media}|${freshnessKey(article)}`,
         detail,
       );
     },
