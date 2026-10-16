@@ -23,7 +23,7 @@ const DESKTOP: Viewport = { width: 1280, height: 900, mobile: false };
 /** The narrowest phones in use (WCAG 1.4.10 reflow width). */
 const NARROW: Viewport = { width: 320, height: 640, mobile: true };
 const SCHEMES = ["light", "dark"] as const;
-/** The interface is French until the Wolof catalog is complete (W-01). */
+/** The audit runs the interface in French, the phone's language of its browser. */
 const INTERFACE_LANG = "fr";
 /** The title of each step of the welcome, in order (fr catalog). */
 const WELCOME_STEPS = [

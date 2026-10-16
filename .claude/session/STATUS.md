@@ -24,7 +24,7 @@
 - Dernière mise à jour à distance : « Lecture unique, carte et barre, réglages, audit » (#353).
 - **Services en marche** : API, console, surveillance (22 sites + der.sn), filtre public et tunnel ngrok, Metro (sur #353), rattrapage des voix françaises.
 - **Voix** : 650 sur 4 975 articles faits le 16/10 à 15 h. Le journal de ce lancement est dans le dossier temporaire de l'ancienne session ; le suivant ira dans `bgs-ops/logs/voices-fr.log`.
-- **Tunnel ngrok** : il n'est pas relancé automatiquement (la protection de sécurité a refusé de l'inclure au script). S'il est tombé, demander à l'utilisateur avant de le relancer.
+- **Tunnel ngrok** : relancé par `services.sh` s'il est tombé (autorisation permanente de l'utilisateur du 16/10, qui couvre aussi les redémarrages après une fusion : collecte seule ou `deploy.sh`). Le 16/10 à 19 h 20, il était tombé (avec le filtre public) : les téléphones ne joignaient plus l'API ; relancé.
 - **Ancien serveur web 8084** : il sert un vieil export web de l'app ; son script n'existe plus. Inutile aujourd'hui ; ne pas le recréer sans besoin.
 
 **Tâches immédiates, dans l'ordre**

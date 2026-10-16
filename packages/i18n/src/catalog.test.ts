@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { findMissingMessages, listMessageKeys, lookupMessage } from "./catalog";
+import { en } from "./messages/en";
 import { fr } from "./messages/fr";
 import { wo } from "./messages/wo";
 
@@ -58,8 +59,49 @@ describe("shipped catalogs", () => {
     }
   });
 
-  it("report every Wolof string still to be translated", () => {
-    // Wolof strings come from native speakers: until then, all keys are reported.
-    expect(findMissingMessages(fr, wo)).toEqual(listMessageKeys(fr));
+  // The whole app follows the language chosen (16/10/2026): a French string added
+  // without its Wolof and English versions fails here.
+  it.each([
+    ["Wolof", wo],
+    ["English", en],
+  ] as const)("have every French message in %s, never empty", (_name, catalog) => {
+    expect(findMissingMessages(fr, catalog)).toEqual([]);
+    for (const key of listMessageKeys(fr)) {
+      expect(
+        textsOf(catalog, key).every((text) => text.trim() !== ""),
+        key,
+      ).toBe(true);
+    }
+  });
+
+  it.each([
+    ["Wolof", wo],
+    ["English", en],
+  ] as const)("keep in %s the placeholders of each French message", (_name, catalog) => {
+    for (const key of listMessageKeys(fr)) {
+      // Plural forms together: "Voir l'article" has no count, its plural has one.
+      expect(placeholdersOf(textsOf(catalog, key)), key).toEqual(placeholdersOf(textsOf(fr, key)));
+    }
+  });
+
+  it("write English without the French space before a colon or a question mark", () => {
+    for (const key of listMessageKeys(fr)) {
+      for (const text of textsOf(en, key)) {
+        expect(text, key).not.toMatch(/\s[:?!]/u);
+      }
+    }
   });
 });
+
+/** Every form of a message (one text, or its plural forms). */
+function textsOf(catalog: object, key: string): string[] {
+  const message = lookupMessage(catalog, key);
+  return typeof message === "string"
+    ? [message]
+    : [message?.one, message?.many, message?.other].filter((text) => text !== undefined);
+}
+
+/** The placeholders a message uses ("{count}"), sorted, without duplicates. */
+function placeholdersOf(texts: readonly string[]): string[] {
+  return [...new Set(texts.flatMap((text) => text.match(/\{\w+\}/g) ?? []))].sort();
+}

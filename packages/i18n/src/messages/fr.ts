@@ -357,6 +357,8 @@ export const fr = {
     languageAuto: "Comme le téléphone",
     languageFr: "Français",
     languageWo: "Wolof",
+    languageWoMachine:
+      "L'interface en wolof est une traduction automatique, en attente de relecture.",
     dataSaver: "Économie de données",
     dataSaverNever: "Jamais",
     dataSaverCellular: "Mobile",

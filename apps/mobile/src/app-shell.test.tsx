@@ -145,18 +145,20 @@ describe("first run", () => {
     expect(await screen.findByText("Choisissez votre langue")).toBeOnTheScreen();
     await fireEvent.press(screen.getByRole("radio", { name: "Wolof" }));
     expect(screen.getByRole("radio", { name: "Wolof", checked: true })).toBeOnTheScreen();
+    // Chosen there, the language changes the welcome itself at once.
+    expect(screen.getByText("Tànnal sa làkk")).toBeOnTheScreen();
     for (const title of [
-      "Le Gouvernement, en un seul endroit",
-      "La source, toujours",
-      "Gardez l'essentiel, même sans réseau",
+      "Ngóornamaŋ bi, ci benn béreb",
+      "Cosaan gi, saa su nekk",
+      "Denc li gën a am solo, su internet amul sax",
     ]) {
-      await fireEvent.press(screen.getByRole("button", { name: "Suivant" }));
+      await fireEvent.press(screen.getByRole("button", { name: "Topp" }));
       expect(await screen.findByText(title)).toBeOnTheScreen();
     }
-    await fireEvent.press(screen.getByRole("button", { name: "Commencer" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Tàmbali" }));
     // The welcome screens fade away to reveal the app (no sudden cut).
     await waitFor(() => {
-      expect(screen.queryByText("Gardez l'essentiel, même sans réseau")).toBeNull();
+      expect(screen.queryByText("Denc li gën a am solo, su internet amul sax")).toBeNull();
     });
     expect(await AsyncStorage.multiGet(["bgs-onboarding", "bgs-language"])).toEqual([
       ["bgs-onboarding", "done"],
@@ -588,8 +590,10 @@ describe("app shell", () => {
     await fireEvent.press(await screen.findByRole("button", { name: "Réglages" }));
     await fireEvent.press(await screen.findByRole("radio", { name: "Sombre" }));
     await fireEvent.press(screen.getByRole("radio", { name: "Wolof" }));
-    expect(screen.getByRole("radio", { name: "Sombre", checked: true })).toBeOnTheScreen();
+    // The whole interface follows: the settings now speak Wolof, said machine-translated.
+    expect(screen.getByRole("radio", { name: "Lëndëm", checked: true })).toBeOnTheScreen();
     expect(screen.getByRole("radio", { name: "Wolof", checked: true })).toBeOnTheScreen();
+    expect(screen.getByText(/Masin moo tekki wolof/)).toBeOnTheScreen();
     // Read after the actions (an async callback inside waitFor overlaps act() calls).
     expect(await AsyncStorage.multiGet(["bgs-theme", "bgs-language"])).toEqual([
       ["bgs-theme", "dark"],
@@ -605,11 +609,9 @@ describe("app shell", () => {
     const fetchMock = newsFetch();
     globalThis.fetch = fetchMock as unknown as typeof fetch;
     await renderRouter(routes, { initialUrl: "/" });
-    await fireEvent.press(await screen.findByRole("button", { name: "Réglages" }));
+    await fireEvent.press(await screen.findByRole("button", { name: "Tànneef yi" }));
     expect(await screen.findByRole("radio", { name: "Wolof", checked: true })).toBeOnTheScreen();
-    expect(
-      screen.getByRole("radio", { name: "Comme le téléphone", checked: true }),
-    ).toBeOnTheScreen();
+    expect(screen.getByRole("radio", { name: "Ni telefon bi", checked: true })).toBeOnTheScreen();
   });
 
   it("opens a section from its chip, 20 stories per numbered page", async () => {

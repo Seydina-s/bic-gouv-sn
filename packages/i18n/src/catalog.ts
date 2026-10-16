@@ -16,9 +16,16 @@ export type MessageKey<T> = {
   [K in keyof T & string]: T[K] extends Message ? K : `${K}.${MessageKey<T[K]>}`;
 }[keyof T & string];
 
-/** Same shape as the reference catalog, where any message may still be missing. */
+/**
+ * Same keys as the reference catalog, where any message may still be missing. A
+ * translated message is any text (or plural forms), never the French literal.
+ */
 export type PartialCatalog<T> = {
-  [K in keyof T]?: T[K] extends Message ? T[K] : PartialCatalog<T[K]>;
+  [K in keyof T]?: T[K] extends string
+    ? string
+    : T[K] extends Message
+      ? PluralMessage
+      : PartialCatalog<T[K]>;
 };
 
 const PLURAL_FORMS: ReadonlySet<string> = new Set(["one", "many", "other"]);
