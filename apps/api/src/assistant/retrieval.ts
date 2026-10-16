@@ -173,9 +173,13 @@ function freshness(publishedOn: string | null, today: string, intent: QuestionIn
   return intent.current ? 2 * Math.exp(-days / 120) : 0.15 * Math.exp(-days / 365);
 }
 
-/** The languages searched: a Wolof question also reads the French pages (procedures…). */
+/**
+ * The languages searched: a question outside French also reads the French pages, where
+ * every official text is (16/10/2026: an English question found nothing, the English
+ * versions not existing yet).
+ */
 export function searchedLanguages(lang: Lang): Lang[] {
-  return lang === "wo" ? ["wo", "fr"] : [lang];
+  return lang === "fr" ? ["fr"] : [lang, "fr"];
 }
 
 function byWords(index: PassageIndex, question: string, lang: Lang): ScoredPassage[] {

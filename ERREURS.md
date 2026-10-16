@@ -464,3 +464,10 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : le Chrome sans écran de la CI est réglé en anglais ; l'app suit désormais la langue de l'appareil. Même cause, trouvée plus tôt, dans les tests unitaires (simulateur par défaut en anglais), corrigée là sans penser au navigateur de l'audit.
 - **Correctif** : Chrome est lancé en français (`--lang=fr-FR --accept-lang=fr-FR,fr`, `scripts/test-browser.ts`), vérifié sur la machine ; les tests unitaires fixent le français dans `apps/mobile/src/testing/jest-setup.ts`.
 - **Prévention** : règle globale « app qui suit la langue de l'appareil ».
+
+## 16/10/2026 — L'assistant ne trouvait rien aux questions en anglais
+
+- **Ce qui s'est passé** : après le déploiement de #363, la question « What did the latest Council of Ministers decide? » répondait « introuvable », alors que la même question en français trouve le communiqué du 13/10. Vu par une vérification réelle après déploiement, avant toute annonce.
+- **Cause racine** : `searchedLanguages` (`apps/api/src/assistant/retrieval.ts`) ne cherchait que dans la langue de la question, sauf pour le wolof, qui lit aussi le français. Une règle écrite pour deux langues (« le wolof est l'exception ») ; l'anglais, ajouté ensuite, cherchait dans des passages anglais qui n'existent pas encore.
+- **Correctif** : toute langue autre que le français lit aussi les pages françaises ; test qui échoue avec l'ancienne règle (vérifié).
+- **Prévention** : la règle « traitements écrits pour une seule source » (ERREURS-GLOBALES) vaut aussi pour les langues : à l'ajout d'une langue, chercher chaque test sur une langue (`=== "wo"`, `!== "fr"`) et l'écrire sur ce qui la distingue vraiment (ici : « pas le français »). Et poser une vraie question dans la nouvelle langue après chaque déploiement qui la touche.
