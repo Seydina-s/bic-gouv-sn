@@ -2,18 +2,23 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { FileArticleRepository } from "@bgs/content-store";
-import type { NewsArticle } from "@bgs/shared-types";
+import type { Institution, NewsArticle } from "@bgs/shared-types";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { QuarantineError, SourceUnreachableError } from "./lib/errors";
 import { articleContentHash } from "./merge";
-import type { SourceArticleRef, SourceProvider } from "./sources/source-provider";
-import { isWithdrawalCheckDue, reconcileWithdrawals } from "./withdrawn";
+import type { SourceArticleRef, SourceProvider, WithdrawalCheck } from "./sources/source-provider";
+import {
+  isWithdrawalCheckDue,
+  listingPagesFor,
+  MAX_HIDDEN_AT_ONCE,
+  nextWithdrawalCheck,
+  reconcileWithdrawals,
+} from "./withdrawn";
 
 // Placeholder articles, not real content.
 const idOf = (n: number) => `00000000-0000-5000-8000-${String(n).padStart(12, "0")}`;
 const urlOf = (slug: string) => `https://www.presidence.sn/fr/actualites/${slug}/`;
 
-function article(n: number, slug: string): NewsArticle {
+function article(n: number, slug: string, day = "2026-01-01"): NewsArticle {
   const translations: NewsArticle["translations"] = [
     {
       lang: "fr",
@@ -30,10 +35,10 @@ function article(n: number, slug: string): NewsArticle {
     alsoPublishedBy: [],
     category: "communiques",
     sourceUrl: urlOf(slug),
-    sourcePublishedOn: "2026-01-01",
+    sourcePublishedOn: day,
     sourceUpdatedAt: null,
     fetchedAt: "2026-09-25T10:00:00Z",
-    contentHash: articleContentHash(translations, "2026-01-01", "communiques"),
+    contentHash: articleContentHash(translations, day, "communiques"),
     version: 1,
     lang: "fr",
     translations,
@@ -59,23 +64,28 @@ function source(): SourceProvider & { read: string[] } {
     listPage: () => Promise.resolve({ refs: [listed], lastPage: 1 }),
     articleIdFor: (ref) => idOf(Number(ref.sourceId)),
     downloadMedia: () => Promise.reject(new Error("unused")),
-    fetchArticle: (ref) => {
-      read.push(ref.slug);
-      if (ref.slug === "retire") {
-        return Promise.reject(new SourceUnreachableError(urlOf(ref.slug), 404));
-      }
-      if (ref.slug === "depublie") {
-        return Promise.reject(
-          new QuarantineError(urlOf(ref.slug), "article is not published at the source"),
-        );
-      }
-      if (ref.slug === "panne") {
-        return Promise.reject(new SourceUnreachableError(urlOf(ref.slug), 503));
-      }
-      return Promise.resolve(article(3, ref.slug));
+    fetchArticle: () => Promise.reject(new Error("unused")),
+    recheck: (sourceUrl) => {
+      const slug = new URL(sourceUrl).pathname.split("/").filter(Boolean).at(-1) ?? "";
+      read.push(slug);
+      return Promise.resolve(CHECKS[slug] ?? "still-published");
     },
   };
 }
+
+/** The same site, answering every address as found: it cannot be checked. */
+function blindSource(): SourceProvider {
+  const provider: SourceProvider = source();
+  delete provider.recheck;
+  return provider;
+}
+
+/** What reading each placeholder article again says (lib/recheck.test.ts covers how). */
+const CHECKS: Record<string, WithdrawalCheck> = {
+  retire: "withdrawn",
+  depublie: "withdrawn",
+  panne: "unconfirmed",
+};
 
 let dir: string;
 let repo: FileArticleRepository;
@@ -182,5 +192,101 @@ describe("reconcileWithdrawals", () => {
     const report = await reconcileWithdrawals(source(), repo, ["fr"], { ...APPLY, apply: false });
     expect(report.hidden).toBe(2);
     expect(await hidden()).toEqual([]);
+  });
+
+  it("refuses a site that cannot tell a withdrawn article apart", async () => {
+    await expect(reconcileWithdrawals(blindSource(), repo, ["fr"], APPLY)).rejects.toThrow(
+      "cannot tell a withdrawn article apart",
+    );
+  });
+
+  it("hides nothing when too many articles vanish at once, and says so", async () => {
+    for (let n = 10; n < 10 + MAX_HIDDEN_AT_ONCE; n += 1) {
+      await repo.save(article(n, `retire-${String(n)}`));
+    }
+    const everythingGone = { ...source(), recheck: () => Promise.resolve("withdrawn" as const) };
+    const report = await reconcileWithdrawals(everythingGone, repo, ["fr"], APPLY);
+    expect(report).toMatchObject({ hidden: 0, suspicious: true });
+    expect(await hidden()).toEqual([]);
+  });
+});
+
+describe("reconcileWithdrawals on the newest listing pages only", () => {
+  /** A listing of several pages whose first page shows these stored articles. */
+  function recentListing(ids: number[]): SourceProvider & { read: string[] } {
+    const provider = source();
+    return {
+      ...provider,
+      listPage: (lang, page) =>
+        Promise.resolve({
+          lastPage: 5,
+          refs: page === 1 ? ids.map((n) => ({ ...ref(n), lang })) : [],
+        }),
+    };
+  }
+  const ref = (n: number): SourceArticleRef => ({
+    sourceId: n,
+    slug: `article-${String(n)}`,
+    lang: "fr",
+    sourceUpdatedAt: "",
+    coverSourceUrl: null,
+  });
+  const RECENT = { ...APPLY, listingPages: 1 };
+
+  it("reads again only the unlisted articles newer than the window's oldest", async () => {
+    await repo.save(article(10, "liste", "2026-10-10"));
+    await repo.save(article(11, "retire", "2026-10-12"));
+    await repo.save(article(12, "meme-jour", "2026-10-10"));
+    const provider = recentListing([10]);
+    const report = await reconcileWithdrawals(provider, repo, ["fr"], RECENT);
+    // Articles 1 to 5 (January) and the one of the window's last day are not read.
+    expect(provider.read).toEqual(["retire"]);
+    expect(report.hidden).toBe(1);
+  });
+
+  it("ignores a pinned old post at the top of the listing", async () => {
+    await repo.save(article(10, "liste", "2026-10-10"));
+    await repo.save(article(11, "retire", "2026-10-12"));
+    // A post of June 2025 pinned first, article 10 last on the page: the January
+    // articles 2 to 5 stay outside the window.
+    await repo.save(article(20, "epingle", "2025-06-01"));
+    const provider = recentListing([20, 10]);
+    await reconcileWithdrawals(provider, repo, ["fr"], RECENT);
+    expect(provider.read).toEqual(["retire"]);
+  });
+
+  it("reads nothing again when the window shows no dated article we store", async () => {
+    const provider = recentListing([99]);
+    const report = await reconcileWithdrawals(provider, repo, ["fr"], RECENT);
+    expect(provider.read).toEqual([]);
+    expect(report.missing).toEqual([]);
+  });
+});
+
+describe("nextWithdrawalCheck", () => {
+  const at = new Date("2026-10-16T02:30:00Z");
+  const target = (institution: Institution, checkable = true) => ({
+    institution,
+    langs: ["fr"] as const,
+    provider: checkable ? source() : blindSource(),
+  });
+
+  it("takes the first institution due whose site can be checked, one at a time", () => {
+    const targets = [target("presidence"), target("sante", false), target("justice")];
+    const checked = new Map<Institution, Date>([["presidence", new Date("2026-10-16T02:05:00Z")]]);
+    expect(nextWithdrawalCheck(targets, checked, at)?.institution).toBe("justice");
+    expect(nextWithdrawalCheck(targets, new Map(), at)?.institution).toBe("presidence");
+  });
+
+  it("waits for the quiet hours and for the next night", () => {
+    const targets = [target("justice")];
+    expect(nextWithdrawalCheck(targets, new Map(), new Date("2026-10-16T12:00:00Z"))).toBeNull();
+    const checked = new Map<Institution, Date>([["justice", new Date("2026-10-16T02:05:00Z")]]);
+    expect(nextWithdrawalCheck(targets, checked, at)).toBeNull();
+  });
+
+  it("reads the whole listing of presidence.sn only", () => {
+    expect(listingPagesFor("presidence")).toBeUndefined();
+    expect(listingPagesFor("primature")).toBe(3);
   });
 });

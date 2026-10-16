@@ -2,6 +2,7 @@ import { officialMediaUrl, type Lang, type NewsArticle } from "@bgs/shared-types
 import type { z } from "zod";
 import { QuarantineError } from "../../lib/errors";
 import { createPoliteHttp } from "../../lib/polite-http";
+import { lastSegmentOf, recheckWith } from "../../lib/recheck";
 import type { SourceArticleRef, SourceProvider } from "../source-provider";
 import { detailResponseSchema, listResponseSchema } from "./api-schemas";
 import { normalizeDetail, presidenceArticleId } from "./normalize";
@@ -44,6 +45,15 @@ export function createPresidenceProvider({
     return parsed.data;
   }
 
+  async function fetchArticle(ref: SourceArticleRef): Promise<NewsArticle> {
+    const detail = await getJson(
+      `/article/${encodeURIComponent(ref.slug)}`,
+      ref.lang,
+      detailResponseSchema,
+    );
+    return normalizeDetail(detail, { lang: ref.lang, fetchedAt: now().toISOString() });
+  }
+
   return {
     circuits: () => [breaker.snapshot()],
 
@@ -74,13 +84,19 @@ export function createPresidenceProvider({
       return Buffer.from(await http.read(url, (response) => response.arrayBuffer()));
     },
 
-    async fetchArticle(ref: SourceArticleRef): Promise<NewsArticle> {
-      const detail = await getJson(
-        `/article/${encodeURIComponent(ref.slug)}`,
-        ref.lang,
-        detailResponseSchema,
-      );
-      return normalizeDetail(detail, { lang: ref.lang, fetchedAt: now().toISOString() });
-    },
+    fetchArticle,
+
+    // The API answers a withdrawn article with 404, or flags it as not published.
+    recheck: (sourceUrl, lang) =>
+      recheckWith(async () => {
+        await fetchArticle({
+          sourceId: 0, // not needed to read one article
+          slug: lastSegmentOf(sourceUrl),
+          lang,
+          sourceUpdatedAt: "",
+          coverSourceUrl: null,
+        });
+        return true;
+      }),
   };
 }

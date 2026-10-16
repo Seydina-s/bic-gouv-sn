@@ -7,6 +7,7 @@ import {
 import { QuarantineError } from "../../lib/errors";
 import { stableUuid } from "../../lib/identity";
 import { createPoliteHttp } from "../../lib/polite-http";
+import { recheckPage } from "../../lib/recheck";
 import { plainLetters, sanitizeNested, unpublishable } from "../../lib/sanitize";
 import { articleContentHash } from "../../merge";
 import type { SourceArticleRef, SourceProvider } from "../source-provider";
@@ -43,6 +44,11 @@ export interface DrupalSite {
   intervalMs: number;
   /** Where the theme puts the text and photo, when not in Drupal's usual fields. */
   layout?: DrupalLayout;
+  /**
+   * The site answers 404 to an address it does not know, so a withdrawn article can
+   * be told apart (ING-04). Some answer every address as found: never checked.
+   */
+  answersNotFound?: boolean;
 }
 
 /** "/sites/default/files/styles/slider/public/a.jpg?itok=x" → the original file. */
@@ -102,6 +108,10 @@ export function createDrupalProvider(
 
   return {
     circuits: () => [http.breaker.snapshot()],
+
+    ...(site.answersNotFound === true && {
+      recheck: (sourceUrl: string) => recheckPage(http, sourceUrl),
+    }),
 
     async listPage(lang, number) {
       if (lang !== "fr") {

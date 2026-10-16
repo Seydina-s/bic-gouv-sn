@@ -5,6 +5,7 @@ import { DomUtils, parseDocument } from "htmlparser2";
 import { QuarantineError } from "../../lib/errors";
 import { stableUuid } from "../../lib/identity";
 import { createPoliteHttp } from "../../lib/polite-http";
+import { recheckPage } from "../../lib/recheck";
 import { isEmptied, plainLetters, sanitizeNested, unpublishable } from "../../lib/sanitize";
 import { articleContentHash } from "../../merge";
 import { parseDrupalListing } from "../drupal/drupal-parse";
@@ -191,5 +192,8 @@ export function createMesriProvider({
       }
       return result.data;
     },
+
+    // The site answers 404 to an article it does not know (checked on 16/10/2026).
+    recheck: (sourceUrl) => recheckPage(http, sourceUrl),
   };
 }

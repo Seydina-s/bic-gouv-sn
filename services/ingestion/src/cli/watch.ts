@@ -9,7 +9,12 @@ import {
   readSitesReview,
   writeSitesReview,
 } from "@bgs/content-store";
-import { errorCodeOf, INSTITUTION_SITES, INSTITUTIONS } from "@bgs/shared-types";
+import {
+  errorCodeOf,
+  INSTITUTION_SITES,
+  INSTITUTIONS,
+  type Institution,
+} from "@bgs/shared-types";
 import { diskSpace } from "../lib/disk-space";
 import { acquireLock } from "../lib/single-instance";
 import { openStores } from "../lib/stores";
@@ -31,7 +36,7 @@ import {
   watchedFrom,
   type WatchedSource,
 } from "../watch";
-import { isWithdrawalCheckDue, reconcileWithdrawals } from "../withdrawn";
+import { listingPagesFor, nextWithdrawalCheck, reconcileWithdrawals } from "../withdrawn";
 
 // Into PostgreSQL when DATABASE_URL is set (SCALE-02), shared with the API; else .data/.
 const { stores, inDatabase, paths, close, document } = await openStores();
@@ -155,8 +160,8 @@ async function report(outcome: PassOutcome, lastChangeAt: Date | null): Promise<
   return delay;
 }
 
-// Articles withdrawn by the source are hidden, once a night (ING-03).
-let lastWithdrawalCheckAt: Date | null = null;
+// Articles withdrawn by the source are hidden, each institution once a night (ING-03, ING-04).
+const lastWithdrawalChecks = new Map<Institution, Date>();
 // The ministry sites not collected yet, looked at again once a week (GOV-08).
 const sitesReview = document("sites-review");
 async function reviewSitesIfDue() {
@@ -211,23 +216,31 @@ async function collectEntreprendreIfDue() {
 
 async function checkWithdrawalsIfDue() {
   const now = new Date();
-  if (!isWithdrawalCheckDue(now, lastWithdrawalCheckAt)) {
+  const target = nextWithdrawalCheck(sources, lastWithdrawalChecks, now);
+  if (target === null) {
     return;
   }
-  lastWithdrawalCheckAt = now;
+  lastWithdrawalChecks.set(target.institution, now);
   try {
-    const { hidden, restored, missing } = await reconcileWithdrawals(
-      provider,
+    const { hidden, restored, missing, suspicious } = await reconcileWithdrawals(
+      target.provider,
       repository,
-      ["fr", "wo"],
-      { apply: true, now: () => new Date(), institution: "presidence" },
+      target.langs,
+      {
+        apply: true,
+        now: () => new Date(),
+        institution: target.institution,
+        listingPages: listingPagesFor(target.institution),
+      },
     );
     process.stdout.write(
-      `${now.toISOString()} withdrawals checked · ${String(missing.length)} unlisted · newly hidden ${String(hidden)} · shown again ${String(restored)}\n`,
+      `${now.toISOString()} withdrawals checked on ${target.name} · ${String(missing.length)} unlisted · newly hidden ${String(hidden)} · shown again ${String(restored)}${suspicious ? " · too many at once: nothing hidden, check the site" : ""}\n`,
     );
   } catch (error) {
     // Retried the next night; the ordinary passes are not affected.
-    process.stdout.write(`${now.toISOString()} ✗ withdrawal check: ${String(error)}\n`);
+    process.stdout.write(
+      `${now.toISOString()} ✗ withdrawal check on ${target.name}: ${String(error)}\n`,
+    );
   }
 }
 

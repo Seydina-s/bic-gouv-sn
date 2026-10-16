@@ -2,7 +2,8 @@ import type { DrupalSite } from "./drupal-provider";
 
 /*
  * Ministry sites built with Drupal 7 (docs/sources.md, checked on 09/10/2026). Both
- * ask robots for 10 seconds between two visits (Crawl-delay: 10).
+ * ask robots for 10 seconds between two visits (Crawl-delay: 10). Both also answer
+ * an unknown address as found (16/10/2026): their withdrawals cannot be checked.
  */
 
 export const DRUPAL_MINISTRIES = {
@@ -30,6 +31,7 @@ export const DRUPAL_MINISTRIES = {
     // Drupal 9: the communiqués are listed here, each at "/node/<number>", dated on its page.
     sections: [{ path: "/communique", articlePrefix: "/node/", category: "communiques" }],
     intervalMs: 1000,
+    answersNotFound: true,
   },
   economie: {
     institution: "economie",
@@ -39,5 +41,6 @@ export const DRUPAL_MINISTRIES = {
     sections: [{ path: "/fr/actualites", articlePrefix: "/fr/blog/", category: "actualites" }],
     layout: { body: { container: "whole-content", child: "content" }, image: "full-image" },
     intervalMs: 1000,
+    answersNotFound: true,
   },
 } as const satisfies Record<string, DrupalSite>;

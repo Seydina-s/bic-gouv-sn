@@ -7,7 +7,8 @@ export interface ListingPosition {
 }
 
 export interface WalkOptions {
-  maxPages?: number;
+  /** Pages read, newest first; the whole listing when undefined. */
+  maxPages?: number | undefined;
   /** Called after each page, once its entries are visited. */
   onPage?: (position: ListingPosition) => void;
 }
