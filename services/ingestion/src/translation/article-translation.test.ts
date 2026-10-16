@@ -74,14 +74,19 @@ function batches(reply: (request: BatchRequest) => BatchResult) {
   };
 }
 
-const translated = (request: BatchRequest): BatchResult => ({
-  customId: request.customId,
-  ok: true,
-  text: JSON.stringify({ title: "Tur bu fictif", bodyHtml: WOLOF }),
-  inputTokens: 1000,
-  outputTokens: 200,
-  truncated: false,
-});
+/** A successful batch reply carrying `text`, as the model would write it. */
+const replyWith =
+  (text: string) =>
+  (request: BatchRequest): BatchResult => ({
+    customId: request.customId,
+    ok: true,
+    text,
+    inputTokens: 1000,
+    outputTokens: 200,
+    truncated: false,
+  });
+
+const translated = replyWith(JSON.stringify({ title: "Tur bu fictif", bodyHtml: WOLOF }));
 
 let dir: string;
 let articles: FileArticleRepository;
@@ -223,13 +228,12 @@ describe("the English translation runs", () => {
       target: ENGLISH,
       state: fileDocument(join(dir, "runs-en.json")),
     });
-  const inEnglish = (request: BatchRequest): BatchResult => ({
-    ...translated(request),
-    text: JSON.stringify({
+  const inEnglish = replyWith(
+    JSON.stringify({
       title: "A made-up title",
       bodyHtml: "<p>A made-up English text for the translation tests.</p>",
     }),
-  });
+  );
 
   it("translates every article without English, Wolof ones included, and saves it as English", async () => {
     const wolof = article(4, "2025-12-01");
@@ -305,7 +309,7 @@ describe("a trial", () => {
   });
 
   it("says why a reply was refused", async () => {
-    const service = batches((request) => ({ ...translated(request), text: "pas du JSON" }));
+    const service = batches(replyWith("pas du JSON"));
     const batchId = await translation.submitTrial(service.client, [article(1, "2025-11-02")]);
     service.end();
     expect(await translation.trialReplies(service.client, batchId)).toEqual([
