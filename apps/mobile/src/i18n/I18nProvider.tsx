@@ -25,7 +25,7 @@ export interface I18nContextValue {
 }
 
 export type LangChoice = Lang | "auto";
-const CHOICES: readonly LangChoice[] = ["auto", "fr", "wo"];
+const CHOICES: readonly LangChoice[] = ["auto", "fr", "wo", "en"];
 
 export const I18nContext = createContext<I18nContextValue | null>(null);
 

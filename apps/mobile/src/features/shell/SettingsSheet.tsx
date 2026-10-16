@@ -79,6 +79,7 @@ export function SettingsSheet({ visible, onClose }: { visible: boolean; onClose:
     },
     { value: "fr", label: t("settings.languageFr"), icon: "FR" },
     { value: "wo", label: t("settings.languageWo"), icon: "WO" },
+    { value: "en", label: t("settings.languageEn"), icon: "EN" },
   ];
   const dataSavings: Segment<DataSaverPreference>[] = [
     { value: "never", label: t("settings.dataSaverNever"), icon: ImageIcon },

@@ -14,7 +14,7 @@ import { WovenIn } from "../news/WovenIn";
 import { OnboardingPath } from "./OnboardingPath";
 import { dimWhenPressed } from "../../components/press-feedback";
 
-/** Language picker: the two official languages, named in their own words. */
+/** Language picker: the app's three languages, named in their own words. */
 function LanguageChoice() {
   const { theme } = useTheme();
   const { t, lang, choice, setLang } = useTranslation();
@@ -24,6 +24,7 @@ function LanguageChoice() {
   const options = [
     { value: "fr" as const, label: t("settings.languageFr") },
     { value: "wo" as const, label: t("settings.languageWo") },
+    { value: "en" as const, label: t("settings.languageEn") },
   ];
   return (
     <View accessibilityRole="radiogroup" style={{ gap: space.md }}>

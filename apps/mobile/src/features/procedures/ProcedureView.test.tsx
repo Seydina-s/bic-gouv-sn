@@ -117,6 +117,17 @@ describe("the page of a procedure", () => {
     expect(screen.getByRole("button", { name: "Pause" })).toBeOnTheScreen();
   });
 
+  it("says in English that the sheet is in French, and still reads it in French", async () => {
+    await AsyncStorage.setItem("bgs-language", "en");
+    await show(SHEET);
+    expect(await screen.findByText("This page is only available in French")).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole("button", { name: "Listen" }));
+    expect(Speech.speak).toHaveBeenCalledWith(
+      SHEET.title,
+      expect.objectContaining({ language: "fr-FR" }),
+    );
+  });
+
   it("leads to the nearest service the sheet names, only when one is verified", async () => {
     const where = { ...SHEET, blocks: [p("Où s'adresser ?"), p("Au commissariat de police.")] };
     const onOpen = jest.fn();

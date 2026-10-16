@@ -1,3 +1,4 @@
+import type { FrCatalog, Translate } from "@bgs/i18n";
 import { withAlpha } from "@bgs/ui";
 import type { IconProps as PhosphorProps } from "phosphor-react-native";
 import { CalendarCheckIcon as CalendarCheck } from "phosphor-react-native/src/icons/CalendarCheck";
@@ -30,6 +31,11 @@ const ICONS: Record<BriefKind, ComponentType<PhosphorProps>> = {
 /** The name of each fact, shown in the panel and read aloud. */
 export function useBriefLabels(): Record<BriefKind, string> {
   const { t } = useTranslation();
+  return briefLabelsOf(t);
+}
+
+/** The name of each fact in the language of `t`. */
+export function briefLabelsOf(t: Translate<FrCatalog>): Record<BriefKind, string> {
   return {
     who: t("procedures.briefWho"),
     documents: t("procedures.documents"),

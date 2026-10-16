@@ -8,9 +8,11 @@ describe("resolveLang", () => {
 
   it.each([
     [["wo-SN", "fr-FR"], "wo"],
-    [["en-US", "fr_SN"], "fr"],
+    [["en-US", "fr_SN"], "en"],
+    [["pt-BR", "fr_SN"], "fr"],
     [["FR-sn"], "fr"],
-    [["en-US"], "fr"],
+    [["en-US"], "en"],
+    [["pt-BR"], "fr"],
     [[], "fr"],
   ] as const)("device %j → %s", (tags, expected) => {
     expect(resolveLang(null, tags)).toBe(expected);
