@@ -377,7 +377,6 @@ export const fr = {
     quietOn: "Oui",
     quietOnSpoken: "Oui, aucune notification entre 22\u00a0h et 7\u00a0h",
     quietOff: "Non",
-    notificationTopics: "Rubriques",
     notificationsBlocked:
       "Les notifications sont bloquées pour Bic Gouv Sn dans les réglages du téléphone.",
     openPhoneSettings: "Ouvrir les réglages du téléphone",

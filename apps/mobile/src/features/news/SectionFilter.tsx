@@ -5,10 +5,11 @@ import { useRef, useState } from "react";
 import { ScrollView } from "react-native";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
-import { categoryLabelKey, SECTION_FILTERS } from "./category";
+import { categoryLabelKey } from "./category";
 import { FilterSheet } from "./FilterSheet";
 import { encodeFilters, NO_FILTERS } from "./filters";
 import { SectionChip } from "./SectionChip";
+import { useOfferedSections } from "./useOfferedSections";
 
 export interface SectionFilterProps {
   /** Selected section slug, or null for every section. */
@@ -27,6 +28,7 @@ export function SectionFilter({ selected, onSelect }: SectionFilterProps) {
   const row = useRef<ScrollView>(null);
   const router = useRouter();
   const [filtering, setFiltering] = useState(false);
+  const sections = useOfferedSections(selected === null ? [] : [selected]);
 
   const chip = (category: string | null, label: string) => {
     const active = selected === category;
@@ -40,8 +42,9 @@ export function SectionFilter({ selected, onSelect }: SectionFilterProps) {
           onSelect(category);
         }}
         onLayout={(event) => {
-          // The selected section is brought into view (it may sit past the screen edge).
-          if (active) {
+          // A chosen section is brought into view (it may sit past the screen edge);
+          // "Tout" is not: the row then starts at its very beginning, "Filtrer" first.
+          if (active && category !== null) {
             row.current?.scrollTo({ x: Math.max(0, event.nativeEvent.layout.x - space.lg) });
           }
         }}
@@ -80,7 +83,7 @@ export function SectionFilter({ selected, onSelect }: SectionFilterProps) {
             router.push("/institutions");
           }}
         />
-        {SECTION_FILTERS.map((category) => chip(category, t(categoryLabelKey(category))))}
+        {sections.map((category) => chip(category, t(categoryLabelKey(category))))}
       </ScrollView>
       <FilterSheet
         visible={filtering}

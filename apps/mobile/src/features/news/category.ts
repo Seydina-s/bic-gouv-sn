@@ -1,4 +1,4 @@
-const KNOWN = [
+export const KNOWN_CATEGORIES = [
   "conseil-des-ministres",
   "communiques",
   "international",
@@ -9,7 +9,7 @@ const KNOWN = [
   "actualites",
 ] as const;
 
-type KnownCategory = (typeof KNOWN)[number];
+type KnownCategory = (typeof KNOWN_CATEGORIES)[number];
 
 /**
  * Sections offered by the "Filtrer" panel, those with articles only: "Actualités"
@@ -26,13 +26,18 @@ export const PANEL_SECTIONS: readonly KnownCategory[] = [
   "agenda",
 ];
 
-/** The panel's sections that have articles, in its order. */
+/**
+ * The sections offered wherever one is chosen (the front page's chips, the "Filtrer"
+ * panel, the notifications by section): those that have articles. "Actualités" was
+ * missing (15/10/2026): someone following chosen sections never heard of the
+ * ministries' news, and "Agenda", always empty, was offered instead.
+ */
 export function panelSections(present: readonly string[]): KnownCategory[] {
   return PANEL_SECTIONS.filter((slug) => present.includes(slug));
 }
 
 export function isKnown(slug: string): slug is KnownCategory {
-  return (KNOWN as readonly string[]).includes(slug);
+  return (KNOWN_CATEGORIES as readonly string[]).includes(slug);
 }
 
 /** i18n key of a section label; unknown sections read as "Actualité". */

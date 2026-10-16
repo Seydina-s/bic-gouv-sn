@@ -23,7 +23,7 @@ import LicencesScreen from "./app/licences";
 import SearchScreen from "./app/search";
 import ServiceScreen from "./app/service/[id]";
 import { clearMapCalls, mapCalls, offlineRequests } from "./testing/maplibre-mock";
-import { DETAIL, LIST, newsFetch } from "./testing/news-fixtures";
+import { DETAIL, LIST, newsFetch, SECTIONS } from "./testing/news-fixtures";
 import { PROCEDURE_LIST } from "./testing/procedure-fixtures";
 
 jest.mock("expo-localization", () => ({ getLocales: () => [{ languageTag: "fr-SN" }] }));
@@ -353,7 +353,10 @@ describe("app shell", () => {
     // The front page is still mounted underneath (a pop-up, not a new page).
     expect(screen.getByTestId("news-feed", { includeHiddenElements: true })).toBeTruthy();
     await fireEvent.press(first(screen.getAllByRole("button", { name: "Fermer les réglages" })));
-    expect(screen.queryByRole("radio", { name: "Sombre" })).toBeNull();
+    // Gone once the sheet has slid away, never cut off mid-way.
+    await waitFor(() => {
+      expect(screen.queryByRole("radio", { name: "Sombre" })).toBeNull();
+    });
     expect(screen.getByTestId("news-feed")).toBeOnTheScreen();
   });
 
@@ -610,8 +613,13 @@ describe("app shell", () => {
   });
 
   it("opens a section from its chip, 20 stories per numbered page", async () => {
+    // Only sections that have articles get a chip.
+    const withReleases = {
+      sections: [...SECTIONS.sections, { category: "communiques", total: 45, items: [] }],
+    };
     const fetchMock = newsFetch({
       list: () => new Response(JSON.stringify({ ...LIST, total: 45 })),
+      sections: () => new Response(JSON.stringify(withReleases)),
     });
     globalThis.fetch = fetchMock as unknown as typeof fetch;
     await renderRouter(routes, { initialUrl: "/" });

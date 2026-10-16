@@ -1,13 +1,6 @@
 import { createPushClient } from "../../api/push-client";
-import {
-  isInvitationDue,
-  QUIET_HOURS,
-  subscriptionFor,
-  toggleTopic,
-  topicsFromText,
-  topicsToText,
-} from "./notification-preferences";
-import { articleIdOf, articleIdOfResponse } from "./useNotificationTaps";
+import { isInvitationDue, QUIET_HOURS, subscriptionFor } from "./notification-preferences";
+import { articleIdOf, articleIdOfResponse, firstTimeFor, responseKey } from "./useNotificationTaps";
 
 const TOKEN = "ExponentPushToken[abcdefghij0123456789]";
 
@@ -73,25 +66,15 @@ describe("the push subscription client", () => {
   });
 });
 
-describe("the sections a phone follows", () => {
-  it("start from every section, then keep the ones touched", () => {
-    expect(toggleTopic(null, "discours")).toEqual(["discours"]);
-    expect(toggleTopic(["discours"], "communiques")).toEqual(["discours", "communiques"]);
-    expect(toggleTopic(["discours", "communiques"], "discours")).toEqual(["communiques"]);
-    expect(toggleTopic(["discours"], null)).toBeNull();
+describe("a touched notification", () => {
+  const response = (identifier: string) => ({
+    notification: { request: { identifier, content: { data: { articleId: "a" } } } },
   });
 
-  it("never stop by mistake: removing the last one means every section again", () => {
-    expect(toggleTopic(["discours"], "discours")).toBeNull();
-  });
-
-  it("are remembered as text, unknown sections left aside", () => {
-    const known = ["discours", "communiques"];
-    expect(topicsFromText(topicsToText(["discours"]), known)).toEqual(["discours"]);
-    expect(topicsFromText(topicsToText(null), known)).toBeNull();
-    expect(topicsFromText("disparue,discours", known)).toEqual(["discours"]);
-    expect(topicsFromText("disparue", known)).toBeNull();
-    expect(topicsFromText(null, known)).toBeNull();
-    expect(subscriptionFor(TOKEN, "on", "fr", ["discours"]).topics).toEqual(["discours"]);
+  it("opens its article once, even delivered twice at a cold start", () => {
+    expect(firstTimeFor(response("notification-1"))).toBe(true);
+    expect(firstTimeFor(response("notification-1"))).toBe(false);
+    expect(firstTimeFor(response("notification-2"))).toBe(true);
+    expect(responseKey({})).toBeNull();
   });
 });

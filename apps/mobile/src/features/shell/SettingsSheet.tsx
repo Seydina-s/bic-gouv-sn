@@ -16,6 +16,7 @@ import { XIcon as X } from "phosphor-react-native/src/icons/X";
 import { useEffect, useState } from "react";
 import {
   Animated,
+  Easing,
   Linking,
   Modal,
   Pressable,
@@ -36,9 +37,6 @@ import { type UsageConsent, useUsageStats } from "../usage-stats/UsageStatsProvi
 import type { NotificationChoice, QuietChoice } from "../notifications/notification-preferences";
 import { useNotifications } from "../notifications/NotificationsProvider";
 import { useOnboardingDone } from "../onboarding/OnboardingProvider";
-import { toggleTopic } from "../notifications/notification-preferences";
-import { categoryLabelKey, SECTION_FILTERS } from "../news/category";
-import { SectionChip } from "../news/SectionChip";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useReduceMotion } from "../../theme/useSystemAccessibility";
 import { useTheme } from "../../theme/useTheme";
@@ -120,27 +118,45 @@ export function SettingsSheet({ visible, onClose }: { visible: boolean; onClose:
   ];
   const close = onClose;
   const reduceMotion = useReduceMotion();
-  const [rise] = useState(() => new Animated.Value(0));
+  const [shown, setShown] = useState(visible);
+  const [presence] = useState(() => new Animated.Value(0));
+  // Opened: the window comes first, then the panel appears in it.
+  if (visible && !shown) {
+    setShown(true);
+  }
 
-  // The panel rises from the bottom (a cut when "reduce motion" is on).
+  // One movement for the veil and the panel (owner's request, 15/10/2026: the old fade
+  // of the window and the cut of the panel left letters on screen as it closed). In:
+  // the panel rises a little as it appears; out: both fade together, faster, and the
+  // window closes only once they are gone. A plain fade when motion is reduced.
   useEffect(() => {
-    if (!visible) {
-      rise.setValue(0);
-      return;
+    if (!shown) {
+      return undefined;
     }
-    if (reduceMotion !== false) {
-      rise.setValue(1);
-      return;
-    }
-    const { damping, stiffness, mass } = theme.motion.spring.gentle;
-    Animated.spring(rise, { toValue: 1, damping, stiffness, mass, useNativeDriver: true }).start();
-  }, [visible, reduceMotion, rise, theme.motion.spring.gentle]);
+    const { duration } = theme.motion;
+    const animation = Animated.timing(presence, {
+      toValue: visible ? 1 : 0,
+      duration: visible ? duration.normal : duration.exitNormal,
+      easing: visible ? Easing.out(Easing.cubic) : Easing.in(Easing.cubic),
+      useNativeDriver: true,
+    });
+    animation.start(({ finished }) => {
+      if (finished && !visible) {
+        setShown(false);
+      }
+    });
+    return () => {
+      animation.stop();
+    };
+  }, [visible, shown, presence, theme.motion]);
+
+  const rise = reduceMotion === false ? space.xl : 0;
 
   return (
     <Modal
-      visible={visible}
+      visible={shown}
       transparent
-      animationType="fade"
+      animationType="none"
       statusBarTranslucent
       navigationBarTranslucent
       onRequestClose={close}
@@ -152,19 +168,19 @@ export function SettingsSheet({ visible, onClose }: { visible: boolean; onClose:
           onPress={close}
           style={StyleSheet.absoluteFill}
         >
-          <GlassBackdrop strength="veil" />
+          <Animated.View style={[StyleSheet.absoluteFill, { opacity: presence }]}>
+            <GlassBackdrop strength="veil" />
+          </Animated.View>
         </Pressable>
         <Animated.View
           accessibilityViewIsModal
           style={[
             styles.sheet,
             {
+              opacity: presence,
               transform: [
                 {
-                  translateY: rise.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [space.xxxl * 2, 0],
-                  }),
+                  translateY: presence.interpolate({ inputRange: [0, 1], outputRange: [rise, 0] }),
                 },
               ],
             },
@@ -242,35 +258,6 @@ export function SettingsSheet({ visible, onClose }: { visible: boolean; onClose:
                       selected={notifications.quiet}
                       onSelect={notifications.setQuiet}
                     />
-                    <Text
-                      accessibilityRole="header"
-                      style={[textStyle.label, { color: color.textSecondary }]}
-                    >
-                      {t("settings.notificationTopics")}
-                    </Text>
-                    <View style={[styles.chips, { gap: space.sm }]}>
-                      <SectionChip
-                        category={null}
-                        label={t("feed.allSections")}
-                        active={notifications.topics === null}
-                        role="checkbox"
-                        onPress={() => {
-                          notifications.setTopics(toggleTopic(notifications.topics, null));
-                        }}
-                      />
-                      {SECTION_FILTERS.map((category) => (
-                        <SectionChip
-                          key={category}
-                          category={category}
-                          label={t(categoryLabelKey(category))}
-                          active={notifications.topics?.includes(category) ?? false}
-                          role="checkbox"
-                          onPress={() => {
-                            notifications.setTopics(toggleTopic(notifications.topics, category));
-                          }}
-                        />
-                      ))}
-                    </View>
                   </>
                 )}
               </View>
