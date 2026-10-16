@@ -135,3 +135,10 @@ Mise à jour du 15/10/2026 : points 43 à 46 tranchés le 12/10 (Finances relay�
 | 56 | **Dossier vide `C:\bic-gouv-sn-w3`** : reste du nettoyage, vide mais verrouillé contre la suppression automatique. Le supprimer à la main dans l'Explorateur (clic droit, Supprimer). Même chose, si vous êtes d'accord, pour `C:\bic-gouv-sn-work` : une ancienne copie qui n'est plus reliée au dépôt (tout son contenu utile est déjà dans `main`), volumineuse. | Rangement et place disque ; aucun travail perdu | CLEAN-01 |
 
 Mise à jour du 15/10/2026 (soir) : points 47 (suppression faite), 48 (option A livrée), 49 (cause trouvée et corrigée) et 51 (copies retirées) réglés. Restent 50, 52 à 55.
+
+Mise à jour du 16/10/2026 (après-midi) : points 57 et 58 ajoutés.
+
+| # | Quoi | Pourquoi / effet si ça attend | Réf. backlog |
+|---|---|---|---|
+| 57 | **Lancer le déploiement** : dans un terminal Git Bash, `bash /c/Users/HP/bgs-ops/deploy.sh` (la protection de sécurité m'a refusé ce redémarrage des services en marche). Il relance l'API, la console, la surveillance et les voix sur la dernière version (#356). | Sans lui, la surveillance continue de ne vérifier les retraits que sur presidence.sn ; l'article de la Primature retiré (discours FILDAK) reste affiché jusque-là | ING-04 |
+| 58 | **Phase multilingue** (chiffrage complet : `docs/cadrage/phase-multilingue.md`) : (1) période à traduire : tout l'historique (≈ 255 $ au total), depuis avril 2024 (≈ 146 $, recommandé) ou depuis octobre 2025 (≈ 80 $) ; (2) modèle de l'anglais : Sonnet 5 (recommandé) ou Opus 5.5, après un essai à l'aveugle sur 15 articles (≈ 0,20 $) ; (3) accent de la voix anglaise : américain, britannique ou les deux ; (4) interface en wolof : traduction automatique marquée tout de suite, ou attendre un relecteur natif ; (5) voix : file d'attente sur le serveur actuel (gratuit, ≈ 3 semaines) ou second serveur temporaire (≈ 40 $ par mois) ; (6) accord sur le budget et limite de dépense dans la console Anthropic | Le travail sans coût (anglais dans le modèle, langue de toute l'app) peut commencer sans attendre ; aucune traduction ni voix payante avant votre accord | ML-07 |
