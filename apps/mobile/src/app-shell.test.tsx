@@ -175,6 +175,30 @@ describe("first run", () => {
     });
     expect((await screen.findAllByText("Titre de test A"))[0]).toBeOnTheScreen();
   });
+
+  it("offers English, and once chosen the whole app speaks English", async () => {
+    await AsyncStorage.removeItem("bgs-onboarding");
+    await renderRouter(routes, { initialUrl: "/" });
+    expect(await screen.findByText("Choisissez votre langue")).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole("radio", { name: "English" }));
+    expect(screen.getByText("Choose your language")).toBeOnTheScreen();
+    for (const title of [
+      "The Government, in one place",
+      "Always the source",
+      "Keep what matters, even without a network",
+    ]) {
+      await fireEvent.press(screen.getByRole("button", { name: "Next" }));
+      expect(await screen.findByText(title)).toBeOnTheScreen();
+    }
+    await fireEvent.press(screen.getByRole("button", { name: "Get started" }));
+    await waitFor(() => {
+      expect(screen.queryByText("Keep what matters, even without a network")).toBeNull();
+    });
+    // The app itself: English navigation, the articles still there (shown in French).
+    expect(await screen.findByRole("tab", { name: "Home" })).toBeOnTheScreen();
+    expect((await screen.findAllByText("Titre de test A"))[0]).toBeOnTheScreen();
+    expect(await AsyncStorage.getItem("bgs-language")).toBe("en");
+  });
 });
 
 describe("app shell", () => {

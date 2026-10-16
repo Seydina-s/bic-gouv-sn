@@ -1,18 +1,18 @@
-import type { Lang } from "@bgs/shared-types";
+import { langSchema, type Lang } from "@bgs/shared-types";
 import { findMissingMessages, type MessageTree } from "./catalog";
 
 /**
- * The language chosen at onboarding always wins. Before that, Wolof is used if
- * the phone lists it first among Wolof/French; French otherwise.
+ * The language chosen at onboarding always wins. Before that, the first of the
+ * app's languages (Wolof, French, English) the phone lists; French otherwise.
  */
 export function resolveLang(chosen: Lang | null, deviceLanguageTags: readonly string[]): Lang {
   if (chosen !== null) {
     return chosen;
   }
   for (const tag of deviceLanguageTags) {
-    const language = tag.toLowerCase().split(/[-_]/)[0];
-    if (language === "wo" || language === "fr") {
-      return language;
+    const parsed = langSchema.safeParse(tag.toLowerCase().split(/[-_]/)[0]);
+    if (parsed.success) {
+      return parsed.data;
     }
   }
   return "fr";

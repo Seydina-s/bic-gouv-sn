@@ -19,6 +19,14 @@ export type { ApiClientOptions as NewsClientOptions } from "./json-getter";
 export type StoryFilter =
   { category: string } | { publisher: string } | { params: Readonly<Record<string, string>> };
 
+/**
+ * The language of the contents asked: in Wolof or English, an article without a
+ * version in that language comes in French instead of being left out (16/10/2026).
+ */
+export function langQuery(lang: Lang): Record<string, string> {
+  return lang === "fr" ? { lang } : { lang, fallback: "fr" };
+}
+
 /** Stories per numbered page of a section. */
 export const SECTION_PAGE_SIZE = 20;
 /** Stories per front page row, before "Voir plus". */
@@ -39,7 +47,7 @@ export function createNewsClient(options: ApiClientOptions) {
       signal?: AbortSignal,
       category: string | null = null,
     ): Promise<NewsListResponse> {
-      const query = new URLSearchParams({ lang, limit: "20" });
+      const query = new URLSearchParams({ ...langQuery(lang), limit: "20" });
       if (cursor !== null) {
         query.set("cursor", cursor);
       }
@@ -59,7 +67,7 @@ export function createNewsClient(options: ApiClientOptions) {
       signal?: AbortSignal,
     ): Promise<NewsListResponse> {
       const query = new URLSearchParams({
-        lang,
+        ...langQuery(lang),
         limit: String(SECTION_PAGE_SIZE),
         ...("params" in filter ? filter.params : filter),
         page: String(page),
@@ -68,26 +76,32 @@ export function createNewsClient(options: ApiClientOptions) {
     },
     /** How many stories each institution has, for the list of institutions. */
     publishers(lang: Lang, signal?: AbortSignal): Promise<NewsPublishersResponse> {
-      return getJson(`/v1/news/publishers?lang=${lang}`, readNewsPublishers, signal);
+      const query = new URLSearchParams(langQuery(lang));
+      return getJson(`/v1/news/publishers?${query.toString()}`, readNewsPublishers, signal);
     },
     /** The newest stories of every section, for the front page rows (one request). */
     sections(lang: Lang, signal?: AbortSignal): Promise<NewsSectionsResponse> {
-      const query = new URLSearchParams({ lang, perSection: String(ROW_SIZE) });
+      const query = new URLSearchParams({ ...langQuery(lang), perSection: String(ROW_SIZE) });
       return getJson(`/v1/news/sections?${query.toString()}`, readNewsSections, signal);
     },
     /** Stories matching a query (accents and case ignored), best matches first. */
     searchNews(lang: Lang, query: string, signal?: AbortSignal): Promise<NewsListResponse> {
-      const params = new URLSearchParams({ lang, q: query, limit: "30" });
+      const params = new URLSearchParams({ ...langQuery(lang), q: query, limit: "30" });
       return getJson(`/v1/news/search?${params.toString()}`, readNewsList, signal);
     },
     /** Newest story of one section, or null when the section has none in this language. */
     async latestIn(lang: Lang, category: string, signal?: AbortSignal) {
-      const query = new URLSearchParams({ lang, limit: "1", category });
+      const query = new URLSearchParams({ ...langQuery(lang), limit: "1", category });
       const page = await getJson(`/v1/news?${query.toString()}`, readNewsList, signal);
       return page.items[0] ?? null;
     },
     getNews(id: string, lang: Lang, signal?: AbortSignal): Promise<NewsDetail> {
-      return getJson(`/v1/news/${encodeURIComponent(id)}?lang=${lang}`, readNewsDetail, signal);
+      const query = new URLSearchParams(langQuery(lang));
+      return getJson(
+        `/v1/news/${encodeURIComponent(id)}?${query.toString()}`,
+        readNewsDetail,
+        signal,
+      );
     },
   };
 }

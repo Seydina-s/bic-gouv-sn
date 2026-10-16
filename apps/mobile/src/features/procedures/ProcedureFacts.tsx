@@ -1,5 +1,6 @@
+import type { FrCatalog, Translate } from "@bgs/i18n";
 import type { ProcedureSummary } from "@bgs/shared-types";
-import { useCallback } from "react";
+import { useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
@@ -11,12 +12,14 @@ export interface ProcedureFact {
 }
 
 /** A fee in words: a fee of 0 at the source means the procedure is free. */
+/** How a fee is said in the language of `t` ("Gratuit" for 0). */
+export function feeWordingOf(t: Translate<FrCatalog>): (amount: number) => string {
+  return (amount: number) => (amount === 0 ? t("procedures.free") : formatFcfa(amount));
+}
+
 export function useFeeWording(): (amount: number) => string {
   const { t } = useTranslation();
-  return useCallback(
-    (amount: number) => (amount === 0 ? t("procedures.free") : formatFcfa(amount)),
-    [t],
-  );
+  return useMemo(() => feeWordingOf(t), [t]);
 }
 
 /**

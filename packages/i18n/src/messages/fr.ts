@@ -18,6 +18,8 @@ export const fr = {
     sourceAttribution: "Source\u00a0: {source}",
     alsoPublishedBy: "Aussi publi\u00e9 par\u00a0: {institutions}",
     machineTranslation: "Traduction automatique",
+    /** An article shown in French because it has no version in the language chosen. */
+    onlyInFrench: "Disponible en français seulement",
     listen: "Écouter",
     pause: "Pause",
     resume: "Reprendre",
@@ -241,6 +243,7 @@ export const fr = {
     usefulLinks: "Liens utiles",
     related: "Démarches liées",
     goOfficial: "Faire la démarche sur e-senegal.sn",
+    onlyInFrench: "Fiche disponible en français seulement",
     nextProcedures: "Démarches suivantes",
     nearest: {
       mairie: "Trouver la mairie la plus proche",
@@ -357,6 +360,8 @@ export const fr = {
     languageAuto: "Comme le téléphone",
     languageFr: "Français",
     languageWo: "Wolof",
+    /** Each language named in its own words. */
+    languageEn: "English",
     languageWoMachine:
       "L'interface en wolof est une traduction automatique, en attente de relecture.",
     dataSaver: "Économie de données",

@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { act, fireEvent, render, screen } from "@testing-library/react-native";
 import type { Block } from "@bgs/shared-types";
 import * as Speech from "expo-speech";
@@ -47,7 +48,8 @@ describe("createNewsClient", () => {
     });
     await client.listNews("wo", "abc");
     expect(fetchImpl.mock.calls[0]).toEqual(
-      expect.arrayContaining(["https://api.test/v1/news?lang=wo&limit=20&cursor=abc"]),
+      // In Wolof, an article without a Wolof version comes in French (fallback).
+      expect.arrayContaining(["https://api.test/v1/news?lang=wo&fallback=fr&limit=20&cursor=abc"]),
     );
   });
 
@@ -223,6 +225,37 @@ describe("BlockRenderer", () => {
       </TestProviders>,
     );
     expect(screen.getByLabelText("Salle du Conseil")).toHaveProp("testID", "cover-image");
+  });
+});
+
+describe("an article without a version in the language chosen", () => {
+  afterEach(async () => {
+    await AsyncStorage.clear();
+  });
+
+  it("is shown in French, saying so under its title", async () => {
+    await AsyncStorage.setItem("bgs-language", "en");
+    await render(
+      <TestProviders>
+        <ArticleView
+          detail={{ ...DETAIL, lang: "fr" }}
+          isPending={false}
+          paneWidth={390}
+          bottomInset={0}
+        />
+      </TestProviders>,
+    );
+    expect(await screen.findByText(/Only available in French/)).toBeOnTheScreen();
+  });
+
+  it("says nothing when it is in the language chosen", async () => {
+    await render(
+      <TestProviders>
+        <ArticleView detail={DETAIL} isPending={false} paneWidth={390} bottomInset={0} />
+      </TestProviders>,
+    );
+    expect(await screen.findByText(DETAIL.title)).toBeOnTheScreen();
+    expect(screen.queryByText(/Disponible en français seulement/)).toBeNull();
   });
 });
 
