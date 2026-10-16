@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { readApiUrl } from "./config";
-import { formatClockTime, formatDay, formatDuration } from "./format";
+import { formatClockTime, formatDay, formatDuration, formatGigabytes } from "./format";
 import { t } from "./i18n";
 import { themeCss } from "./theme-css";
 
@@ -15,6 +15,13 @@ describe("formatDuration", () => {
     [200_000, "2 j 7 h"],
   ])("%s s → %s", (seconds, expected) => {
     expect(formatDuration(seconds, t)).toBe(expected);
+  });
+});
+
+describe("formatGigabytes", () => {
+  it("shows gigabytes with one French decimal at most", () => {
+    expect(formatGigabytes(10.5 * 1024 ** 3)).toBe("10,5");
+    expect(formatGigabytes(255 * 1024 ** 3)).toBe("255");
   });
 });
 

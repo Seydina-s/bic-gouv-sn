@@ -25,6 +25,13 @@ export function formatDuration(seconds: number, t: Translate<AdminFrCatalog>): s
   });
 }
 
+const GIGABYTES = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 1 });
+
+/** Bytes as gigabytes in French, one decimal at most ("10,5"). */
+export function formatGigabytes(bytes: number): string {
+  return GIGABYTES.format(bytes / 1024 ** 3);
+}
+
 /** Wall-clock time in Dakar (GMT, no daylight saving), e.g. "14:32". */
 export function formatClockTime(date: Date): string {
   return new Intl.DateTimeFormat("fr-SN", {
