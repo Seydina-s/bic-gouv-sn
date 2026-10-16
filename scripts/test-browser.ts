@@ -173,6 +173,10 @@ function startChrome(executable: string): StartedChrome {
     "--disable-gpu",
     "--disable-dev-shm-usage",
     "--no-first-run",
+    // A French browser: the app follows the device's language (16/10/2026), and the
+    // audit and journeys read the French interface whatever the machine's language.
+    "--lang=fr-FR",
+    "--accept-lang=fr-FR,fr",
     // CI containers run as root without a user namespace for the sandbox.
     ...(process.env["CI"] === undefined ? [] : ["--no-sandbox"]),
     `--remote-debugging-port=${String(DEBUG_PORT)}`,

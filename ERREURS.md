@@ -457,3 +457,10 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : `git checkout -- <fichier>` remet la version du dernier commit, pas celle d'avant la mutation.
 - **Correctif** : fichier réécrit, commit d'étape local avant de poursuivre.
 - **Prévention** : règle globale « test de mutation sur un fichier non commité ».
+
+## 16/10/2026 — Fusion bloquée : l'audit d'accessibilité lisait l'app en anglais
+
+- **Ce qui s'est passé** : la #361 (anglais proposé, langue de l'appareil suivie) a échoué quatre fois à « Production builds » : l'audit attendait « Choisissez votre langue » et voyait « Choose your language ».
+- **Cause racine** : le Chrome sans écran de la CI est réglé en anglais ; l'app suit désormais la langue de l'appareil. Même cause, trouvée plus tôt, dans les tests unitaires (simulateur par défaut en anglais), corrigée là sans penser au navigateur de l'audit.
+- **Correctif** : Chrome est lancé en français (`--lang=fr-FR --accept-lang=fr-FR,fr`, `scripts/test-browser.ts`), vérifié sur la machine ; les tests unitaires fixent le français dans `apps/mobile/src/testing/jest-setup.ts`.
+- **Prévention** : règle globale « app qui suit la langue de l'appareil ».
