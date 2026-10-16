@@ -7,7 +7,7 @@ import {
 } from "./assistant.schema";
 
 describe("assistant schemas", () => {
-  it("takes a question in French or Wolof, asked or to check, within its length", () => {
+  it("takes a question in one of the app's languages, asked or to check, within its length", () => {
     expect(
       assistantQuestionSchema.parse({ question: "  Quand a lieu le Conseil ?  ", lang: "fr" }),
     ).toEqual({ question: "Quand a lieu le Conseil ?", lang: "fr", mode: "ask" });
@@ -26,7 +26,7 @@ describe("assistant schemas", () => {
       }).success,
     ).toBe(false);
     expect(
-      assistantQuestionSchema.safeParse({ question: "Une question", lang: "en" }).success,
+      assistantQuestionSchema.safeParse({ question: "Une question", lang: "pt" }).success,
     ).toBe(false);
     expect(
       assistantQuestionSchema.safeParse({ question: "Une question", lang: "fr", extra: 1 }).success,

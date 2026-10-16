@@ -30,6 +30,7 @@ import {
   type EntreprendreDetail,
   type EntreprendreOverview,
 } from "./entreprendre.schema";
+import { langSchema } from "../common/primitives.schema";
 import { placeSchema } from "../content/state-service.schema";
 import {
   opportunitiesResponseSchema,
@@ -73,6 +74,10 @@ function withReadableParts(raw: unknown): unknown {
     return raw;
   }
   const readable: Record<string, unknown> = { ...raw, cover: readCover(raw["cover"]) };
+  if (Array.isArray(raw["availableLangs"])) {
+    // A language added later is not offered by this version; the article stays.
+    readable["availableLangs"] = keepValid(raw["availableLangs"], langSchema);
+  }
   if ("blocks" in raw) {
     readable["blocks"] = keepValid(raw["blocks"], blockSchema);
   }

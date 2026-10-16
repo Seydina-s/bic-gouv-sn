@@ -1,3 +1,4 @@
+import type { Lang } from "@bgs/shared-types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   createContext,
@@ -57,7 +58,7 @@ export interface NotificationsState {
 const NotificationsContext = createContext<NotificationsState | null>(null);
 
 /** Tells the API what this phone wants; a failure is tried again at the next opening. */
-async function synchronize(choice: NotificationChoice, quiet: QuietChoice, lang: "fr" | "wo") {
+async function synchronize(choice: NotificationChoice, quiet: QuietChoice, lang: Lang) {
   if (choice === "off") {
     const saved = await AsyncStorage.getItem(TOKEN_SLOT);
     if (saved !== null) {

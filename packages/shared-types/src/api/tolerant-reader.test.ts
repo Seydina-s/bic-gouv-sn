@@ -75,6 +75,16 @@ describe("readNewsList (a newer API talking to an older app)", () => {
     ).toBeNull();
   });
 
+  it("keeps an article offered in a language added later, without that language", () => {
+    const later = { ...summary, availableLangs: ["fr", "pt"] };
+    expect(readNewsList({ items: [later], nextCursor: null })?.items[0]?.availableLangs).toEqual([
+      "fr",
+    ]);
+    expect(readNewsDetail({ ...detail, availableLangs: ["pt", "en"] })?.availableLangs).toEqual([
+      "en",
+    ]);
+  });
+
   it("refuses a page whose essential shape is broken", () => {
     expect(readNewsList(null)).toBeNull();
     expect(readNewsList({ items: "no", nextCursor: null })).toBeNull();
