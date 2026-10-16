@@ -2,6 +2,12 @@
 
 **Dernière mise à jour** : 16/10/2026 (17 h) · **Mode** : autonome prolongé (demande de l'utilisateur du 14/10). Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md` (points 50, 52 à 58).
 
+## 16/10, soir, en bref : toute l'app dans la langue choisie, traduction prête
+- **Langue de toute l'app** (#358 à #361, #363, #364) : anglais dans le modèle ; interface complète en anglais et en wolof (wolof en traduction automatique, signalée) ; choix Français / Wolof / English dans la présentation et les Réglages ; articles et démarches dans la langue choisie, sinon en français avec une mention (`fallback=fr`, le fil n'est plus réduit en wolof) ; dictée en anglais ; assistant qui cherche aussi dans les pages françaises (défaut trouvé par une vraie question après déploiement, corrigé, ERREURS.md) ; notifications dans la langue de chaque téléphone ; abonnés anglais comptés dans la console. Mises à jour à distance publiées, déploiement local fait.
+- **Traduction** (#362) : commande `translate --lang wo|en` (Sonnet 5.5, décision de l'utilisateur), mode `--trial`. Essai du 16/10 au soir : 20 traductions sur 20 acceptées, 0,21 $ ; page de relecture https://claude.ai/artifact/SqgSrwTtRJtEXsQps43jms. Écart repéré : « Premier ministre » transcrit en wolof au lieu de « Njiitu Jëwriñ yi ». **Grand lot (≈ 85 $) en attente de l'utilisateur** (point 59).
+- **Exploitation** : autorisation permanente de redémarrer les services locaux après une fusion ; tunnel ngrok retrouvé arrêté (avec le filtre public) puis relancé, désormais relancé par `services.sh` ; disque à 7,8 Go libres.
+- **Incidents consignés** (ERREURS.md) : navigateur de l'audit en anglais (fusion bloquée), assistant muet en anglais.
+
 ## 16/10, après-midi, en bref
 - **ING-04 fusionnée (#356)** : retraits vérifiés aussi sur la Primature et 14 ministères (6 sites non vérifiables, `docs/sources.md`) ; essai réel : le discours FILDAK retiré par la Primature est trouvé, aucun faux retrait. **Déploiement à lancer par l'utilisateur** (point 57, refusé par la protection de sécurité).
 - **Phase multilingue chiffrée** (`docs/cadrage/phase-multilingue.md`) : 6 520 articles visibles, 5 824 sans wolof, aucun en anglais ; décisions attendues au point 58.
@@ -31,9 +37,10 @@
 1. **IOS-10 TestFlight** : l'utilisateur doit lancer une fois la commande du point 55 (connexion Apple). Ensuite : suivre la compilation, vérifier l'envoi à App Store Connect, inviter le testeur et lui donner le lien TestFlight.
 2. **VOX-11 / VOX-12** : laisser finir le rattrapage français. Ensuite, mettre à jour le serveur des voix (alerte `protobuf`), puis lancer le rattrapage wolof (`--lang wo`).
 3. **Retours de l'utilisateur sur la version #353** : audio, panneau de la carte, barre inversée, réglages, bouton « Filtrer ».
-4. **ML-07** (16/10) : travail sans coût de la phase multilingue (anglais dans le modèle, l'API et l'app ; langue choisie appliquée à toute l'app) ; partie payante après le point 58.
-5. **DATA-10** : articles de démonstration de WordPress à vérifier puis écarter.
-6. Puis : GOV-21 (historique des sites lents), AST-25 (services de l'État dans l'assistant). ING-04 fait (#356), déploiement au point 57.
+4. **ML-12 (traduction)** : attendre la décision du point 59 sur l'essai. Si l'utilisateur veut la consigne wolof renforcée : ajouter à `wolof-prompt.ts` une liste de termes officiels (Premier ministre → Njiitu Jëwriñ yi, Président de la République → Njiitu Réew mi, Conseil des ministres → Ndiisoog Jëwriñ…), refaire `translate --lang wo --trial 10` depuis `C:\bic-gouv-sn`. Puis grand lot : `translate --lang en --submit --since 2024-04-02` et `--lang wo`, collecte quelques heures plus tard (`docs/runbooks/traduction.md`) ; démarches ensuite (chaîne à étendre aux fiches).
+5. **ML-13 (voix anglaise)** : Kokoro en anglais américain, après les rattrapages français puis wolof (file d'attente, décision du 16/10) ; écoute à l'aveugle face à Chatterbox-Turbo ; `apps/api/src/cli/voices.ts` n'accepte encore que fr et wo.
+6. **DATA-10** : 4 articles de démonstration (3 « Bienvenue sur WordPress » à l'Industrie-Commerce, « Happy Easter » à la Culture) : proposition « écarté par le contrôle de qualité » en attente de l'accord de l'utilisateur.
+7. Puis : GOV-21 (historique des sites lents), AST-25 (services de l'État dans l'assistant).
 
 **Règles apprises récemment** (détail dans ERREURS.md)
 - Lancer `pnpm e2e` en local avant d'envoyer un changement d'animation de fenêtre ou de panneau.
