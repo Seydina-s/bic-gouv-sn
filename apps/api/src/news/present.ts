@@ -31,8 +31,16 @@ function excerptIn(article: NewsArticle, lang: Lang, bodyHtml: string): string {
   return excerpt;
 }
 
-function translationIn(article: NewsArticle, lang: Lang) {
-  return publishedTranslation(article, lang);
+/**
+ * The version shown for `lang`; with a fallback (the app asks `fallback=fr` since
+ * 16/10/2026), an article missing in `lang` is shown in the fallback language
+ * instead of disappearing from the feed.
+ */
+function translationIn(article: NewsArticle, lang: Lang, fallback: Lang | null) {
+  return (
+    publishedTranslation(article, lang) ??
+    (fallback === null ? undefined : publishedTranslation(article, fallback))
+  );
 }
 
 /** The source withdrew the version in `lang` (it existed, it is gone for good). */
@@ -88,13 +96,17 @@ function documentsOf(article: NewsArticle, mediaBaseUrl: string): NewsDocument[]
   }));
 }
 
-/** Feed entry in `lang`, or null when the article has no version in that language. */
+/**
+ * Feed entry in `lang` (else in `fallback`), or null when the article has neither.
+ * Its `lang` is the language really shown.
+ */
 export function toSummary(
   article: NewsArticle,
   lang: Lang,
   mediaBaseUrl: string,
+  fallback: Lang | null = null,
 ): NewsSummary | null {
-  const translation = translationIn(article, lang);
+  const translation = translationIn(article, lang, fallback);
   if (translation === undefined) {
     return null;
   }
@@ -102,9 +114,9 @@ export function toSummary(
     id: article.id,
     category: article.category,
     publishedOn: article.sourcePublishedOn,
-    lang,
+    lang: translation.lang,
     title: translation.title,
-    excerpt: excerptIn(article, lang, translation.bodyHtml),
+    excerpt: excerptIn(article, translation.lang, translation.bodyHtml),
     translationStatus: translation.status,
     availableLangs: availableLangs(article),
     cover: coverOf(article, mediaBaseUrl),
@@ -112,13 +124,17 @@ export function toSummary(
   };
 }
 
-/** Full article in `lang`, or null when the article has no version in that language. */
+/**
+ * Full article in `lang` (else in `fallback`), or null when the article has neither.
+ * Its `lang` is the language really shown.
+ */
 export function toDetail(
   article: NewsArticle,
   lang: Lang,
   mediaBaseUrl: string,
+  fallback: Lang | null = null,
 ): NewsDetail | null {
-  const translation = translationIn(article, lang);
+  const translation = translationIn(article, lang, fallback);
   if (translation === undefined) {
     return null;
   }
@@ -126,7 +142,7 @@ export function toDetail(
     id: article.id,
     category: article.category,
     publishedOn: article.sourcePublishedOn,
-    lang,
+    lang: translation.lang,
     title: translation.title,
     translationStatus: translation.status,
     availableLangs: availableLangs(article),
@@ -139,7 +155,7 @@ export function toDetail(
     fetchedAt: article.fetchedAt,
     version: article.version,
     documents: documentsOf(article, mediaBaseUrl),
-    audio: audioOf(article, lang, translation, mediaBaseUrl),
+    audio: audioOf(article, translation.lang, translation, mediaBaseUrl),
   };
 }
 
