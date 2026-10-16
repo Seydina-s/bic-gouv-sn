@@ -1,6 +1,36 @@
 # STATUS — Bic Gouv SN
 
-**Dernière mise à jour** : 16/10/2026 (nuit) · **Mode** : autonome prolongé (demande de l'utilisateur du 14/10). Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md` (points 47 à 56).
+**Dernière mise à jour** : 16/10/2026 (15 h, passage de session) · **Mode** : autonome prolongé (demande de l'utilisateur du 14/10). Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md` (points 47 à 56).
+
+## Reprise de session (préparée le 16/10/2026, 15 h)
+
+À lire en premier par la session suivante, pour reprendre exactement là où la précédente s'est arrêtée.
+
+**Mode** : autonome prolongé (demande du 14/10). S'arrêter et demander pour toute dépense, toute question de sécurité ou de données personnelles, et toute action difficile à défaire.
+
+**Démarrage**
+1. Lire CLAUDE.md, backlog.md, decisions.md, ce fichier et `A-FAIRE-UTILISATEUR.md`.
+2. Lancer `bash /c/Users/HP/bgs-ops/services.sh` : il relance ce qui ne tourne plus (API 3100, console 3001, surveillance, filtre public 3200, Metro 8081, voix) et ne touche pas au reste. Le mode d'emploi de tous les scripts est dans `C:\Users\HP\bgs-ops\README.md`.
+3. Travailler dans `C:\bic-gouv-sn-w2`, sur une branche partie de `origin/main`. Livrer avec `bgs-ops/ship.sh`, puis lancer `bgs-ops/deploy.sh` si l'API, la console, `shared-types` ou l'ingestion ont changé.
+
+**État au moment du passage**
+- `main` = #354 et les commits suivants ; aucun travail non livré, aucune branche en cours.
+- Dernière mise à jour à distance : « Lecture unique, carte et barre, réglages, audit » (#353).
+- **Services en marche** : API, console, surveillance (22 sites + der.sn), filtre public et tunnel ngrok, Metro (sur #353), rattrapage des voix françaises.
+- **Voix** : 650 sur 4 975 articles faits le 16/10 à 15 h. Le journal de ce lancement est dans le dossier temporaire de l'ancienne session ; le suivant ira dans `bgs-ops/logs/voices-fr.log`.
+- **Tunnel ngrok** : il n'est pas relancé automatiquement (la protection de sécurité a refusé de l'inclure au script). S'il est tombé, demander à l'utilisateur avant de le relancer.
+- **Ancien serveur web 8084** : il sert un vieil export web de l'app ; son script n'existe plus. Inutile aujourd'hui ; ne pas le recréer sans besoin.
+
+**Tâches immédiates, dans l'ordre**
+1. **IOS-10 TestFlight** : l'utilisateur doit lancer une fois la commande du point 55 (connexion Apple). Ensuite : suivre la compilation, vérifier l'envoi à App Store Connect, inviter le testeur et lui donner le lien TestFlight.
+2. **VOX-11 / VOX-12** : laisser finir le rattrapage français. Ensuite, mettre à jour le serveur des voix (alerte `protobuf`), puis lancer le rattrapage wolof (`--lang wo`).
+3. **Retours de l'utilisateur sur la version #353** : audio, panneau de la carte, barre inversée, réglages, bouton « Filtrer ».
+4. Puis reprendre le backlog : ING-04 (retraits des sites des ministères), GOV-21 (historique des sites lents), AST-25 (services de l'État dans l'assistant, une fois vérifiés).
+
+**Règles apprises récemment** (détail dans ERREURS.md)
+- Lancer `pnpm e2e` en local avant d'envoyer un changement d'animation de fenêtre ou de panneau.
+- Écrire les chemins Windows avec l'outil d'édition, jamais dans une chaîne de script.
+- Une ressource partagée (son, micro, fichier) n'a qu'un propriétaire à la fois ; tout événement doit supporter d'arriver deux fois.
 
 ## Nuit du 15 au 16/10 en bref : lecture unique, carte, réglages, audit
 - **Audio** : écouter un autre article coupe aussitôt la lecture en cours ; la dictée de l'assistant met la lecture en pause.
