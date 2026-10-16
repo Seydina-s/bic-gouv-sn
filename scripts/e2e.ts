@@ -91,6 +91,8 @@ const JOURNEYS: Journey[] = [
       await browser.press("Réglages");
       await browser.press("Redémarrer");
       await browser.waitForText("Choisissez votre langue");
+      // The settings fade out over it: a finger reaches the presentation once they are gone.
+      await browser.waitForControlGone("Fermer les réglages");
       for (const title of [
         "Le Gouvernement, en un seul endroit",
         "La source, toujours",
