@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { PassageIndex } from "./passage-search";
 import type { Passage } from "./passages";
-import { PASSAGES_GIVEN, questionIntent, retrievePassages } from "./retrieval";
+import { PASSAGES_GIVEN, questionIntent, retrievePassages, searchedLanguages } from "./retrieval";
 
 // Placeholder texts, not real content.
 function passage(
@@ -154,6 +154,19 @@ describe("the extracts given to the model", () => {
       TODAY,
     );
     expect(given.slice(0, 2).map((p) => p.id)).toEqual(["content-4:fr:0", "content-4:fr:1"]);
+  });
+
+  it("read the French pages for an English question, with its French rephrasing", () => {
+    // As answerQuestion searches it: the question, then the French search it became.
+    const given = retrievePassages(
+      index,
+      "What did the latest Council of Ministers decide? dernier Conseil des ministres décisions",
+      "en",
+      TODAY,
+    );
+    expect(given.slice(0, 2).map((p) => p.id)).toEqual(["content-4:fr:0", "content-4:fr:1"]);
+    expect(searchedLanguages("en")).toEqual(["en", "fr"]);
+    expect(searchedLanguages("fr")).toEqual(["fr"]);
   });
 
   it("bring this week's news first for a question about recent news", () => {
