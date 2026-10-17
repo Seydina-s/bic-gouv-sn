@@ -82,6 +82,7 @@ export class ClaudeProvider implements LlmProvider {
         system: [{ type: "text", text: request.system, cache_control: { type: "ephemeral" } }],
         messages: [{ role: "user", content: request.user }],
         thinking: noThinkingFirst(this.model),
+        ...steadyAnswers(this.model),
       }),
     });
     if (!response.ok) {
@@ -113,6 +114,17 @@ export class ClaudeProvider implements LlmProvider {
  */
 export function noThinkingFirst(model: string): { type: "disabled" | "between_tools" } {
   return { type: model.startsWith("claude-sonnet-5-5") ? "between_tools" : "disabled" };
+}
+
+/**
+ * The same question with the same extracts gets the same answer: temperature 0 where
+ * the model accepts it (bench of 17/10/2026: "Le chef de l'État a-t-il réagi à
+ * l'attaque d'Ankara ?" was answered "not found", then rightly ten minutes later).
+ * Claude 4.6 and later models, the 5 family among them, refuse any temperature (400):
+ * nothing is sent to them.
+ */
+export function steadyAnswers(model: string): { temperature?: number } {
+  return /^claude-(3-|haiku-4-5|sonnet-4-5|opus-4-1)/.test(model) ? { temperature: 0 } : {};
 }
 
 /** Failures that say nothing about Anthropic's health: they do not open the circuit. */
