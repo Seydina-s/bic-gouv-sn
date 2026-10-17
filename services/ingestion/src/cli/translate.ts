@@ -89,6 +89,11 @@ async function trial<Item, French, Value>(
   translation: BatchTranslation<Item, French, Value>,
   chosen: readonly Item[],
 ): Promise<void> {
+  if (chosen.length === 0) {
+    // An empty batch is refused by the service (17/10/2026: 400, nothing paid).
+    say(`Aucun élément à essayer : rien n'est envoyé.`);
+    return;
+  }
   const batches = client();
   const batchId = await translation.submitTrial(batches, chosen);
   say(

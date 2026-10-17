@@ -286,6 +286,7 @@ export const wo: PartialCatalog<FrCatalog> = {
     mapHint: "Panno bi ci suuf dafay wone liggéeykaay yooyu, te jàngukaayu xët mën na leen a jàng.",
     mapFailed: "Kaart bi feeñul. Lim bi dafay wone liggéeykaay yooyu.",
     panel: "Pannoy liggéeykaay yi",
+    collapsePanel: "Wàññi pannoy liggéeykaay yi",
     panelSize: {
       reduced: "Wàññi",
       medium: "Ubbi ba digg",

@@ -297,6 +297,7 @@ export const fr = {
     mapHint: "Le panneau en bas présente les mêmes services, lisibles par un lecteur d'écran.",
     mapFailed: "La carte n'a pas pu s'afficher. La liste présente les mêmes services.",
     panel: "Panneau des services",
+    collapsePanel: "Réduire le panneau des services",
     panelSize: {
       reduced: "Réduit",
       medium: "À moitié ouvert",

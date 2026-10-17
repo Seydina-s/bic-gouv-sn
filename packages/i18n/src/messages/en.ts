@@ -295,6 +295,7 @@ export const en: PartialCatalog<FrCatalog> = {
     mapHint: "The panel at the bottom lists the same services, readable by a screen reader.",
     mapFailed: "The map could not be displayed. The list shows the same services.",
     panel: "Services panel",
+    collapsePanel: "Collapse the services panel",
     panelSize: {
       reduced: "Collapsed",
       medium: "Half open",
