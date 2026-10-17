@@ -618,9 +618,10 @@ describe("app shell", () => {
     // UX-02, 17/10/2026): the app behind is hidden from screen readers meanwhile.
     expect(screen.getByRole("tab", { name: /Accueil/, hidden: true })).toBeOnTheScreen();
     expect(screen.queryByRole("tab", { name: /Accueil/ })).toBeNull();
-    const handler = back.mock.calls.at(-1)?.[1];
+    // Android's back gesture, as the platform calls the sheet's listener.
+    const pressBack = back.mock.calls.at(-1)?.[1] as (() => boolean | null | undefined) | undefined;
     await act(() => {
-      expect(handler?.()).toBe(true);
+      expect(pressBack?.()).toBe(true);
     });
     await waitFor(() => {
       expect(screen.queryByRole("radio", { name: "Sombre" })).toBeNull();
