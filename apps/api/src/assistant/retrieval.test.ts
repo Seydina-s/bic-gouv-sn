@@ -73,6 +73,7 @@ describe("the question's intent", () => {
       publisher: "Présidence",
       members: [],
       period: null,
+      procedure: false,
     });
     expect(questionIntent("Qu'a dit le dernier Conseil des ministres ?")).toMatchObject({
       recent: true,
@@ -85,6 +86,7 @@ describe("the question's intent", () => {
       publisher: null,
       members: [],
       period: null,
+      procedure: true,
     });
   });
 
@@ -236,6 +238,24 @@ describe("the extracts given to the model", () => {
       "content-2",
     ]);
     expect(given.every((p) => p.kind === "news-article")).toBe(true);
+  });
+
+  it("bring the procedure sheet first for a question asking how to do something", () => {
+    // Bench of 17/10/2026: articles sharing "père" crowded out the sheet.
+    const sheet: Passage = {
+      ...passage(30, "2008-01-01", "", "Renonciation à succession : le procès-verbal fictif."),
+      kind: "procedure",
+      title: "Demander un procès-verbal de renonciation à succession",
+    };
+    const crowded = new PassageIndex([
+      ...Array.from({ length: 60 }, (_, n) =>
+        passage(100 + n, "2026-10-01", "discours", `Le père fictif ${String(n)} parle aux jeunes.`),
+      ),
+      sheet,
+    ]);
+    const question = "Je ne veux pas de la succession de mon père, comment la refuser ?";
+    expect(questionIntent(question).procedure).toBe(true);
+    expect(retrievePassages(crowded, question, "fr", TODAY)[0]?.contentId).toBe("content-30");
   });
 
   it("give at most two pieces of a page found by the search", () => {

@@ -58,6 +58,35 @@ const RECENT = [
   " ces derniers jours ",
 ];
 
+/**
+ * Questions asking how to do something official: the procedure sheets come first
+ * (bench of 17/10/2026: "Je ne veux pas de l'héritage de mon père, comment le
+ * refuser ?" was given speeches sharing "père" and "jeunes", never the sheet on
+ * renouncing an inheritance, and was refused).
+ */
+const HOW_TO = [
+  " comment ",
+  " je veux ",
+  " je voudrais ",
+  " je souhaite ",
+  " que faire ",
+  " que dois je ",
+  " quelles pieces ",
+  " quels papiers ",
+  " quels documents ",
+  " ou faire ",
+  " ou deposer ",
+  " demarche ",
+  " demarches ",
+  " formalites ",
+  " how do i ",
+  " how to ",
+  " how can i ",
+  " naka laay ",
+  " naka lay ",
+  " naka la ",
+];
+
 /** Questions about who holds a post or how things stand now. */
 const CURRENT = [
   " qui ",
@@ -140,6 +169,8 @@ export interface QuestionIntent {
    * answered from the newest articles, not by words (17/10/2026).
    */
   period: NewsPeriod | null;
+  /** The question asks how to do something official: procedure sheets first. */
+  procedure: boolean;
 }
 
 function namedPublisher(text: string): string | null {
@@ -160,6 +191,7 @@ export function questionIntent(question: string): QuestionIntent {
     publisher: namedPublisher(text),
     members: membersNamed(text).map(({ name, post }) => ({ name, post })),
     period: newsPeriod(text),
+    procedure: HOW_TO.some((cue) => text.includes(cue)),
   };
 }
 
@@ -194,6 +226,25 @@ function byWords(index: PassageIndex, question: string, lang: Lang): ScoredPassa
     index.search(question, { lang: searched, limit: CANDIDATES }),
   );
   return rankings.length === 1 ? (rankings[0] ?? []) : fuseRankings(rankings, CANDIDATES);
+}
+
+/** Passages searched among the sheets only, so that many articles never crowd them out. */
+const SHEETS_SEARCHED = 400;
+/** Sheets brought in for a procedure question, and how much they weigh in the fusion. */
+const PROCEDURE_CANDIDATES = 10;
+export const PROCEDURE_WEIGHT = 2;
+/** How much more a sheet weighs, for a procedure question, once fused. */
+export const PROCEDURE_BOOST = 1.5;
+
+/** The best sheets for the question, whatever the articles sharing its words. */
+function bySheets(index: PassageIndex, question: string, lang: Lang): ScoredPassage[] {
+  const rankings = searchedLanguages(lang).map((searched) =>
+    index
+      .search(question, { lang: searched, limit: SHEETS_SEARCHED })
+      .filter(({ passage }) => passage.kind === "procedure")
+      .slice(0, PROCEDURE_CANDIDATES),
+  );
+  return rankings.length === 1 ? (rankings[0] ?? []) : fuseRankings(rankings, PROCEDURE_CANDIDATES);
 }
 
 /** Newest first, undated last. */
@@ -289,8 +340,17 @@ export function retrievePassages(
   {
     limit = PASSAGES_GIVEN,
     meaningWeight = MEANING_WEIGHT,
+    procedureWeight = PROCEDURE_WEIGHT,
+    procedureBoost = PROCEDURE_BOOST,
     period,
-  }: { limit?: number; meaningWeight?: number; period?: NewsPeriod | null } = {},
+  }: {
+    limit?: number;
+    meaningWeight?: number;
+    /** Chosen on the test set; given here to compare others. */
+    procedureWeight?: number;
+    procedureBoost?: number;
+    period?: NewsPeriod | null;
+  } = {},
 ): Passage[] {
   const intent = questionIntent(question);
   // Heard by the caller in the question's rephrasing, when given.
@@ -299,15 +359,36 @@ export function retrievePassages(
     return periodNews(index, lang, today, asked).slice(0, limit);
   }
   const words = byWords(index, withMembers(widenQuestion(question), intent), lang);
+  const rankings: { ranking: readonly ScoredPassage[]; weight: number }[] = [
+    { ranking: words, weight: 1 },
+    ...(byMeaning === null ? [] : [{ ranking: byMeaning, weight: meaningWeight }]),
+    ...(intent.procedure
+      ? [
+          {
+            ranking: bySheets(index, withMembers(widenQuestion(question), intent), lang),
+            weight: procedureWeight,
+          },
+        ]
+      : []),
+  ];
   const candidates =
-    byMeaning === null ? words : fuseRankings([words, byMeaning], CANDIDATES, [1, meaningWeight]);
+    rankings.length === 1
+      ? words
+      : fuseRankings(
+          rankings.map(({ ranking }) => ranking),
+          CANDIDATES,
+          rankings.map(({ weight }) => weight),
+        );
   const ranked = candidates
     .map(({ passage, score }) => ({
       passage,
       score:
         score *
         (1 + freshness(passage.publishedOn, today, intent)) *
-        (intent.publisher !== null && passage.publisher === intent.publisher ? PUBLISHER_BOOST : 1),
+        (intent.publisher !== null && passage.publisher === intent.publisher
+          ? PUBLISHER_BOOST
+          : 1) *
+        (intent.procedure && passage.kind === "procedure" ? procedureBoost : 1),
     }))
     .sort((a, b) => b.score - a.score)
     .map(({ passage }) => passage);
