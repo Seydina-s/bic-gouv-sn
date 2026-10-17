@@ -17,6 +17,10 @@ pnpm --filter @bgs/ingestion translate --lang en --trial 10
 - La commande attend les réponses (quelques minutes à quelques heures), puis écrit `translation-trial-wo.json` ou `translation-trial-en.json` à côté des données, avec le français envoyé, la traduction et, le cas échéant, le motif du refus.
 - **Rien n'est enregistré dans les articles** : un grand lot reprendra ces articles.
 
+## Corriger le wolof
+
+Les mots que le wolof doit employer sont dans `services/ingestion/src/translation/wolof-glossary.ts` : chaque correction de l'utilisateur (ou d'un relecteur natif) y devient une ligne, avec sa source, puis vaut pour toutes les traductions suivantes. Seules deux sources y entrent : un locuteur natif, et les formes des articles wolof officiels de la Présidence.
+
 ## 1. Estimer le coût (rien n'est envoyé)
 
 ```
