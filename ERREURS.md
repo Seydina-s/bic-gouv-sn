@@ -500,3 +500,10 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : la collecte enregistrait chaque article seul. Le magasin de fichiers réécrit alors tout le fichier, plus sa copie de secours, à chaque enregistrement : 2 132 écritures de 56 Mo. L'API, qui reconstruit la base de l'assistant à chaque changement, relisait le fichier sans cesse et le gardait ouvert plus longtemps que les 11 s de patience du remplacement.
 - **Correctif** : `saveMany` (une écriture pour plusieurs articles) dans les deux magasins ; la collecte enregistre par groupes de 200. Testé : une seule écriture pour une collecte de 3 articles.
 - **Prévention** : règle globale « traitement par lots sur un stockage en fichier entier ».
+
+## 17/10/2026 — Réponses wolof du grand lot écartées à tort
+
+- **Ce qui s'est passé** : la collecte wolof n'a enregistré que 4 traductions sur 2 689. 2 562 réponses ont été comptées comme « articles changés entre-temps », alors que rien n'avait changé à la source.
+- **Cause racine** : une réponse n'est gardée que si l'article est encore dans la version envoyée, et cette version était l'empreinte de tout l'article, traductions automatiques comprises. L'anglais, collecté juste avant, a ajouté une traduction à chaque article et changé toutes les empreintes. Deux langues traduites en même temps s'invalidaient l'une l'autre ; les tests ne collectaient jamais deux langues à la suite.
+- **Correctif** : l'empreinte retenue ne porte que sur les versions officielles (`officialFingerprint`, `services/ingestion/src/translation/article-translation.ts`), l'ancienne reste acceptée pour les lots déjà envoyés, et `--recollect` relit tous les lots des 29 derniers jours (réponses gardées par le fournisseur : rien n'est payé deux fois). Test : anglais collecté puis wolof, les deux enregistrés ; il échoue avec l'ancienne règle (vérifié).
+- **Prévention** : règle globale « empreinte qui couvre ce qu'on y ajoute ».
