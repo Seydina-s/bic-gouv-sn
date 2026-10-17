@@ -486,3 +486,10 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Impact** : aucun en production. Les contrôles locaux ont pu lire quelques secondes de code d'une autre branche, mais la CI de GitHub reprend tous les contrôles avant chaque fusion.
 - **Correctif** : correctif suivant ouvert dans `C:\bic-gouv-sn-w4`, libre.
 - **Prévention** : règle globale « copie de travail occupée par une commande en cours » ; aide-mémoire de l'environnement de travail mis à jour.
+
+## 17/10/2026 — Section DER absente de l'accueil chez les testeurs
+
+- **Ce qui s'est passé** : l'utilisateur ne voyait plus la section « Entreprendre » (DER/FJ) sur l'accueil. L'API la servait bien ; le filtre public (`scripts/public-gate.mjs`), seule porte des téléphones vers l'API, répondait 404 à `/v1/entreprendre`.
+- **Cause racine** : le filtre laisse passer une liste fixe de chemins ; DER-01 (12/10) a ajouté un nouveau chemin à l'app sans l'y ajouter. Les essais sur l'ordinateur parlent directement à l'API et ne passent pas par le filtre : rien ne l'a montré.
+- **Correctif** : chemin ajouté au filtre, filtre relancé.
+- **Prévention** : `apps/mobile/src/api/public-gate.test.ts` lit les chemins appelés par les clients de l'app et échoue si le filtre en refuse un (vérifié en retirant le chemin). Règle globale « liste d'autorisation tenue à la main ».
