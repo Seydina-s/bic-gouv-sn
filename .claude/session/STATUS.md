@@ -23,7 +23,7 @@
 
 ## Reprise de session (mise à jour le 17/10/2026, 7 h)
 
-**Changements depuis la version du 16/10 ci-dessous** : `main` = #374, aucune branche en cours ; copies de travail `-w2` et `-w4` (une copie par livraison en cours, jamais de changement de branche dans une copie occupée). Tâches immédiates : (1) retours wolof de l'utilisateur → `wolof-glossary.ts` puis `translate --lang wo --trial 10` depuis `C:ic-gouv-sn` ; (2) sur accord (points 59 et 61) : grand lot des articles puis `translate --procedures` ; (3) VOX-11 rattrapage français en cours (≈ 3 700 articles) ; (4) ML-13 voix anglaise après les rattrapages ; (5) DATA-10 sur accord (point 60).
+**Changements depuis la version du 16/10 ci-dessous** : `main` = #374, aucune branche en cours ; copies de travail `-w2` et `-w4` (une copie par livraison en cours, jamais de changement de branche dans une copie occupée). Tâches immédiates : (1) retours wolof de l'utilisateur → `wolof-glossary.ts` puis `translate --lang wo --trial 10` depuis `C:\bic-gouv-sn` ; (2) sur accord (points 59 et 61) : grand lot des articles puis `translate --procedures` ; (3) VOX-11 rattrapage français en cours (≈ 3 700 articles) ; (4) ML-13 voix anglaise après les rattrapages ; (5) DATA-10 sur accord (point 60).
 
 ## Reprise de session (préparée le 16/10/2026, 15 h)
 
