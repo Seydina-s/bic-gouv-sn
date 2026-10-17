@@ -34,6 +34,7 @@ export function procedure(
     legalTexts: [],
     usefulLinks: [],
     related: [],
+    localized: {},
     ...overrides,
   };
   return value;

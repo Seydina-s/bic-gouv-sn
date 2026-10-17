@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { officialSourceUrlSchema } from "../common/official-source.schema";
-import { httpsUrlSchema, isoDateTimeSchema } from "../common/primitives.schema";
+import { httpsUrlSchema, isoDateTimeSchema, langSchema } from "../common/primitives.schema";
 import { translationStatusSchema } from "../content/translation.schema";
 import { blockSchema } from "./news.schema";
 
@@ -21,6 +21,11 @@ export const procedureSummarySchema = z.object({
   /** Processing time in days; null when the source gives none. */
   delayDays: z.int().nonnegative().nullable(),
   online: z.boolean(),
+  /**
+   * Language the sheet is shown in: the one asked when a translation exists, else
+   * French (ML-14). Absent from APIs older than this field (French).
+   */
+  lang: langSchema.optional(),
 });
 export type ProcedureSummary = z.infer<typeof procedureSummarySchema>;
 

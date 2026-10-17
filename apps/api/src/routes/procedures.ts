@@ -2,10 +2,12 @@ import { createHash } from "node:crypto";
 import type { ProcedureThemeStore, ProcedureRepository } from "@bgs/content-store";
 import {
   apiErrorSchema,
+  langSchema,
   procedureDetailSchema,
   procedureListResponseSchema,
   procedureThemesResponseSchema,
   type ErrorCode,
+  type Lang,
   type Procedure,
 } from "@bgs/shared-types";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
@@ -28,6 +30,21 @@ const NOT_FOUND: ErrorCode = "PROCEDURE_NOT_FOUND";
 
 function fingerprint(parts: readonly string[]): string {
   return `"${createHash("sha256").update(parts.join("|")).digest("base64url").slice(0, 27)}"`;
+}
+
+/**
+ * The language asked, and `fallback=fr` from apps that accept a sheet in French when
+ * it has no translation (ML-14). Apps installed before send neither: French, as ever.
+ */
+const languageQuery = {
+  lang: langSchema.default("fr"),
+  fallback: z.enum(["fr"]).optional(),
+};
+
+/** What makes a shown sheet stale: its French version, and its translation in `lang`. */
+function sheetStamp(procedure: Procedure, lang: Lang): string {
+  const sheet = lang === "fr" ? undefined : procedure.localized[lang];
+  return `${procedure.contentHash}:${sheet === undefined ? "" : `${sheet.forHash}:${sheet.title}`}`;
 }
 
 /** Procedures made ready for searching once per version, not at every search. */
@@ -119,12 +136,14 @@ export const proceduresRoutes: FastifyPluginAsyncZod<ProceduresRoutesOptions> = 
             .regex(/^[a-z0-9]+$/)
             .max(64)
             .optional(),
+          ...languageQuery,
         }),
         response: { 200: procedureListResponseSchema, 304: z.null() },
       },
     },
     async (request, reply) => {
-      const { q, limit, cursor, page: pageNumber, theme } = request.query;
+      const { q, limit, cursor, page: pageNumber, theme, lang } = request.query;
+      const fallback = request.query.fallback ?? null;
       const inTheme =
         theme === undefined ? null : ((await validatedByTheme()).get(theme) ?? new Set());
       const all = matching(await procedures.all(), q).filter(
@@ -152,14 +171,16 @@ export const proceduresRoutes: FastifyPluginAsyncZod<ProceduresRoutesOptions> = 
         String(start),
         theme ?? "",
         String(all.length),
-        ...page.map((p) => p.contentHash),
+        lang,
+        String(fallback),
+        ...page.map((p) => sheetStamp(p, lang)),
       ]);
       void reply.header("etag", etag).header("cache-control", CACHE_CONTROL);
       if (request.headers["if-none-match"] === etag) {
         return reply.code(304).send(null);
       }
       return {
-        items: page.flatMap((procedure) => toProcedureSummary(procedure) ?? []),
+        items: page.flatMap((procedure) => toProcedureSummary(procedure, lang, fallback) ?? []),
         nextCursor: start + limit < all.length && last !== undefined ? last.slug : null,
         total: all.length,
       };
@@ -173,12 +194,15 @@ export const proceduresRoutes: FastifyPluginAsyncZod<ProceduresRoutesOptions> = 
         tags: ["procedures"],
         summary: "One procedure: steps, documents, fee, delay, link to the official page",
         params: z.object({ slug: z.string().min(1).max(200) }),
+        querystring: z.object(languageQuery),
         response: { 200: procedureDetailSchema, 304: z.null(), 404: apiErrorSchema },
       },
     },
     async (request, reply) => {
       const procedure = await procedures.getBySlug(request.params.slug);
-      const detail = procedure === null ? null : toProcedureDetail(procedure);
+      const { lang } = request.query;
+      const fallback = request.query.fallback ?? null;
+      const detail = procedure === null ? null : toProcedureDetail(procedure, lang, fallback);
       if (procedure === null || detail === null) {
         return reply.code(404).send({
           code: NOT_FOUND,
@@ -186,7 +210,7 @@ export const proceduresRoutes: FastifyPluginAsyncZod<ProceduresRoutesOptions> = 
           requestId: request.id,
         });
       }
-      const etag = fingerprint([procedure.contentHash]);
+      const etag = fingerprint([sheetStamp(procedure, lang), lang, String(fallback)]);
       void reply.header("etag", etag).header("cache-control", CACHE_CONTROL);
       if (request.headers["if-none-match"] === etag) {
         return reply.code(304).send(null);

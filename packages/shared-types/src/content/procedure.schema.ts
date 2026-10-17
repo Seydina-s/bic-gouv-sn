@@ -4,6 +4,29 @@ import { checkTraceableContent, traceableContentShape } from "./traceable-conten
 
 const text = z.string().trim().min(1);
 
+/** The languages a sheet is machine-translated into (owner's decision of 16/10/2026). */
+export const SHEET_LANGS = ["wo", "en"] as const;
+export type SheetLang = (typeof SHEET_LANGS)[number];
+
+/**
+ * A machine translation of the whole sheet (ML-14): what the source writes in French
+ * (title, text, summary, who, documents, questions), in another language. It holds
+ * for one French version only: once the source changes the sheet, it is no longer
+ * shown, and the French is, until the next translation.
+ */
+export const localizedSheetSchema = z.strictObject({
+  status: z.enum(["machine", "reviewed"]),
+  /** contentHash of the French sheet it translates. */
+  forHash: z.string().regex(/^[a-f0-9]{64}$/),
+  title: text,
+  bodyHtml: z.string(),
+  summary: text.nullable(),
+  eligibility: text.nullable(),
+  documents: z.array(text),
+  faqs: z.array(z.strictObject({ question: text, answerHtml: text })),
+});
+export type LocalizedSheet = z.infer<typeof localizedSheetSchema>;
+
 /**
  * An administrative procedure ingested from e-senegal.sn, kept identical to the
  * source (CLAUDE.md §1: we explain and link, we never perform the procedure).
@@ -45,6 +68,14 @@ export const procedureSchema = z
     usefulLinks: z.array(z.strictObject({ name: text, url: httpsUrlSchema })),
     /** Related procedures, by slug. */
     related: z.array(z.strictObject({ slug: z.string().min(1), title: text })),
+    /** Machine translations of the sheet, by language (none before ML-14). */
+    localized: z.partialRecord(z.enum(SHEET_LANGS), localizedSheetSchema).default({}),
   })
   .superRefine(checkTraceableContent);
 export type Procedure = z.infer<typeof procedureSchema>;
+
+/** The sheet in `lang`, when one exists for the current French version. */
+export function currentSheet(procedure: Procedure, lang: SheetLang): LocalizedSheet | null {
+  const sheet = procedure.localized[lang];
+  return sheet !== undefined && sheet.forHash === procedure.contentHash ? sheet : null;
+}

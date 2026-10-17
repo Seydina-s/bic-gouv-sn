@@ -1,6 +1,11 @@
 import type { Database } from "@bgs/database";
-import { procedureSchema, type Procedure } from "@bgs/shared-types";
-import { byFrenchTitle, type ProcedureRepository } from "./procedure-repository";
+import {
+  procedureSchema,
+  type LocalizedSheet,
+  type Procedure,
+  type SheetLang,
+} from "@bgs/shared-types";
+import { byFrenchTitle, withSheet, type ProcedureRepository } from "./procedure-repository";
 import { PostgresVersionedTable } from "./postgres-versioned-table";
 import type { SaveOutcome, VersionedEntry } from "./versioned-json-store";
 
@@ -38,6 +43,10 @@ export class PostgresProcedureRepository implements ProcedureRepository {
 
   save(procedure: Procedure): Promise<SaveOutcome> {
     return this.table.save(procedure);
+  }
+
+  setLocalized(id: string, lang: SheetLang, sheet: LocalizedSheet): Promise<boolean> {
+    return this.table.replaceCurrent(id, (current) => withSheet(current, lang, sheet));
   }
 
   /** Copies a procedure and its history as they are (see PostgresVersionedTable). */

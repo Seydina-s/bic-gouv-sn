@@ -1,4 +1,9 @@
-import { procedureSchema, type Procedure } from "@bgs/shared-types";
+import {
+  procedureSchema,
+  type LocalizedSheet,
+  type Procedure,
+  type SheetLang,
+} from "@bgs/shared-types";
 import { VersionedJsonStore, type SaveOutcome } from "./versioned-json-store";
 
 export interface ProcedureRepository {
@@ -7,6 +12,11 @@ export interface ProcedureRepository {
   /** Every procedure, in alphabetical order of its French title. */
   all(): Promise<Procedure[]>;
   save(procedure: Procedure): Promise<SaveOutcome>;
+  /**
+   * Attaches a machine translation of the sheet, replacing the previous one of that
+   * language. Derived like a newspaper's images: no new version. False if unknown.
+   */
+  setLocalized(id: string, lang: SheetLang, sheet: LocalizedSheet): Promise<boolean>;
 }
 
 function titleOf(procedure: Procedure): string {
@@ -45,4 +55,13 @@ export class FileProcedureRepository implements ProcedureRepository {
   save(procedure: Procedure): Promise<SaveOutcome> {
     return this.store.save(procedure);
   }
+
+  setLocalized(id: string, lang: SheetLang, sheet: LocalizedSheet): Promise<boolean> {
+    return this.store.replaceCurrent(id, (current) => withSheet(current, lang, sheet));
+  }
+}
+
+/** The procedure with its sheet in `lang` replaced, shared by every procedure store. */
+export function withSheet(procedure: Procedure, lang: SheetLang, sheet: LocalizedSheet): Procedure {
+  return { ...procedure, localized: { ...procedure.localized, [lang]: sheet } };
 }

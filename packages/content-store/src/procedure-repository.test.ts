@@ -35,6 +35,7 @@ function procedure(n: number, title: string, overrides: Partial<Procedure> = {})
     legalTexts: [],
     usefulLinks: [],
     related: [],
+    localized: {},
     ...overrides,
   };
 }
@@ -66,6 +67,30 @@ describe.each(STORAGES)("procedures stored %s", (_name, open) => {
     ]);
     expect((await repo.getBySlug("test-3"))?.id).toBe(procedure(3, "x").id);
     expect(await repo.getBySlug("absent")).toBeNull();
+  });
+
+  it("keeps a sheet's translation without a new version, one per language", async () => {
+    const french = procedure(4, "Passeport");
+    await repo.save(french);
+    const sheet = {
+      status: "machine" as const,
+      forHash: french.contentHash,
+      title: "Passport",
+      bodyHtml: "<p>Steps.</p>",
+      summary: null,
+      eligibility: null,
+      documents: ["Birth certificate"],
+      faqs: [],
+    };
+    expect(await repo.setLocalized(french.id, "en", sheet)).toBe(true);
+    expect(await repo.setLocalized(french.id, "en", { ...sheet, title: "Passport (new)" })).toBe(
+      true,
+    );
+    const stored = await repo.get(french.id);
+    expect(stored?.localized.en?.title).toBe("Passport (new)");
+    expect(stored?.localized.wo).toBeUndefined();
+    expect(stored?.version).toBe(1);
+    expect(await repo.setLocalized(procedure(5, "x").id, "en", sheet)).toBe(false);
   });
 
   it("versions a procedure changed at the source, never overwriting silently", async () => {
