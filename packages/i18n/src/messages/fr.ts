@@ -641,6 +641,30 @@ export const fr = {
       failed: "La dictée n'a pas fonctionné. Réessayez ou écrivez votre message.",
     },
   },
+  /**
+   * Official themes of e-senegal.sn (and the three the team added), by id, as the
+   * source writes them: the app shows the translation only while the French matches.
+   */
+  procedureThemes: {
+    "688d064649b595b42707a1f4": "Citoyenneté, justice et sécurité",
+    "688d064649b595b42707a203": "Loisirs et sports",
+    "688d064649b595b42707a1f8": "Transports",
+    "688d064649b595b42707a1fd": "Santé et protection sociale",
+    "688d064649b595b42707a201": "Education et formation",
+    "688d064649b595b42707a202": "Famille, étapes de la vie et vie sociale",
+    "688d064649b595b42707a200": "Emploi et travail",
+    "688d064649b595b42707a1f6": "Habitat et logement",
+    "688d064649b595b42707a204": "Vie associative",
+    "688d064649b595b42707a1ff": "Questions juridiques, administratives et fiscales",
+    "688d064649b595b42707a1fe": "Vie de l'entreprise",
+    "688d064649b595b42707a1fb": "Culture et communication",
+    "688d064649b595b42707a1fa": "Activités de l'entreprise",
+    "688d064649b595b42707a1f9": "Ressources humaines",
+    "688d064649b595b42707a1f5": "Finances",
+    bgsagriculture: "Agriculture, élevage et pêche",
+    bgsenvironnement: "Environnement et ressources naturelles",
+    bgsenergie: "Énergie, mines et hydrocarbures",
+  },
 } as const;
 
 export type FrCatalog = typeof fr;

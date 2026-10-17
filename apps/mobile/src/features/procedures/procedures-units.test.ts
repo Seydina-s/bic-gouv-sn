@@ -1,6 +1,7 @@
 import { createProceduresClient } from "../../api/procedures-client";
 import { PROCEDURE_DETAIL, PROCEDURE_LIST } from "../../testing/procedure-fixtures";
 import { formatFcfa } from "./format";
+import { themeTitle } from "./theme-title";
 
 function clientAnswering(body: unknown) {
   const fetchImpl = jest.fn<Promise<Response>, [string]>(() =>
@@ -59,5 +60,22 @@ describe("formatFcfa", () => {
     const text = formatFcfa(20000);
     expect(text).toMatch(/^20\s000\sF\sCFA$/u);
     expect(text).not.toContain(" F");
+  });
+});
+
+describe("themeTitle (ML-14)", () => {
+  const transports = { id: "688d064649b595b42707a1f8", title: "Transports" };
+
+  it("gives an official theme's title in the reader's language", () => {
+    expect(themeTitle(transports, "en")).toBe("Transportation");
+    expect(themeTitle(transports, "wo")).toBe("Dem-dikk");
+    expect(themeTitle(transports, "fr")).toBe("Transports");
+  });
+
+  it("keeps the source's title for a theme renamed or unknown", () => {
+    expect(themeTitle({ ...transports, title: "Transports et mobilité" }, "en")).toBe(
+      "Transports et mobilité",
+    );
+    expect(themeTitle({ id: "nouveau", title: "Nouveau thème" }, "en")).toBe("Nouveau thème");
   });
 });
