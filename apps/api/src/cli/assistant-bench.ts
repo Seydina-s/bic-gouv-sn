@@ -1,6 +1,8 @@
 // The assistant's weekly test bench (AST-30d): about a hundred questions asked to the
 // real assistant, checked, kept with the known weaknesses next to the data.
 //   pnpm --filter @bgs/api assistant:bench --dry   lists the questions, pays nothing
+//   pnpm --filter @bgs/api assistant:bench --weaknesses   the known weaknesses and the
+//     traps only, a few cents: to check a fix at once, and that it opens no door
 //   pnpm --filter @bgs/api assistant:bench         asks them (≈ 1 $ with Sonnet 5.5)
 // Reads ANTHROPIC_API_KEY from .env.local (typed there by the owner only). Messages
 // are in French: this command is run by the team.
@@ -54,6 +56,7 @@ const KIND_LABELS: Record<BenchCase["kind"], string> = {
 const config = loadConfig(process.env);
 const today = new Date().toISOString().slice(0, 10);
 const dry = process.argv.includes("--dry");
+const weaknessesOnly = process.argv.includes("--weaknesses");
 const root = join(dirname(config.NEWS_STORE_PATH), "assistant", "bench");
 const weaknessesPath = join(root, "weaknesses.json");
 
@@ -103,11 +106,13 @@ try {
   const knowledge = await buildKnowledge(articles, procedures, services);
   const { retrieval, traps } = await fixedSets();
   const previous = await readWeaknesses();
-  const asked = [
-    ...generatedCases(knowledge.passages, today),
-    ...retrievalCases(retrieval, today),
-    ...trapCases(traps),
-  ];
+  const asked = weaknessesOnly
+    ? trapCases(traps)
+    : [
+        ...generatedCases(knowledge.passages, today),
+        ...retrievalCases(retrieval, today),
+        ...trapCases(traps),
+      ];
   const cases = [...asked, ...weaknessCases(previous, asked)];
   say(
     `Banc d'essai du ${today} : ${String(cases.length)} questions, dont ${String(cases.length - asked.length)} faiblesses connues`,
