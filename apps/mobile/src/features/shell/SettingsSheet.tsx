@@ -16,9 +16,9 @@ import { XIcon as X } from "phosphor-react-native/src/icons/X";
 import { useEffect, useState } from "react";
 import {
   Animated,
+  BackHandler,
   Easing,
   Linking,
-  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -127,6 +127,20 @@ export function SettingsSheet({ visible, onClose }: { visible: boolean; onClose:
     setShown(true);
   }
 
+  // Android's back gesture closes the sheet, as a native window did.
+  useEffect(() => {
+    if (!visible) {
+      return undefined;
+    }
+    const subscription = BackHandler.addEventListener("hardwareBackPress", () => {
+      close();
+      return true;
+    });
+    return () => {
+      subscription.remove();
+    };
+  }, [visible, close]);
+
   // One movement for the veil and the panel (owner's request, 15/10/2026: the old fade
   // of the window and the cut of the panel left letters on screen as it closed). In:
   // the panel rises a little as it appears; out: both fade together, faster, and the
@@ -154,15 +168,14 @@ export function SettingsSheet({ visible, onClose }: { visible: boolean; onClose:
 
   const rise = reduceMotion === false ? space.xl : 0;
 
+  if (!shown) {
+    return null;
+  }
+  // Laid in the app's own tree, not in a native window: the cross-fade between light
+  // and dark modes then covers the sheet too, and Android's picture of the screen
+  // includes it (UX-02, 17/10/2026: a native window stayed above the fade).
   return (
-    <Modal
-      visible={shown}
-      transparent
-      animationType="none"
-      statusBarTranslucent
-      navigationBarTranslucent
-      onRequestClose={close}
-    >
+    <View style={StyleSheet.absoluteFill}>
       <View style={styles.root}>
         <Pressable
           accessibilityRole="button"
@@ -356,7 +369,7 @@ export function SettingsSheet({ visible, onClose }: { visible: boolean; onClose:
           </ScrollView>
         </Animated.View>
       </View>
-    </Modal>
+    </View>
   );
 }
 

@@ -1,4 +1,5 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import { StyleSheet, View } from "react-native";
 import { SettingsSheet } from "./SettingsSheet";
 
 interface SettingsControl {
@@ -23,7 +24,14 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   );
   return (
     <SettingsContext.Provider value={control}>
-      {children}
+      {/* While the sheet is open, screen readers stay in it (a native window did so). */}
+      <View
+        style={styles.fill}
+        accessibilityElementsHidden={open}
+        importantForAccessibility={open ? "no-hide-descendants" : "auto"}
+      >
+        {children}
+      </View>
       <SettingsSheet
         visible={open}
         onClose={() => {
@@ -33,6 +41,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     </SettingsContext.Provider>
   );
 }
+
+const styles = StyleSheet.create({ fill: { flex: 1 } });
 
 export function useSettings(): SettingsControl {
   const control = useContext(SettingsContext);
