@@ -41,8 +41,10 @@ describe("keptOffline", () => {
       ["news", "fr", "feed", "all"],
       ["news", "fr", "id-fictif"],
       ["news", "fr", "section", "communiques", null],
-      ["procedures", "list", "all", ""],
-      ["procedures", "detail", "demarche-fictive"],
+      ["procedures", "fr", "list", "all", ""],
+      ["procedures", "en", "list", "all", ""],
+      ["procedures", "fr", "detail", "demarche-fictive"],
+      ["procedures", "en", "theme", "etat-civil", 1],
       ["services"],
     ]) {
       expect(keptOffline(answered(key))).toBe(true);
@@ -51,6 +53,7 @@ describe("keptOffline", () => {
 
   it("never keeps the searches typed", () => {
     expect(keptOffline(answered(["news", "fr", "search", "bourse"]))).toBe(false);
-    expect(keptOffline(answered(["procedures", "list", "all", "passeport"]))).toBe(false);
+    expect(keptOffline(answered(["procedures", "fr", "list", "all", "passeport"]))).toBe(false);
+    expect(keptOffline(answered(["procedures", "wo", "list", "etat-civil", "acte"]))).toBe(false);
   });
 });

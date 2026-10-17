@@ -77,6 +77,7 @@ function procedure(n: number): Procedure {
     legalTexts: [],
     usefulLinks: [],
     related: [],
+    localized: {},
   };
 }
 

@@ -20,11 +20,12 @@ describe("/v1/procedures", () => {
   let dir: string;
   let app: FastifyInstance;
   let searchMisses: SearchMisses;
+  let procedures: FileProcedureRepository;
 
   beforeEach(async () => {
     dir = await mkdtemp(join(tmpdir(), "bgs-api-procedures-"));
     searchMisses = new SearchMisses(new FileSearchMissStore(join(dir, "search-misses.json")));
-    const procedures = new FileProcedureRepository(join(dir, "procedures.json"));
+    procedures = new FileProcedureRepository(join(dir, "procedures.json"));
     await procedures.save(
       procedure(1, "Extrait de naissance", "<p>Se rendre à la mairie.</p>", {
         costFcfa: 1000,
@@ -140,5 +141,55 @@ describe("/v1/procedures", () => {
     const response = await app.inject({ method: "GET", url: "/v1/procedures/absente" });
     expect(response.statusCode).toBe(404);
     expect(apiErrorSchema.parse(response.json()).code).toBe("PROCEDURE_NOT_FOUND");
+  });
+
+  describe("in the language chosen (ML-14)", () => {
+    // Placeholder texts, not real content.
+    const sheetFor = (forHash: string) => ({
+      status: "machine" as const,
+      forHash,
+      title: "Birth certificate extract",
+      bodyHtml: "<p>Go to the town hall.</p>",
+      summary: null,
+      eligibility: null,
+      documents: ["Identity document"],
+      faqs: [{ question: "How long?", answerHtml: "<p>Two days.</p>" }],
+    });
+    const french = procedure(1, "Extrait de naissance", "<p>Se rendre à la mairie.</p>", {
+      costFcfa: 1000,
+      delayDays: 2,
+      documents: ["Pièce d'identité"],
+      faqs: [{ question: "Délai ?", answerHtml: "<p>Deux jours.</p>" }],
+    });
+    const detail = async (query: string) =>
+      procedureDetailSchema.parse(
+        (await app.inject({ method: "GET", url: `/v1/procedures/${french.slug}?${query}` })).json(),
+      );
+
+    it("shows the translated sheet with fallback=fr, and French to apps that do not ask", async () => {
+      await procedures.setLocalized(french.id, "en", sheetFor(french.contentHash));
+      expect(await detail("lang=en&fallback=fr")).toMatchObject({
+        lang: "en",
+        title: "Birth certificate extract",
+        documents: ["Identity document"],
+        translationStatus: "machine",
+      });
+      expect(await detail("lang=en")).toMatchObject({ lang: "fr", title: "Extrait de naissance" });
+      expect(await detail("lang=wo&fallback=fr")).toMatchObject({ lang: "fr" });
+      const list = procedureListResponseSchema.parse(
+        (await app.inject({ method: "GET", url: "/v1/procedures?lang=en&fallback=fr" })).json(),
+      );
+      expect(list.items.find((item) => item.slug === french.slug)?.title).toBe(
+        "Birth certificate extract",
+      );
+    });
+
+    it("no longer shows a translation once the French sheet changed", async () => {
+      await procedures.setLocalized(french.id, "en", sheetFor("f".repeat(64)));
+      expect(await detail("lang=en&fallback=fr")).toMatchObject({
+        lang: "fr",
+        title: "Extrait de naissance",
+      });
+    });
   });
 });

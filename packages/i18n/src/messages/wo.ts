@@ -31,6 +31,7 @@ export const wo: PartialCatalog<FrCatalog> = {
     pauseReading: "Taxawal jàng bi",
     resumeReading: "Delloo jàng bi",
     wolofVoiceSoon: "Baatu wolof dina ñëw ci kanam",
+    englishVoiceSoon: "Baatu angale dina ñëw ci kanam",
     nowReading: "Jàng gi: {title}. Ubbi",
     stopReading: "Dakkal jàng bi",
     updatedJustNow: "Yeesal nañu ko leegi.",

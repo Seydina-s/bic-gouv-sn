@@ -16,29 +16,41 @@ function clientAnswering(body: unknown) {
 describe("procedures client", () => {
   it("asks for the alphabetical list without a query", async () => {
     const { client, fetchImpl } = clientAnswering(PROCEDURE_LIST);
-    await expect(client.listProcedures("", null)).resolves.toEqual(PROCEDURE_LIST);
-    expect(fetchImpl).toHaveBeenCalledWith("https://api.test/v1/procedures?limit=30", {
+    await expect(client.listProcedures("fr", "", null)).resolves.toEqual(PROCEDURE_LIST);
+    expect(fetchImpl).toHaveBeenCalledWith("https://api.test/v1/procedures?lang=fr&limit=30", {
       signal: expect.any(AbortSignal) as AbortSignal,
     });
   });
 
   it("sends the query and the cursor of the next page", async () => {
     const { client, fetchImpl } = clientAnswering(PROCEDURE_LIST);
-    await client.listProcedures("carte d'identité", "abc");
+    await client.listProcedures("fr", "carte d'identité", "abc");
     expect(fetchImpl.mock.calls[0]?.[0]).toBe(
-      "https://api.test/v1/procedures?limit=30&q=carte+d%27identit%C3%A9&cursor=abc",
+      "https://api.test/v1/procedures?lang=fr&limit=30&q=carte+d%27identit%C3%A9&cursor=abc",
     );
+  });
+
+  it("asks for the sheets in the reader's language, French when not translated (ML-14)", async () => {
+    const { client, fetchImpl } = clientAnswering(PROCEDURE_LIST);
+    await client.listProcedures("en", "", null);
+    await client.themePage("wo", "etatcivil", 2);
+    expect(fetchImpl.mock.calls.map(([url]) => url)).toEqual([
+      "https://api.test/v1/procedures?lang=en&fallback=fr&limit=30",
+      "https://api.test/v1/procedures?lang=wo&fallback=fr&limit=20&theme=etatcivil&page=2",
+    ]);
   });
 
   it("reads one procedure by its slug", async () => {
     const { client, fetchImpl } = clientAnswering(PROCEDURE_DETAIL);
-    await expect(client.getProcedure("demarche-test-a")).resolves.toEqual(PROCEDURE_DETAIL);
-    expect(fetchImpl.mock.calls[0]?.[0]).toBe("https://api.test/v1/procedures/demarche-test-a");
+    await expect(client.getProcedure("en", "demarche-test-a")).resolves.toEqual(PROCEDURE_DETAIL);
+    expect(fetchImpl.mock.calls[0]?.[0]).toBe(
+      "https://api.test/v1/procedures/demarche-test-a?lang=en&fallback=fr",
+    );
   });
 
   it("refuses an answer of the wrong shape", async () => {
     const { client } = clientAnswering({ nope: true });
-    await expect(client.getProcedure("x")).rejects.toThrow("unexpected shape");
+    await expect(client.getProcedure("fr", "x")).rejects.toThrow("unexpected shape");
   });
 });
 

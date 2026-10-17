@@ -29,6 +29,7 @@ export const en: PartialCatalog<FrCatalog> = {
     pauseReading: "Pause the reading",
     resumeReading: "Resume the reading",
     wolofVoiceSoon: "Wolof voice coming soon",
+    englishVoiceSoon: "English voice coming soon",
     nowReading: "Now playing: {title}. Open",
     stopReading: "Stop the reading",
     updatedJustNow: "Updated just now.",

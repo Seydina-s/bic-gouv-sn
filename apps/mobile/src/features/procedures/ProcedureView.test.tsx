@@ -128,6 +128,23 @@ describe("the page of a procedure", () => {
     );
   });
 
+  it("shows a translated sheet without the French mention, and waits for its voice (ML-14)", async () => {
+    await AsyncStorage.setItem("bgs-language", "en");
+    jest.mocked(Speech.speak).mockClear();
+    await show({
+      ...SHEET,
+      lang: "en",
+      translationStatus: "machine",
+      title: "Placeholder translated title",
+      blocks: [p("Placeholder translated text.")],
+    });
+    expect(await screen.findByText("Machine translation")).toBeOnTheScreen();
+    expect(screen.queryByText("This page is only available in French")).toBeNull();
+    await fireEvent.press(screen.getByRole("button", { name: "Listen" }));
+    expect(screen.getByRole("button", { name: "English voice coming soon" })).toBeOnTheScreen();
+    expect(Speech.speak).not.toHaveBeenCalled();
+  });
+
   it("leads to the nearest service the sheet names, only when one is verified", async () => {
     const where = { ...SHEET, blocks: [p("Où s'adresser ?"), p("Au commissariat de police.")] };
     const onOpen = jest.fn();
