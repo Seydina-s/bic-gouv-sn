@@ -286,11 +286,17 @@ export function retrievePassages(
   lang: Lang,
   today: string,
   byMeaning: readonly ScoredPassage[] | null = null,
-  { limit = PASSAGES_GIVEN, meaningWeight = MEANING_WEIGHT } = {},
+  {
+    limit = PASSAGES_GIVEN,
+    meaningWeight = MEANING_WEIGHT,
+    period,
+  }: { limit?: number; meaningWeight?: number; period?: NewsPeriod | null } = {},
 ): Passage[] {
   const intent = questionIntent(question);
-  if (intent.period !== null) {
-    return periodNews(index, lang, today, intent.period).slice(0, limit);
+  // Heard by the caller in the question's rephrasing, when given.
+  const asked = period === undefined ? intent.period : period;
+  if (asked !== null) {
+    return periodNews(index, lang, today, asked).slice(0, limit);
   }
   const words = byWords(index, withMembers(widenQuestion(question), intent), lang);
   const candidates =

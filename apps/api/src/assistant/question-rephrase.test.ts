@@ -1,15 +1,11 @@
 import { describe, expect, it } from "vitest";
-import type { PassageIndex } from "./passage-search";
-import { needsRephrasing } from "./question-rephrase";
+import { REPHRASE_RULES } from "./question-rephrase";
 
-describe("needsRephrasing", () => {
-  // Every word known: only the language decides.
-  const index = { unknownWords: () => [] } as unknown as PassageIndex;
-
-  it("always rephrases a question outside French into a French search", () => {
-    expect(needsRephrasing("Where did the President go?", "en", index)).toBe(true);
-    expect(needsRephrasing("Fan la Njiitu Réew mi dem?", "wo", index)).toBe(true);
-    // In French, only when a word is found in no passage.
-    expect(needsRephrasing("Où est allé le Président ?", "fr", index)).toBe(false);
+describe("the rephrasing rules", () => {
+  it("ask for abbreviations written in full and the words of time kept (17/10/2026)", () => {
+    // "dernier cm" and "kom on fait pr avoir un pasport" found their page 7 times in 10.
+    expect(REPHRASE_RULES).toContain('"cm" → "Conseil des ministres"');
+    expect(REPHRASE_RULES).toContain("Keep the words of time");
+    expect(REPHRASE_RULES).toContain("Never answer the message");
   });
 });
