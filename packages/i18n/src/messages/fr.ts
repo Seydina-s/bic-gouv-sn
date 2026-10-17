@@ -26,6 +26,7 @@ export const fr = {
     pauseReading: "Mettre la lecture en pause",
     resumeReading: "Reprendre la lecture",
     wolofVoiceSoon: "Voix wolof bientôt disponible",
+    englishVoiceSoon: "Voix anglaise bientôt disponible",
     nowReading: "En lecture : {title}. Ouvrir",
     stopReading: "Arrêter la lecture",
     updatedJustNow: "Mis à jour à l'instant.",

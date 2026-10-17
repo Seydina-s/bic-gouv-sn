@@ -13,7 +13,7 @@ import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 import { Runs } from "../news/BlockRenderer";
 import { FloatingListenButton, useListenScroll } from "../news/FloatingListenButton";
-import { FRENCH_VOICE, ListenPill, useListening } from "../news/ListenButton";
+import { ListenPill, useListening } from "../news/ListenButton";
 import { FloatingAppBar } from "../shell/FloatingAppBar";
 import { ProcedureActionBar } from "./ProcedureActionBar";
 import { briefLabelsOf, ProcedureBrief } from "./ProcedureBrief";
@@ -44,8 +44,9 @@ function usePageWords(): PageWords {
 }
 
 /**
- * Procedures are in French and read by the French voice: what is read aloud around
- * them stays French whatever the interface's language (16/10/2026).
+ * A sheet still in French is read by the French voice: what is read aloud around it
+ * stays French whatever the interface's language (16/10/2026). A translated sheet
+ * waits for the voice of its language (ML-13).
  */
 const FRENCH = createTranslator({ lang: "fr", reference: fr, catalog: fr });
 const FRENCH_WORDS = pageWordsOf(FRENCH);
@@ -124,6 +125,8 @@ function ProcedureSheetView({
 }) {
   const { theme } = useTheme();
   const { t, lang } = useTranslation();
+  // The language the sheet came in: the chosen one once translated (ML-14), else French.
+  const sheetLang = detail.lang ?? "fr";
   const words = usePageWords();
   const page = useMemo(() => procedurePage(detail, words), [detail, words]);
   // The first sections come with the screen, the others on the next frame.
@@ -142,7 +145,7 @@ function ProcedureSheetView({
       title: detail.title,
       path: `/procedure/${detail.slug}`,
     },
-    voice: FRENCH_VOICE,
+    lang: sheetLang,
     pieces: () =>
       spokenProcedure(
         detail.title,
@@ -189,7 +192,7 @@ function ProcedureSheetView({
             <Runs inlines={page.lead} />
           </Text>
         )}
-        {lang !== "fr" && (
+        {sheetLang !== lang && (
           <Text style={[textStyle.bodySmall, { color: color.textTertiary, marginTop: space.xs }]}>
             {t("procedures.onlyInFrench")}
           </Text>

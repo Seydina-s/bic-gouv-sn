@@ -1,6 +1,7 @@
 import { keepPreviousData, useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { createProceduresClient } from "../../api/procedures-client";
 import { API_BASE_URL } from "../../api/base-url";
+import { useTranslation } from "../../i18n/useTranslation";
 
 const client = createProceduresClient({ baseUrl: API_BASE_URL });
 
@@ -9,19 +10,22 @@ const client = createProceduresClient({ baseUrl: API_BASE_URL });
  * only one theme's validated procedures when a theme is given.
  */
 export function useProcedures(query: string, theme: string | null = null) {
+  const { lang } = useTranslation();
   const trimmed = query.trim();
   return useInfiniteQuery({
-    queryKey: ["procedures", "list", theme ?? "all", trimmed],
-    queryFn: ({ pageParam, signal }) => client.listProcedures(trimmed, pageParam, signal, theme),
+    queryKey: ["procedures", lang, "list", theme ?? "all", trimmed],
+    queryFn: ({ pageParam, signal }) =>
+      client.listProcedures(lang, trimmed, pageParam, signal, theme),
     initialPageParam: null as string | null,
     getNextPageParam: (page) => page.nextCursor,
   });
 }
 
 export function useProcedure(slug: string) {
+  const { lang } = useTranslation();
   return useQuery({
-    queryKey: ["procedures", "detail", slug],
-    queryFn: ({ signal }) => client.getProcedure(slug, signal),
+    queryKey: ["procedures", lang, "detail", slug],
+    queryFn: ({ signal }) => client.getProcedure(lang, slug, signal),
   });
 }
 
@@ -35,9 +39,10 @@ export function useProcedureThemes() {
 
 /** One numbered page of a theme; the previous page stays shown while the next loads. */
 export function useProcedureThemePage(theme: string, page: number) {
+  const { lang } = useTranslation();
   return useQuery({
-    queryKey: ["procedures", "theme", theme, page],
-    queryFn: ({ signal }) => client.themePage(theme, page, signal),
+    queryKey: ["procedures", lang, "theme", theme, page],
+    queryFn: ({ signal }) => client.themePage(lang, theme, page, signal),
     placeholderData: keepPreviousData,
   });
 }

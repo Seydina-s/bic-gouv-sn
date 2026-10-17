@@ -46,9 +46,11 @@ const persister = createAsyncStoragePersister({ storage: AsyncStorage, key: "bgs
  * back a stored value over 2 MB).
  */
 export function keptOffline(query: Query): boolean {
-  const [area, , kind, typed] = query.queryKey;
+  // Keys start with the area and the language: ["news", lang, kind, …].
+  const [area, , kind, , typed] = query.queryKey;
   const newsSearch = area === "news" && kind === "search";
-  const procedureSearch = area === "procedures" && typeof typed === "string" && typed !== "";
+  const procedureSearch =
+    area === "procedures" && kind === "list" && typeof typed === "string" && typed !== "";
   return defaultShouldDehydrateQuery(query) && !newsSearch && !procedureSearch;
 }
 
