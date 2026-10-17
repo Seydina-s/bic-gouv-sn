@@ -1,9 +1,5 @@
 import { withTimeout } from "@bgs/resilience";
-import {
-  assistantReplySchema,
-  type AssistantQuestion,
-  type AssistantReply,
-} from "@bgs/shared-types";
+import { readAssistantReply, type AssistantQuestion, type AssistantReply } from "@bgs/shared-types";
 import type { ApiClientOptions } from "./json-getter";
 
 /** Why a question got no reply, as the screen explains it. */
@@ -53,11 +49,11 @@ export function createAssistantClient({
       if (!response.ok) {
         throw new AskError(failureOf(response.status));
       }
-      const reply = assistantReplySchema.safeParse(await response.json().catch(() => null));
-      if (!reply.success) {
+      const reply = readAssistantReply(await response.json().catch(() => null));
+      if (reply === null) {
         throw new AskError("failed");
       }
-      return reply.data;
+      return reply;
     },
   };
 }
