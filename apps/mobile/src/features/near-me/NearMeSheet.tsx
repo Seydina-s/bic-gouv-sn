@@ -1,4 +1,9 @@
-import BottomSheet, { BottomSheetFlatList, BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetFlatList,
+  BottomSheetScrollView,
+  type BottomSheetBackdropProps,
+} from "@gorhom/bottom-sheet";
 import type { PublicService } from "@bgs/shared-types";
 import { ArrowLeftIcon as ArrowLeft } from "phosphor-react-native/src/icons/ArrowLeft";
 import {
@@ -259,6 +264,25 @@ export function NearMeSheet({
   }, [selected]);
 
   const handle = useCallback(() => <Handle index={rest} onSize={resize} />, [rest, resize]);
+  const { t } = useTranslation();
+  // Raised, the panel goes back to its first height at a tap outside it, as the
+  // Settings close at a tap outside them (owner's request of 17/10/2026): one tap
+  // instead of two slides. Down, nothing covers the map.
+  const backdrop = useCallback(
+    (props: BottomSheetBackdropProps) => (
+      <BottomSheetBackdrop
+        {...props}
+        appearsOnIndex={1}
+        disappearsOnIndex={0}
+        pressBehavior="collapse"
+        opacity={0.12}
+        style={[props.style, { backgroundColor: color.scrim }]}
+        accessibilityRole="button"
+        accessibilityLabel={t("nearMe.collapsePanel")}
+      />
+    ),
+    [color.scrim, t],
+  );
 
   return (
     <BottomSheet
@@ -274,6 +298,7 @@ export function NearMeSheet({
         onRest(next);
       }}
       handleComponent={handle}
+      backdropComponent={backdrop}
       backgroundStyle={{ backgroundColor: color.background }}
       style={[styles.sheet, { shadowColor: color.scrim }]}
     >

@@ -72,9 +72,13 @@ function serveMedia(path, request, response) {
   }
 }
 
-/** Method and path prefix the app uses (apps/mobile/src). */
+/**
+ * Method and path prefix the app uses (apps/mobile/src). A path missing here is
+ * refused (404) to the phones only: kept in step by apps/api/src/public-gate.test.ts.
+ */
 const ALLOWED = [
   ["GET", "/v1/health"],
+  ["GET", "/v1/entreprendre"],
   ["GET", "/v1/news"],
   ["GET", "/v1/procedures"],
   ["GET", "/v1/services"],

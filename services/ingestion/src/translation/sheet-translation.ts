@@ -180,15 +180,21 @@ export class SheetTranslation extends BatchTranslation<Procedure, SheetText, She
   }
 }
 
+/** How many of the optional fields a sheet fills (summary, who, documents, questions). */
+function richness(procedure: Procedure): number {
+  return [
+    procedure.summary !== null,
+    procedure.eligibility !== null,
+    procedure.documents.length > 0,
+    procedure.faqs.length > 0,
+  ].filter(Boolean).length;
+}
+
 /**
- * Sheets for a trial: complete ones (summary, documents and questions, so every
- * field is tried), spread over the whole list rather than its first letters.
+ * Sheets for a trial: the richest first, so that as many fields as possible are
+ * tried. Few sheets fill them all (17/10/2026: of 718, 6 list their documents and
+ * none has questions): requiring every field left the trial empty.
  */
 export function sheetTrialPicks(procedures: readonly Procedure[], count: number): Procedure[] {
-  const complete = procedures.filter(
-    (procedure) =>
-      procedure.summary !== null && procedure.documents.length > 0 && procedure.faqs.length > 0,
-  );
-  const step = Math.max(1, Math.floor(complete.length / count));
-  return complete.filter((_procedure, index) => index % step === 0).slice(0, count);
+  return [...procedures].sort((a, b) => richness(b) - richness(a)).slice(0, count);
 }
