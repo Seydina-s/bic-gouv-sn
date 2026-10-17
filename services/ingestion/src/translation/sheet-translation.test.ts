@@ -223,11 +223,16 @@ describe("checkSheet", () => {
 });
 
 describe("the sheets of a trial", () => {
-  it("are complete ones, spread over the list", () => {
-    const all = [1, 2, 3, 4, 5, 6].map((n) =>
-      procedure(n, n === 3 ? { faqs: [] } : n === 5 ? { summary: null } : {}),
-    );
-    expect(sheetTrialPicks(all, 2).map((p) => p.slug)).toEqual(["test-1", "test-4"]);
+  it("are the richest ones, even when none fills every field", () => {
+    // As at the source on 17/10/2026: almost no sheet lists documents or questions.
+    const bare = { summary: null, documents: [], faqs: [] };
+    const all = [
+      procedure(1, bare),
+      procedure(2, { ...bare, summary: "Un résumé fictif." }),
+      procedure(3, { ...bare, documents: ["Une pièce fictive"], summary: "Un résumé fictif." }),
+      procedure(4, bare),
+    ];
+    expect(sheetTrialPicks(all, 2).map((p) => p.slug)).toEqual(["test-3", "test-2"]);
     expect(sheetTrialPicks(all, 10)).toHaveLength(4);
   });
 });
