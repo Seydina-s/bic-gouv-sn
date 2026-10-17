@@ -1,6 +1,13 @@
 # STATUS — Bic Gouv SN
 
-**Dernière mise à jour** : 16/10/2026 (17 h) · **Mode** : autonome prolongé (demande de l'utilisateur du 14/10). Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md` (points 50, 52 à 58).
+**Dernière mise à jour** : 17/10/2026 (7 h) · **Mode** : autonome jusqu'au 17/10 à 14 h (demande de l'utilisateur). Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md` (points 50, 52 à 56, 59 à 61).
+
+## 17/10, nuit et matin, en bref : démarches dans la langue choisie
+- **Livré et déployé** : #367 (lectures orphelines arrêtées sur le serveur des voix), #368 (fondu clair ↔ sombre qui couvre aussi les Réglages, publié à 1 h 54), #369 et #370 (l'assistant cite les services de l'État vérifiés), #371 (limite de 10 min à la vérification nocturne des retraits, qui avait bloqué la collecte 2 h 30), #372 à #374 (ci-dessous). Déploiement local unique à 6 h 43, vérifié en réel.
+- **Démarches dans la langue choisie (ML-14)** : fiche traduite gardée à part, valable pour sa version française (#372) ; traduction des fiches par la même chaîne que les articles, `translate --procedures`, rien envoyé (≈ 3,7 $ anglais, ≈ 11,7 $ wolof, #373) ; noms des 18 thèmes en anglais et en wolof (#373).
+- **Wolof** : glossaire imposé (Monsieur → Gòor gi, etc.) ; essai refait, 10 sur 10. **Retours wolof de l'utilisateur attendus** avant le grand lot (point 59).
+- **Assistant** : politesses anglaises répondues sur le téléphone (#374).
+- **Erreur consignée** : changement de branche dans une copie en pleine livraison (sans conséquence ; règle globale ajoutée).
 
 ## 16/10, soir, en bref : toute l'app dans la langue choisie, traduction prête
 - **Langue de toute l'app** (#358 à #361, #363, #364) : anglais dans le modèle ; interface complète en anglais et en wolof (wolof en traduction automatique, signalée) ; choix Français / Wolof / English dans la présentation et les Réglages ; articles et démarches dans la langue choisie, sinon en français avec une mention (`fallback=fr`, le fil n'est plus réduit en wolof) ; dictée en anglais ; assistant qui cherche aussi dans les pages françaises (défaut trouvé par une vraie question après déploiement, corrigé, ERREURS.md) ; notifications dans la langue de chaque téléphone ; abonnés anglais comptés dans la console. Mises à jour à distance publiées, déploiement local fait.
@@ -13,6 +20,10 @@
 - **Phase multilingue chiffrée** (`docs/cadrage/phase-multilingue.md`) : 6 520 articles visibles, 5 824 sans wolof, aucun en anglais ; décisions attendues au point 58.
 - **Découvert** : articles de démonstration de WordPress publiés comme actualités (DATA-10), à vérifier puis écarter.
 - **Erreur consignée** : fichier effacé par `git checkout --` pendant un test de mutation (ERREURS.md, règle globale ajoutée).
+
+## Reprise de session (mise à jour le 17/10/2026, 7 h)
+
+**Changements depuis la version du 16/10 ci-dessous** : `main` = #374, aucune branche en cours ; copies de travail `-w2` et `-w4` (une copie par livraison en cours, jamais de changement de branche dans une copie occupée). Tâches immédiates : (1) retours wolof de l'utilisateur → `wolof-glossary.ts` puis `translate --lang wo --trial 10` depuis `C:\bic-gouv-sn` ; (2) sur accord (points 59 et 61) : grand lot des articles puis `translate --procedures` ; (3) VOX-11 rattrapage français en cours (≈ 3 700 articles) ; (4) ML-13 voix anglaise après les rattrapages ; (5) DATA-10 sur accord (point 60).
 
 ## Reprise de session (préparée le 16/10/2026, 15 h)
 
