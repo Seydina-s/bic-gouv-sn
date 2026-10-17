@@ -85,6 +85,8 @@ export interface WithdrawalReport {
   restored: number;
   /** Too many withdrawals at once (MAX_HIDDEN_AT_ONCE): none was hidden. */
   suspicious: boolean;
+  /** The time budget ran out: the versions not read again wait for the next night. */
+  incomplete: boolean;
 }
 
 export interface ReconcileOptions {
@@ -101,6 +103,12 @@ export interface ReconcileOptions {
    * only stored articles newer than the last one these pages show are checked.
    */
   listingPages?: number | undefined;
+  /**
+   * Time (ms since the epoch, as `now` gives it) after which no version is read
+   * again: on 17/10/2026 a slow network made the check of presidence.sn last two and
+   * a half hours, during which the collection waited. What was decided is applied.
+   */
+  deadline?: number | undefined;
 }
 
 /** What the listing of one language shows, and which stored articles it covers. */
@@ -165,7 +173,7 @@ export async function reconcileWithdrawals(
   provider: SourceProvider,
   repository: ArticleRepository,
   langs: readonly Lang[],
-  { apply, now, institution, listingPages }: ReconcileOptions,
+  { apply, now, institution, listingPages, deadline }: ReconcileOptions,
 ): Promise<WithdrawalReport> {
   const recheck = provider.recheck?.bind(provider);
   if (recheck === undefined) {
@@ -178,6 +186,7 @@ export async function reconcileWithdrawals(
   const missing: MissingArticle[] = [];
   const toHide: Change[] = [];
   const toRestore: Change[] = [];
+  let incomplete = false;
   let cursor: string | undefined;
   do {
     const page = await repository.list({
@@ -204,6 +213,10 @@ export async function reconcileWithdrawals(
           continue;
         }
         if (!covers(window, article.sourcePublishedOn)) {
+          continue;
+        }
+        if (deadline !== undefined && now().getTime() > deadline) {
+          incomplete = true;
           continue;
         }
         const sourceUrl = translation.sourceUrl ?? article.sourceUrl;
@@ -234,5 +247,6 @@ export async function reconcileWithdrawals(
     hidden: suspicious ? 0 : toHide.length,
     restored: toRestore.length,
     suspicious,
+    incomplete,
   };
 }

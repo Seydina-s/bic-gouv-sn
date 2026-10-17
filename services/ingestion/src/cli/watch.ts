@@ -155,7 +155,10 @@ async function report(outcome: PassOutcome, lastChangeAt: Date | null): Promise<
   return delay;
 }
 
-// Articles withdrawn by the source are hidden, each institution once a night (ING-03, ING-04).
+// Articles withdrawn by the source are hidden, each institution once a night (ING-03, ING-04),
+// within a time budget: the collection waits for the check (presidence.sn takes about
+// 5 minutes; a slow network once made it last 2 h 30, 17/10/2026).
+const WITHDRAWAL_BUDGET_MS = 10 * 60 * 1000;
 const lastWithdrawalChecks = new Map<Institution, Date>();
 // The ministry sites not collected yet, looked at again once a week (GOV-08).
 const sitesReview = document("sites-review");
@@ -217,7 +220,7 @@ async function checkWithdrawalsIfDue() {
   }
   lastWithdrawalChecks.set(target.institution, now);
   try {
-    const { hidden, restored, missing, suspicious } = await reconcileWithdrawals(
+    const { hidden, restored, missing, suspicious, incomplete } = await reconcileWithdrawals(
       target.provider,
       repository,
       target.langs,
@@ -226,10 +229,12 @@ async function checkWithdrawalsIfDue() {
         now: () => new Date(),
         institution: target.institution,
         listingPages: listingPagesFor(target.institution),
+        deadline: now.getTime() + WITHDRAWAL_BUDGET_MS,
       },
     );
+    const seconds = Math.round((Date.now() - now.getTime()) / 1000);
     process.stdout.write(
-      `${now.toISOString()} withdrawals checked on ${target.name} · ${String(missing.length)} unlisted · newly hidden ${String(hidden)} · shown again ${String(restored)}${suspicious ? " · too many at once: nothing hidden, check the site" : ""}\n`,
+      `${now.toISOString()} withdrawals checked on ${target.name} · ${String(missing.length)} unlisted · newly hidden ${String(hidden)} · shown again ${String(restored)}${suspicious ? " · too many at once: nothing hidden, check the site" : ""}${incomplete ? " · time budget spent: the rest waits for the next night" : ""} · ${String(seconds)} s\n`,
     );
   } catch (error) {
     // Retried the next night; the ordinary passes are not affected.
