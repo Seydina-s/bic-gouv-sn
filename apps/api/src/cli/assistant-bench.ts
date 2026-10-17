@@ -106,14 +106,24 @@ try {
   const knowledge = await buildKnowledge(articles, procedures, services);
   const { retrieval, traps } = await fixedSets();
   const previous = await readWeaknesses();
+  const dateOf = new Map(knowledge.passages.map((p) => [p.sourceUrl, p.publishedOn]));
+  const dated = (url: string) => dateOf.get(url) ?? null;
+  const nextWeek = new Date(Date.parse(today) + 7 * 86_400_000).toISOString().slice(0, 10);
+  // Every case the bench knows today, both halves of the retrieval set included.
+  const current = [
+    ...generatedCases(knowledge.passages, today),
+    ...retrievalCases(retrieval, today, dated),
+    ...retrievalCases(retrieval, nextWeek, dated),
+    ...trapCases(traps),
+  ];
   const asked = weaknessesOnly
     ? trapCases(traps)
     : [
         ...generatedCases(knowledge.passages, today),
-        ...retrievalCases(retrieval, today),
+        ...retrievalCases(retrieval, today, dated),
         ...trapCases(traps),
       ];
-  const cases = [...asked, ...weaknessCases(previous, asked)];
+  const cases = [...asked, ...weaknessCases(previous, asked, current)];
   say(
     `Banc d'essai du ${today} : ${String(cases.length)} questions, dont ${String(cases.length - asked.length)} faiblesses connues`,
   );

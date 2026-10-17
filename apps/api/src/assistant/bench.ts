@@ -4,6 +4,7 @@ import type { AnswerCase } from "./answer-eval";
 import type { AnswerStatus, GroundedAnswer } from "./grounded-answer";
 import { periodDays, type NewsPeriod } from "./news-overview";
 import type { Passage } from "./passages";
+import { questionIntent } from "./retrieval";
 import type { RetrievalCase } from "./retrieval-eval";
 
 /*
@@ -37,6 +38,12 @@ export interface BenchCase {
   sources?: string[] | undefined;
   /** Every page cited must be dated on or after this day (fresh news). */
   freshFrom?: string | undefined;
+  /**
+   * For "the latest" or "now" questions: a page newer than this day is right too,
+   * the expected one having aged (bench of 17/10/2026: "dernier cm" failed for
+   * citing a newer Council than the one written down).
+   */
+  orNewerThan?: string | undefined;
 }
 
 export interface BenchVerdict {
@@ -167,12 +174,17 @@ export function generatedCases(passages: readonly Passage[], today: string): Ben
       sources: [procedure.sourceUrl],
     }),
   );
-  // A name of a few words only: "Gendarmerie" alone names a hundred offices.
-  const named = pages(passages, "service").filter((s) => s.title.split(/\s+/).length >= 3);
-  const services = spread(named, 4, today).map((service) =>
+  // With its town, as people ask: "Hôtel de ville" alone names hundreds of offices.
+  const located = pages(passages, "service").flatMap((service) => {
+    const town = townOf(service);
+    return town === null ? [] : [{ service, town }];
+  });
+  const services = spread(located, 4, today).map(({ service, town }) =>
     benchCase({
       kind: "service",
-      question: `Où se trouve ${service.title} ?`,
+      question: service.title.toLowerCase().includes(town.toLowerCase())
+        ? `Où se trouve ${service.title} ?`
+        : `Où se trouve ${service.title} à ${town} ?`,
       lang: "fr",
       accepted: ["answered"],
       sources: [service.sourceUrl],
@@ -181,20 +193,40 @@ export function generatedCases(passages: readonly Passage[], today: string): Ben
   return [...period, ...council, ...procedures, ...services];
 }
 
-/** Half of the retrieval test set each week, the other half the next. */
-export function retrievalCases(cases: readonly RetrievalCase[], today: string): BenchCase[] {
+/** The town of a service, as its extract gives it after the address; null if none. */
+function townOf(service: Passage): string | null {
+  // "Rue…, Dakar": the town follows the address; a lone address names no town.
+  const parts = (service.text.split("\n")[1] ?? "").split(", ");
+  const town = parts.length >= 2 ? (parts.at(-1)?.trim() ?? "") : "";
+  // The country is no town ("…, Sénégal").
+  return town.length >= 2 && !/\d/.test(town) && !/^s[ée]n[ée]gal$/i.test(town) ? town : null;
+}
+
+/**
+ * Half of the retrieval test set each week, the other half the next. `dateOf` gives
+ * the date of an expected page, for the questions about the latest or the present.
+ */
+export function retrievalCases(
+  cases: readonly RetrievalCase[],
+  today: string,
+  dateOf: (url: string) => string | null = () => null,
+): BenchCase[] {
   const parity = weekParity(today);
   return cases
     .filter((_, index) => index % 2 === parity)
-    .map((c) =>
-      benchCase({
+    .map((c) => {
+      const intent = questionIntent(c.question);
+      const dates = c.expected.flatMap((url) => dateOf(url) ?? []);
+      const oldest = dates.reduce<string | null>((a, b) => (a === null || b < a ? b : a), null);
+      return benchCase({
         kind: SEARCH_KIND[c.style],
         question: c.question,
         lang: c.lang,
         accepted: ["answered"],
         sources: c.expected,
-      }),
-    );
+        ...((intent.recent || intent.current) && oldest !== null ? { orNewerThan: oldest } : {}),
+      });
+    });
 }
 
 /** The "zero invention" traps (data/assistant-answer-eval.json), every week. */
@@ -244,7 +276,14 @@ function failure(
   if (answer.status !== "answered") {
     return null;
   }
-  if (c.sources !== undefined && !cited.some(({ url }) => c.sources?.includes(url) === true)) {
+  const newer = c.orNewerThan;
+  const newerCited =
+    newer !== undefined && cited.some(({ publishedOn }) => (publishedOn ?? "") > newer);
+  if (
+    c.sources !== undefined &&
+    !newerCited &&
+    !cited.some(({ url }) => c.sources?.includes(url) === true)
+  ) {
     return "N'a pas cité la page attendue.";
   }
   const freshFrom = c.freshFrom;
@@ -290,6 +329,7 @@ export const weaknessSchema = z.object({
     accepted: z.array(z.enum(["answered", "not_found", "out_of_scope"])),
     sources: z.array(z.string()).optional(),
     freshFrom: z.string().optional(),
+    orNewerThan: z.string().optional(),
   }),
   /** When it first failed, its last reason, and how many runs it passed since. */
   since: z.string(),
@@ -308,9 +348,12 @@ export const FIXED_AFTER = 2;
 export function weaknessCases(
   weaknesses: readonly Weakness[],
   asked: readonly BenchCase[],
+  current: readonly BenchCase[] = [],
 ): BenchCase[] {
   const ids = new Set(asked.map((c) => c.id));
-  return weaknesses.map(({ case: c }) => c).filter((c) => !ids.has(c.id));
+  // Judged as the bench judges it today, when the question is still among its cases.
+  const now = new Map(current.map((c) => [c.id, c]));
+  return weaknesses.map(({ case: c }) => now.get(c.id) ?? c).filter((c) => !ids.has(c.id));
 }
 
 /**

@@ -206,6 +206,9 @@ export function servicePassages(service: StateService): Passage[] {
   const lines = [
     `${facts.name} (${t(`nearMe.category.${facts.category}`)})`,
     [facts.address, facts.town].filter((part) => part !== null).join(", "),
+    // Most offices have no address (774 of 871 on 17/10/2026): their place on the map
+    // still answers "where is it?", the reply opening the office's sheet and its map.
+    `Emplacement : sur la carte de l'application (${facts.location.lat.toFixed(4)}, ${facts.location.lng.toFixed(4)})`,
     facts.openingHours === null ? "" : `${t("nearMe.hours")} : ${facts.openingHours}`,
     facts.phone === null ? "" : `Téléphone : ${facts.phone}`,
     facts.website === null ? "" : `${t("nearMe.website")} : ${facts.website}`,
