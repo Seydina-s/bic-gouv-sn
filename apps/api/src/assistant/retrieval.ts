@@ -2,6 +2,7 @@ import { INSTITUTIONS, type Institution, type Lang } from "@bgs/shared-types";
 import { fuseRankings } from "./hybrid-search";
 import type { PassageIndex, ScoredPassage } from "./passage-search";
 import { membersNamed } from "./government";
+import { newsPeriod, periodDays, type NewsPeriod } from "./news-overview";
 import { publisherLabel, type Passage } from "./passages";
 import { widenQuestion } from "./question-words";
 
@@ -134,6 +135,11 @@ export interface QuestionIntent {
    * page of the Primature): their ministry may have no site of its own.
    */
   members: { name: string; post: string }[];
+  /**
+   * The news of a period asked, with no other subject ("les actualités du jour"):
+   * answered from the newest articles, not by words (17/10/2026).
+   */
+  period: NewsPeriod | null;
 }
 
 function namedPublisher(text: string): string | null {
@@ -153,6 +159,7 @@ export function questionIntent(question: string): QuestionIntent {
     section: SECTIONS.find(([cue]) => text.includes(cue))?.[1] ?? null,
     publisher: namedPublisher(text),
     members: membersNamed(text).map(({ name, post }) => ({ name, post })),
+    period: newsPeriod(text),
   };
 }
 
@@ -234,6 +241,41 @@ function newestNamed(index: PassageIndex, lang: Lang, intent: QuestionIntent): P
 }
 
 /**
+ * For the news of a period: the opening of each article of that period, newest
+ * first, an article once whatever its languages. None in the period (nothing
+ * published today): the newest ones, whose dates let the model say so.
+ */
+function periodNews(index: PassageIndex, lang: Lang, today: string, period: NewsPeriod): Passage[] {
+  const latest = (days: { from: string; to: string } | null) => {
+    const seen = new Set<string>();
+    return searchedLanguages(lang)
+      .flatMap((searched) =>
+        index.latest({
+          lang: searched,
+          section: null,
+          contents: PASSAGES_GIVEN,
+          perContent: 1,
+          from: days?.from ?? "0000",
+          to: days?.to ?? today,
+        }),
+      )
+      .filter((passage) => {
+        if (seen.has(passage.contentId)) {
+          return false;
+        }
+        seen.add(passage.contentId);
+        return true;
+      })
+      .slice(0, PASSAGES_GIVEN);
+  };
+  const inPeriod = latest(periodDays(period, today));
+  return inPeriod.length > 0 ? inPeriod : latest(null);
+}
+
+/** Pieces of one page among those given: more would crowd the other pages out. */
+export const PER_PAGE = 2;
+
+/**
  * `byMeaning`: the passages closest in meaning, when the search by meaning is
  * ready; fused with the words by rank (AI-02: 94 % of right pages in the first 5,
  * against 88 % by words alone on the test set).
@@ -247,6 +289,9 @@ export function retrievePassages(
   { limit = PASSAGES_GIVEN, meaningWeight = MEANING_WEIGHT } = {},
 ): Passage[] {
   const intent = questionIntent(question);
+  if (intent.period !== null) {
+    return periodNews(index, lang, today, intent.period).slice(0, limit);
+  }
   const words = byWords(index, withMembers(widenQuestion(question), intent), lang);
   const candidates =
     byMeaning === null ? words : fuseRankings([words, byMeaning], CANDIDATES, [1, meaningWeight]);
@@ -260,14 +305,22 @@ export function retrievePassages(
     }))
     .sort((a, b) => b.score - a.score)
     .map(({ passage }) => passage);
-  const seen = new Set<string>();
-  return [...newestNamed(index, lang, intent), ...ranked]
-    .filter((passage) => {
-      if (seen.has(passage.id)) {
-        return false;
-      }
-      seen.add(passage.id);
-      return true;
-    })
-    .slice(0, limit);
+  const named = newestNamed(index, lang, intent);
+  const seen = new Set(named.map((passage) => passage.id));
+  const perPage = new Map<string, number>();
+  for (const passage of named) {
+    perPage.set(passage.contentId, (perPage.get(passage.contentId) ?? 0) + 1);
+  }
+  // At most PER_PAGE pieces of a page found by the search (17/10/2026: up to 4 of 8
+  // were pieces of one page); the newest of a section named keep theirs.
+  const others = ranked.filter((passage) => {
+    const pieces = perPage.get(passage.contentId) ?? 0;
+    if (seen.has(passage.id) || pieces >= PER_PAGE) {
+      return false;
+    }
+    seen.add(passage.id);
+    perPage.set(passage.contentId, pieces + 1);
+    return true;
+  });
+  return [...named, ...others].slice(0, limit);
 }

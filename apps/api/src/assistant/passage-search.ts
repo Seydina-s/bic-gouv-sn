@@ -194,26 +194,42 @@ class LanguageIndex {
       });
   }
 
-  /** The opening passages of the newest contents, of one section or publisher when given. */
+  /**
+   * The opening passages of the newest contents, of one section or publisher when
+   * given; only articles published between `from` and `to` (days) when given.
+   */
   latest({
     section,
     publisher = null,
     contents,
     perContent,
-  }: {
-    section: string | null;
-    publisher?: string | null;
-    contents: number;
-    perContent: number;
-  }): Passage[] {
+    from = null,
+    to = null,
+  }: LatestOptions): Passage[] {
+    const within = (passage: Passage | undefined) =>
+      passage?.kind === "news-article" &&
+      passage.publishedOn !== null &&
+      passage.publishedOn >= (from ?? "") &&
+      passage.publishedOn <= (to ?? "9999");
     const firsts = [...this.positionsByContent.values()]
       .map((positions) => positions.flatMap((position) => this.passages[position] ?? []))
       .filter((passages) => passages.length > 0)
       .filter((passages) => section === null || passages[0]?.section === section)
       .filter((passages) => publisher === null || passages[0]?.publisher === publisher)
+      .filter((passages) => (from === null && to === null) || within(passages[0]))
       .sort(([a], [b]) => (a === undefined || b === undefined ? 0 : byNewest(a, b)));
     return firsts.slice(0, contents).flatMap((passages) => passages.slice(0, perContent));
   }
+}
+
+interface LatestOptions {
+  section: string | null;
+  publisher?: string | null;
+  contents: number;
+  perContent: number;
+  /** First and last days of publication (articles only), when a period is asked. */
+  from?: string | null;
+  to?: string | null;
 }
 
 /** Newest first; undated last. */
@@ -255,13 +271,7 @@ export class PassageIndex {
   }
 
   /** The opening passages of the newest contents in `lang`, of one section or publisher when given. */
-  latest(options: {
-    lang: Lang;
-    section: string | null;
-    publisher?: string | null;
-    contents: number;
-    perContent: number;
-  }): Passage[] {
+  latest(options: LatestOptions & { lang: Lang }): Passage[] {
     return this.byLang.get(options.lang)?.latest(options) ?? [];
   }
 
