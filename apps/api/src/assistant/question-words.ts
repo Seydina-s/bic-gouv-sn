@@ -35,6 +35,26 @@ const SHORTHANDS: Readonly<Record<string, string>> = {
   bic: "Bureau de l'Information et de la Communication du Gouvernement",
 };
 
+/**
+ * Everyday words, and the words the official sheets use for them (bench of
+ * 17/10/2026: "protéger le design de mon produit" never found the sheet on
+ * "dessins et modèles industriels", nor "devenir soldat" the one on "carrière
+ * militaire"). Each failure the bench finds on such a word adds an entry here.
+ */
+const OFFICIAL_WORDS: Readonly<Record<string, string>> = {
+  design: "dessin modèle industriel",
+  soldat: "carrière militaire armée",
+  militaire: "carrière militaire",
+  heritage: "succession",
+  divorce: "divorce séparation de corps",
+  divorcee: "divorce séparation de corps",
+  boutique: "commerce",
+  logo: "marque",
+  brevet: "brevet d'invention",
+  papiers: "pièces à fournir",
+  loyer: "bail",
+};
+
 /** Lower case, without accents or apostrophes: how shortcuts are looked up. */
 function words(question: string): string[] {
   return question
@@ -45,8 +65,14 @@ function words(question: string): string[] {
     .filter((word) => word !== "");
 }
 
-/** The question, followed by the full words of the shortcuts it contains. */
+/** The question, followed by the full words of its shortcuts and the official words of its everyday ones. */
 export function widenQuestion(question: string): string {
-  const added = [...new Set(words(question).flatMap((word) => SHORTHANDS[word] ?? []))];
+  const added = [
+    ...new Set(
+      words(question).flatMap((word) =>
+        [SHORTHANDS[word] ?? [], OFFICIAL_WORDS[word] ?? []].flat(),
+      ),
+    ),
+  ];
   return added.length === 0 ? question : `${question} ${added.join(" ")}`;
 }
