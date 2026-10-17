@@ -155,3 +155,11 @@ Mise à jour du 17/10/2026 (matin) : point 59 avancé (consigne wolof renforcée
 | # | Quoi | Pourquoi / effet si ça attend | Réf. backlog |
 |---|---|---|---|
 | 61 | **Essai de traduction des fiches des démarches** (5 fiches en anglais et en wolof, moins de 0,10 $) : d'accord pour le lancer, pour relire la traduction des démarches avant le grand lot ? Estimation de toutes les fiches : ≈ 3,7 $ en anglais, ≈ 11,7 $ en wolof (déjà comprise dans les ≈ 85 $ du point 59). | Sans traduction, les démarches restent en français avec la mention « disponible en français seulement » | ML-14 |
+
+Mise à jour du 17/10/2026 (après-midi) : points 59 (grand lot envoyé) et 61 (essai des fiches lancé) réglés ; points 62 à 64 ajoutés (programme de l'assistant, `docs/cadrage/assistant-fiabilite.md`).
+
+| # | Quoi | Pourquoi / effet si ça attend | Réf. backlog |
+|---|---|---|---|
+| 62 | **Assistant — reformulation systématique** : chaque question est aussi reformulée en recherche claire avant la recherche (abréviations, fautes, wolof). Coût : ≈ + 20 à 30 % par question, sous le même plafond mensuel. D'accord ? | Les questions écrites comme on parle (« dernier cm », « kom on fait pr avoir un pasport ») trouvent la bonne page 7 fois sur 10 seulement | AST-30c |
+| 63 | **Assistant — banc d'essai hebdomadaire** (≈ 150 questions, justesse et fraîcheur, résultats dans la console) : ≈ 4 à 5 $ par mois. D'accord ? | Sans lui, une régression de l'assistant n'est vue que par les utilisateurs | AST-30d |
+| 64 | **Assistant — questions restées sans réponse** : (a) les compter seulement par type, sans garder le texte ; (b) garder le texte, pseudonymisé, 90 jours, visible dans la console ; (c) seulement quand la personne touche « Signaler cette réponse ». Lequel ? | Sans relevé, on ne voit que ce qu'on pense à tester | AST-30e |
