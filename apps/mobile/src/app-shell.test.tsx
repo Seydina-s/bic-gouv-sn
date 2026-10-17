@@ -3,7 +3,7 @@ import { act, fireEvent, screen, waitFor, within } from "@testing-library/react-
 import * as Location from "expo-location";
 import { router } from "expo-router";
 import { renderRouter } from "expo-router/testing-library";
-import { Dimensions, Keyboard, Linking, Share } from "react-native";
+import { BackHandler, Dimensions, Keyboard, Linking, Share } from "react-native";
 import RootLayout from "./app/_layout";
 import TabsLayout from "./app/(tabs)/_layout";
 import HomeScreen from "./app/(tabs)/index";
@@ -605,6 +605,27 @@ describe("app shell", () => {
     await fireEvent.press(screen.getByRole("button", { name: /^zod \d/ }));
     expect(screen.getByText(/Copyright \(c\) \d{4} Colin McDonnell/)).toBeOnTheScreen();
     expect(screen.getByText(/Permission is hereby granted/)).toBeOnTheScreen();
+  });
+
+  it("lays the settings in the app, under the theme's cross-fade, closed by Android's back", async () => {
+    const fetchMock = newsFetch();
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    const back = jest.spyOn(BackHandler, "addEventListener");
+    await renderRouter(routes, { initialUrl: "/" });
+    await fireEvent.press(await screen.findByRole("button", { name: "Réglages" }));
+    expect(await screen.findByRole("radio", { name: "Sombre" })).toBeOnTheScreen();
+    // In the app's own tree (no native window, which stayed above the cross-fade,
+    // UX-02, 17/10/2026): the app behind is hidden from screen readers meanwhile.
+    expect(screen.getByRole("tab", { name: /Accueil/, hidden: true })).toBeOnTheScreen();
+    expect(screen.queryByRole("tab", { name: /Accueil/ })).toBeNull();
+    const handler = back.mock.calls.at(-1)?.[1];
+    await act(() => {
+      expect(handler?.()).toBe(true);
+    });
+    await waitFor(() => {
+      expect(screen.queryByRole("radio", { name: "Sombre" })).toBeNull();
+    });
+    back.mockRestore();
   });
 
   it("remembers the appearance and language chosen in the settings", async () => {
