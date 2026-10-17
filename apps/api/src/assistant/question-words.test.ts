@@ -12,6 +12,16 @@ describe("widenQuestion", () => {
     );
     expect(widenQuestion("Comment obtenir un passeport ?")).toBe("Comment obtenir un passeport ?");
   });
+
+  it("adds the official words of everyday ones (bench of 17/10/2026)", () => {
+    expect(widenQuestion("Comment protéger le design de mon produit ?")).toBe(
+      "Comment protéger le design de mon produit ? dessin modèle industriel",
+    );
+    expect(widenQuestion("Comment devenir soldat ?")).toBe(
+      "Comment devenir soldat ? carrière militaire armée",
+    );
+    expect(widenQuestion("Je refuse l'héritage")).toBe("Je refuse l'héritage succession");
+  });
 });
 
 describe("typing slips", () => {
