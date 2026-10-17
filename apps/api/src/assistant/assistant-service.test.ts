@@ -7,6 +7,7 @@ import { AssistantService, DEFAULT_MONTHLY_LIMIT, monthOf } from "./assistant-se
 import { SYSTEM_RULES } from "./grounded-answer";
 import type { Knowledge } from "./knowledge";
 import type { LlmProvider, LlmRequest } from "./llm-provider";
+import { REPHRASE_RULES } from "./question-rephrase";
 import { PassageIndex } from "./passage-search";
 import type { Passage } from "./passages";
 
@@ -110,7 +111,11 @@ describe("the assistant service", () => {
     const { assistant } = service(french, undefined, wolof);
     await assistant.answer(question);
     await assistant.answer({ ...question, lang: "wo" });
-    expect(french.requests.map((request) => request.system)).toEqual([SYSTEM_RULES]);
+    // Each question is rephrased for the search, then answered (17/10/2026).
+    expect(french.requests.map((request) => request.system)).toEqual([
+      REPHRASE_RULES,
+      SYSTEM_RULES,
+    ]);
     expect(wolof.requests.at(-1)?.system).toBe(SYSTEM_RULES);
   });
 
@@ -130,10 +135,10 @@ describe("the assistant service", () => {
       month: "2026-10",
       questions: 1,
       monthlyLimit: DEFAULT_MONTHLY_LIMIT,
-      inputTokens: 1000,
-      outputTokens: 50,
-      // What the call cost at its model's price, summed over the month.
-      costUsd: 0.00125,
+      // Both calls of the question (rephrasing, answer), at their model's price.
+      inputTokens: 2000,
+      outputTokens: 100,
+      costUsd: 0.0025,
       configured: true,
     });
   });
@@ -171,7 +176,8 @@ describe("the assistant service", () => {
       reply: { status: "paused", text: null, sources: [], resumesOn: "2026-11-01" },
       problem: "quota_reached",
     });
-    expect(llm.requests).toHaveLength(2);
+    // Two questions, two calls each.
+    expect(llm.requests).toHaveLength(4);
     expect((await assistant.usage()).questions).toBe(2);
 
     setTime("2026-11-01T00:00:01Z");
@@ -184,7 +190,7 @@ describe("the assistant service", () => {
     await assistant.setMonthlyLimit(3, "admin-1");
     const replies = await Promise.all(Array.from({ length: 10 }, () => assistant.answer(question)));
     expect(replies.filter(({ reply }) => reply.status === "answered")).toHaveLength(3);
-    expect(llm.requests).toHaveLength(3);
+    expect(llm.requests).toHaveLength(6);
   });
 
   it("stays usable when the model fails, and says why for the error journal", async () => {

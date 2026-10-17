@@ -5,9 +5,9 @@ import type { PassageIndex } from "./passage-search";
 import type { Passage } from "./passages";
 import { fuseRankings, type EmbeddingProvider, type VectorIndex } from "./hybrid-search";
 import type { ScoredPassage } from "./passage-search";
-import { needsRephrasing, rephraseQuestion } from "./question-rephrase";
+import { rephraseQuestion } from "./question-rephrase";
 import { widenQuestion } from "./question-words";
-import { retrievePassages, searchedLanguages } from "./retrieval";
+import { questionIntent, retrievePassages, searchedLanguages } from "./retrieval";
 
 /** A question is encoded in milliseconds: past this, the words answer alone. */
 const MEANING_TIMEOUT_MS = 3000;
@@ -205,17 +205,20 @@ export async function answerQuestion(
   }: { question: string; lang: Lang; mode?: AssistantMode; today?: string },
   { index, meaning = null, llm, call }: AnswerDependencies,
 ): Promise<GroundedAnswer> {
-  // Wolof in any spelling, or words found nowhere: searched with a French rephrasing too.
-  const rephrased = needsRephrasing(question, lang, index)
-    ? await rephraseQuestion(question, llm, call)
-    : { query: null, usage: null };
+  // Every question is searched with its French rephrasing too (17/10/2026).
+  const rephrased = await rephraseQuestion(question, llm, call);
   const searched = rephrased.query === null ? question : `${question} ${rephrased.query}`;
+  // The news of a period, heard in the question or in its rephrasing ("xibaar yi tey").
+  const period =
+    questionIntent(question).period ??
+    (rephrased.query === null ? null : questionIntent(rephrased.query).period);
   const given = retrievePassages(
     index,
     searched,
     lang,
     today,
     await closestInMeaning(searched, lang, meaning),
+    { period },
   );
   if (given.length === 0) {
     return refused("not_found", null, rephrased.usage);

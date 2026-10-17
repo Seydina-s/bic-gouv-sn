@@ -145,13 +145,15 @@ describe("answerQuestion", () => {
     );
     expect(answer.status).toBe("answered");
     expect(answer.sources[0]?.title).toMatch(/^Port/);
-    const [request] = llm.requests;
+    // The rephrasing first, then the answer.
+    expect(llm.requests.map((r) => r.system)).toEqual([REPHRASE_RULES, SYSTEM_RULES]);
+    const request = llm.requests.at(-1);
     expect(request?.system).toBe(SYSTEM_RULES);
     expect(request?.user.match(/<extract /g)).toHaveLength(PASSAGES_GIVEN);
     expect(request?.maxOutputTokens).toBeGreaterThan(0);
   });
 
-  it("only asks for a French rephrasing when no word is known, then says not found", async () => {
+  it("rephrases every question, and says not found when nothing matches", async () => {
     const llm = provider("{}");
     const answer = await answerQuestion(
       { question: "aéroport", lang: "fr" },
@@ -193,6 +195,40 @@ describe("answerQuestion", () => {
     expect(llm.requests[1]?.user).toContain("khamna fii la port bi nek");
     // Both calls are counted in the month's use.
     expect(answer.usage?.inputTokens).toBe(2 * usage.inputTokens);
+  });
+
+  it("hears the news of a period in the rephrasing of a Wolof question", async () => {
+    const dated = new PassageIndex([
+      {
+        ...passage(40, "Article fictif du jour", "Une activité fictive."),
+        kind: "news-article" as const,
+        publishedOn: "2026-10-17",
+      },
+      {
+        ...passage(41, "Article fictif ancien", "Une autre activité."),
+        kind: "news-article" as const,
+        publishedOn: "2026-09-01",
+      },
+    ]);
+    const requests: LlmRequest[] = [];
+    const llm: LlmProvider = {
+      name: "test",
+      complete: (request: LlmRequest) => {
+        requests.push(request);
+        return Promise.resolve(
+          reply(
+            request.system === REPHRASE_RULES
+              ? '{"query": "actualités du jour"}'
+              : '{"status":"answered","answer":"Réponse.","citations":[1]}',
+          ),
+        );
+      },
+    };
+    const answer = await answerQuestion(
+      { question: "Lan mooy xibaar yu am solo tey ?", lang: "wo", today: "2026-10-17" },
+      { index: dated, llm, call: direct },
+    );
+    expect(answer.sources.map((source) => source.title)).toEqual(["Article fictif du jour"]);
   });
 
   it("still searches the question as written when the rephrasing fails", async () => {
