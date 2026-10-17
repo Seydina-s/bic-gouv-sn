@@ -1,5 +1,7 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { describe, expect, it } from "vitest";
 
 /*
  * The phones reach the API through the public gate (scripts/public-gate.mjs), which
@@ -8,7 +10,7 @@ import { join } from "node:path";
  * while it showed on a computer talking to the API directly (17/10/2026).
  */
 
-const repo = join(__dirname, "../../../..");
+const repo = fileURLToPath(new URL("../../..", import.meta.url));
 
 /** The path prefixes the gate lets through. */
 function gatePrefixes(): string[] {

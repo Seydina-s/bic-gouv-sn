@@ -74,7 +74,7 @@ function serveMedia(path, request, response) {
 
 /**
  * Method and path prefix the app uses (apps/mobile/src). A path missing here is
- * refused (404) to the phones only: kept in step by apps/mobile/src/api/public-gate.test.ts.
+ * refused (404) to the phones only: kept in step by apps/api/src/public-gate.test.ts.
  */
 const ALLOWED = [
   ["GET", "/v1/health"],
