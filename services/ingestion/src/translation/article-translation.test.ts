@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { articleContentHash } from "../merge";
 import { ClaudeBatches, type BatchRequest, type BatchResult } from "./claude-batches";
 import { BATCH_PRICES, MEASURED_OVERRUN } from "./cost-estimate";
-import { ArticleTranslation, outputTokensFor } from "./article-translation";
+import { ArticleTranslation, fitsOneReply, outputTokensFor } from "./article-translation";
 import type { BatchClient } from "./batch-translation";
 import { ENGLISH, WOLOF as WOLOF_TARGET } from "./targets";
 import { trialPicks } from "./wolof-candidates";
@@ -209,7 +209,12 @@ describe("the Wolof translation runs", () => {
   it("gives the Wolof room to be longer than the French, within bounds", () => {
     expect(outputTokensFor(100)).toBe(2048);
     expect(outputTokensFor(10_000)).toBe(13_000);
-    expect(outputTokensFor(1_000_000)).toBe(32_000);
+    expect(outputTokensFor(1_000_000)).toBe(64_000);
+    // Wolof: twice the French, since 1.2 cut long articles short (17/10/2026).
+    expect(outputTokensFor(10_000, WOLOF_TARGET.room)).toBe(21_000);
+    // Longer than one reply can hold: never sent, to be cut in parts later.
+    expect(fitsOneReply(31_000, WOLOF_TARGET.room)).toBe(true);
+    expect(fitsOneReply(32_000, WOLOF_TARGET.room)).toBe(false);
   });
 
   it("estimates the cost before anything is sent", async () => {

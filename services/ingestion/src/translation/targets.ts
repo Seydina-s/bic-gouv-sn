@@ -26,6 +26,11 @@ export interface TranslationTarget {
   sheetState: string;
   /** Output size, for the cost estimate: characters per token, length against French. */
   output: OutputSize;
+  /**
+   * Room given to a reply, in tokens per French character: never cut short. Only the
+   * tokens written are paid, the margin costs nothing.
+   */
+  room: number;
 }
 
 export const WOLOF: TranslationTarget = {
@@ -37,6 +42,8 @@ export const WOLOF: TranslationTarget = {
   sheetState: "translation-runs-sheets-wo",
   // Measured on the first run (08/10/2026): Wolof is rare to the model's words.
   output: { charactersPerToken: 1.3, lengthRatio: 1.15 },
+  // 1.2 cut 147 long articles short in the large batch of 17/10/2026.
+  room: 2,
 };
 
 export const ENGLISH: TranslationTarget = {
@@ -48,6 +55,7 @@ export const ENGLISH: TranslationTarget = {
   sheetState: "translation-runs-sheets-en",
   // English is read densely and runs a little shorter than French.
   output: { charactersPerToken: 3.5, lengthRatio: 0.95 },
+  room: 1.2,
 };
 
 export const TARGETS: Readonly<Record<TranslationTarget["lang"], TranslationTarget>> = {
