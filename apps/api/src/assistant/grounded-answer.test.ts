@@ -117,6 +117,15 @@ describe("checkAnswer", () => {
   });
 });
 
+describe("the rules of the answers", () => {
+  it("keep a person's own situation in scope when they ask about a procedure", () => {
+    // Bench of 17/10/2026: an inheritance, a divorce, a product's design and a stock
+    // account were refused as off-topic, though procedures answer them.
+    expect(SYSTEM_RULES).toContain("A person telling their own situation");
+    expect(SYSTEM_RULES).toContain("opinions, jokes, poems, recipes");
+  });
+});
+
 describe("answerQuestion", () => {
   const index = new PassageIndex([
     ...Array.from({ length: 8 }, (_, n) => passage(10 + n, `Port ${String(n)}`, "Le port.")),
