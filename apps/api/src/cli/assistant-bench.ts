@@ -7,7 +7,7 @@
 // Reads ANTHROPIC_API_KEY from .env.local (typed there by the owner only). Messages
 // are in French: this command is run by the team.
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, join } from "node:path";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { contentStores, fileDocument, StateServiceStore } from "@bgs/content-store";
 import { openDatabase } from "@bgs/database";
@@ -24,6 +24,7 @@ import {
   type BenchCase,
   type BenchVerdict,
 } from "../assistant/bench";
+import { benchFolder, WEAKNESSES_FILE } from "../assistant/bench-results";
 import { ClaudeProvider } from "../assistant/claude-provider";
 import { answerQuestion, type GroundedAnswer } from "../assistant/grounded-answer";
 import { buildKnowledge } from "../assistant/knowledge";
@@ -57,8 +58,8 @@ const config = loadConfig(process.env);
 const today = new Date().toISOString().slice(0, 10);
 const dry = process.argv.includes("--dry");
 const weaknessesOnly = process.argv.includes("--weaknesses");
-const root = join(dirname(config.NEWS_STORE_PATH), "assistant", "bench");
-const weaknessesPath = join(root, "weaknesses.json");
+const root = benchFolder(config.NEWS_STORE_PATH);
+const weaknessesPath = join(root, WEAKNESSES_FILE);
 
 async function readJson(path: string): Promise<unknown> {
   return JSON.parse(await readFile(path, "utf8")) as unknown;
@@ -180,7 +181,14 @@ try {
     await writeFile(
       join(root, `${today}.json`),
       JSON.stringify(
-        { today, model: config.ASSISTANT_MODEL, summary, costMicrodollars, verdicts },
+        {
+          today,
+          model: config.ASSISTANT_MODEL,
+          summary,
+          costMicrodollars,
+          fixed: fixed.length,
+          verdicts,
+        },
         null,
         1,
       ),

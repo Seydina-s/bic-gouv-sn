@@ -3,7 +3,11 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { FileProcedureRepository, RemoteConfigStore, fileDocument } from "@bgs/content-store";
 import { TimeoutError } from "@bgs/resilience";
-import { assistantReplySchema, assistantUsageSchema } from "@bgs/shared-types";
+import {
+  assistantBenchSchema,
+  assistantReplySchema,
+  assistantUsageSchema,
+} from "@bgs/shared-types";
 import type { FastifyInstance } from "fastify";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { FileSettingStore } from "../admin/setting-store";
@@ -213,6 +217,19 @@ describe("POST /v1/assistant/answers", () => {
     await ask(await start({ llm: overloaded }));
     // Refused at the rephrasing (searched as written), then at the answer: never asked twice.
     expect(refused).toBe(2);
+  });
+
+  it("shows the weekly test bench to the console's accounts only", async () => {
+    const app = await start();
+    const anonymous = await app.inject({ method: "GET", url: "/admin/v1/assistant/bench" });
+    expect(anonymous.statusCode).toBe(401);
+    const shown = await app.inject({
+      method: "GET",
+      url: "/admin/v1/assistant/bench",
+      headers: { authorization: `Bearer ${await admin.tokenFor("reviewer")}` },
+    });
+    expect(shown.statusCode).toBe(200);
+    expect(assistantBenchSchema.safeParse(shown.json()).success).toBe(true);
   });
 
   it("lets only admins change the limit", async () => {

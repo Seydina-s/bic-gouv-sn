@@ -104,6 +104,7 @@ import { statusRoutes } from "./routes/status";
 import { CircuitBreaker, createResilientCall, TimeoutError } from "@bgs/resilience";
 import { AssistantService } from "./assistant/assistant-service";
 import { ClaudeProvider, isClaudeOutage } from "./assistant/claude-provider";
+import { benchFolder } from "./assistant/bench-results";
 import { buildKnowledge, newsStamp, RefreshedKnowledge } from "./assistant/knowledge";
 import { SemanticLayer } from "./assistant/semantic-layer";
 import { TransformersEmbedder } from "./assistant/transformers-embedder";
@@ -522,6 +523,7 @@ export async function buildApp({
       prefix: "/admin/v1",
       signIn: admin.signIn,
       assistant,
+      benchFolder: benchFolder(config.NEWS_STORE_PATH),
     });
     await app.register(adminAuditRoutes, {
       prefix: "/admin/v1",
