@@ -63,8 +63,27 @@ const resultLineSchema = z.object({
 
 /** Anthropic refused or failed the call; never carries the key. */
 export class BatchApiError extends Error {
-  constructor(readonly status: number) {
-    super(`Anthropic batches answered ${String(status)}`);
+  constructor(
+    readonly status: number,
+    /** The service's own reason ("max_tokens: …"), which never holds the key. */
+    readonly reason: string | null = null,
+  ) {
+    super(`Anthropic batches answered ${String(status)}${reason === null ? "" : `: ${reason}`}`);
+  }
+}
+
+const errorBodySchema = z.object({ error: z.object({ message: z.string() }) });
+
+/**
+ * The reason a refused call gives, cut short (17/10/2026: a trial was refused with
+ * a bare 400, and nothing said why).
+ */
+async function reasonOf(response: Response): Promise<string | null> {
+  try {
+    const parsed = errorBodySchema.safeParse(await response.json());
+    return parsed.success ? parsed.data.error.message.slice(0, 300) : null;
+  } catch {
+    return null;
   }
 }
 
@@ -96,7 +115,7 @@ export class ClaudeBatches {
       { timeoutMs: TIMEOUT_MS },
     );
     if (!response.ok) {
-      throw new BatchApiError(response.status);
+      throw new BatchApiError(response.status, await reasonOf(response));
     }
     return response;
   }

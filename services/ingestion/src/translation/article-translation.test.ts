@@ -382,4 +382,15 @@ describe("Anthropic's batches", () => {
     const { batches } = replying(new Response("{}", { status: 401 }));
     await expect(batches.status("x")).rejects.toThrow("Anthropic batches answered 401");
   });
+
+  it("says the reason the service gives for a refusal", async () => {
+    const refusal = {
+      type: "error",
+      error: { type: "invalid_request_error", message: "fictive reason" },
+    };
+    const { batches } = replying(new Response(JSON.stringify(refusal), { status: 400 }));
+    await expect(batches.status("x")).rejects.toThrow(
+      "Anthropic batches answered 400: fictive reason",
+    );
+  });
 });
