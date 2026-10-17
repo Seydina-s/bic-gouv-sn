@@ -394,7 +394,7 @@ export async function buildApp({
     knowledge: new RefreshedKnowledge({
       stamp: () => newsStamp(articles),
       build: async () => {
-        const knowledge = await buildKnowledge(articles, procedures);
+        const knowledge = await buildKnowledge(articles, procedures, stateServices);
         // The vectors follow in the background; the words answer meanwhile.
         void semantic?.update(knowledge.passages);
         return knowledge;
