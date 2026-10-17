@@ -1,5 +1,6 @@
 import type { Translation } from "@bgs/shared-types";
 import type { OfficialPair } from "./wolof-candidates";
+import { glossaryRules } from "./wolof-glossary";
 
 /*
  * What the model reads to translate one article: fixed rules and official examples
@@ -26,10 +27,11 @@ function example(pair: OfficialPair, number: number): string {
   ].join("\n");
 }
 
-/** Fixed for every article of a run: the rules, then the official examples. */
+/** Fixed for every article of a run: the rules, the glossary, then the official examples. */
 export function translationSystem(pairs: readonly OfficialPair[]): string {
   return [
     RULES,
+    glossaryRules(),
     "Official translations by the Presidency, to follow:",
     ...pairs.map((pair, index) => example(pair, index + 1)),
   ].join("\n\n");

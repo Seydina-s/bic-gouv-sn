@@ -2,6 +2,7 @@ import type { NewsArticle, Translation } from "@bgs/shared-types";
 import { describe, expect, it } from "vitest";
 import { checkTranslation } from "./translation-check";
 import { articlesToTranslate, examplePairs, frenchToTranslate } from "./wolof-candidates";
+import { WOLOF_GLOSSARY } from "./wolof-glossary";
 import { translationRequest, translationSystem } from "./wolof-prompt";
 
 // Placeholder texts, not real content.
@@ -75,6 +76,21 @@ describe("the translation prompt", () => {
     expect(translationRequest({ title: "T", bodyHtml: "<p>x</p>" })).toBe(
       '<article>{"title":"T","bodyHtml":"<p>x</p>"}</article>',
     );
+  });
+
+  it("imposes the glossary's words before the examples, the owner's corrections included", () => {
+    const system = translationSystem([]);
+    expect(system).toContain("Monsieur (before a name) → Gòor gi");
+    expect(system).toContain("le Premier ministre → Njiitu Jëwriñ yi");
+    expect(system.indexOf("Words to use exactly")).toBeLessThan(
+      system.indexOf("Official translations by the Presidency"),
+    );
+  });
+
+  it("keeps one Wolof word per French entry, each with its source", () => {
+    const frenchEntries = WOLOF_GLOSSARY.map((entry) => entry.french);
+    expect(new Set(frenchEntries).size).toBe(frenchEntries.length);
+    expect(WOLOF_GLOSSARY.every((entry) => entry.source.trim() !== "")).toBe(true);
   });
 });
 
