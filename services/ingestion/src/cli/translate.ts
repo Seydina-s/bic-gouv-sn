@@ -1,20 +1,23 @@
-// Machine translation of the articles into Wolof or English (AI-13, ML-12). Messages
-// are in French: this command is run by the team.
-//   pnpm --filter @bgs/ingestion translate --lang wo|en --estimate [--since 2024-04-02]
-//   pnpm --filter @bgs/ingestion translate --lang wo|en --submit [--since …] [--limit 50]
-//   pnpm --filter @bgs/ingestion translate --lang wo|en --collect
-//   pnpm --filter @bgs/ingestion translate --lang wo|en --trial 10
-// --estimate sends nothing and needs no key. --trial sends a few articles, waits for
-// the replies and writes them for a person to read, next to the data, saving nothing
-// in the articles. The others read ANTHROPIC_API_KEY from apps/api/.env.local (typed
-// there by the owner only).
+// Machine translation of the articles, or of the procedure sheets (--procedures),
+// into Wolof or English (AI-13, ML-12, ML-14). Messages are in French: this command
+// is run by the team.
+//   pnpm --filter @bgs/ingestion translate --lang wo|en [--procedures] --estimate [--since 2024-04-02]
+//   pnpm --filter @bgs/ingestion translate --lang wo|en [--procedures] --submit [--since …] [--limit 50]
+//   pnpm --filter @bgs/ingestion translate --lang wo|en [--procedures] --collect
+//   pnpm --filter @bgs/ingestion translate --lang wo|en [--procedures] --trial 10
+// --estimate sends nothing and needs no key. --trial sends a few items, waits for the
+// replies and writes them for a person to read, next to the data, saving nothing.
+// --since applies to articles only (sheets have no publication date). The others
+// read ANTHROPIC_API_KEY from apps/api/.env.local (typed there by the owner only).
 import { writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { setTimeout as wait } from "node:timers/promises";
 import { openStores } from "../lib/stores";
 import { ArticleTranslation, allArticles } from "../translation/article-translation";
+import type { BatchTranslation } from "../translation/batch-translation";
 import { ClaudeBatches } from "../translation/claude-batches";
-import { BATCH_PRICES, estimateCost } from "../translation/cost-estimate";
+import { BATCH_PRICES } from "../translation/cost-estimate";
+import { SheetTranslation, sheetTrialPicks } from "../translation/sheet-translation";
 import { TARGETS } from "../translation/targets";
 import { trialPicks } from "../translation/wolof-candidates";
 
@@ -43,6 +46,8 @@ if (langOption !== "wo" && langOption !== "en") {
   throw new Error("--lang attend wo (wolof) ou en (anglais)");
 }
 const target = TARGETS[langOption];
+const sheets = process.argv.includes("--procedures");
+const items = sheets ? "fiches" : "articles";
 const since = option("--since");
 const limit = Number(option("--limit") ?? "1000");
 const trialCount = option("--trial") === null ? null : Number(option("--trial"));
@@ -68,11 +73,6 @@ if (trialCount !== null && (!Number.isInteger(trialCount) || trialCount < 1 || t
 }
 
 const { stores, document, paths, close } = await openStores();
-const translation = new ArticleTranslation({
-  articles: stores.articles,
-  target,
-  state: document(target.state),
-});
 
 function client(): ClaudeBatches {
   const apiKey = process.env["ANTHROPIC_API_KEY"];
@@ -85,12 +85,14 @@ function client(): ClaudeBatches {
 }
 
 /** Sends the trial, waits for its replies, writes them next to the data. */
-async function trial(count: number): Promise<void> {
-  const chosen = trialPicks(await allArticles(stores.articles), count);
+async function trial<Item, French, Value>(
+  translation: BatchTranslation<Item, French, Value>,
+  chosen: readonly Item[],
+): Promise<void> {
   const batches = client();
   const batchId = await translation.submitTrial(batches, chosen);
   say(
-    `Essai : ${String(chosen.length)} articles envoyés (lot ${batchId}), en attente des réponses…`,
+    `Essai : ${String(chosen.length)} ${items} envoyés (lot ${batchId}), en attente des réponses…`,
   );
   const started = Date.now();
   let replies = await translation.trialReplies(batches, batchId);
@@ -102,7 +104,8 @@ async function trial(count: number): Promise<void> {
     say(`Le lot ${batchId} n'est pas terminé après 3 heures : relancez plus tard.`);
     return;
   }
-  const out = join(dirname(paths.news), `translation-trial-${target.lang}.json`);
+  const name = sheets ? `translation-trial-sheets-${target.lang}` : `translation-trial-${target.lang}`;
+  const out = join(dirname(paths.news), `${name}.json`);
   await writeFile(out, JSON.stringify({ lang: target.lang, model, batchId, replies }, null, 1));
   const input = replies.reduce((sum, reply) => sum + reply.inputTokens, 0);
   const output = replies.reduce((sum, reply) => sum + reply.outputTokens, 0);
@@ -112,15 +115,17 @@ async function trial(count: number): Promise<void> {
   say(`Écrit dans ${out}`);
 }
 
-try {
+/** Runs the command asked on the translation runs of the articles or of the sheets. */
+async function command<Item, French, Value>(
+  translation: BatchTranslation<Item, French, Value>,
+  trialChoice: (count: number) => Promise<Item[]>,
+): Promise<void> {
   if (trialCount !== null) {
-    await trial(trialCount);
+    await trial(translation, await trialChoice(trialCount));
   } else if (process.argv.includes("--estimate")) {
-    const { all, toSend } = await translation.pending(since);
-    const chosen = toSend.slice(0, limit);
-    const estimate = estimateCost(chosen, target.system(all), target, Object.keys(BATCH_PRICES));
+    const estimate = await translation.estimate({ since, limit }, Object.keys(BATCH_PRICES));
     say(
-      `Articles à traduire : ${String(estimate.articles)} (${String(estimate.frenchCharacters)} caractères)`,
+      `${sheets ? "Fiches" : "Articles"} à traduire : ${String(estimate.items)} (${String(estimate.frenchCharacters)} caractères)`,
     );
     say(
       `Estimation : ${String(estimate.inputTokens)} jetons lus, ${String(estimate.outputTokens)} jetons écrits`,
@@ -133,7 +138,7 @@ try {
     say(
       sent === 0
         ? "Rien à envoyer."
-        : `${String(sent)} articles envoyés (lot ${batchId ?? ""}). Relancez --collect dans quelques heures.`,
+        : `${String(sent)} ${items} envoyés (lot ${batchId ?? ""}). Relancez --collect dans quelques heures.`,
     );
   } else if (process.argv.includes("--inspect")) {
     // The first reply of the latest run as the model wrote it (public content only).
@@ -157,13 +162,36 @@ try {
     );
     say(`Écartées par les contrôles : ${JSON.stringify(report.refused)}`);
     say(
-      `Échecs du service : ${String(report.failed)} · articles changés entre-temps : ${String(report.outdated)}`,
+      `Échecs du service : ${String(report.failed)} · ${items} changés entre-temps : ${String(report.outdated)}`,
     );
     say(
       `Lots encore en cours : ${String(report.stillRunning)} · prix des réponses lues : ${dollars(costOf(report.inputTokens, report.outputTokens))}${process.argv.includes("--recollect") ? " (déjà payé, rien de plus)" : ""}`,
     );
   } else {
     say("Précisez --trial, --estimate, --submit, --collect, --inspect ou --recollect.");
+  }
+}
+
+try {
+  if (sheets) {
+    await command(
+      new SheetTranslation({
+        procedures: stores.procedures,
+        target,
+        articles: await allArticles(stores.articles),
+        state: document(target.sheetState),
+      }),
+      async (count) => sheetTrialPicks(await stores.procedures.all(), count),
+    );
+  } else {
+    await command(
+      new ArticleTranslation({
+        articles: stores.articles,
+        target,
+        state: document(target.state),
+      }),
+      async (count) => trialPicks(await allArticles(stores.articles), count),
+    );
   }
 } finally {
   await close();
