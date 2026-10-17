@@ -1,9 +1,10 @@
-import { assistantUsageSchema, type AssistantUsage } from "@bgs/shared-types";
+import { assistantBenchSchema, assistantUsageSchema, type AssistantUsage } from "@bgs/shared-types";
 import { FigureTile } from "../../components/FigureTile";
 import { adminRequest } from "../../lib/admin-api";
 import { averageCost, estimatedCost, formatDollars, usedShare } from "../../lib/assistant-usage";
 import { t } from "../../lib/i18n";
 import { requireAccount } from "../../lib/session";
+import { BenchView } from "./BenchView";
 import { LimitForm } from "./LimitForm";
 
 export const dynamic = "force-dynamic";
@@ -90,7 +91,10 @@ function UsageView({ usage }: { usage: AssistantUsage }) {
 /** The assistant's questions this month, their cost, and its monthly limit. */
 export default async function AssistantPage() {
   const { token } = await requireAccount();
-  const result = await adminRequest({ path: "/assistant", token, schema: assistantUsageSchema });
+  const [result, bench] = await Promise.all([
+    adminRequest({ path: "/assistant", token, schema: assistantUsageSchema }),
+    adminRequest({ path: "/assistant/bench", token, schema: assistantBenchSchema }),
+  ]);
   return (
     <section aria-labelledby="assistant-title" className="space-y-6">
       <h1 id="assistant-title" className="font-display text-3xl font-extrabold tracking-tight">
@@ -104,6 +108,19 @@ export default async function AssistantPage() {
           {result.status === 403 ? t("review.forbidden") : t("assistant.failed")}
         </p>
       )}
+      <section aria-labelledby="bench-title" className="space-y-4 border-t border-line pt-6">
+        <h2 id="bench-title" className="font-display text-2xl font-extrabold tracking-tight">
+          {t("assistant.bench.title")}
+        </h2>
+        <p className="max-w-prose text-ink-soft">{t("assistant.bench.intro")}</p>
+        {bench.ok ? (
+          <BenchView bench={bench.data} />
+        ) : (
+          <p role="alert" className="rounded-md bg-danger-surface p-6 text-on-danger-surface">
+            {t("assistant.bench.failed")}
+          </p>
+        )}
+      </section>
     </section>
   );
 }

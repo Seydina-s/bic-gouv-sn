@@ -1,5 +1,6 @@
 import {
   apiErrorSchema,
+  assistantBenchSchema,
   assistantLimitChangeSchema,
   assistantQuestionSchema,
   assistantReplySchema,
@@ -8,6 +9,7 @@ import {
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import type { AdminSignIn } from "../admin/sign-in-service";
 import type { AssistantProblem, AssistantService } from "../assistant/assistant-service";
+import { readBenchResults } from "../assistant/bench-results";
 import type { ErrorJournal } from "../journal/error-journal";
 import { authorize } from "./admin-guard";
 
@@ -75,13 +77,33 @@ export const assistantRoutes: FastifyPluginAsyncZod<AssistantRoutesOptions> = (
 export interface AdminAssistantOptions {
   signIn: AdminSignIn;
   assistant: AssistantService;
+  /** Where the weekly test bench keeps its runs (assistant-bench.ts). */
+  benchFolder: string;
 }
 
 /** The console: this month's questions and cost, and the monthly limit (admins). */
 export const adminAssistantRoutes: FastifyPluginAsyncZod<AdminAssistantOptions> = (
   app,
-  { signIn, assistant },
+  { signIn, assistant, benchFolder },
 ) => {
+  app.get(
+    "/assistant/bench",
+    {
+      schema: {
+        tags: ["admin"],
+        summary: "The assistant's weekly test bench: latest run, trend, known weaknesses",
+        response: { 200: assistantBenchSchema, 401: apiErrorSchema, 403: apiErrorSchema },
+      },
+    },
+    async (request, reply) => {
+      if ((await authorize(request, reply, signIn, "console.read")) === null) {
+        return reply;
+      }
+      void reply.header("cache-control", "no-store");
+      return readBenchResults(benchFolder);
+    },
+  );
+
   app.get(
     "/assistant",
     {

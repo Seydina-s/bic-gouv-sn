@@ -109,3 +109,47 @@ export const ASSISTANT_LIMIT_MAX = 1_000_000;
 export const assistantLimitChangeSchema = z.strictObject({
   monthlyLimit: z.int().min(1).max(ASSISTANT_LIMIT_MAX),
 });
+
+const benchScoreSchema = z.object({
+  /** The day of the run. */
+  date: z.iso.date(),
+  cases: z.int().nonnegative(),
+  passed: z.int().nonnegative(),
+});
+
+/**
+ * The assistant's weekly test bench, for the console (AST-30f): the latest run by
+ * kind of question, the trend over the runs, and the known weaknesses, each asked
+ * again every week until it passes twice in a row.
+ */
+export const assistantBenchSchema = z.object({
+  latest: benchScoreSchema
+    .extend({
+      /** Traps answered: the target is none. */
+      invented: z.int().nonnegative(),
+      costUsd: z.number().nonnegative(),
+      byKind: z.array(
+        z.object({
+          kind: z.string().min(1),
+          cases: z.int().nonnegative(),
+          passed: z.int().nonnegative(),
+        }),
+      ),
+      /** Weaknesses that passed twice in a row at this run. */
+      fixed: z.int().nonnegative(),
+    })
+    .nullable(),
+  /** The latest runs, oldest first. */
+  history: z.array(benchScoreSchema),
+  weaknesses: z.array(
+    z.object({
+      question: z.string().min(1),
+      kind: z.string().min(1),
+      /** The day it first failed. */
+      since: z.iso.date(),
+      reason: z.string(),
+      passedInARow: z.int().nonnegative(),
+    }),
+  ),
+});
+export type AssistantBench = z.infer<typeof assistantBenchSchema>;
