@@ -211,6 +211,12 @@ describe("servicePassages", () => {
     expect(passage?.text).toContain("Avenue fictive, Dakar");
     expect(passage?.text).toContain("Mo-Fr 08:00-17:00");
     expect(passage?.text).toContain("+221 33 000 00 00");
+    // Its place on the map, even with no address (most offices).
+    expect(passage?.text).toContain(
+      "Emplacement : sur la carte de l'application (14.7000, -17.4000)",
+    );
+    const [noAddress] = servicePassages({ ...office, address: null, town: null });
+    expect(noAddress?.text).toContain("Emplacement : sur la carte de l'application");
   });
 
   it("leaves out an office not verified, or typed in the console with no public page", () => {
