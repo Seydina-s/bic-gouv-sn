@@ -16,6 +16,7 @@
     "admin:reseal": "tsx --env-file-if-exists=.env.local src/cli/rotate-key.ts --reseal",
     "assistant:passages": "tsx src/cli/assistant-passages.ts",
     "assistant:eval": "tsx src/cli/assistant-eval.ts",
+    "assistant:bench": "tsx --env-file-if-exists=.env.local src/cli/assistant-bench.ts",
     "voices:record": "tsx src/cli/voices.ts"
   },
   "dependencies": {
