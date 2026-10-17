@@ -58,3 +58,22 @@ La commande affiche :
 - Longueur comprise entre 0,6 et 2,2 fois celle du français.
 - HTML nettoyé comme tout article collecté.
 - Rien n'est enregistré si l'article a changé depuis l'envoi.
+
+## Fiches des démarches (ML-14)
+
+Les mêmes commandes, avec `--procedures`, traduisent les fiches d'e-senegal.sn au lieu des articles :
+
+```
+pnpm --filter @bgs/ingestion translate --lang en --procedures --estimate
+pnpm --filter @bgs/ingestion translate --lang en --procedures --trial 5
+pnpm --filter @bgs/ingestion translate --lang en --procedures --submit
+pnpm --filter @bgs/ingestion translate --lang en --procedures --collect
+```
+
+- Toute la fiche part en une demande : titre, étapes, résumé, public concerné, pièces à fournir, questions et réponses. Les montants, délais, adresses et liens restent ceux de la fiche française.
+- La traduction est gardée à part de la fiche française, pour sa version du moment : si e-senegal.sn modifie la fiche, l'app remontre le français jusqu'au prochain envoi, qui reprend cette fiche d'elle-même.
+- `--since` ne s'applique pas (les fiches n'ont pas de date de publication) : toutes les fiches sans traduction à jour partent.
+- Le wolof suit le même glossaire que les articles, avec les articles wolof officiels de la Présidence comme exemples.
+- Contrôles en plus de ceux des articles : les champs vides restent vides, chaque liste garde le même nombre d'éléments, chaque réponse garde la structure de la réponse française, et la longueur s'apprécie sur toute la fiche.
+- Estimation du 17/10/2026 sur les 718 fiches : ≈ 3,7 $ en anglais, ≈ 11,7 $ en wolof (Sonnet 5.5, par lots).
+- L'essai écrit `translation-trial-sheets-en.json` (ou `-wo`) à côté des données ; rien n'est enregistré.

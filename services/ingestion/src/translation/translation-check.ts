@@ -48,22 +48,53 @@ function mediaSources(html: string): string[] {
   );
 }
 
-function readReply(text: string): z.infer<typeof replySchema> | null {
+/** The JSON object of a reply, read with `schema`; null when it cannot be. */
+export function readJsonReply<T>(text: string, schema: z.ZodType<T>): T | null {
   const start = text.indexOf("{");
   const end = text.lastIndexOf("}");
   if (start < 0 || end < start) {
     return null;
   }
   try {
-    const parsed = replySchema.safeParse(JSON.parse(text.slice(start, end + 1)));
+    const parsed = schema.safeParse(JSON.parse(text.slice(start, end + 1)));
     return parsed.success ? parsed.data : null;
   } catch {
     return null;
   }
 }
 
-function refused(refusal: TranslationRefusal): CheckedTranslation {
+function refused(refusal: TranslationRefusal): { ok: false; refusal: TranslationRefusal } {
   return { ok: false, refusal };
+}
+
+/**
+ * A translated HTML text, cleaned like any article, when it keeps the French one's
+ * blocks and media and is not empty; else why it is refused.
+ */
+export function checkHtml(
+  frenchHtml: string,
+  html: string,
+): { ok: true; html: string } | { ok: false; refusal: TranslationRefusal } {
+  const clean = sanitizeArticleHtml(html);
+  if (textLength(clean) === 0 && textLength(frenchHtml) > 0) {
+    return refused("empty");
+  }
+  if (blockShape(clean).join(" ") !== blockShape(frenchHtml).join(" ")) {
+    return refused("structure_changed");
+  }
+  if (mediaSources(clean).join(" ") !== mediaSources(frenchHtml).join(" ")) {
+    return refused("media_changed");
+  }
+  return { ok: true, html: clean };
+}
+
+/** The translation's length (in characters of text) far from the French one's. */
+export function lengthOff(frenchText: number, translatedText: number): boolean {
+  if (frenchText === 0) {
+    return false;
+  }
+  const ratio = translatedText / frenchText;
+  return ratio < LENGTH_RATIO.min || ratio > LENGTH_RATIO.max;
 }
 
 /** The model's reply for `french`, cleaned like any article, or why it is refused. */
@@ -71,27 +102,16 @@ export function checkTranslation(
   french: Pick<Translation, "title" | "bodyHtml">,
   reply: string,
 ): CheckedTranslation {
-  const parsed = readReply(reply);
+  const parsed = readJsonReply(reply, replySchema);
   if (parsed === null) {
     return refused("unreadable");
   }
-  const bodyHtml = sanitizeArticleHtml(parsed.bodyHtml);
-  const frenchText = textLength(french.bodyHtml);
-  const wolofText = textLength(bodyHtml);
-  if (wolofText === 0 && frenchText > 0) {
-    return refused("empty");
+  const body = checkHtml(french.bodyHtml, parsed.bodyHtml);
+  if (!body.ok) {
+    return body;
   }
-  if (blockShape(bodyHtml).join(" ") !== blockShape(french.bodyHtml).join(" ")) {
-    return refused("structure_changed");
+  if (lengthOff(textLength(french.bodyHtml), textLength(body.html))) {
+    return refused("length_off");
   }
-  if (mediaSources(bodyHtml).join(" ") !== mediaSources(french.bodyHtml).join(" ")) {
-    return refused("media_changed");
-  }
-  if (frenchText > 0) {
-    const ratio = wolofText / frenchText;
-    if (ratio < LENGTH_RATIO.min || ratio > LENGTH_RATIO.max) {
-      return refused("length_off");
-    }
-  }
-  return { ok: true, title: parsed.title, bodyHtml };
+  return { ok: true, title: parsed.title, bodyHtml: body.html };
 }
