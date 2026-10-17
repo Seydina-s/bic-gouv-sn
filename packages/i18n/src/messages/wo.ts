@@ -581,6 +581,7 @@ export const wo: PartialCatalog<FrCatalog> = {
     sourceKinds: {
       "news-article": "Xibaar",
       procedure: "Yoon",
+      service: "Liggéeykaayu Nguur",
     },
     sourceSpoken: "{kind}: {title}, {date}",
     generated: "Tontu bii, masin moo ko bind jóge ci cosaan yu wóor yii.",

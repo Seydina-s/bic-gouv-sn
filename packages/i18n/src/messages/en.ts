@@ -592,6 +592,7 @@ export const en: PartialCatalog<FrCatalog> = {
     sourceKinds: {
       "news-article": "Article",
       procedure: "Procedure",
+      service: "Government service",
     },
     sourceSpoken: "{kind}: {title}, {date}",
     generated: "Answer written automatically from these official sources.",

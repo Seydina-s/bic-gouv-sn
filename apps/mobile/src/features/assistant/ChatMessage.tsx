@@ -1,6 +1,7 @@
 import type { AssistantSource, Lang } from "@bgs/shared-types";
 import { ArrowClockwiseIcon as ArrowClockwise } from "phosphor-react-native/src/icons/ArrowClockwise";
 import { ListChecksIcon as ListChecks } from "phosphor-react-native/src/icons/ListChecks";
+import { MapPinIcon as MapPin } from "phosphor-react-native/src/icons/MapPin";
 import { NewspaperIcon as Newspaper } from "phosphor-react-native/src/icons/Newspaper";
 import type { IconProps as PhosphorProps } from "phosphor-react-native";
 import { useEffect, type ComponentType, type ReactNode } from "react";
@@ -99,6 +100,13 @@ function Dot({ index, still, color }: { index: number; still: boolean; color: st
   return <Animated.View style={[styles.dot, { backgroundColor: color }, style]} />;
 }
 
+/** What each kind of source looks like: an article, a procedure, a government office. */
+const SOURCE_ICONS: Record<AssistantSource["kind"], ComponentType<PhosphorProps>> = {
+  "news-article": Newspaper,
+  procedure: ListChecks,
+  service: MapPin,
+};
+
 /** One official page the answer comes from, as a small tag to open it. */
 function SourceChip({
   source,
@@ -114,7 +122,7 @@ function SourceChip({
   const date = formatPublishedOn(source.publishedOn, lang);
   return (
     <Pressable
-      accessibilityRole={source.kind === "news-article" || source.slug !== null ? "button" : "link"}
+      accessibilityRole={source.kind === "procedure" && source.slug === null ? "link" : "button"}
       accessibilityLabel={t("assistant.sourceSpoken", { kind, title: source.title, date })}
       onPress={() => {
         onOpen(source);
@@ -132,11 +140,7 @@ function SourceChip({
         },
       ]}
     >
-      <Icon
-        icon={source.kind === "procedure" ? ListChecks : Newspaper}
-        size="sm"
-        color={color.textBrand}
-      />
+      <Icon icon={SOURCE_ICONS[source.kind]} size="sm" color={color.textBrand} />
       <Text numberOfLines={1} style={[textStyle.label, styles.flex, { color: color.textPrimary }]}>
         {source.title}
       </Text>

@@ -4,6 +4,7 @@ import {
   assistantLimitChangeSchema,
   assistantQuestionSchema,
   assistantReplySchema,
+  readAssistantReply,
 } from "./assistant.schema";
 
 describe("assistant schemas", () => {
@@ -58,5 +59,49 @@ describe("assistant schemas", () => {
     expect(assistantLimitChangeSchema.safeParse({ monthlyLimit: 10_000 }).success).toBe(true);
     expect(assistantLimitChangeSchema.safeParse({ monthlyLimit: 0 }).success).toBe(false);
     expect(assistantLimitChangeSchema.safeParse({ monthlyLimit: 2.5 }).success).toBe(false);
+  });
+});
+
+describe("readAssistantReply (a newer API talking to an older app)", () => {
+  // Placeholder sources, not real content.
+  const article = {
+    kind: "news-article",
+    contentId: "a1",
+    slug: null,
+    title: "Titre fictif",
+    url: "https://www.presidence.sn/fr/actualites/test/",
+    publishedOn: "2026-10-13",
+  };
+  const office = {
+    kind: "service",
+    contentId: "osm-n1",
+    slug: null,
+    title: "Mairie fictive",
+    url: "https://www.openstreetmap.org/node/1",
+    publishedOn: "2026-10-15",
+  };
+  const answered = (sources: unknown[]) => ({
+    status: "answered",
+    text: "Réponse fictive.",
+    sources,
+    resumesOn: null,
+  });
+
+  it("reads a government service among the sources", () => {
+    expect(readAssistantReply(answered([article, office]))?.sources).toHaveLength(2);
+  });
+
+  it("drops a source of a kind added later, and keeps the answer", () => {
+    const later = { ...article, kind: "video", contentId: "v1" };
+    expect(readAssistantReply(answered([article, later]))?.sources).toEqual([article]);
+  });
+
+  it("refuses an answer left without any source it can show", () => {
+    const later = { ...article, kind: "video" };
+    expect(readAssistantReply(answered([later]))).toBeNull();
+    expect(readAssistantReply(null)).toBeNull();
+    expect(
+      readAssistantReply({ status: "not_found", text: null, sources: [], resumesOn: null }),
+    ).toMatchObject({ status: "not_found" });
   });
 });

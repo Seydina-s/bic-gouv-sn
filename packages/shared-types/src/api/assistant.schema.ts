@@ -23,10 +23,13 @@ export const assistantQuestionSchema = z.strictObject({
 });
 export type AssistantQuestion = z.infer<typeof assistantQuestionSchema>;
 
-/** An official page the answer comes from, to open in the app or at the source. */
+/**
+ * An official page the answer comes from, to open in the app or at the source. A
+ * "service" is a government office of the map, verified in the console (AST-25).
+ */
 export const assistantSourceSchema = z.object({
-  kind: z.enum(["news-article", "procedure"]),
-  /** The article's id, to open it in the app. */
+  kind: z.enum(["news-article", "procedure", "service"]),
+  /** The article's or the service's id, to open it in the app. */
   contentId: z.string().min(1),
   /** The procedure's slug, to open its sheet in the app; null for an article. */
   slug: z.string().min(1).nullable(),
@@ -61,6 +64,27 @@ export const assistantReplySchema = z.object({
   resumesOn: z.iso.date().nullable(),
 });
 export type AssistantReply = z.infer<typeof assistantReplySchema>;
+
+/**
+ * Tolerant reader for the app: a source of a kind added later is dropped, not the
+ * whole reply. An answer left with no source it can show is refused (nothing is
+ * shown without its source).
+ */
+export function readAssistantReply(raw: unknown): AssistantReply | null {
+  if (typeof raw !== "object" || raw === null || Array.isArray(raw)) {
+    return null;
+  }
+  const sources: unknown = Reflect.get(raw, "sources");
+  const readable = Array.isArray(sources)
+    ? sources.filter((source) => assistantSourceSchema.safeParse(source).success)
+    : sources;
+  const parsed = assistantReplySchema.safeParse({ ...raw, sources: readable });
+  if (!parsed.success) {
+    return null;
+  }
+  const lost = Array.isArray(sources) && sources.length > 0 && parsed.data.sources.length === 0;
+  return parsed.data.status === "answered" && lost ? null : parsed.data;
+}
 
 /** The console's view of this month's use and its limit. */
 export const assistantUsageSchema = z.object({

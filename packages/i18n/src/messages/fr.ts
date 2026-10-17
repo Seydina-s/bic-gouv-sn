@@ -604,6 +604,7 @@ export const fr = {
     sourceKinds: {
       "news-article": "Article",
       procedure: "Démarche",
+      service: "Service de l'État",
     },
     sourceSpoken: "{kind} : {title}, {date}",
     generated: "Réponse rédigée automatiquement à partir de ces sources officielles.",

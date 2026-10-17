@@ -64,6 +64,8 @@ function Assistant() {
     openSource: (source: AssistantSource) => {
       if (source.kind === "news-article") {
         router.push({ pathname: "/article/[id]", params: { id: source.contentId } });
+      } else if (source.kind === "service") {
+        router.push({ pathname: "/service/[id]", params: { id: source.contentId } });
       } else if (source.slug !== null) {
         router.push({ pathname: "/procedure/[slug]", params: { slug: source.slug } });
       } else {
