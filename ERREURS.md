@@ -478,3 +478,11 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : chaque redémarrage local (déploiements du 16/10 au soir, relance de la nuit) arrête net le pilotage, mais la lecture qu'il a lancée sur le serveur continue seule (voulu, pour survivre à la veille de l'ordinateur) ; le nouveau pilotage en lançait une autre sans s'occuper des précédentes. Une coupure réseau passagère (« No route to host ») a d'abord fait croire à une panne.
 - **Correctif** : les trois lectures orphelines arrêtées et les dossiers supprimés (traitements du projet, aucun logiciel du serveur modifié) ; au démarrage, le pilotage arrête désormais les lectures laissées par une exécution précédente et supprime leurs dossiers (`clearLeftovers`, `apps/api/src/voices/remote-synthesizer.ts`), testé.
 - **Prévention** : règle globale « travail lancé à distance qui survit à son lanceur ».
+
+## 17/10/2026 — Changement de branche dans une copie en pleine livraison
+
+- **Ce qui s'est passé** : pendant que la livraison de ML-14b faisait ses contrôles dans `C:\bic-gouv-sn-w2`, j'y ai ouvert une nouvelle branche (`git checkout -b … origin/main`) pour un autre correctif. Remarqué aussitôt, retour sur la branche livrée en quelques secondes.
+- **Cause racine** : la livraison tournait en arrière-plan, et rien ne m'a rappelé que cette copie était occupée ; j'ai choisi la copie par habitude.
+- **Impact** : aucun en production. Les contrôles locaux ont pu lire quelques secondes de code d'une autre branche, mais la CI de GitHub reprend tous les contrôles avant chaque fusion.
+- **Correctif** : correctif suivant ouvert dans `C:\bic-gouv-sn-w4`, libre.
+- **Prévention** : règle globale « copie de travail occupée par une commande en cours » ; aide-mémoire de l'environnement de travail mis à jour.
