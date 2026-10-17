@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { SynthesisJob, SynthesisResult } from "./recordings";
-import { remoteSynthesizer, type Run } from "./remote-synthesizer";
+import { clearLeftovers, remoteSynthesizer, type Run } from "./remote-synthesizer";
 
 let dir: string;
 
@@ -80,6 +80,24 @@ const job = (id: string): SynthesisJob => ({
 });
 
 const quick = { wait: () => Promise.resolve(), host: "voices@example.test", keyPath: "k" };
+
+describe("clearLeftovers", () => {
+  it("stops the readings an earlier run left, and removes only our folders", async () => {
+    const calls: { program: string; args: readonly string[] }[] = [];
+    const run: Run = (program, args) => {
+      calls.push({ program, args });
+      return Promise.resolve("cleared\n");
+    };
+    await clearLeftovers({ host: "voices@server.test", keyPath: "/k", run });
+    const command = calls[0]?.args.at(-1) ?? "";
+    expect(calls[0]?.program).toBe("ssh");
+    expect(calls[0]?.args).toContain("BatchMode=yes");
+    expect(command).toContain("pkill -f 'synthesize[.]py /tmp/bgs-voices-'");
+    expect(command).toContain("rm -rf /tmp/bgs-voices-*");
+    // The pattern never matches the command line that carries it.
+    expect(new RegExp("synthesize[.]py /tmp/bgs-voices-").test(command)).toBe(false);
+  });
+});
 
 describe("remoteSynthesizer", () => {
   it("reads in the background on the server and hands each recording over once copied", async () => {
