@@ -149,3 +149,9 @@ Mise à jour du 16/10/2026 (soir) : point 57 réglé (déploiements faits, autor
 |---|---|---|---|
 | 59 | **Grand lot de traduction (≈ 85 $)** : lire l'essai (https://claude.ai/artifact/SqgSrwTtRJtEXsQps43jms, 10 articles en wolof et en anglais, 0,21 $) puis dire : (a) lancer tel quel ; ou (b) renforcer d'abord la consigne wolof avec les termes officiels de la Présidence (« Premier ministre » a été transcrit au lieu de « Njiitu Jëwriñ yi ») et refaire un petit essai (≈ 0,15 $) | Sans traduction, l'app en anglais ou en wolof affiche les articles en français avec la mention « disponible en français seulement » | ML-12 |
 | 60 | **Articles de démonstration** (DATA-10) : 3 textes d'installation de WordPress à l'Industrie-Commerce et un « Happy Easter » en anglais à la Culture sont affichés comme actualités. D'accord pour les écarter avec une mention « écarté par le contrôle de qualité » (conservés, rétablissables depuis la console) et bloquer ce type de texte à la collecte ? | Ces 4 textes restent visibles dans l'app | DATA-10 |
+
+Mise à jour du 17/10/2026 (matin) : point 59 avancé (consigne wolof renforcée par le glossaire, essai refait : 10 sur 10, « Basaa » disparu, « Gòor gi » employé ; grand lot toujours en attente de vos retours wolof et de votre accord) ; point 61 ajouté.
+
+| # | Quoi | Pourquoi / effet si ça attend | Réf. backlog |
+|---|---|---|---|
+| 61 | **Essai de traduction des fiches des démarches** (5 fiches en anglais et en wolof, moins de 0,10 $) : d'accord pour le lancer, pour relire la traduction des démarches avant le grand lot ? Estimation de toutes les fiches : ≈ 3,7 $ en anglais, ≈ 11,7 $ en wolof (déjà comprise dans les ≈ 85 $ du point 59). | Sans traduction, les démarches restent en français avec la mention « disponible en français seulement » | ML-14 |
