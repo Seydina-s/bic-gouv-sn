@@ -200,6 +200,23 @@ describe("reconcileWithdrawals", () => {
     );
   });
 
+  it("stops reading again once its time budget is spent, and says so", async () => {
+    // Each look at the clock takes a minute; the budget ends after the second article.
+    let minutes = 0;
+    const clock = () => new Date(NOW.getTime() + 60_000 * minutes++);
+    const provider = source();
+    const report = await reconcileWithdrawals(provider, repo, ["fr"], {
+      ...APPLY,
+      now: clock,
+      deadline: NOW.getTime() + 90_000,
+    });
+    expect(provider.read).toHaveLength(2);
+    expect(report.incomplete).toBe(true);
+    // Without a budget, every missing version is read again.
+    const unbounded = await reconcileWithdrawals(source(), repo, ["fr"], APPLY);
+    expect(unbounded.incomplete).toBe(false);
+  });
+
   it("hides nothing when too many articles vanish at once, and says so", async () => {
     for (let n = 10; n < 10 + MAX_HIDDEN_AT_ONCE; n += 1) {
       await repo.save(article(n, `retire-${String(n)}`));
