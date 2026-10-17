@@ -1,7 +1,10 @@
+import type { ProcedureThemesResponse } from "@bgs/shared-types";
 import { keepPreviousData, useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useCallback } from "react";
 import { createProceduresClient } from "../../api/procedures-client";
 import { API_BASE_URL } from "../../api/base-url";
 import { useTranslation } from "../../i18n/useTranslation";
+import { themeTitle } from "./theme-title";
 
 const client = createProceduresClient({ baseUrl: API_BASE_URL });
 
@@ -31,9 +34,19 @@ export function useProcedure(slug: string) {
 
 /** Official themes, with the number of procedures a person has filed under each. */
 export function useProcedureThemes() {
+  const { lang } = useTranslation();
+  // Titles in the reader's language; the same French data kept offline for all.
+  const select = useCallback(
+    (data: ProcedureThemesResponse): ProcedureThemesResponse => ({
+      ...data,
+      themes: data.themes.map((theme) => ({ ...theme, title: themeTitle(theme, lang) })),
+    }),
+    [lang],
+  );
   return useQuery({
     queryKey: ["procedures", "themes"],
     queryFn: ({ signal }) => client.listThemes(signal),
+    select,
   });
 }
 

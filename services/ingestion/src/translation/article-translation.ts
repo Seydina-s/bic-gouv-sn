@@ -1,19 +1,20 @@
-import { type ArticleRepository, type JsonDocument, TypedDocument } from "@bgs/content-store";
-import type { NewsArticle } from "@bgs/shared-types";
-import { z } from "zod";
+import type { ArticleRepository } from "@bgs/content-store";
+import type { NewsArticle, Translation } from "@bgs/shared-types";
 import { articleContentHash } from "../merge";
-import type { BatchRequest, BatchResult, BatchStatus } from "./claude-batches";
-import { checkTranslation, type TranslationRefusal } from "./translation-check";
+import {
+  BatchTranslation,
+  type BatchTranslationOptions,
+  type TranslatedKind,
+} from "./batch-translation";
+import { checkTranslation } from "./translation-check";
 import type { TranslationTarget } from "./targets";
 import { articlesToTranslate } from "./wolof-candidates";
 import { translationRequest } from "./wolof-prompt";
 
 /*
  * Machine translation of articles (AI-13, ML-12): Wolof where the Présidence gave no
- * official Wolof version, English for every article. Sent in batches, collected
- * later (within a day), each translation checked, then saved as a machine
- * translation, labelled as such in the app. An official version collected later
- * replaces it (merge.ts).
+ * official Wolof version, English for every article. An official version collected
+ * later replaces it (merge.ts).
  */
 
 const PAGE_SIZE = 200;
@@ -27,44 +28,6 @@ export function outputTokensFor(frenchCharacters: number): number {
   return Math.min(32_000, Math.max(2048, Math.ceil(frenchCharacters * 1.2) + 1000));
 }
 
-const runSchema = z.object({
-  batchId: z.string().min(1),
-  model: z.string().min(1),
-  submittedAt: z.string(),
-  /** Each article sent, and the version it was sent at. */
-  articles: z.array(z.object({ id: z.string(), contentHash: z.string() })),
-  collectedAt: z.string().nullable(),
-});
-const stateSchema = z.object({ runs: z.array(runSchema) });
-type Run = z.infer<typeof runSchema>;
-
-/** What a collection did with each reply. */
-export interface CollectReport {
-  saved: number;
-  refused: Partial<Record<TranslationRefusal, number>>;
-  failed: number;
-  /** The article changed or got an official Wolof version since it was sent. */
-  outdated: number;
-  inputTokens: number;
-  outputTokens: number;
-  stillRunning: number;
-}
-
-export interface BatchClient {
-  create(requests: readonly BatchRequest[]): Promise<string>;
-  status(id: string): Promise<{ status: BatchStatus; resultsUrl: string | null }>;
-  results(resultsUrl: string): Promise<BatchResult[]>;
-}
-
-export interface ArticleTranslationOptions {
-  articles: ArticleRepository;
-  /** The language translated into, and what it takes. */
-  target: TranslationTarget;
-  /** Where the runs are remembered between the sending and the collection. */
-  state: JsonDocument;
-  now?: () => Date;
-}
-
 export async function allArticles(articles: ArticleRepository): Promise<NewsArticle[]> {
   const all: NewsArticle[] = [];
   let cursor: string | undefined;
@@ -76,242 +39,58 @@ export async function allArticles(articles: ArticleRepository): Promise<NewsArti
   return all;
 }
 
-/** One reply of a trial run, for a person to read: nothing is saved. */
-export interface TrialReply {
-  id: string;
-  /** The French that was sent. */
-  french: { title: string; bodyHtml: string };
-  translation: { title: string; bodyHtml: string } | null;
-  /** Why the checks refused it, or why the service failed. */
-  problem: string | null;
-  inputTokens: number;
-  outputTokens: number;
+/** What is sent of an article, and what comes back. */
+export type ArticleText = Pick<Translation, "title" | "bodyHtml">;
+
+function articleKind(
+  articles: ArticleRepository,
+  target: TranslationTarget,
+): TranslatedKind<NewsArticle, ArticleText, ArticleText> {
+  return {
+    all: () => allArticles(articles),
+    get: (id) => articles.get(id),
+    id: (article) => article.id,
+    version: (article) => article.contentHash,
+    french: (article) => {
+      const french = target.toTranslate(article);
+      return french === null ? null : { title: french.title, bodyHtml: french.bodyHtml };
+    },
+    waiting: (all, since) => articlesToTranslate(all, since, target.toTranslate),
+    system: (all) => target.system(all),
+    request: (french) => ({
+      user: translationRequest(french),
+      maxOutputTokens: outputTokensFor(french.bodyHtml.length),
+    }),
+    check: (french, reply) => {
+      const checked = checkTranslation(french, reply);
+      return checked.ok
+        ? { ok: true, value: { title: checked.title, bodyHtml: checked.bodyHtml } }
+        : checked;
+    },
+    save: async (article, { title, bodyHtml }) => {
+      const translations = [
+        ...article.translations,
+        { lang: target.lang, status: "machine" as const, title, bodyHtml },
+      ];
+      await articles.save({
+        ...article,
+        translations,
+        contentHash: articleContentHash(translations, article.sourcePublishedOn, article.category),
+      });
+    },
+    output: target.output,
+  };
 }
 
-export class ArticleTranslation {
-  private readonly state: TypedDocument<z.infer<typeof stateSchema>>;
-  private readonly now: () => Date;
+export interface ArticleTranslationOptions extends BatchTranslationOptions {
+  articles: ArticleRepository;
+  /** The language translated into, and what it takes. */
+  target: TranslationTarget;
+}
 
-  constructor(private readonly options: ArticleTranslationOptions) {
-    this.state = new TypedDocument(options.state, stateSchema, { runs: [] });
-    this.now = options.now ?? (() => new Date());
-  }
-
-  /** The articles still waiting for the target language, not already in a run being processed. */
-  async pending(since: string | null): Promise<{ all: NewsArticle[]; toSend: NewsArticle[] }> {
-    const all = await allArticles(this.options.articles);
-    const sent = new Set(
-      (await this.state.read()).runs
-        .filter((run) => run.collectedAt === null)
-        .flatMap((run) => run.articles.map((article) => article.id)),
-    );
-    const waiting = articlesToTranslate(all, since, this.options.target.toTranslate);
-    return { all, toSend: waiting.filter((a) => !sent.has(a.id)) };
-  }
-
-  /** Sends up to `limit` articles in one batch; returns how many were sent. */
-  async submit(
-    client: BatchClient,
-    model: string,
-    options: { since: string | null; limit: number },
-  ) {
-    const { all, toSend } = await this.pending(options.since);
-    const chosen = toSend.slice(0, options.limit);
-    if (chosen.length === 0) {
-      return { sent: 0, batchId: null };
-    }
-    const requests = this.requestsFor(chosen, all);
-    const batchId = await client.create(requests);
-    await this.state.change((current) => ({
-      next: {
-        runs: [
-          ...current.runs,
-          {
-            batchId,
-            model,
-            submittedAt: this.now().toISOString(),
-            articles: chosen.map(({ id, contentHash }) => ({ id, contentHash })),
-            collectedAt: null,
-          },
-        ],
-      },
-      result: undefined,
-    }));
-    return { sent: requests.length, batchId };
-  }
-
-  /**
-   * A trial (16/10/2026): the chosen articles sent in one batch that is remembered
-   * nowhere, so that a later full run still takes them. Returns the batch id.
-   */
-  async submitTrial(client: BatchClient, chosen: readonly NewsArticle[]): Promise<string> {
-    return client.create(this.requestsFor(chosen, await allArticles(this.options.articles)));
-  }
-
-  /** A trial's replies once its batch ended (null before), each checked, none saved. */
-  async trialReplies(client: BatchClient, batchId: string): Promise<TrialReply[] | null> {
-    const { status, resultsUrl } = await client.status(batchId);
-    if (status !== "ended" || resultsUrl === null) {
-      return null;
-    }
-    const replies: TrialReply[] = [];
-    for (const result of await client.results(resultsUrl)) {
-      const article = await this.options.articles.get(result.customId);
-      const french = article === null ? null : this.options.target.toTranslate(article);
-      if (french === null) {
-        continue;
-      }
-      const sent = { title: french.title, bodyHtml: french.bodyHtml };
-      if (!result.ok) {
-        replies.push({
-          id: result.customId,
-          french: sent,
-          translation: null,
-          problem: "failed",
-          inputTokens: 0,
-          outputTokens: 0,
-        });
-        continue;
-      }
-      const checked = result.truncated
-        ? ({ ok: false, refusal: "truncated" } as const)
-        : checkTranslation(french, result.text);
-      replies.push({
-        id: result.customId,
-        french: sent,
-        translation: checked.ok ? { title: checked.title, bodyHtml: checked.bodyHtml } : null,
-        problem: checked.ok ? null : checked.refusal,
-        inputTokens: result.inputTokens,
-        outputTokens: result.outputTokens,
-      });
-    }
-    return replies;
-  }
-
-  /** One request per article: the target's fixed rules, then the article as data. */
-  private requestsFor(chosen: readonly NewsArticle[], all: readonly NewsArticle[]): BatchRequest[] {
-    const system = this.options.target.system(all);
-    return chosen.flatMap((article): BatchRequest[] => {
-      const french = this.options.target.toTranslate(article);
-      return french === null
-        ? []
-        : [
-            {
-              customId: article.id,
-              system,
-              user: translationRequest(french),
-              maxOutputTokens: outputTokensFor(french.bodyHtml.length),
-            },
-          ];
-    });
-  }
-
-  /** Saves what the ended runs translated; runs still being processed are left for later. */
-  async collect(client: BatchClient): Promise<CollectReport> {
-    const report: CollectReport = {
-      saved: 0,
-      refused: {},
-      failed: 0,
-      outdated: 0,
-      inputTokens: 0,
-      outputTokens: 0,
-      stillRunning: 0,
-    };
-    const open = (await this.state.read()).runs.filter((run) => run.collectedAt === null);
-    for (const run of open) {
-      const { status, resultsUrl } = await client.status(run.batchId);
-      if (status !== "ended" || resultsUrl === null) {
-        report.stillRunning += 1;
-        continue;
-      }
-      for (const result of await client.results(resultsUrl)) {
-        await this.apply(run, result, report);
-      }
-      await this.markCollected(run.batchId);
-    }
-    return report;
-  }
-
-  /** The latest run's raw replies, to understand a refusal; nothing is saved. */
-  async latestReplies(client: BatchClient): Promise<BatchResult[]> {
-    const latest = (await this.state.read()).runs.at(-1);
-    if (latest === undefined) {
-      return [];
-    }
-    const { resultsUrl } = await client.status(latest.batchId);
-    return resultsUrl === null ? [] : client.results(resultsUrl);
-  }
-
-  /**
-   * Collects the latest run again, after a fix of the checks: the provider keeps the
-   * replies 29 days, so nothing is paid twice. Articles saved since are left alone.
-   */
-  async recollectLatest(client: BatchClient): Promise<CollectReport> {
-    await this.state.change((current) => ({
-      next: {
-        runs: current.runs.map((run, index) =>
-          index === current.runs.length - 1 ? { ...run, collectedAt: null } : run,
-        ),
-      },
-      result: undefined,
-    }));
-    return this.collect(client);
-  }
-
-  private async apply(run: Run, result: BatchResult, report: CollectReport): Promise<void> {
-    if (!result.ok) {
-      report.failed += 1;
-      return;
-    }
-    report.inputTokens += result.inputTokens;
-    report.outputTokens += result.outputTokens;
-    if (result.truncated) {
-      report.refused.truncated = (report.refused.truncated ?? 0) + 1;
-      return;
-    }
-    const sent = run.articles.find((article) => article.id === result.customId);
-    const article = await this.options.articles.get(result.customId);
-    const french = article === null ? null : this.options.target.toTranslate(article);
-    if (
-      sent === undefined ||
-      article === null ||
-      french === null ||
-      article.contentHash !== sent.contentHash
-    ) {
-      report.outdated += 1;
-      return;
-    }
-    const checked = checkTranslation(french, result.text);
-    if (!checked.ok) {
-      report.refused[checked.refusal] = (report.refused[checked.refusal] ?? 0) + 1;
-      return;
-    }
-    const translations = [
-      ...article.translations,
-      {
-        lang: this.options.target.lang,
-        status: "machine" as const,
-        title: checked.title,
-        bodyHtml: checked.bodyHtml,
-      },
-    ];
-    await this.options.articles.save({
-      ...article,
-      translations,
-      contentHash: articleContentHash(translations, article.sourcePublishedOn, article.category),
-    });
-    report.saved += 1;
-  }
-
-  private markCollected(batchId: string): Promise<void> {
-    const at = this.now().toISOString();
-    return this.state.change((current) => ({
-      next: {
-        runs: current.runs.map((run) =>
-          run.batchId === batchId ? { ...run, collectedAt: at } : run,
-        ),
-      },
-      result: undefined,
-    }));
+/** The articles' translation runs into one language. */
+export class ArticleTranslation extends BatchTranslation<NewsArticle, ArticleText, ArticleText> {
+  constructor({ articles, target, ...options }: ArticleTranslationOptions) {
+    super(articleKind(articles, target), options);
   }
 }

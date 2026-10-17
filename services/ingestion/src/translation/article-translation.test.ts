@@ -6,8 +6,9 @@ import type { NewsArticle } from "@bgs/shared-types";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { articleContentHash } from "../merge";
 import { ClaudeBatches, type BatchRequest, type BatchResult } from "./claude-batches";
-import { BATCH_PRICES, estimateCost, MEASURED_OVERRUN } from "./cost-estimate";
-import { ArticleTranslation, outputTokensFor, type BatchClient } from "./article-translation";
+import { BATCH_PRICES, MEASURED_OVERRUN } from "./cost-estimate";
+import { ArticleTranslation, outputTokensFor } from "./article-translation";
+import type { BatchClient } from "./batch-translation";
 import { ENGLISH, WOLOF as WOLOF_TARGET } from "./targets";
 import { trialPicks } from "./wolof-candidates";
 
@@ -200,12 +201,12 @@ describe("the Wolof translation runs", () => {
   });
 
   it("estimates the cost before anything is sent", async () => {
-    const { toSend } = await translation.pending(null);
-    const estimate = estimateCost(toSend, "", WOLOF_TARGET, [
+    const estimate = await translation.estimate({ since: null, limit: 1000 }, [
       ...Object.keys(BATCH_PRICES),
       "modele-inconnu",
     ]);
-    expect(estimate.articles).toBe(3);
+    expect(estimate.items).toBe(3);
+    expect((await translation.estimate({ since: "2025-10-01", limit: 1 }, [])).items).toBe(1);
     expect(estimate.inputTokens).toBeGreaterThan(0);
     expect(estimate.dollars["claude-opus-5-5"]).toBeGreaterThan(
       estimate.dollars["claude-haiku-4-5-20251001"] ?? 0,

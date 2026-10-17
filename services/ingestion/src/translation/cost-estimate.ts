@@ -1,6 +1,3 @@
-import type { NewsArticle } from "@bgs/shared-types";
-import type { TranslationTarget } from "./targets";
-
 /*
  * What translating would cost, before anything is sent (owner's rule: every paid
  * use is costed and approved first). Prudent: the cached rules are counted at full
@@ -15,7 +12,7 @@ export const BATCH_PRICES: Record<string, { input: number; output: number }> = {
   "claude-haiku-4-5-20251001": { input: 0.5, output: 2.5 },
 };
 
-/** Characters per token of the French read (each target gives its own output's). */
+/** Characters per token of the French read (each language gives its own output's). */
 const FRENCH_CHARACTERS_PER_TOKEN = 3.5;
 /**
  * Measured gap between this model and the bill: the batch of 351 articles sent on
@@ -24,8 +21,14 @@ const FRENCH_CHARACTERS_PER_TOKEN = 3.5;
  */
 export const MEASURED_OVERRUN = 1.3;
 
+/** How a language's translation is written: characters per token, length against French. */
+export interface OutputSize {
+  charactersPerToken: number;
+  lengthRatio: number;
+}
+
 export interface CostEstimate {
-  articles: number;
+  items: number;
   frenchCharacters: number;
   inputTokens: number;
   outputTokens: number;
@@ -33,22 +36,21 @@ export interface CostEstimate {
   dollars: Record<string, number | null>;
 }
 
+/** The cost of translating items of these sizes (French characters sent, each). */
 export function estimateCost(
-  articles: readonly NewsArticle[],
+  sizes: readonly number[],
   system: string,
-  target: TranslationTarget,
+  output: OutputSize,
   models: readonly string[],
 ): CostEstimate {
   const systemTokens = system.length / FRENCH_CHARACTERS_PER_TOKEN;
-  const frenchCharacters = articles.reduce((sum, article) => {
-    const french = target.toTranslate(article);
-    return sum + (french === null ? 0 : french.title.length + french.bodyHtml.length);
-  }, 0);
+  const frenchCharacters = sizes.reduce((sum, size) => sum + size, 0);
   const inputTokens = Math.ceil(
-    articles.length * systemTokens + frenchCharacters / FRENCH_CHARACTERS_PER_TOKEN,
+    sizes.length * systemTokens + frenchCharacters / FRENCH_CHARACTERS_PER_TOKEN,
   );
-  const { charactersPerToken, lengthRatio } = target.output;
-  const outputTokens = Math.ceil((frenchCharacters * lengthRatio) / charactersPerToken);
+  const outputTokens = Math.ceil(
+    (frenchCharacters * output.lengthRatio) / output.charactersPerToken,
+  );
   const dollars = Object.fromEntries(
     models.map((model) => {
       const price = BATCH_PRICES[model];
@@ -61,5 +63,5 @@ export function estimateCost(
       ];
     }),
   );
-  return { articles: articles.length, frenchCharacters, inputTokens, outputTokens, dollars };
+  return { items: sizes.length, frenchCharacters, inputTokens, outputTokens, dollars };
 }
