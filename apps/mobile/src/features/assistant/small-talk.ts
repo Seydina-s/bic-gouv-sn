@@ -3,7 +3,8 @@
  * report of 11/10/2026: "Bonjour", "Merci" and "Qui es-tu ?" were answered "outside
  * my subjects"). Only a message made of courtesy alone is answered here: "Bonjour,
  * comment avoir un passeport ?" goes to the assistant. French and Wolof, as people
- * write them (salamalekoum, nanga def, dieuredieuf…).
+ * write them (salamalekoum, nanga def, dieuredieuf…), and English since the app is
+ * offered in English (16/10/2026).
  */
 
 export type SmallTalk = "greeting" | "thanks" | "identity";
@@ -34,6 +35,12 @@ const PHRASES: Readonly<Record<SmallTalk, readonly string[]>> = {
     "ca va",
     "comment allez vous",
     "comment vas tu",
+    "hi",
+    "hey",
+    "good morning",
+    "good afternoon",
+    "good evening",
+    "how are you",
   ],
   thanks: [
     "merci",
@@ -48,6 +55,11 @@ const PHRASES: Readonly<Record<SmallTalk, readonly string[]>> = {
     "diaredief",
     "jerejef waay",
     "ok merci",
+    "thanks",
+    "thank you",
+    "thx",
+    "ok thanks",
+    "ok thank you",
   ],
   identity: [
     "qui es tu",
@@ -64,6 +76,10 @@ const PHRASES: Readonly<Record<SmallTalk, readonly string[]>> = {
     "kan nga",
     "yaw kan nga",
     "kan ngeen",
+    "who are you",
+    "what are you",
+    "what can you do",
+    "what do you do",
   ],
 };
 
@@ -85,6 +101,15 @@ const FILLERS = new Set([
   "beaucoup",
   "pour",
   "moi",
+  "please",
+  "so",
+  "very",
+  "much",
+  "lot",
+  "sir",
+  "madam",
+  "for",
+  "me",
 ]);
 
 function folded(text: string): string {
