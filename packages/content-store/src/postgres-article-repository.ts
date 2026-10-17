@@ -60,6 +60,15 @@ export class PostgresArticleRepository implements ArticleRepository {
     return this.table.save(article);
   }
 
+  /** One row each: the database writes rows, not a whole file. */
+  async saveMany(articles: readonly NewsArticle[]): Promise<SaveOutcome[]> {
+    const outcomes: SaveOutcome[] = [];
+    for (const article of articles) {
+      outcomes.push(await this.table.save(article));
+    }
+    return outcomes;
+  }
+
   /** Copies an article and its history as they are (see PostgresVersionedTable). */
   importEntry(entry: VersionedEntry<NewsArticle>): Promise<"imported" | "present"> {
     return this.table.importEntry(entry);

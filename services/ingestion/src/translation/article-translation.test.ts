@@ -194,6 +194,18 @@ describe("the Wolof translation runs", () => {
     }
   });
 
+  it("saves the translations of a run together, not one write per article", async () => {
+    const service = batches(translated);
+    await translation.submit(service.client, "claude-sonnet-5-5", { since: null, limit: 10 });
+    service.end();
+    const saveMany = vi.spyOn(articles, "saveMany");
+    const save = vi.spyOn(articles, "save");
+    expect(await translation.collect(service.client)).toMatchObject({ saved: 3 });
+    expect(saveMany).toHaveBeenCalledTimes(1);
+    expect(saveMany.mock.calls[0]?.[0]).toHaveLength(3);
+    expect(save).not.toHaveBeenCalled();
+  });
+
   it("gives the Wolof room to be longer than the French, within bounds", () => {
     expect(outputTokensFor(100)).toBe(2048);
     expect(outputTokensFor(10_000)).toBe(13_000);

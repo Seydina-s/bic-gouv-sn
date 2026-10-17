@@ -82,6 +82,8 @@ export interface ArticleRepository {
   /** How many shown articles each institution has, in `lang` (any if undefined). */
   publishers(lang?: Lang): Promise<PublisherCount[]>;
   save(article: NewsArticle): Promise<SaveOutcome>;
+  /** Saves several articles at once (one write of a file store), each as `save` would. */
+  saveMany(articles: readonly NewsArticle[]): Promise<SaveOutcome[]>;
   /** Previous versions of an article, oldest first. */
   history(id: string): Promise<NewsArticle[]>;
   /**

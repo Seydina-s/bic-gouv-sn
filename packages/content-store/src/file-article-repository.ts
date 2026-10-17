@@ -143,6 +143,10 @@ export class FileArticleRepository implements ArticleRepository {
     return this.store.save(article);
   }
 
+  saveMany(articles: readonly NewsArticle[]): Promise<SaveOutcome[]> {
+    return this.store.saveMany(articles);
+  }
+
   /** Attaches processed images without creating a new content version. */
   setImages(id: string, images: NewsArticle["images"]): Promise<boolean> {
     return this.store.replaceCurrent(id, (current) =>

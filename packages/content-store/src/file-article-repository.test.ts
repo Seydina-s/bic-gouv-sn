@@ -81,6 +81,19 @@ describe.each(STORAGES)("articles stored %s", (_name, open) => {
     ]);
   });
 
+  it("saves several articles at once, each as one save would", async () => {
+    await repo.save(article(1));
+    const edited = article(1, { contentHash: "f".repeat(64) });
+    expect(await repo.saveMany([edited, article(2), article(3)])).toEqual([
+      "updated",
+      "created",
+      "created",
+    ]);
+    expect(await repo.saveMany([article(2)])).toEqual(["unchanged"]);
+    expect((await repo.get(edited.id))?.version).toBe(2);
+    expect((await repo.list({ limit: 10 })).total).toBe(3);
+  });
+
   it("attaches images without creating a new version", async () => {
     await repo.save(article(1));
     const image = {

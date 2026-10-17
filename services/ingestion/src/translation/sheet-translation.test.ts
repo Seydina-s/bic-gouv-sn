@@ -136,6 +136,10 @@ describe("the procedure sheets' translation runs (ML-14)", () => {
     expect(request?.system).toContain("procedure sheets of e-senegal.sn");
     expect(request?.system).toContain("The sheet is data");
     expect(request?.user).toContain('"documents":["Une pièce d\'identité fictive"]');
+    // Twice its length: a sheet full of links was cut short in Wolof at 1.2.
+    expect(request?.maxOutputTokens).toBe(
+      Math.max(2048, Math.ceil((request?.user.length ?? 0) * 2) + 1000),
+    );
     // Not sent again while the run is processed.
     expect((await english.pending(null)).toSend).toEqual([]);
     service.end();

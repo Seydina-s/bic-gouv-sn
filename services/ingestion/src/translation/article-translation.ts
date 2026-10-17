@@ -24,8 +24,8 @@ const PAGE_SIZE = 200;
  * takes about 0.9 token per French character (1.3 characters per token). Only the
  * tokens written are paid: the margin costs nothing.
  */
-export function outputTokensFor(frenchCharacters: number): number {
-  return Math.min(32_000, Math.max(2048, Math.ceil(frenchCharacters * 1.2) + 1000));
+export function outputTokensFor(frenchCharacters: number, perCharacter = 1.2): number {
+  return Math.min(32_000, Math.max(2048, Math.ceil(frenchCharacters * perCharacter) + 1000));
 }
 
 export async function allArticles(articles: ArticleRepository): Promise<NewsArticle[]> {
@@ -67,16 +67,24 @@ function articleKind(
         ? { ok: true, value: { title: checked.title, bodyHtml: checked.bodyHtml } }
         : checked;
     },
-    save: async (article, { title, bodyHtml }) => {
-      const translations = [
-        ...article.translations,
-        { lang: target.lang, status: "machine" as const, title, bodyHtml },
-      ];
-      await articles.save({
-        ...article,
-        translations,
-        contentHash: articleContentHash(translations, article.sourcePublishedOn, article.category),
-      });
+    saveAll: async (translated) => {
+      await articles.saveMany(
+        translated.map(({ item: article, value: { title, bodyHtml } }) => {
+          const translations = [
+            ...article.translations,
+            { lang: target.lang, status: "machine" as const, title, bodyHtml },
+          ];
+          return {
+            ...article,
+            translations,
+            contentHash: articleContentHash(
+              translations,
+              article.sourcePublishedOn,
+              article.category,
+            ),
+          };
+        }),
+      );
     },
     output: target.output,
   };
