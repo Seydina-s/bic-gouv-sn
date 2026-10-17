@@ -29,6 +29,9 @@ type Run = z.infer<typeof runSchema>;
  */
 const SAVED_TOGETHER = 200;
 
+/** The provider keeps a batch's replies 29 days. */
+const REPLIES_KEPT_MS = 29 * 24 * 60 * 60_000;
+
 export type Checked<Value> =
   { ok: true; value: Value } | { ok: false; refusal: TranslationRefusal };
 
@@ -37,8 +40,10 @@ export interface TranslatedKind<Item, French, Value> {
   all(): Promise<Item[]>;
   get(id: string): Promise<Item | null>;
   id(item: Item): string;
-  /** The item's version: a reply for an older one is never saved. */
+  /** The item's version when it is sent: a reply for an older one is never saved. */
   version(item: Item): string;
+  /** Whether a reply sent at `sentVersion` still fits the item; `version` equal by default. */
+  stillFits?(item: Item, sentVersion: string): boolean;
   /** What to translate, null when the item needs no translation into this language. */
   french(item: Item): French | null;
   /** The items waiting, in the order they are sent; `since` when it applies. */
@@ -268,14 +273,16 @@ export class BatchTranslation<Item, French, Value> {
   }
 
   /**
-   * Collects the latest run again, after a fix of the checks: the provider keeps the
-   * replies 29 days, so nothing is paid twice. Items saved since are left alone.
+   * Collects again every run whose replies the provider still keeps (29 days), after
+   * a fix: nothing is paid twice, and items saved since are left alone (17/10/2026:
+   * 2 562 Wolof replies were set aside by mistake, from three runs).
    */
-  async recollectLatest(client: BatchClient): Promise<CollectReport> {
+  async recollectRecent(client: BatchClient): Promise<CollectReport> {
+    const since = this.now().getTime() - REPLIES_KEPT_MS;
     await this.state.change((current) => ({
       next: {
-        runs: current.runs.map((run, index) =>
-          index === current.runs.length - 1 ? { ...run, collectedAt: null } : run,
+        runs: current.runs.map((run) =>
+          Date.parse(run.submittedAt) >= since ? { ...run, collectedAt: null } : run,
         ),
       },
       result: undefined,
@@ -316,7 +323,10 @@ export class BatchTranslation<Item, French, Value> {
       sent === undefined ||
       item === null ||
       french === null ||
-      this.kind.version(item) !== sent.contentHash
+      !(
+        this.kind.stillFits?.(item, sent.contentHash) ??
+        this.kind.version(item) === sent.contentHash
+      )
     ) {
       report.outdated += 1;
       return null;

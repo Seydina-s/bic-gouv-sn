@@ -39,6 +39,12 @@ export async function allArticles(articles: ArticleRepository): Promise<NewsArti
   return all;
 }
 
+/** The fingerprint of an article's official versions, whatever was machine-translated. */
+export function officialFingerprint(article: NewsArticle): string {
+  const official = article.translations.filter((translation) => translation.status !== "machine");
+  return articleContentHash(official, article.sourcePublishedOn, article.category);
+}
+
 /** What is sent of an article, and what comes back. */
 export type ArticleText = Pick<Translation, "title" | "bodyHtml">;
 
@@ -50,7 +56,13 @@ function articleKind(
     all: () => allArticles(articles),
     get: (id) => articles.get(id),
     id: (article) => article.id,
-    version: (article) => article.contentHash,
+    // The official versions only: a machine translation saved into one language
+    // must not set aside the replies of another (17/10/2026: once the English was
+    // saved, 2 562 Wolof replies were taken for articles changed meanwhile).
+    version: officialFingerprint,
+    // Runs sent before 17/10/2026 recorded the whole article's fingerprint.
+    stillFits: (article, sent) =>
+      sent === officialFingerprint(article) || sent === article.contentHash,
     french: (article) => {
       const french = target.toTranslate(article);
       return french === null ? null : { title: french.title, bodyHtml: french.bodyHtml };

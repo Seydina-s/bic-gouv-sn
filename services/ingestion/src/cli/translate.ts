@@ -161,7 +161,7 @@ async function command<Item, French, Value>(
     }
   } else if (process.argv.includes("--collect") || process.argv.includes("--recollect")) {
     const report = process.argv.includes("--recollect")
-      ? await translation.recollectLatest(client())
+      ? await translation.recollectRecent(client())
       : await translation.collect(client());
     say(`Traductions enregistrées : ${String(report.saved)}`);
     say(

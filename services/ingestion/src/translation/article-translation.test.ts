@@ -285,6 +285,30 @@ describe("the English translation runs", () => {
     // The Wolof run in progress does not hold the article back from English.
     expect((await english().pending(null)).toSend).toHaveLength(3);
   });
+
+  it("never sets aside the Wolof replies once the English was saved, even collected again", async () => {
+    // 17/10/2026: saving the English changed every article's fingerprint, and 2 562
+    // Wolof replies were taken for articles changed meanwhile.
+    const wolof = batches(translated);
+    const inEnglishToo = batches(inEnglish);
+    await translation.submit(wolof.client, "claude-sonnet-5-5", { since: null, limit: 10 });
+    const runs = english();
+    await runs.submit(inEnglishToo.client, "claude-sonnet-5-5", { since: null, limit: 10 });
+    inEnglishToo.end();
+    expect(await runs.collect(inEnglishToo.client)).toMatchObject({ saved: 3 });
+    wolof.end();
+    expect(await translation.collect(wolof.client)).toMatchObject({ saved: 3, outdated: 0 });
+    expect((await articles.get(idOf(1)))?.translations.map((t) => t.lang)).toEqual([
+      "fr",
+      "en",
+      "wo",
+    ]);
+    // Collected again after a fix: nothing saved twice.
+    expect(await translation.recollectRecent(wolof.client)).toMatchObject({
+      saved: 0,
+      outdated: 3,
+    });
+  });
 });
 
 describe("a trial", () => {
