@@ -493,3 +493,10 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : le filtre laisse passer une liste fixe de chemins ; DER-01 (12/10) a ajouté un nouveau chemin à l'app sans l'y ajouter. Les essais sur l'ordinateur parlent directement à l'API et ne passent pas par le filtre : rien ne l'a montré.
 - **Correctif** : chemin ajouté au filtre, filtre relancé.
 - **Prévention** : `apps/api/src/public-gate.test.ts` lit les chemins appelés par les clients de l'app et échoue si le filtre en refuse un (vérifié en retirant le chemin). Règle globale « liste d'autorisation tenue à la main ».
+
+## 17/10/2026 — Collecte des traductions : un fichier de 56 Mo réécrit pour chaque article
+
+- **Ce qui s'est passé** : la collecte du grand lot anglais a enregistré 1 066 traductions, puis s'est arrêtée sur « EPERM » (fichier `news.json` verrouillé). Pendant ce temps, l'API mettait 48 s à répondre et l'assistant disait « indisponible ».
+- **Cause racine** : la collecte enregistrait chaque article seul. Le magasin de fichiers réécrit alors tout le fichier, plus sa copie de secours, à chaque enregistrement : 2 132 écritures de 56 Mo. L'API, qui reconstruit la base de l'assistant à chaque changement, relisait le fichier sans cesse et le gardait ouvert plus longtemps que les 11 s de patience du remplacement.
+- **Correctif** : `saveMany` (une écriture pour plusieurs articles) dans les deux magasins ; la collecte enregistre par groupes de 200. Testé : une seule écriture pour une collecte de 3 articles.
+- **Prévention** : règle globale « traitement par lots sur un stockage en fichier entier ».

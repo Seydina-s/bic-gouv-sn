@@ -87,20 +87,25 @@ export class VersionedJsonStore<T extends Versioned> {
   }
 
   private async saveLocked(item: T): Promise<SaveOutcome> {
+    const [outcome] = await this.saveManyLocked([item]);
+    return outcome ?? "unchanged";
+  }
+
+  /**
+   * Saves several items with one write of the file (17/10/2026: a translation run
+   * saved 1 066 articles one by one, rewriting a 56 MB file twice each time).
+   */
+  saveMany(items: readonly T[]): Promise<SaveOutcome[]> {
+    return withWriteLock(this.lockPath, () => this.saveManyLocked(items));
+  }
+
+  private async saveManyLocked(items: readonly T[]): Promise<SaveOutcome[]> {
     const entries = { ...(await this.entries()) };
-    const existing = entries[item.id];
-    if (existing?.current.contentHash === item.contentHash) {
-      return "unchanged";
+    const outcomes = items.map((item) => placed(entries, item));
+    if (outcomes.some((outcome) => outcome !== "unchanged")) {
+      await this.write(entries);
     }
-    entries[item.id] =
-      existing === undefined
-        ? { current: { ...item, version: 1 }, history: [] }
-        : {
-            current: { ...item, version: existing.current.version + 1 },
-            history: [...existing.history, existing.current],
-          };
-    await this.write(entries);
-    return existing === undefined ? "created" : "updated";
+    return outcomes;
   }
 
   /** Replaces the current version in place (enrichments such as images). */
@@ -144,4 +149,23 @@ export class VersionedJsonStore<T extends Versioned> {
     await writeFileDurably(this.path, data);
     await writeFileDurably(this.backupPath, data);
   }
+}
+
+/** Puts `item` among `entries` as its new version, unless its fingerprint is the same. */
+function placed<T extends Versioned>(
+  entries: Record<string, VersionedEntry<T>>,
+  item: T,
+): SaveOutcome {
+  const existing = entries[item.id];
+  if (existing?.current.contentHash === item.contentHash) {
+    return "unchanged";
+  }
+  entries[item.id] =
+    existing === undefined
+      ? { current: { ...item, version: 1 }, history: [] }
+      : {
+          current: { ...item, version: existing.current.version + 1 },
+          history: [...existing.history, existing.current],
+        };
+  return existing === undefined ? "created" : "updated";
 }

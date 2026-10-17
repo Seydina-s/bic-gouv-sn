@@ -22,6 +22,13 @@ const runSchema = z.object({
 const stateSchema = z.object({ runs: z.array(runSchema) });
 type Run = z.infer<typeof runSchema>;
 
+/**
+ * Translations saved together: one write of a file store for each group (17/10/2026:
+ * saved one by one, 1 066 articles rewrote a 56 MB file 2 132 times and the API,
+ * rebuilding its base at each change, slowed to 48 s a question).
+ */
+const SAVED_TOGETHER = 200;
+
 export type Checked<Value> =
   { ok: true; value: Value } | { ok: false; refusal: TranslationRefusal };
 
@@ -41,7 +48,8 @@ export interface TranslatedKind<Item, French, Value> {
   /** The item as data, and room for its translation. */
   request(french: French): { user: string; maxOutputTokens: number };
   check(french: French, reply: string): Checked<Value>;
-  save(item: Item, value: Value): Promise<void>;
+  /** Saves the translations of a group of items at once. */
+  saveAll(translated: readonly { item: Item; value: Value }[]): Promise<void>;
   /** Size of the translation against the French, for the cost estimate. */
   output: OutputSize;
 }
@@ -232,9 +240,18 @@ export class BatchTranslation<Item, French, Value> {
         report.stillRunning += 1;
         continue;
       }
+      let group: { item: Item; value: Value }[] = [];
       for (const result of await client.results(resultsUrl)) {
-        await this.apply(run, result, report);
+        const checked = await this.apply(run, result, report);
+        if (checked !== null) {
+          group.push(checked);
+        }
+        if (group.length >= SAVED_TOGETHER) {
+          await this.saveGroup(group, report);
+          group = [];
+        }
       }
+      await this.saveGroup(group, report);
       await this.markCollected(run.batchId);
     }
     return report;
@@ -266,16 +283,31 @@ export class BatchTranslation<Item, French, Value> {
     return this.collect(client);
   }
 
-  private async apply(run: Run, result: BatchResult, report: CollectReport): Promise<void> {
+  private async saveGroup(
+    group: readonly { item: Item; value: Value }[],
+    report: CollectReport,
+  ): Promise<void> {
+    if (group.length > 0) {
+      await this.kind.saveAll(group);
+      report.saved += group.length;
+    }
+  }
+
+  /** A reply checked and still for the current version, ready to save; null otherwise. */
+  private async apply(
+    run: Run,
+    result: BatchResult,
+    report: CollectReport,
+  ): Promise<{ item: Item; value: Value } | null> {
     if (!result.ok) {
       report.failed += 1;
-      return;
+      return null;
     }
     report.inputTokens += result.inputTokens;
     report.outputTokens += result.outputTokens;
     if (result.truncated) {
       report.refused.truncated = (report.refused.truncated ?? 0) + 1;
-      return;
+      return null;
     }
     const sent = run.articles.find((item) => item.id === result.customId);
     const item = await this.kind.get(result.customId);
@@ -287,15 +319,14 @@ export class BatchTranslation<Item, French, Value> {
       this.kind.version(item) !== sent.contentHash
     ) {
       report.outdated += 1;
-      return;
+      return null;
     }
     const checked = this.kind.check(french, result.text);
     if (!checked.ok) {
       report.refused[checked.refusal] = (report.refused[checked.refusal] ?? 0) + 1;
-      return;
+      return null;
     }
-    await this.kind.save(item, checked.value);
-    report.saved += 1;
+    return { item, value: checked.value };
   }
 
   private markCollected(batchId: string): Promise<void> {

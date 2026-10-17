@@ -21,6 +21,9 @@ import type { TranslationTarget } from "./targets";
  * until the next run translates it again.
  */
 
+/** Room for a sheet's translation, in tokens per character of the request. */
+export const SHEET_TOKENS_PER_CHARACTER = 2;
+
 /** What is sent of a sheet, and what comes back: the same keys. */
 export interface SheetText {
   title: string;
@@ -152,15 +155,20 @@ function sheetKind(
     system: () => target.sheetSystem(articles),
     request: (sheet) => {
       const user = sheetRequest(sheet);
-      return { user, maxOutputTokens: outputTokensFor(user.length) };
+      // A sheet full of links took 1.7 tokens a character in Wolof and was cut short
+      // (trial of 17/10/2026): twice its length, the margin costing nothing.
+      return { user, maxOutputTokens: outputTokensFor(user.length, SHEET_TOKENS_PER_CHARACTER) };
     },
     check: checkSheet,
-    save: async (procedure, sheet) => {
-      await procedures.setLocalized(procedure.id, lang, {
-        status: "machine",
-        forHash: procedure.contentHash,
-        ...sheet,
-      });
+    // The procedures' file is small: one write per sheet is enough.
+    saveAll: async (translated) => {
+      for (const { item: procedure, value: sheet } of translated) {
+        await procedures.setLocalized(procedure.id, lang, {
+          status: "machine",
+          forHash: procedure.contentHash,
+          ...sheet,
+        });
+      }
     },
     output: target.output,
   };
