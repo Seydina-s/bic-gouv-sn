@@ -72,6 +72,7 @@ describe("the question's intent", () => {
       section: null,
       publisher: "Présidence",
       members: [],
+      period: null,
     });
     expect(questionIntent("Qu'a dit le dernier Conseil des ministres ?")).toMatchObject({
       recent: true,
@@ -83,7 +84,26 @@ describe("the question's intent", () => {
       section: null,
       publisher: null,
       members: [],
+      period: null,
     });
+  });
+
+  it("hears the news of a period asked with no other subject, in French, English and Wolof", () => {
+    const period = (question: string) => questionIntent(question).period;
+    expect(period("Quelles sont les actualités du jour ?")).toBe("today");
+    expect(period("C'est quoi les actualités d'aujourd'hui ?")).toBe("today");
+    expect(period("Quoi de neuf aujourd'hui ?")).toBe("today");
+    expect(period("What's the news today?")).toBe("today");
+    expect(period("Lan mooy xibaar yi tey ?")).toBe("today");
+    expect(period("Qu'a fait le gouvernement cette semaine ?")).toBe("week");
+    expect(period("Quelles sont les dernières nouvelles du gouvernement ?")).toBe("latest");
+    expect(period("Les infos d'hier")).toBe("yesterday");
+    // A subject: searched as before.
+    expect(period("Où est allé le président cette semaine ?")).toBeNull();
+    expect(period("Qu'a dit le dernier Conseil des ministres ?")).toBeNull();
+    expect(period("Quelles sont les dernières actualités du ministère de la Santé ?")).toBeNull();
+    expect(period("Les actualités sur la pêche aujourd'hui")).toBeNull();
+    expect(period("Comment obtenir un passeport ?")).toBeNull();
   });
 
   it("hears who holds a post, and the ministry named, as people type them", () => {
@@ -198,6 +218,33 @@ describe("the extracts given to the model", () => {
     expect(interior[0]?.contentId).toBe("content-7");
     const prime = retrievePassages(index, "c ki le premier ministre", "fr", TODAY);
     expect(prime[0]?.contentId).toBe("content-9");
+  });
+
+  it("bring the articles of the day for the news of the day, any subject, an article once", () => {
+    const given = retrievePassages(index, "Quelles sont les actualités du jour ?", "fr", TODAY);
+    expect(given.map((p) => p.contentId)).toEqual(["content-6"]);
+    const week = retrievePassages(index, "Qu'a fait le gouvernement cette semaine ?", "fr", TODAY);
+    // Monday 5 to Thursday 8 October.
+    expect(week.map((p) => p.contentId)).toEqual(["content-6", "content-3", "content-2"]);
+  });
+
+  it("bring the newest articles, with their dates, when none is of the period asked", () => {
+    const given = retrievePassages(index, "Les infos d'hier", "fr", "2026-10-20");
+    expect(given.map((p) => p.contentId).slice(0, 3)).toEqual([
+      "content-6",
+      "content-3",
+      "content-2",
+    ]);
+    expect(given.every((p) => p.kind === "news-article")).toBe(true);
+  });
+
+  it("give at most two pieces of a page found by the search", () => {
+    const pieces = new PassageIndex(
+      [0, 1, 2, 3].map((part) =>
+        passage(20, "2025-01-01", "actualites", `Pêche fictive, morceau ${String(part)}.`, part),
+      ),
+    );
+    expect(retrievePassages(pieces, "pêche fictive", "fr", TODAY)).toHaveLength(2);
   });
 
   it("still follow the words for any other question, newer first only when equal", () => {
