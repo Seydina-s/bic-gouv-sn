@@ -149,7 +149,8 @@ describe("POST /v1/assistant/answers", () => {
     const paused = assistantReplySchema.parse((await ask(app)).json());
     expect(paused.status).toBe("paused");
     expect(paused.resumesOn).toMatch(/^\d{4}-\d{2}-01$/);
-    expect(llm.calls).toBe(1);
+    // One question: its rephrasing, then its answer (17/10/2026).
+    expect(llm.calls).toBe(2);
     expect((await errorJournal.entries())[0]).toMatchObject({
       code: "ASSISTANT_LIMIT_REACHED",
       where: "POST /v1/assistant/answers",
@@ -159,9 +160,9 @@ describe("POST /v1/assistant/answers", () => {
     expect(assistantUsageSchema.parse(usage.json())).toMatchObject({
       questions: 1,
       monthlyLimit: 1,
-      inputTokens: 800,
-      outputTokens: 40,
-      costUsd: 0.001,
+      inputTokens: 1600,
+      outputTokens: 80,
+      costUsd: 0.002,
       configured: true,
     });
     const audit = await admin.admin.journal.entries();
@@ -198,7 +199,8 @@ describe("POST /v1/assistant/answers", () => {
     };
     const reply = assistantReplySchema.parse((await ask(await start({ llm: stuckOnce }))).json());
     expect(reply.status).toBe("answered");
-    expect(calls).toBe(2);
+    // The rephrasing asked again once, then the answer.
+    expect(calls).toBe(3);
 
     let refused = 0;
     const overloaded: LlmProvider = {
@@ -209,7 +211,8 @@ describe("POST /v1/assistant/answers", () => {
       },
     };
     await ask(await start({ llm: overloaded }));
-    expect(refused).toBe(1);
+    // Refused at the rephrasing (searched as written), then at the answer: never asked twice.
+    expect(refused).toBe(2);
   });
 
   it("lets only admins change the limit", async () => {
