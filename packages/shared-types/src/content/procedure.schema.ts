@@ -77,5 +77,5 @@ export type Procedure = z.infer<typeof procedureSchema>;
 /** The sheet in `lang`, when one exists for the current French version. */
 export function currentSheet(procedure: Procedure, lang: SheetLang): LocalizedSheet | null {
   const sheet = procedure.localized[lang];
-  return sheet !== undefined && sheet.forHash === procedure.contentHash ? sheet : null;
+  return sheet?.forHash === procedure.contentHash ? sheet : null;
 }
