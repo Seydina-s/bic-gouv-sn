@@ -1,7 +1,7 @@
 import type { ArticleRepository, ProcedureRepository } from "@bgs/content-store";
-import type { NewsArticle } from "@bgs/shared-types";
+import type { NewsArticle, StateService } from "@bgs/shared-types";
 import { PassageIndex } from "./passage-search";
-import { articlePassages, procedurePassages, type Passage } from "./passages";
+import { articlePassages, procedurePassages, servicePassages, type Passage } from "./passages";
 
 /*
  * The official base as the assistant searches it: every article and procedure cut
@@ -37,14 +37,25 @@ async function allArticles(articles: ArticleRepository): Promise<NewsArticle[]> 
   return all;
 }
 
+/** The verified government services (AST-25); none when the map is not served. */
+export interface ServiceSource {
+  verified(): Promise<StateService[]>;
+}
+
 export async function buildKnowledge(
   articles: ArticleRepository,
   procedures: ProcedureRepository,
+  services: ServiceSource | null = null,
 ): Promise<Knowledge> {
-  const [allNews, allProcedures] = await Promise.all([allArticles(articles), procedures.all()]);
+  const [allNews, allProcedures, allServices] = await Promise.all([
+    allArticles(articles),
+    procedures.all(),
+    services?.verified() ?? Promise.resolve([]),
+  ]);
   const passages = [
     ...allNews.flatMap(articlePassages),
     ...allProcedures.flatMap(procedurePassages),
+    ...allServices.flatMap(servicePassages),
   ];
   return {
     index: new PassageIndex(passages),

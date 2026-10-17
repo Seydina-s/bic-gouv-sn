@@ -1,7 +1,7 @@
-import type { NewsArticle } from "@bgs/shared-types";
+import type { NewsArticle, StateService } from "@bgs/shared-types";
 import { describe, expect, it } from "vitest";
 import { procedure } from "../testing/procedure-fixture";
-import { articlePassages, paragraphsOf, procedurePassages } from "./passages";
+import { articlePassages, paragraphsOf, procedurePassages, servicePassages } from "./passages";
 
 // Placeholder texts, not real content.
 function article(translations: NewsArticle["translations"]): NewsArticle {
@@ -173,5 +173,54 @@ describe("procedurePassages", () => {
     expect(free[0]?.text).toContain("Coût : Gratuit");
     const unknown = procedurePassages(procedure(3, "Inconnue", "<p>Corps.</p>"));
     expect(unknown[0]?.text).toBe("Corps.");
+  });
+});
+
+describe("servicePassages", () => {
+  // A placeholder office, not a real one.
+  const office: StateService = {
+    id: "osm-n42",
+    category: "mairie",
+    name: "Mairie fictive de Test",
+    address: "Avenue fictive",
+    town: "Dakar",
+    location: { lat: 14.7, lng: -17.4 },
+    phone: "+221 33 000 00 00",
+    website: null,
+    openingHours: "Mo-Fr 08:00-17:00",
+    origin: { kind: "osm", osmType: "node", osmId: 42, fetchedAt: "2026-09-27T10:00:00Z" },
+    status: "verified",
+    reviewedBy: "Équipe",
+    reviewedAt: "2026-10-15T09:00:00Z",
+    pendingUpdate: null,
+    corrections: { name: "Mairie corrigée de Test" },
+  };
+
+  it("gives one passage per verified office, traceable to its map object and its check", () => {
+    const [passage] = servicePassages(office);
+    expect(passage).toMatchObject({
+      contentId: "osm-n42",
+      kind: "service",
+      lang: "fr",
+      title: "Mairie corrigée de Test",
+      sourceUrl: "https://www.openstreetmap.org/node/42",
+      publishedOn: "2026-10-15",
+      publisher: "Services de l'État vérifiés (carte de l'application)",
+    });
+    expect(passage?.text).toContain("Mairie corrigée de Test (Mairie)");
+    expect(passage?.text).toContain("Avenue fictive, Dakar");
+    expect(passage?.text).toContain("Mo-Fr 08:00-17:00");
+    expect(passage?.text).toContain("+221 33 000 00 00");
+  });
+
+  it("leaves out an office not verified, or typed in the console with no public page", () => {
+    expect(servicePassages({ ...office, status: "proposed" })).toEqual([]);
+    expect(
+      servicePassages({
+        ...office,
+        id: "manual-test-1",
+        origin: { kind: "manual", createdBy: "Équipe", createdAt: "2026-10-01T10:00:00Z" },
+      }),
+    ).toEqual([]);
   });
 });

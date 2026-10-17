@@ -1,11 +1,14 @@
+import { createHash } from "node:crypto";
 import { createTranslator, fr } from "@bgs/i18n";
-import type {
-  Block,
-  Institution,
-  Lang,
-  NewsArticle,
-  Procedure,
-  Translation,
+import {
+  correctedFacts,
+  type Block,
+  type Institution,
+  type Lang,
+  type NewsArticle,
+  type Procedure,
+  type StateService,
+  type Translation,
 } from "@bgs/shared-types";
 import { htmlToBlocks } from "../news/html-to-blocks";
 
@@ -20,7 +23,7 @@ export interface Passage {
   /** Content, language and position: stable while the content does not change. */
   id: string;
   contentId: string;
-  kind: "news-article" | "procedure";
+  kind: "news-article" | "procedure" | "service";
   lang: Lang;
   /** "official", or "reviewed" for a machine translation checked by a person. */
   status: Translation["status"];
@@ -187,6 +190,44 @@ function faqSections(procedure: Procedure): string[] {
   return procedure.faqs.map(({ question, answerHtml }) =>
     [question, ...paragraphsOf(answerHtml)].join("\n"),
   );
+}
+
+/**
+ * A government office of the map, verified in the console (AST-25): what a person
+ * asks for (where, when, how to call), in one passage. Its source is the
+ * OpenStreetMap object it comes from, dated by its verification; an office typed in
+ * the console has no public page to cite and stays out.
+ */
+export function servicePassages(service: StateService): Passage[] {
+  if (service.status !== "verified" || service.origin.kind !== "osm") {
+    return [];
+  }
+  const facts = correctedFacts(service);
+  const lines = [
+    `${facts.name} (${t(`nearMe.category.${facts.category}`)})`,
+    [facts.address, facts.town].filter((part) => part !== null).join(", "),
+    facts.openingHours === null ? "" : `${t("nearMe.hours")} : ${facts.openingHours}`,
+    facts.phone === null ? "" : `Téléphone : ${facts.phone}`,
+    facts.website === null ? "" : `${t("nearMe.website")} : ${facts.website}`,
+  ].filter((line) => line !== "");
+  const text = lines.join("\n");
+  const { osmType, osmId } = service.origin;
+  return [
+    {
+      id: `${service.id}:fr:0`,
+      contentId: service.id,
+      kind: "service",
+      lang: "fr",
+      status: "official",
+      title: facts.name,
+      sourceUrl: `https://www.openstreetmap.org/${osmType}/${String(osmId)}`,
+      publishedOn: service.reviewedAt?.slice(0, 10) ?? null,
+      contentHash: createHash("sha256").update(text).digest("hex"),
+      // Told to the model with the extract: an office of the map, not an article.
+      publisher: "Services de l'État vérifiés (carte de l'application)",
+      text,
+    },
+  ];
 }
 
 /** The sheet's facts and questions are in French, the language of e-senegal.sn. */
