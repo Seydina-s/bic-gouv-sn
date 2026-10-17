@@ -190,7 +190,10 @@ describe("the procedure sheets' translation runs (ML-14)", () => {
 });
 
 describe("checkSheet", () => {
-  const french = frenchSheet(procedure(1)) as SheetText;
+  const french = frenchSheet(procedure(1)) ?? ENGLISH_SHEET;
+  it("reads the French sheet as the source published it", () => {
+    expect(french).toMatchObject({ title: "Démarche fictive 1", eligibility: null });
+  });
   const reply = (changes: Partial<SheetText>) => JSON.stringify({ ...ENGLISH_SHEET, ...changes });
 
   it("keeps a sheet with the same fields, cleaned like the source", () => {
