@@ -25,6 +25,7 @@ Demande de l'utilisateur du 17/10/2026 : l'assistant refuse des questions simple
 3. **Une partie du périmètre n'est pas dans la base de l'assistant.** Elle ne contient que les articles, les fiches des démarches et les services vérifiés. Les pages de la DER (der.sn), les opportunités et l'aide de l'app n'y sont pas, alors que l'app les affiche.
 4. **Les 8 extraits donnés au modèle sont souvent plusieurs morceaux d'une même page** (jusqu'à 4 sur 8), donc peu de sources différentes.
 5. **Rien ne mesure si une réponse est juste et à jour.** Les jeux d'essai existants (72 questions de recherche, 21 pièges « zéro invention ») ne vérifient ni les actualités du jour, ni la DER, ni l'anglais ou le wolof. Ils ne mesurent pas non plus qu'une réponse cite la version la plus récente. Et les questions restées sans réponse chez les vrais utilisateurs ne sont pas relevées.
+6. **Les questions écrites comme on parle trouvent mal leur page.** Sur le jeu d'essai de la recherche (108 questions, mesure du 17/10 par les mots seuls), la bonne page est dans les 5 premières pour 98 % des questions écrites avec les mots de la source, mais seulement pour 70 % des questions de citoyens et 66 % des questions reformulées (« dernier cm », « kom on fait pr avoir un pasport », wolof). La reformulation en recherche française n'est faite que pour une question hors du français, ou dont aucun mot n'est connu.
 
 ## 3. Programme
 
@@ -37,6 +38,7 @@ Demande de l'utilisateur du 17/10/2026 : l'assistant refuse des questions simple
   - le reste : la recherche actuelle (mots et sens).
 - **Base complétée** : pages de la DER, opportunités ouvertes et aide de l'app (tirée des textes de l'app, rien d'inventé), chacune citée avec son lien. L'app apprend d'abord à afficher ces nouvelles sources (mise à jour à distance), puis l'API les envoie.
 - **Diversité des extraits** : au plus 2 morceaux par page parmi les 8.
+- **Reformulation systématique** (cause 6) : chaque question est aussi reformulée en recherche française claire avant la recherche (abréviations, fautes, wolof), par un petit modèle rapide. **Coût : un second appel court par question, ≈ + 20 à 30 % du coût d'une question** ; le plafond mensuel reste celui de la console. À valider avant d'être activé.
 
 ### Étape 2 — Mesurer en continu (coût à valider)
 
@@ -63,6 +65,7 @@ Chaque semaine, les refus relevés deviennent des cas du banc d'essai : une erre
 
 ## 4. Décisions attendues
 
-1. Lancer l'étape 1 (gratuite) : demandée le 17/10, **commencée**.
-2. Étape 2 : accord sur ≈ 4 à 5 $ par mois pour le banc d'essai hebdomadaire.
-3. Étape 3 : choix entre (a), (b) et (c).
+1. Lancer l'étape 1 (gratuite) : demandée le 17/10, **commencée** (actualités d'une période et diversité des extraits faites le 17/10, voir le backlog AST-30a).
+2. Reformulation systématique (≈ + 20 à 30 % par question) : accord ou non.
+3. Étape 2 : accord sur ≈ 4 à 5 $ par mois pour le banc d'essai hebdomadaire.
+4. Étape 3 : choix entre (a), (b) et (c).
