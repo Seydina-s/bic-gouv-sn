@@ -471,3 +471,10 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : `searchedLanguages` (`apps/api/src/assistant/retrieval.ts`) ne cherchait que dans la langue de la question, sauf pour le wolof, qui lit aussi le français. Une règle écrite pour deux langues (« le wolof est l'exception ») ; l'anglais, ajouté ensuite, cherchait dans des passages anglais qui n'existent pas encore.
 - **Correctif** : toute langue autre que le français lit aussi les pages françaises ; test qui échoue avec l'ancienne règle (vérifié).
 - **Prévention** : la règle « traitements écrits pour une seule source » (ERREURS-GLOBALES) vaut aussi pour les langues : à l'ajout d'une langue, chercher chaque test sur une langue (`=== "wo"`, `!== "fr"`) et l'écrire sur ce qui la distingue vraiment (ici : « pas le français »). Et poser une vraie question dans la nouvelle langue après chaque déploiement qui la touche.
+
+## 17/10/2026 — Rattrapage des voix presque arrêté : lectures orphelines sur le serveur
+
+- **Ce qui s'est passé** : le rattrapage français n'avançait plus depuis la veille au soir. Le serveur des voix faisait tourner quatre lectures à la fois sur quatre processeurs (charge 15), dont trois que personne ne relisait, et gardait 19 dossiers de travail.
+- **Cause racine** : chaque redémarrage local (déploiements du 16/10 au soir, relance de la nuit) arrête net le pilotage, mais la lecture qu'il a lancée sur le serveur continue seule (voulu, pour survivre à la veille de l'ordinateur) ; le nouveau pilotage en lançait une autre sans s'occuper des précédentes. Une coupure réseau passagère (« No route to host ») a d'abord fait croire à une panne.
+- **Correctif** : les trois lectures orphelines arrêtées et les dossiers supprimés (traitements du projet, aucun logiciel du serveur modifié) ; au démarrage, le pilotage arrête désormais les lectures laissées par une exécution précédente et supprime leurs dossiers (`clearLeftovers`, `apps/api/src/voices/remote-synthesizer.ts`), testé.
+- **Prévention** : règle globale « travail lancé à distance qui survit à son lanceur ».

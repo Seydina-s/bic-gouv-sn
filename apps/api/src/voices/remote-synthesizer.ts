@@ -63,6 +63,43 @@ const runProgram: Run = (program, args, input) =>
     child.stdin.end(input ?? "");
   });
 
+/** The options of every ssh call: batch mode, our key only, known server only. */
+function sshOptions(keyPath: string): string[] {
+  return [
+    "-i",
+    keyPath,
+    "-o",
+    "IdentitiesOnly=yes",
+    "-o",
+    "ConnectTimeout=30",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "-o",
+    "ServerAliveInterval=60",
+  ];
+}
+
+/**
+ * Stops the readings an earlier run left on the server, and removes their folders.
+ * A reading goes on by itself when this computer stops the command (a deploy, a
+ * restart): on 17/10/2026 four ran at once on four processors, none collected, and
+ * the catch-up barely moved. Called once when the command starts; one command at a
+ * time reads aloud. The pattern ([.]) never matches this shell's own command line.
+ */
+export async function clearLeftovers({
+  host,
+  keyPath,
+  run = runProgram,
+}: Pick<RemoteSynthesizerOptions, "host" | "keyPath" | "run">): Promise<string> {
+  return run("ssh", [
+    ...sshOptions(keyPath),
+    host,
+    "pkill -f 'synthesize[.]py /tmp/bgs-voices-'; rm -rf /tmp/bgs-voices-*; echo cleared",
+  ]);
+}
+
 export function remoteSynthesizer({
   host,
   keyPath,
@@ -80,20 +117,7 @@ export function remoteSynthesizer({
   // Batch mode: never a password prompt. The server's key must already be known
   // (first connection made by hand, docs/guides/creer-le-serveur-ia.md). Only our key
   // is offered: other keys tried first would count as failed logins on the server.
-  const options = [
-    "-i",
-    keyPath,
-    "-o",
-    "IdentitiesOnly=yes",
-    "-o",
-    "ConnectTimeout=30",
-    "-o",
-    "BatchMode=yes",
-    "-o",
-    "StrictHostKeyChecking=yes",
-    "-o",
-    "ServerAliveInterval=60",
-  ];
+  const options = sshOptions(keyPath);
   const ssh = (command: string, input?: string) => run("ssh", [...options, host, command], input);
 
   /** Copied next to its place, then moved: never a half file where the app looks. */

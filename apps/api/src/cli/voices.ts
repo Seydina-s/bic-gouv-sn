@@ -11,7 +11,7 @@ import type { Lang } from "@bgs/shared-types";
 import { loadConfig } from "../config";
 import { resolveDataPath } from "../data-path";
 import { pythonSynthesizer } from "../voices/python-synthesizer";
-import { remoteSynthesizer } from "../voices/remote-synthesizer";
+import { clearLeftovers, remoteSynthesizer } from "../voices/remote-synthesizer";
 import { allArticles, record, recordingsToMake } from "../voices/recordings";
 
 function option(name: string): string | null {
@@ -45,6 +45,10 @@ const serverKey = process.env["VOICES_SSH_KEY"];
 const onServer = serverHost !== undefined && serverKey !== undefined;
 
 try {
+  if (onServer) {
+    // Readings an earlier run left behind would share the server with this one.
+    await clearLeftovers({ host: serverHost, keyPath: serverKey });
+  }
   const todo = recordingsToMake(await allArticles(articles), langs, limit);
   say(
     `Enregistrements à faire : ${String(todo.length)}${onServer ? " (sur le serveur des voix)" : ""}`,
