@@ -1,6 +1,22 @@
 # STATUS — Bic Gouv SN
 
-**Dernière mise à jour** : 17/10/2026 (7 h) · **Mode** : autonome jusqu'au 17/10 à 14 h (demande de l'utilisateur). Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md` (points 50, 52 à 56, 59 à 61).
+**Dernière mise à jour** : 17/10/2026 (23 h) · **Mode** : standard. Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md` (points 50, 52 à 56, 64).
+
+## 17/10, après-midi et soir, en bref : traductions faites, assistant mesuré et amélioré
+- **Traductions (≈ 101 $ en tout)** : articles depuis le 02/04/2024, environ 3 370 en anglais et 2 615 en wolof ; fiches des démarches, 714 en anglais et 711 en wolof ; tout en « traduction automatique ». Restent en français : 27 refus des contrôles et 4 articles wolof trop longs pour une réponse (ML-12c, à traduire par morceaux).
+- **Défauts trouvés et corrigés en route** : collecte qui réécrivait 56 Mo par article (#379), réponses wolof écartées à tort après l'anglais (#380, relues sans surcoût), place trop courte pour le wolof long (#382), crédit Anthropic épuisé (rechargé par l'utilisateur, l'erreur affiche désormais le motif, #378).
+- **Autres corrections** : section DER revenue (filtre public, #376) ; panneau « Près de moi » replié par un toucher en dehors (#376). La transition entre thèmes est en pause (décision de l'utilisateur).
+- **Programme de l'assistant (`docs/cadrage/assistant-fiabilite.md`)** :
+  - actualités d'une période (#377) ;
+  - reformulation de chaque question (#384) ;
+  - banc d'essai hebdomadaire avec faiblesses connues (#385, `pnpm --filter @bgs/api assistant:bench`, `--weaknesses` pour un contrôle rapide) ;
+  - périmètre (#386) ;
+  - aiguillage des démarches (#387) ;
+  - banc plus juste et services sans adresse montrés sur la carte (#388) ;
+  - lexique des mots courants et réponses partielles (#389).
+  
+  Premier banc : 71 sur 92 (77 %). Contrôle des faiblesses et pièges : 51 % → 64 % → 83 %, aucune réponse inventée, 12 faiblesses restantes.
+- **Prochaines étapes** : AST-30f (lancement automatique chaque semaine et résultats dans la console) ; faiblesses restantes (visa Canada, Ankara, « c ki le premier ministre », liste des ministères) ; point 64 (relevé des questions sans réponse) à trancher par l'utilisateur.
 
 ## 17/10, nuit et matin, en bref : démarches dans la langue choisie
 - **Livré et déployé** : #367 (lectures orphelines arrêtées sur le serveur des voix), #368 (fondu clair ↔ sombre qui couvre aussi les Réglages, publié à 1 h 54), #369 et #370 (l'assistant cite les services de l'État vérifiés), #371 (limite de 10 min à la vérification nocturne des retraits, qui avait bloqué la collecte 2 h 30), #372 à #374 (ci-dessous). Déploiement local unique à 6 h 43, vérifié en réel.
