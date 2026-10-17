@@ -25,7 +25,18 @@ const PAGE_SIZE = 200;
  * tokens written are paid: the margin costs nothing.
  */
 export function outputTokensFor(frenchCharacters: number, perCharacter = 1.2): number {
-  return Math.min(32_000, Math.max(2048, Math.ceil(frenchCharacters * perCharacter) + 1000));
+  return Math.min(
+    MAX_OUTPUT_TOKENS,
+    Math.max(2048, Math.ceil(frenchCharacters * perCharacter) + 1000),
+  );
+}
+
+/** The model's own limit on a reply; the longest articles reach it in Wolof. */
+const MAX_OUTPUT_TOKENS = 64_000;
+
+/** Whether the translation of a text this long fits in one reply, with its room. */
+export function fitsOneReply(frenchCharacters: number, perCharacter: number): boolean {
+  return Math.ceil(frenchCharacters * perCharacter) + 1000 <= MAX_OUTPUT_TOKENS;
 }
 
 export async function allArticles(articles: ArticleRepository): Promise<NewsArticle[]> {
@@ -67,11 +78,16 @@ function articleKind(
       const french = target.toTranslate(article);
       return french === null ? null : { title: french.title, bodyHtml: french.bodyHtml };
     },
-    waiting: (all, since) => articlesToTranslate(all, since, target.toTranslate),
+    // An article whose translation cannot fit in one reply is never sent: it would be
+    // paid, cut short and refused (17/10/2026: up to 117 000 characters).
+    waiting: (all, since) =>
+      articlesToTranslate(all, since, target.toTranslate).filter((article) =>
+        fitsOneReply(target.toTranslate(article)?.bodyHtml.length ?? 0, target.room),
+      ),
     system: (all) => target.system(all),
     request: (french) => ({
       user: translationRequest(french),
-      maxOutputTokens: outputTokensFor(french.bodyHtml.length),
+      maxOutputTokens: outputTokensFor(french.bodyHtml.length, target.room),
     }),
     check: (french, reply) => {
       const checked = checkTranslation(french, reply);
