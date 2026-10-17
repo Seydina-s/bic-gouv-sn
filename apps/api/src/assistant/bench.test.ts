@@ -44,8 +44,11 @@ const PAGES = [
   page(4, "news-article", "Ancien conseil fictif", "2026-09-30", "conseil-des-ministres"),
   page(5, "procedure", "Demander un document fictif", null),
   page(6, "procedure", "Liste fictive", null),
-  page(7, "service", "Préfecture fictive de Dakar", null),
-  page(8, "service", "Gendarmerie", null),
+  {
+    ...page(7, "service", "Préfecture fictive", null),
+    text: "Préfecture fictive\nRue fictive, Dakar",
+  },
+  { ...page(8, "service", "Gendarmerie", null), text: "Gendarmerie\nsans adresse" },
 ];
 
 function answered(urls: string[], dates: (string | null)[] = []): GroundedAnswer {
@@ -83,7 +86,7 @@ describe("the bench's questions", () => {
       "Comment demander un document fictif ?",
     ]);
     expect(cases.find((c) => c.kind === "service")?.question).toBe(
-      "Où se trouve Préfecture fictive de Dakar ?",
+      "Où se trouve Préfecture fictive à Dakar ?",
     );
   });
 
@@ -144,6 +147,50 @@ describe("a bench verdict", () => {
       judgeBench(news, answered(["u"], [TODAY])),
     ];
     expect(summarizeBench(verdicts)).toMatchObject({ cases: 2, passed: 1, invented: 1 });
+  });
+});
+
+describe("a fair verdict", () => {
+  it("takes a newer page as right for a question about the latest", () => {
+    const set = [
+      {
+        question: "Qu'a dit le dernier Conseil des ministres ?",
+        style: "citizen" as const,
+        lang: "fr" as const,
+        expected: ["https://www.presidence.sn/fr/test-4"],
+      },
+      {
+        question: "Question fictive sans date",
+        style: "citizen" as const,
+        lang: "fr" as const,
+        expected: ["https://www.presidence.sn/fr/test-4"],
+      },
+    ];
+    const both = [
+      ...retrievalCases(set, TODAY, () => "2026-09-30"),
+      ...retrievalCases(set, "2026-10-24", () => "2026-09-30"),
+    ];
+    const latest = both.find((c) => c.question.startsWith("Qu'a dit"));
+    const plain = both.find((c) => c.question.startsWith("Question fictive"));
+    expect(latest?.orNewerThan).toBe("2026-09-30");
+    expect(plain?.orNewerThan).toBeUndefined();
+    const newer = answered(["https://www.presidence.sn/fr/test-3"], ["2026-10-14"]);
+    expect(latest === undefined ? null : judgeBench(latest, newer).passed).toBe(true);
+    expect(plain === undefined ? null : judgeBench(plain, newer).passed).toBe(false);
+  });
+
+  it("judges a known weakness as the bench judges it today", () => {
+    const old: BenchCase = {
+      id: "same",
+      kind: "search-citizen",
+      question: "dernier cm",
+      lang: "fr",
+      accepted: ["answered"],
+      sources: ["https://x/old"],
+    };
+    const today: BenchCase = { ...old, orNewerThan: "2026-09-30" };
+    const weakness = { case: old, since: TODAY, reason: "", passedInARow: 0 };
+    expect(weaknessCases([weakness], [], [today])).toEqual([today]);
   });
 });
 
