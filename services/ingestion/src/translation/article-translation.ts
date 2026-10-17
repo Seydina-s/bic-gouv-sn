@@ -1,7 +1,11 @@
 import type { ArticleRepository } from "@bgs/content-store";
 import type { NewsArticle, Translation } from "@bgs/shared-types";
 import { articleContentHash } from "../merge";
-import { BatchTranslation, type BatchTranslationOptions, type TranslatedKind } from "./batch-translation";
+import {
+  BatchTranslation,
+  type BatchTranslationOptions,
+  type TranslatedKind,
+} from "./batch-translation";
 import { checkTranslation } from "./translation-check";
 import type { TranslationTarget } from "./targets";
 import { articlesToTranslate } from "./wolof-candidates";

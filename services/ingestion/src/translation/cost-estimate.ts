@@ -48,7 +48,9 @@ export function estimateCost(
   const inputTokens = Math.ceil(
     sizes.length * systemTokens + frenchCharacters / FRENCH_CHARACTERS_PER_TOKEN,
   );
-  const outputTokens = Math.ceil((frenchCharacters * output.lengthRatio) / output.charactersPerToken);
+  const outputTokens = Math.ceil(
+    (frenchCharacters * output.lengthRatio) / output.charactersPerToken,
+  );
   const dollars = Object.fromEntries(
     models.map((model) => {
       const price = BATCH_PRICES[model];

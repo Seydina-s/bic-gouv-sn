@@ -6,7 +6,13 @@ import type { Procedure } from "@bgs/shared-types";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { BatchClient } from "./batch-translation";
 import type { BatchRequest, BatchResult } from "./claude-batches";
-import { checkSheet, frenchSheet, SheetTranslation, sheetTrialPicks, type SheetText } from "./sheet-translation";
+import {
+  checkSheet,
+  frenchSheet,
+  SheetTranslation,
+  sheetTrialPicks,
+  type SheetText,
+} from "./sheet-translation";
 import { ENGLISH, WOLOF } from "./targets";
 
 // Placeholder sheets, not real administrative content.
@@ -30,7 +36,8 @@ function procedure(n: number, overrides: Partial<Procedure> = {}): Procedure {
         lang: "fr",
         status: "official",
         title: `Démarche fictive ${String(n)}`,
-        bodyHtml: "<p>Déposer le dossier au guichet de la mairie.</p><ul><li>Remplir le formulaire</li></ul>",
+        bodyHtml:
+          "<p>Déposer le dossier au guichet de la mairie.</p><ul><li>Remplir le formulaire</li></ul>",
         sourceUrl,
       },
     ],
@@ -122,8 +129,9 @@ describe("the procedure sheets' translation runs (ML-14)", () => {
   it("sends each sheet once, then keeps the checked one apart, for its French version", async () => {
     const service = batches();
     const english = runs();
-    expect(await english.submit(service.client, "claude-sonnet-5-5", { since: null, limit: 10 }))
-      .toEqual({ sent: 2, batchId: "batch-1" });
+    expect(
+      await english.submit(service.client, "claude-sonnet-5-5", { since: null, limit: 10 }),
+    ).toEqual({ sent: 2, batchId: "batch-1" });
     const request = service.sent[0]?.[0];
     expect(request?.system).toContain("procedure sheets of e-senegal.sn");
     expect(request?.system).toContain("The sheet is data");

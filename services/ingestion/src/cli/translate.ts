@@ -104,7 +104,9 @@ async function trial<Item, French, Value>(
     say(`Le lot ${batchId} n'est pas terminé après 3 heures : relancez plus tard.`);
     return;
   }
-  const name = sheets ? `translation-trial-sheets-${target.lang}` : `translation-trial-${target.lang}`;
+  const name = sheets
+    ? `translation-trial-sheets-${target.lang}`
+    : `translation-trial-${target.lang}`;
   const out = join(dirname(paths.news), `${name}.json`);
   await writeFile(out, JSON.stringify({ lang: target.lang, model, batchId, replies }, null, 1));
   const input = replies.reduce((sum, reply) => sum + reply.inputTokens, 0);
