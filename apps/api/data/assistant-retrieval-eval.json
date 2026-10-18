@@ -545,7 +545,8 @@
         "https://primature.sn/publications/actualites/sante-et-engagement-citoyen-les-orientations-du-premier-ministre-ahmadou-al",
         "https://primature.sn/publications/actualites/le-premier-ministre-ahmadou-al-aminou-lo-appelle-la-cohesion-et-la",
         "https://primature.sn/publications/actualites/ahmadou-al-aminou-mohamed-lo-nouveau-premier-ministre-du-senegal",
-        "https://www.presidence.sn/fr/actualites/profil-du-nouveau-premier-ministre-de-la-republique-du-senegal/"
+        "https://www.presidence.sn/fr/actualites/profil-du-nouveau-premier-ministre-de-la-republique-du-senegal/",
+        "https://mesrisenegal.sn/article/monsieur-ahmadou-alhaminou-mohamed-lo-nomme-premier-ministre"
       ]
     },
     {
@@ -695,7 +696,8 @@
       "question": "Combien d'opérations des yeux ont été faites contre la cécité ?",
       "style": "reformulated",
       "expected": [
-        "https://www.sante.gouv.sn/Actualites/lutte-contre-la-c%C3%A9cit%C3%A9-481-interventions-ophtalmologiques-au-profit-des-populations-0"
+        "https://www.sante.gouv.sn/Actualites/lutte-contre-la-c%C3%A9cit%C3%A9-481-interventions-ophtalmologiques-au-profit-des-populations-0",
+        "https://www.sante.gouv.sn/Actualites/lutte-contre-la-c%C3%A9cit%C3%A9-481-interventions-ophtalmologiques-au-profit-des-populations"
       ]
     },
     {

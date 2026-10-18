@@ -6,6 +6,7 @@ import {
   isClaudeOutage,
   noThinkingFirst,
   costOf,
+  steadyAnswers,
 } from "./claude-provider";
 
 const request = { system: "Rules", user: "Question", maxOutputTokens: 400 };
@@ -19,6 +20,16 @@ describe("noThinkingFirst", () => {
     expect(noThinkingFirst("claude-haiku-4-5-20251001")).toEqual({ type: "disabled" });
     expect(noThinkingFirst("claude-haiku-5-5")).toEqual({ type: "disabled" });
     expect(noThinkingFirst("claude-sonnet-5-5")).toEqual({ type: "between_tools" });
+  });
+});
+
+describe("steadyAnswers", () => {
+  it("asks temperature 0 only of the models that accept it", () => {
+    expect(steadyAnswers("claude-haiku-4-5-20251001")).toEqual({ temperature: 0 });
+    // The 5 family refuses any temperature: sending one would stop the assistant.
+    expect(steadyAnswers("claude-sonnet-5-5")).toEqual({});
+    expect(steadyAnswers("claude-haiku-5-5")).toEqual({});
+    expect(steadyAnswers("claude-opus-4-7")).toEqual({});
   });
 });
 
@@ -56,6 +67,8 @@ describe("the Claude provider", () => {
       max_tokens: 400,
       messages: [{ role: "user", content: "Question" }],
       thinking: { type: "disabled" },
+      // Haiku 4.5, the French model: steady answers.
+      temperature: 0,
     });
     expect(body["system"]).toEqual([
       { type: "text", text: "Rules", cache_control: { type: "ephemeral" } },
