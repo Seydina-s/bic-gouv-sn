@@ -53,6 +53,8 @@ const OFFICIAL_WORDS: Readonly<Record<string, string>> = {
   brevet: "brevet d'invention",
   papiers: "pièces à fournir",
   loyer: "bail",
+  handicap: "carte d'égalité des chances",
+  handicape: "carte d'égalité des chances",
 };
 
 /** Lower case, without accents or apostrophes: how shortcuts are looked up. */

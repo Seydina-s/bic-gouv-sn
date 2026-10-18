@@ -662,7 +662,7 @@ export const adminFr = {
     remaining: "Questions restantes",
     cost: "Coût estimé",
     costHelp:
-      "Estimation au tarif de chaque modèle utilisé (Claude Sonnet 5.5 : 2 $ par million de jetons lus, 10 $ par million de jetons écrits ; un jeton est un morceau de mot). Le montant exact figure sur la facture d'Anthropic.",
+      "Estimation au tarif de chaque modèle utilisé : Claude Haiku 4.5 pour le français et l'anglais (1 $ par million de jetons lus, 5 $ par million de jetons écrits), Claude Sonnet 5.5 pour le wolof (2 $ et 10 $). Un jeton est un morceau de mot. Le montant exact figure sur la facture d'Anthropic.",
     average: "Coût moyen d'une question",
     noQuestion: "Aucune question ce mois-ci.",
     limit: "Limite mensuelle de questions",
