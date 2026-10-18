@@ -102,6 +102,23 @@ const CURRENT = [
   " ministeres ",
 ];
 
+/**
+ * Questions about the government as it is made up now: only its newest composition
+ * answers (bench of 17/10/2026: "Quels sont les ministères du gouvernement ?" cited
+ * the list of September 2025, the government of 1 June 2026 being the current one).
+ */
+const COMPOSITION = [
+  " composition ",
+  " membres du gouvernement ",
+  " ministres du gouvernement ",
+  " ministeres du gouvernement ",
+  " liste des ministres ",
+  " liste du gouvernement ",
+  " combien de ministres ",
+  " nouveau gouvernement ",
+  " gouvernement actuel ",
+];
+
 const SECTIONS: readonly [string, string][] = [
   [" conseil des ministres ", "conseil-des-ministres"],
   [" conseil de ministres ", "conseil-des-ministres"],
@@ -155,6 +172,8 @@ export interface QuestionIntent {
   recent: boolean;
   /** The question is about who holds a post, or how things stand now. */
   current: boolean;
+  /** The question is about the government's composition: its newest one only. */
+  composition: boolean;
   /** The section the question names, if it names one. */
   section: string | null;
   /** The institution the question names, as the passages name it; null if none. */
@@ -187,6 +206,7 @@ export function questionIntent(question: string): QuestionIntent {
   return {
     recent: RECENT.some((cue) => text.includes(cue)),
     current: CURRENT.some((cue) => text.includes(cue)),
+    composition: COMPOSITION.some((cue) => text.includes(cue)),
     section: SECTIONS.find(([cue]) => text.includes(cue))?.[1] ?? null,
     publisher: namedPublisher(text),
     members: membersNamed(text).map(({ name, post }) => ({ name, post })),
@@ -208,6 +228,10 @@ function freshness(publishedOn: string | null, today: string, intent: QuestionIn
   const days = Math.max(0, (Date.parse(today) - Date.parse(publishedOn)) / DAY_MS);
   if (intent.recent) {
     return 3 * Math.exp(-days / 10);
+  }
+  // A composition months old is no longer the government: the newest weighs most.
+  if (intent.composition) {
+    return 8 * Math.exp(-days / 60);
   }
   return intent.current ? 2 * Math.exp(-days / 120) : 0.15 * Math.exp(-days / 365);
 }
@@ -274,8 +298,44 @@ function newestNamingMembers(index: PassageIndex, lang: Lang, intent: QuestionIn
 }
 
 /** The newest articles of the section or institution named, for a news question. */
+/** Words of a title announcing the government's composition. */
+const COMPOSITION_TITLE = /\bgouvernement\b/;
+const COMPOSITION_KIND = /\b(composition|liste|membres)\b/;
+/** Pieces of the newest composition given: enough for its list of ministries. */
+const COMPOSITION_PIECES = 4;
+
+/**
+ * The newest article announcing the government's composition, from its opening: its
+ * title shares few words with "Quels sont les ministères ?" and the search alone
+ * found an older one (bench of 17/10/2026).
+ */
+function newestComposition(index: PassageIndex, lang: Lang): Passage[] {
+  const announcing = index
+    .search("composition liste membres nouveau gouvernement", { lang, limit: 200 })
+    .map(({ passage }) => passage)
+    .filter((passage) => {
+      const title = folded(passage.title);
+      return (
+        passage.kind === "news-article" &&
+        COMPOSITION_TITLE.test(title) &&
+        COMPOSITION_KIND.test(title)
+      );
+    })
+    .sort(byNewest);
+  const newest = announcing[0];
+  return newest === undefined
+    ? []
+    : announcing
+        .filter((passage) => passage.contentId === newest.contentId)
+        .sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }))
+        .slice(0, COMPOSITION_PIECES);
+}
+
 function newestNamed(index: PassageIndex, lang: Lang, intent: QuestionIntent): Passage[] {
   return searchedLanguages(lang).flatMap((searched) => {
+    if (intent.composition) {
+      return newestComposition(index, searched);
+    }
     if (intent.section !== null) {
       return index.latest({ lang: searched, section: intent.section, contents: 1, perContent: 4 });
     }
