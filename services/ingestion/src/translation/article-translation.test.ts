@@ -194,6 +194,42 @@ describe("the Wolof translation runs", () => {
     }
   });
 
+  it("translates an article too long for one reply in parts, joined back and checked whole", async () => {
+    // ML-12c: up to 117 000 characters; here 700 paragraphs, about 42 000.
+    const long = article(9, "2025-12-15");
+    const translations = [
+      { ...long.translations[0], bodyHtml: FRENCH.repeat(700) },
+    ] as NewsArticle["translations"];
+    await articles.save({
+      ...long,
+      translations,
+      contentHash: articleContentHash(translations, long.sourcePublishedOn, long.category),
+    });
+    // Each part comes back with as many paragraphs as it was sent.
+    const inParts = batches((request) => {
+      const sent = JSON.parse(request.user.slice("<article>".length, -"</article>".length)) as {
+        bodyHtml: string;
+      };
+      const paragraphs = sent.bodyHtml.split("</p>").length - 1;
+      return replyWith(
+        JSON.stringify({ title: "Tur bu fictif", bodyHtml: WOLOF.repeat(paragraphs) }),
+      )(request);
+    });
+    await translation.submit(inParts.client, "claude-sonnet-5-5", {
+      since: "2025-12-01",
+      limit: 10,
+    });
+    const ids = inParts.sent[0]?.map((request) => request.customId) ?? [];
+    expect(ids.length).toBeGreaterThan(1);
+    expect(ids.every((id) => id.startsWith(`${idOf(9)}_part`))).toBe(true);
+    expect(inParts.sent[0]?.every((request) => request.maxOutputTokens <= 64_000)).toBe(true);
+    inParts.end();
+    expect(await translation.collect(inParts.client)).toMatchObject({ saved: 1, refused: {} });
+    const wolof = (await articles.get(idOf(9)))?.translations.find((t) => t.lang === "wo");
+    expect(wolof?.title).toBe("Tur bu fictif");
+    expect(wolof?.bodyHtml.split("</p>").length).toBe(701);
+  });
+
   it("saves the translations of a run together, not one write per article", async () => {
     const service = batches(translated);
     await translation.submit(service.client, "claude-sonnet-5-5", { since: null, limit: 10 });

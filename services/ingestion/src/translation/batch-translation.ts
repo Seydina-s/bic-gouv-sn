@@ -2,6 +2,7 @@ import { type JsonDocument, TypedDocument } from "@bgs/content-store";
 import { z } from "zod";
 import type { BatchRequest, BatchResult, BatchStatus } from "./claude-batches";
 import { estimateCost, type CostEstimate, type OutputSize } from "./cost-estimate";
+import { joinParts, partId } from "./parts";
 import type { TranslationRefusal } from "./translation-check";
 
 /*
@@ -52,6 +53,10 @@ export interface TranslatedKind<Item, French, Value> {
   system(all: readonly Item[]): string;
   /** The item as data, and room for its translation. */
   request(french: French): { user: string; maxOutputTokens: number };
+  /** An item too long for one reply, in parts (one request each); `request` by default. */
+  requests?(french: French): { user: string; maxOutputTokens: number }[];
+  /** The texts of an item's parts joined into one reply; null when they cannot be. */
+  mergeParts?(texts: readonly string[]): string | null;
   check(french: French, reply: string): Checked<Value>;
   /** Saves the translations of a group of items at once. */
   saveAll(translated: readonly { item: Item; value: Value }[]): Promise<void>;
@@ -184,7 +189,7 @@ export class BatchTranslation<Item, French, Value> {
       return null;
     }
     const replies: TrialReply<French, Value>[] = [];
-    for (const result of await client.results(resultsUrl)) {
+    for (const result of await this.resultsOf(client, resultsUrl)) {
       const item = await this.kind.get(result.customId);
       const french = item === null ? null : this.kind.french(item);
       if (french === null) {
@@ -216,15 +221,28 @@ export class BatchTranslation<Item, French, Value> {
     return replies;
   }
 
-  /** One request per item: the kind's fixed rules, then the item as data. */
+  /** One request per item, or per part of a long one: the fixed rules, then the item. */
   private requestsFor(chosen: readonly Item[], all: readonly Item[]): BatchRequest[] {
     const system = this.kind.system(all);
     return chosen.flatMap((item): BatchRequest[] => {
       const french = this.kind.french(item);
-      return french === null
-        ? []
-        : [{ customId: this.kind.id(item), system, ...this.kind.request(french) }];
+      if (french === null) {
+        return [];
+      }
+      const parts = this.kind.requests?.(french) ?? [this.kind.request(french)];
+      return parts.map((part, index) => ({
+        customId: partId(this.kind.id(item), index, parts.length),
+        system,
+        ...part,
+      }));
     });
+  }
+
+  /** A batch's results, the parts of a long item joined back into one. */
+  private async resultsOf(client: BatchClient, resultsUrl: string): Promise<BatchResult[]> {
+    return joinParts(await client.results(resultsUrl), (texts) =>
+      this.kind.mergeParts === undefined ? null : this.kind.mergeParts(texts),
+    );
   }
 
   /** Saves what the ended runs translated; runs still being processed are left for later. */
@@ -246,7 +264,7 @@ export class BatchTranslation<Item, French, Value> {
         continue;
       }
       let group: { item: Item; value: Value }[] = [];
-      for (const result of await client.results(resultsUrl)) {
+      for (const result of await this.resultsOf(client, resultsUrl)) {
         const checked = await this.apply(run, result, report);
         if (checked !== null) {
           group.push(checked);

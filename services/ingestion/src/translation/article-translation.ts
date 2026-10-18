@@ -1,12 +1,13 @@
 import type { ArticleRepository } from "@bgs/content-store";
 import type { NewsArticle, Translation } from "@bgs/shared-types";
+import { z } from "zod";
 import { articleContentHash } from "../merge";
 import {
   BatchTranslation,
   type BatchTranslationOptions,
   type TranslatedKind,
 } from "./batch-translation";
-import { checkTranslation } from "./translation-check";
+import { checkTranslation, readJsonReply } from "./translation-check";
 import type { TranslationTarget } from "./targets";
 import { articlesToTranslate } from "./wolof-candidates";
 import { translationRequest } from "./wolof-prompt";
@@ -38,6 +39,39 @@ const MAX_OUTPUT_TOKENS = 64_000;
 export function fitsOneReply(frenchCharacters: number, perCharacter: number): boolean {
   return Math.ceil(frenchCharacters * perCharacter) + 1000 <= MAX_OUTPUT_TOKENS;
 }
+
+/** The blocks of a text, each closed: a paragraph, a heading, a list, a quote, a table. */
+const BLOCK_END = /<\/(?:p|h[1-6]|ul|ol|blockquote|table|figure)>/gi;
+
+/**
+ * The text cut between blocks into parts that each fit in one reply, with a margin
+ * (ML-12c): never inside a paragraph or a list.
+ */
+export function partsOf(bodyHtml: string, perCharacter: number): string[] {
+  const limit = Math.floor(((MAX_OUTPUT_TOKENS - 1000) / perCharacter) * 0.8);
+  const blocks: string[] = [];
+  let start = 0;
+  for (const match of bodyHtml.matchAll(BLOCK_END)) {
+    const end = match.index + match[0].length;
+    blocks.push(bodyHtml.slice(start, end));
+    start = end;
+  }
+  if (start < bodyHtml.length) {
+    blocks.push(bodyHtml.slice(start));
+  }
+  const parts: string[] = [];
+  for (const block of blocks) {
+    const last = parts.at(-1);
+    if (last !== undefined && last.length + block.length <= limit) {
+      parts[parts.length - 1] = last + block;
+    } else {
+      parts.push(block);
+    }
+  }
+  return parts.filter((part) => part.trim() !== "");
+}
+
+const partReplySchema = z.object({ title: z.string(), bodyHtml: z.string() });
 
 export async function allArticles(articles: ArticleRepository): Promise<NewsArticle[]> {
   const all: NewsArticle[] = [];
@@ -78,17 +112,37 @@ function articleKind(
       const french = target.toTranslate(article);
       return french === null ? null : { title: french.title, bodyHtml: french.bodyHtml };
     },
-    // An article whose translation cannot fit in one reply is never sent: it would be
-    // paid, cut short and refused (17/10/2026: up to 117 000 characters).
-    waiting: (all, since) =>
-      articlesToTranslate(all, since, target.toTranslate).filter((article) =>
-        fitsOneReply(target.toTranslate(article)?.bodyHtml.length ?? 0, target.room),
-      ),
+    // An article too long for one reply goes in parts (requests, below).
+    waiting: (all, since) => articlesToTranslate(all, since, target.toTranslate),
     system: (all) => target.system(all),
     request: (french) => ({
       user: translationRequest(french),
       maxOutputTokens: outputTokensFor(french.bodyHtml.length, target.room),
     }),
+    // Too long for one reply: in parts, each with the title, joined back after.
+    requests: (french) =>
+      fitsOneReply(french.bodyHtml.length, target.room)
+        ? [
+            {
+              user: translationRequest(french),
+              maxOutputTokens: outputTokensFor(french.bodyHtml.length, target.room),
+            },
+          ]
+        : partsOf(french.bodyHtml, target.room).map((bodyHtml) => ({
+            user: translationRequest({ title: french.title, bodyHtml }),
+            maxOutputTokens: outputTokensFor(bodyHtml.length, target.room),
+          })),
+    mergeParts: (texts) => {
+      const parts = texts.map((text) => readJsonReply(text, partReplySchema));
+      const first = parts[0];
+      if (first === undefined || first === null || parts.some((part) => part === null)) {
+        return null;
+      }
+      return JSON.stringify({
+        title: first.title,
+        bodyHtml: parts.map((part) => part?.bodyHtml ?? "").join(""),
+      });
+    },
     check: (french, reply) => {
       const checked = checkTranslation(french, reply);
       return checked.ok
