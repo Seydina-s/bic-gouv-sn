@@ -74,6 +74,7 @@ describe("the question's intent", () => {
       members: [],
       period: null,
       procedure: false,
+      composition: false,
     });
     expect(questionIntent("Qu'a dit le dernier Conseil des ministres ?")).toMatchObject({
       recent: true,
@@ -87,6 +88,7 @@ describe("the question's intent", () => {
       members: [],
       period: null,
       procedure: true,
+      composition: false,
     });
   });
 
@@ -256,6 +258,32 @@ describe("the extracts given to the model", () => {
     const question = "Je ne veux pas de la succession de mon père, comment la refuser ?";
     expect(questionIntent(question).procedure).toBe(true);
     expect(retrievePassages(crowded, question, "fr", TODAY)[0]?.contentId).toBe("content-30");
+  });
+
+  it("bring the newest composition of the government for a question about it", () => {
+    // Bench of 17/10/2026: the list of September 2025 was cited, not the government of June 2026.
+    const titled = (n: number, date: string, title: string, text: string): Passage => ({
+      ...passage(n, date, "actualites", text),
+      title,
+    });
+    const governments = new PassageIndex([
+      titled(
+        40,
+        "2025-09-06",
+        "Liste complète des membres du nouveau gouvernement.",
+        "Ministère fictif des ministères, ministres fictifs.",
+      ),
+      titled(
+        41,
+        "2026-06-01",
+        "Composition du nouveau Gouvernement",
+        "Les membres fictifs du Gouvernement.",
+      ),
+      titled(42, "2026-06-02", "Le gouvernement fictif visite un marché", "Une visite fictive."),
+    ]);
+    const question = "Quels sont les ministères du gouvernement ?";
+    expect(questionIntent(question).composition).toBe(true);
+    expect(retrievePassages(governments, question, "fr", TODAY)[0]?.contentId).toBe("content-41");
   });
 
   it("give at most two pieces of a page found by the search", () => {
