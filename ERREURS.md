@@ -507,3 +507,10 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : une réponse n'est gardée que si l'article est encore dans la version envoyée, et cette version était l'empreinte de tout l'article, traductions automatiques comprises. L'anglais, collecté juste avant, a ajouté une traduction à chaque article et changé toutes les empreintes. Deux langues traduites en même temps s'invalidaient l'une l'autre ; les tests ne collectaient jamais deux langues à la suite.
 - **Correctif** : l'empreinte retenue ne porte que sur les versions officielles (`officialFingerprint`, `services/ingestion/src/translation/article-translation.ts`), l'ancienne reste acceptée pour les lots déjà envoyés, et `--recollect` relit tous les lots des 29 derniers jours (réponses gardées par le fournisseur : rien n'est payé deux fois). Test : anglais collecté puis wolof, les deux enregistrés ; il échoue avec l'ancienne règle (vérifié).
 - **Prévention** : règle globale « empreinte qui couvre ce qu'on y ajoute ».
+
+## 22/10/2026 — Voix anglaise sautée par un redéploiement
+
+- **Ce qui s'est passé** : la chaîne des voix (français, puis anglais, puis wolof) tourne dans une boucle `for lang in fr en wo`. Le redéploiement de 17 h 09 a arrêté l'enregistrement en cours (anglais, 3 376 à faire) mais pas la boucle : celle-ci a pris l'arrêt pour une fin et lancé le wolof. Sans contrôle, l'anglais n'aurait été repris qu'au redéploiement suivant, et jamais si aucun n'avait suivi.
+- **Cause racine** : `deploy.sh` arrêtait les processus par leur commande (`voices:record`), pas leur parent. Une boucle qui enchaîne des étapes passe à la suivante quand l'étape en cours est tuée.
+- **Correctif** : `deploy.sh` (dans `C:\Users\HP\bgs-ops`) arrête d'abord la boucle, puis l'enregistrement ; `services.sh` relance la chaîne complète, qui reprend où elle s'était arrêtée (le français déjà fait ne coûte qu'une vérification). Chaîne relancée à 17 h 10, vérifiée dans les journaux.
+- **Prévention** : règle globale « arrêter une chaîne par son parent ».
