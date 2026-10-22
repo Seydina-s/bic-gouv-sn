@@ -15,20 +15,28 @@ export interface HeroCarouselProps {
   onPress: (id: string) => void;
 }
 
+/** After the reader swiped, the story chosen stays this many times longer. */
+export const DWELL_AFTER_SWIPE = 2;
+
+/** How long a story stays before the next one: longer for the one the reader chose. */
+export function dwellOf(base: number, chosenByReader: boolean): number {
+  return chosenByReader ? base * DWELL_AFTER_SWIPE : base;
+}
+
 /**
  * "À la une": the newest pictured stories take turns every few seconds, sliding
- * sideways. Swipeable at any time. Turning stops while a finger is on it, off screen,
- * and for good once the reader swipes it (the swipe is the pause of WCAG 2.2.2: the
- * owner removed the pause button on 14/10/2026), with "reduce motion" or a screen
- * reader: the stories then stay reachable by swiping.
+ * sideways. Swipeable at any time. Turning waits while a finger is on it and off
+ * screen; after a swipe it goes on from the story chosen, which stays twice as long
+ * (owner's request of 22/10/2026: a swipe used to stop it for good). It does not turn
+ * with "reduce motion" or a screen reader: the stories then stay reachable by swiping.
  */
 export function HeroCarousel({ stories, width, lastOpened, onPress }: HeroCarouselProps) {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const list = useRef<FlatList<NewsSummary>>(null);
   const [index, setIndex] = useState(0);
-  /** The reader swiped: the stories no longer turn by themselves. */
-  const [swiped, setSwiped] = useState(false);
+  /** The story shown was chosen by the reader's swipe: it stays longer. */
+  const [chosen, setChosen] = useState(false);
   const [touching, setTouching] = useState(false);
   const reduceMotion = useReduceMotion();
   const screenReader = useScreenReader();
@@ -36,21 +44,25 @@ export function HeroCarousel({ stories, width, lastOpened, onPress }: HeroCarous
   const { color, space, radius } = theme;
   const count = stories.length;
   const canTurn = count > 1 && reduceMotion === false && screenReader === false;
-  const turning = canTurn && !swiped && !touching && focused;
+  const turning = canTurn && !touching && focused;
 
   useEffect(() => {
     if (!turning) {
       return;
     }
-    const timer = setTimeout(() => {
-      const next = (index + 1) % count;
-      list.current?.scrollToOffset({ offset: next * width, animated: true });
-      setIndex(next);
-    }, theme.motion.duration.carouselDwell);
+    const timer = setTimeout(
+      () => {
+        const next = (index + 1) % count;
+        list.current?.scrollToOffset({ offset: next * width, animated: true });
+        setIndex(next);
+        setChosen(false);
+      },
+      dwellOf(theme.motion.duration.carouselDwell, chosen),
+    );
     return () => {
       clearTimeout(timer);
     };
-  }, [turning, index, count, width, theme.motion.duration.carouselDwell]);
+  }, [turning, index, count, width, chosen, theme.motion.duration.carouselDwell]);
 
   return (
     <View accessibilityLabel={t("section.carousel")}>
@@ -76,7 +88,7 @@ export function HeroCarousel({ stories, width, lastOpened, onPress }: HeroCarous
           setTouching(false);
         }}
         onScrollBeginDrag={() => {
-          setSwiped(true);
+          setChosen(true);
         }}
         onMomentumScrollEnd={(event) => {
           setIndex(Math.round(event.nativeEvent.contentOffset.x / width));
