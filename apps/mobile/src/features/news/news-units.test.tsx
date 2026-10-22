@@ -548,7 +548,7 @@ describe("stories", () => {
 
   it("opens the latest Conseil des ministres from its card", async () => {
     const onPress = await show("council", null);
-    expect(screen.getByText("Dernier Conseil des ministres")).toBeOnTheScreen();
+    expect(screen.getByLabelText("Dernier Conseil des ministres")).toBeOnTheScreen();
     await fireEvent.press(screen.getByText("Lire le communiqué"));
     expect(onPress).toHaveBeenCalledWith(LIST.items[0]?.id);
   });

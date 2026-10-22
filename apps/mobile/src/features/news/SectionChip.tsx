@@ -1,7 +1,7 @@
-import { tracking } from "@bgs/ui";
 import type { IconProps as PhosphorProps } from "phosphor-react-native";
 import type { ComponentType } from "react";
-import { Pressable, StyleSheet, Text, type LayoutChangeEvent } from "react-native";
+import { Pressable, StyleSheet, type LayoutChangeEvent } from "react-native";
+import { CapsText } from "../../components/CapsText";
 import { Icon } from "../../components/Icon";
 import { useTheme } from "../../theme/useTheme";
 import { CategoryIcon } from "./CategoryIcon";
@@ -61,7 +61,9 @@ export function SectionChip({
       {category === null && glyph !== undefined && (
         <Icon icon={glyph} size="sm" weight="duotone" color={ink} />
       )}
-      <Text style={[textStyle.caption, styles.caps, { color: ink }]}>{label}</Text>
+      <CapsText numberOfLines={1} style={[textStyle.caption, { color: ink }]}>
+        {label}
+      </CapsText>
     </Pressable>
   );
 }
@@ -72,5 +74,4 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: StyleSheet.hairlineWidth,
   },
-  caps: { textTransform: "uppercase", letterSpacing: tracking.caps },
 });

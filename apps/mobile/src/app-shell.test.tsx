@@ -1,3 +1,4 @@
+import { dwellOf } from "./features/news/HeroCarousel";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { act, fireEvent, screen, waitFor, within } from "@testing-library/react-native";
 import * as Location from "expo-location";
@@ -251,11 +252,14 @@ describe("app shell", () => {
     });
   });
 
-  it("stops the carousel by a swipe, with no pause button (owner's decision, 14/10/2026)", async () => {
+  it("keeps the carousel turning after a swipe, with no pause button (owner, 22/10/2026)", async () => {
     await renderRouter(routes, { initialUrl: "/" });
     const carousel = await screen.findByTestId("hero-carousel");
     await fireEvent(carousel, "scrollBeginDrag");
     expect(screen.queryByRole("button", { name: /défilement/ })).toBeNull();
+    // The story chosen by the swipe stays twice as long, then the turns go on.
+    expect(dwellOf(5000, true)).toBe(10_000);
+    expect(dwellOf(5000, false)).toBe(5000);
   });
 
   it("searches the news from the front page and opens a result", async () => {
