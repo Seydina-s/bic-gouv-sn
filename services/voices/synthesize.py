@@ -3,10 +3,12 @@
 French: Kokoro-82M, voice ff_siwis (Apache 2.0; SIWIS data), chosen by the owner in a
 blind listening test on 10/10/2026. Words given as "[word](/phonemes/)" are said with
 those phonemes (names the French rules mispronounce); see apps/api/src/voices.
+English: the same Kokoro-82M, voice af_heart (American English, owner's choice of an
+American accent on 16/10/2026).
 Wolof: Adia_TTS by CONCREE (Apache 2.0).
 
 Usage: python synthesize.py <jobs.json> <voices-dir>
-jobs.json holds [{"id", "lang": "fr" | "wo", "pieces": [text, ...], "out": "file.mp3"}].
+jobs.json holds [{"id", "lang": "fr" | "en" | "wo", "pieces": [text, ...], "out": "file.mp3"}].
 One JSON line per job on stdout: {"id", "ok": true, "durationMs", "bytes", "voiceId"}
 or {"id", "ok": false, "error"}. Models load once, only for the languages asked.
 """
@@ -19,15 +21,18 @@ from pathlib import Path
 import numpy as np
 import soundfile as sf
 
-from chunks import sentences
+from chunks import fitting, sentences
 
 KOKORO = "hexgrad/Kokoro-82M"
 # Pinned revision: the files read are those checked on 10/10/2026. Kokoro loads its
 # weights with torch.load(weights_only=True): no code can run from them.
 KOKORO_REVISION = "f3ff3571791e39611d31c381e3a41a3af07b4987"
 KOKORO_VOICE = "ff_siwis"
-# Kokoro reads at most 510 phonemes at once: French sentences are cut well below.
+KOKORO_ENGLISH_VOICE = "af_heart"
+# Kokoro reads at most 510 phonemes at once: French sentences are cut well below,
+# then cut again by their phonemes when numbers or acronyms make them longer.
 FRENCH_MAX = 300
+PHONEMES_MAX = 500
 GIVEN_PHONEMES = re.compile(r"\[([^\]]+)\]\(/([^/]+)/\)")
 ADIA = "CONCREE/Adia_TTS"
 # Pinned revision, weights in safetensors only: transformers stays at 4.46.1 because
@@ -40,10 +45,10 @@ PARAGRAPH_PAUSE_S = 0.6
 SENTENCE_PAUSE_S = 0.25
 
 
-class French:
-    voice_id = "kokoro-ff_siwis"
+class Kokoro:
+    """A Kokoro voice: French (lang_code "f") or American English ("a")."""
 
-    def __init__(self, voices: Path):
+    def __init__(self, voices: Path, lang_code: str, voice: str):
         from huggingface_hub import hf_hub_download
         from kokoro import KModel, KPipeline
 
@@ -51,8 +56,9 @@ class French:
             return hf_hub_download(KOKORO, name, revision=KOKORO_REVISION, cache_dir=voices)
 
         model = KModel(repo_id=KOKORO, config=pinned("config.json"), model=pinned("kokoro-v1_0.pth")).eval()
-        self._pipeline = KPipeline(lang_code="f", repo_id=KOKORO, model=model)
-        self._voice = pinned(f"voices/{KOKORO_VOICE}.pt")
+        self._pipeline = KPipeline(lang_code=lang_code, repo_id=KOKORO, model=model)
+        self._voice = pinned(f"voices/{voice}.pt")
+        self.voice_id = f"kokoro-{voice}"
         self.rate = 24000
 
     def phonemes(self, sentence: str) -> str:
@@ -69,9 +75,21 @@ class French:
     def read(self, piece: str) -> list[np.ndarray]:
         clips: list[np.ndarray] = []
         for sentence in sentences(piece, FRENCH_MAX):
-            for result in self._pipeline.generate_from_tokens(self.phonemes(sentence), voice=self._voice):
-                clips.append(np.asarray(result.audio, dtype=np.float32))
+            for part in fitting(sentence, lambda text: len(self.phonemes(text)), PHONEMES_MAX):
+                for result in self._pipeline.generate_from_tokens(self.phonemes(part), voice=self._voice):
+                    clips.append(np.asarray(result.audio, dtype=np.float32))
         return clips
+
+
+def French(voices: Path) -> Kokoro:
+    return Kokoro(voices, "f", KOKORO_VOICE)
+
+
+def English(voices: Path) -> Kokoro:
+    return Kokoro(voices, "a", KOKORO_ENGLISH_VOICE)
+
+
+READERS = {"fr": French, "en": English}
 
 
 class Wolof:
@@ -124,7 +142,8 @@ def main() -> None:
     for job in jobs:
         try:
             if job["lang"] not in readers:
-                readers[job["lang"]] = French(voices) if job["lang"] == "fr" else Wolof()
+                reader_of = READERS.get(job["lang"])
+                readers[job["lang"]] = reader_of(voices) if reader_of is not None else Wolof()
             reader = readers[job["lang"]]
             duration_ms, size = _speak(reader, job["pieces"], Path(job["out"]))
             line = {"id": job["id"], "ok": True, "durationMs": duration_ms, "bytes": size,

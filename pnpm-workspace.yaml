@@ -55,3 +55,6 @@ overrides:
   "source-map-js@<1.2.2": "1.2.2"
   # Thirteen high advisories up to 0.8.14: via @bacons/apple-targets > @expo/plist.
   "@xmldom/xmldom@<0.8.15": "0.8.15"
+  # GHSA-587h-7wmj-h5pm (high, 22/10/2026): launch-editor's existence check bypassed
+  # on Windows; via vitest > vite (tests only).
+  "vite@>=8.3.0 <8.3.3": "8.3.3"
