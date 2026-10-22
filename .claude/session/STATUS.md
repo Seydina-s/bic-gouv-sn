@@ -1,6 +1,14 @@
 # STATUS — Bic Gouv SN
 
-**Dernière mise à jour** : 17/10/2026 (23 h) · **Mode** : standard. Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md` (points 50, 52 à 56, 64).
+**Dernière mise à jour** : 22/10/2026 (17 h) · **Mode** : autonome prolongé (demande du 22/10). Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md` (points 50, 52 à 55, 60, 66).
+
+## 18 au 22/10, en bref : traduction automatique, trois voix, nettoyage
+- **Traduction automatique (#399)** : la surveillance traduit seule chaque nouvel article en anglais et en wolof (toutes les 30 min ; fiches des démarches toutes les 6 h) ; `TRANSLATION_AUTO=off` l'arrête. Un article refusé deux fois pour la même version n'est plus renvoyé ; le compteur repart à chaque correction des contrôles (#400).
+- **Refus récurrents examinés (ML-12d)** : deux articles contenaient des émojis Facebook collés comme images, refusés même en français (corrigé) ; deux communiqués de 2024 mis en page ligne par ligne restent en français (decisions.md).
+- **Voix (#398)** : voix anglaise Kokoro af_heart installée et essayée sur le serveur ; phrases trop longues recoupées ; fichier occupé attendu au lieu d'arrêter le rattrapage. Chaîne relancée : français (≈ 220 restants), puis anglais, puis wolof (le wolof continuera sur le futur serveur d'hébergement).
+- **App (#399, mise à jour à distance publiée)** : volet qui se ferme en rideau vers la droite ; rubriques en capitales complètes sur Android (« Interviews & reportages ») ; carrousel « à la une » qui reprend après un balayage.
+- **Assistant** : premier passage automatique du banc (18/10) : 86 sur 92 ; chaque échec garde désormais les extraits donnés et la réponse brute (AST-39, #400). AST-30e (bouton « Signaler cette réponse ») attend la durée de conservation et la mention de confidentialité (point 66).
+- **Nettoyage (22/10)** : 9 anciennes copies du dépôt, 54 branches locales déjà fusionnées, fichiers d'essais et copie corrompue de septembre dans `.data`, modèles de voix locaux (2,1 Go, les voix tournent sur le serveur), cloudflared (remplacé par ngrok), magasin pnpm élagué. Copies gardées : `-w2`, `-w4` (livraisons), `-ota`, `-demo` (Metro de l'iPhone).
 
 ## 17/10, après-midi et soir, en bref : traductions faites, assistant mesuré et amélioré
 - **Traductions (≈ 101 $ en tout)** : articles depuis le 02/04/2024, environ 3 370 en anglais et 2 615 en wolof ; fiches des démarches, 714 en anglais et 711 en wolof ; tout en « traduction automatique ». Restent en français : 27 refus des contrôles et 4 articles wolof trop longs pour une réponse (ML-12c, à traduire par morceaux).
