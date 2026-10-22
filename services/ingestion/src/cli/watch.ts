@@ -32,6 +32,16 @@ import {
   type WatchedSource,
 } from "../watch";
 import { listingPagesFor, nextWithdrawalCheck, reconcileWithdrawals } from "../withdrawn";
+import { ArticleTranslation, allArticles } from "../translation/article-translation";
+import {
+  DEFAULT_TRANSLATION_MODEL,
+  translationPass,
+  type TranslationRuns,
+} from "../translation/auto-translation";
+import { ClaudeBatches } from "../translation/claude-batches";
+import { SheetTranslation } from "../translation/sheet-translation";
+import { ENGLISH, WOLOF } from "../translation/targets";
+import { CURRENT_GOVERNMENT_SINCE } from "../translation/wolof-candidates";
 
 // Into PostgreSQL when DATABASE_URL is set (SCALE-02), shared with the API; else .data/.
 const { stores, inDatabase, paths, close, document } = await openStores();
@@ -244,6 +254,72 @@ async function checkWithdrawalsIfDue() {
   }
 }
 
+// Every new article translated into English and Wolof without anyone asking (owner's
+// request of 22/10/2026): sent at a pass, saved at a later one. The sheets of the
+// procedures change rarely: every 6 hours. TRANSLATION_AUTO=off stops it; without the
+// Anthropic key the collection goes on untranslated.
+const TRANSLATION_EVERY_MS = 30 * 60 * 1000;
+const SHEETS_EVERY_MS = 6 * 60 * 60 * 1000;
+let lastTranslationAt: Date | null = null;
+let lastSheetsAt: Date | null = null;
+let toldNoKey = false;
+async function translateIfDue() {
+  const now = new Date();
+  if (
+    process.env["TRANSLATION_AUTO"] === "off" ||
+    (lastTranslationAt !== null &&
+      now.getTime() - lastTranslationAt.getTime() < TRANSLATION_EVERY_MS)
+  ) {
+    return;
+  }
+  lastTranslationAt = now;
+  const apiKey = process.env["ANTHROPIC_API_KEY"];
+  if (apiKey === undefined || apiKey === "") {
+    if (!toldNoKey) {
+      process.stdout.write(
+        `${now.toISOString()} translation: no Anthropic key, nothing translated\n`,
+      );
+      toldNoKey = true;
+    }
+    return;
+  }
+  const model = process.env["TRANSLATION_MODEL"] ?? DEFAULT_TRANSLATION_MODEL;
+  const client = new ClaudeBatches({ apiKey, model });
+  const runs: { name: string; runs: TranslationRuns }[] = [ENGLISH, WOLOF].map((target) => ({
+    name: `articles ${target.lang}`,
+    runs: new ArticleTranslation({
+      articles: repository,
+      target,
+      state: document(target.state),
+    }),
+  }));
+  const sheetsDue =
+    lastSheetsAt === null || now.getTime() - lastSheetsAt.getTime() >= SHEETS_EVERY_MS;
+  if (sheetsDue) {
+    lastSheetsAt = now;
+    const articles = await allArticles(repository);
+    for (const target of [ENGLISH, WOLOF]) {
+      runs.push({
+        name: `sheets ${target.lang}`,
+        runs: new SheetTranslation({
+          procedures: stores.procedures,
+          target,
+          articles,
+          state: document(target.sheetState),
+        }),
+      });
+    }
+  }
+  const reports = await translationPass(runs, client, { model, since: CURRENT_GOVERNMENT_SINCE });
+  for (const { name, saved, refused, sent, failure } of reports) {
+    if (failure !== null || saved + refused + sent > 0) {
+      process.stdout.write(
+        `${now.toISOString()} translation ${name} · saved ${String(saved)} · refused ${String(refused)} · sent ${String(sent)}${failure === null ? "" : ` · ✗ ${failure}`}\n`,
+      );
+    }
+  }
+}
+
 let lastChangeAt: Date | null = null;
 while (control.running) {
   const startedAt = new Date();
@@ -265,6 +341,7 @@ while (control.running) {
     await checkWithdrawalsIfDue();
     await reviewSitesIfDue();
     await collectEntreprendreIfDue();
+    await translateIfDue();
   } catch (error) {
     delay = await report({ error: { code: errorCodeOf(error) ?? "UNKNOWN" } }, lastChangeAt);
     process.stdout.write(

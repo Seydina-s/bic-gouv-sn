@@ -77,3 +77,14 @@ pnpm --filter @bgs/ingestion translate --lang en --procedures --collect
 - Contrôles en plus de ceux des articles : les champs vides restent vides, chaque liste garde le même nombre d'éléments, chaque réponse garde la structure de la réponse française, et la longueur s'apprécie sur toute la fiche.
 - Estimation du 17/10/2026 sur les 718 fiches : ≈ 3,7 $ en anglais, ≈ 11,7 $ en wolof (Sonnet 5.5, par lots).
 - L'essai écrit `translation-trial-sheets-en.json` (ou `-wo`) à côté des données ; rien n'est enregistré.
+
+## Traduction automatique (depuis le 22/10/2026)
+
+Demande de l'utilisateur : chaque nouvel article est traduit en anglais et en wolof sans que personne ne le demande.
+
+- La surveillance (`pnpm --filter @bgs/ingestion watch`) fait un passage **toutes les 30 minutes**. Elle enregistre d'abord les traductions des lots terminés, puis envoie les articles en attente (au plus 50 par langue et par passage), depuis le 02/04/2024.
+- Les fiches des démarches suivent **toutes les 6 heures**.
+- Ce sont les mêmes lots (moitié prix), les mêmes contrôles et les mêmes suivis que la commande `translate`, qui reste là pour les estimations, les essais et les rattrapages.
+- **Jamais de dépense en boucle** : une version d'article refusée deux fois par les contrôles n'est plus envoyée. Une nouvelle version à la source est retentée.
+- **Couper** : `TRANSLATION_AUTO=off` dans l'environnement de la surveillance. Sans la clé Anthropic, la collecte continue sans traduire et le dit une fois dans son journal.
+- Le journal de la surveillance (`bgs-ops/logs/watch.log`) note chaque passage utile : `translation articles en · saved 3 · refused 0 · sent 2`.

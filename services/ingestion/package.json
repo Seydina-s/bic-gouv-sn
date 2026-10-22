@@ -7,7 +7,7 @@
   "scripts": {
     "collect": "tsx src/cli/collect-latest.ts",
     "backfill": "tsx src/cli/backfill.ts",
-    "watch": "tsx src/cli/watch.ts",
+    "watch": "tsx --env-file-if-exists=../../apps/api/.env.local src/cli/watch.ts",
     "covers": "tsx src/cli/backfill-covers.ts",
     "inline-images": "tsx src/cli/inline-images.ts",
     "documents": "tsx src/cli/documents.ts",

@@ -30,6 +30,14 @@ type Run = z.infer<typeof runSchema>;
  */
 const SAVED_TOGETHER = 200;
 
+/**
+ * Sendings of one version of an item that came back without a translation saved, after
+ * which it is no longer sent (22/10/2026: 17 articles refused by the checks at every
+ * try would have been paid for again every half hour once translation ran by itself).
+ * A new version at the source tries again.
+ */
+export const MAX_TRIES = 2;
+
 /** The provider keeps a batch's replies 29 days. */
 const REPLIES_KEPT_MS = 29 * 24 * 60 * 60_000;
 
@@ -115,13 +123,32 @@ export class BatchTranslation<Item, French, Value> {
   /** The items still waiting for the language, not already in a run being processed. */
   async pending(since: string | null): Promise<{ all: Item[]; toSend: Item[] }> {
     const all = await this.kind.all();
+    const { runs } = await this.state.read();
     const sent = new Set(
-      (await this.state.read()).runs
+      runs
         .filter((run) => run.collectedAt === null)
         .flatMap((run) => run.articles.map((item) => item.id)),
     );
+    // Versions already sent and collected, each time without a translation saved.
+    const tries = new Map<string, string[]>();
+    for (const run of runs.filter((r) => r.collectedAt !== null)) {
+      for (const { id, contentHash } of run.articles) {
+        tries.set(id, [...(tries.get(id) ?? []), contentHash]);
+      }
+    }
+    const triedOut = (item: Item) =>
+      (tries.get(this.kind.id(item)) ?? []).filter((version) => this.fits(item, version)).length >=
+      MAX_TRIES;
     const waiting = this.kind.waiting(all, since);
-    return { all, toSend: waiting.filter((item) => !sent.has(this.kind.id(item))) };
+    return {
+      all,
+      toSend: waiting.filter((item) => !sent.has(this.kind.id(item)) && !triedOut(item)),
+    };
+  }
+
+  /** Whether a reply sent at `version` would still fit the item as it is now. */
+  private fits(item: Item, version: string): boolean {
+    return this.kind.stillFits?.(item, version) ?? this.kind.version(item) === version;
   }
 
   /** What sending up to `limit` waiting items would cost, before anything is sent. */
@@ -341,10 +368,7 @@ export class BatchTranslation<Item, French, Value> {
       sent === undefined ||
       item === null ||
       french === null ||
-      !(
-        this.kind.stillFits?.(item, sent.contentHash) ??
-        this.kind.version(item) === sent.contentHash
-      )
+      !this.fits(item, sent.contentHash)
     ) {
       report.outdated += 1;
       return null;
