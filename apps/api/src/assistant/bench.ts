@@ -1,7 +1,7 @@
 import type { Lang } from "@bgs/shared-types";
 import { z } from "zod";
 import type { AnswerCase } from "./answer-eval";
-import type { AnswerStatus, GroundedAnswer } from "./grounded-answer";
+import type { AnswerStatus, AnswerTrace, GroundedAnswer } from "./grounded-answer";
 import { periodDays, type NewsPeriod } from "./news-overview";
 import type { Passage } from "./passages";
 import { questionIntent } from "./retrieval";
@@ -58,6 +58,20 @@ export interface BenchVerdict {
   /** Answered although no answer was accepted: must never happen. */
   invented: boolean;
   cited: { url: string; publishedOn: string | null }[];
+  /** For a failure: what the model was given and replied (AST-39). */
+  evidence?: BenchEvidence;
+}
+
+export interface BenchEvidence {
+  searched: string;
+  extracts: {
+    number: number;
+    title: string;
+    url: string;
+    publishedOn: string | null;
+    text: string;
+  }[];
+  reply: string | null;
 }
 
 const SEARCH_KIND: Record<RetrievalCase["style"], BenchKind> = {
@@ -261,6 +275,31 @@ export function judgeBench(c: BenchCase, answer: GroundedAnswer | null): BenchVe
   const invented = answer.status === "answered" && !c.accepted.includes("answered");
   const reason = failure(c, answer, cited);
   return { ...base, status: answer.status, passed: reason === null, reason, invented };
+}
+
+/**
+ * A failure keeps the extracts the model was numbered and its reply as written (AST-39):
+ * a refusal that comes and goes ("Ankara", "visa pour le Canada") is then read from the
+ * run itself, whether the right page was missing or the model set it aside.
+ */
+export function withEvidence(verdict: BenchVerdict, trace: AnswerTrace | null): BenchVerdict {
+  if (verdict.passed || trace === null) {
+    return verdict;
+  }
+  return {
+    ...verdict,
+    evidence: {
+      searched: trace.searched,
+      extracts: trace.given.map((passage, index) => ({
+        number: index + 1,
+        title: passage.title,
+        url: passage.sourceUrl,
+        publishedOn: passage.publishedOn,
+        text: passage.text,
+      })),
+      reply: trace.reply,
+    },
+  };
 }
 
 function failure(

@@ -8,6 +8,7 @@ import {
   trapCases,
   updateWeaknesses,
   weaknessCases,
+  withEvidence,
   type BenchCase,
 } from "./bench";
 import type { GroundedAnswer } from "./grounded-answer";
@@ -147,6 +148,35 @@ describe("a bench verdict", () => {
       judgeBench(news, answered(["u"], [TODAY])),
     ];
     expect(summarizeBench(verdicts)).toMatchObject({ cases: 2, passed: 1, invented: 1 });
+  });
+
+  it("keeps, for a failure only, the extracts the model was numbered and its reply", () => {
+    const trace = {
+      searched: "Comment faire ? démarche",
+      given: [page(5, "procedure", "Demander un document fictif", null)],
+      reply: '{"status":"not_found","answer":"","citations":[]}',
+    };
+    const failed = withEvidence(judgeBench(procedure, refusedAnswer("not_found")), trace);
+    expect(failed.evidence).toEqual({
+      searched: "Comment faire ? démarche",
+      extracts: [
+        {
+          number: 1,
+          title: "Demander un document fictif",
+          url: "https://www.presidence.sn/fr/test-5",
+          publishedOn: null,
+          text: "Texte fictif.",
+        },
+      ],
+      reply: trace.reply,
+    });
+    const passed = withEvidence(
+      judgeBench(procedure, answered(["https://e-senegal.sn/#/a"])),
+      trace,
+    );
+    expect(passed.evidence).toBeUndefined();
+    // No answer at all (the service failed): nothing to keep.
+    expect(withEvidence(judgeBench(procedure, null), null).evidence).toBeUndefined();
   });
 });
 
