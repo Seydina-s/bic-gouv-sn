@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { answerQuestion, checkAnswer, SYSTEM_RULES, userMessage } from "./grounded-answer";
+import {
+  answerQuestion,
+  checkAnswer,
+  SYSTEM_RULES,
+  userMessage,
+  type AnswerTrace,
+} from "./grounded-answer";
 import type { LlmProvider, LlmRequest } from "./llm-provider";
 import { PassageIndex } from "./passage-search";
 import { REPHRASE_RULES } from "./question-rephrase";
@@ -248,6 +254,29 @@ describe("answerQuestion", () => {
     );
     expect(answer.status).toBe("answered");
     expect(llm.requests).toHaveLength(2);
+  });
+
+  it("tells the bench what the model was given and wrote, before the checks", async () => {
+    const written = '{"status":"not_found","answer":"","citations":[]}';
+    const traces: AnswerTrace[] = [];
+    const answer = await answerQuestion(
+      { question: "le port", lang: "fr" },
+      { index, llm: provider(written), call: direct, observe: (trace) => traces.push(trace) },
+    );
+    expect(answer.status).toBe("not_found");
+    expect(traces).toHaveLength(1);
+    expect(traces[0]?.searched).toContain("le port");
+    expect(traces[0]?.given).toHaveLength(PASSAGES_GIVEN);
+    expect(traces[0]?.reply).toBe(written);
+    // Nothing found: nothing given, nothing written.
+    const none: AnswerTrace[] = [];
+    await answerQuestion(
+      { question: "aéroport", lang: "fr" },
+      { index, llm: provider("{}"), call: direct, observe: (trace) => none.push(trace) },
+    );
+    expect(none).toHaveLength(1);
+    expect(none[0]).toMatchObject({ given: [], reply: null });
+    expect(none[0]?.searched).toContain("aéroport");
   });
 
   it("leaves a failed call to the caller", async () => {
