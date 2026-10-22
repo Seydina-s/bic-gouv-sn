@@ -237,6 +237,34 @@ describe("the recordings of the articles", () => {
     expect(working.jobs).toHaveLength(2);
   });
 
+  it("waits while the articles' file is busy, then saves the recording", async () => {
+    // 19/10/2026: one busy moment (EPERM) stopped the French catch-up.
+    const todo = recordingsToMake(await allArticles(articles), ["fr"], 1);
+    let busy = 2;
+    const busyAtFirst = Object.assign(Object.create(articles) as FileArticleRepository, {
+      setAudioTrack: (...args: Parameters<FileArticleRepository["setAudioTrack"]>) => {
+        if (busy > 0) {
+          busy -= 1;
+          return Promise.reject(Object.assign(new Error("rename refused"), { code: "EPERM" }));
+        }
+        return articles.setAudioTrack(...args);
+      },
+    });
+    const waits: number[] = [];
+    const wait = (ms: number) => {
+      waits.push(ms);
+      return Promise.resolve();
+    };
+    const report = await record(todo, {
+      articles: busyAtFirst,
+      mediaRoot: dir,
+      synthesize: voice(),
+      wait,
+    });
+    expect(report.recorded).toBe(1);
+    expect(waits).toEqual([30_000, 60_000]);
+  });
+
   it("no longer offers a recording once the words it reads have changed", async () => {
     const todo = recordingsToMake(await allArticles(articles), ["fr"], 1);
     await record(todo, { articles, mediaRoot: dir, synthesize: voice() });

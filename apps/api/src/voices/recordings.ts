@@ -106,6 +106,37 @@ const MAX_FAILED_CALLS = 5;
  */
 export class StoreRefusalError extends Error {}
 
+/** Waits when the articles' file is busy, then tries the same recording again. */
+const BUSY_DELAYS_MS = [30_000, 60_000, 2 * MINUTE, 5 * MINUTE] as const;
+
+/**
+ * The articles' file held open elsewhere (Windows refuses to replace it): a matter of
+ * moments, not a refusal (19/10/2026: the French catch-up stopped at 1 550 of 2 862 on
+ * one such moment, beyond the store's own 11 s of patience).
+ */
+function isBusy(error: unknown): boolean {
+  const code = (error as NodeJS.ErrnoException | undefined)?.code;
+  return code === "EPERM" || code === "EBUSY" || code === "EACCES";
+}
+
+/** Saves one recording, again after a wait while the file is busy; refused otherwise. */
+async function savePatiently(
+  save: () => Promise<unknown>,
+  wait: (ms: number) => Promise<void>,
+): Promise<void> {
+  for (const delay of [...BUSY_DELAYS_MS, null]) {
+    try {
+      await save();
+      return;
+    } catch (error) {
+      if (!isBusy(error) || delay === null) {
+        throw error;
+      }
+      await wait(delay);
+    }
+  }
+}
+
 /**
  * Calls the voices for one group, again after a wait when the call itself fails: only
  * for the jobs `left()` still has (those already handed over are not read twice).
@@ -200,17 +231,18 @@ export async function record(
     }
     // The file must really be there before the app is told about it.
     const bytes = (await stat(join(options.mediaRoot, item.key))).size;
-    await options.articles.setAudioTrack(item.article.id, {
+    const track = {
       lang: item.lang,
-      origin: "tts",
+      origin: "tts" as const,
       key: item.key,
-      format: "mp3",
+      format: "mp3" as const,
       durationMs: result.durationMs,
       bytes,
       voiceId: result.voiceId,
       textHash: item.textHash,
       createdAt: now().toISOString(),
-    });
+    };
+    await savePatiently(() => options.articles.setAudioTrack(item.article.id, track), wait);
     report.recorded += 1;
     report.audioMs += result.durationMs;
   }
