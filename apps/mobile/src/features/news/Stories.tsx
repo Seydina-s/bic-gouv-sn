@@ -1,7 +1,7 @@
 import type { NewsSummary } from "@bgs/shared-types";
-import { tracking } from "@bgs/ui";
 import { ArrowRightIcon as ArrowRight } from "phosphor-react-native/src/icons/ArrowRight";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { CapsText } from "../../components/CapsText";
 import { Icon } from "../../components/Icon";
 import { languageProps } from "../../i18n/language";
 import { useTranslation } from "../../i18n/useTranslation";
@@ -149,9 +149,7 @@ export function CouncilCard({ item, onPress }: Omit<StoryProps, "lastOpened">) {
     >
       <WovenStrip category={item.category} color={ink} />
       <View style={{ padding: space.lg, gap: space.sm }}>
-        <Text style={[textStyle.caption, styles.caps, { color: ink }]}>
-          {t("feed.latestCouncil")}
-        </Text>
+        <CapsText style={[textStyle.caption, { color: ink }]}>{t("feed.latestCouncil")}</CapsText>
         <Text
           {...languageProps(item.lang)}
           style={[textStyle.storyTitle, { color: ink }]}
@@ -242,7 +240,6 @@ export function StoryRow({
 
 const styles = StyleSheet.create({
   card: { overflow: "hidden" },
-  caps: { textTransform: "uppercase", letterSpacing: tracking.caps },
   action: { flexDirection: "row", alignItems: "center" },
   row: { flexDirection: "row", borderTopWidth: StyleSheet.hairlineWidth },
   body: { flex: 1 },

@@ -14,6 +14,7 @@ import { dirname, join } from "node:path";
 import { setTimeout as wait } from "node:timers/promises";
 import { openStores } from "../lib/stores";
 import { ArticleTranslation, allArticles } from "../translation/article-translation";
+import { DEFAULT_TRANSLATION_MODEL } from "../translation/auto-translation";
 import type { BatchTranslation } from "../translation/batch-translation";
 import { ClaudeBatches } from "../translation/claude-batches";
 import { BATCH_PRICES } from "../translation/cost-estimate";
@@ -21,8 +22,6 @@ import { SheetTranslation, sheetTrialPicks } from "../translation/sheet-translat
 import { TARGETS } from "../translation/targets";
 import { trialPicks } from "../translation/wolof-candidates";
 
-/** Owner's decision of 16/10/2026: Sonnet 5.5 for Wolof and English. */
-const DEFAULT_MODEL = "claude-sonnet-5-5";
 /** A trial waits for its batch this long at most, looking every half minute. */
 const TRIAL_WAIT = { everyMs: 30_000, maxMs: 3 * 60 * 60 * 1000 } as const;
 
@@ -51,7 +50,7 @@ const items = sheets ? "fiches" : "articles";
 const since = option("--since");
 const limit = Number(option("--limit") ?? "1000");
 const trialCount = option("--trial") === null ? null : Number(option("--trial"));
-const model = process.env["TRANSLATION_MODEL"] ?? DEFAULT_MODEL;
+const model = process.env["TRANSLATION_MODEL"] ?? DEFAULT_TRANSLATION_MODEL;
 const say = (line: string) => process.stdout.write(`${line}\n`);
 const dollars = (amount: number | null) =>
   amount === null ? "prix inconnu" : `${amount.toFixed(2)} $`;

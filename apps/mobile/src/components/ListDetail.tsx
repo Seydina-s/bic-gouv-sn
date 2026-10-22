@@ -1,14 +1,19 @@
 import { CaretRightIcon as CaretRight } from "phosphor-react-native/src/icons/CaretRight";
-import type { ReactNode } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { Pressable, StyleSheet, useWindowDimensions, View } from "react-native";
 import Animated, {
+  Easing,
   FadeIn,
   FadeOut,
   LinearTransition,
   ReduceMotion,
   SlideInRight,
   SlideOutRight,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
 } from "react-native-reanimated";
+import { scheduleOnRN } from "react-native-worklets";
 import { useTheme } from "../theme/useTheme";
 import { Icon } from "./Icon";
 import { useTwoPane } from "./useTwoPane";
@@ -30,6 +35,10 @@ export interface ListDetailProps {
  * button on their edge closes it, the detail sliding out and the page widening again
  * (owner's request, 14/10/2026). On a narrow screen, only the page: a choice opens its
  * own screen. The page's tree never changes, so a search being typed keeps its keyboard.
+ *
+ * Closed with its button, the detail glides away to the right like a curtain while the
+ * page widens with it, on one eased movement, and goes only once out of sight (owner's
+ * report of 22/10/2026: it paused about a second, then vanished at once).
  */
 export function ListDetail({ list, detail, onClose, closeLabel }: ListDetailProps) {
   const { theme } = useTheme();
@@ -37,13 +46,58 @@ export function ListDetail({ list, detail, onClose, closeLabel }: ListDetailProp
   const { color, motion, touchTarget, opacity, radius } = theme;
   const open = twoPane && detail !== null;
   const glide = LinearTransition.duration(motion.duration.normal).reduceMotion(ReduceMotion.System);
+  const { width } = useWindowDimensions();
+  // 0 open, 1 closed: the curtain's way, run by the close button.
+  const curtain = useSharedValue(0);
+  const [closing, setClosing] = useState(false);
+  // Closed, from whatever side: the next detail opens without a curtain drawn.
+  const [wasOpen, setWasOpen] = useState(open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (!open) {
+      setClosing(false);
+    }
+  }
+  useEffect(() => {
+    if (open) {
+      curtain.set(0);
+    }
+  }, [open, curtain]);
+  const close = useCallback(() => {
+    if (closing) {
+      return;
+    }
+    setClosing(true);
+    curtain.set(
+      withTiming(
+        1,
+        {
+          duration: motion.duration.slow,
+          easing: Easing.out(Easing.cubic),
+          reduceMotion: ReduceMotion.System,
+        },
+        (finished) => {
+          if (finished === true) {
+            scheduleOnRN(onClose);
+          }
+        },
+      ),
+    );
+  }, [closing, curtain, motion.duration.slow, onClose]);
+  const detailWidth = width - listPaneWidth;
+  const widening = useAnimatedStyle(() =>
+    curtain.value === 0 ? {} : { width: listPaneWidth + curtain.value * detailWidth },
+  );
+  const sliding = useAnimatedStyle(() => ({
+    transform: [{ translateX: curtain.value * detailWidth }],
+  }));
   return (
     <View style={[styles.row, { backgroundColor: color.background }]}>
       <Animated.View
-        layout={glide}
+        {...(closing ? {} : { layout: glide })}
         style={
           open
-            ? [styles.listPane, { width: listPaneWidth, borderRightColor: color.border }]
+            ? [styles.listPane, { width: listPaneWidth, borderRightColor: color.border }, widening]
             : styles.full
         }
       >
@@ -52,10 +106,14 @@ export function ListDetail({ list, detail, onClose, closeLabel }: ListDetailProp
       {open && (
         <Animated.View
           entering={SlideInRight.duration(motion.duration.normal).reduceMotion(ReduceMotion.System)}
-          exiting={SlideOutRight.duration(motion.duration.exitNormal).reduceMotion(
-            ReduceMotion.System,
-          )}
-          style={styles.detail}
+          {...(closing
+            ? {}
+            : {
+                exiting: SlideOutRight.duration(motion.duration.exitNormal).reduceMotion(
+                  ReduceMotion.System,
+                ),
+              })}
+          style={[styles.detail, sliding]}
           testID="list-detail-pane"
         >
           {detail}
@@ -74,7 +132,7 @@ export function ListDetail({ list, detail, onClose, closeLabel }: ListDetailProp
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={closeLabel}
-            onPress={onClose}
+            onPress={close}
             style={({ pressed }) => [
               styles.close,
               {

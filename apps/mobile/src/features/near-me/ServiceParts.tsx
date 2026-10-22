@@ -1,5 +1,4 @@
 import type { Place, PublicService, ServiceCategory } from "@bgs/shared-types";
-import { tracking } from "@bgs/ui";
 import type { IconProps as PhosphorProps } from "phosphor-react-native";
 import { BankIcon as Bank } from "phosphor-react-native/src/icons/Bank";
 import { BriefcaseIcon as Briefcase } from "phosphor-react-native/src/icons/Briefcase";
@@ -12,6 +11,7 @@ import { ShieldStarIcon as ShieldStar } from "phosphor-react-native/src/icons/Sh
 import type { ComponentType } from "react";
 import { ScrollView } from "react-native-gesture-handler";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { CapsText } from "../../components/CapsText";
 import { Icon } from "../../components/Icon";
 import { selectedEdge } from "../../components/selection";
 import { useTranslation } from "../../i18n/useTranslation";
@@ -169,7 +169,9 @@ export function ServiceFilters({
         ]}
       >
         {category !== null && <Icon icon={SERVICE_ICONS[category]} size="sm" color={ink} />}
-        <Text style={[textStyle.caption, styles.caps, { color: ink }]}>{label}</Text>
+        <CapsText numberOfLines={1} style={[textStyle.caption, { color: ink }]}>
+          {label}
+        </CapsText>
       </Pressable>
     );
   };
@@ -264,7 +266,6 @@ const styles = StyleSheet.create({
   row: { flexDirection: "row", alignItems: "center", borderTopWidth: StyleSheet.hairlineWidth },
   flex: { flex: 1 },
   chip: { flexDirection: "row", alignItems: "center", borderWidth: StyleSheet.hairlineWidth },
-  caps: { textTransform: "uppercase", letterSpacing: tracking.caps },
   input: { borderWidth: StyleSheet.hairlineWidth },
   place: { justifyContent: "center" },
 });
