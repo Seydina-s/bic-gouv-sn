@@ -242,7 +242,27 @@ describe("the Wolof translation runs", () => {
     expect(save).not.toHaveBeenCalled();
   });
 
+  it("sends again an article refused before the last change of the checks", async () => {
+    // The clock of these tests (8 October) is before that change.
+    const refusing = batches(replyWith("pas du JSON"));
+    refusing.end();
+    for (let attempt = 1; attempt <= 2; attempt += 1) {
+      await translation.submit(refusing.client, "claude-sonnet-5-5", {
+        since: "2025-11-01",
+        limit: 10,
+      });
+      await translation.collect(refusing.client);
+    }
+    expect((await translation.pending("2025-11-01")).toSend.map((a) => a.id)).toEqual([idOf(1)]);
+  });
+
   it("no longer sends an article refused twice in the same version (22/10/2026)", async () => {
+    translation = new ArticleTranslation({
+      articles,
+      target: WOLOF_TARGET,
+      state: fileDocument(join(dir, "runs.json")),
+      now: () => new Date("2026-10-23T10:00:00Z"),
+    });
     const refusing = batches(replyWith("pas du JSON"));
     refusing.end();
     for (let attempt = 1; attempt <= 2; attempt += 1) {
