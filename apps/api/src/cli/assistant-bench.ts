@@ -21,12 +21,17 @@ import {
   updateWeaknesses,
   weaknessCases,
   weaknessSchema,
+  withEvidence,
   type BenchCase,
   type BenchVerdict,
 } from "../assistant/bench";
 import { benchFolder, WEAKNESSES_FILE } from "../assistant/bench-results";
 import { ClaudeProvider } from "../assistant/claude-provider";
-import { answerQuestion, type GroundedAnswer } from "../assistant/grounded-answer";
+import {
+  answerQuestion,
+  type AnswerTrace,
+  type GroundedAnswer,
+} from "../assistant/grounded-answer";
 import { buildKnowledge } from "../assistant/knowledge";
 import { SemanticLayer } from "../assistant/semantic-layer";
 import { TransformersEmbedder } from "../assistant/transformers-embedder";
@@ -159,6 +164,7 @@ try {
     let costMicrodollars = 0;
     const verdicts: BenchVerdict[] = await inGroups(cases, async (c) => {
       let answer: GroundedAnswer | null;
+      const traces: AnswerTrace[] = [];
       try {
         answer = await answerQuestion(
           { question: c.question, lang: c.lang, mode: "ask", today },
@@ -167,13 +173,14 @@ try {
             meaning,
             llm: c.lang === "wo" ? wolofLlm : llm,
             call: (operation) => operation(AbortSignal.timeout(QUESTION_TIMEOUT_MS)),
+            observe: (trace) => traces.push(trace),
           },
         );
         costMicrodollars += answer.usage?.costMicrodollars ?? 0;
       } catch {
         answer = null;
       }
-      return judgeBench(c, answer);
+      return withEvidence(judgeBench(c, answer), traces[0] ?? null);
     });
     const summary = summarizeBench(verdicts);
     const { weaknesses, fixed } = updateWeaknesses(previous, cases, verdicts, today);
@@ -208,7 +215,9 @@ try {
     for (const verdict of verdicts.filter((v) => !v.passed)) {
       say(`  ✗ ${verdict.question} — ${verdict.reason ?? ""}`);
     }
-    say(`Coût : ${(costMicrodollars / 1_000_000).toFixed(2)} $ · résultats dans ${root}`);
+    say(
+      `Coût : ${(costMicrodollars / 1_000_000).toFixed(2)} $ · résultats dans ${root} (extraits donnés et réponse brute de chaque échec)`,
+    );
   }
 } finally {
   await database?.close();

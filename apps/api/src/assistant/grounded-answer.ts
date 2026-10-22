@@ -187,6 +187,18 @@ export function checkAnswer(response: LlmResponse, given: readonly Passage[]): G
   };
 }
 
+/**
+ * What the model was given and what it wrote, before the checks: the test bench keeps
+ * it for each failure, to understand refusals that vary from one run to the next (AST-39).
+ */
+export interface AnswerTrace {
+  /** The words searched: the question, with its French rephrasing when there is one. */
+  searched: string;
+  given: readonly Passage[];
+  /** The model's reply as written; null when no extract was found to give it. */
+  reply: string | null;
+}
+
 export interface AnswerDependencies {
   index: PassageIndex;
   /** The search by meaning, when its vectors are ready; words alone otherwise. */
@@ -194,6 +206,8 @@ export interface AnswerDependencies {
   llm: LlmProvider;
   /** Deadline, circuit breaker and retries of the model calls (@bgs/resilience). */
   call: <T>(operation: (signal: AbortSignal) => Promise<T>, signal?: AbortSignal) => Promise<T>;
+  /** Told what the model was given and replied (the test bench). */
+  observe?: ((trace: AnswerTrace) => void) | undefined;
 }
 
 /** Errors of the model call (deadline, open circuit) are left to the caller. */
@@ -204,7 +218,7 @@ export async function answerQuestion(
     mode = "ask",
     today = new Date().toISOString().slice(0, 10),
   }: { question: string; lang: Lang; mode?: AssistantMode; today?: string },
-  { index, meaning = null, llm, call }: AnswerDependencies,
+  { index, meaning = null, llm, call, observe }: AnswerDependencies,
 ): Promise<GroundedAnswer> {
   // Every question is searched with its French rephrasing too (17/10/2026).
   const rephrased = await rephraseQuestion(question, llm, call);
@@ -222,6 +236,7 @@ export async function answerQuestion(
     { period },
   );
   if (given.length === 0) {
+    observe?.({ searched, given, reply: null });
     return refused("not_found", null, rephrased.usage);
   }
   const request = {
@@ -229,7 +244,9 @@ export async function answerQuestion(
     user: userMessage(question, lang, given, mode, today),
     maxOutputTokens: MAX_OUTPUT_TOKENS,
   };
-  const answer = checkAnswer(await call((signal) => llm.complete(request, signal)), given);
+  const response = await call((signal) => llm.complete(request, signal));
+  observe?.({ searched, given, reply: response.text });
+  const answer = checkAnswer(response, given);
   return { ...answer, usage: addedUsage(answer.usage, rephrased.usage) };
 }
 
