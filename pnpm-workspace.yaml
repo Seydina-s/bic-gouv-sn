@@ -58,3 +58,6 @@ overrides:
   # GHSA-587h-7wmj-h5pm (high, 22/10/2026): launch-editor's existence check bypassed
   # on Windows; via vitest > vite (tests only).
   "vite@>=8.3.0 <8.3.3": "8.3.3"
+  # Zod memory exhaustion on oversized constrained collections (high, 23/10/2026): our
+  # own packages pin 4.6.6; this covers the copy brought by @expo/cli.
+  "zod@<4.6.6": "4.6.6"
