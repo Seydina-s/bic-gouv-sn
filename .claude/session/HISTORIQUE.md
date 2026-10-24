@@ -2,6 +2,12 @@
 
 **Dernière mise à jour** : 22/10/2026 (17 h) · **Mode** : autonome prolongé (demande du 22/10). Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md` (points 50, 52 à 55, 60, 66).
 
+## 24/10, en bref : tournée Dependabot, accessibilité, modèle de méthode
+- **Dépendances (#405, #281, #282, #280, #329)** : toutes les mises à jour mineures fusionnées ; #397 fermée en doublon. Leçons : verrou non mis à jour par Dependabot, branches réécrites par Dependabot pendant les contrôles, outil de contrôle mis à jour sans lancer ce contrôle (ERREURS.md, #409).
+- **Accessibilité (QA-12)** : axe-core 4.14 rend bloquante la règle « nom = texte affiché » ; trois vrais défauts corrigés (carte d'article, carte « Voir plus », ligne de démarche), faux positifs d'axe écartés par un filtre étroit (decisions.md) ; mise à jour à distance publiée.
+- **Outillage** : `ship.sh` durci ; garde du shell : scripts de démarrage interdits dans un tube (#410) ; `apps/admin/AGENTS.md` aligné sur Next.js 16.4 (#411) ; Metro de l'iPhone remis sur main.
+- **Méthode** : modèle générique de prompt système pour tout nouveau projet livré sur le bureau de l'utilisateur (`CLAUDE-MODELE-PROJET.md`).
+
 ## 18 au 22/10, en bref : traduction automatique, trois voix, nettoyage
 - **Traduction automatique (#399)** : la surveillance traduit seule chaque nouvel article en anglais et en wolof (toutes les 30 min ; fiches des démarches toutes les 6 h) ; `TRANSLATION_AUTO=off` l'arrête. Un article refusé deux fois pour la même version n'est plus renvoyé ; le compteur repart à chaque correction des contrôles (#401).
 - **Refus récurrents examinés (ML-12d)** : deux articles contenaient des émojis Facebook collés comme images, refusés même en français (corrigé) ; deux communiqués de 2024 mis en page ligne par ligne restent en français (decisions.md).
