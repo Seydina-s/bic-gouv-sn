@@ -8,6 +8,6 @@ export default defineConfig({
   platform: "node",
   format: "esm",
   outDir: "dist",
-  noExternal: [/^@bgs\//],
+  deps: { alwaysBundle: [/^@bgs\//] },
   sourcemap: true,
 });
