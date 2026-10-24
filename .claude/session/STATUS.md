@@ -36,7 +36,7 @@ Rien en cours d'écriture ; aucune branche ouverte hors Dependabot.
 ## Repères
 - Démarrer : `bash /c/Users/HP/bgs-ops/services.sh` · mode d'emploi de tous les scripts : `C:\Users\HP\bgs-ops\README.md`.
 - Livrer : `bash /c/Users/HP/bgs-ops/ship.sh <copie> <branche> "<titre>" <fichier-description> ["message OTA"]` (contrôles de la CI, PR, fusion, OTA si message).
-- Tâches ouvertes du backlog sans tout relire : `node /c/Users/HP/bgs-ops/open-items.cjs backlog.md`.
+- Tâches ouvertes du backlog sans tout relire : `pnpm backlog:open`.
 - Carte du code : `node ~/.claude/skills/session-rotation/scripts/map.mjs . --focus <dossier>`.
 
 ## Dernière vérification
