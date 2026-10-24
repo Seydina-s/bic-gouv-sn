@@ -99,7 +99,28 @@ export function pushesUngated(command) {
   return /[;\n|]/.test(between.replaceAll("&&", ""));
 }
 
+/**
+ * True when a script that leaves processes running (services.sh, deploy.sh) feeds a
+ * pipe: those processes keep the pipe open, so the command never returns (16/10 with
+ * tail, 24/10/2026 with grep, which then had to be stopped by hand). Its output goes
+ * to a file instead, read afterwards.
+ */
+export function pipesStarter(command) {
+  // Quoted words are text; "2>&1" joins streams, it does not end the command.
+  const text = withoutQuotedHeredocs(command)
+    .replace(/'[^']*'|"(?:\\.|[^"\\])*"/g, "''")
+    .replace(/\d*>&\d+/g, " ");
+  return /\b(services|deploy)\.sh\b[^;&\n|]*\|(?!\|)/.test(text);
+}
+
 export function refusal(command) {
+  if (pipesStarter(command)) {
+    return (
+      "Commande refusée : services.sh et deploy.sh laissent des processus en marche, qui gardent un tube ouvert : " +
+      "la commande ne rendrait jamais la main. Rediriger vers un fichier puis le lire : " +
+      "bash deploy.sh > logs/deploy.log 2>&1; tail -9 logs/deploy.log"
+    );
+  }
   if (pushesUngated(command)) {
     return (
       "Commande refusée : « git push » doit suivre le scanner de secrets, relié à lui par « && » seulement " +

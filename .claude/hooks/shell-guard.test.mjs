@@ -37,6 +37,9 @@ const refused = [
   'gitleaks git --redact --log-opts="-1" | tail -2 && git push -q',
   'gitleaks git --redact --log-opts="-1" || git push',
   'gitleaks git --redact --log-opts="-1"\ngit push',
+  // A script leaving processes running, piped: the pipe never closes (16/10 and 24/10/2026).
+  "bash /c/Users/HP/bgs-ops/services.sh 2>&1 | grep -i metro",
+  "bash deploy.sh | tail -5",
 ];
 
 const allowed = [
@@ -57,6 +60,9 @@ const allowed = [
   // A text that names a secrets file goes in a quoted heredoc: never read by the shell.
   "git commit -q -F - <<'EOF'\ndocs: never print .env.local values\nEOF",
   "cat <<'EOF'\n`fine` and cat .env.local in a text\nEOF",
+  "bash deploy.sh > logs/deploy.log 2>&1; tail -9 logs/deploy.log",
+  "bash services.sh || echo failed",
+  'grep -n "services.sh | tail" README.md',
 ];
 
 test("refuses every command that could show a secret or run text", () => {
