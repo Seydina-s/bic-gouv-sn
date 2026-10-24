@@ -14,7 +14,7 @@
 Rien en cours d'écriture ; aucune branche ouverte hors Dependabot.
 
 ## Prochaines étapes (dans l'ordre)
-1. Dimanche 25/10 après 4 h : lire le passage du banc (`.data/assistant/bench/2026-10-25.json`, champ `evidence` des échecs) et corriger les faiblesses récurrentes.
+1. Dimanche 25/10 après 4 h : lire le passage du banc (`.data/assistant/bench/2026-10-25.json`, champ `evidence` des échecs) et corriger les faiblesses récurrentes. Avant cette heure, commencer par l'étape 2.
 2. PR Dependabot de versions majeures, avec essai réel : #227 ioredis 6 (lancer aussi les contrôles qui utilisent Redis), puis #400 pillow 13 et #303 torch 2.13 (serveur des voix : à tester sur le serveur avant fusion, jamais pendant un rattrapage). Les mineures du 24/10 sont fusionnées (#405, #281, #282, #280, #329 ; #397 fermée en doublon). Pour un outil de contrôle, lancer ce contrôle-là en local (ex. `pnpm a11y` après les builds) : `ship.sh` ne lance ni builds, ni audit, ni parcours.
 3. Selon les réponses de l'utilisateur : DATA-10 (point 60), puis AST-30e, bouton « Signaler cette réponse » (point 66).
 4. Après chaque fusion qui touche l'API, la console, `shared-types` ou l'ingestion : `bash /c/Users/HP/bgs-ops/deploy.sh` (autorisé sans demander).
