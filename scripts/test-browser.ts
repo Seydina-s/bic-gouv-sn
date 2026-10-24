@@ -401,16 +401,43 @@ export class TestBrowser {
     return Array.isArray(found) ? (found as string[]) : [];
   }
 
-  /** WCAG A/AA rules axe finds broken on the open page. */
+  /**
+   * WCAG A/AA rules axe finds broken on the open page.
+   *
+   * axe 4.14 reads the texts of side-by-side blocks as one run ("Pièces à fournir" then
+   * "1 pièce" becomes "fournir1"), so a button whose name holds every word it shows was
+   * reported under label-content-name-mismatch (WCAG 2.5.3). Such a node is dropped only
+   * when its text as laid out (one block per line), compared word by word as axe does
+   * (accents, punctuation and brackets aside), is still a run of words of its name.
+   */
   async audit(): Promise<Violation[]> {
     await this.evaluate(AXE_SOURCE);
     const found = await this.evaluate(
-      `axe.run(document, { runOnly: { type: "tag", values: ${JSON.stringify(WCAG_TAGS)} } })
-        .then((result) => result.violations.map((violation) => ({
+      `(() => {
+        const words = (text) => text.normalize("NFKD").replace(/\\([^()]*\\)/g, " ").toLowerCase()
+          .split(/[^\\p{L}\\p{N}]+/u).filter(Boolean);
+        const holds = (name, shown) => name.some((_, start) => shown.every((word, i) => name[start + i] === word));
+        const mismatched = (node) => {
+          const element = document.querySelector(node.target[0]);
+          if (element === null) return true;
+          const shown = words(element.innerText ?? "");
+          return shown.length > 0 && !holds(words(element.getAttribute("aria-label") ?? ""), shown);
+        };
+        const kept = (violation) => violation.id === "label-content-name-mismatch"
+          ? { ...violation, nodes: violation.nodes.filter(mismatched) }
+          : violation;
+        return axe.run(document, { runOnly: { type: "tag", values: ${JSON.stringify(WCAG_TAGS)} } })
+          .then((result) => result.violations.map(kept).filter((violation) => violation.nodes.length > 0));
+      })()
+        .then((violations) => violations.map((violation) => ({
           rule: violation.id,
           impact: violation.impact ?? "unknown",
           help: violation.help,
-          targets: violation.nodes.slice(0, 3).map((node) => node.target.join(" ")),
+          // Markup and visible text beside the generated selector: the selector alone names no component.
+          targets: violation.nodes.slice(0, 3).map((node) => {
+            const shown = (document.querySelector(node.target[0])?.innerText ?? "").replace(/\\s+/g, " ").slice(0, 160);
+            return node.target.join(" ") + "  " + node.html.replace(/\\s+/g, " ").slice(0, 200) + "  [visible : " + shown + "]";
+          }),
         })))`,
     );
     if (!Array.isArray(found)) {

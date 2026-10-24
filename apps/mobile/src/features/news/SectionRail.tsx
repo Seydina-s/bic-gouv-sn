@@ -109,7 +109,12 @@ function SeeMoreCard({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={t("section.seeMoreOf", { section: t(categoryLabelKey(category)) })}
+      // What the card reads, in its order, then the section it opens (WCAG 2.5.3).
+      accessibilityLabel={[
+        t("section.seeMore"),
+        t("section.count", { count: total }),
+        t(categoryLabelKey(category)),
+      ].join(". ")}
       onPress={onPress}
       style={({ pressed }) => [
         styles.seeMore,
