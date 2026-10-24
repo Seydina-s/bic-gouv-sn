@@ -1,6 +1,6 @@
 # Reprise — Bic Gouv SN
 
-**Mis à jour** : 24/10/2026 22 h 40 · **Mode** : autonome prolongé (demande du 22/10 ; s'arrêter pour toute dépense imprévue, sécurité, données personnelles, contenu publié, action difficile à défaire) · **main** : #409 (+ garde-fou des tubes). Historique des sessions : `HISTORIQUE.md` (à ne lire que pour un besoin précis). Méthode : skill `session-rotation`.
+**Mis à jour** : 24/10/2026 23 h 10 · **Mode** : autonome prolongé (demande du 22/10 ; s'arrêter pour toute dépense imprévue, sécurité, données personnelles, contenu publié, action difficile à défaire) · **main** : #411 (+ cette rotation). Historique des sessions : `HISTORIQUE.md` (à ne lire que pour un besoin précis). Méthode : skill `session-rotation`.
 
 ## État
 - Services locaux en marche (`bash /c/Users/HP/bgs-ops/services.sh` relance ce qui est tombé) : API 3100, console 3001 (Next.js 16.4.1), surveillance des 22 sites + der.sn, filtre public 3200 + tunnel ngrok, Metro 8081 (iPhone, copie `-demo`).
@@ -14,7 +14,7 @@
 Rien en cours d'écriture ; aucune branche ouverte hors Dependabot.
 
 ## Prochaines étapes (dans l'ordre)
-1. Dimanche 25/10 après 4 h : lire le passage du banc (`.data/assistant/bench/2026-10-25.json`, champ `evidence` des échecs) et corriger les faiblesses récurrentes.
+1. Dimanche 25/10 après 4 h : lire le passage du banc (`.data/assistant/bench/2026-10-25.json`, champ `evidence` des échecs) et corriger les faiblesses récurrentes. Avant cette heure, commencer par l'étape 2.
 2. PR Dependabot de versions majeures, avec essai réel : #227 ioredis 6 (lancer aussi les contrôles qui utilisent Redis), puis #400 pillow 13 et #303 torch 2.13 (serveur des voix : à tester sur le serveur avant fusion, jamais pendant un rattrapage). Les mineures du 24/10 sont fusionnées (#405, #281, #282, #280, #329 ; #397 fermée en doublon). Pour un outil de contrôle, lancer ce contrôle-là en local (ex. `pnpm a11y` après les builds) : `ship.sh` ne lance ni builds, ni audit, ni parcours.
 3. Selon les réponses de l'utilisateur : DATA-10 (point 60), puis AST-30e, bouton « Signaler cette réponse » (point 66).
 4. Après chaque fusion qui touche l'API, la console, `shared-types` ou l'ingestion : `bash /c/Users/HP/bgs-ops/deploy.sh` (autorisé sans demander).
@@ -32,6 +32,9 @@ Rien en cours d'écriture ; aucune branche ouverte hors Dependabot.
 - Une copie de travail par livraison (`-w2`, `-w4`) ; ne jamais changer de branche dans une copie en cours de livraison ; jamais de `git stash` nu ni de `--force`.
 - Une PR bloquée par l'audit de sécurité : corriger la dépendance sur main, puis `gh pr update-branch <n>` avant de relancer la fusion (relancer seul le contrôle ne suffit pas).
 - `deploy.sh` arrête la boucle des voix avant l'enregistrement en cours (ERREURS.md, 22/10) ; après tout redémarrage, relire le journal de chaque langue.
+- Jamais `services.sh` ni `deploy.sh` dans un tube (refusé par le garde du shell) : rediriger vers un fichier puis le lire.
+- Une PR Dependabot : `ship.sh` attend la réécriture de Dependabot et part de sa version ; si la CI échoue de la même façon à chaque relance, lire le journal du job (ou rejouer le contrôle en local) au lieu de relancer.
+- La console Next.js 16.4 réécrit `apps/admin/AGENTS.md` au démarrage : le dépôt en garde la version écrite (#411) ; si la copie servie redevient sale, comparer à `origin/main` avant tout `checkout`.
 - Deux communiqués de mai et juin 2024 restent en français volontairement (decisions.md, 22/10).
 
 ## Repères
@@ -41,6 +44,6 @@ Rien en cours d'écriture ; aucune branche ouverte hors Dependabot.
 - Carte du code : `node ~/.claude/skills/session-rotation/scripts/map.mjs . --focus <dossier>`.
 
 ## Dernière vérification
-23/10 : #399, #401, #403 et #404 fusionnées avec tous les contrôles verts (API 458 tests, ingestion 369, app 305 + 11 e2e, console 131) ; déploiement local vérifié (API 200, console 307, voix et traduction actives) ; aucune copie de travail sur une branche, aucun stash.
+24/10 : #405 à #411 fusionnées avec tous les contrôles verts (API 458 tests, audit d'accessibilité 103/103, garde du shell testé avec mutation) ; déploiement local vérifié à 22 h 10 (API 200, console 307, voix anglaises reprises, 2 001 restantes) ; Metro (`-demo`) sur main, paquet iOS construit (12 Mo) ; copie servie propre sur main ; aucune copie de travail sur une branche, aucun stash.
 
 <!-- fin de la reprise -->
