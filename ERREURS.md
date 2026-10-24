@@ -514,3 +514,10 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : `deploy.sh` arrêtait les processus par leur commande (`voices:record`), pas leur parent. Une boucle qui enchaîne des étapes passe à la suivante quand l'étape en cours est tuée.
 - **Correctif** : `deploy.sh` (dans `C:\Users\HP\bgs-ops`) arrête d'abord la boucle, puis l'enregistrement ; `services.sh` relance la chaîne complète, qui reprend où elle s'était arrêtée (le français déjà fait ne coûte qu'une vérification). Chaîne relancée à 17 h 10, vérifiée dans les journaux.
 - **Prévention** : règle globale « arrêter une chaîne par son parent ».
+
+## 24/10/2026 — Contrôles locaux verts, CI rouge (fichier de verrouillage)
+
+- **Ce qui s'est passé** : la mise à jour Dependabot de fastify (#405) a passé tous les contrôles de `ship.sh` en local, puis a échoué quatre fois en CI dès l'installation. Dependabot avait modifié `apps/api/package.json` sans mettre à jour `pnpm-lock.yaml`.
+- **Cause racine** : `ship.sh` lançait `pnpm install --frozen-lockfile` sans regarder son résultat. L'échec passait inaperçu, puis pnpm, qui remet les dépendances en accord avant chaque script, a réécrit le fichier de verrouillage en local : les contrôles suivants tournaient donc sur un état que la CI n'aurait jamais.
+- **Correctif** : `ship-fn.sh` (dans `C:\Users\HP\bgs-ops`) s'arrête si l'installation stricte échoue, et aussi si un contrôle modifie `pnpm-lock.yaml`. Fichier de verrouillage de #405 régénéré et ajouté à la PR. #397, autre PR Dependabot dans le même cas, est fermée au profit de #281, complète.
+- **Prévention** : règle globale « une étape de contrôle ne jette jamais un code d'échec ».
