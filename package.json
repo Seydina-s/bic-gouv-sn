@@ -25,7 +25,8 @@
     "e2e": "tsx scripts/e2e.ts",
     "app:icons": "tsx scripts/app-icons.ts",
     "map:markers": "tsx scripts/map-markers.ts",
-    "i18n:wolof": "tsx scripts/wolof-to-translate.ts"
+    "i18n:wolof": "tsx scripts/wolof-to-translate.ts",
+    "backlog:open": "node scripts/backlog-open.mjs"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
