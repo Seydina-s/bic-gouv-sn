@@ -522,3 +522,10 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Correctif** : `ship-fn.sh` (dans `C:\Users\HP\bgs-ops`) s'arrête si l'installation stricte échoue, et aussi si un contrôle modifie `pnpm-lock.yaml`. Fichier de verrouillage de #405 régénéré et ajouté à la PR. #397, autre PR Dependabot dans le même cas, est fermée au profit de #281, complète. Deux livraisons suivantes (#281, #282) ont ensuite été refusées à l'envoi, après 10 minutes de contrôles verts : Dependabot réécrit ses branches après chaque fusion sur `main`. `ship.sh` attend désormais cette réécriture, puis part de la version de Dependabot (sauf commit local d'un autre auteur), et son message d'échec distingue secret détecté, réseau coupé et branche réécrite. Enfin, #282 (axe-core 4.14) a passé `ship.sh` puis échoué quatre fois en CI sur l'audit d'accessibilité, que `ship.sh` ne lance pas (ni les builds de production ni les parcours de bout en bout) : la nouvelle version rendait bloquante une règle (QA-12, decisions.md du 24/10).
 - **Prévention (suite)** : la mise à jour d'un outil de contrôle (lint, audit, tests, build) se vérifie en lançant ce contrôle-là en local avant la livraison ; un échec identique à chaque relance se lit dans le journal au lieu d'être relancé.
 - **Prévention** : règle globale « une étape de contrôle ne jette jamais un code d'échec ».
+
+## 24/10/2026 — Script de démarrage passé dans un tube (récidive)
+
+- **Ce qui s'est passé** : `services.sh 2>&1 | grep -i metro` n'a jamais rendu la main ; il a fallu arrêter le `grep` à la main, sans toucher à la tâche entière, qui aurait pu emporter Metro.
+- **Cause racine** : les processus que lance `services.sh` (comme `deploy.sh`) héritent du tube et le gardent ouvert. La règle était écrite depuis le 16/10 (avec `tail`), mais seulement écrite.
+- **Correctif** : le garde-fou du shell refuse désormais `services.sh` ou `deploy.sh` suivi d'un tube (`.claude/hooks/shell-guard.mjs`, cas testés et test de mutation).
+- **Prévention** : règle d'escalade appliquée (règle enfreinte deux fois = contrôle automatique).

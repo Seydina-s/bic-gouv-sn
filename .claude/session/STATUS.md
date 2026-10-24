@@ -1,20 +1,21 @@
 # Reprise — Bic Gouv SN
 
-**Mis à jour** : 23/10/2026 21 h 40 · **Mode** : autonome prolongé (demande du 22/10 ; s'arrêter pour toute dépense imprévue, sécurité, données personnelles, contenu publié, action difficile à défaire) · **main** : #403 (+ cette rotation). Historique des sessions : `HISTORIQUE.md` (à ne lire que pour un besoin précis). Méthode : skill `session-rotation`.
+**Mis à jour** : 24/10/2026 22 h 40 · **Mode** : autonome prolongé (demande du 22/10 ; s'arrêter pour toute dépense imprévue, sécurité, données personnelles, contenu publié, action difficile à défaire) · **main** : #409 (+ garde-fou des tubes). Historique des sessions : `HISTORIQUE.md` (à ne lire que pour un besoin précis). Méthode : skill `session-rotation`.
 
 ## État
 - Services locaux en marche (`bash /c/Users/HP/bgs-ops/services.sh` relance ce qui est tombé) : API 3100, console 3001 (Next.js 16.4.1), surveillance des 22 sites + der.sn, filtre public 3200 + tunnel ngrok, Metro 8081 (iPhone, copie `-demo`).
 - Traduction automatique (#399, #401) : la surveillance traduit chaque nouvel article en anglais et en wolof toutes les 30 min, les fiches des démarches toutes les 6 h ; résultats dans `bgs-ops/logs/watch.log` (lignes `translation`). Refusé deux fois = plus renvoyé ; le compteur repart de `CHECKS_CHANGED_AT` (`services/ingestion/src/translation/batch-translation.ts`) à chaque correction des contrôles.
-- Voix (serveur Hetzner `voices@95.216.167.95`) : français fini ; anglais en cours (650 / 3 245 le 23/10 à 21 h 38, `bgs-ops/logs/voices-en.log`) ; wolof ensuite, à finir sur le futur serveur d'hébergement (décision du 22/10).
+- Voix (serveur Hetzner `voices@95.216.167.95`, clé `~/.ssh/bic_gouv_ai`) : français fini ; anglais en cours (2 001 restants le 24/10 à 22 h 10, `bgs-ops/logs/voices-en.log` ; un « scp: Connection closed » isolé est retenté seul) ; wolof ensuite, à finir sur le futur serveur d'hébergement (décision du 22/10).
 - Banc d'essai de l'assistant : chaque dimanche à 4 h (tâche Windows « BicGouvSN-BancEssai », `bgs-ops/bench.sh`) ; dernier score 86 / 92 ; les échecs gardent désormais extraits et réponse brute (`evidence`, #401).
-- Dernière mise à jour à distance de l'app : « Volet qui se ferme en douceur, rubriques complètes, carrousel qui reprend » (#399).
+- Dernière mise à jour à distance de l'app : « Boutons mieux nommés pour la lecture d'écran et la commande vocale » (#282) ; tanstack (#280) partira avec la suivante. Metro (`-demo`) remis sur main le 24/10.
+- Modèle de méthode générique pour tout nouveau projet : `C:\Users\HP\Desktop\CLAUDE-MODELE-PROJET.md` (24/10) ; y reporter chaque nouvelle règle de `~/.claude/ERREURS-GLOBALES.md`.
 
 ## En cours
 Rien en cours d'écriture ; aucune branche ouverte hors Dependabot.
 
 ## Prochaines étapes (dans l'ordre)
 1. Dimanche 25/10 après 4 h : lire le passage du banc (`.data/assistant/bench/2026-10-25.json`, champ `evidence` des échecs) et corriger les faiblesses récurrentes.
-2. PR Dependabot ouvertes, une à une avec les contrôles de `ship.sh` : #405 fastify, #397 et #281 sanitize-html, #282 axe-core, #280 tanstack, #329 outils ; puis les versions majeures avec essai réel : #227 ioredis 6, #400 pillow 13 et #303 torch 2.13 (serveur des voix, à tester sur le serveur avant fusion, jamais pendant un rattrapage).
+2. PR Dependabot de versions majeures, avec essai réel : #227 ioredis 6 (lancer aussi les contrôles qui utilisent Redis), puis #400 pillow 13 et #303 torch 2.13 (serveur des voix : à tester sur le serveur avant fusion, jamais pendant un rattrapage). Les mineures du 24/10 sont fusionnées (#405, #281, #282, #280, #329 ; #397 fermée en doublon). Pour un outil de contrôle, lancer ce contrôle-là en local (ex. `pnpm a11y` après les builds) : `ship.sh` ne lance ni builds, ni audit, ni parcours.
 3. Selon les réponses de l'utilisateur : DATA-10 (point 60), puis AST-30e, bouton « Signaler cette réponse » (point 66).
 4. Après chaque fusion qui touche l'API, la console, `shared-types` ou l'ingestion : `bash /c/Users/HP/bgs-ops/deploy.sh` (autorisé sans demander).
 
