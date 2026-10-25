@@ -5,13 +5,16 @@ import { FileProcedureRepository, RemoteConfigStore, fileDocument } from "@bgs/c
 import { TimeoutError } from "@bgs/resilience";
 import {
   assistantBenchSchema,
+  assistantFlagsResponseSchema,
   assistantReplySchema,
   assistantUsageSchema,
+  submissionReceiptSchema,
 } from "@bgs/shared-types";
 import type { FastifyInstance } from "fastify";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { FileSettingStore } from "../admin/setting-store";
 import { buildApp } from "../app";
+import { FileAnswerFlagStore } from "../assistant/answer-flags";
 import type { LlmProvider } from "../assistant/llm-provider";
 import { loadConfig } from "../config";
 import { ErrorJournal } from "../journal/error-journal";
@@ -78,6 +81,7 @@ async function start(
     admin: admin.admin,
     remoteConfig: new RemoteConfigStore(fileDocument(remotePath)),
     settings: new FileSettingStore(join(dir, "settings.json")),
+    answerFlagStore: new FileAnswerFlagStore(join(dir, "flags.json")),
     llm: options.llm === undefined ? model() : options.llm,
     errorJournal: options.errorJournal ?? null,
     ...(options.logs === undefined
@@ -103,6 +107,60 @@ beforeEach(async () => {
 afterEach(async () => {
   await Promise.all(apps.splice(0).map((app) => app.close()));
   await rm(dir, { recursive: true, force: true });
+});
+
+describe("« Signaler cette réponse » (AST-30e)", () => {
+  const flagged = {
+    question: "Comment demander le passeport fictif ?",
+    lang: "fr",
+    mode: "ask",
+    status: "answered",
+    answer: "Le passeport fictif se demande au guichet de test.",
+    sources: [
+      {
+        kind: "procedure",
+        contentId: "procedure-1",
+        slug: "test-1",
+        title: "Passeport fictif",
+        url: "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/test-1",
+        publishedOn: null,
+      },
+    ],
+  };
+  const flag = (app: FastifyInstance, payload: object) =>
+    app.inject({ method: "POST", url: "/v1/assistant/flags", payload });
+
+  it("keeps a flagged answer, read in the console's accounts only", async () => {
+    const app = await start();
+    const sent = await flag(app, flagged);
+    expect(sent.statusCode).toBe(201);
+    const { id } = submissionReceiptSchema.parse(sent.json());
+    const url = "/admin/v1/assistant/flags";
+    expect((await app.inject({ method: "GET", url })).statusCode).toBe(401);
+    const listed = await app.inject({
+      method: "GET",
+      url,
+      headers: { authorization: `Bearer ${await admin.tokenFor("reviewer")}` },
+    });
+    expect(listed.headers["cache-control"]).toBe("no-store");
+    expect(assistantFlagsResponseSchema.parse(listed.json()).flags).toMatchObject([
+      { id, question: flagged.question, status: "answered" },
+    ]);
+  });
+
+  it("refuses a link that is not an official source, or anything else sent", async () => {
+    const app = await start();
+    const [source] = flagged.sources;
+    const elsewhere = { ...flagged, sources: [{ ...source, url: "https://example.com/piege" }] };
+    expect((await flag(app, elsewhere)).statusCode).toBe(400);
+    expect((await flag(app, { ...flagged, email: "personne@example.com" })).statusCode).toBe(400);
+    expect((await flag(app, { ...flagged, answer: "x".repeat(2001) })).statusCode).toBe(400);
+  });
+
+  it("is refused while the assistant is switched off", async () => {
+    const response = await flag(await start({ features: { assistant: false } }), flagged);
+    expect(response.statusCode).toBe(503);
+  });
 });
 
 describe("POST /v1/assistant/answers", () => {
