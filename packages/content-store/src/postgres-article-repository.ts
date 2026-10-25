@@ -206,6 +206,10 @@ export class PostgresArticleRepository implements ArticleRepository {
     return this.table.replaceCurrent(id, (current) => withDuplicateOf(current, referenceId));
   }
 
+  remove(id: string): Promise<VersionedEntry<NewsArticle> | null> {
+    return this.table.remove(id);
+  }
+
   setAlsoPublishedBy(id: string, others: NewsArticle["alsoPublishedBy"]): Promise<boolean> {
     return this.table.replaceCurrent(id, (current) => ({ ...current, alsoPublishedBy: others }));
   }

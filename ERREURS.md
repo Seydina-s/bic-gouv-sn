@@ -529,3 +529,10 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : les processus que lance `services.sh` (comme `deploy.sh`) héritent du tube et le gardent ouvert. La règle était écrite depuis le 16/10 (avec `tail`), mais seulement écrite.
 - **Correctif** : le garde-fou du shell refuse désormais `services.sh` ou `deploy.sh` suivi d'un tube (`.claude/hooks/shell-guard.mjs`, cas testés et test de mutation).
 - **Prévention** : règle d'escalade appliquée (règle enfreinte deux fois = contrôle automatique).
+
+## 25/10/2026 — Modification faite dans la copie servie
+
+- **Ce qui s'est passé** : en reprenant après la rotation, deux modifications de l'assistant ont été écrites dans `C:\bic-gouv-sn` (la copie servie, détachée sur main) au lieu d'une copie de travail. Repéré à la modification suivante, avant tout redémarrage : changements déplacés dans `-w2` (`git diff` puis `git apply`), copie servie remise propre.
+- **Cause racine** : la session démarre dans la copie servie ; la règle « une copie de travail par livraison » vivait dans la mémoire et la reprise, sans rien qui l'impose au moment d'écrire.
+- **Correctif** : aucun effet (rien n'a été redémarré ni envoyé).
+- **Prévention** : avant la première modification d'une session, se placer dans une copie de travail (`-w2`/`-w4`) sur une nouvelle branche ; la reprise (STATUS.md) le rappelle dans « Points d'attention ».

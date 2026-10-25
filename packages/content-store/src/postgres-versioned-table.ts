@@ -100,6 +100,23 @@ export class PostgresVersionedTable<T extends Versioned> {
     });
   }
 
+  /** Deletes an item with its whole history (see VersionedJsonStore.remove). */
+  remove(id: string): Promise<VersionedEntry<T> | null> {
+    return this.database.transaction(async (tx) => {
+      const current = await this.lockCurrent(tx, id);
+      if (current === null) {
+        return null;
+      }
+      const { rows } = await tx.query(
+        `SELECT data FROM ${this.spec.historyTable} WHERE id = $1 ORDER BY version`,
+        [id],
+      );
+      await tx.query(`DELETE FROM ${this.spec.historyTable} WHERE id = $1`, [id]);
+      await tx.query(`DELETE FROM ${this.spec.table} WHERE id = $1`, [id]);
+      return { current, history: this.parse(rows) };
+    });
+  }
+
   /** The current version, the item locked until the transaction ends (even if new). */
   private async lockCurrent(tx: Queryable, id: string): Promise<T | null> {
     await tx.query("SELECT pg_advisory_xact_lock(hashtext($1))", [`${this.spec.table}:${id}`]);

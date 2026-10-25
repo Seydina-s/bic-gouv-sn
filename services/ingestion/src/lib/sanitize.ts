@@ -178,10 +178,20 @@ export function unpublishable(title: string, bodyHtml: string, lang: string): st
     return null;
   }
   const text = `${title} ${bodyHtml}`;
+  if (SAMPLE_POST.test(text)) {
+    return "WordPress sample post";
+  }
   return looksEnglish(text)
     ? "text in English (the app has no English edition yet)"
     : damageIn(text);
 }
+
+/**
+ * The post WordPress writes on installing a site, never content: three of them were
+ * collected as news from industriecommerce.gouv.sn (DATA-10, 16/10/2026).
+ */
+const SAMPLE_POST =
+  /bienvenue sur wordpress|welcome to wordpress|ceci est votre premier article|this is your first post/i;
 
 const ENGLISH_WORDS: ReadonlySet<string> = new Set([
   "the",
@@ -219,7 +229,9 @@ export function looksEnglish(html: string): boolean {
     .split(/[^\p{L}]+/u);
   const english = words.filter((word) => ENGLISH_WORDS.has(word)).length;
   const french = words.filter((word) => FRENCH_WORDS.has(word)).length;
-  return english >= 10 && english > 3 * french;
+  // A short text with no French at all counts too: a one-line English greeting was
+  // collected as news ("Happy Easter", mcat.gouv.sn, DATA-10).
+  return (english >= 10 && english > 3 * french) || (english >= 3 && french === 0);
 }
 
 /**
