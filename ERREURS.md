@@ -536,3 +536,10 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : la session démarre dans la copie servie ; la règle « une copie de travail par livraison » vivait dans la mémoire et la reprise, sans rien qui l'impose au moment d'écrire.
 - **Correctif** : aucun effet (rien n'a été redémarré ni envoyé).
 - **Prévention** : avant la première modification d'une session, se placer dans une copie de travail (`-w2`/`-w4`) sur une nouvelle branche ; la reprise (STATUS.md) le rappelle dans « Points d'attention ».
+
+## 25/10/2026 — Profils Chrome des tests jamais supprimés
+
+- **Ce qui s'est passé** : 16 dossiers `bgs-test-chrome-*` d'environ 90 Mo chacun s'étaient accumulés dans le dossier temporaire de l'ordinateur, sur un disque déjà presque plein (point 54) : chaque audit d'accessibilité et chaque parcours de bout en bout en laissait un.
+- **Cause racine** : `scripts/test-browser.ts` créait un profil Chrome temporaire à chaque lancement (`mkdtempSync`) et ne le supprimait jamais ; `close()` arrêtait Chrome sans attendre sa fin, ni supprimer quoi que ce soit.
+- **Correctif** : `stopChrome` (même fichier) attend l'arrêt de Chrome puis supprime le profil, avec des essais répétés (Windows verrouille un moment les fichiers d'un programme arrêté), y compris après un lancement raté ; l'audit et les parcours attendent `close()`. Les 18 profils restants ont été supprimés (554 Mo).
+- **Prévention** : `scripts/test-browser-check.ts` (`pnpm test-browser:check`), lancé en CI après les parcours, échoue si un profil reste (test de mutation fait). Règle générale ajoutée à `ERREURS-GLOBALES.md` et au modèle de prompt système (section 10.2) : tout dossier temporaire créé par un outil est supprimé par lui, après l'arrêt du programme qui l'utilise, et un contrôle le vérifie.
