@@ -1,10 +1,16 @@
-import { assistantBenchSchema, assistantUsageSchema, type AssistantUsage } from "@bgs/shared-types";
+import {
+  assistantBenchSchema,
+  assistantFlagsResponseSchema,
+  assistantUsageSchema,
+  type AssistantUsage,
+} from "@bgs/shared-types";
 import { FigureTile } from "../../components/FigureTile";
 import { adminRequest } from "../../lib/admin-api";
 import { averageCost, estimatedCost, formatDollars, usedShare } from "../../lib/assistant-usage";
 import { t } from "../../lib/i18n";
 import { requireAccount } from "../../lib/session";
 import { BenchView } from "./BenchView";
+import { FlagsView } from "./FlagsView";
 import { LimitForm } from "./LimitForm";
 
 export const dynamic = "force-dynamic";
@@ -91,9 +97,10 @@ function UsageView({ usage }: { usage: AssistantUsage }) {
 /** The assistant's questions this month, their cost, and its monthly limit. */
 export default async function AssistantPage() {
   const { token } = await requireAccount();
-  const [result, bench] = await Promise.all([
+  const [result, bench, flags] = await Promise.all([
     adminRequest({ path: "/assistant", token, schema: assistantUsageSchema }),
     adminRequest({ path: "/assistant/bench", token, schema: assistantBenchSchema }),
+    adminRequest({ path: "/assistant/flags", token, schema: assistantFlagsResponseSchema }),
   ]);
   return (
     <section aria-labelledby="assistant-title" className="space-y-6">
@@ -118,6 +125,19 @@ export default async function AssistantPage() {
         ) : (
           <p role="alert" className="rounded-md bg-danger-surface p-6 text-on-danger-surface">
             {t("assistant.bench.failed")}
+          </p>
+        )}
+      </section>
+      <section aria-labelledby="flags-title" className="space-y-4 border-t border-line pt-6">
+        <h2 id="flags-title" className="font-display text-2xl font-extrabold tracking-tight">
+          {t("assistant.flags.title")}
+        </h2>
+        <p className="max-w-prose text-ink-soft">{t("assistant.flags.intro")}</p>
+        {flags.ok ? (
+          <FlagsView flags={flags.data.flags} />
+        ) : (
+          <p role="alert" className="rounded-md bg-danger-surface p-6 text-on-danger-surface">
+            {t("assistant.flags.failed")}
           </p>
         )}
       </section>
