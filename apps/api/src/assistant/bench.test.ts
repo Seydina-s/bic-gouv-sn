@@ -91,9 +91,17 @@ describe("the bench's questions", () => {
     );
   });
 
-  it("ask for the newest news when nothing was published in the period", () => {
+  it("accept the newest news given when nothing was published in the period", () => {
     const cases = generatedCases(PAGES, "2026-10-20");
-    expect(cases.find((c) => c.lang === "en")?.freshFrom).toBe(TODAY);
+    // All four articles are given: the oldest of them may be cited.
+    expect(cases.find((c) => c.lang === "en")?.freshFrom).toBe("2026-09-30");
+    const many = Array.from({ length: 10 }, (_, n) =>
+      page(60 + n, "news-article", "Article fictif", `2026-10-${String(10 + n)}`),
+    );
+    // Ten articles, eight given: from the 12th.
+    expect(generatedCases(many, "2026-10-25").find((c) => c.lang === "fr")?.freshFrom).toBe(
+      "2026-10-12",
+    );
   });
 
   it("take half of the retrieval set each week, and every trap", () => {

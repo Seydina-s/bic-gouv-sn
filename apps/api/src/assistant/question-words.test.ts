@@ -54,10 +54,12 @@ describe("typing slips", () => {
 });
 
 describe("datesOf", () => {
-  it("gives the model today and the bounds of this week", () => {
-    expect(datesOf("2026-10-11")).toBe(
+  it("gives the model today, and the bounds of this week to a question about it", () => {
+    expect(datesOf("2026-10-11", true)).toBe(
       "Today's date: 2026-10-11 (Sunday). This week: Monday 2026-10-05 to Sunday 2026-10-11.",
     );
-    expect(datesOf("2026-10-12")).toContain("Monday 2026-10-12 to Sunday 2026-10-18");
+    expect(datesOf("2026-10-12", true)).toContain("Monday 2026-10-12 to Sunday 2026-10-18");
+    // Bench of 25/10/2026: given to all, the week made "the last Council" a refusal.
+    expect(datesOf("2026-10-25", false)).toBe("Today's date: 2026-10-25 (Sunday).");
   });
 });

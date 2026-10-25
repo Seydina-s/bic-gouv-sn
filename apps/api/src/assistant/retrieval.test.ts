@@ -242,6 +242,29 @@ describe("the extracts given to the model", () => {
     expect(given.every((p) => p.kind === "news-article")).toBe(true);
   });
 
+  it("bring the newest news in any language for the period, the language asked first", () => {
+    // Bench of 25/10/2026: the Wolof pages lag, and a Wolof question got news 17 days old.
+    const wolof = (n: number, date: string): Passage => ({
+      ...passage(n, date, "actualites", "Xibaar bu fictif."),
+      id: `content-${String(n)}:wo:0`,
+      lang: "wo",
+    });
+    const lagging = new PassageIndex([
+      wolof(50, "2026-09-20"),
+      passage(51, "2026-10-08", "actualites", "Une visite fictive."),
+      wolof(51, "2026-10-08"),
+      passage(52, "2026-10-07", "actualites", "Une audience fictive."),
+    ]);
+    const given = retrievePassages(lagging, "Lan mooy xibaar yi tey ?", "wo", TODAY);
+    expect(given.map((p) => p.id)).toEqual(["content-51:wo:0"]);
+    const older = retrievePassages(lagging, "Lan mooy xibaar yi tey ?", "wo", "2026-10-10");
+    expect(older.map((p) => p.id)).toEqual([
+      "content-51:wo:0",
+      "content-52:fr:0",
+      "content-50:wo:0",
+    ]);
+  });
+
   it("bring the procedure sheet first for a question asking how to do something", () => {
     // Bench of 17/10/2026: articles sharing "père" crowded out the sheet.
     const sheet: Passage = {
