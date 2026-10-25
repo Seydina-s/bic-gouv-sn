@@ -1,6 +1,13 @@
 # Historique des sessions — Bic Gouv SN (archive : la reprise est dans STATUS.md ; ne lire ce fichier que pour un besoin précis)
 
-**Dernière mise à jour** : 22/10/2026 (17 h) · **Mode** : autonome prolongé (demande du 22/10). Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md` (points 50, 52 à 55, 60, 66).
+**Dernière mise à jour** : 25/10/2026 (19 h 55) · **Mode** : autonome prolongé (demande du 22/10). Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md` (points 50, 70).
+
+## 25/10, en bref : banc de l'assistant, « Signaler cette réponse », modèle 3.1 et premières skills
+- **Assistant (#413)** : banc du 25/10 (77 / 96, aucune réponse inventée) ; la semaine en cours n'est plus donnée qu'aux questions qui en parlent ; actualités d'une période mélangées entre langues par date ; plafond de réponse porté à 600 jetons. Faiblesses restantes : AST-42. Contrôle rapide d'une correction : `bgs-ops/check-bench.sh` (≈ 0,17 $).
+- **Contenus (#415)** : la collecte refuse les pages d'exemple de WordPress et les textes courts en anglais ; commande `discard` (liste, puis suppression par identifiant avec copie privée) ; 5 articles supprimés sur décision de l'utilisateur.
+- **« Signaler cette réponse » (AST-30e)** : serveur (#417, 90 jours, effacement automatique), page de la console (#419), bouton de l'app avec la phrase validée par l'utilisateur (#420, mise à jour à distance) ; mention « Traduction automatique » des contenus (#416) et note de l'interface wolof (#420) retirées.
+- **Outillage** : profils Chrome des tests supprimés à la fermeture et vérifiés en CI (#418) ; `deploy.sh` relance aussi le filtre public ; garde du shell resserré sur l'exécution des scripts (#421) ; disque : 23 Go libres (SDK Android et caches supprimés, Téléchargements jamais touchés) ; version de développement iPhone compilée.
+- **Méthode** : modèle universel de prompt système refait (v3, puis 3.1 : ossature du document initial de l'utilisateur, 30 suppositions, section 18 tirée des 5 cours Claude Code de l'Anthropic Academy) ; premières skills du projet (`verification`, `livraison`) et sous-agent `relecteur` (#421) ; Claude crée ses skills et hooks sans attendre (décision du 25/10). Deux arrêts de `ship.sh` sur des vérifications partielles, consignés dans ERREURS.md.
 
 ## 24/10, en bref : tournée Dependabot, accessibilité, modèle de méthode
 - **Dépendances (#405, #281, #282, #280, #329)** : toutes les mises à jour mineures fusionnées ; #397 fermée en doublon. Leçons : verrou non mis à jour par Dependabot, branches réécrites par Dependabot pendant les contrôles, outil de contrôle mis à jour sans lancer ce contrôle (ERREURS.md, #409).
