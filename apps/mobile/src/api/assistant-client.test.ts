@@ -1,3 +1,4 @@
+import type { AssistantFlagSubmission } from "@bgs/shared-types";
 import { AskError, createAssistantClient } from "./assistant-client";
 
 const question = { question: "Une question fictive ?", lang: "fr", mode: "ask" } as const;
@@ -43,12 +44,12 @@ describe("the assistant client", () => {
   });
 
   it("sends a flag with only what the person chose to send (AST-30e)", async () => {
-    const flag = {
+    const flag: AssistantFlagSubmission = {
       ...question,
       status: "not_found",
       answer: null,
       sources: [],
-    } as const;
+    };
     const { client, fetchImpl } = answering(() => new Response("{}", { status: 201 }));
     await client.flag(flag);
     const [url, init] = (fetchImpl.mock.calls[0] ?? []) as unknown as [string, RequestInit];
