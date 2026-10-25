@@ -640,10 +640,11 @@ describe("app shell", () => {
     await fireEvent.press(await screen.findByRole("button", { name: "Réglages" }));
     await fireEvent.press(await screen.findByRole("radio", { name: "Sombre" }));
     await fireEvent.press(screen.getByRole("radio", { name: "Wolof" }));
-    // The whole interface follows: the settings now speak Wolof, said machine-translated.
+    // The whole interface follows: the settings now speak Wolof, with no machine-translation
+    // note any more (owner's decision of 25/10/2026, point 67).
     expect(screen.getByRole("radio", { name: "Lëndëm", checked: true })).toBeOnTheScreen();
     expect(screen.getByRole("radio", { name: "Wolof", checked: true })).toBeOnTheScreen();
-    expect(screen.getByText(/Masin moo tekki wolof/)).toBeOnTheScreen();
+    expect(screen.queryByText(/Masin moo tekki wolof/)).toBeNull();
     // Read after the actions (an async callback inside waitFor overlaps act() calls).
     expect(await AsyncStorage.multiGet(["bgs-theme", "bgs-language"])).toEqual([
       ["bgs-theme", "dark"],
