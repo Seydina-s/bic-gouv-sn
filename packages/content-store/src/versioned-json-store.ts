@@ -122,6 +122,23 @@ export class VersionedJsonStore<T extends Versioned> {
     });
   }
 
+  /**
+   * Deletes an item with its whole history, for a text the owner decided was never
+   * content (DATA-10). Returns what was deleted, for a backup; null if unknown.
+   */
+  remove(id: string): Promise<VersionedEntry<T> | null> {
+    return withWriteLock(this.lockPath, async () => {
+      const entries = { ...(await this.entries()) };
+      const entry = entries[id];
+      if (entry === undefined) {
+        return null;
+      }
+      delete entries[id];
+      await this.write(entries);
+      return entry;
+    });
+  }
+
   /** Changes whenever the file is replaced or rewritten (size, time, file id). */
   private async stampOf(path: string): Promise<string> {
     const { size, mtimeMs, ino } = await stat(path);
