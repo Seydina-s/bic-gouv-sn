@@ -79,8 +79,7 @@ import {
 import {
   type AnswerFlagStore,
   AnswerFlags,
-  FileAnswerFlagStore,
-  PostgresAnswerFlagStore,
+  defaultAnswerFlagStore,
 } from "./assistant/answer-flags";
 import { PhotoFolder } from "./media/photos";
 import {
@@ -277,9 +276,7 @@ export async function buildApp({
   participationStore = database === null
     ? new FileParticipationStore(config.PARTICIPATION_PATH)
     : new PostgresParticipationStore(database),
-  answerFlagStore = database === null
-    ? new FileAnswerFlagStore(config.ASSISTANT_FLAGS_PATH)
-    : new PostgresAnswerFlagStore(database),
+  answerFlagStore = defaultAnswerFlagStore(database, config.ASSISTANT_FLAGS_PATH),
   settings = database === null
     ? new FileSettingStore(config.SETTINGS_PATH)
     : new PostgresSettingStore(database),

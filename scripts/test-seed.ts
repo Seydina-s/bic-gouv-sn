@@ -323,7 +323,7 @@ async function seedParticipation(dataDir: string): Promise<void> {
   );
 }
 
-/** Two answers flagged by people (AST-30e): one answered with its source, one not found. */
+/** Two answers flagged by people (AST-30e): one answered with its source, one not found, asked again. */
 function seedAnswerFlags(dataDir: string): void {
   writeFileSync(
     join(dataDir, "assistant-flags.json"),
@@ -360,6 +360,29 @@ function seedAnswerFlags(dataDir: string): void {
           sources: [],
         },
       ],
+    }),
+  );
+  // The second one asked again by the bench (AST-30g), now answered; the first not yet.
+  const bench = join(dataDir, "assistant", "bench");
+  mkdirSync(bench, { recursive: true });
+  writeFileSync(
+    join(bench, "flag-rechecks.json"),
+    JSON.stringify({
+      "00000000-0000-4000-8000-00000000f1a2": {
+        askedOn: "2026-10-04",
+        status: "answered",
+        answer: "Tontu bu fictif ngir audit bi.",
+        sources: [
+          {
+            kind: "procedure",
+            contentId: "audit-procedure",
+            slug: "demarche-fictive",
+            title: "Démarche fictive",
+            url: "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demarche-fictive",
+            publishedOn: null,
+          },
+        ],
+      },
     }),
   );
 }

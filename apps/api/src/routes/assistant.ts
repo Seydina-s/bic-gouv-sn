@@ -13,7 +13,8 @@ import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import type { AdminSignIn } from "../admin/sign-in-service";
 import type { AnswerFlags } from "../assistant/answer-flags";
 import type { AssistantProblem, AssistantService } from "../assistant/assistant-service";
-import { readBenchResults } from "../assistant/bench-results";
+import { readBenchResults, readFlagRechecks } from "../assistant/bench-results";
+import { recheckChanged } from "../assistant/flag-recheck";
 import type { ErrorJournal } from "../journal/error-journal";
 import { authorize } from "./admin-guard";
 
@@ -125,7 +126,8 @@ export const adminAssistantRoutes: FastifyPluginAsyncZod<AdminAssistantOptions> 
     {
       schema: {
         tags: ["admin"],
-        summary: "Answers people flagged, newest first (kept 90 days)",
+        summary:
+          "Answers people flagged, newest first (kept 90 days), each with the bench's latest recheck",
         response: { 200: assistantFlagsResponseSchema, 401: apiErrorSchema, 403: apiErrorSchema },
       },
     },
@@ -134,7 +136,17 @@ export const adminAssistantRoutes: FastifyPluginAsyncZod<AdminAssistantOptions> 
         return reply;
       }
       void reply.header("cache-control", "no-store");
-      return { flags: await flags.list() };
+      const [kept, rechecks] = await Promise.all([flags.list(), readFlagRechecks(benchFolder)]);
+      return {
+        flags: kept.map((flag) => {
+          const recheck = rechecks[flag.id];
+          return {
+            ...flag,
+            recheck:
+              recheck === undefined ? null : { ...recheck, changed: recheckChanged(flag, recheck) },
+          };
+        }),
+      };
     },
   );
 
