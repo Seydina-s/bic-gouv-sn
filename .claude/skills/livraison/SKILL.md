@@ -29,7 +29,7 @@ Les scripts sont dans `C:\Users\HP\bgs-ops` (mode d'emploi : `README.md` du doss
 
 ## 3. Après la fusion
 
-- Si l'API, la console, `shared-types` ou l'ingestion ont changé : `bash /c/Users/HP/bgs-ops/deploy.sh > <fichier> 2>&1` (autorisé sans demander ; jamais dans un tube), puis vérifier :
+- Si l'API, la console, `shared-types`, l'ingestion ou le filtre public (`scripts/public-gate.mjs`, dont la liste n'est lue qu'au démarrage) ont changé : `bash /c/Users/HP/bgs-ops/deploy.sh > <fichier> 2>&1` (autorisé sans demander ; jamais dans un tube). Il remet la copie servie sur `origin/main` et relance tout, filtre public compris. Puis vérifier :
   - `curl` sur `http://localhost:3100/v1/health` : 200 ;
   - la console `http://localhost:3001/` : 307, après une vingtaine de secondes de démarrage ;
   - la dernière ligne des journaux des voix (`bgs-ops/logs/voices-<langue>.log`), puisque le déploiement arrête puis relance la boucle des voix.

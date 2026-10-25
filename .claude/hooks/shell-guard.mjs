@@ -103,14 +103,18 @@ export function pushesUngated(command) {
  * True when a script that leaves processes running (services.sh, deploy.sh) feeds a
  * pipe: those processes keep the pipe open, so the command never returns (16/10 with
  * tail, 24/10/2026 with grep, which then had to be stopped by hand). Its output goes
- * to a file instead, read afterwards.
+ * to a file instead, read afterwards. Only a script that is run counts: reading or
+ * searching the file itself ("grep … deploy.sh | head") was refused too (25/10/2026).
  */
 export function pipesStarter(command) {
   // Quoted words are text; "2>&1" joins streams, it does not end the command.
   const text = withoutQuotedHeredocs(command)
     .replace(/'[^']*'|"(?:\\.|[^"\\])*"/g, "''")
     .replace(/\d*>&\d+/g, " ");
-  return /\b(services|deploy)\.sh\b[^;&\n|]*\|(?!\|)/.test(text);
+  // The script is the command word of its segment, run directly or through a shell.
+  return /(?:^|[;&|(\n])\s*(?:(?:nohup|time)\s+)*(?:(?:bash|sh|source|\.)\s+)?[^\s;&|()]*\b(?:services|deploy)\.sh\b[^;&\n|]*\|(?!\|)/.test(
+    text,
+  );
 }
 
 export function refusal(command) {

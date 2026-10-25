@@ -40,6 +40,9 @@ const refused = [
   // A script leaving processes running, piped: the pipe never closes (16/10 and 24/10/2026).
   "bash /c/Users/HP/bgs-ops/services.sh 2>&1 | grep -i metro",
   "bash deploy.sh | tail -5",
+  "cd /c/bic-gouv-sn && bash deploy.sh | tail -3",
+  "nohup bash services.sh | cat",
+  "/c/Users/HP/bgs-ops/services.sh | head",
 ];
 
 const allowed = [
@@ -63,6 +66,9 @@ const allowed = [
   "bash deploy.sh > logs/deploy.log 2>&1; tail -9 logs/deploy.log",
   "bash services.sh || echo failed",
   'grep -n "services.sh | tail" README.md',
+  // Reading or searching the scripts runs nothing (25/10/2026).
+  'grep -n "" /c/Users/HP/bgs-ops/deploy.sh | sed -n 1,80p',
+  'grep -n -i "gate" /c/Users/HP/bgs-ops/README.md /c/Users/HP/bgs-ops/services.sh | head -8',
 ];
 
 test("refuses every command that could show a secret or run text", () => {
