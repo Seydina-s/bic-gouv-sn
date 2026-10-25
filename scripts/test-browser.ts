@@ -3,6 +3,7 @@
 // plain gestures). No test framework: Chrome is already on the CI runners.
 import { spawn, type ChildProcess } from "node:child_process";
 import { mkdtempSync, readFileSync } from "node:fs";
+import { rm } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -162,12 +163,15 @@ const START_ATTEMPTS = 2;
 
 interface StartedChrome {
   process: ChildProcess;
+  /** Its own profile folder, removed when it stops. */
+  profile: string;
   /** Its last error lines, to explain a failed start. */
   errors: () => string;
   exited: () => boolean;
 }
 
 function startChrome(executable: string): StartedChrome {
+  const profile = mkdtempSync(join(tmpdir(), "bgs-test-chrome-"));
   const chrome = spawn(executable, [
     "--headless=new",
     "--disable-gpu",
@@ -180,7 +184,7 @@ function startChrome(executable: string): StartedChrome {
     // CI containers run as root without a user namespace for the sandbox.
     ...(process.env["CI"] === undefined ? [] : ["--no-sandbox"]),
     `--remote-debugging-port=${String(DEBUG_PORT)}`,
-    `--user-data-dir=${mkdtempSync(join(tmpdir(), "bgs-test-chrome-"))}`,
+    `--user-data-dir=${profile}`,
     "about:blank",
   ]);
   let stderr = "";
@@ -195,7 +199,24 @@ function startChrome(executable: string): StartedChrome {
     exited = true;
     stderr += String(error);
   });
-  return { process: chrome, errors: () => stderr, exited: () => exited };
+  return { process: chrome, profile, errors: () => stderr, exited: () => exited };
+}
+
+/** Longest wait for Chrome to exit before its profile is removed anyway. */
+const STOP_TIMEOUT_MS = 10_000;
+
+/**
+ * Stops Chrome, waits for it to exit, then removes its profile (about 90 MB each). Kept
+ * until 25/10/2026, the profiles of every audit and journey had piled up in the temporary
+ * folder. Windows keeps a stopped program's files locked a moment: removal is retried.
+ */
+async function stopChrome(chrome: ChildProcess, profile: string): Promise<void> {
+  if (chrome.exitCode === null && chrome.signalCode === null) {
+    const exited = new Promise((resolve) => chrome.once("exit", resolve));
+    chrome.kill();
+    await Promise.race([exited, wait(STOP_TIMEOUT_MS)]);
+  }
+  await rm(profile, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 });
 }
 
 async function pageSocketUrl(chrome: StartedChrome): Promise<string> {
@@ -217,15 +238,17 @@ async function pageSocketUrl(chrome: StartedChrome): Promise<string> {
 }
 
 /** Starts Chrome, trying a second time if the first start fails. */
-async function launchChrome(executable: string): Promise<{ chrome: ChildProcess; url: string }> {
+async function launchChrome(
+  executable: string,
+): Promise<{ chrome: ChildProcess; url: string; profile: string }> {
   let lastError: unknown = null;
   for (let attempt = 1; attempt <= START_ATTEMPTS; attempt += 1) {
     const chrome = startChrome(executable);
     try {
-      return { chrome: chrome.process, url: await pageSocketUrl(chrome) };
+      return { chrome: chrome.process, url: await pageSocketUrl(chrome), profile: chrome.profile };
     } catch (error) {
       lastError = error;
-      chrome.process.kill();
+      await stopChrome(chrome.process, chrome.profile);
       await wait(1000);
     }
   }
@@ -241,6 +264,7 @@ export class TestBrowser {
 
   private constructor(
     private readonly chrome: ChildProcess,
+    private readonly profile: string,
     private readonly socket: WebSocket,
   ) {
     socket.addEventListener("message", (event) => {
@@ -270,12 +294,12 @@ export class TestBrowser {
     if (executable === undefined) {
       throw new Error("Set CHROME_PATH to a Chrome or Chromium executable");
     }
-    const { chrome, url } = await launchChrome(executable);
+    const { chrome, url, profile } = await launchChrome(executable);
     const socket = new WebSocket(url);
     await new Promise((resolve) => {
       socket.addEventListener("open", resolve, { once: true });
     });
-    const browser = new TestBrowser(chrome, socket);
+    const browser = new TestBrowser(chrome, profile, socket);
     await browser.send("Page.enable");
     await browser.send("Runtime.enable");
     await browser.send("Network.enable");
@@ -605,8 +629,8 @@ export class TestBrowser {
     return point as { x: number; y: number };
   }
 
-  close(): void {
+  async close(): Promise<void> {
     this.socket.close();
-    this.chrome.kill();
+    await stopChrome(this.chrome, this.profile);
   }
 }
