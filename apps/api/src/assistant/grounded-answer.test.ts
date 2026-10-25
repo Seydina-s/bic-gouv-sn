@@ -65,6 +65,20 @@ describe("userMessage", () => {
     );
     expect(userMessage("Le port ferme", "fr", given)).not.toContain("Task:");
   });
+
+  it("gives the bounds of this week to a question about the week only", () => {
+    // Bench of 25/10/2026: given to all, the week made "the last Council" a refusal.
+    const today = "2026-10-25";
+    const latest = userMessage("Qu'a décidé le dernier Conseil ?", "fr", given, "ask", today);
+    expect(latest).toContain("Today's date: 2026-10-25 (Sunday).");
+    expect(latest).not.toContain("This week");
+    expect(
+      userMessage("Qu'a fait le gouvernement cette semaine ?", "fr", given, "ask", today),
+    ).toContain("This week: Monday 2026-10-19 to Sunday 2026-10-25.");
+    expect(
+      userMessage("Lan la Njiitu réew mi def ayu bés bii ?", "wo", given, "ask", today),
+    ).toContain("This week:");
+  });
 });
 
 describe("checkAnswer", () => {
