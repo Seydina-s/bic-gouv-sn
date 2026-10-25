@@ -29,7 +29,7 @@ Rien en cours d'écriture ; aucune branche ouverte hors Dependabot.
 - Tout texte visible par l'utilisateur en français ; commits et PR sans aucune mention de Claude (CLAUDE.md §15).
 - Ne jamais lire `.env*` (sauf `.env.example`), `.data/admin/**`, clés, `*.p8`. La clé Anthropic est dans `apps/api/.env.local`, saisie par l'utilisateur seul.
 - Garde du shell : pas d'accent grave dans `node -e` ni dans PowerShell hors guillemets ; `git push` seulement après gitleaks (`ship.sh` le fait) ; écrire les scripts avec l'outil d'écriture de fichiers.
-- Une copie de travail par livraison (`-w2`, `-w4`) ; ne jamais changer de branche dans une copie en cours de livraison ; jamais de `git stash` nu ni de `--force`.
+- La session démarre dans la copie servie : jamais d'écriture dedans ; avant la première modification, aller dans `-w2`/`-w4` sur une nouvelle branche (ERREURS.md, 25/10). Une copie de travail par livraison (`-w2`, `-w4`) ; ne jamais changer de branche dans une copie en cours de livraison ; jamais de `git stash` nu ni de `--force`.
 - Une PR bloquée par l'audit de sécurité : corriger la dépendance sur main, puis `gh pr update-branch <n>` avant de relancer la fusion (relancer seul le contrôle ne suffit pas).
 - `deploy.sh` arrête la boucle des voix avant l'enregistrement en cours (ERREURS.md, 22/10) ; après tout redémarrage, relire le journal de chaque langue.
 - Jamais `services.sh` ni `deploy.sh` dans un tube (refusé par le garde du shell) : rediriger vers un fichier puis le lire.
