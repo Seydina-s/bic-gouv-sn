@@ -17,7 +17,6 @@ export const fr = {
   content: {
     sourceAttribution: "Source\u00a0: {source}",
     alsoPublishedBy: "Aussi publi\u00e9 par\u00a0: {institutions}",
-    machineTranslation: "Traduction automatique",
     /** An article shown in French because it has no version in the language chosen. */
     onlyInFrench: "Disponible en français seulement",
     listen: "Écouter",

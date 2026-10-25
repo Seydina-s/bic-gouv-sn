@@ -207,7 +207,6 @@ function ArticleBody({
           ]}
         >
           {formatPublishedOn(detail.publishedOn, lang)}
-          {detail.translationStatus === "machine" ? ` · ${t("content.machineTranslation")}` : ""}
           {/* Shown in French because it has no version in the language chosen (fallback). */}
           {detail.lang !== lang ? ` · ${t("content.onlyInFrench")}` : ""}
         </Text>

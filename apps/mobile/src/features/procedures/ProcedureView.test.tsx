@@ -138,7 +138,9 @@ describe("the page of a procedure", () => {
       title: "Placeholder translated title",
       blocks: [p("Placeholder translated text.")],
     });
-    expect(await screen.findByText("Machine translation")).toBeOnTheScreen();
+    expect(await screen.findByText("Placeholder translated title")).toBeOnTheScreen();
+    // Owner's decision of 25/10/2026: translated content carries no mention.
+    expect(screen.queryByText("Machine translation")).toBeNull();
     expect(screen.queryByText("This page is only available in French")).toBeNull();
     await fireEvent.press(screen.getByRole("button", { name: "Listen" }));
     expect(screen.getByRole("button", { name: "English voice coming soon" })).toBeOnTheScreen();

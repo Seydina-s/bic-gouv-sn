@@ -23,7 +23,6 @@ export const wo: PartialCatalog<FrCatalog> = {
   content: {
     sourceAttribution: "Fi mu jóge: {source}",
     alsoPublishedBy: "Siiwal nañu ko it ci: {institutions}",
-    machineTranslation: "Masin moo ko tekki",
     onlyInFrench: "Ci farañse rekk la am",
     listen: "Déglu",
     pause: "Taxawal",
