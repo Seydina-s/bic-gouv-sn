@@ -128,13 +128,12 @@ export class VersionedJsonStore<T extends Versioned> {
    */
   remove(id: string): Promise<VersionedEntry<T> | null> {
     return withWriteLock(this.lockPath, async () => {
-      const entries = { ...(await this.entries()) };
+      const entries = await this.entries();
       const entry = entries[id];
       if (entry === undefined) {
         return null;
       }
-      delete entries[id];
-      await this.write(entries);
+      await this.write(Object.fromEntries(Object.entries(entries).filter(([key]) => key !== id)));
       return entry;
     });
   }

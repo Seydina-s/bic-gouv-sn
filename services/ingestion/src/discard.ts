@@ -82,7 +82,7 @@ export async function discardArticles(
       entry: { current, history: await articles.history(id) },
     };
     await kept.update((saved) => ({
-      next: [...(Array.isArray(saved) ? saved : []), discarded],
+      next: [...(Array.isArray(saved) ? (saved as unknown[]) : []), discarded],
       result: null,
     }));
     await articles.remove(id);
