@@ -2,7 +2,6 @@ import { fireEvent, render, screen } from "@testing-library/react-native";
 import { getLocales } from "expo-localization";
 import { Text } from "react-native";
 import { I18nProvider } from "./I18nProvider";
-import { ThemeProvider } from "../theme/ThemeProvider";
 import { useTranslation } from "./useTranslation";
 
 jest.mock("expo-localization", () => ({ getLocales: jest.fn() }));
