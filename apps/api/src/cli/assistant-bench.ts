@@ -178,16 +178,16 @@ try {
     let costMicrodollars = 0;
     /** The real assistant's answer; null when the service did not reply. */
     const ask = async (
-      question: { question: string; lang: Lang; mode: AssistantMode },
+      { question, lang, mode }: { question: string; lang: Lang; mode: AssistantMode },
       traces: AnswerTrace[] = [],
     ): Promise<GroundedAnswer | null> => {
       try {
         const answer = await answerQuestion(
-          { ...question, today },
+          { question, lang, mode, today },
           {
             index: knowledge.index,
             meaning,
-            llm: question.lang === "wo" ? wolofLlm : llm,
+            llm: lang === "wo" ? wolofLlm : llm,
             call: (operation) => operation(AbortSignal.timeout(QUESTION_TIMEOUT_MS)),
             observe: (trace) => traces.push(trace),
           },
@@ -205,7 +205,7 @@ try {
     });
     const flagAnswers = new Map(
       await inGroups(flagged, async (flag) => {
-        const answer = await ask(flag);
+        const answer = await ask({ question: flag.question, lang: flag.lang, mode: flag.mode });
         const sources = answer === null ? [] : sourcesOf(answer.sources, knowledge.procedureSlugs);
         return [flag.id, answer === null ? null : flagRecheck(answer, sources, today)] as const;
       }),
