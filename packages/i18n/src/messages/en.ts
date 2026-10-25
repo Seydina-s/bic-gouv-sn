@@ -21,7 +21,6 @@ export const en: PartialCatalog<FrCatalog> = {
   content: {
     sourceAttribution: "Source: {source}",
     alsoPublishedBy: "Also published by: {institutions}",
-    machineTranslation: "Machine translation",
     onlyInFrench: "Only available in French",
     listen: "Listen",
     pause: "Pause",
