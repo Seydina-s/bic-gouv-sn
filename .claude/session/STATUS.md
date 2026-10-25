@@ -1,12 +1,12 @@
 # Reprise — Bic Gouv SN
 
-**Mis à jour** : 24/10/2026 23 h 10 · **Mode** : autonome prolongé (demande du 22/10 ; s'arrêter pour toute dépense imprévue, sécurité, données personnelles, contenu publié, action difficile à défaire) · **main** : #411 (+ cette rotation). Historique des sessions : `HISTORIQUE.md` (à ne lire que pour un besoin précis). Méthode : skill `session-rotation`.
+**Mis à jour** : 25/10/2026 14 h 15 · **Mode** : autonome prolongé (demande du 22/10 ; s'arrêter pour toute dépense imprévue, sécurité, données personnelles, contenu publié, action difficile à défaire) · **main** : #413. Historique des sessions : `HISTORIQUE.md` (à ne lire que pour un besoin précis). Méthode : skill `session-rotation`.
 
 ## État
 - Services locaux en marche (`bash /c/Users/HP/bgs-ops/services.sh` relance ce qui est tombé) : API 3100, console 3001 (Next.js 16.4.1), surveillance des 22 sites + der.sn, filtre public 3200 + tunnel ngrok, Metro 8081 (iPhone, copie `-demo`).
 - Traduction automatique (#399, #401) : la surveillance traduit chaque nouvel article en anglais et en wolof toutes les 30 min, les fiches des démarches toutes les 6 h ; résultats dans `bgs-ops/logs/watch.log` (lignes `translation`). Refusé deux fois = plus renvoyé ; le compteur repart de `CHECKS_CHANGED_AT` (`services/ingestion/src/translation/batch-translation.ts`) à chaque correction des contrôles.
-- Voix (serveur Hetzner `voices@95.216.167.95`, clé `~/.ssh/bic_gouv_ai`) : français fini ; anglais en cours (2 001 restants le 24/10 à 22 h 10, `bgs-ops/logs/voices-en.log` ; un « scp: Connection closed » isolé est retenté seul) ; wolof ensuite, à finir sur le futur serveur d'hébergement (décision du 22/10).
-- Banc d'essai de l'assistant : chaque dimanche à 4 h (tâche Windows « BicGouvSN-BancEssai », `bgs-ops/bench.sh`) ; dernier score 86 / 92 ; les échecs gardent désormais extraits et réponse brute (`evidence`, #401).
+- Voix (serveur Hetzner `voices@95.216.167.95`, clé `~/.ssh/bic_gouv_ai`) : français fini ; anglais en cours (environ 1 200 restants le 25/10 à 14 h 10, serveur parfois injoignable quelques minutes, retenté seul, `bgs-ops/logs/voices-en.log` ; un « scp: Connection closed » isolé est retenté seul) ; wolof ensuite, à finir sur le futur serveur d'hébergement (décision du 22/10).
+- Banc d'essai de l'assistant : chaque dimanche à 4 h (tâche Windows « BicGouvSN-BancEssai », `bgs-ops/bench.sh`) ; passage du 25/10 : 77 / 96, aucune réponse inventée ; #413 (AST-41) corrige la semaine donnée à toutes les questions, le mélange des langues et les réponses coupées (contrôle des faiblesses : 28 / 39 contre 25). Contrôle rapide d'une correction avant fusion : `bash /c/Users/HP/bgs-ops/check-bench.sh <copie>` (≈ 0,17 $, remet seul les résultats du jour).
 - Dernière mise à jour à distance de l'app : « Boutons mieux nommés pour la lecture d'écran et la commande vocale » (#282) ; tanstack (#280) partira avec la suivante. Metro (`-demo`) remis sur main le 24/10.
 - Modèle de méthode générique pour tout nouveau projet : `C:\Users\HP\Desktop\CLAUDE-MODELE-PROJET.md` (24/10) ; y reporter chaque nouvelle règle de `~/.claude/ERREURS-GLOBALES.md`.
 
@@ -14,7 +14,7 @@
 Rien en cours d'écriture ; aucune branche ouverte hors Dependabot.
 
 ## Prochaines étapes (dans l'ordre)
-1. Dimanche 25/10 après 4 h : lire le passage du banc (`.data/assistant/bench/2026-10-25.json`, champ `evidence` des échecs) et corriger les faiblesses récurrentes. Avant cette heure, commencer par l'étape 2.
+1. AST-42 (backlog) : fiches de démarches mal trouvées pour les questions reformulées, refus trop littéraux (« Conseil de mercredi », visa Canada), titre d'article traité comme hors sujet. Extraits et réponses dans `.data/assistant/bench/2026-10-25.json` (`evidence`). Vérifier sur le vrai modèle avec `check-bench.sh` avant la fusion ; pièges toujours à 15 / 15.
 2. PR Dependabot de versions majeures, avec essai réel : #227 ioredis 6 (lancer aussi les contrôles qui utilisent Redis), puis #400 pillow 13 et #303 torch 2.13 (serveur des voix : à tester sur le serveur avant fusion, jamais pendant un rattrapage). Les mineures du 24/10 sont fusionnées (#405, #281, #282, #280, #329 ; #397 fermée en doublon). Pour un outil de contrôle, lancer ce contrôle-là en local (ex. `pnpm a11y` après les builds) : `ship.sh` ne lance ni builds, ni audit, ni parcours.
 3. Selon les réponses de l'utilisateur : DATA-10 (point 60), puis AST-30e, bouton « Signaler cette réponse » (point 66).
 4. Après chaque fusion qui touche l'API, la console, `shared-types` ou l'ingestion : `bash /c/Users/HP/bgs-ops/deploy.sh` (autorisé sans demander).
@@ -44,6 +44,6 @@ Rien en cours d'écriture ; aucune branche ouverte hors Dependabot.
 - Carte du code : `node ~/.claude/skills/session-rotation/scripts/map.mjs . --focus <dossier>`.
 
 ## Dernière vérification
-24/10 : #405 à #411 fusionnées avec tous les contrôles verts (API 458 tests, audit d'accessibilité 103/103, garde du shell testé avec mutation) ; déploiement local vérifié à 22 h 10 (API 200, console 307, voix anglaises reprises, 2 001 restantes) ; Metro (`-demo`) sur main, paquet iOS construit (12 Mo) ; copie servie propre sur main ; aucune copie de travail sur une branche, aucun stash.
+25/10 : #413 fusionnée avec tous les contrôles verts (112 tests de l'assistant, test de fusion des langues vérifié par mutation) ; déploiement local à 14 h 07 (API `/v1/health` 200, console 307, voix reprises) ; copie servie propre sur main ; résultats du banc du 25/10 remis tels que produits par le passage complet.
 
 <!-- fin de la reprise -->
