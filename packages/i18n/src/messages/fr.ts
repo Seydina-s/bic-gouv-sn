@@ -363,8 +363,6 @@ export const fr = {
     languageWo: "Wolof",
     /** Each language named in its own words. */
     languageEn: "English",
-    languageWoMachine:
-      "L'interface en wolof est une traduction automatique, en attente de relecture.",
     dataSaver: "Économie de données",
     dataSaverNever: "Jamais",
     dataSaverCellular: "Mobile",

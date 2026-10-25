@@ -360,7 +360,6 @@ export const en: PartialCatalog<FrCatalog> = {
     languageFr: "Français",
     languageWo: "Wolof",
     languageEn: "English",
-    languageWoMachine: "The Wolof interface is a machine translation, awaiting review.",
     dataSaver: "Data saver",
     dataSaverNever: "Never",
     dataSaverCellular: "Mobile",

@@ -351,7 +351,6 @@ export const wo: PartialCatalog<FrCatalog> = {
     languageFr: "Français",
     languageWo: "Wolof",
     languageEn: "English",
-    languageWoMachine: "Masin moo tekki wolof bu aplikasioŋ bi, ñu ngi koy xoolaat.",
     dataSaver: "Wàññi done yi",
     dataSaverNever: "Mukk",
     dataSaverCellular: "Mobil",
