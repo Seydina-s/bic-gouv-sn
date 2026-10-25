@@ -32,6 +32,7 @@ describe("loadConfig", () => {
       TRUST_PROXY: false,
       PARTICIPATION_PATH: fromRoot(".data/participation.json"),
       PARTICIPATION_PHOTOS_ROOT: fromRoot(".data/participation-photos"),
+      ASSISTANT_FLAGS_PATH: fromRoot(".data/assistant-flags.json"),
       OPPORTUNITIES_PATH: fromRoot(".data/opportunities.json"),
       NOTIFICATIONS_PATH: fromRoot(".data/admin/notifications.json"),
       INGESTION_STATUS_PATH: fromRoot(".data/ingestion-status.json"),

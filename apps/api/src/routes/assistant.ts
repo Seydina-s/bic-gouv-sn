@@ -1,13 +1,17 @@
 import {
   apiErrorSchema,
   assistantBenchSchema,
+  assistantFlagSubmissionSchema,
+  assistantFlagsResponseSchema,
   assistantLimitChangeSchema,
   assistantQuestionSchema,
   assistantReplySchema,
   assistantUsageSchema,
+  submissionReceiptSchema,
 } from "@bgs/shared-types";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import type { AdminSignIn } from "../admin/sign-in-service";
+import type { AnswerFlags } from "../assistant/answer-flags";
 import type { AssistantProblem, AssistantService } from "../assistant/assistant-service";
 import { readBenchResults } from "../assistant/bench-results";
 import type { ErrorJournal } from "../journal/error-journal";
@@ -15,6 +19,8 @@ import { authorize } from "./admin-guard";
 
 export interface AssistantRoutesOptions {
   assistant: AssistantService;
+  /** « Signaler cette réponse »: the answers people flagged (AST-30e). */
+  flags: AnswerFlags;
   /** False while the assistant is switched off in the console (remote control). */
   isOpen: () => Promise<boolean>;
   /** Failures and refusals are counted there, for the console's error journal. */
@@ -23,6 +29,8 @@ export interface AssistantRoutesOptions {
 
 /** Per address and per hour: room for a person's questions, not for a script. */
 const QUESTION_RATE = { max: 20, timeWindow: "1 hour" } as const;
+/** Per address and per hour: a person flags a few answers, not hundreds. */
+const FLAG_RATE = { max: 10, timeWindow: "1 hour" } as const;
 const ROUTE = "POST /v1/assistant/answers";
 
 const PROBLEM_CODES: Record<Exclude<AssistantProblem, null>, string> = {
@@ -37,7 +45,7 @@ const PROBLEM_CODES: Record<Exclude<AssistantProblem, null>, string> = {
  */
 export const assistantRoutes: FastifyPluginAsyncZod<AssistantRoutesOptions> = (
   app,
-  { assistant, isOpen, errorJournal },
+  { assistant, flags, isOpen, errorJournal },
 ) => {
   app.post(
     "/assistant/answers",
@@ -71,12 +79,38 @@ export const assistantRoutes: FastifyPluginAsyncZod<AssistantRoutesOptions> = (
       return answer;
     },
   );
+
+  // Only what the person chose to send: the question, the answer and its sources.
+  app.post(
+    "/assistant/flags",
+    {
+      config: { rateLimit: FLAG_RATE },
+      schema: {
+        tags: ["assistant"],
+        summary: "Flag an answer of the assistant (« Signaler cette réponse », anonymous)",
+        body: assistantFlagSubmissionSchema,
+        response: { 201: submissionReceiptSchema, 503: apiErrorSchema },
+      },
+    },
+    async (request, reply) => {
+      if (!(await isOpen())) {
+        return reply.code(503).send({
+          code: "ASSISTANT_OFF",
+          message: "The assistant is switched off",
+          requestId: request.id,
+        });
+      }
+      const flag = await flags.receive(request.body);
+      return reply.code(201).send({ id: flag.id });
+    },
+  );
   return Promise.resolve();
 };
 
 export interface AdminAssistantOptions {
   signIn: AdminSignIn;
   assistant: AssistantService;
+  flags: AnswerFlags;
   /** Where the weekly test bench keeps its runs (assistant-bench.ts). */
   benchFolder: string;
 }
@@ -84,8 +118,26 @@ export interface AdminAssistantOptions {
 /** The console: this month's questions and cost, and the monthly limit (admins). */
 export const adminAssistantRoutes: FastifyPluginAsyncZod<AdminAssistantOptions> = (
   app,
-  { signIn, assistant, benchFolder },
+  { signIn, assistant, flags, benchFolder },
 ) => {
+  app.get(
+    "/assistant/flags",
+    {
+      schema: {
+        tags: ["admin"],
+        summary: "Answers people flagged, newest first (kept 90 days)",
+        response: { 200: assistantFlagsResponseSchema, 401: apiErrorSchema, 403: apiErrorSchema },
+      },
+    },
+    async (request, reply) => {
+      if ((await authorize(request, reply, signIn, "console.read")) === null) {
+        return reply;
+      }
+      void reply.header("cache-control", "no-store");
+      return { flags: await flags.list() };
+    },
+  );
+
   app.get(
     "/assistant/bench",
     {

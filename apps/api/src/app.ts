@@ -76,6 +76,12 @@ import {
   type ParticipationStore,
   PostgresParticipationStore,
 } from "./participation/participation";
+import {
+  type AnswerFlagStore,
+  AnswerFlags,
+  FileAnswerFlagStore,
+  PostgresAnswerFlagStore,
+} from "./assistant/answer-flags";
 import { PhotoFolder } from "./media/photos";
 import {
   FileOpportunityStore,
@@ -165,6 +171,8 @@ export interface AppOptions {
   automaticOpportunitiesEveryMs?: number | null;
   /** Messages and reports of Participer; defaults from database. */
   participationStore?: ParticipationStore;
+  /** Answers of the assistant people flagged; defaults from database. */
+  answerFlagStore?: AnswerFlagStore;
   /** Settings changed in the console; defaults from database. */
   settings?: SettingStore;
   /** The assistant's model; defaults to Claude when ANTHROPIC_API_KEY is set, else none. */
@@ -269,6 +277,9 @@ export async function buildApp({
   participationStore = database === null
     ? new FileParticipationStore(config.PARTICIPATION_PATH)
     : new PostgresParticipationStore(database),
+  answerFlagStore = database === null
+    ? new FileAnswerFlagStore(config.ASSISTANT_FLAGS_PATH)
+    : new PostgresAnswerFlagStore(database),
   settings = database === null
     ? new FileSettingStore(config.SETTINGS_PATH)
     : new PostgresSettingStore(database),
@@ -431,9 +442,11 @@ export async function buildApp({
       },
     }),
   });
+  const answerFlags = new AnswerFlags(answerFlagStore);
   await app.register(assistantRoutes, {
     prefix: "/v1",
     assistant,
+    flags: answerFlags,
     isOpen: async () => (await remoteConfig.read()).features.assistant,
     errorJournal,
   });
@@ -523,6 +536,7 @@ export async function buildApp({
       prefix: "/admin/v1",
       signIn: admin.signIn,
       assistant,
+      flags: answerFlags,
       benchFolder: benchFolder(config.NEWS_STORE_PATH),
     });
     await app.register(adminAuditRoutes, {
