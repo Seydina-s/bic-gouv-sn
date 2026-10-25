@@ -18,7 +18,7 @@ bash ${CLAUDE_SKILL_DIR}/scripts/verify.sh
 
 Il enchaîne, en s'arrêtant au premier échec : installation stricte, lint, types, format, tests avec couverture (seuils de la CI), puis vérifie qu'aucun contrôle n'a réécrit `pnpm-lock.yaml`. Il donne le chemin du journal des tests. Code de sortie 0 = vert. Les tests prennent plusieurs minutes : le lancer en arrière-plan, sortie redirigée vers un fichier (jamais dans un tube).
 
-Pendant le travail, lancer d'abord les tests du seul paquet touché (plus rapide) ; le verdict final repose sur le script complet.
+Pendant le travail, lancer d'abord les tests du seul paquet touché (plus rapide) ; un filtre (`-t`, un seul fichier) ne sert que pendant l'écriture. Après **la dernière** modification, le verdict repose sur le script complet : un texte retiré ou un type changé casse souvent un test d'un autre fichier (25/10 : un parcours des réglages attendait encore une note retirée).
 
 ## 2. Contrôles en plus, selon le changement
 
