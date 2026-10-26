@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { datesOf } from "./grounded-answer";
 import { PassageIndex, withinEdits } from "./passage-search";
 import type { Passage } from "./passages";
-import { widenQuestion } from "./question-words";
+import { namesSheetWords, widenQuestion } from "./question-words";
 
 describe("widenQuestion", () => {
   it("adds the full words of text shortcuts and acronyms, keeping the question as typed", () => {
@@ -10,7 +10,9 @@ describe("widenQuestion", () => {
     expect(widenQuestion("le DG du BIC Gouv")).toBe(
       "le DG du BIC Gouv directeur général Bureau de l'Information et de la Communication du Gouvernement gouvernement",
     );
-    expect(widenQuestion("Comment obtenir un passeport ?")).toBe("Comment obtenir un passeport ?");
+    expect(widenQuestion("Comment obtenir un acte de naissance ?")).toBe(
+      "Comment obtenir un acte de naissance ?",
+    );
   });
 
   it("adds the official words of everyday ones (bench of 17/10/2026)", () => {
@@ -21,6 +23,19 @@ describe("widenQuestion", () => {
       "Comment devenir soldat ? carrière militaire armée",
     );
     expect(widenQuestion("Je refuse l'héritage")).toBe("Je refuse l'héritage succession");
+  });
+
+  it("names the sheets of the bench of 25/10/2026, and tells a procedure by them", () => {
+    expect(widenQuestion("J'ai perdu ma pièce d'identité")).toBe(
+      "J'ai perdu ma pièce d'identité carte nationale d'identité",
+    );
+    expect(widenQuestion("Une aide pour payer l'université ?")).toContain("bourse d'études");
+    expect(widenQuestion("avoir un passeport")).toContain("passeport numérisé");
+    expect(namesSheetWords("Quelle carte pour les personnes vivant avec un handicap ?")).toBe(true);
+    expect(namesSheetWords("Qu'a dit le président à Thiès ?")).toBe(false);
+    expect(namesSheetWords("Prytanée militaire de Saint-Louis : l'excellence scolaire")).toBe(
+      false,
+    );
   });
 });
 

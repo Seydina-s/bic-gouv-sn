@@ -80,6 +80,11 @@ describe("the question's intent", () => {
       recent: true,
       section: "conseil-des-ministres",
     });
+    // A weekday alone names the latest one (bench of 25/10/2026); with its date, that day.
+    const recent = (question: string) => questionIntent(question).recent;
+    expect(recent("conseil des ministres mercredi c quoi les decisions")).toBe(true);
+    expect(recent("Qu'a décidé le Conseil de mercredi ?")).toBe(true);
+    expect(recent("Le communiqué du mercredi 30 septembre 2026")).toBe(false);
     expect(questionIntent("Comment obtenir un passeport ?")).toEqual({
       recent: false,
       current: false,
