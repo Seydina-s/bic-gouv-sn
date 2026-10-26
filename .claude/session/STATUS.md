@@ -29,7 +29,7 @@ Rien en cours d'écriture.
 - Ne jamais lire `.env*` (sauf `.env.example`), `.data/admin/**`, clés, `*.p8`. Le dossier Téléchargements de l'utilisateur n'est jamais touché.
 - Garde du shell : pas d'accent grave dans `node -e` ni dans PowerShell hors guillemets ; une commande qui nomme `.env.local` est refusée (l'écrire dans un script) ; antislashs dans un script : l'écrire avec l'outil d'écriture (`String.raw`), jamais dans la commande.
 - La session démarre dans la copie servie : jamais d'écriture dedans ; travailler dans `-w2`/`-w4` sur une nouvelle branche. Jamais de changement de branche dans une copie en cours de livraison ; jamais de `git stash` nu ni de `--force`.
-- Avant de livrer : la vérification complète, **sans filtre** (ERREURS.md, 25/10 : deux arrêts de `ship.sh` sur un même jour).
+- Avant de livrer : la vérification complète, **sans filtre** (ERREURS.md, 25/10 : deux arrêts de `ship.sh` sur un même jour). **Une seule suite complète à la fois** (vérification ou `ship.sh`, toutes copies confondues) : deux en même temps font dépasser les délais des tests de l'API (ERREURS.md, 26/10).
 - Deux livraisons en parallèle qui ajoutent une ligne en fin de `backlog.md` entrent en conflit : écrire au backlog après la fusion de l'autre.
 - `deploy.sh` arrête la boucle des voix (ERREURS.md, 22/10) : après tout redémarrage, relire le journal de chaque langue. Jamais `services.sh` ni `deploy.sh` exécutés dans un tube.
 - La console Next.js 16.4 réécrit `apps/admin/AGENTS.md` au démarrage (#411) : comparer à `origin/main` avant tout `checkout` si la copie servie est sale.
