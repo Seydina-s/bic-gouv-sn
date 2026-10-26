@@ -1,6 +1,6 @@
 # Reprise — Bic Gouv SN
 
-**Mis à jour** : 26/10/2026 2 h 20 · **Mode** : autonome prolongé (demande du 22/10 ; s'arrêter pour toute dépense imprévue, sécurité, données personnelles, contenu publié, action difficile à défaire) · **main** : #426 (+ rotation du 26/10). Historique des sessions : `HISTORIQUE.md` (à ne lire que pour un besoin précis). Méthode : skill `session-rotation`.
+**Mis à jour** : 26/10/2026 3 h 40 · **Mode** : autonome prolongé (demande du 22/10 ; s'arrêter pour toute dépense imprévue, sécurité, données personnelles, contenu publié, action difficile à défaire) · **main** : #428. Historique des sessions : `HISTORIQUE.md` (à ne lire que pour un besoin précis). Méthode : skill `session-rotation`.
 
 ## État
 - Services locaux en marche (`bash /c/Users/HP/bgs-ops/services.sh` relance ce qui est tombé) : API 3100, console 3001 (Next.js 16.4.1), surveillance des 22 sites + der.sn, filtre public 3200 + tunnel ngrok, Metro 8081 (iPhone, copie `-demo`). `deploy.sh` relance aussi le filtre public depuis le 25/10.
@@ -17,9 +17,8 @@
 Rien en cours d'écriture.
 
 ## Prochaines étapes (dans l'ordre)
-1. QA-14 : types des scripts (`scripts/tsconfig.json`) jamais vérifiés ; 2 erreurs dans `scripts/test-seed.ts` ; ajouter le contrôle à la CI.
-2. PR Dependabot majeures avec essai réel : #227 ioredis 6, puis #400 pillow 13 et #303 torch 2.13 (serveur des voix : tester sur le serveur avant fusion).
-3. Après chaque livraison : skills `verification` puis `livraison` (déploiement et reprise compris).
+1. PR Dependabot majeures avec essai réel : #227 ioredis 6, puis #400 pillow 13 et #303 torch 2.13 (serveur des voix : tester sur le serveur avant fusion).
+2. Après chaque livraison : skills `verification` puis `livraison` (déploiement et reprise compris).
 
 ## Attend l'utilisateur (`.claude/session/A-FAIRE-UTILISATEUR.md`)
 - Rien d'urgent. Point 70 en pause : médias gardés sur l'ordinateur jusqu'au choix d'un hébergement par l'utilisateur.
@@ -42,6 +41,7 @@ Rien en cours d'écriture.
 - Carte du code : `node ~/.claude/skills/session-rotation/scripts/map.mjs . --focus <dossier>`.
 
 ## Dernière vérification
+26/10 (3 h 34) : #428 fusionnée (QA-14 : `pnpm typecheck` vérifie aussi les scripts racine, jeu de test corrigé), contrôles de la CI verts, mutation détectée (champ `publisher` retiré) ; outils seulement, pas de déploiement, copie servie sur main.
 26/10 (1 h 50) : #425 fusionnée, CI verte, mutations détectées (jour de semaine, « militaire »), mesure de la recherche 0,78 → 0,83, contrôle rapide du banc 37 / 39 ; déploiement à 1 h 49 (API 200, console 307, voix relancées).
 26/10 : #423 fusionnée, contrôles de la CI verts deux fois, mutations détectées (réponse reposée d'un signalement effacé, « réponse différente »), audit 103/103 ; déploiement à 0 h 15 (API 200, console 307, voix relancées).
 25/10 : #413 et #415 à #420 fusionnées avec tous les contrôles verts (tests de mutation : fusion des langues, effacement des signalements, profil de test, phrase d'information du bouton, règle du garde du shell) ; audit d'accessibilité 103/103 ; déploiement à 18 h 45 (API 200, console 307) ; filtre public relancé à 19 h 27 (signalement via le filtre : 400 de l'API, route inconnue : 404).
