@@ -11,6 +11,7 @@ Les scripts sont dans `C:\Users\HP\bgs-ops` (mode d'emploi : `README.md` du doss
 
 - **Jamais dans la copie servie** `C:\bic-gouv-sn` (détachée sur main, d'où tournent les services). Travailler dans `-w2` ou `-w4`, sur une nouvelle branche partie d'`origin/main` : `feat/…`, `fix/…`, `chore/…`.
 - Une copie qu'utilise une commande en arrière-plan (livraison, construction, tests) n'est jamais touchée : ni `checkout`, ni `merge`. Prendre l'autre copie.
+- **Une seule suite de tests complète à la fois** sur cette machine (vérification ou `ship.sh`, quelle que soit la copie) : deux en même temps saturent la machine et les tests de l'API dépassent leurs délais (ERREURS.md, 26/10). L'autre copie sert à préparer le changement suivant, pas à le tester en même temps.
 - Après un changement de branche dont `pnpm-lock.yaml` diffère : `pnpm install --frozen-lockfile`.
 - La skill `verification` est passée (verdict RÉUSSI).
 - **Suivi** : une ligne horodatée au `backlog.md` (et `decisions.md` pour une décision). Si une autre livraison en cours ajoute aussi une ligne en fin de `backlog.md`, attendre sa fusion, puis `git merge origin/main`, avant d'écrire la sienne (sinon conflit).

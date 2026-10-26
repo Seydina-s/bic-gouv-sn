@@ -557,3 +557,10 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : le point avait été écrit du point de vue du développement (version reliée à Metro) sans vérifier ce que l'utilisateur avait déjà : la version TestFlight du 15/10 contenait les mêmes modules natifs (aucun changement natif depuis, `git diff` de `apps/mobile/package.json`) et recevait toutes les mises à jour à distance (canal `preview`, version d'exécution identique).
 - **Correctif** : point 50 classé ; l'utilisateur garde TestFlight ; une réinstallation demande d'ouvrir l'app 30 s, de la fermer complètement puis de la rouvrir (mise à jour appliquée au démarrage suivant). Mémoire `iphone-testflight-preferred`.
 - **Prévention** : avant de demander une installation, comparer les dépendances natives depuis la dernière version de l'utilisateur et vérifier son canal ; ne proposer une compilation que si un module natif a changé ou si sa version expire. Règle ajoutée à `ERREURS-GLOBALES.md` et au modèle de prompt système (supposition 10).
+
+## 26/10/2026 — Deux suites de tests lancées en même temps : délais dépassés partout
+
+- **Ce qui s'est passé** : la vérification complète d'une branche (copie `-w2`) et la livraison de la reprise (`ship.sh`, copie `-w4`) ont tourné en même temps. Les deux ont échoué sur les mêmes tests de l'API (comptes, statistiques, signalements sur base embarquée), chacun au-delà de 30 s, alors que la reprise ne touchait aucun code. Un aller-retour de livraison perdu.
+- **Cause racine** : chaque suite complète lance déjà tous les paquets en parallèle et occupe la machine ; deux suites à la fois la saturent. Rien n'interdisait de lancer une vérification pendant une livraison dans l'autre copie.
+- **Correctif** : relance l'une après l'autre.
+- **Prévention** : skill `livraison` (section 1) et reprise : une seule suite complète à la fois sur cette machine (vérification ou livraison) ; attendre la fin de l'une avant de lancer l'autre. Une seconde copie sert à préparer le changement suivant, pas à le tester en même temps.
