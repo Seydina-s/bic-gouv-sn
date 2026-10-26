@@ -1,4 +1,4 @@
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { FileProcedureRepository, RemoteConfigStore, fileDocument } from "@bgs/content-store";
@@ -74,7 +74,11 @@ async function start(
     JSON.stringify({ minVersion: null, features: options.features ?? {} }),
   );
   const app = await buildApp({
-    config: loadConfig({ LOG_LEVEL: options.logs === undefined ? "silent" : "warn" }),
+    config: loadConfig({
+      LOG_LEVEL: options.logs === undefined ? "silent" : "warn",
+      // The bench's folder in the test's own folder (assistant/bench).
+      NEWS_STORE_PATH: join(dir, "news.json"),
+    }),
     version: "1.0.0",
     articles: temporaryStore(),
     procedures,
@@ -144,7 +148,24 @@ describe("« Signaler cette réponse » (AST-30e)", () => {
     });
     expect(listed.headers["cache-control"]).toBe("no-store");
     expect(assistantFlagsResponseSchema.parse(listed.json()).flags).toMatchObject([
-      { id, question: flagged.question, status: "answered" },
+      { id, question: flagged.question, status: "answered", recheck: null },
+    ]);
+  });
+
+  it("comes with the bench's latest asking of the question (AST-30g)", async () => {
+    const app = await start();
+    const { id } = submissionReceiptSchema.parse((await flag(app, flagged)).json());
+    const recheck = { askedOn: "2026-11-01", status: "not_found", answer: null, sources: [] };
+    const bench = join(dir, "assistant", "bench");
+    await mkdir(bench, { recursive: true });
+    await writeFile(join(bench, "flag-rechecks.json"), JSON.stringify({ [id]: recheck }));
+    const listed = await app.inject({
+      method: "GET",
+      url: "/admin/v1/assistant/flags",
+      headers: { authorization: `Bearer ${await admin.tokenFor("reviewer")}` },
+    });
+    expect(assistantFlagsResponseSchema.parse(listed.json()).flags).toEqual([
+      expect.objectContaining({ id, recheck: { ...recheck, changed: true } }),
     ]);
   });
 

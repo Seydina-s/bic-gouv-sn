@@ -715,7 +715,7 @@ export const adminFr = {
     flags: {
       title: "Réponses signalées",
       intro:
-        "Les réponses que des citoyens ont signalées depuis l'application, avec leur question et les sources citées. Rien ne permet de savoir qui a signalé. Chaque signalement est effacé au bout de 90 jours.",
+        "Les réponses que des citoyens ont signalées depuis l'application, avec leur question et les sources citées. Chaque dimanche, le banc d'essai repose la question à l'assistant : sa nouvelle réponse s'affiche dessous, pour vérifier qu'une correction tient. Rien ne permet de savoir qui a signalé. Chaque signalement est effacé au bout de 90 jours.",
       count: {
         one: "{count} réponse signalée",
         other: "{count} réponses signalées",
@@ -728,6 +728,12 @@ export const adminFr = {
       noAnswer:
         "Aucune réponse : l'assistant n'a rien trouvé, ou la question sortait de son périmètre.",
       sources: "Sources citées",
+      recheck: {
+        title: "Reposée le {date}",
+        pending: "Pas encore reposée : le banc d'essai la reposera dimanche à 4 h.",
+        same: "Même réponse qu'au signalement",
+        changed: "Réponse différente de celle signalée",
+      },
       statuses: {
         answered: "Réponse donnée",
         not_found: "Introuvable dans la base",

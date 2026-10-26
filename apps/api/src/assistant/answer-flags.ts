@@ -29,6 +29,11 @@ export class PostgresAnswerFlagStore extends PostgresDocumentStore<AssistantFlag
   }
 }
 
+/** PostgreSQL when the API has a database, the file otherwise: the API and the bench. */
+export function defaultAnswerFlagStore(database: Database | null, path: string): AnswerFlagStore {
+  return database === null ? new FileAnswerFlagStore(path) : new PostgresAnswerFlagStore(database);
+}
+
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 /**
