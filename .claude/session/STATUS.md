@@ -1,13 +1,13 @@
 # Reprise — Bic Gouv SN
 
-**Mis à jour** : 26/10/2026 3 h 40 · **Mode** : autonome prolongé (demande du 22/10 ; s'arrêter pour toute dépense imprévue, sécurité, données personnelles, contenu publié, action difficile à défaire) · **main** : #428. Historique des sessions : `HISTORIQUE.md` (à ne lire que pour un besoin précis). Méthode : skill `session-rotation`.
+**Mis à jour** : 26/10/2026 14 h · **Mode** : autonome prolongé (demande du 22/10 ; s'arrêter pour toute dépense imprévue, sécurité, données personnelles, contenu publié, action difficile à défaire) · **main** : #400. Historique des sessions : `HISTORIQUE.md` (à ne lire que pour un besoin précis). Méthode : skill `session-rotation`.
 
 ## État
 - Services locaux en marche (`bash /c/Users/HP/bgs-ops/services.sh` relance ce qui est tombé) : API 3100, console 3001 (Next.js 16.4.1), surveillance des 22 sites + der.sn, filtre public 3200 + tunnel ngrok, Metro 8081 (iPhone, copie `-demo`). `deploy.sh` relance aussi le filtre public depuis le 25/10.
 - **Skills du projet** (`.claude/skills/`) : `verification` (avant de dire « terminé » : contrôles exacts de la CI par script, diff, tests affaiblis, rapport fixe) et `livraison` (procédure complète) ; sous-agent `relecteur` (`.claude/agents/`, lecture seule). Claude crée ses skills et hooks sans attendre (décision du 25/10, decisions.md).
 - « Signaler cette réponse » (AST-30e) en service : serveur (#417, 90 jours, effacement automatique), page « Réponses signalées » de la console (#419), bouton de l'app avec la phrase validée (#420, mise à jour à distance publiée) ; route autorisée par le filtre public. Chaque dimanche, le banc d'essai repose les questions signalées (#423, AST-30g), sans les juger : leur nouvelle réponse est dans `.data/assistant/bench/flag-rechecks.json`, affichée sous le signalement dans la console ; jamais leur texte dans le journal ni dans les fichiers gardés sans limite.
 - Traduction automatique (#399, #401) : nouveaux articles traduits en anglais et en wolof toutes les 30 min, fiches toutes les 6 h (`bgs-ops/logs/watch.log`). Plus aucune mention de traduction dans l'app (#416, #420).
-- Voix (serveur Hetzner `voices@95.216.167.95`, clé `~/.ssh/bic_gouv_ai`) : français fini ; anglais en cours (335 restants le 26/10 à 0 h 15, `bgs-ops/logs/voices-en.log`) ; wolof ensuite, à finir sur le futur serveur d'hébergement.
+- Voix (serveur Hetzner `voices@95.216.167.95`, clé `~/.ssh/bic_gouv_ai`) : français et anglais finis (265 / 265 le 26/10 à 4 h 49) ; wolof en cours depuis (3 390 à faire, lots de 24, ≈ 40 min par article, 5 Go de mémoire sur 7,7), à finir sur le futur serveur d'hébergement. Le serveur garde encore pillow 12 (`~/voices`, verrou d'avant #400) : à mettre à jour après l'essai wolof. Copies d'essai sur le serveur : `~/voices-trial` (main + pillow 13), `~/voices-torch` (torch 2.13), scripts `~/trial*.sh` (essais plafonnés en mémoire par `systemd-run --user --scope -p MemoryMax=…`).
 - Banc d'essai de l'assistant : chaque dimanche à 4 h (`bgs-ops/bench.sh`) ; passage du 25/10 : 77 / 96, aucune réponse inventée ; après AST-42 (#425), contrôle rapide 37 / 39 (contre 28), pièges 15 / 15 ; restent le visa pour le Canada et la carte grise (suivis comme faiblesses). Contrôle rapide d'une correction : `bash /c/Users/HP/bgs-ops/check-bench.sh <copie>` (≈ 0,17 $).
 - Contenus refusés par les règles de collecte : `pnpm --filter @bgs/ingestion discard` (liste) / `--apply <id>` (copie privée dans `.data/discarded-articles.json`) ; 5 supprimés le 25/10, aucun restant.
 - Disque : 23 Go libres (SDK Android supprimé) ; le gros poste est `.data/media` (15 Go, en hausse) → point 70.
@@ -17,11 +17,15 @@
 Rien en cours d'écriture.
 
 ## Prochaines étapes (dans l'ordre)
-1. PR Dependabot majeures avec essai réel : #227 ioredis 6, puis #400 pillow 13 et #303 torch 2.13 (serveur des voix : tester sur le serveur avant fusion).
-2. Après chaque livraison : skills `verification` puis `livraison` (déploiement et reprise compris).
+1. Port 3100 : relancer l'API (`services.sh`) dès que le port est libéré (voir « Attend l'utilisateur »), puis contrôler `curl localhost:3100/v1/health` = 200 (un 307 vers `/fr/…` = l'autre projet).
+2. Livrer la branche `chore/dependabot-round-26-10` (copie `-w2` : ERREURS.md, backlog, reprise).
+3. Avec l'accord de l'utilisateur pour arrêter la boucle des voix ≈ 20 min : `bash ~/trial-wo.sh voices-trial voices-torch` sur le serveur ; si le wolof est bon, `uv sync --frozen` dans `~/voices` (pillow 13), puis #303 torch 2.13 (décision à consigner : torchaudio reste en 2.11, dernière version publiée), puis `deploy.sh`.
+4. Après chaque livraison : skills `verification` puis `livraison` (déploiement et reprise compris).
 
 ## Attend l'utilisateur (`.claude/session/A-FAIRE-UTILISATEUR.md`)
-- Rien d'urgent. Point 70 en pause : médias gardés sur l'ordinateur jusqu'au choix d'un hébergement par l'utilisateur.
+- **Port 3100 occupé** depuis le 26/10 à 13 h 32 par un autre projet de l'utilisateur (`C:\seydina-digital`, `next start -p 3100`) : notre API ne redémarre pas (le déploiement croit qu'elle tourne). Ne pas arrêter ce processus sans son accord ; lui demander de changer le port de l'un des deux.
+- **Arrêt de la boucle des voix** pour l'essai wolof (pillow 13, torch 2.13) : refusé par le contrôle de sécurité en mode autonome ; demander l'accord explicite de l'utilisateur.
+- Point 70 en pause : médias gardés sur l'ordinateur jusqu'au choix d'un hébergement par l'utilisateur.
 - iPhone : l'utilisateur garde la version **TestFlight** (15/10, canal `preview`, à jour par mise à jour à distance) ; à recompiler (profil `testflight`) avant son expiration vers le 13/01/2027. Ne plus lui proposer la version de développement.
 
 ## Points d'attention

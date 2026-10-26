@@ -564,3 +564,10 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : chaque suite complète lance déjà tous les paquets en parallèle et occupe la machine ; deux suites à la fois la saturent. Rien n'interdisait de lancer une vérification pendant une livraison dans l'autre copie.
 - **Correctif** : relance l'une après l'autre.
 - **Prévention** : skill `livraison` (section 1) et reprise : une seule suite complète à la fois sur cette machine (vérification ou livraison) ; attendre la fin de l'une avant de lancer l'autre. Une seconde copie sert à préparer le changement suivant, pas à le tester en même temps.
+
+## 26/10/2026 — Livraison d'une branche sous le nom d'une autre (ship.sh, Dependabot)
+
+- **Ce qui s'est passé** : la livraison de pillow 13 (#400) a été lancée dans la copie `-w4`, restée sur la branche d'ioredis après sa fusion. `ship.sh` a fait tous ses contrôles sur cette branche-là, puis a voulu l'envoyer sous le nom de la branche de pillow. GitHub a refusé l'envoi (historique incompatible) : rien n'a été publié, une livraison perdue.
+- **Cause racine** : pour une branche Dependabot, `ship-fn.sh` repart de la version de Dependabot sauf si la copie contient des commits d'un autre auteur (un correctif local à garder). Ce test supposait que la copie était déjà sur la branche demandée. Sur une autre branche, les commits récents de main comptaient comme des commits locaux : la copie n'a pas changé de branche. Rien ne vérifiait ensuite que la copie était sur la branche livrée.
+- **Correctif** : les commits locaux ne comptent que si la copie est sur la branche demandée ; sinon elle repart toujours de la version de Dependabot. Avant tout contrôle, `ship.sh` s'arrête si la copie n'est pas sur la branche livrée (« nothing done »). Essai : une livraison demandée sous un autre nom est refusée sans rien toucher. Fichier : `C:\Users\HP\bgs-ops\ship-fn.sh`.
+- **Prévention** : un script qui envoie « la branche X » vérifie d'abord que la copie est sur X ; après chaque livraison, remettre la copie en mode détaché sur `origin/main` (skill `livraison`, section 3).
