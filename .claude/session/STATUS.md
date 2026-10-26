@@ -1,6 +1,6 @@
 # Reprise — Bic Gouv SN
 
-**Mis à jour** : 26/10/2026 1 h 55 · **Mode** : autonome prolongé (demande du 22/10 ; s'arrêter pour toute dépense imprévue, sécurité, données personnelles, contenu publié, action difficile à défaire) · **main** : #425. Historique des sessions : `HISTORIQUE.md` (à ne lire que pour un besoin précis). Méthode : skill `session-rotation`.
+**Mis à jour** : 26/10/2026 2 h 20 · **Mode** : autonome prolongé (demande du 22/10 ; s'arrêter pour toute dépense imprévue, sécurité, données personnelles, contenu publié, action difficile à défaire) · **main** : #426 (+ rotation du 26/10). Historique des sessions : `HISTORIQUE.md` (à ne lire que pour un besoin précis). Méthode : skill `session-rotation`.
 
 ## État
 - Services locaux en marche (`bash /c/Users/HP/bgs-ops/services.sh` relance ce qui est tombé) : API 3100, console 3001 (Next.js 16.4.1), surveillance des 22 sites + der.sn, filtre public 3200 + tunnel ngrok, Metro 8081 (iPhone, copie `-demo`). `deploy.sh` relance aussi le filtre public depuis le 25/10.
