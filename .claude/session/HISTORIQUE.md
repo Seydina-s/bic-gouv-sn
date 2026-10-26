@@ -1,6 +1,12 @@
 # Historique des sessions — Bic Gouv SN (archive : la reprise est dans STATUS.md ; ne lire ce fichier que pour un besoin précis)
 
-**Dernière mise à jour** : 25/10/2026 (19 h 55) · **Mode** : autonome prolongé (demande du 22/10). Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md` (points 50, 70).
+**Dernière mise à jour** : 26/10/2026 (2 h 20) · **Mode** : autonome prolongé (demande du 22/10). Actions de l'utilisateur : `.claude/session/A-FAIRE-UTILISATEUR.md` (rien d'urgent ; point 70 en pause).
+
+## 25-26/10 (nuit), en bref : questions signalées au banc, démarches mieux trouvées, iPhone sur TestFlight
+- **AST-30g (#423)** : chaque dimanche, le banc d'essai repose les questions signalées dans leur langue et leur mode, sans les juger ; leur nouvelle réponse (`.data/assistant/bench/flag-rechecks.json`) s'affiche sous le signalement dans la console, avec « même réponse » ou « réponse différente » ; ni le journal ni les fichiers gardés sans limite ne contiennent leur texte.
+- **AST-42 (#425)** : la reformulation nomme une démarche comme les fiches (« démarche demander… ») ; quelques mots du quotidien suffisent à reconnaître une démarche ; un jour de semaine sans date désigne le plus récent (recherche et note au modèle) ; un titre d'article seul est dans le périmètre ; jeu d'essai corrigé (fiches justes acceptées). Recherche 0,78 → 0,83 ; contrôle rapide du banc 37 / 39 (contre 28). Essai écarté : familles de mots dans la recherche par mots (gain négligeable).
+- **iPhone** : la version de développement proposée par erreur (point 50, ERREURS.md) ; l'utilisateur garde TestFlight (15/10), à jour par mise à jour à distance ; expiration vers le 13/01/2027.
+- **Point 70** : en pause jusqu'au choix d'un hébergement par l'utilisateur.
 
 ## 25/10, en bref : banc de l'assistant, « Signaler cette réponse », modèle 3.1 et premières skills
 - **Assistant (#413)** : banc du 25/10 (77 / 96, aucune réponse inventée) ; la semaine en cours n'est plus donnée qu'aux questions qui en parlent ; actualités d'une période mélangées entre langues par date ; plafond de réponse porté à 600 jetons. Faiblesses restantes : AST-42. Contrôle rapide d'une correction : `bgs-ops/check-bench.sh` (≈ 0,17 $).
