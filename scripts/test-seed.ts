@@ -91,6 +91,8 @@ async function seedArticle(dataDir: string): Promise<void> {
   await new FileArticleRepository(join(dataDir, "news.json")).save({
     id: ARTICLE_ID,
     kind: "news-article",
+    publisher: "presidence",
+    alsoPublishedBy: [],
     category: "communiques",
     sourceUrl,
     sourcePublishedOn: "2026-09-28",
@@ -128,6 +130,8 @@ async function seedWithdrawnArticle(storePath: string): Promise<void> {
   await repository.save({
     id,
     kind: "news-article",
+    publisher: "presidence",
+    alsoPublishedBy: [],
     category: "communiques",
     sourceUrl,
     sourcePublishedOn: "2026-09-27",

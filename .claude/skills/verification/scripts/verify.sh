@@ -17,7 +17,7 @@ step "lint"
 pnpm lint > /dev/null 2>&1 || { echo "ÉCHEC : relancer pnpm lint pour le détail"; exit 1; }
 echo "ok"
 step "types"
-pnpm -r --if-present typecheck > /dev/null 2>&1 || { echo "ÉCHEC : relancer pnpm typecheck pour le détail"; exit 1; }
+pnpm typecheck > /dev/null 2>&1 || { echo "ÉCHEC : relancer pnpm typecheck pour le détail"; exit 1; }
 echo "ok"
 step "format"
 npx prettier --check . > /dev/null 2>&1 || { echo "ÉCHEC : npx prettier --check . pour le détail"; exit 1; }
