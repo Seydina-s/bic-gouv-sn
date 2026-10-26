@@ -17,13 +17,11 @@
 Rien en cours d'écriture.
 
 ## Prochaines étapes (dans l'ordre)
-1. Port 3100 : relancer l'API (`services.sh`) dès que le port est libéré (voir « Attend l'utilisateur »), puis contrôler `curl localhost:3100/v1/health` = 200 (un 307 vers `/fr/…` = l'autre projet).
-2. Livrer la branche `chore/dependabot-round-26-10` (copie `-w2` : ERREURS.md, backlog, reprise).
-3. Avec l'accord de l'utilisateur pour arrêter la boucle des voix ≈ 20 min : `bash ~/trial-wo.sh voices-trial voices-torch` sur le serveur ; si le wolof est bon, `uv sync --frozen` dans `~/voices` (pillow 13), puis #303 torch 2.13 (décision à consigner : torchaudio reste en 2.11, dernière version publiée), puis `deploy.sh`.
-4. Après chaque livraison : skills `verification` puis `livraison` (déploiement et reprise compris).
+1. Avec l'accord de l'utilisateur pour arrêter la boucle des voix ≈ 20 min : `bash ~/trial-wo.sh voices-trial voices-torch` sur le serveur ; si le wolof est bon, `uv sync --frozen` dans `~/voices` (pillow 13), puis #303 torch 2.13 (décision à consigner : torchaudio reste en 2.11, dernière version publiée), puis `deploy.sh`.
+2. Après chaque livraison : skills `verification` puis `livraison` (déploiement et reprise compris).
 
 ## Attend l'utilisateur (`.claude/session/A-FAIRE-UTILISATEUR.md`)
-- **Port 3100 occupé** depuis le 26/10 à 13 h 32 par un autre projet de l'utilisateur (`C:\seydina-digital`, `next start -p 3100`) : notre API ne redémarre pas (le déploiement croit qu'elle tourne). Ne pas arrêter ce processus sans son accord ; lui demander de changer le port de l'un des deux.
+- Port 3100 : le 26/10 de 13 h 32 à 14 h 03, un autre projet de l'utilisateur (`C:\seydina-digital`, `next start -p 3100`) l'a occupé et notre API n'a pas redémarré (le déploiement croit qu'elle tourne dès que le port répond). Réglé seul. Si `curl localhost:3100/v1/health` donne un 307 vers `/fr/…`, c'est cet autre projet : ne pas l'arrêter, prévenir l'utilisateur.
 - **Arrêt de la boucle des voix** pour l'essai wolof (pillow 13, torch 2.13) : refusé par le contrôle de sécurité en mode autonome ; demander l'accord explicite de l'utilisateur.
 - Point 70 en pause : médias gardés sur l'ordinateur jusqu'au choix d'un hébergement par l'utilisateur.
 - iPhone : l'utilisateur garde la version **TestFlight** (15/10, canal `preview`, à jour par mise à jour à distance) ; à recompiler (profil `testflight`) avant son expiration vers le 13/01/2027. Ne plus lui proposer la version de développement.
@@ -45,6 +43,7 @@ Rien en cours d'écriture.
 - Carte du code : `node ~/.claude/skills/session-rotation/scripts/map.mjs . --focus <dossier>`.
 
 ## Dernière vérification
+26/10 (14 h 20) : #430 (test de la limite de débit dans un vrai Redis, exécuté en CI), #227 ioredis 6, #400 pillow 13 et #431 fusionnées, contrôles de la CI verts ; déploiement à 13 h 48 ; API 200 depuis 14 h 03 (port 3100 pris avant par un autre projet, `services.sh` corrigé), console 307, une seule synthèse wolof sur le serveur (3 380 à faire).
 26/10 (3 h 34) : #428 fusionnée (QA-14 : `pnpm typecheck` vérifie aussi les scripts racine, jeu de test corrigé), contrôles de la CI verts, mutation détectée (champ `publisher` retiré) ; outils seulement, pas de déploiement, copie servie sur main.
 26/10 (1 h 50) : #425 fusionnée, CI verte, mutations détectées (jour de semaine, « militaire »), mesure de la recherche 0,78 → 0,83, contrôle rapide du banc 37 / 39 ; déploiement à 1 h 49 (API 200, console 307, voix relancées).
 26/10 : #423 fusionnée, contrôles de la CI verts deux fois, mutations détectées (réponse reposée d'un signalement effacé, « réponse différente »), audit 103/103 ; déploiement à 0 h 15 (API 200, console 307, voix relancées).
