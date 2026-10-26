@@ -8,6 +8,7 @@ import {
   trapCases,
   updateWeaknesses,
   weaknessCases,
+  withEvidence,
   type BenchCase,
 } from "./bench";
 import type { GroundedAnswer } from "./grounded-answer";
@@ -90,9 +91,17 @@ describe("the bench's questions", () => {
     );
   });
 
-  it("ask for the newest news when nothing was published in the period", () => {
+  it("accept the newest news given when nothing was published in the period", () => {
     const cases = generatedCases(PAGES, "2026-10-20");
-    expect(cases.find((c) => c.lang === "en")?.freshFrom).toBe(TODAY);
+    // All four articles are given: the oldest of them may be cited.
+    expect(cases.find((c) => c.lang === "en")?.freshFrom).toBe("2026-09-30");
+    const many = Array.from({ length: 10 }, (_, n) =>
+      page(60 + n, "news-article", "Article fictif", `2026-10-${String(10 + n)}`),
+    );
+    // Ten articles, eight given: from the 12th.
+    expect(generatedCases(many, "2026-10-25").find((c) => c.lang === "fr")?.freshFrom).toBe(
+      "2026-10-12",
+    );
   });
 
   it("take half of the retrieval set each week, and every trap", () => {
@@ -147,6 +156,35 @@ describe("a bench verdict", () => {
       judgeBench(news, answered(["u"], [TODAY])),
     ];
     expect(summarizeBench(verdicts)).toMatchObject({ cases: 2, passed: 1, invented: 1 });
+  });
+
+  it("keeps, for a failure only, the extracts the model was numbered and its reply", () => {
+    const trace = {
+      searched: "Comment faire ? démarche",
+      given: [page(5, "procedure", "Demander un document fictif", null)],
+      reply: '{"status":"not_found","answer":"","citations":[]}',
+    };
+    const failed = withEvidence(judgeBench(procedure, refusedAnswer("not_found")), trace);
+    expect(failed.evidence).toEqual({
+      searched: "Comment faire ? démarche",
+      extracts: [
+        {
+          number: 1,
+          title: "Demander un document fictif",
+          url: "https://www.presidence.sn/fr/test-5",
+          publishedOn: null,
+          text: "Texte fictif.",
+        },
+      ],
+      reply: trace.reply,
+    });
+    const passed = withEvidence(
+      judgeBench(procedure, answered(["https://e-senegal.sn/#/a"])),
+      trace,
+    );
+    expect(passed.evidence).toBeUndefined();
+    // No answer at all (the service failed): nothing to keep.
+    expect(withEvidence(judgeBench(procedure, null), null).evidence).toBeUndefined();
   });
 });
 

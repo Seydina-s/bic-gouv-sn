@@ -211,6 +211,12 @@ const envSchema = z.object({
     .min(1)
     .default(".data/participation-photos")
     .transform((path) => resolveDataPath(path)),
+  /** Answers of the assistant people flagged (AST-30e), erased after 90 days. */
+  ASSISTANT_FLAGS_PATH: z
+    .string()
+    .min(1)
+    .default(".data/assistant-flags.json")
+    .transform((path) => resolveDataPath(path)),
   /** Opportunities prepared and published in the console (two-person rule). */
   OPPORTUNITIES_PATH: z
     .string()

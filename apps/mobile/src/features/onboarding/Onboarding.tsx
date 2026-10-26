@@ -6,7 +6,6 @@ import { Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } fr
 import Animated, { Easing, FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Icon } from "../../components/Icon";
-import { MachineTranslationNote } from "../../i18n/MachineTranslationNote";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 import { SectionTag } from "../news/SectionTag";
@@ -56,7 +55,6 @@ function LanguageChoice() {
           </Pressable>
         );
       })}
-      <MachineTranslationNote />
     </View>
   );
 }

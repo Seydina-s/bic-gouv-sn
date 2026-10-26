@@ -38,6 +38,13 @@ const SAVED_TOGETHER = 200;
  */
 export const MAX_TRIES = 2;
 
+/**
+ * Tries are counted from the last change of the checks (translation-check.ts): a fix
+ * there gives every refused item its chances again. Moved forward with each such fix
+ * (22/10/2026: emoji pasted as images refused even the French itself, ML-12d).
+ */
+export const CHECKS_CHANGED_AT = "2026-10-22T00:00:00.000Z";
+
 /** The provider keeps a batch's replies 29 days. */
 const REPLIES_KEPT_MS = 29 * 24 * 60 * 60_000;
 
@@ -131,7 +138,10 @@ export class BatchTranslation<Item, French, Value> {
     );
     // Versions already sent and collected, each time without a translation saved.
     const tries = new Map<string, string[]>();
-    for (const run of runs.filter((r) => r.collectedAt !== null)) {
+    const counted = runs.filter(
+      (r) => r.collectedAt !== null && Date.parse(r.submittedAt) >= Date.parse(CHECKS_CHANGED_AT),
+    );
+    for (const run of counted) {
       for (const { id, contentHash } of run.articles) {
         tries.set(id, [...(tries.get(id) ?? []), contentHash]);
       }

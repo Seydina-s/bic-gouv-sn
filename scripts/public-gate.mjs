@@ -90,6 +90,7 @@ const ALLOWED = [
   ["POST", "/v1/participation/messages"],
   ["POST", "/v1/participation/reports"],
   ["POST", "/v1/assistant/answers"],
+  ["POST", "/v1/assistant/flags"],
   ["PUT", "/v1/push/subscription"],
   ["DELETE", "/v1/push/subscription"],
 ];

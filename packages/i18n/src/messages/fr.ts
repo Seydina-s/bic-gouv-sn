@@ -17,7 +17,6 @@ export const fr = {
   content: {
     sourceAttribution: "Source\u00a0: {source}",
     alsoPublishedBy: "Aussi publi\u00e9 par\u00a0: {institutions}",
-    machineTranslation: "Traduction automatique",
     /** An article shown in French because it has no version in the language chosen. */
     onlyInFrench: "Disponible en français seulement",
     listen: "Écouter",
@@ -364,8 +363,6 @@ export const fr = {
     languageWo: "Wolof",
     /** Each language named in its own words. */
     languageEn: "English",
-    languageWoMachine:
-      "L'interface en wolof est une traduction automatique, en attente de relecture.",
     dataSaver: "Économie de données",
     dataSaverNever: "Jamais",
     dataSaverCellular: "Mobile",
@@ -610,6 +607,16 @@ export const fr = {
     },
     sourceSpoken: "{kind} : {title}, {date}",
     generated: "Réponse rédigée automatiquement à partir de ces sources officielles.",
+    flag: {
+      action: "Signaler cette réponse",
+      notice:
+        "Votre question, la réponse et ses sources seront envoyées à l'équipe pour corriger l'assistant. Aucune information sur vous n'est envoyée, et tout est effacé au bout de 90 jours. Si votre question contient votre nom ou un numéro, ne la signalez pas.",
+      send: "Envoyer le signalement",
+      cancel: "Annuler",
+      sending: "Envoi…",
+      sent: "Merci, l'équipe va vérifier cette réponse.",
+      failed: "Le signalement n'a pas pu partir. Réessayez plus tard.",
+    },
     notFound:
       "Désolé, je ne suis pas en mesure de répondre à cette question\u00a0: les publications officielles n'en parlent pas. Vous pouvez chercher dans les actualités ou écrire directement au Gouvernement.",
     outOfScope:

@@ -1,10 +1,11 @@
 import type { AssistantSource, Lang } from "@bgs/shared-types";
 import { ArrowClockwiseIcon as ArrowClockwise } from "phosphor-react-native/src/icons/ArrowClockwise";
+import { FlagIcon as Flag } from "phosphor-react-native/src/icons/Flag";
 import { ListChecksIcon as ListChecks } from "phosphor-react-native/src/icons/ListChecks";
 import { MapPinIcon as MapPin } from "phosphor-react-native/src/icons/MapPin";
 import { NewspaperIcon as Newspaper } from "phosphor-react-native/src/icons/Newspaper";
 import type { IconProps as PhosphorProps } from "phosphor-react-native";
-import { useEffect, type ComponentType, type ReactNode } from "react";
+import { useEffect, useState, type ComponentType, type ReactNode } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import Animated, {
   FadeInDown,
@@ -28,6 +29,8 @@ export interface ChatActions {
   searchNews: () => void;
   writeToGovernment: () => void;
   retry: (turn: ChatTurn) => void;
+  /** « Signaler cette réponse »: true once the flag reached the team. */
+  flag: (turn: ChatTurn) => Promise<boolean>;
 }
 
 /** The person's message, on the right, in a soft green bubble. */
@@ -184,6 +187,119 @@ function TurnAction({
   );
 }
 
+type FlagState = "idle" | "confirming" | "sending" | "sent" | "failed";
+
+/**
+ * « Signaler cette réponse » (AST-30e, owner's decisions of 19 and 25/10/2026): discreet
+ * under the answer, then one confirmation that says exactly what is sent and for how
+ * long, before anything leaves the phone. Two choices only; nothing is sent by a slip.
+ */
+function FlagAnswer({ turn, onFlag }: { turn: ChatTurn; onFlag: ChatActions["flag"] }) {
+  const { theme } = useTheme();
+  const { t } = useTranslation();
+  const { color, space, radius, textStyle, touchTarget } = theme;
+  const [state, setState] = useState<FlagState>("idle");
+  const note = (text: string) => (
+    <Text
+      accessibilityLiveRegion="polite"
+      style={[textStyle.bodySmall, { color: color.textSecondary }]}
+    >
+      {text}
+    </Text>
+  );
+  if (state === "sent") {
+    return note(t("assistant.flag.sent"));
+  }
+  if (state === "idle" || state === "failed") {
+    return (
+      <View style={{ gap: space.xs }}>
+        {state === "failed" && note(t("assistant.flag.failed"))}
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => {
+            setState("confirming");
+          }}
+          style={({ pressed }) => [
+            styles.row,
+            {
+              alignSelf: "flex-start",
+              gap: space.xs,
+              minHeight: touchTarget.min,
+              opacity: pressed ? 0.6 : 1,
+            },
+          ]}
+        >
+          <Icon icon={Flag} size="sm" color={color.textSecondary} />
+          <Text style={[textStyle.label, { color: color.textSecondary }]}>
+            {t("assistant.flag.action")}
+          </Text>
+        </Pressable>
+      </View>
+    );
+  }
+  const sending = state === "sending";
+  const button = {
+    minHeight: touchTarget.min,
+    paddingHorizontal: space.lg,
+    borderRadius: radius.full,
+    justifyContent: "center" as const,
+  };
+  return (
+    <View
+      style={{
+        gap: space.md,
+        padding: space.md,
+        borderRadius: radius.md,
+        borderWidth: StyleSheet.hairlineWidth,
+        borderColor: color.border,
+        backgroundColor: color.surface,
+      }}
+    >
+      {note(t("assistant.flag.notice"))}
+      <View style={[styles.wrap, { gap: space.sm }]}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityState={{ disabled: sending, busy: sending }}
+          disabled={sending}
+          onPress={() => {
+            setState("sending");
+            void onFlag(turn).then((sent) => {
+              setState(sent ? "sent" : "failed");
+            });
+          }}
+          style={({ pressed }) => [
+            button,
+            { backgroundColor: pressed ? color.primaryPressed : color.primary },
+          ]}
+        >
+          <Text style={[textStyle.label, { color: color.onPrimary }]}>
+            {sending ? t("assistant.flag.sending") : t("assistant.flag.send")}
+          </Text>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          disabled={sending}
+          onPress={() => {
+            setState("idle");
+          }}
+          style={({ pressed }) => [
+            button,
+            {
+              borderWidth: StyleSheet.hairlineWidth,
+              borderColor: color.borderStrong,
+              backgroundColor: pressed ? color.primaryContainer : undefined,
+            },
+          ]}
+        >
+          <Text style={[textStyle.label, { color: color.textBrand }]}>
+            {t("assistant.flag.cancel")}
+          </Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
 function Said({ children, muted = false }: { children: ReactNode; muted?: boolean }) {
   const { theme } = useTheme();
   const { textStyle, color } = theme;
@@ -236,6 +352,7 @@ function TurnBody({ turn, actions }: { turn: ChatTurn; actions: ChatActions }) {
           <Text style={[textStyle.bodySmall, { color: color.textTertiary }]}>
             {t("assistant.generated")}
           </Text>
+          <FlagAnswer turn={turn} onFlag={actions.flag} />
         </>
       );
     case "not_found":
@@ -249,10 +366,16 @@ function TurnBody({ turn, actions }: { turn: ChatTurn; actions: ChatActions }) {
               onPress={actions.writeToGovernment}
             />
           </View>
+          <FlagAnswer turn={turn} onFlag={actions.flag} />
         </>
       );
     case "out_of_scope":
-      return <Said muted>{t("assistant.outOfScope")}</Said>;
+      return (
+        <>
+          <Said muted>{t("assistant.outOfScope")}</Said>
+          <FlagAnswer turn={turn} onFlag={actions.flag} />
+        </>
+      );
     case "paused":
       return (
         <>

@@ -197,11 +197,6 @@ function ProcedureSheetView({
             {t("procedures.onlyInFrench")}
           </Text>
         )}
-        {detail.translationStatus === "machine" && (
-          <Text style={[textStyle.bodySmall, { color: color.textTertiary, marginTop: space.xs }]}>
-            {t("content.machineTranslation")}
-          </Text>
-        )}
         <View
           style={[styles.listen, { marginTop: space.lg }]}
           onLayout={(event) => {

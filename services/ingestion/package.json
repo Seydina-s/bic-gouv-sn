@@ -13,6 +13,7 @@
     "documents": "tsx src/cli/documents.ts",
     "entreprendre": "tsx src/cli/entreprendre.ts",
     "withdrawn": "tsx src/cli/withdrawn.ts",
+    "discard": "tsx src/cli/discard.ts",
     "procedures": "tsx src/cli/procedures.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --coverage",
@@ -31,9 +32,9 @@
     "dom-serializer": "3.1.1",
     "domhandler": "6.0.1",
     "htmlparser2": "12.0.0",
-    "sanitize-html": "2.17.7",
+    "sanitize-html": "2.18.1",
     "sharp": "0.35.5",
-    "zod": "4.6.5"
+    "zod": "4.6.6"
   },
   "devDependencies": {
     "@types/node": "24.19.0",

@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { langSchema } from "../common/primitives.schema";
+import { officialSourceUrlSchema } from "../common/official-source.schema";
+import { isoDateTimeSchema, langSchema } from "../common/primitives.schema";
 
 /*
  * The assistant (CLAUDE.md §1, P2; owner's decision of 07/10/2026): short answers
@@ -85,6 +86,58 @@ export function readAssistantReply(raw: unknown): AssistantReply | null {
   const lost = Array.isArray(sources) && sources.length > 0 && parsed.data.sources.length === 0;
   return parsed.data.status === "answered" && lost ? null : parsed.data;
 }
+
+/**
+ * « Signaler cette réponse » (AST-30e, owner's decisions of 19 and 25/10/2026): the
+ * question, the answer and its sources, sent only when the person taps the button;
+ * nothing about the person. Read in the console, erased after ASSISTANT_FLAG_KEPT_DAYS.
+ */
+export const ASSISTANT_FLAG_KEPT_DAYS = 90;
+export const ASSISTANT_ANSWER_MAX = 2000;
+/** Sent by the app, shown in the console: its links must be official ones. */
+const flaggedSourceSchema = assistantSourceSchema.extend({ url: officialSourceUrlSchema });
+export const assistantFlagSubmissionSchema = z.strictObject({
+  question: z.string().trim().min(ASSISTANT_QUESTION_MIN).max(ASSISTANT_QUESTION_MAX),
+  lang: langSchema,
+  mode: assistantModeSchema,
+  status: z.enum(["answered", "not_found", "out_of_scope"]),
+  answer: z.string().trim().min(1).max(ASSISTANT_ANSWER_MAX).nullable(),
+  sources: z.array(flaggedSourceSchema).max(8),
+});
+export type AssistantFlagSubmission = z.infer<typeof assistantFlagSubmissionSchema>;
+
+export const assistantFlagSchema = assistantFlagSubmissionSchema.extend({
+  id: z.uuid(),
+  receivedAt: isoDateTimeSchema,
+});
+export type AssistantFlag = z.infer<typeof assistantFlagSchema>;
+
+/**
+ * A flagged question asked again by the weekly bench (AST-30g): what the assistant
+ * replies to it now, to see whether a fix holds. Its sources come from our own base.
+ */
+export const assistantFlagRecheckSchema = z.object({
+  askedOn: z.iso.date(),
+  status: assistantFlagSubmissionSchema.shape.status,
+  answer: z.string().trim().min(1).max(ASSISTANT_ANSWER_MAX).nullable(),
+  sources: z.array(assistantSourceSchema).max(8),
+});
+export type AssistantFlagRecheck = z.infer<typeof assistantFlagRecheckSchema>;
+
+/**
+ * The console's list of flagged answers, newest first, each with its latest recheck;
+ * `changed`: another status or other pages than in the flagged answer.
+ */
+export const assistantFlagsResponseSchema = z.object({
+  flags: z.array(
+    assistantFlagSchema.extend({
+      recheck: assistantFlagRecheckSchema.extend({ changed: z.boolean() }).nullable(),
+    }),
+  ),
+});
+export type AssistantFlagWithRecheck = z.infer<
+  typeof assistantFlagsResponseSchema
+>["flags"][number];
 
 /** The console's view of this month's use and its limit. */
 export const assistantUsageSchema = z.object({

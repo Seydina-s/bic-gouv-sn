@@ -507,3 +507,60 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : une réponse n'est gardée que si l'article est encore dans la version envoyée, et cette version était l'empreinte de tout l'article, traductions automatiques comprises. L'anglais, collecté juste avant, a ajouté une traduction à chaque article et changé toutes les empreintes. Deux langues traduites en même temps s'invalidaient l'une l'autre ; les tests ne collectaient jamais deux langues à la suite.
 - **Correctif** : l'empreinte retenue ne porte que sur les versions officielles (`officialFingerprint`, `services/ingestion/src/translation/article-translation.ts`), l'ancienne reste acceptée pour les lots déjà envoyés, et `--recollect` relit tous les lots des 29 derniers jours (réponses gardées par le fournisseur : rien n'est payé deux fois). Test : anglais collecté puis wolof, les deux enregistrés ; il échoue avec l'ancienne règle (vérifié).
 - **Prévention** : règle globale « empreinte qui couvre ce qu'on y ajoute ».
+
+## 22/10/2026 — Voix anglaise sautée par un redéploiement
+
+- **Ce qui s'est passé** : la chaîne des voix (français, puis anglais, puis wolof) tourne dans une boucle `for lang in fr en wo`. Le redéploiement de 17 h 09 a arrêté l'enregistrement en cours (anglais, 3 376 à faire) mais pas la boucle : celle-ci a pris l'arrêt pour une fin et lancé le wolof. Sans contrôle, l'anglais n'aurait été repris qu'au redéploiement suivant, et jamais si aucun n'avait suivi.
+- **Cause racine** : `deploy.sh` arrêtait les processus par leur commande (`voices:record`), pas leur parent. Une boucle qui enchaîne des étapes passe à la suivante quand l'étape en cours est tuée.
+- **Correctif** : `deploy.sh` (dans `C:\Users\HP\bgs-ops`) arrête d'abord la boucle, puis l'enregistrement ; `services.sh` relance la chaîne complète, qui reprend où elle s'était arrêtée (le français déjà fait ne coûte qu'une vérification). Chaîne relancée à 17 h 10, vérifiée dans les journaux.
+- **Prévention** : règle globale « arrêter une chaîne par son parent ».
+
+## 24/10/2026 — Contrôles locaux verts, CI rouge (fichier de verrouillage)
+
+- **Ce qui s'est passé** : la mise à jour Dependabot de fastify (#405) a passé tous les contrôles de `ship.sh` en local, puis a échoué quatre fois en CI dès l'installation. Dependabot avait modifié `apps/api/package.json` sans mettre à jour `pnpm-lock.yaml`.
+- **Cause racine** : `ship.sh` lançait `pnpm install --frozen-lockfile` sans regarder son résultat. L'échec passait inaperçu, puis pnpm, qui remet les dépendances en accord avant chaque script, a réécrit le fichier de verrouillage en local : les contrôles suivants tournaient donc sur un état que la CI n'aurait jamais.
+- **Correctif** : `ship-fn.sh` (dans `C:\Users\HP\bgs-ops`) s'arrête si l'installation stricte échoue, et aussi si un contrôle modifie `pnpm-lock.yaml`. Fichier de verrouillage de #405 régénéré et ajouté à la PR. #397, autre PR Dependabot dans le même cas, est fermée au profit de #281, complète. Deux livraisons suivantes (#281, #282) ont ensuite été refusées à l'envoi, après 10 minutes de contrôles verts : Dependabot réécrit ses branches après chaque fusion sur `main`. `ship.sh` attend désormais cette réécriture, puis part de la version de Dependabot (sauf commit local d'un autre auteur), et son message d'échec distingue secret détecté, réseau coupé et branche réécrite. Enfin, #282 (axe-core 4.14) a passé `ship.sh` puis échoué quatre fois en CI sur l'audit d'accessibilité, que `ship.sh` ne lance pas (ni les builds de production ni les parcours de bout en bout) : la nouvelle version rendait bloquante une règle (QA-12, decisions.md du 24/10).
+- **Prévention (suite)** : la mise à jour d'un outil de contrôle (lint, audit, tests, build) se vérifie en lançant ce contrôle-là en local avant la livraison ; un échec identique à chaque relance se lit dans le journal au lieu d'être relancé.
+- **Prévention** : règle globale « une étape de contrôle ne jette jamais un code d'échec ».
+
+## 24/10/2026 — Script de démarrage passé dans un tube (récidive)
+
+- **Ce qui s'est passé** : `services.sh 2>&1 | grep -i metro` n'a jamais rendu la main ; il a fallu arrêter le `grep` à la main, sans toucher à la tâche entière, qui aurait pu emporter Metro.
+- **Cause racine** : les processus que lance `services.sh` (comme `deploy.sh`) héritent du tube et le gardent ouvert. La règle était écrite depuis le 16/10 (avec `tail`), mais seulement écrite.
+- **Correctif** : le garde-fou du shell refuse désormais `services.sh` ou `deploy.sh` suivi d'un tube (`.claude/hooks/shell-guard.mjs`, cas testés et test de mutation).
+- **Prévention** : règle d'escalade appliquée (règle enfreinte deux fois = contrôle automatique).
+
+## 25/10/2026 — Modification faite dans la copie servie
+
+- **Ce qui s'est passé** : en reprenant après la rotation, deux modifications de l'assistant ont été écrites dans `C:\bic-gouv-sn` (la copie servie, détachée sur main) au lieu d'une copie de travail. Repéré à la modification suivante, avant tout redémarrage : changements déplacés dans `-w2` (`git diff` puis `git apply`), copie servie remise propre.
+- **Cause racine** : la session démarre dans la copie servie ; la règle « une copie de travail par livraison » vivait dans la mémoire et la reprise, sans rien qui l'impose au moment d'écrire.
+- **Correctif** : aucun effet (rien n'a été redémarré ni envoyé).
+- **Prévention** : avant la première modification d'une session, se placer dans une copie de travail (`-w2`/`-w4`) sur une nouvelle branche ; la reprise (STATUS.md) le rappelle dans « Points d'attention ».
+
+## 25/10/2026 — Profils Chrome des tests jamais supprimés
+
+- **Ce qui s'est passé** : 16 dossiers `bgs-test-chrome-*` d'environ 90 Mo chacun s'étaient accumulés dans le dossier temporaire de l'ordinateur, sur un disque déjà presque plein (point 54) : chaque audit d'accessibilité et chaque parcours de bout en bout en laissait un.
+- **Cause racine** : `scripts/test-browser.ts` créait un profil Chrome temporaire à chaque lancement (`mkdtempSync`) et ne le supprimait jamais ; `close()` arrêtait Chrome sans attendre sa fin, ni supprimer quoi que ce soit.
+- **Correctif** : `stopChrome` (même fichier) attend l'arrêt de Chrome puis supprime le profil, avec des essais répétés (Windows verrouille un moment les fichiers d'un programme arrêté), y compris après un lancement raté ; l'audit et les parcours attendent `close()`. Les 18 profils restants ont été supprimés (554 Mo).
+- **Prévention** : `scripts/test-browser-check.ts` (`pnpm test-browser:check`), lancé en CI après les parcours, échoue si un profil reste (test de mutation fait). Règle générale ajoutée à `ERREURS-GLOBALES.md` et au modèle de prompt système (section 10.2) : tout dossier temporaire créé par un outil est supprimé par lui, après l'arrêt du programme qui l'utilise, et un contrôle le vérifie.
+
+## 25/10/2026 — Types des tests non revérifiés avant une livraison
+
+- **Ce qui s'est passé** : la livraison du bouton « Signaler cette réponse » s'est arrêtée à la vérification des types (`ship.sh`) : un test ajouté après la dernière vérification des types de l'app déclarait un objet en lecture seule (`as const`), incompatible avec le type attendu. Rien n'a été envoyé ; un aller-retour de livraison perdu.
+- **Cause racine** : les types avaient été vérifiés avant l'écriture des tests, puis seuls les tests ont été relancés ; les commandes exactes de la CI n'ont pas été rejouées en entier après la dernière modification. La règle était écrite (CLAUDE.md §10) mais dépendait de la mémoire. Deuxième arrêt dans la même livraison : un test du parcours des réglages attendait encore la note wolof retirée ; le fichier de parcours n'avait été lancé qu'avec un filtre (`-t`) sur la partie Assistant.
+- **Correctif** : objet de test typé explicitement (`AssistantFlagSubmission`), dans `apps/mobile/src/api/assistant-client.test.ts`.
+- **Prévention** : le contrôle automatique a fonctionné (`ship.sh` refuse d'envoyer). En amont, la skill `verification` (`.claude/skills/verification/`) rejoue toutes les commandes de la CI par un script, juste avant la livraison ; elle se déclenche d'elle-même dès qu'un changement est déclaré fini.
+
+## 25/10/2026 — Mauvaise version d'app proposée à l'utilisateur (iPhone)
+
+- **Ce qui s'est passé** : le point 50 lui demandait d'installer la version de développement de l'iPhone (lien Expo). Le lien s'est ouvert dans l'app Expo (« aucun compte ») ; pour l'essayer, l'utilisateur a désinstallé sa version TestFlight, puis l'a réinstallée et l'a retrouvée sans les nouveautés jusqu'à une seconde ouverture.
+- **Cause racine** : le point avait été écrit du point de vue du développement (version reliée à Metro) sans vérifier ce que l'utilisateur avait déjà : la version TestFlight du 15/10 contenait les mêmes modules natifs (aucun changement natif depuis, `git diff` de `apps/mobile/package.json`) et recevait toutes les mises à jour à distance (canal `preview`, version d'exécution identique).
+- **Correctif** : point 50 classé ; l'utilisateur garde TestFlight ; une réinstallation demande d'ouvrir l'app 30 s, de la fermer complètement puis de la rouvrir (mise à jour appliquée au démarrage suivant). Mémoire `iphone-testflight-preferred`.
+- **Prévention** : avant de demander une installation, comparer les dépendances natives depuis la dernière version de l'utilisateur et vérifier son canal ; ne proposer une compilation que si un module natif a changé ou si sa version expire. Règle ajoutée à `ERREURS-GLOBALES.md` et au modèle de prompt système (supposition 10).
+
+## 26/10/2026 — Deux suites de tests lancées en même temps : délais dépassés partout
+
+- **Ce qui s'est passé** : la vérification complète d'une branche (copie `-w2`) et la livraison de la reprise (`ship.sh`, copie `-w4`) ont tourné en même temps. Les deux ont échoué sur les mêmes tests de l'API (comptes, statistiques, signalements sur base embarquée), chacun au-delà de 30 s, alors que la reprise ne touchait aucun code. Un aller-retour de livraison perdu.
+- **Cause racine** : chaque suite complète lance déjà tous les paquets en parallèle et occupe la machine ; deux suites à la fois la saturent. Rien n'interdisait de lancer une vérification pendant une livraison dans l'autre copie.
+- **Correctif** : relance l'une après l'autre.
+- **Prévention** : skill `livraison` (section 1) et reprise : une seule suite complète à la fois sur cette machine (vérification ou livraison) ; attendre la fin de l'une avant de lancer l'autre. Une seconde copie sert à préparer le changement suivant, pas à le tester en même temps.

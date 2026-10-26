@@ -1,17 +1,20 @@
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { FileProcedureRepository, RemoteConfigStore, fileDocument } from "@bgs/content-store";
 import { TimeoutError } from "@bgs/resilience";
 import {
   assistantBenchSchema,
+  assistantFlagsResponseSchema,
   assistantReplySchema,
   assistantUsageSchema,
+  submissionReceiptSchema,
 } from "@bgs/shared-types";
 import type { FastifyInstance } from "fastify";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { FileSettingStore } from "../admin/setting-store";
 import { buildApp } from "../app";
+import { FileAnswerFlagStore } from "../assistant/answer-flags";
 import type { LlmProvider } from "../assistant/llm-provider";
 import { loadConfig } from "../config";
 import { ErrorJournal } from "../journal/error-journal";
@@ -71,13 +74,18 @@ async function start(
     JSON.stringify({ minVersion: null, features: options.features ?? {} }),
   );
   const app = await buildApp({
-    config: loadConfig({ LOG_LEVEL: options.logs === undefined ? "silent" : "warn" }),
+    config: loadConfig({
+      LOG_LEVEL: options.logs === undefined ? "silent" : "warn",
+      // The bench's folder in the test's own folder (assistant/bench).
+      NEWS_STORE_PATH: join(dir, "news.json"),
+    }),
     version: "1.0.0",
     articles: temporaryStore(),
     procedures,
     admin: admin.admin,
     remoteConfig: new RemoteConfigStore(fileDocument(remotePath)),
     settings: new FileSettingStore(join(dir, "settings.json")),
+    answerFlagStore: new FileAnswerFlagStore(join(dir, "flags.json")),
     llm: options.llm === undefined ? model() : options.llm,
     errorJournal: options.errorJournal ?? null,
     ...(options.logs === undefined
@@ -103,6 +111,77 @@ beforeEach(async () => {
 afterEach(async () => {
   await Promise.all(apps.splice(0).map((app) => app.close()));
   await rm(dir, { recursive: true, force: true });
+});
+
+describe("« Signaler cette réponse » (AST-30e)", () => {
+  const flagged = {
+    question: "Comment demander le passeport fictif ?",
+    lang: "fr",
+    mode: "ask",
+    status: "answered",
+    answer: "Le passeport fictif se demande au guichet de test.",
+    sources: [
+      {
+        kind: "procedure",
+        contentId: "procedure-1",
+        slug: "test-1",
+        title: "Passeport fictif",
+        url: "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/test-1",
+        publishedOn: null,
+      },
+    ],
+  };
+  const flag = (app: FastifyInstance, payload: object) =>
+    app.inject({ method: "POST", url: "/v1/assistant/flags", payload });
+
+  it("keeps a flagged answer, read in the console's accounts only", async () => {
+    const app = await start();
+    const sent = await flag(app, flagged);
+    expect(sent.statusCode).toBe(201);
+    const { id } = submissionReceiptSchema.parse(sent.json());
+    const url = "/admin/v1/assistant/flags";
+    expect((await app.inject({ method: "GET", url })).statusCode).toBe(401);
+    const listed = await app.inject({
+      method: "GET",
+      url,
+      headers: { authorization: `Bearer ${await admin.tokenFor("reviewer")}` },
+    });
+    expect(listed.headers["cache-control"]).toBe("no-store");
+    expect(assistantFlagsResponseSchema.parse(listed.json()).flags).toMatchObject([
+      { id, question: flagged.question, status: "answered", recheck: null },
+    ]);
+  });
+
+  it("comes with the bench's latest asking of the question (AST-30g)", async () => {
+    const app = await start();
+    const { id } = submissionReceiptSchema.parse((await flag(app, flagged)).json());
+    const recheck = { askedOn: "2026-11-01", status: "not_found", answer: null, sources: [] };
+    const bench = join(dir, "assistant", "bench");
+    await mkdir(bench, { recursive: true });
+    await writeFile(join(bench, "flag-rechecks.json"), JSON.stringify({ [id]: recheck }));
+    const listed = await app.inject({
+      method: "GET",
+      url: "/admin/v1/assistant/flags",
+      headers: { authorization: `Bearer ${await admin.tokenFor("reviewer")}` },
+    });
+    expect(assistantFlagsResponseSchema.parse(listed.json()).flags).toEqual([
+      expect.objectContaining({ id, recheck: { ...recheck, changed: true } }),
+    ]);
+  });
+
+  it("refuses a link that is not an official source, or anything else sent", async () => {
+    const app = await start();
+    const [source] = flagged.sources;
+    const elsewhere = { ...flagged, sources: [{ ...source, url: "https://example.com/piege" }] };
+    expect((await flag(app, elsewhere)).statusCode).toBe(400);
+    expect((await flag(app, { ...flagged, email: "personne@example.com" })).statusCode).toBe(400);
+    expect((await flag(app, { ...flagged, answer: "x".repeat(2001) })).statusCode).toBe(400);
+  });
+
+  it("is refused while the assistant is switched off", async () => {
+    const response = await flag(await start({ features: { assistant: false } }), flagged);
+    expect(response.statusCode).toBe(503);
+  });
 });
 
 describe("POST /v1/assistant/answers", () => {

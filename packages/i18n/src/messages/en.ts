@@ -21,7 +21,6 @@ export const en: PartialCatalog<FrCatalog> = {
   content: {
     sourceAttribution: "Source: {source}",
     alsoPublishedBy: "Also published by: {institutions}",
-    machineTranslation: "Machine translation",
     onlyInFrench: "Only available in French",
     listen: "Listen",
     pause: "Pause",
@@ -361,7 +360,6 @@ export const en: PartialCatalog<FrCatalog> = {
     languageFr: "Français",
     languageWo: "Wolof",
     languageEn: "English",
-    languageWoMachine: "The Wolof interface is a machine translation, awaiting review.",
     dataSaver: "Data saver",
     dataSaverNever: "Never",
     dataSaverCellular: "Mobile",
@@ -598,6 +596,16 @@ export const en: PartialCatalog<FrCatalog> = {
     },
     sourceSpoken: "{kind}: {title}, {date}",
     generated: "Answer written automatically from these official sources.",
+    flag: {
+      action: "Report this answer",
+      notice:
+        "Your question, the answer and its sources will be sent to the team to correct the assistant. Nothing about you is sent, and everything is erased after 90 days. If your question contains your name or a number, do not report it.",
+      send: "Send the report",
+      cancel: "Cancel",
+      sending: "Sending…",
+      sent: "Thank you, the team will check this answer.",
+      failed: "The report could not be sent. Please try again later.",
+    },
     notFound:
       "Sorry, I cannot answer this question: the official publications do not cover it. You can search the news or write directly to the Government.",
     outOfScope:

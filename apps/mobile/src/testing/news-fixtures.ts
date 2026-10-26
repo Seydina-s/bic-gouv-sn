@@ -148,9 +148,18 @@ export function newsFetch(
     opportunities?: () => Response;
     participation?: () => Response;
     assistant?: () => Response;
+    flags?: () => Response;
   } = {},
 ) {
   return jest.fn((input: string) => {
+    if (input.includes("/v1/assistant/flags")) {
+      return Promise.resolve(
+        overrides.flags?.() ??
+          new Response(JSON.stringify({ id: "00000000-0000-4000-8000-0000000000f2" }), {
+            status: 201,
+          }),
+      );
+    }
     if (input.includes("/v1/assistant/")) {
       return Promise.resolve(
         overrides.assistant?.() ?? new Response(JSON.stringify(ASSISTANT_ANSWER)),

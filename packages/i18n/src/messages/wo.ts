@@ -23,7 +23,6 @@ export const wo: PartialCatalog<FrCatalog> = {
   content: {
     sourceAttribution: "Fi mu jóge: {source}",
     alsoPublishedBy: "Siiwal nañu ko it ci: {institutions}",
-    machineTranslation: "Masin moo ko tekki",
     onlyInFrench: "Ci farañse rekk la am",
     listen: "Déglu",
     pause: "Taxawal",
@@ -352,7 +351,6 @@ export const wo: PartialCatalog<FrCatalog> = {
     languageFr: "Français",
     languageWo: "Wolof",
     languageEn: "English",
-    languageWoMachine: "Masin moo tekki wolof bu aplikasioŋ bi, ñu ngi koy xoolaat.",
     dataSaver: "Wàññi done yi",
     dataSaverNever: "Mukk",
     dataSaverCellular: "Mobil",
@@ -587,6 +585,16 @@ export const wo: PartialCatalog<FrCatalog> = {
     },
     sourceSpoken: "{kind}: {title}, {date}",
     generated: "Tontu bii, masin moo ko bind jóge ci cosaan yu wóor yii.",
+    flag: {
+      action: "Xamle tontu bii",
+      notice:
+        "Sa laaj, tontu bi ak cosaan yi dinañu leen yónnee ekip bi ngir defar ndimbal bi. Dara lu jëm ci yaw du dem, te lépp dinañu ko far ci 90 fan. Su sa laaj amee sa tur walla ab nimero, bul ko xamle.",
+      send: "Yónnee xamle bi",
+      cancel: "Neenal",
+      sending: "Ñuy yónnee…",
+      sent: "Jërëjëf, ekip bi dina xool tontu bii.",
+      failed: "Xamle bi mënul a dem. Jéemaatal ci kanam tuuti.",
+    },
     notFound:
       "Baal ma, mënuma tontu laaj bii: li Nguur gi siiwal waxul ci dara. Mën nga seet ci xibaar yi walla nga bind Ngóornamaŋ bi.",
     outOfScope:

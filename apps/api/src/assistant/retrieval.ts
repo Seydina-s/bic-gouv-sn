@@ -2,9 +2,9 @@ import { INSTITUTIONS, type Institution, type Lang } from "@bgs/shared-types";
 import { fuseRankings } from "./hybrid-search";
 import type { PassageIndex, ScoredPassage } from "./passage-search";
 import { membersNamed } from "./government";
-import { newsPeriod, periodDays, type NewsPeriod } from "./news-overview";
+import { namesWeek, newsPeriod, periodDays, type NewsPeriod } from "./news-overview";
 import { publisherLabel, type Passage } from "./passages";
-import { widenQuestion } from "./question-words";
+import { namesSheetWords, widenQuestion } from "./question-words";
 
 /*
  * Which official extracts the model reads for a question. Words and meaning choose
@@ -201,17 +201,34 @@ function namedPublisher(text: string): string | null {
   return named === undefined ? null : publisherLabel(named);
 }
 
+/** Whether the question is about this week: only then is the model told its bounds. */
+export function asksAboutWeek(question: string): boolean {
+  return namesWeek(folded(widenQuestion(question)));
+}
+
+/**
+ * A weekday with no date after it ("le conseil de mercredi") names the latest one,
+ * whatever day it was held (bench of 25/10/2026: refused, the last Council being on a
+ * Tuesday); "le mercredi 30 septembre" names its date.
+ */
+const BARE_WEEKDAY = / (lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche) (?!\d)/u;
+
+/** Whether the question names a weekday with no date: the model is then reminded what it means. */
+export function namesBareWeekday(question: string): boolean {
+  return BARE_WEEKDAY.test(folded(question));
+}
+
 export function questionIntent(question: string): QuestionIntent {
   const text = folded(widenQuestion(question));
   return {
-    recent: RECENT.some((cue) => text.includes(cue)),
+    recent: RECENT.some((cue) => text.includes(cue)) || BARE_WEEKDAY.test(text),
     current: CURRENT.some((cue) => text.includes(cue)),
     composition: COMPOSITION.some((cue) => text.includes(cue)),
     section: SECTIONS.find(([cue]) => text.includes(cue))?.[1] ?? null,
     publisher: namedPublisher(text),
     members: membersNamed(text).map(({ name, post }) => ({ name, post })),
     period: newsPeriod(text),
-    procedure: HOW_TO.some((cue) => text.includes(cue)),
+    procedure: HOW_TO.some((cue) => text.includes(cue)) || namesSheetWords(question),
   };
 }
 
@@ -359,6 +376,8 @@ function newestNamed(index: PassageIndex, lang: Lang, intent: QuestionIntent): P
 function periodNews(index: PassageIndex, lang: Lang, today: string, period: NewsPeriod): Passage[] {
   const latest = (days: { from: string; to: string } | null) => {
     const seen = new Set<string>();
+    // Newest first across languages, the language asked first on a same day: the
+    // Wolof pages lag, and gave a Wolof question news 17 days old (bench of 25/10/2026).
     return searchedLanguages(lang)
       .flatMap((searched) =>
         index.latest({
@@ -370,6 +389,7 @@ function periodNews(index: PassageIndex, lang: Lang, today: string, period: News
           to: days?.to ?? today,
         }),
       )
+      .sort((a, b) => (b.publishedOn ?? "").localeCompare(a.publishedOn ?? ""))
       .filter((passage) => {
         if (seen.has(passage.contentId)) {
           return false;

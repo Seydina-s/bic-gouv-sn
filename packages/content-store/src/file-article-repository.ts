@@ -18,7 +18,7 @@ import {
   type SectionPage,
   type SectionsQuery,
 } from "./article-repository";
-import { VersionedJsonStore } from "./versioned-json-store";
+import { VersionedJsonStore, type VersionedEntry } from "./versioned-json-store";
 
 /**
  * Provisional article store: one JSON file (see VersionedJsonStore: validated reads,
@@ -170,6 +170,10 @@ export class FileArticleRepository implements ArticleRepository {
     return this.store.replaceCurrent(id, (current) =>
       newsArticleSchema.parse(withDuplicateOf(current, referenceId)),
     );
+  }
+
+  remove(id: string): Promise<VersionedEntry<NewsArticle> | null> {
+    return this.store.remove(id);
   }
 
   setAlsoPublishedBy(id: string, others: NewsArticle["alsoPublishedBy"]): Promise<boolean> {

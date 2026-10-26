@@ -3,7 +3,8 @@
 //   pnpm --filter @bgs/api assistant:bench --dry   lists the questions, pays nothing
 //   pnpm --filter @bgs/api assistant:bench --weaknesses   the known weaknesses and the
 //     traps only, a few cents: to check a fix at once, and that it opens no door
-//   pnpm --filter @bgs/api assistant:bench         asks them (≈ 1 $ with Sonnet 5.5)
+//   pnpm --filter @bgs/api assistant:bench         asks them (≈ 1 $ with Sonnet 5.5),
+//     and the questions people flagged again (AST-30g), their replies shown in the console
 // Reads ANTHROPIC_API_KEY from .env.local (typed there by the owner only). Messages
 // are in French: this command is run by the team.
 import { mkdir, readFile, writeFile } from "node:fs/promises";
@@ -11,7 +12,10 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { contentStores, fileDocument, StateServiceStore } from "@bgs/content-store";
 import { openDatabase } from "@bgs/database";
+import type { AssistantMode, Lang } from "@bgs/shared-types";
 import { answerSetSchema } from "../assistant/answer-eval";
+import { AnswerFlags, defaultAnswerFlagStore } from "../assistant/answer-flags";
+import { sourcesOf } from "../assistant/assistant-service";
 import {
   generatedCases,
   judgeBench,
@@ -21,12 +25,23 @@ import {
   updateWeaknesses,
   weaknessCases,
   weaknessSchema,
+  withEvidence,
   type BenchCase,
   type BenchVerdict,
 } from "../assistant/bench";
-import { benchFolder, WEAKNESSES_FILE } from "../assistant/bench-results";
+import {
+  benchFolder,
+  FLAG_RECHECKS_FILE,
+  readFlagRechecks,
+  WEAKNESSES_FILE,
+} from "../assistant/bench-results";
 import { ClaudeProvider } from "../assistant/claude-provider";
-import { answerQuestion, type GroundedAnswer } from "../assistant/grounded-answer";
+import { flagRecheck, nextRechecks, recheckChanged } from "../assistant/flag-recheck";
+import {
+  answerQuestion,
+  type AnswerTrace,
+  type GroundedAnswer,
+} from "../assistant/grounded-answer";
 import { buildKnowledge } from "../assistant/knowledge";
 import { SemanticLayer } from "../assistant/semantic-layer";
 import { TransformersEmbedder } from "../assistant/transformers-embedder";
@@ -125,8 +140,12 @@ try {
         ...trapCases(traps),
       ];
   const cases = [...asked, ...weaknessCases(previous, asked, current)];
+  // The full run only: the quick check (--weaknesses) runs the code of a working copy.
+  const flagged = weaknessesOnly
+    ? []
+    : await new AnswerFlags(defaultAnswerFlagStore(database, config.ASSISTANT_FLAGS_PATH)).list();
   say(
-    `Banc d'essai du ${today} : ${String(cases.length)} questions, dont ${String(cases.length - asked.length)} faiblesses connues`,
+    `Banc d'essai du ${today} : ${String(cases.length)} questions, dont ${String(cases.length - asked.length)} faiblesses connues, et ${String(flagged.length)} ${flagged.length > 1 ? "questions signalées" : "question signalée"}`,
   );
   if (dry) {
     for (const c of cases) {
@@ -157,24 +176,44 @@ try {
     const meaning =
       semantic === null || vectors === null ? null : { vectors, embedder: semantic.embedder };
     let costMicrodollars = 0;
-    const verdicts: BenchVerdict[] = await inGroups(cases, async (c) => {
-      let answer: GroundedAnswer | null;
+    /** The real assistant's answer; null when the service did not reply. */
+    const ask = async (
+      { question, lang, mode }: { question: string; lang: Lang; mode: AssistantMode },
+      traces: AnswerTrace[] = [],
+    ): Promise<GroundedAnswer | null> => {
       try {
-        answer = await answerQuestion(
-          { question: c.question, lang: c.lang, mode: "ask", today },
+        const answer = await answerQuestion(
+          { question, lang, mode, today },
           {
             index: knowledge.index,
             meaning,
-            llm: c.lang === "wo" ? wolofLlm : llm,
+            llm: lang === "wo" ? wolofLlm : llm,
             call: (operation) => operation(AbortSignal.timeout(QUESTION_TIMEOUT_MS)),
+            observe: (trace) => traces.push(trace),
           },
         );
         costMicrodollars += answer.usage?.costMicrodollars ?? 0;
+        return answer;
       } catch {
-        answer = null;
+        return null;
       }
-      return judgeBench(c, answer);
+    };
+    const verdicts: BenchVerdict[] = await inGroups(cases, async (c) => {
+      const traces: AnswerTrace[] = [];
+      const answer = await ask({ question: c.question, lang: c.lang, mode: "ask" }, traces);
+      return withEvidence(judgeBench(c, answer), traces[0] ?? null);
     });
+    const flagAnswers = new Map(
+      await inGroups(flagged, async (flag) => {
+        const answer = await ask({ question: flag.question, lang: flag.lang, mode: flag.mode });
+        const sources = answer === null ? [] : sourcesOf(answer.sources, knowledge.procedureSlugs);
+        return [flag.id, answer === null ? null : flagRecheck(answer, sources, today)] as const;
+      }),
+    );
+    const changed = flagged.filter((flag) => {
+      const recheck = flagAnswers.get(flag.id) ?? null;
+      return recheck !== null && recheckChanged(flag, recheck);
+    }).length;
     const summary = summarizeBench(verdicts);
     const { weaknesses, fixed } = updateWeaknesses(previous, cases, verdicts, today);
     await mkdir(root, { recursive: true });
@@ -187,6 +226,8 @@ try {
           summary,
           costMicrodollars,
           fixed: fixed.length,
+          // Counts only: this file is kept for good, a flag 90 days at most.
+          flagged: { asked: flagged.length, changed },
           verdicts,
         },
         null,
@@ -194,6 +235,10 @@ try {
       ),
     );
     await writeFile(weaknessesPath, JSON.stringify(weaknesses, null, 1));
+    if (!weaknessesOnly) {
+      const rechecks = nextRechecks(flagged, await readFlagRechecks(root), flagAnswers);
+      await writeFile(join(root, FLAG_RECHECKS_FILE), JSON.stringify(rechecks, null, 1));
+    }
     say(
       `Réussies : ${String(summary.passed)} sur ${String(summary.cases)} (${percent(summary.passed, summary.cases)}) · réponses inventées : ${String(summary.invented)} (objectif : 0)`,
     );
@@ -208,7 +253,15 @@ try {
     for (const verdict of verdicts.filter((v) => !v.passed)) {
       say(`  ✗ ${verdict.question} — ${verdict.reason ?? ""}`);
     }
-    say(`Coût : ${(costMicrodollars / 1_000_000).toFixed(2)} $ · résultats dans ${root}`);
+    // Never their words: this log is kept for good.
+    if (flagged.length > 0) {
+      say(
+        `Questions signalées reposées : ${String(flagged.length)}, dont ${String(changed)} avec une réponse différente de celle signalée (à lire dans la console, page Assistant)`,
+      );
+    }
+    say(
+      `Coût : ${(costMicrodollars / 1_000_000).toFixed(2)} $ · résultats dans ${root} (extraits donnés et réponse brute de chaque échec)`,
+    );
   }
 } finally {
   await database?.close();

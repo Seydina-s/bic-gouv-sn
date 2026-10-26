@@ -215,7 +215,7 @@ export class AssistantService {
 }
 
 /** One source per official page, in the order first cited. */
-function sourcesOf(
+export function sourcesOf(
   passages: readonly Passage[],
   procedureSlugs: ReadonlyMap<string, string>,
 ): AssistantSource[] {
