@@ -324,6 +324,7 @@
       "question": "Comment inscrire mon enfant à la case des tout-petits ?",
       "style": "direct",
       "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-a-inscrire-un-enfant-dans-une-case-des-tout-petits",
         "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-a-beneficier-dune-case-des-tout-petits"
       ]
     },
@@ -338,6 +339,7 @@
       "question": "Je veux me plaindre de mon opérateur de téléphone",
       "style": "reformulated",
       "expected": [
+        "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demander-a-instruire-une-plainte-a-lautorite-de-regulation-des-telecommunications-et-des-postes-con",
         "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/instruire-une-plainte-a-lautorite-de-regulation-des-telecommunications-et-des-postes-dirigee-contre"
       ]
     },

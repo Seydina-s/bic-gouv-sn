@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   answerQuestion,
+  BARE_WEEKDAY_NOTE,
   checkAnswer,
   SYSTEM_RULES,
   userMessage,
@@ -52,6 +53,15 @@ describe("userMessage", () => {
     const news = { ...passage(3, "Audience", "Le texte."), publisher: "Primature" };
     expect(userMessage("Question ?", "fr", [news])).toContain(
       '<extract number="1" title="Audience" date="not given" publisher="Primature">',
+    );
+  });
+
+  it("reminds that a weekday named alone is the latest one, only then (26/10/2026)", () => {
+    expect(
+      userMessage("conseil des ministres mercredi c quoi les decisions", "fr", given),
+    ).toContain(BARE_WEEKDAY_NOTE);
+    expect(userMessage("Le Conseil du mercredi 30 septembre", "fr", given)).not.toContain(
+      BARE_WEEKDAY_NOTE,
     );
   });
 
@@ -143,6 +153,14 @@ describe("the rules of the answers", () => {
     // account were refused as off-topic, though procedures answer them.
     expect(SYSTEM_RULES).toContain("A person telling their own situation");
     expect(SYSTEM_RULES).toContain("opinions, jokes, poems, recipes");
+  });
+
+  it("answer an article's title, the sheet on the subject, and a weekday named alone", () => {
+    // Bench of 25/10/2026: the Prytanée's title refused as off-topic, the sheet on the
+    // Canada visa called "not found", "Wednesday's Council" refused (held on a Tuesday).
+    expect(SYSTEM_RULES).toContain("only the title or subject of an official news item");
+    expect(SYSTEM_RULES).toContain("official sheet or page on the very subject asked");
+    expect(SYSTEM_RULES).toContain("A weekday named without a date");
   });
 });
 
