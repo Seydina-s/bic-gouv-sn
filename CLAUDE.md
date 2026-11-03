@@ -383,7 +383,7 @@ Un fichier `backlog.md` à la racine du projet est la source de vérité unique 
 - **États possibles d'une tâche** : 🔴 À faire · 🔵 En cours · ✅ Terminé · ⏸ En pause · ❌ Abandonnée (avec la raison notée).
 - **Historique** : une tâche n'est jamais supprimée du backlog, seul son état change.
 - **Ajouts** : toute tâche découverte en cours de route, tout changement d'orientation, toute suppression de périmètre est ajouté immédiatement, horodaté.
-- **Relecture** : avant de décider de la prochaine action, l'Orchestrateur relit systématiquement `backlog.md` en entier. Jamais de décision basée uniquement sur la mémoire de la session.
+- **Relecture** : avant de décider de la prochaine action, l'Orchestrateur relit systématiquement la liste des tâches ouvertes (`pnpm backlog:open`, tirée de `backlog.md`, dernier état de chaque tâche). Il n'ouvre `backlog.md` que pour l'historique d'une tâche précise (décision de l'utilisateur du 24/10/2026, économie de contexte). Jamais de décision basée uniquement sur la mémoire de la session.
 
 **Feuille de route initiale (sprints à détailler dans `backlog.md`)**
 
@@ -507,7 +507,8 @@ Dès qu'un sprint atteint 100 %, avant de passer au suivant, chaque agent actif 
 - `decisions.md` : journal des décisions (section 6).
 - `ERREURS.md` : journal des erreurs du projet (section 16).
 - `.claude/context/PROJECT.md`, `STACK.md`, `AGENTS.md` : détail de la vision, du stack validé, des rôles actifs (Ingestion & Données et IA & Wolof inclus).
-- `.claude/session/STATUS.md` : état résumé mis à jour à chaque fin de session.
+- `.claude/session/STATUS.md` : reprise courte (80 lignes au plus, jusqu'au marqueur `<!-- fin de la reprise -->`), réécrite à chaque fin de tâche et à chaque rotation de session (skill personnel `session-rotation`).
+- `.claude/session/HISTORIQUE.md` : historique des sessions, lu seulement pour un besoin précis.
 - `.claude/session/START.md` : prompt de démarrage de session (section 13).
 - `docs/sources.md` : cartographie des sources officielles.
 - `docs/errors-catalog.md` : catalogue des codes d'erreur et de leur explication simple.
@@ -517,7 +518,7 @@ Dès qu'un sprint atteint 100 %, avant de passer au suivant, chaque agent actif 
 
 ## 13. Prompt de démarrage de session  `[FIXE — à copier tel quel dans .claude/session/START.md]`
 
-> Tu es l'Orchestrateur de ce projet. Lis dans cet ordre : CLAUDE.md, backlog.md, decisions.md, .claude/session/STATUS.md. Affiche un résumé de situation en quelques lignes, identifie ce qui est en attente d'une validation de ma part, puis commence immédiatement la tâche suivante du backlog. Si tu as besoin d'informations ou d'assets, regroupe toutes les demandes en un seul message clair et numéroté. Go.
+> Tu es l'Orchestrateur de ce projet. Lis dans cet ordre : CLAUDE.md, la reprise de .claude/session/STATUS.md (déjà affichée au démarrage quand le hook de session est installé : ne pas la relire), la liste des tâches ouvertes (`pnpm backlog:open`), decisions.md. Affiche un résumé de situation en quelques lignes, identifie ce qui est en attente d'une validation de ma part, puis commence immédiatement la tâche suivante du backlog. Si tu as besoin d'informations ou d'assets, regroupe toutes les demandes en un seul message clair et numéroté. Go.
 
 ---
 

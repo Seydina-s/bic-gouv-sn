@@ -55,6 +55,12 @@ const OFFICIAL_WORDS: Readonly<Record<string, string>> = {
   loyer: "bail",
   handicap: "carte d'égalité des chances",
   handicape: "carte d'égalité des chances",
+  // Bench of 25/10/2026: the sheets on the national identity card, the grants and the
+  // digitised passport were never given for these words.
+  identite: "carte nationale d'identité",
+  universite: "bourse d'études supérieures",
+  etudiant: "bourse d'études supérieures",
+  passeport: "passeport numérisé",
 };
 
 /** Lower case, without accents or apostrophes: how shortcuts are looked up. */
@@ -65,6 +71,28 @@ function words(question: string): string[] {
     .replace(/\p{Diacritic}/gu, "")
     .split(/[^\p{L}\p{N}]+/u)
     .filter((word) => word !== "");
+}
+
+/**
+ * Everyday words that, alone, ask about a procedure ("Quelle carte pour les personnes
+ * vivant avec un handicap ?" was given Council communiqués, never the sheet, bench of
+ * 25/10/2026). Words also common in the news ("militaire", "brevet") are left out: the
+ * Prytanée's article title was then given the sheet on its entrance exam.
+ */
+const PROCEDURE_WORDS: ReadonlySet<string> = new Set([
+  "handicap",
+  "handicape",
+  "identite",
+  "passeport",
+  "divorce",
+  "divorcee",
+  "heritage",
+  "papiers",
+]);
+
+/** Whether the question uses an everyday word that asks about a procedure. */
+export function namesSheetWords(question: string): boolean {
+  return words(question).some((word) => PROCEDURE_WORDS.has(word));
 }
 
 /** The question, followed by the full words of its shortcuts and the official words of its everyday ones. */

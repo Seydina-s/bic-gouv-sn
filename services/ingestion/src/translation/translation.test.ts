@@ -116,6 +116,17 @@ describe("checkTranslation", () => {
     expect(checkTranslation(withEmphasis, reply(moved))).toMatchObject({ ok: true });
   });
 
+  it("keeps a translation of a text with emoji pasted as outside images", () => {
+    // The cleaning drops such images from both: they once refused even the French itself.
+    const emoji = `<img alt="🤝" src="https://static.xx.fbcdn.net/images/emoji.php/v9/t64/1/16/1f91d.png" />`;
+    const withEmoji = {
+      title: "Titre fictif",
+      bodyHtml: `<p><img src="${IMAGE}" /></p><p>Un texte français fictif pour les essais ${emoji}</p>`,
+    };
+    const body = `<p><img src="${IMAGE}" /></p><p>Mbind mu fictif ngir seetlu yi, lu gudd ${emoji}</p>`;
+    expect(checkTranslation(withEmoji, reply(body))).toMatchObject({ ok: true });
+  });
+
   it("cleans what it keeps like any scraped article", () => {
     const body = `<p><img src="${IMAGE}" /></p><p onclick="x()">Mbind mu fictif ngir seetlu yi, lu gudd.</p><script>x()</script>`;
     const checked = checkTranslation(french, reply(body));

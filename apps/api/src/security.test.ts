@@ -1,7 +1,7 @@
 import { writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { randomUUID } from "node:crypto";
+import { randomInt, randomUUID } from "node:crypto";
 import { FileArticleRepository } from "@bgs/content-store";
 import { apiErrorSchema } from "@bgs/shared-types";
 import type { FastifyInstance } from "fastify";
@@ -56,6 +56,31 @@ describe("rate limiting", () => {
     const api = await start({ RATE_LIMIT_PER_MINUTE: "1" });
     for (let i = 0; i < 3; i += 1) {
       expect((await api.inject({ url: "/v1/health" })).statusCode).toBe(200);
+    }
+  });
+});
+
+const redisUrl = process.env["REDIS_URL"];
+
+// The counter skips a failing Redis (requests go through), so only a real Redis shows
+// that the client library still drives it.
+describe.runIf(redisUrl !== undefined)("rate limiting shared in Redis (SCALE-01)", () => {
+  it("counts the requests of two instances together", async () => {
+    const env = { RATE_LIMIT_PER_MINUTE: "2", REDIS_URL: String(redisUrl) };
+    const other = await buildApp({
+      config: loadConfig({ LOG_LEVEL: "silent", ...env }),
+      version: "1.0.0",
+      articles: temporaryStore(),
+    });
+    try {
+      const api = await start(env);
+      // A new address on each run: the counter lives one minute in the shared Redis.
+      const remoteAddress = `10.${String(randomInt(256))}.${String(randomInt(256))}.${String(randomInt(256))}`;
+      expect((await api.inject({ url: "/v1/news", remoteAddress })).statusCode).toBe(200);
+      expect((await other.inject({ url: "/v1/news", remoteAddress })).statusCode).toBe(200);
+      expect((await api.inject({ url: "/v1/news", remoteAddress })).statusCode).toBe(429);
+    } finally {
+      await other.close();
     }
   });
 });

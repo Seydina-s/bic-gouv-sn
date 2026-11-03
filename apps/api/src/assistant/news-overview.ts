@@ -74,6 +74,11 @@ const GENERIC = new Set(
   ).split(" "),
 );
 
+/** Whether the question names this week, whatever its subject. */
+export function namesWeek(text: Folded): boolean {
+  return PERIODS.some(([name, cues]) => name === "week" && cues.some((cue) => text.includes(cue)));
+}
+
 /** The period asked, or "latest" for the news in general; null when there is a subject. */
 export function newsPeriod(text: Folded): NewsPeriod | null {
   let rest = text;

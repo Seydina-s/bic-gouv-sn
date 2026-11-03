@@ -1,3 +1,4 @@
+import type { AssistantFlagSubmission } from "@bgs/shared-types";
 import { AskError, createAssistantClient } from "./assistant-client";
 
 const question = { question: "Une question fictive ?", lang: "fr", mode: "ask" } as const;
@@ -40,5 +41,22 @@ describe("the assistant client", () => {
     await expect(offline.ask(question)).rejects.toMatchObject({ failure: "offline" });
     const { client } = answering(() => new Response(JSON.stringify({ status: "nouveau" })));
     await expect(client.ask(question)).rejects.toMatchObject({ failure: "failed" });
+  });
+
+  it("sends a flag with only what the person chose to send (AST-30e)", async () => {
+    const flag: AssistantFlagSubmission = {
+      ...question,
+      status: "not_found",
+      answer: null,
+      sources: [],
+    };
+    const { client, fetchImpl } = answering(() => new Response("{}", { status: 201 }));
+    await client.flag(flag);
+    const [url, init] = (fetchImpl.mock.calls[0] ?? []) as unknown as [string, RequestInit];
+    expect(url).toBe("https://api.test/v1/assistant/flags");
+    expect(init.method).toBe("POST");
+    expect(JSON.parse(init.body as string)).toEqual(flag);
+    const closed = answering(() => new Response("{}", { status: 503 }));
+    await expect(closed.client.flag(flag)).rejects.toEqual(new AskError("closed"));
   });
 });

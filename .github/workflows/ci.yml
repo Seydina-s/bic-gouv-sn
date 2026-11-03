@@ -75,6 +75,8 @@ jobs:
         run: pnpm a11y
       - name: End-to-end journeys (app web export and console)
         run: pnpm e2e
+      - name: Test browser removes its profile
+        run: pnpm test-browser:check
 
   containers:
     name: Container images

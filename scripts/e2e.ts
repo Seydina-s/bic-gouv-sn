@@ -238,7 +238,7 @@ async function main(): Promise<number> {
       }
     }
   } finally {
-    browser?.close();
+    await browser?.close();
     stack.stop();
   }
   say(`\n${String(JOURNEYS.length - failed)}/${String(JOURNEYS.length)} parcours réussis.`);

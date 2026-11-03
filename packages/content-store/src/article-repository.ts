@@ -1,6 +1,6 @@
 import type { Institution, Lang, NewsArticle } from "@bgs/shared-types";
 
-import type { SaveOutcome } from "./versioned-json-store";
+import type { SaveOutcome, VersionedEntry } from "./versioned-json-store";
 
 export type { SaveOutcome };
 
@@ -110,6 +110,11 @@ export interface ArticleRepository {
   setDuplicateOf(id: string, referenceId: string | null): Promise<boolean>;
   /** Replaces the other institutions' publications of the same content. No new version. */
   setAlsoPublishedBy(id: string, others: NewsArticle["alsoPublishedBy"]): Promise<boolean>;
+  /**
+   * Deletes an article with its history: only for a text the owner decided was never
+   * content (DATA-10); a source's withdrawal is setWithdrawn. Returns what was deleted.
+   */
+  remove(id: string): Promise<VersionedEntry<NewsArticle> | null>;
 }
 
 /** `article` marked as a duplicate of `referenceId`, or unmarked with null. */

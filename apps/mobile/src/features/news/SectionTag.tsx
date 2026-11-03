@@ -1,5 +1,5 @@
-import { tracking } from "@bgs/ui";
 import { StyleSheet, Text, View } from "react-native";
+import { CapsText } from "../../components/CapsText";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 import { categoryLabelKey } from "./category";
@@ -24,9 +24,9 @@ export function SectionTag({ category, lastOpened = false, color }: SectionTagPr
   return (
     <View style={[styles.row, { gap: space.sm }]}>
       <CategoryIcon category={category} color={tint} />
-      <Text style={[textStyle.caption, styles.caps, { color: tint }]}>
+      <CapsText numberOfLines={1} style={[textStyle.caption, styles.shrink, { color: tint }]}>
         {t(categoryLabelKey(category))}
-      </Text>
+      </CapsText>
       {lastOpened && (
         <Text
           style={[
@@ -49,6 +49,6 @@ export function SectionTag({ category, lastOpened = false, color }: SectionTagPr
 
 const styles = StyleSheet.create({
   row: { flexDirection: "row", alignItems: "center" },
-  caps: { textTransform: "uppercase", letterSpacing: tracking.caps },
+  shrink: { flexShrink: 1 },
   knot: { borderRadius: 999, overflow: "hidden" },
 });

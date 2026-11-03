@@ -27,7 +27,9 @@ export function ProcedureRow({
     <Pressable
       accessibilityRole="button"
       accessibilityState={{ selected }}
-      accessibilityLabel={[item.title, item.summary, ...facts.map((f) => `${f.label} : ${f.value}`)]
+      // The row shows each fact's value beside an icon: the value comes first, its name
+      // in brackets, so the words shown stay in a row (WCAG 2.5.3).
+      accessibilityLabel={[item.title, item.summary, ...facts.map((f) => `${f.value} (${f.label})`)]
         .filter(Boolean)
         .join(". ")}
       onPress={() => {

@@ -1,10 +1,10 @@
 import type { Lang } from "@bgs/shared-types";
 import { z } from "zod";
 import type { AnswerCase } from "./answer-eval";
-import type { AnswerStatus, GroundedAnswer } from "./grounded-answer";
+import type { AnswerStatus, AnswerTrace, GroundedAnswer } from "./grounded-answer";
 import { periodDays, type NewsPeriod } from "./news-overview";
 import type { Passage } from "./passages";
-import { questionIntent } from "./retrieval";
+import { PASSAGES_GIVEN, questionIntent } from "./retrieval";
 import type { RetrievalCase } from "./retrieval-eval";
 
 /*
@@ -58,6 +58,20 @@ export interface BenchVerdict {
   /** Answered although no answer was accepted: must never happen. */
   invented: boolean;
   cited: { url: string; publishedOn: string | null }[];
+  /** For a failure: what the model was given and replied (AST-39). */
+  evidence?: BenchEvidence;
+}
+
+export interface BenchEvidence {
+  searched: string;
+  extracts: {
+    number: number;
+    title: string;
+    url: string;
+    publishedOn: string | null;
+    text: string;
+  }[];
+  reply: string | null;
 }
 
 const SEARCH_KIND: Record<RetrievalCase["style"], BenchKind> = {
@@ -117,15 +131,22 @@ const PERIOD_QUESTIONS: readonly [NewsPeriod, Lang, string][] = [
   ["week", "fr", "Qu'a fait le gouvernement cette semaine ?"],
 ];
 
-/** The day from which a fresh answer about `period` cites its pages. */
+/**
+ * The day from which a fresh answer about `period` cites its pages. Nothing published
+ * in the period: the newest articles are given (`periodNews`), and any of them may be
+ * cited; only the newest day was accepted, which failed a sound Sunday answer citing
+ * Saturday and Friday (bench of 25/10/2026).
+ */
 function freshDay(news: readonly Passage[], period: NewsPeriod, today: string): string {
   const days = periodDays(period, today);
-  const dated = news.flatMap((passage) => passage.publishedOn ?? []).filter((d) => d <= today);
-  const newest = dated.reduce((a, b) => (a > b ? a : b), "0000-00-00");
-  if (days === null) {
-    return newest;
+  const dated = news
+    .flatMap((passage) => passage.publishedOn ?? [])
+    .filter((d) => d <= today)
+    .sort((a, b) => b.localeCompare(a));
+  if (days !== null && dated.some((day) => day >= days.from)) {
+    return days.from;
   }
-  return dated.some((day) => day >= days.from) ? days.from : newest;
+  return dated.slice(0, PASSAGES_GIVEN).at(-1) ?? "0000-00-00";
 }
 
 /** Questions drawn from the base itself: they follow it without upkeep. */
@@ -261,6 +282,31 @@ export function judgeBench(c: BenchCase, answer: GroundedAnswer | null): BenchVe
   const invented = answer.status === "answered" && !c.accepted.includes("answered");
   const reason = failure(c, answer, cited);
   return { ...base, status: answer.status, passed: reason === null, reason, invented };
+}
+
+/**
+ * A failure keeps the extracts the model was numbered and its reply as written (AST-39):
+ * a refusal that comes and goes ("Ankara", "visa pour le Canada") is then read from the
+ * run itself, whether the right page was missing or the model set it aside.
+ */
+export function withEvidence(verdict: BenchVerdict, trace: AnswerTrace | null): BenchVerdict {
+  if (verdict.passed || trace === null) {
+    return verdict;
+  }
+  return {
+    ...verdict,
+    evidence: {
+      searched: trace.searched,
+      extracts: trace.given.map((passage, index) => ({
+        number: index + 1,
+        title: passage.title,
+        url: passage.sourceUrl,
+        publishedOn: passage.publishedOn,
+        text: passage.text,
+      })),
+      reply: trace.reply,
+    },
+  };
 }
 
 function failure(

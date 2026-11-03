@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { answerQuestion, checkAnswer, SYSTEM_RULES, userMessage } from "./grounded-answer";
+import {
+  answerQuestion,
+  BARE_WEEKDAY_NOTE,
+  checkAnswer,
+  SYSTEM_RULES,
+  userMessage,
+  type AnswerTrace,
+} from "./grounded-answer";
 import type { LlmProvider, LlmRequest } from "./llm-provider";
 import { PassageIndex } from "./passage-search";
 import { REPHRASE_RULES } from "./question-rephrase";
@@ -49,6 +56,15 @@ describe("userMessage", () => {
     );
   });
 
+  it("reminds that a weekday named alone is the latest one, only then (26/10/2026)", () => {
+    expect(
+      userMessage("conseil des ministres mercredi c quoi les decisions", "fr", given),
+    ).toContain(BARE_WEEKDAY_NOTE);
+    expect(userMessage("Le Conseil du mercredi 30 septembre", "fr", given)).not.toContain(
+      BARE_WEEKDAY_NOTE,
+    );
+  });
+
   it("asks for Wolof when the question is in Wolof", () => {
     expect(userMessage("[wo] Laaj", "wo", given)).toContain("Language of the answer: Wolof");
   });
@@ -58,6 +74,20 @@ describe("userMessage", () => {
       "Task: check the claim in the question against the extracts",
     );
     expect(userMessage("Le port ferme", "fr", given)).not.toContain("Task:");
+  });
+
+  it("gives the bounds of this week to a question about the week only", () => {
+    // Bench of 25/10/2026: given to all, the week made "the last Council" a refusal.
+    const today = "2026-10-25";
+    const latest = userMessage("Qu'a décidé le dernier Conseil ?", "fr", given, "ask", today);
+    expect(latest).toContain("Today's date: 2026-10-25 (Sunday).");
+    expect(latest).not.toContain("This week");
+    expect(
+      userMessage("Qu'a fait le gouvernement cette semaine ?", "fr", given, "ask", today),
+    ).toContain("This week: Monday 2026-10-19 to Sunday 2026-10-25.");
+    expect(
+      userMessage("Lan la Njiitu réew mi def ayu bés bii ?", "wo", given, "ask", today),
+    ).toContain("This week:");
   });
 });
 
@@ -123,6 +153,14 @@ describe("the rules of the answers", () => {
     // account were refused as off-topic, though procedures answer them.
     expect(SYSTEM_RULES).toContain("A person telling their own situation");
     expect(SYSTEM_RULES).toContain("opinions, jokes, poems, recipes");
+  });
+
+  it("answer an article's title, the sheet on the subject, and a weekday named alone", () => {
+    // Bench of 25/10/2026: the Prytanée's title refused as off-topic, the sheet on the
+    // Canada visa called "not found", "Wednesday's Council" refused (held on a Tuesday).
+    expect(SYSTEM_RULES).toContain("only the title or subject of an official news item");
+    expect(SYSTEM_RULES).toContain("official sheet or page on the very subject asked");
+    expect(SYSTEM_RULES).toContain("A weekday named without a date");
   });
 });
 
@@ -248,6 +286,29 @@ describe("answerQuestion", () => {
     );
     expect(answer.status).toBe("answered");
     expect(llm.requests).toHaveLength(2);
+  });
+
+  it("tells the bench what the model was given and wrote, before the checks", async () => {
+    const written = '{"status":"not_found","answer":"","citations":[]}';
+    const traces: AnswerTrace[] = [];
+    const answer = await answerQuestion(
+      { question: "le port", lang: "fr" },
+      { index, llm: provider(written), call: direct, observe: (trace) => traces.push(trace) },
+    );
+    expect(answer.status).toBe("not_found");
+    expect(traces).toHaveLength(1);
+    expect(traces[0]?.searched).toContain("le port");
+    expect(traces[0]?.given).toHaveLength(PASSAGES_GIVEN);
+    expect(traces[0]?.reply).toBe(written);
+    // Nothing found: nothing given, nothing written.
+    const none: AnswerTrace[] = [];
+    await answerQuestion(
+      { question: "aéroport", lang: "fr" },
+      { index, llm: provider("{}"), call: direct, observe: (trace) => none.push(trace) },
+    );
+    expect(none).toHaveLength(1);
+    expect(none[0]).toMatchObject({ given: [], reply: null });
+    expect(none[0]?.searched).toContain("aéroport");
   });
 
   it("leaves a failed call to the caller", async () => {

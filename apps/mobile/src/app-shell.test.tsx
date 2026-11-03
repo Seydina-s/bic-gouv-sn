@@ -1,3 +1,4 @@
+import { dwellOf } from "./features/news/HeroCarousel";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { act, fireEvent, screen, waitFor, within } from "@testing-library/react-native";
 import * as Location from "expo-location";
@@ -251,11 +252,14 @@ describe("app shell", () => {
     });
   });
 
-  it("stops the carousel by a swipe, with no pause button (owner's decision, 14/10/2026)", async () => {
+  it("keeps the carousel turning after a swipe, with no pause button (owner, 22/10/2026)", async () => {
     await renderRouter(routes, { initialUrl: "/" });
     const carousel = await screen.findByTestId("hero-carousel");
     await fireEvent(carousel, "scrollBeginDrag");
     expect(screen.queryByRole("button", { name: /défilement/ })).toBeNull();
+    // The story chosen by the swipe stays twice as long, then the turns go on.
+    expect(dwellOf(5000, true)).toBe(10_000);
+    expect(dwellOf(5000, false)).toBe(5000);
   });
 
   it("searches the news from the front page and opens a result", async () => {
@@ -636,10 +640,11 @@ describe("app shell", () => {
     await fireEvent.press(await screen.findByRole("button", { name: "Réglages" }));
     await fireEvent.press(await screen.findByRole("radio", { name: "Sombre" }));
     await fireEvent.press(screen.getByRole("radio", { name: "Wolof" }));
-    // The whole interface follows: the settings now speak Wolof, said machine-translated.
+    // The whole interface follows: the settings now speak Wolof, with no machine-translation
+    // note any more (owner's decision of 25/10/2026, point 67).
     expect(screen.getByRole("radio", { name: "Lëndëm", checked: true })).toBeOnTheScreen();
     expect(screen.getByRole("radio", { name: "Wolof", checked: true })).toBeOnTheScreen();
-    expect(screen.getByText(/Masin moo tekki wolof/)).toBeOnTheScreen();
+    expect(screen.queryByText(/Masin moo tekki wolof/)).toBeNull();
     // Read after the actions (an async callback inside waitFor overlaps act() calls).
     expect(await AsyncStorage.multiGet(["bgs-theme", "bgs-language"])).toEqual([
       ["bgs-theme", "dark"],
@@ -1021,6 +1026,49 @@ describe("app shell", () => {
       screen.getByRole("button", { name: /^Démarche : Démarche fictive citée/ }),
     );
     expect(await screen.findByRole("header", { name: "Démarche de test A" })).toBeOnTheScreen();
+  });
+
+  it("flags an answer only after saying what is sent, then thanks the person (AST-30e)", async () => {
+    let flagsAnswer = () => new Response("{}", { status: 503 });
+    const fetchMock = newsFetch({ flags: () => flagsAnswer() });
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    await renderRouter(routes, { initialUrl: "/assistant" });
+    const field = screen.getByLabelText("Posez une question ou vérifiez une information");
+    await fireEvent.changeText(field, "Une question fictive ?");
+    await fireEvent.press(screen.getByRole("button", { name: "Envoyer" }));
+    expect(
+      await screen.findByText("Une réponse fictive tirée de la démarche de test."),
+    ).toBeOnTheScreen();
+    // Cancelling sends nothing.
+    await fireEvent.press(screen.getByRole("button", { name: "Signaler cette réponse" }));
+    const notice =
+      "Votre question, la réponse et ses sources seront envoyées à l'équipe pour corriger l'assistant. Aucune information sur vous n'est envoyée, et tout est effacé au bout de 90 jours. Si votre question contient votre nom ou un numéro, ne la signalez pas.";
+    expect(screen.getByText(notice)).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole("button", { name: "Annuler" }));
+    expect(screen.queryByText(notice)).toBeNull();
+    const flagged = () =>
+      fetchMock.mock.calls.filter(([url]) => url.includes("/v1/assistant/flags"));
+    expect(flagged()).toHaveLength(0);
+    // A failed sending says so and leaves the button.
+    await fireEvent.press(screen.getByRole("button", { name: "Signaler cette réponse" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Envoyer le signalement" }));
+    expect(
+      await screen.findByText("Le signalement n'a pas pu partir. Réessayez plus tard."),
+    ).toBeOnTheScreen();
+    flagsAnswer = () => new Response("{}", { status: 201 });
+    await fireEvent.press(screen.getByRole("button", { name: "Signaler cette réponse" }));
+    await fireEvent.press(screen.getByRole("button", { name: "Envoyer le signalement" }));
+    expect(await screen.findByText("Merci, l'équipe va vérifier cette réponse.")).toBeOnTheScreen();
+    expect(screen.queryByRole("button", { name: "Signaler cette réponse" })).toBeNull();
+    const init = (flagged().at(-1) as unknown as [string, RequestInit] | undefined)?.[1];
+    expect(JSON.parse(init?.body as string)).toEqual({
+      question: "Une question fictive ?",
+      lang: "fr",
+      mode: "ask",
+      status: "answered",
+      answer: "Une réponse fictive tirée de la démarche de test.",
+      sources: [expect.objectContaining({ title: "Démarche fictive citée" })],
+    });
   });
 
   it("says kindly when the month's messages are used up, and starts a new discussion", async () => {

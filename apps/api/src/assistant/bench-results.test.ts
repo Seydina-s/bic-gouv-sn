@@ -3,7 +3,13 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { assistantBenchSchema } from "@bgs/shared-types";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { benchFolder, readBenchResults, WEAKNESSES_FILE } from "./bench-results";
+import {
+  benchFolder,
+  FLAG_RECHECKS_FILE,
+  readBenchResults,
+  readFlagRechecks,
+  WEAKNESSES_FILE,
+} from "./bench-results";
 
 let dir: string;
 
@@ -76,5 +82,15 @@ describe("the bench's results for the console", () => {
       weaknesses: [],
     });
     expect(benchFolder(join(dir, "news.json"))).toBe(join(dir, "assistant", "bench"));
+  });
+
+  it("give the flagged questions asked again, none when the file is absent or unreadable", async () => {
+    expect(await readFlagRechecks(join(dir, "absent"))).toEqual({});
+    const recheck = { askedOn: "2026-11-01", status: "not_found", answer: null, sources: [] };
+    const id = "00000000-0000-4000-8000-00000000000a";
+    await writeFile(join(dir, FLAG_RECHECKS_FILE), JSON.stringify({ [id]: recheck }));
+    expect(await readFlagRechecks(dir)).toEqual({ [id]: recheck });
+    await writeFile(join(dir, FLAG_RECHECKS_FILE), JSON.stringify({ [id]: { askedOn: 1 } }));
+    expect(await readFlagRechecks(dir)).toEqual({});
   });
 });

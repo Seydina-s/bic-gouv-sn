@@ -168,6 +168,23 @@ describe.each(STORAGES)("articles stored %s", (_name, open) => {
     expect(await repo.setWithdrawn("missing", "fr", null)).toBe(false);
   });
 
+  it("deletes an article with its history, and gives back what it deleted", async () => {
+    // DATA-10: WordPress sample posts collected as news, deleted on the owner's decision.
+    await repo.save(article(1));
+    await repo.save(article(1, { contentHash: "f".repeat(64) }));
+    await repo.save(article(2));
+    const id = article(1).id;
+    const removed = await repo.remove(id);
+    expect(removed?.current.version).toBe(2);
+    expect(removed?.history.map((a) => a.version)).toEqual([1]);
+    expect(await repo.get(id)).toBeNull();
+    expect(await repo.history(id)).toEqual([]);
+    expect((await repo.list({ limit: 10, includeWithdrawn: true })).items.map((a) => a.id)).toEqual(
+      [article(2).id],
+    );
+    expect(await repo.remove(id)).toBeNull();
+  });
+
   it("hides a duplicate from the app, notes it on the reference, and can show it again", async () => {
     await repo.save(article(1));
     await repo.save(article(2));

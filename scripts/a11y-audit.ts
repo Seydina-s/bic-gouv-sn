@@ -240,7 +240,7 @@ async function main(): Promise<number> {
     reports.push(...(await reflowScreens(browser, consoleBase, CONSOLE_SCREENS)));
     return report(reports);
   } finally {
-    browser?.close();
+    await browser?.close();
     stack.stop();
   }
 }

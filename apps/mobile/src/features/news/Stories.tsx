@@ -1,7 +1,7 @@
 import type { NewsSummary } from "@bgs/shared-types";
-import { tracking } from "@bgs/ui";
 import { ArrowRightIcon as ArrowRight } from "phosphor-react-native/src/icons/ArrowRight";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { CapsText } from "../../components/CapsText";
 import { Icon } from "../../components/Icon";
 import { languageProps } from "../../i18n/language";
 import { useTranslation } from "../../i18n/useTranslation";
@@ -21,8 +21,15 @@ export interface StoryProps {
   onPress: (id: string) => void;
 }
 
-/** What a screen reader announces for one story: section, title, day, institution. */
-export function useStoryLabel(item: NewsSummary): {
+/**
+ * What a screen reader announces for one story: section, title, opening words when
+ * the card shows them, day, institution. Every word shown is in it, in the order
+ * shown (WCAG 2.5.3: voice control names a button by what it reads on it).
+ */
+export function useStoryLabel(
+  item: NewsSummary,
+  { withExcerpt = false }: { withExcerpt?: boolean } = {},
+): {
   label: string;
   day: string;
   institution: string;
@@ -31,7 +38,8 @@ export function useStoryLabel(item: NewsSummary): {
   const day = formatPublishedOn(item.publishedOn, lang);
   const key = institutionLabelKey(item.publisher);
   const institution = key === null ? "" : t(key);
-  const label = [t(categoryLabelKey(item.category)), item.title, day, institution]
+  const excerpt = withExcerpt ? item.excerpt : "";
+  const label = [t(categoryLabelKey(item.category)), item.title, excerpt, day, institution]
     .filter(Boolean)
     .join(". ");
   return { label, day, institution };
@@ -63,7 +71,7 @@ export function LeadStory({
   showInstitution = true,
 }: LeadStoryProps) {
   const { theme } = useTheme();
-  const { label, day, institution } = useStoryLabel(item);
+  const { label, day, institution } = useStoryLabel(item, { withExcerpt: true });
   const prefetch = usePrefetchArticle();
   const { color, space, textStyle, layout } = theme;
 
@@ -149,9 +157,7 @@ export function CouncilCard({ item, onPress }: Omit<StoryProps, "lastOpened">) {
     >
       <WovenStrip category={item.category} color={ink} />
       <View style={{ padding: space.lg, gap: space.sm }}>
-        <Text style={[textStyle.caption, styles.caps, { color: ink }]}>
-          {t("feed.latestCouncil")}
-        </Text>
+        <CapsText style={[textStyle.caption, { color: ink }]}>{t("feed.latestCouncil")}</CapsText>
         <Text
           {...languageProps(item.lang)}
           style={[textStyle.storyTitle, { color: ink }]}
@@ -242,7 +248,6 @@ export function StoryRow({
 
 const styles = StyleSheet.create({
   card: { overflow: "hidden" },
-  caps: { textTransform: "uppercase", letterSpacing: tracking.caps },
   action: { flexDirection: "row", alignItems: "center" },
   row: { flexDirection: "row", borderTopWidth: StyleSheet.hairlineWidth },
   body: { flex: 1 },

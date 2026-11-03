@@ -1,6 +1,6 @@
-import { tracking } from "@bgs/ui";
 import { useState } from "react";
 import { Modal, Pressable, ScrollView, StyleSheet, Switch, Text, View } from "react-native";
+import { CapsText } from "../../components/CapsText";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
@@ -61,12 +61,12 @@ function Heading({ text, aside }: { text: string; aside?: string }) {
   const { color, textStyle } = theme;
   return (
     <View style={styles.headingRow}>
-      <Text
+      <CapsText
         accessibilityRole="header"
-        style={[textStyle.caption, styles.heading, { color: color.textSecondary }]}
+        style={[textStyle.caption, { color: color.textSecondary }]}
       >
         {text}
-      </Text>
+      </CapsText>
       {aside !== undefined && (
         <Text style={[textStyle.caption, { color: color.textBrand }]}>{aside}</Text>
       )}
@@ -378,7 +378,6 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   sheet: { position: "absolute", left: 0, right: 0, bottom: 0, maxHeight: "88%" },
   headingRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  heading: { textTransform: "uppercase", letterSpacing: tracking.caps },
   clear: { justifyContent: "center" },
   wrap: { flexDirection: "row", flexWrap: "wrap" },
   pill: { borderWidth: 1, justifyContent: "center" },

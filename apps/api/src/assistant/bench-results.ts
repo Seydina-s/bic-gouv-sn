@@ -1,8 +1,9 @@
 import { readdir, readFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import type { AssistantBench } from "@bgs/shared-types";
+import { type AssistantBench, assistantFlagRecheckSchema } from "@bgs/shared-types";
 import { z } from "zod";
 import { weaknessSchema } from "./bench";
+import type { FlagRechecks } from "./flag-recheck";
 
 /*
  * The bench's results as the console shows them (AST-30f): each run is kept by its
@@ -15,6 +16,9 @@ export function benchFolder(newsStorePath: string): string {
 }
 
 export const WEAKNESSES_FILE = "weaknesses.json";
+/** The flagged questions asked again (AST-30g), by flag id; rewritten by each run. */
+export const FLAG_RECHECKS_FILE = "flag-rechecks.json";
+const flagRechecksSchema = z.record(z.uuid(), assistantFlagRecheckSchema);
 /** Runs shown in the trend. */
 const HISTORY = 8;
 const RUN_FILE = /^\d{4}-\d{2}-\d{2}\.json$/;
@@ -34,6 +38,14 @@ const runSchema = z.object({
 
 async function readJson(path: string): Promise<unknown> {
   return JSON.parse(await readFile(path, "utf8")) as unknown;
+}
+
+/** The flagged questions asked again, by flag id; none when nothing readable is there. */
+export async function readFlagRechecks(folder: string): Promise<FlagRechecks> {
+  const parsed = flagRechecksSchema.safeParse(
+    await readJson(join(folder, FLAG_RECHECKS_FILE)).catch(() => ({})),
+  );
+  return parsed.success ? parsed.data : {};
 }
 
 /** The runs and weaknesses kept in `folder`; an empty bench when nothing is there yet. */

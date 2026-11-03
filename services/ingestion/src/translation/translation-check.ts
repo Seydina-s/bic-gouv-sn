@@ -82,7 +82,9 @@ export function checkHtml(
   if (blockShape(clean).join(" ") !== blockShape(frenchHtml).join(" ")) {
     return refused("structure_changed");
   }
-  if (mediaSources(clean).join(" ") !== mediaSources(frenchHtml).join(" ")) {
+  // Both cleaned alike: Facebook emoji pasted as images are dropped from either, and
+  // were refusing even the French itself (ML-12d, 22/10/2026).
+  if (mediaSources(clean).join(" ") !== mediaSources(sanitizeArticleHtml(frenchHtml)).join(" ")) {
     return refused("media_changed");
   }
   return { ok: true, html: clean };

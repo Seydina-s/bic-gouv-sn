@@ -205,5 +205,25 @@ describe("text announced as French but written in English", () => {
       ) +
       "</p>";
     expect(looksEnglish(french)).toBe(false);
+    expect(looksEnglish("<p>Le Ministre reçoit The Daily Show à Dakar.</p>")).toBe(false);
+  });
+
+  it("sets aside a short English greeting with no French (DATA-10)", () => {
+    const greeting =
+      "<h2>The Ministry of Tourism and Recreation wishes the Christian community a Happy Easter</h2>";
+    expect(unpublishable("Happy Easter", greeting, "fr")).toBe(
+      "text in English (the app has no English edition yet)",
+    );
+  });
+});
+
+describe("the post WordPress writes on installing a site (DATA-10)", () => {
+  it("is never published", () => {
+    const sample =
+      "<p>Bienvenue sur WordPress. Ceci est votre premier article. Modifiez-le ou supprimez-le, puis commencez à écrire !</p>";
+    expect(unpublishable("Bonjour tout le monde !", sample, "fr")).toBe("WordPress sample post");
+    expect(
+      unpublishable("Hello world!", "<p>Welcome to WordPress. This is your first post.</p>", "fr"),
+    ).toBe("WordPress sample post");
   });
 });

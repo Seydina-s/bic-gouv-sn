@@ -91,6 +91,8 @@ async function seedArticle(dataDir: string): Promise<void> {
   await new FileArticleRepository(join(dataDir, "news.json")).save({
     id: ARTICLE_ID,
     kind: "news-article",
+    publisher: "presidence",
+    alsoPublishedBy: [],
     category: "communiques",
     sourceUrl,
     sourcePublishedOn: "2026-09-28",
@@ -128,6 +130,8 @@ async function seedWithdrawnArticle(storePath: string): Promise<void> {
   await repository.save({
     id,
     kind: "news-article",
+    publisher: "presidence",
+    alsoPublishedBy: [],
     category: "communiques",
     sourceUrl,
     sourcePublishedOn: "2026-09-27",
@@ -323,6 +327,70 @@ async function seedParticipation(dataDir: string): Promise<void> {
   );
 }
 
+/** Two answers flagged by people (AST-30e): one answered with its source, one not found, asked again. */
+function seedAnswerFlags(dataDir: string): void {
+  writeFileSync(
+    join(dataDir, "assistant-flags.json"),
+    JSON.stringify({
+      schemaVersion: 1,
+      flags: [
+        {
+          id: "00000000-0000-4000-8000-00000000f1a1",
+          receivedAt: "2026-10-02T09:30:00.000Z",
+          question: "Comment demander la démarche fictive ?",
+          lang: "fr",
+          mode: "ask",
+          status: "answered",
+          answer: "Une réponse fictive pour l'audit d'accessibilité.",
+          sources: [
+            {
+              kind: "procedure",
+              contentId: "audit-procedure",
+              slug: "demarche-fictive",
+              title: "Démarche fictive",
+              url: "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demarche-fictive",
+              publishedOn: null,
+            },
+          ],
+        },
+        {
+          id: "00000000-0000-4000-8000-00000000f1a2",
+          receivedAt: "2026-10-01T18:00:00.000Z",
+          question: "Laaj bu fictif ngir audit bi ?",
+          lang: "wo",
+          mode: "verify",
+          status: "not_found",
+          answer: null,
+          sources: [],
+        },
+      ],
+    }),
+  );
+  // The second one asked again by the bench (AST-30g), now answered; the first not yet.
+  const bench = join(dataDir, "assistant", "bench");
+  mkdirSync(bench, { recursive: true });
+  writeFileSync(
+    join(bench, "flag-rechecks.json"),
+    JSON.stringify({
+      "00000000-0000-4000-8000-00000000f1a2": {
+        askedOn: "2026-10-04",
+        status: "answered",
+        answer: "Tontu bu fictif ngir audit bi.",
+        sources: [
+          {
+            kind: "procedure",
+            contentId: "audit-procedure",
+            slug: "demarche-fictive",
+            title: "Démarche fictive",
+            url: "https://e-senegal.sn/#/comprendre-ma-demarche/demarche/demarche-fictive",
+            publishedOn: null,
+          },
+        ],
+      },
+    }),
+  );
+}
+
 /** One opportunity published in the app, one waiting for a second person. */
 function seedOpportunities(dataDir: string): void {
   const someone = { id: "audit-autre-personne", name: "Autre personne (fictive)" };
@@ -454,6 +522,7 @@ export async function seed(dataDir: string, password: string): Promise<void> {
   seedErrorJournal(dataDir);
   seedOpportunities(dataDir);
   await seedParticipation(dataDir);
+  seedAnswerFlags(dataDir);
   await seedArticle(dataDir);
   await seedProcedure(dataDir);
   await seedServices(dataDir);

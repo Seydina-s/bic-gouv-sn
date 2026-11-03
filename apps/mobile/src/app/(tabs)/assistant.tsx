@@ -44,7 +44,7 @@ function Assistant() {
   const bottomInset = useTabBarInset();
   const scroll = useRef<ScrollView>(null);
   const [draft, setDraft] = useState("");
-  const { turns, busy, send, reset } = useConversation();
+  const { turns, busy, send, reset, flag } = useConversation();
   const voice = useVoiceInput(lang, setDraft);
   const contentWidth = useContentWidth();
   const { color, space, textStyle, touchTarget } = theme;
@@ -81,6 +81,7 @@ function Assistant() {
     retry: (turn: ChatTurn) => {
       void send(turn.question, lang);
     },
+    flag,
   };
 
   // The same column as the other tabs, so margins never jump from one tab to the next.

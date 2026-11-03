@@ -186,4 +186,10 @@ export const MIGRATIONS: readonly { id: string; statements: readonly string[] }[
     id: "014-content-documents",
     statements: ["CREATE TABLE content_documents (name text PRIMARY KEY, data jsonb NOT NULL)"],
   },
+  {
+    // Answers of the assistant a person flagged (AST-30e, owner's decisions of 19 and
+    // 25/10/2026): each one whole, erased after ASSISTANT_FLAG_KEPT_DAYS.
+    id: "015-assistant-flags",
+    statements: ["CREATE TABLE assistant_flags (id text PRIMARY KEY, data jsonb NOT NULL)"],
+  },
 ];
