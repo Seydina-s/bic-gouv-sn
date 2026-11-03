@@ -38,9 +38,12 @@ minimumReleaseAgeExclude:
 # patched version and outside the shipped app. Reviewed at each Expo SDK upgrade.
 auditConfig:
   ignoreGhsas:
-    # node-forge <=1.4.0, RSA signature verification: only in @expo/cli, which uses
-    # it to sign (dev manifests, local iOS builds), never to verify.
-    - GHSA-86w9-cpqp-85rv
+    # decode-uri-component <=0.5.0, slow decoding of a crafted ~224 KB string (03/11/2026,
+    # decisions.md): only through expo-router > query-string 7, which loads it with
+    # require(); the fix (0.5.1) is an ES module only and would break the app's links.
+    # In the app it decodes the phone's own deep links; absent from the API, the console
+    # and ingestion.
+    - GHSA-qr28-fpjm-wq7f
     # braces <=3.0.3, stack exhaustion on deeply nested patterns (owner's decision,
     # 03/10/2026): only in Metro and Jest, through micromatch, fed with the project's
     # own glob patterns; absent from the app, the API, the console and ingestion.
@@ -61,3 +64,5 @@ overrides:
   # Zod memory exhaustion on oversized constrained collections (high, 23/10/2026): our
   # own packages pin 4.6.6; this covers the copy brought by @expo/cli.
   "zod@<4.6.6": "4.6.6"
+  # Six advisories up to 1.4.0, high (03/11/2026): via @expo/cli (signing dev manifests).
+  "node-forge@<1.4.1": "1.4.1"

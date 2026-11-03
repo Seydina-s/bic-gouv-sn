@@ -1,8 +1,13 @@
+import { join } from "node:path";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
     include: ["src/**/*.test.ts"],
+    // One module cache per package: the default one, shared at the workspace root,
+    // was cleared by one package while another wrote in it when all test in parallel
+    // (03/11/2026, ENOTEMPTY then EPERM on Windows; see ERREURS.md).
+    fsModuleCachePath: join(process.cwd(), "node_modules", ".vitest-cache"),
     // The default 5 s is too tight for cold imports when packages test in parallel
     // on a loaded machine or a small CI runner (API app build took 12.6 s once).
     testTimeout: 30_000,
