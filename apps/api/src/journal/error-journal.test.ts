@@ -9,6 +9,7 @@ import { adminForTests } from "../testing/admin-session";
 import { temporaryStore } from "../testing/store";
 import { ErrorJournal, errorCodeOf, UNKNOWN_ROUTE } from "./error-journal";
 import { FileErrorJournalStore } from "./error-journal-store";
+import type { PushProblemListener, PushProvider } from "../notifications/notifications";
 
 let dir: string;
 let app: FastifyInstance | null = null;
@@ -85,5 +86,69 @@ describe("error journal", () => {
     ]);
     expect(JSON.stringify(entries)).not.toContain("secret");
     expect(JSON.stringify(entries)).not.toContain("nothing-here");
+  });
+
+  it("records the notifications that cannot reach the phones (03/11/2026)", async () => {
+    const admin = await adminForTests();
+    const journal = new ErrorJournal(new FileErrorJournalStore(join(dir, "error-journal.json")));
+    let report: PushProblemListener = () => undefined;
+    const push: PushProvider = {
+      ready: true,
+      send: () => Promise.resolve({ outcome: "sent", recipients: 1 }),
+      reportProblemsTo: (listener) => {
+        report = listener;
+      },
+    };
+    const build = (pushProvider?: PushProvider) =>
+      buildApp({
+        config: loadConfig({ LOG_LEVEL: "silent" }),
+        version: "1.0.0",
+        articles: temporaryStore(),
+        admin: admin.admin,
+        errorJournal: journal,
+        automaticNotificationsEveryMs: 60_000,
+        ...(pushProvider === undefined ? {} : { pushProvider }),
+      });
+    app = await build(push);
+    report("PUSH_NOT_DELIVERED", "InvalidCredentials", 3);
+    // A server started without a push service cannot announce anything: said at start.
+    const unconfigured = await build();
+    try {
+      await unconfigured.ready();
+    } finally {
+      await unconfigured.close();
+    }
+    const answer = await app.inject({
+      method: "GET",
+      url: "/admin/v1/errors",
+      headers: { authorization: `Bearer ${await admin.tokenFor("reviewer")}` },
+    });
+    const { entries } = answer.json<{ entries: { code: string; where: string }[] }>();
+    expect(entries.map(({ code, where }) => [code, where])).toEqual(
+      expect.arrayContaining([
+        ["PUSH_NOT_DELIVERED", "Notifications (InvalidCredentials)"],
+        ["PUSH_NOT_CONFIGURED", "Notifications (serveur)"],
+      ]),
+    );
+  });
+
+  it("leaves out the missing push service of a test server, which never sends", async () => {
+    const admin = await adminForTests();
+    const journal = new ErrorJournal(new FileErrorJournalStore(join(dir, "error-journal.json")));
+    app = await buildApp({
+      config: loadConfig({ LOG_LEVEL: "silent", NODE_ENV: "test" }),
+      version: "1.0.0",
+      articles: temporaryStore(),
+      admin: admin.admin,
+      errorJournal: journal,
+      automaticNotificationsEveryMs: 60_000,
+    });
+    await app.ready();
+    const answer = await app.inject({
+      method: "GET",
+      url: "/admin/v1/errors",
+      headers: { authorization: `Bearer ${await admin.tokenFor("reviewer")}` },
+    });
+    expect(answer.json<{ entries: unknown[] }>().entries).toEqual([]);
   });
 });

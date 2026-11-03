@@ -186,6 +186,37 @@ export const ERROR_CATALOG = {
     severity: "info",
     action: "Rechargez la page des notifications.",
   },
+  PUSH_NOT_CONFIGURED: {
+    what: "Les notifications automatiques des nouveaux articles ne partent pas : l'envoi n'est pas configuré sur le serveur.",
+    where: "Notifications sur les téléphones",
+    impact:
+      "Aucun téléphone n'est prévenu des nouveaux articles ; l'app reste à jour quand on l'ouvre.",
+    severity: "critical",
+    action:
+      "Prévenez l'équipe technique : le serveur doit être relancé avec l'envoi des notifications activé.",
+  },
+  PUSH_SERVICE_UNREACHABLE: {
+    what: "Le service qui transmet les notifications aux téléphones (Expo) n'a pas répondu.",
+    where: "Notifications sur les téléphones",
+    impact: "Une partie ou la totalité des téléphones n'a pas reçu la dernière notification.",
+    severity: "warning",
+    action: "Rien à faire si cela reste isolé ; si cela se répète, prévenez l'équipe technique.",
+  },
+  PUSH_REJECTED: {
+    what: "Le service d'envoi (Expo) a refusé des notifications.",
+    where: "Notifications sur les téléphones",
+    impact: "Les téléphones concernés n'ont pas reçu la notification.",
+    severity: "critical",
+    action: "Prévenez l'équipe technique : le détail technique donne la raison du refus.",
+  },
+  PUSH_NOT_DELIVERED: {
+    what: "Apple ou Google n'ont pas remis des notifications aux téléphones.",
+    where: "Notifications sur les téléphones",
+    impact: "Les téléphones concernés n'ont pas reçu la notification.",
+    severity: "critical",
+    action:
+      "Prévenez l'équipe technique : le détail technique donne la raison (identifiants Apple ou Google, message trop long…).",
+  },
   ERROR_GROUP_NOT_FOUND: {
     what: "Une erreur à marquer comme réglée n'est plus dans le journal.",
     where: "Centre d'administration, journal des erreurs",

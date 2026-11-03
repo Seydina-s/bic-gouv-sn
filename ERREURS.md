@@ -578,3 +578,17 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : `services.sh` jugeait l'API lancée dès que le port 3100 écoutait, sans vérifier qui répondait ; son attente de démarrage acceptait aussi n'importe quelle réponse.
 - **Correctif** : l'API n'est « déjà lancée » que si `/v1/health` répond `"status":"ok"` ; si le port est tenu par un autre programme, le script le dit et nomme sa ligne de commande, sans rien arrêter. Fichier : `C:\Users\HP\bgs-ops\services.sh`.
 - **Prévention** : un script qui teste « ce service tourne » interroge le service lui-même (réponse attendue), jamais seulement un port ouvert.
+
+## 03/11/2026 — Tests arrêtés au démarrage par le cache partagé de vitest
+
+- **Ce qui s'est passé** : deux fois en une semaine, la suite complète s'est arrêtée avant le moindre test, sur `packages/ui` : `ENOTEMPTY` puis `EPERM` en supprimant `node_modules/.vitest-cache` à la racine du dépôt. Relancée, elle passait. Une livraison et une vérification perdues.
+- **Cause racine** : vitest 5 range son cache de modules dans un seul dossier à la racine, commun à tous les paquets. La suite lance les dix paquets en même temps ; quand l'un vide ce cache pendant qu'un autre y écrit, Windows refuse la suppression.
+- **Correctif** : un cache par paquet (`fsModuleCachePath` dans `vitest.shared.ts`, dans le `node_modules` de chaque paquet).
+- **Prévention** : un outil lancé en parallèle sur plusieurs paquets ne partage aucun dossier de travail ; à chaque montée de version d'un outil de test, vérifier où il écrit ses caches.
+
+## 03/11/2026 — Scripts jetables emportés dans un commit
+
+- **Ce qui s'est passé** : deux scripts de diagnostic (`apps/api/.tmp-due.mts`, `.tmp-replay.mts`), écrits dans la copie de travail pour relire les articles, sont entrés dans le commit de #440 par `git add -A`. Le lint de `ship.sh` les a refusés avant tout envoi ; une livraison perdue. Un premier script avait même été écrit dans la copie servie, puis déplacé aussitôt.
+- **Cause racine** : un script qui a besoin des paquets du dépôt a été posé dans le dépôt faute d'autre moyen, puis la liste des fichiers du commit n'a pas été relue (vérification sautée pour gagner du temps).
+- **Correctif** : fichiers retirés du commit avant tout envoi.
+- **Prévention** : scripts jetables dans le dossier temporaire de la session ; s'il faut les paquets du dépôt, les y poser le temps de l'exécution puis les sortir aussitôt ; relire `git diff --cached --name-only` avant chaque commit ; ne jamais sauter la skill `verification`.

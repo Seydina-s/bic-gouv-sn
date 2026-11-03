@@ -1,52 +1,47 @@
 # Reprise — Bic Gouv SN
 
-**Mis à jour** : 26/10/2026 14 h · **Mode** : autonome prolongé (demande du 22/10 ; s'arrêter pour toute dépense imprévue, sécurité, données personnelles, contenu publié, action difficile à défaire) · **main** : #400. Historique des sessions : `HISTORIQUE.md` (à ne lire que pour un besoin précis). Méthode : skill `session-rotation`.
+**Mis à jour** : 03/11/2026 9 h 15 · **Mode** : autonome jusqu'au 03/11 à 15 h (demande de l'utilisateur : finir ses tâches, puis audits, tests, failles, bugs silencieux, UI/UX, design ; toutes autorisations données) · **main** : #438. Historique des sessions : `HISTORIQUE.md` (à ne lire que pour un besoin précis). Méthode : skill `session-rotation`.
 
 ## État
-- Services locaux en marche (`bash /c/Users/HP/bgs-ops/services.sh` relance ce qui est tombé) : API 3100, console 3001 (Next.js 16.4.1), surveillance des 22 sites + der.sn, filtre public 3200 + tunnel ngrok, Metro 8081 (iPhone, copie `-demo`). `deploy.sh` relance aussi le filtre public depuis le 25/10.
-- **Skills du projet** (`.claude/skills/`) : `verification` (avant de dire « terminé » : contrôles exacts de la CI par script, diff, tests affaiblis, rapport fixe) et `livraison` (procédure complète) ; sous-agent `relecteur` (`.claude/agents/`, lecture seule). Claude crée ses skills et hooks sans attendre (décision du 25/10, decisions.md).
-- « Signaler cette réponse » (AST-30e) en service : serveur (#417, 90 jours, effacement automatique), page « Réponses signalées » de la console (#419), bouton de l'app avec la phrase validée (#420, mise à jour à distance publiée) ; route autorisée par le filtre public. Chaque dimanche, le banc d'essai repose les questions signalées (#423, AST-30g), sans les juger : leur nouvelle réponse est dans `.data/assistant/bench/flag-rechecks.json`, affichée sous le signalement dans la console ; jamais leur texte dans le journal ni dans les fichiers gardés sans limite.
-- Traduction automatique (#399, #401) : nouveaux articles traduits en anglais et en wolof toutes les 30 min, fiches toutes les 6 h (`bgs-ops/logs/watch.log`). Plus aucune mention de traduction dans l'app (#416, #420).
-- Voix (serveur Hetzner `voices@95.216.167.95`, clé `~/.ssh/bic_gouv_ai`) : français et anglais finis (265 / 265 le 26/10 à 4 h 49) ; wolof en cours depuis (3 390 à faire, lots de 24, ≈ 40 min par article, 5 Go de mémoire sur 7,7), à finir sur le futur serveur d'hébergement. Le serveur garde encore pillow 12 (`~/voices`, verrou d'avant #400) : à mettre à jour après l'essai wolof. Copies d'essai sur le serveur : `~/voices-trial` (main + pillow 13), `~/voices-torch` (torch 2.13), scripts `~/trial*.sh` (essais plafonnés en mémoire par `systemd-run --user --scope -p MemoryMax=…`).
-- Banc d'essai de l'assistant : chaque dimanche à 4 h (`bgs-ops/bench.sh`) ; passage du 25/10 : 77 / 96, aucune réponse inventée ; après AST-42 (#425), contrôle rapide 37 / 39 (contre 28), pièges 15 / 15 ; restent le visa pour le Canada et la carte grise (suivis comme faiblesses). Contrôle rapide d'une correction : `bash /c/Users/HP/bgs-ops/check-bench.sh <copie>` (≈ 0,17 $).
-- Contenus refusés par les règles de collecte : `pnpm --filter @bgs/ingestion discard` (liste) / `--apply <id>` (copie privée dans `.data/discarded-articles.json`) ; 5 supprimés le 25/10, aucun restant.
-- Disque : 23 Go libres (SDK Android supprimé) ; le gros poste est `.data/media` (15 Go, en hausse) → point 70.
-- Modèle universel de prompt système : `C:\Users\HP\Desktop\CLAUDE-MODELE-PROJET.md` (v3.1 du 25/10 : ossature du document initial, 30 suppositions, section 18 « Utiliser Claude Code au maximum » tirée des 5 cours Claude Code de l'Anthropic Academy) ; y reporter chaque nouvelle règle de `~/.claude/ERREURS-GLOBALES.md`.
+- Services locaux en marche (`bash /c/Users/HP/bgs-ops/services.sh` relance ce qui est tombé) : API 3100, console 3001, surveillance des 22 sites + der.sn, filtre public 3200 + tunnel ngrok, Metro 8081, boucle des voix (relancée le 03/11 à 2 h 45). L'ordinateur se met en veille (01/11 20 h 42 → 03/11 1 h 53 : ni collecte, ni notifications, ni voix pendant ce temps).
+- **Notifications** (demande de l'utilisateur : elles n'arrivent plus sur son iPhone) : un seul abonné (son téléphone, fr, heures calmes 22 h–7 h UTC, inscrit le 23/10) ; son adresse Expo est valable (notification silencieuse de contrôle, accusé d'Apple « ok ») ; 26 articles de la semaine devaient partir de jour ; le vrai notificateur rejoué sur les vrais articles les annonce. La cause réelle reste inconnue : aucune trace d'envoi nulle part (registre des envois et pause dans `.data/admin`, jamais lus). PR **#440** (`fix/push-observability`, copie `-w2`) rend tout visible (état au démarrage, chaque annonce, refus d'Expo, accusés d'Apple et de Google, codes `PUSH_*` au journal des erreurs).
+- Voix (serveur `voices@95.216.167.95`, clé `~/.ssh/bic_gouv_ai`) : français et anglais finis ; wolof en cours (≈ 34 par jour, 3 380 restants le 26/10). Serveur passé sur **pillow 13** le 03/11 (wolof identique à l'octet près). Copies d'essai : `~/voices-trial`, `~/voices-torch` (torch 2.13 installé, essai des 3 voix réussi) ; scripts `~/trial*.sh`.
+- Audit des dépendances : node-forge forcé en 1.4.1, exception justifiée decode-uri-component (#438, decisions.md). GitHub signale encore 36 alertes Dependabot sur main (1 critique, 8 élevées), à trier.
+- Skills du projet : `verification`, `livraison` ; sous-agent `relecteur`. Banc de l'assistant chaque dimanche à 4 h (`bgs-ops/bench.sh`).
+- Modèle universel : `C:\Users\HP\Desktop\CLAUDE-MODELE-PROJET.md` ; y reporter chaque règle de `~/.claude/ERREURS-GLOBALES.md` (skill `alimenter-modele`).
 
 ## En cours
-Rien en cours d'écriture.
+- **#440** ouverte, non fusionnée : le parcours de bout en bout « Console : marquer une erreur comme réglée » échoue en CI (« Production builds ») car l'API de test démarre sans service d'envoi et inscrit `PUSH_NOT_CONFIGURED` au journal des erreurs. À corriger : n'inscrire cette erreur que si l'envoi est attendu (production), ou lancer l'API de test (`scripts/test-stack.ts`) avec un réglage qui l'exclut ; rejouer `pnpm e2e` en local.
+- **#303** torch 2.13 ouverte (décision et backlog déjà dans la branche) : `gh pr update-branch 303` (l'audit bloquait), puis livrer ; ensuite, boucle des voix arrêtée : `uv sync --frozen` dans `~/voices` sur le serveur, puis `deploy.sh`.
+- Branche **`wip/watch-failure-log`** (envoyée, sans PR) : `services/ingestion/src/lib/failure-log.ts` + tests (4 verts), pas encore branché dans `cli/watch.ts` (ligne « ✗ code ref » écrite à chaque passage : ≈ 4 000 lignes par semaine pour les mêmes 30 quarantaines, dont des articles de démonstration WordPress de `femme.gouv.sn`).
 
 ## Prochaines étapes (dans l'ordre)
-1. Avec l'accord de l'utilisateur pour arrêter la boucle des voix ≈ 20 min : `bash ~/trial-wo.sh voices-trial voices-torch` sur le serveur ; si le wolof est bon, `uv sync --frozen` dans `~/voices` (pillow 13), puis #303 torch 2.13 (décision à consigner : torchaudio reste en 2.11, dernière version publiée), puis `deploy.sh`.
-2. Après chaque livraison : skills `verification` puis `livraison` (déploiement et reprise compris).
+1. Corriger #440 (voir « En cours »), livrer, `deploy.sh`, puis lire dans `bgs-ops/logs/api.log` la ligne de démarrage « Automatic notifications are on / paused / cannot be sent » : elle donne la cause. Si « paused » : demander à l'utilisateur de reprendre l'envoi dans la console (Notifications). Contrôler au prochain article de jour la ligne « Article announced to the phones » (recipients 1), puis consigner la cause dans ERREURS.md.
+2. #303 torch 2.13 (voir « En cours »).
+3. Brancher `FailureLog` dans `cli/watch.ts` (ligne 338), livrer, relancer la surveillance.
+4. Trier les alertes Dependabot de GitHub (1 critique) ; puis l'audit demandé : interface (accessibilité `pnpm a11y`, finitions), bugs silencieux (erreurs avalées, recensement fait : surtout l'app et la console).
 
 ## Attend l'utilisateur (`.claude/session/A-FAIRE-UTILISATEUR.md`)
-- Port 3100 : le 26/10 de 13 h 32 à 14 h 03, un autre projet de l'utilisateur (`C:\seydina-digital`, `next start -p 3100`) l'a occupé et notre API n'a pas redémarré (le déploiement croit qu'elle tourne dès que le port répond). Réglé seul. Si `curl localhost:3100/v1/health` donne un 307 vers `/fr/…`, c'est cet autre projet : ne pas l'arrêter, prévenir l'utilisateur.
-- **Arrêt de la boucle des voix** pour l'essai wolof (pillow 13, torch 2.13) : refusé par le contrôle de sécurité en mode autonome ; demander l'accord explicite de l'utilisateur.
-- Point 70 en pause : médias gardés sur l'ordinateur jusqu'au choix d'un hébergement par l'utilisateur.
-- iPhone : l'utilisateur garde la version **TestFlight** (15/10, canal `preview`, à jour par mise à jour à distance) ; à recompiler (profil `testflight`) avant son expiration vers le 13/01/2027. Ne plus lui proposer la version de développement.
+- Peut-être reprendre l'envoi automatique dans la console, selon la ligne de démarrage de l'API (étape 1).
+- Point 70 en pause : médias sur l'ordinateur jusqu'au choix d'un hébergement (aussi la fin des mises en veille).
+- iPhone : version **TestFlight** (canal `preview`), à recompiler avant son expiration vers le 13/01/2027.
 
 ## Points d'attention
 - Tout texte visible par l'utilisateur en français ; commits et PR sans aucune mention de Claude (CLAUDE.md §15).
-- Ne jamais lire `.env*` (sauf `.env.example`), `.data/admin/**`, clés, `*.p8`. Le dossier Téléchargements de l'utilisateur n'est jamais touché.
-- Garde du shell : pas d'accent grave dans `node -e` ni dans PowerShell hors guillemets ; une commande qui nomme `.env.local` est refusée (l'écrire dans un script) ; antislashs dans un script : l'écrire avec l'outil d'écriture (`String.raw`), jamais dans la commande.
-- La session démarre dans la copie servie : jamais d'écriture dedans ; travailler dans `-w2`/`-w4` sur une nouvelle branche. Jamais de changement de branche dans une copie en cours de livraison ; jamais de `git stash` nu ni de `--force`.
-- Avant de livrer : la vérification complète, **sans filtre** (ERREURS.md, 25/10 : deux arrêts de `ship.sh` sur un même jour). **Une seule suite complète à la fois** (vérification ou `ship.sh`, toutes copies confondues) : deux en même temps font dépasser les délais des tests de l'API (ERREURS.md, 26/10).
-- Deux livraisons en parallèle qui ajoutent une ligne en fin de `backlog.md` entrent en conflit : écrire au backlog après la fusion de l'autre.
-- `deploy.sh` arrête la boucle des voix (ERREURS.md, 22/10) : après tout redémarrage, relire le journal de chaque langue. Jamais `services.sh` ni `deploy.sh` exécutés dans un tube.
-- La console Next.js 16.4 réécrit `apps/admin/AGENTS.md` au démarrage (#411) : comparer à `origin/main` avant tout `checkout` si la copie servie est sale.
-- Parcourir le disque (`du`) est très lent sur cette machine : viser des dossiers précis, en arrière-plan.
+- Ne jamais lire `.env*` (sauf `.env.example`), `.data/admin/**`, clés, `*.p8`. Le dossier Téléchargements n'est jamais touché. Un `grep` qui nomme `env` dans `scripts/test-stack.ts` est refusé par le garde du shell : utiliser Grep ou Read.
+- Garde du shell : pas d'accent grave dans `node -e` ; `git push` seulement après `gitleaks git --redact … &&`.
+- Jamais d'écriture dans la copie servie `C:\bic-gouv-sn` ; scripts jetables dans le dossier temporaire de la session, jamais dans une copie du dépôt (03/11 : deux fichiers emportés par `git add -A`). Relire `git diff --cached --name-only` avant chaque commit.
+- **Une seule suite complète à la fois** sur la machine, même un `vitest` ou un `tsc` d'appoint (03/11 : vérification des types de `ship.sh` tombée pendant des tests lancés dans l'autre copie).
+- Deux livraisons qui ajoutent une ligne en fin de `backlog.md` entrent en conflit : écrire au backlog après la fusion de l'autre.
+- `deploy.sh` arrête la boucle des voix ; jamais `services.sh` ni `deploy.sh` dans un tube. Si `curl localhost:3100/v1/health` donne un 307 vers `/fr/…`, c'est un autre projet de l'utilisateur sur le port : ne pas l'arrêter.
 
 ## Repères
 - Démarrer : `bash /c/Users/HP/bgs-ops/services.sh` · scripts : `C:\Users\HP\bgs-ops\README.md` · livrer : skill `livraison`.
-- Tâches ouvertes du backlog sans tout relire : `pnpm backlog:open`.
-- Carte du code : `node ~/.claude/skills/session-rotation/scripts/map.mjs . --focus <dossier>`.
+- Tâches ouvertes : `pnpm backlog:open` · carte du code : `node ~/.claude/skills/session-rotation/scripts/map.mjs . --focus <dossier>`.
+- Notification silencieuse de contrôle (aucun affichage) : envoyer `{"to": <jeton>, "_contentAvailable": true, "priority": "normal"}` à `https://exp.host/--/api/v2/push/send`, puis l'accusé par `…/getReceipts`.
 
 ## Dernière vérification
-26/10 (14 h 20) : #430 (test de la limite de débit dans un vrai Redis, exécuté en CI), #227 ioredis 6, #400 pillow 13 et #431 fusionnées, contrôles de la CI verts ; déploiement à 13 h 48 ; API 200 depuis 14 h 03 (port 3100 pris avant par un autre projet, `services.sh` corrigé), console 307, une seule synthèse wolof sur le serveur (3 380 à faire).
-26/10 (3 h 34) : #428 fusionnée (QA-14 : `pnpm typecheck` vérifie aussi les scripts racine, jeu de test corrigé), contrôles de la CI verts, mutation détectée (champ `publisher` retiré) ; outils seulement, pas de déploiement, copie servie sur main.
-26/10 (1 h 50) : #425 fusionnée, CI verte, mutations détectées (jour de semaine, « militaire »), mesure de la recherche 0,78 → 0,83, contrôle rapide du banc 37 / 39 ; déploiement à 1 h 49 (API 200, console 307, voix relancées).
-26/10 : #423 fusionnée, contrôles de la CI verts deux fois, mutations détectées (réponse reposée d'un signalement effacé, « réponse différente »), audit 103/103 ; déploiement à 0 h 15 (API 200, console 307, voix relancées).
-25/10 : #413 et #415 à #420 fusionnées avec tous les contrôles verts (tests de mutation : fusion des langues, effacement des signalements, profil de test, phrase d'information du bouton, règle du garde du shell) ; audit d'accessibilité 103/103 ; déploiement à 18 h 45 (API 200, console 307) ; filtre public relancé à 19 h 27 (signalement via le filtre : 400 de l'API, route inconnue : 404).
+03/11 : #438 fusionnée (audit sans faille grave, cache de vitest par paquet : contrôles complets verts) ; #440 : contrôles locaux verts (tests 479 + 1 sauté pour l'API), mutations détectées (branchement dans l'API, signalement des refus), e2e en CI rouge (voir « En cours ») ; essai des 3 voix sur le serveur avec torch 2.13 et pillow 13 : wolof identique à l'octet près.
+26/10 (14 h 20) : #430, #227 ioredis 6, #400 pillow 13 et #431 fusionnées ; déploiement à 13 h 48.
 
 <!-- fin de la reprise -->
