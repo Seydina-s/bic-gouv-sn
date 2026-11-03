@@ -592,3 +592,17 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : un script qui a besoin des paquets du dépôt a été posé dans le dépôt faute d'autre moyen, puis la liste des fichiers du commit n'a pas été relue (vérification sautée pour gagner du temps).
 - **Correctif** : fichiers retirés du commit avant tout envoi.
 - **Prévention** : scripts jetables dans le dossier temporaire de la session ; s'il faut les paquets du dépôt, les y poser le temps de l'exécution puis les sortir aussitôt ; relire `git diff --cached --name-only` avant chaque commit ; ne jamais sauter la skill `verification`.
+
+## 03/11/2026 — Journal de la surveillance : des échecs « réglés » à chaque passage
+
+- **Ce qui s'est passé** : juste après le déploiement de #442, le journal de la surveillance écrivait les mêmes quarantaines comme nouvelles, puis « no longer failing » au passage suivant, et ainsi de suite.
+- **Cause racine** : `FailureLog` comparait les échecs d'un passage à ceux du passage précédent, alors qu'un passage lit les sites de référence et **un seul** site de ministère, à tour de rôle (`dueSources`). Un échec absent d'un passage voulait seulement dire que son site n'avait pas été lu. Les tests de #442 ne faisaient lire qu'un seul site par passage, et la boucle réelle n'avait pas été observée sur plusieurs passages avant la livraison.
+- **Correctif** : `pollSources` donne la liste des sites lus, chacun avec ses échecs (`read`) ; un échec n'est réglé que si son propre site, relu, ne le signale plus (`services/ingestion/src/lib/failure-log.ts`, test « keeps the failures of a site that this pass did not read »).
+- **Prévention** : un état qui compare deux passages doit d'abord savoir ce que chaque passage a réellement lu ; tester avec des passages qui ne lisent pas tous la même chose ; après le déploiement d'un changement de journal, lire au moins trois passages réels avant de le dire terminé.
+
+## 03/11/2026 — Journal de l'API écrasé par un déploiement
+
+- **Ce qui s'est passé** : un article est arrivé à 11 h 51, en pleine enquête sur les notifications ; la ligne qui disait s'il avait été annoncé au téléphone était dans `bgs-ops/logs/api.log`, effacé par le déploiement de 12 h 03.
+- **Cause racine** : `services.sh` lançait l'API et la surveillance avec `>` (journal recréé à chaque démarrage), et chaque `deploy.sh` les redémarre.
+- **Correctif** : journaux complétés (`>>`), réduits à leurs 20 000 dernières lignes, une ligne « ===== restarted … » à chaque démarrage (`bgs-ops/services.sh`, `keep_log`).
+- **Prévention** : un journal qui sert d'enquête ne doit jamais être recréé par un redémarrage ; pendant une enquête, ne pas redéployer avant d'avoir relevé ce que le journal contient.

@@ -337,7 +337,7 @@ while (control.running) {
       );
     }
     delay = await report({ result }, lastChangeAt);
-    for (const line of failureLog.lines(result.failures, startedAt)) {
+    for (const line of failureLog.lines(result.read, startedAt)) {
       process.stdout.write(`${startedAt.toISOString()} ${line}\n`);
     }
     await checkWithdrawalsIfDue();
