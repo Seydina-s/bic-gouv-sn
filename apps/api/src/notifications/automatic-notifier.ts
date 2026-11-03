@@ -45,6 +45,15 @@ export interface AutomaticNotifierOptions {
   mediaBaseUrl: string | undefined;
   perHour: number;
   now?: () => Date;
+  /** Told of each announcement and its outcome (the API's log). */
+  onAnnounced?: (announcement: Announcement) => void;
+}
+
+/** One article announced: what became of it, for the log (never a token). */
+export interface Announcement {
+  articleId: string;
+  outcome: "sent" | "not-sent" | "failed";
+  recipients: number;
 }
 
 /**
@@ -178,6 +187,11 @@ export class AutomaticNotifier {
         delivery: outcome.outcome,
         ...(outcome.outcome === "sent" ? { recipients: outcome.recipients } : {}),
       },
+    });
+    this.options.onAnnounced?.({
+      articleId: article.id,
+      outcome: outcome.outcome,
+      recipients: outcome.outcome === "sent" ? outcome.recipients : 0,
     });
     return true;
   }

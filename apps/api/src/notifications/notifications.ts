@@ -25,9 +25,20 @@ export const NOTIFICATION_PHOTOS_FOLDER = "notifications";
 /** What became of a notification handed to the push service. */
 export type PushResult = { outcome: "sent"; recipients: number } | { outcome: "not-sent" };
 
+/** What can go wrong once a notification has left the API (codes of the error catalog). */
+export type PushProblemCode = "PUSH_SERVICE_UNREACHABLE" | "PUSH_REJECTED" | "PUSH_NOT_DELIVERED";
+
+/**
+ * Told of every problem: its reason in a few technical words (Expo's error names,
+ * never a token) and how many notifications it concerns.
+ */
+export type PushProblemListener = (code: PushProblemCode, reason: string, count: number) => void;
+
 export interface PushProvider {
   readonly ready: boolean;
   send(message: PushMessage): Promise<PushResult>;
+  /** Problems found while sending or later (receipts): set once the API exists. */
+  reportProblemsTo?(listener: PushProblemListener): void;
 }
 
 export const noPushProvider: PushProvider = {
