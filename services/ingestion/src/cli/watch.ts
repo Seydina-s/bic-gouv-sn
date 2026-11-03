@@ -32,6 +32,7 @@ import {
   type WatchedSource,
 } from "../watch";
 import { listingPagesFor, nextWithdrawalCheck, reconcileWithdrawals } from "../withdrawn";
+import { FailureLog } from "../lib/failure-log";
 import { ArticleTranslation, allArticles } from "../translation/article-translation";
 import {
   DEFAULT_TRANSLATION_MODEL,
@@ -321,6 +322,7 @@ async function translateIfDue() {
 }
 
 let lastChangeAt: Date | null = null;
+const failureLog = new FailureLog();
 while (control.running) {
   const startedAt = new Date();
   let delay: number;
@@ -335,8 +337,8 @@ while (control.running) {
       );
     }
     delay = await report({ result }, lastChangeAt);
-    for (const failure of result.failures) {
-      process.stdout.write(`${startedAt.toISOString()} ✗ ${failure.code} ${failure.ref}\n`);
+    for (const line of failureLog.lines(result.failures, startedAt)) {
+      process.stdout.write(`${startedAt.toISOString()} ${line}\n`);
     }
     await checkWithdrawalsIfDue();
     await reviewSitesIfDue();
