@@ -310,8 +310,16 @@ describe("pollSources", () => {
       () => NOW,
     );
     expect(result.outcomes.created).toBe(1);
-    expect(result.failures).toEqual([
-      { ref: "primature.sn", code: "INGESTION_OTHER_SOURCE_UNREACHABLE", message: "site down" },
+    const outage = {
+      ref: "primature.sn",
+      code: "INGESTION_OTHER_SOURCE_UNREACHABLE",
+      message: "site down",
+    };
+    expect(result.failures).toEqual([outage]);
+    // Which sites were read, each with its own failures (the watcher's log needs it).
+    expect(result.read).toEqual([
+      { source: "presidence.sn", failures: [] },
+      { source: "primature.sn", failures: [outage] },
     ]);
   });
 

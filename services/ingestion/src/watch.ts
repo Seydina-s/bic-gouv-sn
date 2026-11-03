@@ -24,6 +24,11 @@ export interface PollResult {
   detectionDelays: number[];
 }
 
+/** A pass over several sites: also which sites were read, each with its own failures. */
+export interface SourcesPollResult extends PollResult {
+  read: { source: string; failures: PollResult["failures"] }[];
+}
+
 /** Remembers, per language, the source modification time last processed for each item. */
 export class SeenIndex {
   private readonly seen = new Map<string, string>();
@@ -192,42 +197,51 @@ export async function pollSources(
   repository: ArticleRepository,
   now: () => Date = () => new Date(),
   media: MediaStorage | null = null,
-): Promise<PollResult> {
-  const result: PollResult = {
+): Promise<SourcesPollResult> {
+  const result: SourcesPollResult = {
     outcomes: { created: 0, updated: 0, unchanged: 0 },
     failures: [],
     detectionDelays: [],
+    read: [],
   };
   for (const source of dueSources(sources, now())) {
     source.lastPassAt = now();
-    try {
-      const pass = await pollOnce(
-        source.provider,
-        repository,
-        source.langs,
-        source.seen,
-        now,
-        media,
-      );
-      for (const outcome of ["created", "updated", "unchanged"] as const) {
-        result.outcomes[outcome] += pass.outcomes[outcome];
-      }
-      result.failures.push(...pass.failures);
-      result.detectionDelays.push(...pass.detectionDelays);
-    } catch (error) {
-      if (source.essential) {
-        throw error;
-      }
-      const code = errorCodeOf(error) ?? "UNKNOWN";
-      result.failures.push({
+    const failures = await pollSource(source, repository, now, media, result);
+    result.failures.push(...failures);
+    result.read.push({ source: source.name, failures });
+  }
+  return result;
+}
+
+/** One site of a pass: adds its outcomes to the pass, returns its failures. */
+async function pollSource(
+  source: WatchedSource,
+  repository: ArticleRepository,
+  now: () => Date,
+  media: MediaStorage | null,
+  result: PollResult,
+): Promise<PollResult["failures"]> {
+  try {
+    const pass = await pollOnce(source.provider, repository, source.langs, source.seen, now, media);
+    for (const outcome of ["created", "updated", "unchanged"] as const) {
+      result.outcomes[outcome] += pass.outcomes[outcome];
+    }
+    result.detectionDelays.push(...pass.detectionDelays);
+    return pass.failures;
+  } catch (error) {
+    if (source.essential) {
+      throw error;
+    }
+    const code = errorCodeOf(error) ?? "UNKNOWN";
+    return [
+      {
         ref: source.name,
         // The console must not blame presidence.sn for another institution's site.
         code: code === "INGESTION_SOURCE_UNREACHABLE" ? "INGESTION_OTHER_SOURCE_UNREACHABLE" : code,
         message: error instanceof Error ? error.message : String(error),
-      });
-    }
+      },
+    ];
   }
-  return result;
 }
 
 const SECOND = 1000;
