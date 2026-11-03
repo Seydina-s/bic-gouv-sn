@@ -131,4 +131,24 @@ describe("error journal", () => {
       ]),
     );
   });
+
+  it("leaves out the missing push service of a test server, which never sends", async () => {
+    const admin = await adminForTests();
+    const journal = new ErrorJournal(new FileErrorJournalStore(join(dir, "error-journal.json")));
+    app = await buildApp({
+      config: loadConfig({ LOG_LEVEL: "silent", NODE_ENV: "test" }),
+      version: "1.0.0",
+      articles: temporaryStore(),
+      admin: admin.admin,
+      errorJournal: journal,
+      automaticNotificationsEveryMs: 60_000,
+    });
+    await app.ready();
+    const answer = await app.inject({
+      method: "GET",
+      url: "/admin/v1/errors",
+      headers: { authorization: `Bearer ${await admin.tokenFor("reviewer")}` },
+    });
+    expect(answer.json<{ entries: unknown[] }>().entries).toEqual([]);
+  });
 });

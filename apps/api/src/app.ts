@@ -196,10 +196,14 @@ async function reportAutomaticNotifications(
   automatic: AutomaticNotifier,
   pushReady: boolean,
   errorJournal: ErrorJournal | null,
+  environment: Config["NODE_ENV"],
 ): Promise<void> {
   if (!pushReady) {
     app.log.error("Automatic notifications cannot be sent: no push service (PUSH_PROVIDER)");
-    errorJournal?.record("PUSH_NOT_CONFIGURED", "Notifications (serveur)", null);
+    // A test server never sends: not a problem for the console's error journal.
+    if (environment !== "test") {
+      errorJournal?.record("PUSH_NOT_CONFIGURED", "Notifications (serveur)", null);
+    }
     return;
   }
   const { paused, changedAt } = await automatic.state();
@@ -536,7 +540,13 @@ export async function buildApp({
     });
     if (automaticNotificationsEveryMs !== null) {
       app.addHook("onReady", async () => {
-        await reportAutomaticNotifications(app, automatic, pushProvider.ready, errorJournal);
+        await reportAutomaticNotifications(
+          app,
+          automatic,
+          pushProvider.ready,
+          errorJournal,
+          config.NODE_ENV,
+        );
         automatic.start(automaticNotificationsEveryMs, (error) => {
           app.log.error({ err: error }, "Automatic notifications failed");
         });
