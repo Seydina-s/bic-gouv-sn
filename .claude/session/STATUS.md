@@ -1,6 +1,6 @@
 # Reprise — Bic Gouv SN
 
-**Mis à jour** : 03/11/2026 13 h 30 · **Mode** : autonome jusqu'au 03/11 à 15 h (demande de l'utilisateur : finir ses tâches, puis audits, tests, failles, bugs silencieux, UI/UX, design ; toutes autorisations données) · **main** : #447. Historique des sessions : `HISTORIQUE.md` (à ne lire que pour un besoin précis). Méthode : skill `session-rotation`.
+**Mis à jour** : 03/11/2026 13 h 30 · **Mode** : autonome jusqu'au 03/11 à 20 h (prolongé par l'utilisateur ; demande initiale : finir ses tâches, puis audits, tests, failles, bugs silencieux, UI/UX, design ; toutes autorisations données) · **main** : #448 (+ PR `fix/push-receipts-survive-restart`, PUSH-06). Historique des sessions : `HISTORIQUE.md` (à ne lire que pour un besoin précis). Méthode : skill `session-rotation`.
 
 ## État
 - Services locaux en marche (`bash /c/Users/HP/bgs-ops/services.sh` relance ce qui est tombé) : API 3100, console 3001, surveillance des 22 sites + der.sn, filtre public 3200 + tunnel ngrok, Metro 8081, boucle des voix. Déploiement du 03/11 à 13 h 24. Journaux `api.log` et `watch.log` désormais complétés à chaque redémarrage (20 000 lignes, ligne « ===== restarted … »), plus jamais écrasés. L'ordinateur se met en veille (rien ne tourne pendant ce temps).
@@ -17,7 +17,7 @@
 
 ## Prochaines étapes (dans l'ordre)
 1. Demander à l'utilisateur s'il a reçu sur son iPhone, le 03/11 vers 13 h 09, la notification « CLOUD & NEW DEAL TECHNOLOGIQUE… ». Oui → l'envoi marche (la panne passée tenait sans doute aux mises en veille de l'ordinateur) : le consigner dans ERREURS.md. Non → Expo et Apple acceptent : chercher côté téléphone (réglages de notification de l'app, mode Concentration, version TestFlight), et lire l'accusé du prochain envoi (`PUSH_*` au journal, ou rien = remis).
-2. PUSH-06 : les accusés en attente (`expo-push-provider.ts`, `readReceiptsLater`, minuteur en mémoire) survivent à un redémarrage : les garder sur disque et les lire au démarrage, ou les lire à l'arrêt ; test qui redémarre entre l'envoi et l'accusé.
+2. PUSH-06 (accusés gardés sur disque, lus au démarrage) : à la fusion, `deploy.sh`, puis vérifier qu'un fichier apparaît dans `.data/push-receipts` après le prochain envoi et disparaît 15 min plus tard (sans erreur `PUSH_*` = remis).
 3. Si l'utilisateur accepte le point 71 : arrêter la boucle des voix (comme `deploy.sh`, lignes 16-18), vérifier qu'aucun `synthesize.py` ne tourne sur le serveur (ne pas utiliser `pkill -f` avec un motif présent dans sa propre commande SSH : la session se coupe), sauvegarder, copier `services/voices/pyproject.toml` et `uv.lock` de `origin/main` dans `~/voices`, `uv sync --frozen`, puis `services.sh`.
 4. Suite de l'audit : finitions de l'interface (UI/UX, design) ; erreurs avalées de l'app (`grep -rn "catch {|.catch(() =>" apps/mobile/src`), à rendre visibles quand Sentry aura sa clé.
 
