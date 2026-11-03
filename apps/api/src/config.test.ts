@@ -25,6 +25,7 @@ describe("loadConfig", () => {
       ERROR_JOURNAL_PATH: fromRoot(".data/error-journal.json"),
       PUSH_PROVIDER: "none",
       PUSH_SUBSCRIPTIONS_PATH: fromRoot(".data/push-subscriptions.json"),
+      PUSH_RECEIPTS_PATH: fromRoot(".data/push-receipts"),
       USAGE_STATS_PATH: fromRoot(".data/usage-stats.json"),
       SEARCH_MISSES_PATH: fromRoot(".data/search-misses.json"),
       SETTINGS_PATH: fromRoot(".data/admin/settings.json"),
