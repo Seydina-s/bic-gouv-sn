@@ -1,9 +1,9 @@
 # Reprise — Bic Gouv SN
 
-**Mis à jour** : 03/11/2026 13 h 30 · **Mode** : autonome jusqu'au 03/11 à 20 h (prolongé par l'utilisateur ; demande initiale : finir ses tâches, puis audits, tests, failles, bugs silencieux, UI/UX, design ; toutes autorisations données) · **main** : #448 (+ PR `fix/push-receipts-survive-restart`, PUSH-06). Historique des sessions : `HISTORIQUE.md` (à ne lire que pour un besoin précis). Méthode : skill `session-rotation`.
+**Mis à jour** : 03/11/2026 14 h 25 · **Mode** : autonome jusqu'au 03/11 à 20 h (prolongé par l'utilisateur ; demande initiale : finir ses tâches, puis audits, tests, failles, bugs silencieux, UI/UX, design ; toutes autorisations données) · **main** : #449. Historique des sessions : `HISTORIQUE.md` (à ne lire que pour un besoin précis). Méthode : skill `session-rotation`.
 
 ## État
-- Services locaux en marche (`bash /c/Users/HP/bgs-ops/services.sh` relance ce qui est tombé) : API 3100, console 3001, surveillance des 22 sites + der.sn, filtre public 3200 + tunnel ngrok, Metro 8081, boucle des voix. Déploiement du 03/11 à 13 h 24. Journaux `api.log` et `watch.log` désormais complétés à chaque redémarrage (20 000 lignes, ligne « ===== restarted … »), plus jamais écrasés. L'ordinateur se met en veille (rien ne tourne pendant ce temps).
+- Services locaux en marche (`bash /c/Users/HP/bgs-ops/services.sh` relance ce qui est tombé) : API 3100, console 3001, surveillance des 22 sites + der.sn, filtre public 3200 + tunnel ngrok, Metro 8081, boucle des voix. Déploiement du 03/11 à 14 h 14. Journaux `api.log` et `watch.log` désormais complétés à chaque redémarrage (20 000 lignes, ligne « ===== restarted … »), plus jamais écrasés. L'ordinateur se met en veille (rien ne tourne pendant ce temps).
 - **Notifications** (demande de l'utilisateur : elles n'arrivent plus sur son iPhone) : #440 déployée ; « Automatic notifications are on ». **Le 03/11 à 13 h 09, l'API a annoncé « CLOUD & NEW DEAL TECHNOLOGIQUE… » : outcome sent, recipients 1** (Expo a accepté). L'accusé d'Apple, lu 15 min après l'envoi par un minuteur en mémoire, a été perdu par le déploiement de 13 h 24 (défaut : PUSH-06). Un seul abonné (son téléphone, fr, heures calmes 22 h–7 h UTC). Un article de 11 h 51 avait aussi dû partir (trace effacée par un déploiement).
 - Surveillance des sites : #442 puis #446 déployées : n'écrit plus que les nouveaux échecs, ceux qui disparaissent (seulement quand leur site a été relu) et un rappel par jour ; vérifié sur plusieurs passages réels.
 - Audit : accessibilité 103/103 écrans ; erreurs avalées recensées (43 dans l'app et la console) : la console écrit maintenant la cause technique au journal de son serveur (#447) ; dans l'app, rien n'est visible tant que Sentry n'a pas de clé (point 11 de `A-FAIRE-UTILISATEUR.md`).
@@ -17,7 +17,7 @@
 
 ## Prochaines étapes (dans l'ordre)
 1. Demander à l'utilisateur s'il a reçu sur son iPhone, le 03/11 vers 13 h 09, la notification « CLOUD & NEW DEAL TECHNOLOGIQUE… ». Oui → l'envoi marche (la panne passée tenait sans doute aux mises en veille de l'ordinateur) : le consigner dans ERREURS.md. Non → Expo et Apple acceptent : chercher côté téléphone (réglages de notification de l'app, mode Concentration, version TestFlight), et lire l'accusé du prochain envoi (`PUSH_*` au journal, ou rien = remis).
-2. PUSH-06 (accusés gardés sur disque, lus au démarrage) : à la fusion, `deploy.sh`, puis vérifier qu'un fichier apparaît dans `.data/push-receipts` après le prochain envoi et disparaît 15 min plus tard (sans erreur `PUSH_*` = remis).
+2. PUSH-06 livré (#449) et déployé à 14 h 14 : au prochain envoi (« Article announced to the phones » dans `bgs-ops/logs/api.log`), un fichier apparaît dans `C:ic-gouv-sn.datapush-receipts` (n'en lister que les noms : ils contiennent les adresses des téléphones), puis disparaît environ 15 min plus tard ; sans ligne `PUSH_NOT_DELIVERED` au journal, Apple a remis la notification. Déjà vérifié : l'extension iPhone qui ajoute la photo affiche la notification même si l'image ne se charge pas.
 3. Si l'utilisateur accepte le point 71 : arrêter la boucle des voix (comme `deploy.sh`, lignes 16-18), vérifier qu'aucun `synthesize.py` ne tourne sur le serveur (ne pas utiliser `pkill -f` avec un motif présent dans sa propre commande SSH : la session se coupe), sauvegarder, copier `services/voices/pyproject.toml` et `uv.lock` de `origin/main` dans `~/voices`, `uv sync --frozen`, puis `services.sh`.
 4. Suite de l'audit : finitions de l'interface (UI/UX, design) ; erreurs avalées de l'app (`grep -rn "catch {|.catch(() =>" apps/mobile/src`), à rendre visibles quand Sentry aura sa clé.
 
@@ -29,6 +29,7 @@
 ## Points d'attention
 - Tout texte visible par l'utilisateur en français ; commits et PR sans aucune mention de Claude (CLAUDE.md §15).
 - Ne jamais lire `.env*` (sauf `.env.example`), `.data/admin/**`, clés, `*.p8`. Le dossier Téléchargements n'est jamais touché. Un `grep` qui nomme `env` dans `scripts/test-stack.ts` est refusé par le garde du shell : utiliser Grep ou Read.
+- Surveiller un journal : `tail -F` rate des lignes sous Windows ; relire le nombre de lignes en boucle (`grep -ac "" fichier` toutes les 20 s).
 - Garde du shell : pas d'accent grave dans `node -e` ; `git push` seulement après `gitleaks git --redact … &&` ; pas de `sleep` long en avant-plan (utiliser Monitor).
 - Jamais d'écriture dans la copie servie `C:\bic-gouv-sn` ; scripts jetables dans le dossier temporaire de la session. Relire `git diff --cached --name-only` avant chaque commit.
 - **Une seule suite complète à la fois** sur la machine, même un `vitest` ou un `tsc` d'appoint.
@@ -43,6 +44,6 @@
 - Notification silencieuse de contrôle (aucun affichage) : envoyer `{"to": <jeton>, "_contentAvailable": true, "priority": "normal"}` à `https://exp.host/--/api/v2/push/send`, puis l'accusé par `…/getReceipts`.
 
 ## Dernière vérification
-03/11 : #440 (e2e 11/11 en local, CI verte), #303, #442 (tests du journal des échecs, types, lint) et #443 fusionnées ; #444 à #447 fusionnées ; déploiements de 10 h 46, 11 h 29, 12 h 03, 12 h 47 et 13 h 24 vérifiés (santé 200, console 307, voix relancées).
+03/11 : #440 (e2e 11/11 en local, CI verte), #303, #442 (tests du journal des échecs, types, lint) et #443 fusionnées ; #444 à #449 fusionnées ; déploiements de 10 h 46, 11 h 29, 12 h 03, 12 h 47, 13 h 24 et 14 h 14 vérifiés (santé 200, console 307, voix relancées).
 
 <!-- fin de la reprise -->
