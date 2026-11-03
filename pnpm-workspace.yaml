@@ -66,3 +66,9 @@ overrides:
   "zod@<4.6.6": "4.6.6"
   # Six advisories up to 1.4.0, high (03/11/2026): via @expo/cli (signing dev manifests).
   "node-forge@<1.4.1": "1.4.1"
+  # Scheme spoofing, host confusion and path equivalence (medium and low, 03/11/2026):
+  # via ajv, which validates the API's requests and the console's settings.
+  "fast-uri@>=3.0.0 <3.1.9": "3.1.9"
+  "fast-uri@>=4.0.0 <4.2.3": "4.2.3"
+  # Quadratic matching of an IPv6 zone identifier (medium, 03/11/2026).
+  "ip-address@<10.7.4": "10.7.4"
