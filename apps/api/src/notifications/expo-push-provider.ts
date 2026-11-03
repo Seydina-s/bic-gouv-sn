@@ -2,6 +2,11 @@ import { createTranslator, fr } from "@bgs/i18n";
 import { retry, sleep, withTimeout } from "@bgs/resilience";
 import { followsSection, isQuietHour, type PushSubscription } from "@bgs/shared-types";
 import type { PushProblemListener, PushProvider, PushResult } from "./notifications";
+import {
+  type Issued,
+  MemoryPendingReceiptStore,
+  type PendingReceiptStore,
+} from "./pending-receipts";
 import { type PushMessage, versionFor } from "./push-message";
 import type { PushSubscriptionStore } from "./push-subscriptions";
 
@@ -15,6 +20,8 @@ const CHUNK = 100;
 const RECEIPTS_CHUNK = 1000;
 /** Expo advises reading receipts about 15 minutes after sending. */
 const RECEIPTS_AFTER_MS = 15 * 60_000;
+/** Expo keeps receipts 24 hours: a batch still unread after that is given up. */
+const RECEIPTS_KEPT_MS = 24 * 60 * 60_000;
 /** The phone is gone (app removed): its token is forgotten, nothing to report. */
 const GONE = "DeviceNotRegistered";
 /** Expo accepts 600 notifications a second per project: 6 requests of 100. */
@@ -36,12 +43,6 @@ interface Ticket {
 
 type Receipt = Omit<Ticket, "id">;
 
-/** A ticket Expo gave for one phone: its receipt says later whether it arrived. */
-interface Issued {
-  id: string;
-  token: string;
-}
-
 /** The distinct error names, for a report that fits on one line. */
 function summary(errors: readonly string[]): string {
   return [...new Set(errors)].join(", ");
@@ -59,6 +60,8 @@ export interface ExpoPushOptions {
   retryBaseDelayMs?: number;
   /** When receipts are read after sending; null: never (tests read them by hand). */
   receiptsAfterMs?: number | null;
+  /** Where the receipts wait to be read; in memory when not given. */
+  pendingReceipts?: PendingReceiptStore;
 }
 
 /**
@@ -118,11 +121,13 @@ export class ExpoPushProvider implements PushProvider {
   readonly ready = true;
   private readonly fetchImpl: typeof fetch;
   private readonly now: () => number;
+  private readonly pendingReceipts: PendingReceiptStore;
   private report: PushProblemListener = () => undefined;
 
   constructor(private readonly options: ExpoPushOptions) {
     this.fetchImpl = options.fetchImpl ?? ((input, init) => fetch(input, init));
     this.now = options.now ?? Date.now;
+    this.pendingReceipts = options.pendingReceipts ?? new MemoryPendingReceiptStore();
   }
 
   reportProblemsTo(listener: PushProblemListener): void {
@@ -182,23 +187,56 @@ export class ExpoPushProvider implements PushProvider {
     if (messages.length > 0 && delivered === 0) {
       throw new Error("Expo push service unreachable");
     }
-    this.readReceiptsLater(issued);
+    await this.keepForReceipts(issued);
     return { outcome: "sent", recipients: messages.length };
   }
 
-  private readReceiptsLater(issued: readonly Issued[]): void {
+  private async keepForReceipts(issued: readonly Issued[]): Promise<void> {
     const after =
       this.options.receiptsAfterMs === undefined ? RECEIPTS_AFTER_MS : this.options.receiptsAfterMs;
-    if (issued.length === 0 || after === null) {
-      return;
+    if (issued.length > 0 && after !== null) {
+      await this.pendingReceipts.add(this.now() + after, issued);
     }
-    setTimeout(() => {
-      this.readReceipts(issued).catch((error: unknown) => {
+  }
+
+  /**
+   * Reads the receipts whose time has come, those of a sending made before a restart
+   * included. A batch that cannot be read stays for the next check, for a day at most.
+   */
+  async readDueReceipts(): Promise<void> {
+    const now = this.now();
+    for (const batch of await this.pendingReceipts.due(now)) {
+      try {
+        await this.readReceipts(batch.issued);
+        await this.pendingReceipts.forget(batch.key);
+      } catch (error) {
         // The error's name only: its message varies, and each variant would be a new group.
         const name = error instanceof Error ? error.name : "unknown";
-        this.report("PUSH_SERVICE_UNREACHABLE", `receipts: ${name}`, issued.length);
-      });
-    }, after).unref();
+        this.report("PUSH_SERVICE_UNREACHABLE", `receipts: ${name}`, batch.issued.length);
+        if (now - batch.dueAt >= RECEIPTS_KEPT_MS) {
+          await this.pendingReceipts.forget(batch.key);
+        }
+      }
+    }
+  }
+
+  /** Reads the due receipts now, then every `everyMs`, never twice at once; returns how to stop. */
+  checkReceiptsEvery(everyMs: number): () => void {
+    let running: Promise<void> = Promise.resolve();
+    const check = () => {
+      running = running
+        .then(() => this.readDueReceipts())
+        .catch((error: unknown) => {
+          const name = error instanceof Error ? error.name : "unknown";
+          this.report("PUSH_SERVICE_UNREACHABLE", `receipts: ${name}`, 0);
+        });
+    };
+    check();
+    const timer = setInterval(check, everyMs);
+    timer.unref();
+    return () => {
+      clearInterval(timer);
+    };
   }
 
   /**

@@ -113,6 +113,12 @@ const envSchema = z.object({
     .min(1)
     .default(".data/push-subscriptions.json")
     .transform((path) => resolveDataPath(path)),
+  /** Folder of the receipts still to read after a sending (one file per sending). */
+  PUSH_RECEIPTS_PATH: z
+    .string()
+    .min(1)
+    .default(".data/push-receipts")
+    .transform((path) => resolveDataPath(path)),
   /** Anonymous usage counters (ADM-12): nothing about who sent the signals. */
   USAGE_STATS_PATH: z
     .string()

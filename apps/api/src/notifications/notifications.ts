@@ -39,6 +39,8 @@ export interface PushProvider {
   send(message: PushMessage): Promise<PushResult>;
   /** Problems found while sending or later (receipts): set once the API exists. */
   reportProblemsTo?(listener: PushProblemListener): void;
+  /** Reads the phones' receipts now, then every `everyMs`; returns how to stop. */
+  checkReceiptsEvery?(everyMs: number): () => void;
 }
 
 export const noPushProvider: PushProvider = {

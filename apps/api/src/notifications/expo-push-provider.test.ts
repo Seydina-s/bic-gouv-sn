@@ -6,6 +6,7 @@ import type { PushSubscription } from "@bgs/shared-types";
 import { describe, expect, it, vi } from "vitest";
 import { ExpoPushProvider } from "./expo-push-provider";
 import type { PushMessage } from "./push-message";
+import { FilePendingReceiptStore, MemoryPendingReceiptStore } from "./pending-receipts";
 import { FilePushSubscriptionStore } from "./push-subscriptions";
 
 // Placeholder tokens and article, shaped like the real ones.
@@ -281,11 +282,84 @@ describe("problems after a notification leaves the API (03/11/2026)", () => {
       subscriptions: store,
       fetchImpl: recording,
       now: () => NOON,
-      receiptsAfterMs: 1,
+      receiptsAfterMs: 0,
     });
     await provider.send(NOTIFICATION);
+    const stop = provider.checkReceiptsEvery(60_000);
     await vi.waitFor(() => {
       expect(urls.filter((url) => url.endsWith("getReceipts"))).toHaveLength(1);
     });
+    stop();
+  });
+
+  it("reads after a restart the receipts of a sending made before it (03/11/2026)", async () => {
+    const { store, fetchImpl } = await setUp([subscription(1)], () => ({
+      status: "ok",
+      id: "ticket-1",
+    }));
+    const pendingReceipts = new FilePendingReceiptStore(
+      join(tmpdir(), "bgs-receipts", randomUUID()),
+    );
+    let clock = NOON;
+    const sender = new ExpoPushProvider({
+      subscriptions: store,
+      fetchImpl,
+      now: () => clock,
+      pendingReceipts,
+    });
+    await sender.send(NOTIFICATION);
+    // The API restarts; Apple has refused the message meanwhile.
+    const asked: unknown[] = [];
+    const receipts = ((_url: string, init?: RequestInit) => {
+      asked.push(JSON.parse(typeof init?.body === "string" ? init.body : "{}"));
+      const data = { "ticket-1": { status: "error", details: { error: "InvalidCredentials" } } };
+      return Promise.resolve(new Response(JSON.stringify({ data })));
+    }) as typeof fetch;
+    const restarted = new ExpoPushProvider({
+      subscriptions: store,
+      fetchImpl: receipts,
+      now: () => clock,
+      pendingReceipts,
+    });
+    const problems = listening(restarted);
+    await restarted.readDueReceipts();
+    expect(asked).toEqual([]); // not before Expo's 15 minutes
+    clock = NOON + 15 * 60_000;
+    await restarted.readDueReceipts();
+    await restarted.readDueReceipts();
+    expect(asked).toEqual([{ ids: ["ticket-1"] }]); // once, then forgotten
+    expect(problems).toEqual([["PUSH_NOT_DELIVERED", "InvalidCredentials", 1]]);
+  });
+
+  it("keeps the receipts it could not read for the next check, a day at most", async () => {
+    const { store } = await setUp([subscription(1)]);
+    const pendingReceipts = new MemoryPendingReceiptStore();
+    await pendingReceipts.add(NOON, [{ id: "ticket-1", token: token(1) }]);
+    let clock = NOON;
+    let up = false;
+    const provider = new ExpoPushProvider({
+      subscriptions: store,
+      now: () => clock,
+      pendingReceipts,
+      fetchImpl: () =>
+        up
+          ? Promise.resolve(new Response(JSON.stringify({ data: {} })))
+          : Promise.reject(new Error("down")),
+    });
+    const problems = listening(provider);
+    await provider.readDueReceipts();
+    expect(await pendingReceipts.due(clock)).toHaveLength(1);
+    up = true;
+    await provider.readDueReceipts();
+    expect(await pendingReceipts.due(clock)).toEqual([]);
+    await pendingReceipts.add(NOON, [{ id: "ticket-2", token: token(1) }]);
+    up = false;
+    clock = NOON + 24 * 60 * 60_000;
+    await provider.readDueReceipts();
+    expect(await pendingReceipts.due(clock)).toEqual([]);
+    expect(problems).toEqual([
+      ["PUSH_SERVICE_UNREACHABLE", "receipts: Error", 1],
+      ["PUSH_SERVICE_UNREACHABLE", "receipts: Error", 1],
+    ]);
   });
 });

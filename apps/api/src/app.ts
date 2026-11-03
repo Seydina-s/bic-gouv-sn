@@ -31,6 +31,7 @@ import { SecretBox } from "./admin/secret-box";
 import { AdminSignIn } from "./admin/sign-in-service";
 import { AccountAdmin } from "./admin/account-admin";
 import { ExpoPushProvider } from "./notifications/expo-push-provider";
+import { FilePendingReceiptStore } from "./notifications/pending-receipts";
 import {
   FilePushSubscriptionStore,
   PostgresPushSubscriptionStore,
@@ -121,6 +122,8 @@ import type { SettingStore } from "./admin/setting-store";
 const MAX_PARAM_LENGTH = 200;
 /** Below this size, compressing costs more than it saves. */
 const COMPRESS_FROM_BYTES = 1024;
+/** Receipts due are looked for this often (they are due 15 minutes after a sending). */
+const RECEIPT_CHECKS_EVERY_MS = 60_000;
 
 export interface AppOptions {
   config: Config;
@@ -217,7 +220,11 @@ async function reportAutomaticNotifications(
 /** Expo's free push service when configured; otherwise approvals send nothing. */
 function defaultPushProvider(config: Config, subscriptions: PushSubscriptionStore): PushProvider {
   return config.PUSH_PROVIDER === "expo"
-    ? new ExpoPushProvider({ subscriptions, accessToken: config.EXPO_ACCESS_TOKEN })
+    ? new ExpoPushProvider({
+        subscriptions,
+        accessToken: config.EXPO_ACCESS_TOKEN,
+        pendingReceipts: new FilePendingReceiptStore(config.PUSH_RECEIPTS_PATH),
+      })
     : noPushProvider;
 }
 
@@ -539,6 +546,7 @@ export async function buildApp({
       },
     });
     if (automaticNotificationsEveryMs !== null) {
+      let stopReceiptChecks: (() => void) | null = null;
       app.addHook("onReady", async () => {
         await reportAutomaticNotifications(
           app,
@@ -550,8 +558,13 @@ export async function buildApp({
         automatic.start(automaticNotificationsEveryMs, (error) => {
           app.log.error({ err: error }, "Automatic notifications failed");
         });
+        // Receipts left by a sending before a restart are read at once.
+        stopReceiptChecks = pushProvider.checkReceiptsEvery?.(RECEIPT_CHECKS_EVERY_MS) ?? null;
       });
-      app.addHook("onClose", () => automatic.close());
+      app.addHook("onClose", async () => {
+        stopReceiptChecks?.();
+        await automatic.close();
+      });
     }
     await app.register(adminAuthRoutes, { prefix: "/admin/v1", signIn: admin.signIn });
     await app.register(adminProcedureThemesRoutes, {
