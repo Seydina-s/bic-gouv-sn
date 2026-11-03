@@ -606,3 +606,10 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : `services.sh` lançait l'API et la surveillance avec `>` (journal recréé à chaque démarrage), et chaque `deploy.sh` les redémarre.
 - **Correctif** : journaux complétés (`>>`), réduits à leurs 20 000 dernières lignes, une ligne « ===== restarted … » à chaque démarrage (`bgs-ops/services.sh`, `keep_log`).
 - **Prévention** : un journal qui sert d'enquête ne doit jamais être recréé par un redémarrage ; pendant une enquête, ne pas redéployer avant d'avoir relevé ce que le journal contient.
+
+## 03/11/2026 — Notifications absentes pendant trois semaines : l'interrupteur de l'app était coupé
+
+- **Ce qui s'est passé** : signalé par l'utilisateur, aucune notification sur son iPhone depuis des semaines. Le serveur annonçait pourtant les articles (« sent, recipients 1 ») et Apple répondait « ok » dans ses accusés (lus le 03/11 pour les envois de 15 h 49 et 15 h 50). Deux enquêtes (PUSH-05, PUSH-06) ont porté sur le serveur, qui n'était pas en cause.
+- **Cause racine** : dans l'app, l'interrupteur « Notifications » était sur « désactivées » (confirmé par l'utilisateur). Le serveur gardait l'abonnement du 23/10 : l'app ne le retire que si elle connaît encore l'adresse donnée au serveur (`bgs-push-token`), ce qui n'était plus le cas (stockage de l'app sans doute remis à zéro, cause exacte inconnue). Indice resté invisible : l'app se réinscrit à chaque ouverture quand les notifications sont actives, et le fichier des abonnements n'avait plus changé depuis le 23/10 01 h 20, alors que le téléphone se connectait chaque jour.
+- **Correctif** : l'utilisateur a réactivé les notifications dans l'app ; réinscription vue à 16 h 17, notification d'essai acceptée par Apple.
+- **Prévention** : une panne « rien n'arrive » se vérifie d'abord de bout en bout : le téléphone s'est-il réinscrit récemment (date du fichier ou de la ligne d'abonnement) avant de chercher dans l'envoi. Un abonnement qui ne se réinscrit plus doit se voir : PUSH-07 (dernière réinscription de chaque abonnement, et abonnés actifs dans la console).

@@ -1,13 +1,13 @@
 # Reprise — Bic Gouv SN
 
-**Mis à jour** : 03/11/2026 14 h 25 · **Mode** : autonome jusqu'au 03/11 à 20 h (prolongé par l'utilisateur ; demande initiale : finir ses tâches, puis audits, tests, failles, bugs silencieux, UI/UX, design ; toutes autorisations données) · **main** : #449. Historique des sessions : `HISTORIQUE.md` (à ne lire que pour un besoin précis). Méthode : skill `session-rotation`.
+**Mis à jour** : 03/11/2026 16 h 40 · **Mode** : autonome jusqu'au 03/11 à 20 h (prolongé par l'utilisateur ; demande initiale : finir ses tâches, puis audits, tests, failles, bugs silencieux, UI/UX, design ; toutes autorisations données) · **main** : #450. Historique des sessions : `HISTORIQUE.md` (à ne lire que pour un besoin précis). Méthode : skill `session-rotation`.
 
 ## État
 - Services locaux en marche (`bash /c/Users/HP/bgs-ops/services.sh` relance ce qui est tombé) : API 3100, console 3001, surveillance des 22 sites + der.sn, filtre public 3200 + tunnel ngrok, Metro 8081, boucle des voix. Déploiement du 03/11 à 14 h 14. Journaux `api.log` et `watch.log` désormais complétés à chaque redémarrage (20 000 lignes, ligne « ===== restarted … »), plus jamais écrasés. L'ordinateur se met en veille (rien ne tourne pendant ce temps).
-- **Notifications** (demande de l'utilisateur : elles n'arrivent plus sur son iPhone) : #440 déployée ; « Automatic notifications are on ». **Le 03/11 à 13 h 09, l'API a annoncé « CLOUD & NEW DEAL TECHNOLOGIQUE… » : outcome sent, recipients 1** (Expo a accepté). L'accusé d'Apple, lu 15 min après l'envoi par un minuteur en mémoire, a été perdu par le déploiement de 13 h 24 (défaut : PUSH-06). Un seul abonné (son téléphone, fr, heures calmes 22 h–7 h UTC). Un article de 11 h 51 avait aussi dû partir (trace effacée par un déploiement).
+- **Notifications : réglé le 03/11.** La cause était l'interrupteur de l'app, coupé sur l'iPhone de l'utilisateur (serveur et Apple remettaient bien : accusés « ok » à 15 h 49 et 15 h 50). Réactivé, réinscription vue à 16 h 17, essai remis par Apple (ERREURS.md). Leçon : PUSH-07 (rendre visible un abonnement que le téléphone ne confirme plus). Un seul abonné (son téléphone, fr, heures calmes 22 h–7 h UTC).
 - Surveillance des sites : #442 puis #446 déployées : n'écrit plus que les nouveaux échecs, ceux qui disparaissent (seulement quand leur site a été relu) et un rappel par jour ; vérifié sur plusieurs passages réels.
 - Audit : accessibilité 103/103 écrans ; erreurs avalées recensées (43 dans l'app et la console) : la console écrit maintenant la cause technique au journal de son serveur (#447) ; dans l'app, rien n'est visible tant que Sentry n'a pas de clé (point 11 de `A-FAIRE-UTILISATEUR.md`).
-- Voix (serveur `voices@95.216.167.95`, clé `~/.ssh/bic_gouv_ai`) : français et anglais finis ; wolof en cours (3 155 restants le 03/11). Le serveur tourne encore avec torch 2.12 et l'ancien certifi : l'installation de #303 (torch 2.13) et #443 (certifi, filelock, setuptools) a été **refusée à l'agent par l'outil de sécurité** (copie vers le serveur + `uv sync --frozen`) → point 71 de `A-FAIRE-UTILISATEUR.md`. Sauvegarde prévue avant copie : `~/voices/*.bak-0311`.
+- Voix (serveur `voices@95.216.167.95`, clé `~/.ssh/bic_gouv_ai`) : français et anglais finis ; wolof en cours (environ 3 150 restants le 03/11). **Serveur à jour le 03/11 à 15 h 55** (point 71 accepté) : torch 2.13, certifi, filelock, setuptools ; sauvegarde `~/voices/*.bak-0311` ; essai wolof + français réussi ; boucle relancée.
 - Alertes Dependabot : voix traitées (#443 ; transformers et protobuf acceptés, décision du 09/10) ; npm : fast-uri et ip-address forcés, glob/minimatch/deepmerge acceptés (#444, decisions.md du 03/11).
 - Skills du projet : `verification`, `livraison` ; sous-agent `relecteur`. Banc de l'assistant chaque dimanche à 4 h (`bgs-ops/bench.sh`).
 - Modèle universel : `C:\Users\HP\Desktop\CLAUDE-MODELE-PROJET.md` ; y reporter chaque règle de `~/.claude/ERREURS-GLOBALES.md` (skill `alimenter-modele`).
@@ -16,13 +16,11 @@
 - Rien d'entamé. Alertes acceptées (glob, minimatch, deepmerge, uuid, transformers, protobuf, decode-uri-component) encore ouvertes sur GitHub : les marquer « tolerable risk » avec renvoi à decisions.md si l'utilisateur le souhaite.
 
 ## Prochaines étapes (dans l'ordre)
-1. Demander à l'utilisateur s'il a reçu sur son iPhone, le 03/11 vers 13 h 09, la notification « CLOUD & NEW DEAL TECHNOLOGIQUE… ». Oui → l'envoi marche (la panne passée tenait sans doute aux mises en veille de l'ordinateur) : le consigner dans ERREURS.md. Non → Expo et Apple acceptent : chercher côté téléphone (réglages de notification de l'app, mode Concentration, version TestFlight), et lire l'accusé du prochain envoi (`PUSH_*` au journal, ou rien = remis).
-2. PUSH-06 livré (#449) et déployé à 14 h 14 : au prochain envoi (« Article announced to the phones » dans `bgs-ops/logs/api.log`), un fichier apparaît dans `C:ic-gouv-sn.datapush-receipts` (n'en lister que les noms : ils contiennent les adresses des téléphones), puis disparaît environ 15 min plus tard ; sans ligne `PUSH_NOT_DELIVERED` au journal, Apple a remis la notification. Déjà vérifié : l'extension iPhone qui ajoute la photo affiche la notification même si l'image ne se charge pas.
-3. Si l'utilisateur accepte le point 71 : arrêter la boucle des voix (comme `deploy.sh`, lignes 16-18), vérifier qu'aucun `synthesize.py` ne tourne sur le serveur (ne pas utiliser `pkill -f` avec un motif présent dans sa propre commande SSH : la session se coupe), sauvegarder, copier `services/voices/pyproject.toml` et `uv.lock` de `origin/main` dans `~/voices`, `uv sync --frozen`, puis `services.sh`.
-4. Suite de l'audit : finitions de l'interface (UI/UX, design) ; erreurs avalées de l'app (`grep -rn "catch {|.catch(() =>" apps/mobile/src`), à rendre visibles quand Sentry aura sa clé.
+1. PUSH-07 : garder la date de dernière réinscription de chaque abonnement (fichier et PostgreSQL), abonnés actifs sur 30 jours dans la console ; dans l'app, retirer l'abonnement quand les notifications sont coupées et que l'adresse donnée au serveur est perdue (une seule fois, pas un appel à Expo à chaque ouverture).
+2. Suite de l'audit : finitions de l'interface (UI/UX, design) ; erreurs avalées de l'app (`grep -rn "catch {|.catch(() =>" apps/mobile/src`), à rendre visibles quand Sentry aura sa clé.
 
 ## Attend l'utilisateur (`.claude/session/A-FAIRE-UTILISATEUR.md`)
-- Point 71 : autoriser ou non l'installation sur le serveur des voix.
+- Rien de neuf (point 71 fait le 03/11).
 - Point 70 en pause : médias sur l'ordinateur jusqu'au choix d'un hébergement (aussi la fin des mises en veille).
 - iPhone : version **TestFlight** (canal `preview`), à recompiler avant son expiration vers le 13/01/2027.
 
