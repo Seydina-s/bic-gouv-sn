@@ -187,6 +187,29 @@ export interface AdminServices {
   accounts: AdminAccountStore;
 }
 
+/**
+ * Says at start whether new articles will reach the phones: on, paused in the
+ * console, or impossible (no push service): the last one is an error to fix.
+ */
+async function reportAutomaticNotifications(
+  app: FastifyInstance,
+  automatic: AutomaticNotifier,
+  pushReady: boolean,
+  errorJournal: ErrorJournal | null,
+): Promise<void> {
+  if (!pushReady) {
+    app.log.error("Automatic notifications cannot be sent: no push service (PUSH_PROVIDER)");
+    errorJournal?.record("PUSH_NOT_CONFIGURED", "Notifications (serveur)", null);
+    return;
+  }
+  const { paused, changedAt } = await automatic.state();
+  if (paused) {
+    app.log.warn({ since: changedAt }, "Automatic notifications are paused in the console");
+  } else {
+    app.log.info("Automatic notifications are on");
+  }
+}
+
 /** Expo's free push service when configured; otherwise approvals send nothing. */
 function defaultPushProvider(config: Config, subscriptions: PushSubscriptionStore): PushProvider {
   return config.PUSH_PROVIDER === "expo"
@@ -314,6 +337,12 @@ export async function buildApp({
   if (errorJournal !== null) {
     journalErrors(app, errorJournal);
   }
+  // A notification refused or lost on its way shows in the log and the console's
+  // error journal (03/11/2026: phones stopped receiving them with no trace anywhere).
+  pushProvider.reportProblemsTo?.((code, reason, count) => {
+    app.log.warn({ code, reason, count }, "Push notifications problem");
+    errorJournal?.record(code, `Notifications (${reason})`, null);
+  });
   // Before compression: a repeated write gets the first answer as it was sent.
   registerIdempotency(app, sharedState);
   // Answers leave compressed (gzip, or brotli when asked): on 3G, the services list
@@ -501,13 +530,16 @@ export async function buildApp({
       ...notificationServices,
       settings,
       perHour: config.AUTO_NOTIFICATIONS_PER_HOUR,
+      onAnnounced: (announcement) => {
+        app.log.info(announcement, "Article announced to the phones");
+      },
     });
     if (automaticNotificationsEveryMs !== null) {
-      app.addHook("onReady", () => {
+      app.addHook("onReady", async () => {
+        await reportAutomaticNotifications(app, automatic, pushProvider.ready, errorJournal);
         automatic.start(automaticNotificationsEveryMs, (error) => {
           app.log.error({ err: error }, "Automatic notifications failed");
         });
-        return Promise.resolve();
       });
       app.addHook("onClose", () => automatic.close());
     }
