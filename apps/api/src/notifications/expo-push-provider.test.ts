@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { writeFileDurably } from "@bgs/content-store";
 import type { PushSubscription } from "@bgs/shared-types";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { ExpoPushProvider } from "./expo-push-provider";
 import type { PushMessage } from "./push-message";
 import { FilePushSubscriptionStore } from "./push-subscriptions";
@@ -196,5 +196,96 @@ describe("sending a notification through Expo", () => {
     await store.save(subscription(1));
     await store.save(subscription(1, { topics: [] }));
     expect(await store.list()).toEqual([]);
+  });
+});
+
+describe("problems after a notification leaves the API (03/11/2026)", () => {
+  type Problem = [code: string, reason: string, count: number];
+
+  function listening(provider: ExpoPushProvider): Problem[] {
+    const problems: Problem[] = [];
+    provider.reportProblemsTo((code, reason, count) => problems.push([code, reason, count]));
+    return problems;
+  }
+
+  it("reports every refusal at sending except a phone that is gone", async () => {
+    const { store, fetchImpl } = await setUp(
+      [subscription(1), subscription(2), subscription(3), subscription(4)],
+      (to) =>
+        to === token(1)
+          ? { status: "error", details: { error: "DeviceNotRegistered" } }
+          : to === token(4)
+            ? { status: "ok", id: "ticket-4" }
+            : { status: "error", details: { error: "InvalidCredentials" } },
+    );
+    const provider = new ExpoPushProvider({ subscriptions: store, fetchImpl, now: () => NOON });
+    const problems = listening(provider);
+    await provider.send(NOTIFICATION);
+    expect(problems).toEqual([["PUSH_REJECTED", "InvalidCredentials", 2]]);
+    expect((await store.list()).map((item) => item.token)).not.toContain(token(1));
+  });
+
+  it("reports the requests lost on the way, even when others went through", async () => {
+    const all = Array.from({ length: 150 }, (_, n) => subscription(n));
+    const { store, fetchImpl } = await setUp(all);
+    let calls = 0;
+    const halfDown = ((url: string, init?: RequestInit) => {
+      calls += 1;
+      return calls === 2 ? Promise.reject(new Error("réseau coupé")) : fetchImpl(url, init);
+    }) as typeof fetch;
+    const provider = new ExpoPushProvider({
+      subscriptions: store,
+      fetchImpl: halfDown,
+      now: () => NOON,
+    });
+    const problems = listening(provider);
+    expect(await provider.send(NOTIFICATION)).toEqual({ outcome: "sent", recipients: 150 });
+    expect(problems).toEqual([["PUSH_SERVICE_UNREACHABLE", "sending", 1]]);
+  });
+
+  it("reads Apple's and Google's answers: forgets the phones gone, reports the rest", async () => {
+    const { store } = await setUp([subscription(1), subscription(2), subscription(3)]);
+    const asked: unknown[] = [];
+    const receipts = ((_url: string, init?: RequestInit) => {
+      asked.push(JSON.parse(typeof init?.body === "string" ? init.body : "{}"));
+      const data = {
+        "ticket-1": { status: "error", details: { error: "DeviceNotRegistered" } },
+        "ticket-2": { status: "error", details: { error: "MessageTooBig" } },
+        "ticket-3": { status: "ok" },
+      };
+      return Promise.resolve(new Response(JSON.stringify({ data })));
+    }) as typeof fetch;
+    const provider = new ExpoPushProvider({ subscriptions: store, fetchImpl: receipts });
+    const problems = listening(provider);
+    await provider.readReceipts(
+      [1, 2, 3].map((n) => ({ id: `ticket-${String(n)}`, token: token(n) })),
+    );
+    expect(asked).toEqual([{ ids: ["ticket-1", "ticket-2", "ticket-3"] }]);
+    expect(problems).toEqual([["PUSH_NOT_DELIVERED", "MessageTooBig", 1]]);
+    expect((await store.list()).map((item) => item.token).sort()).toEqual([token(2), token(3)]);
+  });
+
+  it("reads the receipts by itself a while after sending", async () => {
+    const { store, fetchImpl } = await setUp([subscription(1)], () => ({
+      status: "ok",
+      id: "ticket-1",
+    }));
+    const urls: string[] = [];
+    const recording = ((url: string, init?: RequestInit) => {
+      urls.push(url);
+      return url.endsWith("getReceipts")
+        ? Promise.resolve(new Response(JSON.stringify({ data: { "ticket-1": { status: "ok" } } })))
+        : fetchImpl(url, init);
+    }) as typeof fetch;
+    const provider = new ExpoPushProvider({
+      subscriptions: store,
+      fetchImpl: recording,
+      now: () => NOON,
+      receiptsAfterMs: 1,
+    });
+    await provider.send(NOTIFICATION);
+    await vi.waitFor(() => {
+      expect(urls.filter((url) => url.endsWith("getReceipts"))).toHaveLength(1);
+    });
   });
 });

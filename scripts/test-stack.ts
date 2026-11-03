@@ -27,6 +27,7 @@ function startApi(dataDir: string): ChildProcess {
     stdio: ["ignore", "ignore", "inherit"],
     env: {
       ...process.env,
+      NODE_ENV: "test",
       HOST: "127.0.0.1",
       PORT: String(API_PORT),
       LOG_LEVEL: "error",
