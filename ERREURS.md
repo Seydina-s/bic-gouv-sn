@@ -585,3 +585,10 @@ Journal des erreurs corrigées dans ce projet (CLAUDE.md §16). Une erreur n'est
 - **Cause racine** : vitest 5 range son cache de modules dans un seul dossier à la racine, commun à tous les paquets. La suite lance les dix paquets en même temps ; quand l'un vide ce cache pendant qu'un autre y écrit, Windows refuse la suppression.
 - **Correctif** : un cache par paquet (`fsModuleCachePath` dans `vitest.shared.ts`, dans le `node_modules` de chaque paquet).
 - **Prévention** : un outil lancé en parallèle sur plusieurs paquets ne partage aucun dossier de travail ; à chaque montée de version d'un outil de test, vérifier où il écrit ses caches.
+
+## 03/11/2026 — Scripts jetables emportés dans un commit
+
+- **Ce qui s'est passé** : deux scripts de diagnostic (`apps/api/.tmp-due.mts`, `.tmp-replay.mts`), écrits dans la copie de travail pour relire les articles, sont entrés dans le commit de #440 par `git add -A`. Le lint de `ship.sh` les a refusés avant tout envoi ; une livraison perdue. Un premier script avait même été écrit dans la copie servie, puis déplacé aussitôt.
+- **Cause racine** : un script qui a besoin des paquets du dépôt a été posé dans le dépôt faute d'autre moyen, puis la liste des fichiers du commit n'a pas été relue (vérification sautée pour gagner du temps).
+- **Correctif** : fichiers retirés du commit avant tout envoi.
+- **Prévention** : scripts jetables dans le dossier temporaire de la session ; s'il faut les paquets du dépôt, les y poser le temps de l'exécution puis les sortir aussitôt ; relire `git diff --cached --name-only` avant chaque commit ; ne jamais sauter la skill `verification`.
