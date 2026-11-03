@@ -55,6 +55,7 @@ describe("adminRequest", () => {
   });
 
   it("explains an unexpected answer, an unreachable API and a missing address", async () => {
+    const log = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
     fetchMock.mockResolvedValue(json({ unexpected: true }));
     expect(await adminRequest({ path: "/x", schema: z.object({ id: z.string() }) })).toMatchObject({
       code: "ADMIN_API_INVALID_RESPONSE",
@@ -63,6 +64,12 @@ describe("adminRequest", () => {
     expect(await adminRequest({ path: "/x", schema: z.object({}) })).toMatchObject({
       code: "ADMIN_API_UNREACHABLE",
     });
+    // The person reads a plain message; the cause stays in the server's log.
+    expect(log.mock.calls).toEqual([
+      ["Admin API GET /x: answer out of its schema (id invalid_type)\n"],
+      ["Admin API GET /x: network\n"],
+    ]);
+    log.mockRestore();
     vi.stubEnv("API_URL", "");
     expect(await adminRequest({ path: "/x", schema: z.object({}) })).toMatchObject({
       code: "ADMIN_API_UNCONFIGURED",

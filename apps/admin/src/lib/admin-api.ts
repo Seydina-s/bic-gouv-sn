@@ -64,12 +64,31 @@ export async function adminRequest<S extends z.ZodType>({
       return { ok: false, status: response.status, code };
     }
     const parsed = schema.safeParse(json);
-    return parsed.success
-      ? { ok: true, data: parsed.data }
-      : { ok: false, status: null, code: "ADMIN_API_INVALID_RESPONSE" };
-  } catch {
+    if (!parsed.success) {
+      logCause(method, path, `answer out of its schema (${fieldsOf(parsed.error)})`);
+      return { ok: false, status: null, code: "ADMIN_API_INVALID_RESPONSE" };
+    }
+    return { ok: true, data: parsed.data };
+  } catch (error) {
+    logCause(method, path, error instanceof Error ? error.message : String(error));
     return { ok: false, status: null, code: "ADMIN_API_UNREACHABLE" };
   }
+}
+
+/**
+ * The person reads a plain message; the technical cause goes to the console's server
+ * log (no content, no personal data), otherwise the failure leaves no trace (03/11/2026).
+ */
+function logCause(method: string, path: string, cause: string): void {
+  process.stderr.write(`Admin API ${method} ${path}: ${cause}\n`);
+}
+
+/** The fields that did not match, at most five: enough to find the change, nothing more. */
+function fieldsOf(error: z.ZodError): string {
+  return error.issues
+    .slice(0, 5)
+    .map((issue) => `${issue.path.join(".") || "(root)"} ${issue.code}`)
+    .join(", ");
 }
 
 /**
