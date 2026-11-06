@@ -9,6 +9,7 @@ import type { ColorValue } from "react-native";
 import type { IconProps as PhosphorProps } from "phosphor-react-native";
 import { GlassTabBar } from "../../components/GlassTabBar";
 import { Icon } from "../../components/Icon";
+import { useNotificationTaps } from "../../features/notifications/useNotificationTaps";
 import { useTranslation } from "../../i18n/useTranslation";
 import { useTheme } from "../../theme/useTheme";
 
@@ -23,6 +24,10 @@ function tabIcon(glyph: ComponentType<PhosphorProps>) {
 export default function TabsLayout() {
   const { theme } = useTheme();
   const { t } = useTranslation();
+  // Read here, not in the root layout: a notification's article then always opens
+  // over the front page. Opened from the root before the tabs existed, it lay alone
+  // on the iPhone, with no way back (owner, 06/11/2026).
+  useNotificationTaps();
 
   return (
     <Tabs
