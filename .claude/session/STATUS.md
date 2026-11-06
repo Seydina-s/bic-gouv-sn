@@ -1,6 +1,6 @@
 # Reprise — Bic Gouv SN
 
-**Mis à jour** : 06/11/2026 · **Mode** : standard (le mode autonome a pris fin le 03/11 à 20 h) · **main** : #452 (NAV-01). Historique des sessions : `HISTORIQUE.md` (à ne lire que pour un besoin précis). Méthode : skill `session-rotation`.
+**Mis à jour** : 06/11/2026 · **Mode** : standard (le mode autonome a pris fin le 03/11 à 20 h) · **main** : #453 (NAV-01, mise à jour à distance publiée le 06/11 à 17 h 18). Historique des sessions : `HISTORIQUE.md` (à ne lire que pour un besoin précis). Méthode : skill `session-rotation`.
 
 ## État
 - Services locaux en marche (`bash /c/Users/HP/bgs-ops/services.sh` relance ce qui est tombé) : API 3100, console 3001, surveillance des 22 sites + der.sn, filtre public 3200 + tunnel ngrok, Metro 8081, boucle des voix. Déploiement du 03/11 à 14 h 14. Journaux `api.log` et `watch.log` désormais complétés à chaque redémarrage (20 000 lignes, ligne « ===== restarted … »), plus jamais écrasés. L'ordinateur se met en veille (rien ne tourne pendant ce temps).
