@@ -5,7 +5,7 @@ import * as Location from "expo-location";
 import { router } from "expo-router";
 import { renderRouter } from "expo-router/testing-library";
 import { BackHandler, Dimensions, Keyboard, Linking, Share } from "react-native";
-import RootLayout from "./app/_layout";
+import RootLayout, { unstable_settings } from "./app/_layout";
 import TabsLayout from "./app/(tabs)/_layout";
 import HomeScreen from "./app/(tabs)/index";
 import AssistantScreen from "./app/(tabs)/assistant";
@@ -741,6 +741,28 @@ describe("app shell", () => {
     await waitFor(async () => {
       expect(await AsyncStorage.getItem("bgs-favorites-v1")).not.toContain(DETAIL.id);
     });
+  });
+
+  it("puts the front page under an article opened directly, as from a notification", async () => {
+    await renderRouter(
+      { ...routes, _layout: { default: RootLayout, unstable_settings } },
+      { initialUrl: `/article/${DETAIL.id}` },
+    );
+    expect(await screen.findByText("Paragraphe de test.")).toBeOnTheScreen();
+    // Owner, 06/11/2026: the article was alone, with no way back into the app.
+    expect(router.canGoBack()).toBe(true);
+    await act(async () => {
+      router.back();
+      await Promise.resolve();
+    });
+    expect(await screen.findByRole("button", { name: "Réglages" })).toBeOnTheScreen();
+  });
+
+  it("offers the front page from a screen with nothing under it", async () => {
+    await renderRouter(routes, { initialUrl: `/article/${DETAIL.id}` });
+    expect(await screen.findByText("Paragraphe de test.")).toBeOnTheScreen();
+    await fireEvent.press(screen.getByRole("button", { name: "Accueil" }));
+    expect(await screen.findByRole("button", { name: "Réglages" })).toBeOnTheScreen();
   });
 
   it("shows how to keep articles when there is no favorite yet", async () => {

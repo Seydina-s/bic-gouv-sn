@@ -7,6 +7,7 @@ import { useCallback, useEffect, useState, type ComponentType } from "react";
 import { Platform, StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { HomeButton } from "../components/HomeButton";
 import { QueryProvider } from "../data/QueryProvider";
 import { DataSaverProvider } from "../features/data-saver/DataSaverProvider";
 import { UsageStatsProvider } from "../features/usage-stats/UsageStatsProvider";
@@ -34,6 +35,12 @@ const monitoringEnabled = initMonitoring({
   dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
   environment: process.env.EXPO_PUBLIC_APP_ENV,
 });
+
+/**
+ * The tabs always lie under a screen opened directly. A notification touched while the
+ * app was closed opened its article alone, with no back button (owner, 06/11/2026).
+ */
+export const unstable_settings = { initialRouteName: "(tabs)" };
 
 // Keep the native splash visible until fonts are ready: no white screen, no font swap.
 void SplashScreen.preventAutoHideAsync();
@@ -75,10 +82,12 @@ function ThemedStack() {
         {/* Below the bar, the screens' safe area (and their headers) starts under it. */}
         <SafeAreaProvider style={styles.fill}>
           <Stack
-            screenOptions={{
+            screenOptions={({ navigation }) => ({
               headerShown: false,
               contentStyle: { backgroundColor: theme.color.background },
-            }}
+              // Nothing to go back to: the front page instead of no way out at all.
+              ...(navigation.canGoBack() ? {} : { headerLeft: () => <HomeButton /> }),
+            })}
           />
         </SafeAreaProvider>
       </View>
