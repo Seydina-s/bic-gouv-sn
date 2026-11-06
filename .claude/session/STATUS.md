@@ -1,9 +1,10 @@
 # Reprise — Bic Gouv SN
 
-**Mis à jour** : 03/11/2026 16 h 40 · **Mode** : autonome jusqu'au 03/11 à 20 h (prolongé par l'utilisateur ; demande initiale : finir ses tâches, puis audits, tests, failles, bugs silencieux, UI/UX, design ; toutes autorisations données) · **main** : #450. Historique des sessions : `HISTORIQUE.md` (à ne lire que pour un besoin précis). Méthode : skill `session-rotation`.
+**Mis à jour** : 06/11/2026 · **Mode** : standard (le mode autonome a pris fin le 03/11 à 20 h) · **main** : #452 (NAV-01). Historique des sessions : `HISTORIQUE.md` (à ne lire que pour un besoin précis). Méthode : skill `session-rotation`.
 
 ## État
 - Services locaux en marche (`bash /c/Users/HP/bgs-ops/services.sh` relance ce qui est tombé) : API 3100, console 3001, surveillance des 22 sites + der.sn, filtre public 3200 + tunnel ngrok, Metro 8081, boucle des voix. Déploiement du 03/11 à 14 h 14. Journaux `api.log` et `watch.log` désormais complétés à chaque redémarrage (20 000 lignes, ligne « ===== restarted … »), plus jamais écrasés. L'ordinateur se met en veille (rien ne tourne pendant ce temps).
+- **NAV-01 (06/11, demande de l'utilisateur)** : un article ouvert en touchant une notification n'avait pas de bouton retour. Corrigé : l'accueil est toujours sous un écran ouvert directement (`unstable_settings` dans `apps/mobile/src/app/_layout.tsx`), et un bouton « Accueil » apparaît sur tout écran sans écran précédent (`components/HomeButton.tsx`). Livré avec mise à jour à distance de l'app (ERREURS.md, 06/11).
 - **Notifications : réglé le 03/11.** La cause était l'interrupteur de l'app, coupé sur l'iPhone de l'utilisateur (serveur et Apple remettaient bien : accusés « ok » à 15 h 49 et 15 h 50). Réactivé, réinscription vue à 16 h 17, essai remis par Apple (ERREURS.md). Leçon : PUSH-07 (rendre visible un abonnement que le téléphone ne confirme plus). Un seul abonné (son téléphone, fr, heures calmes 22 h–7 h UTC).
 - Surveillance des sites : #442 puis #446 déployées : n'écrit plus que les nouveaux échecs, ceux qui disparaissent (seulement quand leur site a été relu) et un rappel par jour ; vérifié sur plusieurs passages réels.
 - Audit : accessibilité 103/103 écrans ; erreurs avalées recensées (43 dans l'app et la console) : la console écrit maintenant la cause technique au journal de son serveur (#447) ; dans l'app, rien n'est visible tant que Sentry n'a pas de clé (point 11 de `A-FAIRE-UTILISATEUR.md`).
@@ -16,8 +17,9 @@
 - Rien d'entamé. Alertes acceptées (glob, minimatch, deepmerge, uuid, transformers, protobuf, decode-uri-component) encore ouvertes sur GitHub : les marquer « tolerable risk » avec renvoi à decisions.md si l'utilisateur le souhaite.
 
 ## Prochaines étapes (dans l'ordre)
-1. PUSH-07 : garder la date de dernière réinscription de chaque abonnement (fichier et PostgreSQL), abonnés actifs sur 30 jours dans la console ; dans l'app, retirer l'abonnement quand les notifications sont coupées et que l'adresse donnée au serveur est perdue (une seule fois, pas un appel à Expo à chaque ouverture).
-2. Suite de l'audit : finitions de l'interface (UI/UX, design) ; erreurs avalées de l'app (`grep -rn "catch {|.catch(() =>" apps/mobile/src`), à rendre visibles quand Sentry aura sa clé.
+1. Demander à l'utilisateur de confirmer sur son iPhone (après la mise à jour à distance : rouvrir l'app deux fois) qu'un article ouvert depuis une notification a maintenant un bouton retour vers l'accueil.
+2. PUSH-07 : garder la date de dernière réinscription de chaque abonnement (fichier et PostgreSQL), abonnés actifs sur 30 jours dans la console ; dans l'app, retirer l'abonnement quand les notifications sont coupées et que l'adresse donnée au serveur est perdue (une seule fois, pas un appel à Expo à chaque ouverture).
+3. Suite de l'audit : finitions de l'interface (UI/UX, design) ; erreurs avalées de l'app (`grep -rn "catch {|.catch(() =>" apps/mobile/src`), à rendre visibles quand Sentry aura sa clé.
 
 ## Attend l'utilisateur (`.claude/session/A-FAIRE-UTILISATEUR.md`)
 - Rien de neuf (point 71 fait le 03/11).
