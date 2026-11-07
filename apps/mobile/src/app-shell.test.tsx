@@ -1,5 +1,6 @@
 import { dwellOf } from "./features/news/HeroCarousel";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import type * as ReactModule from "react";
 import { act, fireEvent, screen, waitFor, within } from "@testing-library/react-native";
 import * as Location from "expo-location";
 import { router } from "expo-router";
@@ -45,8 +46,38 @@ jest.mock("expo-location", () => ({
   Accuracy: { Balanced: 3 },
 }));
 
+// The notification that opened the app, when a test says one did.
+let mockLastResponse: unknown = null;
+jest.mock("expo-notifications", () => ({
+  ...jest.requireActual<object>("expo-notifications"),
+  setNotificationHandler: jest.fn(),
+  getLastNotificationResponse: () => mockLastResponse,
+  addNotificationResponseReceivedListener: () => ({ remove: jest.fn() }),
+}));
+
 let mockFontState: [boolean, Error | null] = [true, null];
-jest.mock("expo-font", () => ({ useFonts: () => mockFontState }));
+// On a phone, fonts arrive a moment after the first render.
+let mockFontsLate = false;
+jest.mock("expo-font", () => {
+  const { useEffect, useState } = jest.requireActual<typeof ReactModule>("react");
+  return {
+    useFonts: () => {
+      const [late, setLate] = useState(mockFontsLate);
+      useEffect(() => {
+        if (late) {
+          const timer = setTimeout(() => {
+            setLate(false);
+          }, 300);
+          return () => {
+            clearTimeout(timer);
+          };
+        }
+        return undefined;
+      }, [late]);
+      return late ? [false, null] : mockFontState;
+    },
+  };
+});
 
 // The photo picker exists only in builds made since Participer: a stand-in here.
 let mockPickerAvailable = false;
@@ -121,6 +152,8 @@ beforeEach(async () => {
   // Most journeys start after the welcome screens (tested on their own below).
   await AsyncStorage.setItem("bgs-onboarding", "done");
   mockFontState = [true, null];
+  mockLastResponse = null;
+  mockFontsLate = false;
   mockMapAvailable = false;
   mockPickerAvailable = false;
   clearMapCalls();
@@ -750,6 +783,24 @@ describe("app shell", () => {
     );
     expect(await screen.findByText("Paragraphe de test.")).toBeOnTheScreen();
     // Owner, 06/11/2026: the article was alone, with no way back into the app.
+    expect(router.canGoBack()).toBe(true);
+    await act(async () => {
+      router.back();
+      await Promise.resolve();
+    });
+    expect(await screen.findByRole("button", { name: "Réglages" })).toBeOnTheScreen();
+  });
+
+  it("puts the front page under an article opened by touching a notification, app closed", async () => {
+    mockLastResponse = {
+      notification: {
+        request: { identifier: "cold-start", content: { data: { articleId: DETAIL.id } } },
+      },
+    };
+    mockFontsLate = true;
+    await renderRouter({ ...routes, _layout: { default: RootLayout, unstable_settings } });
+    expect(await screen.findByText("Paragraphe de test.")).toBeOnTheScreen();
+    // Owner, 06/11/2026 (on the iPhone, after the first fix): still no way back.
     expect(router.canGoBack()).toBe(true);
     await act(async () => {
       router.back();

@@ -12,7 +12,6 @@ import { QueryProvider } from "../data/QueryProvider";
 import { DataSaverProvider } from "../features/data-saver/DataSaverProvider";
 import { UsageStatsProvider } from "../features/usage-stats/UsageStatsProvider";
 import { NotificationsProvider } from "../features/notifications/NotificationsProvider";
-import { useNotificationTaps } from "../features/notifications/useNotificationTaps";
 import { UpdateGate } from "../features/remote-config/FeatureGate";
 import { SettingsProvider } from "../features/shell/SettingsProvider";
 import { FavoritesProvider } from "../features/favorites/FavoritesProvider";
@@ -56,7 +55,6 @@ function ThemedStack() {
     setLaunching(false);
   }, []);
   useDocumentLanguage();
-  useNotificationTaps();
 
   // Root background behind every screen: no white flash in dark mode.
   useEffect(() => {
