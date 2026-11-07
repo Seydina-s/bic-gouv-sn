@@ -1,11 +1,11 @@
 # Reprise — Bic Gouv SN
 
-**Mis à jour** : 07/11/2026 · **Mode** : standard (le mode autonome a pris fin le 03/11 à 20 h) · **main** : NAV-01 bis (#455) ; PUSH-07 sur la branche `feat/push-07-stale-subscriptions` (copie `C:\bic-gouv-sn-w4`), en cours de livraison. Historique des sessions : `HISTORIQUE.md` (à ne lire que pour un besoin précis). Méthode : skill `session-rotation`.
+**Mis à jour** : 07/11/2026 · **Mode** : standard (le mode autonome a pris fin le 03/11 à 20 h) · **main** : PUSH-07 (branche `feat/push-07-stale-subscriptions`, fusionnée le 07/11 vers 1 h avec mise à jour à distance de l'app ; numéro de PR dans `bgs-ops/logs/ship-push07.log`). Historique des sessions : `HISTORIQUE.md` (à ne lire que pour un besoin précis). Méthode : skill `session-rotation`.
 
 ## État
 - Services locaux en marche (`bash /c/Users/HP/bgs-ops/services.sh` relance ce qui est tombé) : API 3100, console 3001, surveillance des 22 sites + der.sn, filtre public 3200 + tunnel ngrok, Metro 8081, boucle des voix. Déploiement du 03/11 à 14 h 14. Journaux `api.log` et `watch.log` désormais complétés à chaque redémarrage (20 000 lignes, ligne « ===== restarted … »), plus jamais écrasés. L'ordinateur se met en veille (rien ne tourne pendant ce temps).
 - **NAV-01 terminé** : l'utilisateur a confirmé sur l'iPhone le 07/11 (« ça marche à merveille ») : article ouvert depuis une notification, app fermée, avec flèche de retour et geste du bord gauche (#455). Lancements d'une mise à jour : `npx eas-cli@latest update:insights <groupe> --platform ios --days 1`.
-- **PUSH-07 (07/11, commit `c73363a`, pas encore poussé)** : date du dernier signe de vie de chaque abonnement (`seenAt` dans le fichier, colonne `seen_at`, migration 016), oubli des téléphones muets depuis 90 jours avant chaque envoi (`forgetSilent` dans `expo-push-provider.ts`), total « actifs sur 30 jours » dans la console (`activeLastMonth`), retrait unique de l'abonnement par l'app quand le téléphone refuse les notifications. Défaut trouvé en chemin et corrigé : l'app retirait puis recréait son abonnement à chaque ouverture (ERREURS.md, 07/11). Backlog, decisions.md, ERREURS.md et `~/.claude/ERREURS-GLOBALES.md` déjà à jour.
+- **PUSH-07 (07/11, livré)** : date du dernier signe de vie de chaque abonnement (`seenAt` dans le fichier, colonne `seen_at`, migration 016), oubli des téléphones muets depuis 90 jours avant chaque envoi (`forgetSilent` dans `expo-push-provider.ts`), total « actifs sur 30 jours » dans la console (`activeLastMonth`), retrait unique de l'abonnement par l'app quand le téléphone refuse les notifications. Défaut trouvé en chemin et corrigé : l'app retirait puis recréait son abonnement à chaque ouverture (ERREURS.md, 07/11). Backlog, decisions.md, ERREURS.md et `~/.claude/ERREURS-GLOBALES.md` déjà à jour.
 - **Notifications : réglé le 03/11.** La cause était l'interrupteur de l'app, coupé sur l'iPhone de l'utilisateur (serveur et Apple remettaient bien : accusés « ok » à 15 h 49 et 15 h 50). Réactivé, réinscription vue à 16 h 17, essai remis par Apple (ERREURS.md). Leçon : PUSH-07 (rendre visible un abonnement que le téléphone ne confirme plus). Un seul abonné (son téléphone, fr, heures calmes 22 h–7 h UTC).
 - Surveillance des sites : #442 puis #446 déployées : n'écrit plus que les nouveaux échecs, ceux qui disparaissent (seulement quand leur site a été relu) et un rappel par jour ; vérifié sur plusieurs passages réels.
 - Audit : accessibilité 103/103 écrans ; erreurs avalées recensées (43 dans l'app et la console) : la console écrit maintenant la cause technique au journal de son serveur (#447) ; dans l'app, rien n'est visible tant que Sentry n'a pas de clé (point 11 de `A-FAIRE-UTILISATEUR.md`).
@@ -18,7 +18,7 @@
 - Rien d'autre d'entamé. Alertes acceptées (glob, minimatch, deepmerge, uuid, transformers, protobuf, decode-uri-component) encore ouvertes sur GitHub : les marquer « tolerable risk » avec renvoi à decisions.md si l'utilisateur le souhaite.
 
 ## Prochaines étapes (dans l'ordre)
-1. Livrer PUSH-07 depuis `C:\bic-gouv-sn-w4` (branche `feat/push-07-stale-subscriptions`, déjà commitée) : `verify.sh` complet (supprimer `apps/admin/.next` avant), puis skill `livraison` (ship.sh avec mise à jour à distance de l'app), puis `deploy.sh` (API, console, migration 016). Vérifier ensuite la page Notifications de la console (ligne « Actifs sur les 30 derniers jours : 1 »).
+1. Contrôler PUSH-07 en service : `curl localhost:3100/v1/health` (200) ; dernière ligne de `bgs-ops/logs/deploy-push07.log` (déploiement lancé juste après la fusion) ; page Notifications de la console : la ligne « Actifs sur les 30 derniers jours : 1 ». Si le déploiement n'a pas eu lieu : `bash /c/Users/HP/bgs-ops/deploy.sh > fichier 2>&1`.
 2. Reporter la règle du 07/11 de `ERREURS-GLOBALES.md` (réglage enregistré utilisé avant d'être relu) dans le modèle universel (skill `alimenter-modele`).
 3. Suite de l'audit : finitions de l'interface (UI/UX, design) ; erreurs avalées de l'app (`grep -rn "catch {|.catch(() =>" apps/mobile/src`), à rendre visibles quand Sentry aura sa clé.
 
@@ -46,6 +46,6 @@
 - Notification silencieuse de contrôle (aucun affichage) : envoyer `{"to": <jeton>, "_contentAvailable": true, "priority": "normal"}` à `https://exp.host/--/api/v2/push/send`, puis l'accusé par `…/getReceipts`.
 
 ## Dernière vérification
-07/11 : PUSH-07, tests des notifications de l'API verts (48, fichier et PostgreSQL), tests de l'app `NotificationsProvider` + `data` verts (le test « is renewed at each opening » échouait avant le correctif). `verify.sh` complet lancé mais pas terminé au moment de la rotation : à relancer avant de livrer. NAV-01 confirmé sur l'iPhone par l'utilisateur.
+07/11 : PUSH-07, `verify.sh` complet vert (installation, lint, types, format, tests avec couverture) ; tests des notifications de l'API verts (48, fichier et PostgreSQL), tests de l'app `NotificationsProvider` + `data` verts (le test « is renewed at each opening » échouait avant le correctif). NAV-01 confirmé sur l'iPhone par l'utilisateur.
 
 <!-- fin de la reprise -->
