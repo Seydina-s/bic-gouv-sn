@@ -509,6 +509,8 @@ export const adminFr = {
       one: "{count} téléphone abonné aux notifications.",
       other: "{count} téléphones abonnés aux notifications.",
     },
+    subscribersActive:
+      "Actifs sur les 30 derniers jours (l'app a été ouverte au moins une fois) : {count}. Un téléphone sans nouvelles depuis 90 jours est retiré de la liste.",
     subscribersDetail:
       "Toutes les rubriques\u00a0: {everySection} · Heures calmes\u00a0: {quietHours} · Français\u00a0: {french} · Wolof\u00a0: {wolof} · Anglais\u00a0: {english}",
     subscriberGrowth:

@@ -137,6 +137,8 @@ export class ExpoPushProvider implements PushProvider {
   async send(message: PushMessage): Promise<PushResult> {
     const hour = new Date(this.now()).getUTCHours(); // Dakar is on UTC all year.
     const { category } = message;
+    // Phones silent for months are forgotten first (PUSH-07): never sent to again.
+    await this.options.subscriptions.forgetSilent();
     const subscribed = await (category === null
       ? this.options.subscriptions.list()
       : this.options.subscriptions.following(category));

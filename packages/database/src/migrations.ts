@@ -192,4 +192,15 @@ export const MIGRATIONS: readonly { id: string; statements: readonly string[] }[
     id: "015-assistant-flags",
     statements: ["CREATE TABLE assistant_flags (id text PRIMARY KEY, data jsonb NOT NULL)"],
   },
+  {
+    // When each phone last subscribed again (PUSH-07): the app does so each time it
+    // opens, so a phone silent for long is counted out, then forgotten. Phones
+    // already there start from the day they first subscribed.
+    id: "016-push-seen-at",
+    statements: [
+      "ALTER TABLE push_subscriptions ADD COLUMN seen_at timestamptz",
+      "UPDATE push_subscriptions SET seen_at = subscribed_at",
+      "CREATE INDEX push_subscriptions_seen_at ON push_subscriptions (seen_at)",
+    ],
+  },
 ];
