@@ -57,17 +57,25 @@ export interface NotificationsState {
 
 const NotificationsContext = createContext<NotificationsState | null>(null);
 
+/**
+ * Withdraws the token last given to the API, once: forgotten once withdrawn, so the
+ * next openings ask nothing of the API or of Expo. Without one, the API forgets the
+ * phone itself after 90 days without news (PUSH-07).
+ */
+async function withdraw() {
+  const saved = await AsyncStorage.getItem(TOKEN_SLOT);
+  if (saved !== null) {
+    await client.unsubscribe(saved);
+    await AsyncStorage.removeItem(TOKEN_SLOT);
+  }
+}
+
 /** Tells the API what this phone wants; a failure is tried again at the next opening. */
 async function synchronize(choice: NotificationChoice, quiet: QuietChoice, lang: Lang) {
-  if (choice === "off") {
-    const saved = await AsyncStorage.getItem(TOKEN_SLOT);
-    if (saved !== null) {
-      await client.unsubscribe(saved);
-      await AsyncStorage.removeItem(TOKEN_SLOT);
-    }
-    return;
-  }
-  if ((await permission()) !== "granted") {
+  // Turned off in the app, or refused in the phone's settings (PUSH-07): nothing
+  // would arrive, so the subscription is withdrawn rather than kept silent.
+  if (choice === "off" || (await permission()) !== "granted") {
+    await withdraw();
     return;
   }
   const token = await pushToken();
@@ -85,8 +93,12 @@ async function synchronize(choice: NotificationChoice, quiet: QuietChoice, lang:
  */
 export function NotificationsProvider({ children }: { children: ReactNode }) {
   const { t, lang } = useTranslation();
-  const [choice, choose] = usePersistentChoice(CHOICE_SLOT, NOTIFICATION_CHOICES, "off");
-  const [quiet, setQuiet] = usePersistentChoice(QUIET_SLOT, QUIET_CHOICES, "on");
+  const [choice, choose, choiceRead] = usePersistentChoice(
+    CHOICE_SLOT,
+    NOTIFICATION_CHOICES,
+    "off",
+  );
+  const [quiet, setQuiet, quietRead] = usePersistentChoice(QUIET_SLOT, QUIET_CHOICES, "on");
   const [invited, markInvited] = usePersistentChoice(INVITED_SLOT, INVITED, "no");
   const [blocked, setBlocked] = useState(false);
   // A choice of sections made before 15/10/2026 would otherwise keep filtering, with
@@ -99,8 +111,10 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
 
   // Kept in step: at every change of choice, and when the app comes back (the
   // person may have changed the permission in the phone's settings meanwhile).
+  // Only once the saved choices are read: the "off" shown meanwhile would withdraw,
+  // then renew, the subscription at every opening (found with PUSH-07, 07/11/2026).
   useEffect(() => {
-    if (!supported) {
+    if (!supported || !choiceRead || !quietRead) {
       return undefined;
     }
     const refresh = () => {
@@ -120,7 +134,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     return () => {
       subscription.remove();
     };
-  }, [supported, choice, quiet, lang]);
+  }, [supported, choiceRead, quietRead, choice, quiet, lang]);
 
   const setChoice = useCallback(
     async (next: NotificationChoice): Promise<void> => {

@@ -183,6 +183,11 @@ export default async function NotificationsPage() {
           </p>
         )}
         {subscribers.total > 0 && (
+          <p className="max-w-prose">
+            {t("notifications.subscribersActive", { count: subscribers.activeLastMonth })}
+          </p>
+        )}
+        {subscribers.total > 0 && (
           <p className="max-w-prose text-sm text-ink-soft">
             {t("notifications.subscribersDetail", {
               everySection: subscribers.everySection,

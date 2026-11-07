@@ -97,6 +97,8 @@ export const subscribersSummarySchema = z.object({
   newLastDay: z.int().nonnegative(),
   /** Phones that subscribed in the 7 days before those 24 hours (the usual pace). */
   newWeekBefore: z.int().nonnegative(),
+  /** Phones that subscribed again in the last 30 days (the app does so when it opens). */
+  activeLastMonth: z.int().nonnegative(),
 });
 export type SubscribersSummary = z.infer<typeof subscribersSummarySchema>;
 

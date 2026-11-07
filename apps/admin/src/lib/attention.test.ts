@@ -32,6 +32,7 @@ const quiet: Notifications = {
     english: 0,
     newLastDay: 0,
     newWeekBefore: 0,
+    activeLastMonth: 0,
   },
 };
 

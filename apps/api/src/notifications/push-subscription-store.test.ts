@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
+import { mkdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import type { PushSubscription } from "@bgs/shared-types";
 import { afterEach, describe, expect, it } from "vitest";
 import { migrate } from "@bgs/database";
@@ -105,6 +106,7 @@ describe.each(pairs)("the push subscriptions kept %s", (_name, makePair) => {
       english: 0,
       newLastDay: 0,
       newWeekBefore: 0,
+      activeLastMonth: 0,
     });
     await store.save({ ...phone("a", ["discours"]), quietHours: { from: 22, to: 7 } });
     await store.save({ ...phone("b", []), topics: null, lang: "wo" });
@@ -119,6 +121,7 @@ describe.each(pairs)("the push subscriptions kept %s", (_name, makePair) => {
       english: 1,
       newLastDay: 4,
       newWeekBefore: 0,
+      activeLastMonth: 4,
     });
   });
 
@@ -136,6 +139,46 @@ describe.each(pairs)("the push subscriptions kept %s", (_name, makePair) => {
     today = new Date(today.getTime() + 10 * 24 * HOUR_MS);
     expect(await store.summary()).toMatchObject({ total: 3, newLastDay: 0, newWeekBefore: 0 });
   });
+
+  it("count as active the phones that subscribed again in the last 30 days", async () => {
+    const [store] = await makePair();
+    await store.save(phone("a", ["discours"]));
+    await store.save(phone("b", ["discours"]));
+    today = new Date(today.getTime() + 25 * 24 * HOUR_MS);
+    // The app opened again on phone a only: the same choices, sent again.
+    await store.save(phone("a", ["discours"]));
+    today = new Date(today.getTime() + 10 * 24 * HOUR_MS);
+    expect(await store.summary()).toMatchObject({ total: 2, activeLastMonth: 1 });
+  });
+
+  it("forget the phones silent for 90 days, and only them", async () => {
+    const [store] = await makePair();
+    await store.save(phone("a", ["discours"]));
+    await store.save(phone("b", ["discours"]));
+    today = new Date(today.getTime() + 60 * 24 * HOUR_MS);
+    await store.save(phone("b", ["discours"]));
+    today = new Date(today.getTime() + 30 * 24 * HOUR_MS - HOUR_MS);
+    await store.forgetSilent();
+    expect(await store.list()).toHaveLength(2);
+    today = new Date(today.getTime() + 2 * HOUR_MS);
+    await store.forgetSilent();
+    expect((await store.list()).map((item) => item.token)).toEqual([phone("b", []).token]);
+  });
+});
+
+describe("the push subscriptions kept in a file before PUSH-07", () => {
+  it("keep a phone with no date at all, and date the others from their first subscription", async () => {
+    const path = join(tmpdir(), "bgs-push", `${randomUUID()}.json`);
+    await mkdir(dirname(path), { recursive: true });
+    const undated = phone("a", ["discours"]);
+    const dated = { ...phone("b", ["discours"]), subscribedAt: "2026-10-01T10:00:00.000Z" };
+    await writeFile(path, JSON.stringify({ schemaVersion: 1, subscriptions: [undated, dated] }));
+    const store = new FilePushSubscriptionStore(path, clock);
+    expect(await store.summary()).toMatchObject({ total: 2, activeLastMonth: 1 });
+    today = new Date(today.getTime() + 91 * 24 * HOUR_MS);
+    await store.forgetSilent();
+    expect(await store.list()).toEqual([undated]);
+  });
 });
 
 describe("the console's totals", () => {
@@ -148,6 +191,7 @@ describe("the console's totals", () => {
     english: 0,
     newLastDay: 1,
     newWeekBefore: 0,
+    activeLastMonth: 1,
   };
 
   it("are counted once a minute at most, shared by the requests meanwhile", async () => {

@@ -10,8 +10,15 @@ import {
 import { z } from "zod";
 import type { Queryable } from "@bgs/database";
 
-/** A subscription as kept: with when the phone subscribed (none before 01/10/2026). */
-const keptSchema = pushSubscriptionSchema.extend({ subscribedAt: z.iso.datetime().optional() });
+/**
+ * A subscription as kept: with when the phone subscribed (none before 01/10/2026)
+ * and when it last subscribed again (none before 07/11/2026; the app does so each
+ * time it opens), both to the hour.
+ */
+const keptSchema = pushSubscriptionSchema.extend({
+  subscribedAt: z.iso.datetime().optional(),
+  seenAt: z.iso.datetime().optional(),
+});
 type Kept = z.infer<typeof keptSchema>;
 
 const fileSchema = z.object({
@@ -27,12 +34,32 @@ function subscribedHour(now: Date): Date {
   return new Date(Math.floor(now.getTime() / HOUR_MS) * HOUR_MS);
 }
 
-/** The two windows of the console's growth check, ending now. */
-function growthWindows(now: Date): { dayStart: Date; weekStart: Date } {
+/** A phone that shows no sign for this long is counted out of the active ones. */
+export const ACTIVE_DAYS = 30;
+/**
+ * A phone that shows no sign for this long is forgotten (PUSH-07, decision of the
+ * user of 06/11/2026): the app is gone, or its notifications are off for good.
+ */
+export const SILENT_FORGOTTEN_DAYS = 90;
+
+/** The windows of the console's totals, ending now. */
+function windows(now: Date): { dayStart: Date; weekStart: Date; activeStart: Date } {
   return {
     dayStart: new Date(now.getTime() - DAY_MS),
     weekStart: new Date(now.getTime() - 8 * DAY_MS),
+    activeStart: new Date(now.getTime() - ACTIVE_DAYS * DAY_MS),
   };
+}
+
+/** Before this, a phone that showed no sign is forgotten. */
+function silentSince(now: Date): Date {
+  return new Date(now.getTime() - SILENT_FORGOTTEN_DAYS * DAY_MS);
+}
+
+/** The last sign of a kept phone: its last subscription, else its first. */
+function lastSign(item: Kept): Date | undefined {
+  const at = item.seenAt ?? item.subscribedAt;
+  return at === undefined ? undefined : new Date(at);
 }
 
 export interface PushSubscriptionStore {
@@ -46,6 +73,8 @@ export interface PushSubscriptionStore {
   summary(): Promise<SubscribersSummary>;
   /** Forgets these tokens (unsubscribed, or no longer valid for Expo). */
   remove(tokens: readonly string[]): Promise<void>;
+  /** Forgets the phones silent for SILENT_FORGOTTEN_DAYS (undated ones are kept). */
+  forgetSilent(): Promise<void>;
 }
 
 /**
@@ -89,7 +118,7 @@ export class FilePushSubscriptionStore implements PushSubscriptionStore {
   async summary(): Promise<SubscribersSummary> {
     const all = await this.kept();
     const count = (keep: (item: Kept) => boolean) => all.filter(keep).length;
-    const { dayStart, weekStart } = growthWindows(this.now());
+    const { dayStart, weekStart, activeStart } = windows(this.now());
     // Subscribed after `from`, and up to `to` when given; undated phones never count.
     const subscribedBetween = (from: Date, to?: Date) => (item: Kept) => {
       if (item.subscribedAt === undefined) {
@@ -107,6 +136,7 @@ export class FilePushSubscriptionStore implements PushSubscriptionStore {
       english: count((item) => item.lang === "en"),
       newLastDay: count(subscribedBetween(dayStart)),
       newWeekBefore: count(subscribedBetween(weekStart, dayStart)),
+      activeLastMonth: count((item) => (lastSign(item) ?? activeStart) > activeStart),
     };
   }
 
@@ -118,13 +148,19 @@ export class FilePushSubscriptionStore implements PushSubscriptionStore {
         return others;
       }
       // A phone changing its choices keeps the day it first subscribed.
-      const subscribedAt =
-        previous === undefined ? subscribedHour(this.now()).toISOString() : previous.subscribedAt;
+      // Subscribing again, done each time the app opens, is its sign of life.
+      const seenAt = subscribedHour(this.now()).toISOString();
+      const subscribedAt = previous === undefined ? seenAt : previous.subscribedAt;
       return [
         ...others,
-        { ...subscription, ...(subscribedAt === undefined ? {} : { subscribedAt }) },
+        { ...subscription, ...(subscribedAt === undefined ? {} : { subscribedAt }), seenAt },
       ];
     });
+  }
+
+  forgetSilent(): Promise<void> {
+    const before = silentSince(this.now());
+    return this.change((all) => all.filter((item) => (lastSign(item) ?? before) >= before));
   }
 
   remove(tokens: readonly string[]): Promise<void> {
@@ -161,6 +197,7 @@ const summaryRowSchema = z.object({
   english: count,
   new_last_day: count,
   new_week_before: count,
+  active_last_month: count,
 });
 
 /** PostgreSQL: every API instance reads and writes the same subscriptions (SCALE-02). */
@@ -193,7 +230,7 @@ export class PostgresPushSubscriptionStore implements PushSubscriptionStore {
   }
 
   async summary(): Promise<SubscribersSummary> {
-    const { dayStart, weekStart } = growthWindows(this.now());
+    const { dayStart, weekStart, activeStart } = windows(this.now());
     const { rows } = await this.database.query(
       `SELECT count(*) AS total,
          count(*) FILTER (WHERE topics IS NULL) AS every_section,
@@ -202,9 +239,10 @@ export class PostgresPushSubscriptionStore implements PushSubscriptionStore {
          count(*) FILTER (WHERE lang = 'wo') AS wolof,
          count(*) FILTER (WHERE lang = 'en') AS english,
          count(*) FILTER (WHERE subscribed_at > $1) AS new_last_day,
-         count(*) FILTER (WHERE subscribed_at > $2 AND subscribed_at <= $1) AS new_week_before
+         count(*) FILTER (WHERE subscribed_at > $2 AND subscribed_at <= $1) AS new_week_before,
+         count(*) FILTER (WHERE seen_at > $3) AS active_last_month
        FROM push_subscriptions`,
-      [dayStart, weekStart],
+      [dayStart, weekStart, activeStart],
     );
     const totals = summaryRowSchema.parse(rows[0]);
     return {
@@ -216,6 +254,7 @@ export class PostgresPushSubscriptionStore implements PushSubscriptionStore {
       english: totals.english,
       newLastDay: totals.new_last_day,
       newWeekBefore: totals.new_week_before,
+      activeLastMonth: totals.active_last_month,
     };
   }
 
@@ -226,10 +265,12 @@ export class PostgresPushSubscriptionStore implements PushSubscriptionStore {
     }
     await this.database.query(
       // A phone changing its choices keeps the day it first subscribed.
-      `INSERT INTO push_subscriptions (token, topics, quiet_hours, lang, subscribed_at)
-       VALUES ($1, $2::text[], $3::jsonb, $4, $5)
+      // Subscribing again, done each time the app opens, is its sign of life.
+      `INSERT INTO push_subscriptions (token, topics, quiet_hours, lang, subscribed_at, seen_at)
+       VALUES ($1, $2::text[], $3::jsonb, $4, $5, $5)
        ON CONFLICT (token) DO UPDATE SET
-         topics = EXCLUDED.topics, quiet_hours = EXCLUDED.quiet_hours, lang = EXCLUDED.lang`,
+         topics = EXCLUDED.topics, quiet_hours = EXCLUDED.quiet_hours, lang = EXCLUDED.lang,
+         seen_at = EXCLUDED.seen_at`,
       [
         subscription.token,
         subscription.topics,
@@ -247,6 +288,13 @@ export class PostgresPushSubscriptionStore implements PushSubscriptionStore {
         tokens,
       ]);
     }
+  }
+
+  async forgetSilent(): Promise<void> {
+    // Undated phones (NULL) are kept: "<" is never true for them.
+    await this.database.query("DELETE FROM push_subscriptions WHERE seen_at < $1", [
+      silentSince(this.now()),
+    ]);
   }
 }
 

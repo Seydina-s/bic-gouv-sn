@@ -6,28 +6,36 @@ import { useCallback, useEffect, useRef, useState } from "react";
  * `initial`, then takes the saved value once read; an unknown or damaged saved
  * value is ignored, and so is a saved value read after the person already chose
  * (audit of 15/10/2026). Saving never blocks the screen and a failure keeps the
- * choice for the current session.
+ * choice for the current session. The third value is true once the saved value
+ * was read (or could not be): before it, `initial` may not be the person's choice.
  */
 export function usePersistentChoice<T extends string>(
   slot: string,
   options: readonly T[],
   initial: T,
-): [T, (next: T) => void] {
+): [T, (next: T) => void, boolean] {
   const [value, setValue] = useState<T>(initial);
+  const [read, setRead] = useState(false);
   // Chosen before the saved value was read: the saved (older) one must not replace it.
   const touched = useRef(false);
 
   useEffect(() => {
     let active = true;
-    AsyncStorage.getItem(slot).then(
-      (saved) => {
-        const known = options.find((option) => option === saved);
-        if (active && !touched.current && known !== undefined) {
-          setValue(known);
+    AsyncStorage.getItem(slot)
+      .then(
+        (saved) => {
+          const known = options.find((option) => option === saved);
+          if (active && !touched.current && known !== undefined) {
+            setValue(known);
+          }
+        },
+        () => undefined,
+      )
+      .finally(() => {
+        if (active) {
+          setRead(true);
         }
-      },
-      () => undefined,
-    );
+      });
     return () => {
       active = false;
     };
@@ -44,5 +52,5 @@ export function usePersistentChoice<T extends string>(
     [slot],
   );
 
-  return [value, choose];
+  return [value, choose, read];
 }
